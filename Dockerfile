@@ -1,0 +1,47 @@
+FROM novnc-lite-fluxbox
+MAINTAINER Ling-Hong Hung <lhhunghimself@gmail.com>
+
+#start from the alpine version of novnc that uses fluxbox because lxde is not available
+
+ENV DEBIAN_FRONTEND noninteractive HOME /root
+
+#PyQt5 is built from source because the alpine packages leave out the webkit
+ADD PyQt5/ /usr/lib/python3.5/site-packages/PyQt5/
+RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+
+RUN apk --update --upgrade --no-cache add  qt5-qtbase qt5-qtwebkit g++ python2-dev python3-dev mesa-dri-swrast
+RUN apk add py2-pip python3 && python3 -m pip install --upgrade pip
+
+#install these first because the libraries conflict with some of the others for orange
+RUN apk add --no-cache postgresql-dev &&  pip install psycopg2 && apk del --no-cache postgresql-dev
+RUN apk add --no-cache git gfortran openblas openblas-dev musl linux-headers
+RUN apk add --no-cache freetds-dev && pip install git+https://github.com/pymssql/pymssql.git && apk del freetds-dev
+
+RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
+
+#need to install these with pip - alpine packages are too old
+RUN pip install numpy
+RUN pip install scipy
+
+#not sure that virtualenv is actually necessary but it's in the github instructions
+RUN apk --update --upgrade --no-cache add py-virtualenv 
+WORKDIR  /root
+RUN virtualenv --python=python3 --system-site-packages orange3venv && source orange3venv/bin/activate
+RUN git clone https://github.com/biolab/orange3.git 
+WORKDIR orange3
+RUN apk --no-cache add libffi-dev openssl-dev
+RUN pip install -r requirements-core.txt
+RUN pip install -r requirements-gui.txt
+#there are other requirements to be installed but these are the minimum ones
+RUN pip install -e .
+
+#need to add the qtsvg library to get the plugins - I didn't bother to figure out how to build them from source
+RUN apk add --no-cache py3-sip qt5-qtsvg dbus
+RUN apk del g++ gfortran *-dev
+
+#need to add the 5.6.1 version of the libraries (compiled from debian source using alpine build environment) - the apk package only give 5.6.0 
+COPY libQt5Svg/ /usr/lib/
+
+ADD startup.sh /root/startup.sh
+EXPOSE 6800
+WORKDIR /root
