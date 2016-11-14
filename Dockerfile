@@ -1,4 +1,4 @@
-FROM novnc-lite-fluxbox
+FROM biodepot/guidock-lite-fluxbox
 MAINTAINER Ling-Hong Hung <lhhunghimself@gmail.com>
 
 #start from the alpine version of novnc that uses fluxbox because lxde is not available
