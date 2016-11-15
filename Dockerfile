@@ -41,7 +41,8 @@ RUN apk del g++ gfortran *-dev
 
 #need to add the 5.6.1 version of the libraries (compiled from debian source using alpine build environment) - the apk package only give 5.6.0 
 COPY libQt5Svg/ /usr/lib/
-
+ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD startup.sh /root/startup.sh
 EXPOSE 6800
 WORKDIR /root
+CMD ["/root/startup.sh"]
