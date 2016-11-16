@@ -45,4 +45,5 @@ ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 ADD startup.sh /root/startup.sh
 EXPOSE 6800
 WORKDIR /root
+COPY fluxbox_config/ /root/.fluxbox/
 CMD ["/root/startup.sh"]
