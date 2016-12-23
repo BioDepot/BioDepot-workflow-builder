@@ -7,5 +7,6 @@ To use start the container after it has been built
 
 Finally - use a browser and go to localhost:6080 (for windows docker-machine you will need to know the ip of the container)
 
-Demo - https://drive.google.com/file/d/0B6xuS_tbRDJ0RzN6NlJ0T1U4VUU/view?usp=sharing
+Demo - [Link](https://drive.google.com/file/d/0B6xuS_tbRDJ0RzN6NlJ0T1U4VUU/view?usp=sharing)
+
  
