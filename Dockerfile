@@ -22,6 +22,7 @@ RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
 #need to install these with pip - alpine packages are too old
 RUN pip install numpy
 RUN pip install scipy
+RUN pip install docker-py
 
 #not sure that virtualenv is actually necessary but it's in the github instructions
 RUN apk --update --upgrade --no-cache add py-virtualenv 
@@ -34,6 +35,7 @@ RUN pip install -r requirements-core.txt
 RUN pip install -r requirements-gui.txt
 #there are other requirements to be installed but these are the minimum ones
 RUN pip install -e .
+RUN pip install -e orange-biodepot
 
 #need to add the qtsvg library to get the plugins - I didn't bother to figure out how to build them from source
 RUN apk add --no-cache py3-sip qt5-qtsvg dbus
