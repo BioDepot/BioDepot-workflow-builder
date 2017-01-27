@@ -37,8 +37,8 @@ RUN pip install -r requirements-gui.txt
 RUN pip install -e .
 
 # Biodepot
-ADD orange-biodepot orange-biodepot 
-RUN pip install -e orange-biodepot
+ADD biodepot biodepot 
+RUN pip install -e biodepot
 
 #need to add the qtsvg library to get the plugins - I didn't bother to figure out how to build them from source
 RUN apk add --no-cache py3-sip qt5-qtsvg dbus
