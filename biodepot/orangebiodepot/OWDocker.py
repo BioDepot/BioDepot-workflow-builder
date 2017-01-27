@@ -259,8 +259,7 @@ class OWDocker(widget.OWWidget):
                 self.infoTable.setItem(i, 3, QtGui.QTableWidgetItem(cont['Command']))
                 self.infoTable.setItem(i, 4, QtGui.QTableWidgetItem(millis_to_datetime(cont['Created'])))
                 self.infoTable.setItem(i, 5, QtGui.QTableWidgetItem(cont['Status']))
-                ## DK: Temporary Disabled due to error
-                ## self.infoTable.setItem(i, 6, QtGui.QTableWidgetItem('\n'.join(cont['Ports'])))
+                self.infoTable.setItem(i, 6, QtGui.QTableWidgetItem('\n'.join([str(_.get('PublicPort', ' ')) for _ in cont['Ports']])))
                 self.infoTable.setItem(i, 7, QtGui.QTableWidgetItem('\n'.join(cont['Names'])))
 
     def draw_volumes_table(self):
