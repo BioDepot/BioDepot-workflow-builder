@@ -35,6 +35,9 @@ RUN pip install -r requirements-core.txt
 RUN pip install -r requirements-gui.txt
 #there are other requirements to be installed but these are the minimum ones
 RUN pip install -e .
+
+# Biodepot
+ADD orange-biodepot orange-biodepot 
 RUN pip install -e orange-biodepot
 
 #need to add the qtsvg library to get the plugins - I didn't bother to figure out how to build them from source
