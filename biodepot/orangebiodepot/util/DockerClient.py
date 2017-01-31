@@ -22,8 +22,8 @@ class DockerClient:
     def has_image(self, name, version):
         repo_tag = name + ':' + version
         for image in self.cli.images():
-            if repo_tag in image['RepoTags']:
-                return True
+            if not image['RepoTags']: continue #DK fix NoneType is not iterable
+            elif repo_tag in image['RepoTags']: return True
         return False
 
     def remove_image(self, id, force=False):
