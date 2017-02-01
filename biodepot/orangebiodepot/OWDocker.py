@@ -180,7 +180,7 @@ class OWDocker(widget.OWWidget):
         self.infoTable.setRowCount(totalRows)
         for i, client in enumerate(self.docker_clients):
             clientSep = QtWidgets.QTableWidgetItem(client.getName() + ": " + client.getUrl())
-            clientSep.setBackgroundColor(QtGui.QColor('lightGray'))
+            clientSep.setBackground(QtGui.QColor('lightGray'))
             self.infoTable.setItem(i, 0, clientSep)
             self.infoTable.setSpan(i, 0, 1, 2)
             self.infoTable.setCellWidget(i, 0, None)
@@ -223,6 +223,7 @@ class OWDocker(widget.OWWidget):
                 created = millis_to_datetime(img['Created'])
                 size = sizeof_fmt(img['Size'])
                 repo_info = [id, created, size]
+                if not img['RepoTags']: continue
                 for repo in img['RepoTags']:
                     table.append(repo.split(':') + repo_info)
 
