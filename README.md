@@ -29,7 +29,7 @@ To add widget to BioDepot:
 
 1. Download BioDepot source codes:  `https://github.com/BioDepot/BioDepot-workflow-builder/tree/master/biodepot`    
 2. Locate to folder orangebiodepot (eg: `~/Desktop/biodepot/orangebiodepot`)   
-3. Write the widget (or copy any of existing and modify as necessary)   
+3. Write the widget (or copy any of existing widgets and modify as necessary)   
 4. On BwB, run xterm and locate to the shared widget location (e.g: /data/biodepot)   
 5. Rebuild BioDepot and rerun Orange:   
 
