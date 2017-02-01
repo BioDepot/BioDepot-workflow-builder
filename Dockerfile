@@ -1,5 +1,5 @@
 FROM biodepot/guidock-lite-fluxbox
-MAINTAINER Ling-Hong Hung <lhhunghimself@gmail.com>
+MAINTAINER Ling-Hong Hung & Daniel Kristiyanto <lhhunghimself@gmail.com> 
 
 #start from the alpine version of novnc that uses fluxbox because lxde is not available
 
@@ -38,7 +38,9 @@ RUN pip install -e .
 
 # Biodepot
 ADD biodepot biodepot 
-RUN pip install -e biodepot
+RUN pip install -e biodepot 
+# Remove source code
+RUN rm -rf biodepot
 
 #need to add the qtsvg library to get the plugins - I didn't bother to figure out how to build them from source
 RUN apk add --no-cache py3-sip qt5-qtsvg dbus

@@ -1,4 +1,7 @@
 
+[![](https://images.microbadger.com/badges/image/biodepot/bwb.svg)](https://microbadger.com/images/biodepot/bwb "Get your own image badge on microbadger.com")  [![](https://images.microbadger.com/badges/version/biodepot/bwb.svg)](https://microbadger.com/images/biodepot/bwb "Get your own version badge on microbadger.com")
+
+![BwB](Media/logo.png)
 # BioDepot Workflow Builder (BwB)
 
 BioDepot is a self-contained tools with graphical user interface for bioinformatic workflows. The package is based on Orange 3 by Biolab and NoVnc. Widgets mainly written in Python (Qt5, Docker-Py, PyQt5).
@@ -21,7 +24,6 @@ Currently BwB uses docker sock binding, to run BwB:
 ```
 3. BwB can be accessed from browser:  http://localhost:6080 (for windows machines, you'll need to know the address of your docker-machine)  
 
-Demo: [Link](https://drive.google.com/file/d/0B6xuS_tbRDJ0RzN6NlJ0T1U4VUU/view?usp=sharing)
 
 
 ## Developing Widget
@@ -39,3 +41,8 @@ To add widget to BioDepot:
     orange-canvas
 ```
 
+![Screenshot](Media/Screenshot.png)
+
+## More resources:
+- Demo: [Link](https://drive.google.com/file/d/0B6xuS_tbRDJ0RzN6NlJ0T1U4VUU/view?usp=sharing)
+- Manual: [Manual](https://github.com/kristiyanto/BioDepot-workflow-builder/blob/master/simplified_manual.pdf)
