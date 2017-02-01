@@ -3,7 +3,7 @@ import numpy
 
 import Orange.data
 from Orange.widgets import widget, gui
-from PyQt4 import QtGui
+from PyQt5 import QtGui, QtWidgets
 
 class OWDtoxsAlignment(widget.OWWidget):
     name = "Directory"
@@ -20,7 +20,7 @@ class OWDtoxsAlignment(widget.OWWidget):
 
     def __init__(self):
         super().__init__()
-        self.dir_edit = QtGui.QLineEdit()
+        self.dir_edit = QtWidgets.QLineEdit()
         self.btn_dir = gui.button(None, self, "☰", callback=self.get_dir, autoDefault=False)
 
         self.buttonsArea.layout().addWidget(self.btn_dir)
@@ -32,7 +32,7 @@ class OWDtoxsAlignment(widget.OWWidget):
     Called when button pushed
     """
     def get_dir(self):
-        dir  = QtGui.QFileDialog.getExistingDirectory(self)
+        dir  = QtWidgets.QFileDialog.getExistingDirectory(self)
         self.set_dir(dir)
 
     """

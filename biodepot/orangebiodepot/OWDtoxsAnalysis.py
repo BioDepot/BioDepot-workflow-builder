@@ -1,7 +1,7 @@
 import os
 import Orange.data
 from Orange.widgets import widget, gui
-from PyQt4.QtCore import QThread, SIGNAL
+from PyQt5.QtCore import QThread, pyqtSignal
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
 
 class OWDtoxsAnalysis(widget.OWWidget):
@@ -81,8 +81,8 @@ class OWDtoxsAnalysis(widget.OWWidget):
         self.btn_run.setEnabled(False)
         # Pull the image in a new thread
         self.pull_image_thread = PullImageThread(self.docker, self.image_name, self.image_version)
-        self.connect(self.pull_image_thread, SIGNAL("pull_progress"), self.pull_image_progress)
-        self.connect(self.pull_image_thread, SIGNAL("finished()"), self.pull_image_done)
+        self.pull_image_thread.pull_progress.connect(self.pull_image_progress)
+        self.pull_image_thread.finished.connect(self.pull_image_done)
         self.pull_image_thread.start()
 
     def pull_image_progress(self, val):
@@ -116,8 +116,8 @@ class OWDtoxsAnalysis(widget.OWWidget):
                                                      self.host_counts_dir,
                                                      self.host_results_dir)
 
-        self.connect(self.run_analysis_thread, SIGNAL('analysis_progress'), self.run_analysis_progress)
-        self.connect(self.run_analysis_thread, SIGNAL("finished()"), self.run_analysis_done)
+        self.run_analysis_thread.analysis_progress.connect(self.run_analysis_progress)
+        self.run_analysis_thread.finished.connect(self.run_analysis_done)
         self.run_analysis_thread.start()
 
     def run_analysis_progress(self, val):
@@ -137,6 +137,7 @@ class OWDtoxsAnalysis(widget.OWWidget):
 Run Container Thread
 """
 class RunAnalysisThread(QThread):
+    analysis_progress = pyqtSignal(int)
 
     container_aligns_dir = "/home/user/Counts"
     container_results_dir = "/home/user/Results"
@@ -179,7 +180,7 @@ class RunAnalysisThread(QThread):
         i = 1
         # Keep running until container is exited
         while self.docker.container_running(self.containerId):
-            self.emit(SIGNAL('analysis_progress'), i * 0.55)
+            self.analysis_progress.emit(i * 0.55)
             self.sleep(1)
             i += 1
         # Remove the container now that it is finished

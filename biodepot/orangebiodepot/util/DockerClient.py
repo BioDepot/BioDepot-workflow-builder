@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from docker import Client
 import requests, json
-from PyQt4.QtCore import QThread, SIGNAL
+from PyQt5.QtCore import QThread, pyqtSignal
 
 
 class DockerClient:
@@ -9,6 +9,9 @@ class DockerClient:
         self.url = url
         self.name = name
         self.cli = Client(base_url=url)
+
+    def pull(self, repo_tag, stream=True):
+        self.cli.pull(repo_tag, stream)
 
     def getName(self):
         return self.name
@@ -92,11 +95,13 @@ class DockerClient:
 
 
 class PullImageThread(QThread):
+    pull_progress = pyqtSignal(int)
     def __init__(self, cli, name, version):
         QThread.__init__(self)
         self.cli = cli
         self.name = name
         self.version = version
+        
 
     def __del__(self):
         self.wait()
@@ -108,7 +113,7 @@ class PullImageThread(QThread):
             # We create a dict mapping id to % finished for each part (progress)
             # The total progress is the mean of individual progresses
             progs = dict()
-            for line in self.cli.pull(repo_tag, stream=True):
+            for line in self.cli.cli.pull(repo_tag, stream=True):
                 for status in line.decode('utf-8').split('\r\n')[:-1]:
                     line = json.loads(status)
                     statusStr = line['status']
@@ -125,7 +130,8 @@ class PullImageThread(QThread):
                         if len(progDetail) > 1:
                             progs[line['id']] = 50 + (progDetail['current'] / progDetail['total'] * 50)
                     if (len(progs) > 0):
-                        self.emit(SIGNAL('pull_progress'), sum(progs.values()) / len(progs))
+                        self.current_progress = sum(progs.values()) / len(progs)
+                        self.pull_progress.emit(self.current_progress)
 
         except requests.exceptions.RequestException:
             print('Connection Exception!')

@@ -4,7 +4,7 @@ import numpy
 import Orange.data
 from Orange.widgets import widget, gui
 from orangebiodepot.util.DockerClient import DockerClient
-from PyQt4 import QtGui, QtCore
+from PyQt5 import QtCore, QtGui, QtWidgets
 import datetime
 
 class OWDocker(widget.OWWidget):
@@ -44,7 +44,7 @@ class OWDocker(widget.OWWidget):
         self.btn_con.setFixedWidth(100)
         self.btn_vol.setFixedWidth(100)
 
-        self.hboxTop = QtGui.QHBoxLayout()
+        self.hboxTop = QtWidgets.QHBoxLayout()
         self.hboxTop.setAlignment(QtCore.Qt.AlignLeft)
         self.hboxTop.addWidget(self.btn_con)
         self.hboxTop.addWidget(self.btn_img)
@@ -54,7 +54,7 @@ class OWDocker(widget.OWWidget):
         self.hboxTop.addWidget(self.btn_ver)
         self.hboxTop.addWidget(self.btn_inf)
 
-        self.infoTable = QtGui.QTableWidget()
+        self.infoTable = QtWidgets.QTableWidget()
         self.infoTable.horizontalHeader().setStretchLastSection(True)
         self.infoTable.setFont(self.font)
 
@@ -71,10 +71,10 @@ class OWDocker(widget.OWWidget):
         self.btn_pau.setFixedWidth(100)
         self.btn_unp.setFixedWidth(100)
 
-        self.rm_force = QtGui.QCheckBox("Force")
+        self.rm_force = QtWidgets.QCheckBox("Force")
         self.rm_force.setHidden(True)
 
-        self.hbox = QtGui.QHBoxLayout()
+        self.hbox = QtWidgets.QHBoxLayout()
         self.hbox.addWidget(self.btn_rmv)
         self.hbox.addSpacing(5)
         self.hbox.addWidget(self.rm_force)
@@ -161,14 +161,14 @@ class OWDocker(widget.OWWidget):
         self.infoTable.clearSpans()
         self.infoTable.setColumnCount(3)
         self.infoTable.setHorizontalHeaderLabels(['', 'NAME', 'URL'])
-        self.infoTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.infoTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.infoTable.horizontalHeader().setVisible(True)
         self.infoTable.setRowCount(len(self.docker_clients))
         for i, client in enumerate(self.docker_clients):
-            self.infoTable.setCellWidget(i, 0, QtGui.QCheckBox())
-            self.infoTable.setItem(i, 0, QtGui.QTableWidgetItem(''))
-            self.infoTable.setItem(i, 1, QtGui.QTableWidgetItem(client.getName()))
-            self.infoTable.setItem(i, 2, QtGui.QTableWidgetItem(client.getUrl()))
+            self.infoTable.setCellWidget(i, 0, QtWidgets.QCheckBox())
+            self.infoTable.setItem(i, 0, QtWidgets.QTableWidgetItem(''))
+            self.infoTable.setItem(i, 1, QtWidgets.QTableWidgetItem(client.getName()))
+            self.infoTable.setItem(i, 2, QtWidgets.QTableWidgetItem(client.getUrl()))
 
     def draw_version_table(self):
         self.infoTable.clearSpans()
@@ -179,17 +179,17 @@ class OWDocker(widget.OWWidget):
         totalRows = len(self.docker_clients) + sum(len(client.version().items()) for client in self.docker_clients)
         self.infoTable.setRowCount(totalRows)
         for i, client in enumerate(self.docker_clients):
-            clientSep = QtGui.QTableWidgetItem(client.getName() + ": " + client.getUrl())
+            clientSep = QtWidgets.QTableWidgetItem(client.getName() + ": " + client.getUrl())
             clientSep.setBackgroundColor(QtGui.QColor('lightGray'))
             self.infoTable.setItem(i, 0, clientSep)
             self.infoTable.setSpan(i, 0, 1, 2)
             self.infoTable.setCellWidget(i, 0, None)
             table = [(str(k), str(v)) for k, v in sorted(client.version().items())]
             for x, row in enumerate(table):
-                self.infoTable.setItem(i+x+1, 0, QtGui.QTableWidgetItem(row[0]))
-                self.infoTable.setItem(i+x+1, 1, QtGui.QTableWidgetItem(row[1]))
+                self.infoTable.setItem(i+x+1, 0, QtWidgets.QTableWidgetItem(row[0]))
+                self.infoTable.setItem(i+x+1, 1, QtWidgets.QTableWidgetItem(row[1]))
                 self.infoTable.setCellWidget(i+x+1, 0, None)
-        self.infoTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.infoTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
 
     def draw_info_table(self):
         self.infoTable.clearSpans()
@@ -197,12 +197,12 @@ class OWDocker(widget.OWWidget):
         self.infoTable.setColumnCount(2)
         self.infoTable.setHorizontalHeaderLabels(['', ''])
         self.infoTable.setRowCount(len(table))
-        self.infoTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.Interactive)
+        self.infoTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Interactive)
         self.infoTable.horizontalHeader().resizeSection(0, 150)
         self.infoTable.horizontalHeader().setVisible(False)
         for i, row in enumerate(table):
-            self.infoTable.setItem(i, 0, QtGui.QTableWidgetItem(row[0]))
-            self.infoTable.setItem(i, 1, QtGui.QTableWidgetItem(row[1]))
+            self.infoTable.setItem(i, 0, QtWidgets.QTableWidgetItem(row[0]))
+            self.infoTable.setItem(i, 1, QtWidgets.QTableWidgetItem(row[1]))
             self.infoTable.setCellWidget(i, 0, None)
 
     def draw_images_table(self):
@@ -210,13 +210,13 @@ class OWDocker(widget.OWWidget):
         tableHeader = ['', 'REPOSITORY', 'TAG', 'ID', 'CREATED', 'SIZE']
         self.infoTable.setColumnCount(len(tableHeader))
         self.infoTable.setHorizontalHeaderLabels(tableHeader)
-        self.infoTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.infoTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.infoTable.horizontalHeader().setVisible(True)
         table = []
         imgs = self.docker_clients[0].images()
         if not type(imgs) is list:
-            self.infoTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-            self.infoTable.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+            self.infoTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+            self.infoTable.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         else:
             for img in imgs:
                 id = img['Id'].split(':')[1][:12]
@@ -228,60 +228,60 @@ class OWDocker(widget.OWWidget):
 
         self.infoTable.setRowCount(len(table))
         for i, row in enumerate(table):
-            self.infoTable.setCellWidget(i, 0, QtGui.QCheckBox())
-            self.infoTable.setItem(i, 0, QtGui.QTableWidgetItem(''))
+            self.infoTable.setCellWidget(i, 0, QtWidgets.QCheckBox())
+            self.infoTable.setItem(i, 0, QtWidgets.QTableWidgetItem(''))
             for x, cell in enumerate(row):
-                self.infoTable.setItem(i, 1+x, QtGui.QTableWidgetItem(cell))
+                self.infoTable.setItem(i, 1+x, QtWidgets.QTableWidgetItem(cell))
 
     def draw_containers_table(self):
         self.infoTable.clearSpans()
         tableHeader = ['', 'CONTAINER ID', 'IMAGE', 'COMMAND', 'CREATED', 'STATUS', 'PORTS', 'NAMES']
         self.infoTable.setColumnCount(len(tableHeader))
         self.infoTable.setHorizontalHeaderLabels(tableHeader)
-        self.infoTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.infoTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.infoTable.horizontalHeader().setVisible(True)
-        self.infoTable.horizontalHeader().setResizeMode(3, QtGui.QHeaderView.Interactive)
+        self.infoTable.horizontalHeader().setSectionResizeMode(3, QtWidgets.QHeaderView.Interactive)
         self.infoTable.horizontalHeader().resizeSection(3, 120)
         conts = self.docker_clients[0].containers()
         if not type(conts) is list:
             self.infoTable.setRowCount(0)
-            self.infoTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-            self.infoTable.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+            self.infoTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+            self.infoTable.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         else:
             self.infoTable.setRowCount(len(conts))
             for i, cont in enumerate(conts):
-                self.infoTable.setCellWidget(i, 0, QtGui.QCheckBox())
-                self.infoTable.setItem(i, 0, QtGui.QTableWidgetItem(''))
-                self.infoTable.setItem(i, 1, QtGui.QTableWidgetItem(cont['Id'][:12]))
+                self.infoTable.setCellWidget(i, 0, QtWidgets.QCheckBox())
+                self.infoTable.setItem(i, 0, QtWidgets.QTableWidgetItem(''))
+                self.infoTable.setItem(i, 1, QtWidgets.QTableWidgetItem(cont['Id'][:12]))
                 img_split = cont['Image'].split(':')
                 img_str = img_split[0] if len(img_split) < 2 else img_split[1][:12]
-                self.infoTable.setItem(i, 2, QtGui.QTableWidgetItem(img_str))
-                self.infoTable.setItem(i, 3, QtGui.QTableWidgetItem(cont['Command']))
-                self.infoTable.setItem(i, 4, QtGui.QTableWidgetItem(millis_to_datetime(cont['Created'])))
-                self.infoTable.setItem(i, 5, QtGui.QTableWidgetItem(cont['Status']))
-                self.infoTable.setItem(i, 6, QtGui.QTableWidgetItem('\n'.join([str(_.get('PublicPort', ' ')) for _ in cont['Ports']])))
-                self.infoTable.setItem(i, 7, QtGui.QTableWidgetItem('\n'.join(cont['Names'])))
+                self.infoTable.setItem(i, 2, QtWidgets.QTableWidgetItem(img_str))
+                self.infoTable.setItem(i, 3, QtWidgets.QTableWidgetItem(cont['Command']))
+                self.infoTable.setItem(i, 4, QtWidgets.QTableWidgetItem(millis_to_datetime(cont['Created'])))
+                self.infoTable.setItem(i, 5, QtWidgets.QTableWidgetItem(cont['Status']))
+                self.infoTable.setItem(i, 6, QtWidgets.QTableWidgetItem('\n'.join([str(_.get('PublicPort', ' ')) for _ in cont['Ports']])))
+                self.infoTable.setItem(i, 7, QtWidgets.QTableWidgetItem('\n'.join(cont['Names'])))
 
     def draw_volumes_table(self):
         self.infoTable.clearSpans()
         tableHeader = ['', 'DRIVER', 'VOLUME NAME', 'MOUNT POINT']
         self.infoTable.setColumnCount(len(tableHeader))
         self.infoTable.setHorizontalHeaderLabels(tableHeader)
-        self.infoTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.ResizeToContents)
+        self.infoTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         self.infoTable.horizontalHeader().setVisible(True)
         vols = self.docker_clients[0].volumes()
         if not type(vols) is list:
             self.infoTable.setRowCount(0)
-            self.infoTable.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
-            self.infoTable.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+            self.infoTable.horizontalHeader().setSectionResizeMode(QtWidgets.QHeaderView.Stretch)
+            self.infoTable.horizontalHeader().setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
         else:
             self.infoTable.setRowCount(len(vols))
             for i, vol in enumerate(vols):
-                self.infoTable.setCellWidget(i, 0, QtGui.QCheckBox())
-                self.infoTable.setItem(i, 0, QtGui.QTableWidgetItem(''))
-                self.infoTable.setItem(i, 1, QtGui.QTableWidgetItem(vol['Driver']))
-                self.infoTable.setItem(i, 2, QtGui.QTableWidgetItem(vol['Name']))
-                self.infoTable.setItem(i, 3, QtGui.QTableWidgetItem(vol['Mountpoint']))
+                self.infoTable.setCellWidget(i, 0, QtWidgets.QCheckBox())
+                self.infoTable.setItem(i, 0, QtWidgets.QTableWidgetItem(''))
+                self.infoTable.setItem(i, 1, QtWidgets.QTableWidgetItem(vol['Driver']))
+                self.infoTable.setItem(i, 2, QtWidgets.QTableWidgetItem(vol['Name']))
+                self.infoTable.setItem(i, 3, QtWidgets.QTableWidgetItem(vol['Mountpoint']))
 
     """
     Remove functions

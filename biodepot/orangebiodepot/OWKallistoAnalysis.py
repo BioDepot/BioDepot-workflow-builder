@@ -1,7 +1,7 @@
 import os
 import Orange.data
 from Orange.widgets import widget, gui
-from PyQt4.QtCore import QThread, SIGNAL
+from PyQt5.QtCore import QThread, pyqtSignal
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
 
 class OWKallistoAnalysis(widget.OWWidget):
@@ -83,11 +83,11 @@ class OWKallistoAnalysis(widget.OWWidget):
         self.btn_run.setEnabled(False)
         # Pull the image in a new thread
         self.pull_image_thread = PullImageThread(self.docker, self.image_name, self.image_version)
-        self.connect(self.pull_image_thread, SIGNAL("pull_progress"), self.pull_image_progress)
-        self.connect(self.pull_image_thread, SIGNAL("finished()"), self.pull_image_done)
+        self.pull_image_thread.pull_progress.connect(self.pull_image_progress)
+        self.pull_image_thread.finished.connect(self.pull_image_done)
         self.pull_image_thread.start()
 
-    def pull_image_progress(self, val):
+    def pull_image_progress(self, val=0):
         self.progressBarSet(val)
 
     def pull_image_done(self):
@@ -119,8 +119,8 @@ class OWKallistoAnalysis(widget.OWWidget):
                                                      self.host_counts_dir,
                                                      self.host_results_dir)
 
-        self.connect(self.run_analysis_thread, SIGNAL('analysis_progress'), self.run_analysis_progress)
-        self.connect(self.run_analysis_thread, SIGNAL("finished()"), self.run_analysis_done)
+        self.run_analysis_thread.analysis_progress.connect(self.run_analysis_progress)
+        self.run_analysis_thread.finished.connect(self.run_analysis_done)
         self.run_analysis_thread.start()
 
     def run_analysis_progress(self, val):
@@ -141,6 +141,7 @@ class OWKallistoAnalysis(widget.OWWidget):
 Run Container Thread
 """
 class RunAnalysisThread(QThread):
+    analysis_progress = pyqtSignal(int)
 
     container_aligns_dir = '/kallisto/test'
     container_results_dir = '/kallisto/test/output'
@@ -176,7 +177,7 @@ class RunAnalysisThread(QThread):
         i = 1
         # Keep running until container is exited
         while self.docker.container_running(self.containerId):
-            self.emit(SIGNAL('analysis_progress'), i)
+            self.analysis_progress.emit(i)
             self.sleep(0.0001)
             i += 1
         # Remove the container now that it is finished
