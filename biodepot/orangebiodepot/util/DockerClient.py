@@ -10,8 +10,8 @@ class DockerClient:
         self.name = name
         self.cli = Client(base_url=url)
 
-    def pull(self, repo_tag, stream=True):
-        self.cli.pull(repo_tag, stream)
+    def getClient(self):
+        return self.cli
 
     def getName(self):
         return self.name
@@ -98,10 +98,9 @@ class PullImageThread(QThread):
     pull_progress = pyqtSignal(int)
     def __init__(self, cli, name, version):
         QThread.__init__(self)
-        self.cli = cli
+        self.docker = cli
         self.name = name
         self.version = version
-        
 
     def __del__(self):
         self.wait()
@@ -113,7 +112,7 @@ class PullImageThread(QThread):
             # We create a dict mapping id to % finished for each part (progress)
             # The total progress is the mean of individual progresses
             progs = dict()
-            for line in self.cli.cli.pull(repo_tag, stream=True):
+            for line in self.docker.getClient().pull(repo_tag, stream=True):
                 for status in line.decode('utf-8').split('\r\n')[:-1]:
                     line = json.loads(status)
                     statusStr = line['status']
@@ -133,5 +132,7 @@ class PullImageThread(QThread):
                         self.current_progress = sum(progs.values()) / len(progs)
                         self.pull_progress.emit(self.current_progress)
 
+
         except requests.exceptions.RequestException:
+            # TODO emit error
             print('Connection Exception!')
