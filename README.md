@@ -1,14 +1,14 @@
 
-# BioDepot Workflow Builder
+# BioDepot Workflow Builder (BwB)
 
 BioDepot is a self-contained tools with graphical user interface for bioinformatic workflows. The package is based on Orange 3 by Biolab and NoVnc. Widgets mainly written in Python (Qt5, Docker-Py, PyQt5).
 
-# Requirements  
+## Requirements  
 
 - Docker 1.13.0  
 - Internet Browser  
 
-# Running BwB
+## Running BwB
 Currently BwB uses docker sock binding, to run BwB:
 
 1. Install Docker   
@@ -24,7 +24,7 @@ Currently BwB uses docker sock binding, to run BwB:
 Demo: [Link](https://drive.google.com/file/d/0B6xuS_tbRDJ0RzN6NlJ0T1U4VUU/view?usp=sharing)
 
 
-# Developing Widget
+## Developing Widget
 To add widget to BioDepot:
 
 1. Download BioDepot source codes:  `https://github.com/BioDepot/BioDepot-workflow-builder/tree/master/biodepot`    
