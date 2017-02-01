@@ -1,7 +1,8 @@
+![BwB](Media/logo.png)
 
 [![](https://images.microbadger.com/badges/image/biodepot/bwb.svg)](https://microbadger.com/images/biodepot/bwb "Get your own image badge on microbadger.com")  [![](https://images.microbadger.com/badges/version/biodepot/bwb.svg)](https://microbadger.com/images/biodepot/bwb "Get your own version badge on microbadger.com")
 
-![BwB](Media/logo.png)
+
 # BioDepot Workflow Builder (BwB)
 
 BioDepot is a self-contained tools with graphical user interface for bioinformatic workflows. The package is based on Orange 3 by Biolab and NoVnc. Widgets mainly written in Python (Qt5, Docker-Py, PyQt5).
