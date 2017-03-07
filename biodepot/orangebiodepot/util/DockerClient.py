@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from docker import Client
+from docker import APIClient
 import requests, json
 from PyQt5.QtCore import QThread, pyqtSignal
 
@@ -8,7 +8,7 @@ class DockerClient:
     def __init__(self, url, name):
         self.url = url
         self.name = name
-        self.cli = Client(base_url=url)
+        self.cli = APIClient(base_url=url)
 
     def getClient(self):
         return self.cli
