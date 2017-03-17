@@ -1,6 +1,6 @@
 FROM biodepot/guidock-lite-fluxbox
 MAINTAINER Ling-Hong Hung <lhhunghimself@gmail.com> 
-MAINTAINER Daniel Kristiyanto
+MAINTAINER Daniel Kristiyanto <danielkr@uw.edu>
 
 #start from the alpine version of novnc that uses fluxbox because lxde is not available
 
