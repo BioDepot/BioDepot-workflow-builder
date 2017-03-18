@@ -93,6 +93,38 @@ class DockerClient:
     def remove_volume(self, name):
         self.cli.remove_volume(name)
 
+class DockerThread_BuildImage(QThread):
+    build_process = pyqtSignal(['QString'])
+    build_complete = pyqtSignal(int)
+    def __init__(self, cli, name, dockerfile):
+        QThread.__init__(self)
+        self.docker = cli
+        self.dockerfile = dockerfile
+        self.name = name
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        imagename = self.name
+        try:
+            import io
+            f = io.BytesIO(self.dockerfile.encode('utf-8'))
+            for rawline in self.docker.getClient().build(fileobj=f, tag=imagename, stream=True):
+                for jsonstr in rawline.decode('utf-8').split('\r\n')[:-1]:
+                    log = jsonstr
+                    try:
+                        line = json.loads(jsonstr)
+                        log = line['stream']
+                    except ValueError as e:
+                        print (e)
+                    except TypeError as e:
+                        print (e)
+                    self.build_process.emit(log)
+
+        except requests.exceptions.RequestException as e:
+            # TODO emit error
+            print(e)
 
 class PullImageThread(QThread):
     pull_progress = pyqtSignal(int)
