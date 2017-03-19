@@ -35,11 +35,11 @@ RUN apk --no-cache add libffi-dev openssl-dev
 RUN pip install -r requirements-core.txt
 RUN pip install -r requirements-gui.txt
 #there are other requirements to be installed but these are the minimum ones
-RUN pip install -e .
+RUN pip3 install -e .
 
 # Biodepot
 ADD biodepot biodepot 
-RUN pip install -e biodepot 
+RUN pip3 install -e biodepot 
 
 #need to add the qtsvg library to get the plugins - I didn't bother to figure out how to build them from source
 RUN apk add --no-cache py3-sip qt5-qtsvg dbus
