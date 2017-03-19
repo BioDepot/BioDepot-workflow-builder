@@ -21,9 +21,9 @@ RUN apk add --no-cache freetds-dev && pip install git+https://github.com/pymssql
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
 
 #need to install these with pip - alpine packages are too old
-RUN pip install numpy
-RUN pip install scipy
-RUN pip install docker-py
+RUN pip3 install numpy
+RUN pip3 install scipy
+RUN pip3 install docker-py
 
 #not sure that virtualenv is actually necessary but it's in the github instructions
 RUN apk --update --upgrade --no-cache add py-virtualenv 
@@ -32,8 +32,8 @@ RUN virtualenv --python=python3 --system-site-packages orange3venv && source ora
 RUN git clone https://github.com/biolab/orange3.git 
 WORKDIR orange3
 RUN apk --no-cache add libffi-dev openssl-dev
-RUN pip install -r requirements-core.txt
-RUN pip install -r requirements-gui.txt
+RUN pip3 install -r requirements-core.txt
+RUN pip3 install -r requirements-gui.txt
 #there are other requirements to be installed but these are the minimum ones
 RUN pip3 install -e .
 
