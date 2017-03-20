@@ -1,55 +1,53 @@
-FROM biodepot/guidock-lite-fluxbox
-MAINTAINER Ling-Hong Hung <lhhunghimself@gmail.com> 
-MAINTAINER Daniel Kristiyanto <danielkr@uw.edu>
+FROM ubuntu:latest
+MAINTAINER Daniel Kristiyanto
 
-#start from the alpine version of novnc that uses fluxbox because lxde is not available
-
-ENV DEBIAN_FRONTEND noninteractive HOME /root
-
-#PyQt5 is built from source because the alpine packages leave out the webkit
-ADD PyQt5/ /usr/lib/python3.5/site-packages/PyQt5/
-RUN echo "http://dl-4.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
-
-RUN apk --update --upgrade --no-cache add  qt5-qtbase qt5-qtwebkit g++ python2-dev python3-dev mesa-dri-swrast
-RUN apk add py2-pip python3 && python3 -m pip install --upgrade pip
-
-#install these first because the libraries conflict with some of the others for orange
-RUN apk add --no-cache postgresql-dev &&  pip install psycopg2 && apk del --no-cache postgresql-dev
-RUN apk add --no-cache git gfortran openblas openblas-dev musl linux-headers
-RUN apk add --no-cache freetds-dev && pip install git+https://github.com/pymssql/pymssql.git && apk del freetds-dev
-
-RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
-
-#need to install these with pip - alpine packages are too old
-RUN pip3 install numpy
-RUN pip3 install scipy
-RUN pip3 install docker-py
-
-#not sure that virtualenv is actually necessary but it's in the github instructions
-RUN apk --update --upgrade --no-cache add py-virtualenv 
-WORKDIR  /root
-RUN virtualenv --python=python3 --system-site-packages orange3venv && source orange3venv/bin/activate
-RUN git clone https://github.com/biolab/orange3.git 
-WORKDIR orange3
-RUN apk --no-cache add libffi-dev openssl-dev
-RUN pip3 install -r requirements-core.txt
-RUN pip3 install -r requirements-gui.txt
-#there are other requirements to be installed but these are the minimum ones
-RUN pip3 install -e .
-
-# Biodepot
-ADD biodepot biodepot 
-RUN pip3 install -e biodepot 
-
-#need to add the qtsvg library to get the plugins - I didn't bother to figure out how to build them from source
-RUN apk add --no-cache py3-sip qt5-qtsvg dbus
-RUN apk del g++ gfortran *-dev
-
-#need to add the 5.6.1 version of the libraries (compiled from debian source using alpine build environment) - the apk package only give 5.6.0 
-COPY libQt5Svg/ /usr/lib/
-ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-ADD startup.sh /root/startup.sh
-EXPOSE 6800
+ENV DEBIAN_FRONTEND noninteractive
+EXPOSE 6080
 WORKDIR /root
-COPY fluxbox_config/ /root/.fluxbox/
-CMD ["/root/startup.sh"]
+
+## REQUIRED PACKAGES
+RUN apt-get update -y
+RUN apt-get install -y git x11vnc wget unzip xvfb openbox geany menu \
+    build-essential python3 python3-dev python3-pip virtualenv libssl-dev \
+    net-tools rox-filer feh python3-pyqt5 libqt5webkit5-dev python3-pyqt5.qtsvg \
+    python3-pyqt5.qtwebkit
+
+## NOVNC
+RUN git clone https://github.com/kanaka/noVNC.git && \
+    cd noVNC/utils && git clone https://github.com/kanaka/websockify websockify
+
+## ORANGE3
+RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+RUN virtualenv --python=python3 --system-site-packages orange3venv
+RUN source orange3venv/bin/activate
+RUN git clone https://github.com/biolab/orange3.git 
+RUN pip3 install --upgrade pip
+RUN pip3 install -r orange3/requirements-core.txt
+RUN pip3 install -r orange3/requirements-gui.txt
+RUN pip3 install docker-py numpy
+RUN pip3 install -e orange3
+
+## BIODEPOT
+ADD biodepot biodepot
+RUN pip3 install -e biodepot
+
+## CLEAN UP
+RUN apt-get autoclean && apt-get autoremove && rm -rf /var/lib/apt/lists/*
+
+## DESKTOP SETTINGS
+ADD menu.xml  /root/.config/openbox/menu.xml 
+ADD Media/logo.png /root/.config/openbox/bg.png
+RUN echo "feh /root/.config/openbox/bg.png & rox-filer /data & orange-canvas" \ 
+    >> /root/.config/openbox/autostart
+ADD rc.xml /root/.config/openbox/rc.xml
+
+## CMD
+ADD novnc.sh /root/novnc.sh
+RUN chmod 0755 /root/novnc.sh
+
+
+
+## START
+WORKDIR /data
+CMD /root/novnc.sh
+
