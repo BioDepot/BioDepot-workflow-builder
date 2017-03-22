@@ -8,7 +8,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 class OWCutAdapt(widget.OWWidget):
     name = "CutAdapt"
     description = "CutAdapt for RNA-seq"
-    icon = "icons/cutadapt.png"
+    icon = "icons/cutadapt.svg"
 
     priority = 10
 

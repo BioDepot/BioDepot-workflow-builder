@@ -11,7 +11,7 @@ from orangebiodepot.util.DockerClient import DockerClient
 class OWUnpack(widget.OWWidget):
     name = "UnPack"
     description = "Unpack compressed fastqc files"
-    icon = "icons/unpack.png"
+    icon = "icons/unpack.svg"
 
     priority = 10
 
