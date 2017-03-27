@@ -9,7 +9,7 @@ class OWBamFile(widget.OWWidget):
     name = "Bam File"
     description = "Set an bam file"
     category = "Data"
-    icon = "icons/bamfile.svg"
+    icon = "icons/Bamfile.svg"
     priority = 2
 
     inputs = [("File", str, "set_file")]
