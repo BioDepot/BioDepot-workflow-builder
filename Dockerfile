@@ -24,7 +24,7 @@ RUN git clone https://github.com/biolab/orange3.git
 RUN pip3 install --upgrade pip
 RUN pip3 install -r orange3/requirements-core.txt
 RUN pip3 install -r orange3/requirements-gui.txt
-RUN pip3 install docker numpy
+RUN pip3 install docker numpy pysam
 RUN pip3 install -e orange3
 
 ## BIODEPOT
