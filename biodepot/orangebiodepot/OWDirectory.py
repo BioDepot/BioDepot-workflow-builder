@@ -5,7 +5,7 @@ import Orange.data
 from Orange.widgets import widget, gui
 from PyQt5 import QtGui, QtWidgets
 
-class OWDtoxsAlignment(widget.OWWidget):
+class OWDirectory(widget.OWWidget):
     name = "Directory"
     description = "Set an input as a Directory"
     category = "Data"
@@ -44,3 +44,19 @@ class OWDtoxsAlignment(widget.OWWidget):
             path = path.strip()
             self.dir_edit.setText(path)
             self.send("Dir", path)
+
+def main(argv=sys.argv):
+    from AnyQt.QtWidgets import QApplication
+    app = QApplication(list(argv))
+
+    ow = OWDirectory()
+    ow.show()
+    ow.raise_()
+
+    ow.handleNewSignals()
+    app.exec_()
+    ow.handleNewSignals()
+    return 0
+
+if __name__=="__main__":
+    sys.exit(main())
