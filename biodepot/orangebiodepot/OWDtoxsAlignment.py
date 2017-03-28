@@ -44,11 +44,11 @@ class OWDtoxsAlignment(widget.OWWidget):
         # ~/BioDepot/WidgetName/
         # TODO is this an issue if multiple containers write to the same place?
         # TODO add timestamp to directory name to differentiate runs
-        counts_dir = '~/BioDepot/Dtoxs_Alignment/Counts'
-        if not os.path.exists(counts_dir):
-            os.makedirs(counts_dir)
-        # Jimmy, Mar-7-2-17, I don't know what does "toHostDir" do. Since our DockerClient missed that code, I comment it temporary
-        self.host_counts_dir = counts_dir #self.docker.toHostDir(counts_dir)
+        #counts_dir = '~/BioDepot/Dtoxs_Alignment/Counts'
+        #if not os.path.exists(counts_dir):
+        #    os.makedirs(counts_dir)
+        # Jimmy, Mar/7/2017, I don't know what does "toHostDir" do. Since our DockerClient missed that code, I comment it temporary
+        #self.host_counts_dir = counts_dir #self.docker.toHostDir(counts_dir)
 
         # GUI
         box = gui.widgetBox(self.controlArea, "Info")
@@ -98,6 +98,10 @@ class OWDtoxsAlignment(widget.OWWidget):
         else:
             # Jimmy, Mar-7-2-17, I don't know what does "toHostDir" do. Since our DockerClient missed that code, I comment it temporary
             self.host_seq_dir = path # self.docker.toHostDir(path)
+            self.host_counts_dir = self.host_seq_dir + '/counts'
+            if not os.path.exists(self.host_counts_dir):
+                os.makedirs(self.host_counts_dir)
+
             if self.host_seq_dir is None:
                 # TODO emit error
                 self.seq_dir_set = False
@@ -117,13 +121,10 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.is_running = True
         self.btn_run.setEnabled(False)
         # Pull the image in a new thread
-        self.pull_image_thread = QThread()
         self.pull_image_worker = PullImageThread(self.docker, self.image_name, self.image_version)
-        self.pull_image_worker.pull_progress[int].connect(self.pull_image_progress)
+        self.pull_image_worker.pull_progress.connect(self.pull_image_progress)
         self.pull_image_worker.finished.connect(self.pull_image_finished)
-        self.pull_image_worker.moveToThread(self.pull_image_thread)
-        self.pull_image_thread.started.connect(self.pull_image_worker.work)
-        self.pull_image_thread.start()
+        self.pull_image_worker.start()
 
     @pyqtSlot(int, name="pullImageProgress")
     def pull_image_progress(self, val):
@@ -131,8 +132,6 @@ class OWDtoxsAlignment(widget.OWWidget):
 
     @pyqtSlot(name="pullImageFinished")
     def pull_image_finished(self):
-        self.pull_image_thread.terminate()
-        self.pull_image_thread.wait()
         self.infoLabel.setText('Finished pulling \'' + self.image_name + ":" + self.image_version + '\'')
         self.progressBarFinished()
         self.start_container()
@@ -189,7 +188,7 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.btn_run.setText('Run again')
         self.setStatusMessage('Finished!')
         self.progressBarFinished()
-        self.send("Counts", self.docker.toContainerDir(self.host_counts_dir))
+        self.send("Counts", self.host_counts_dir)
         # TODO create Orange.data.Table from TOP-40.tsv
 
 
@@ -233,7 +232,7 @@ class RunAlignmentWorker(QObject):
 
         i = 1
         # Keep running until container is exited
-        while self.docker.isRunning(self.containerId):
+        while self.docker.container_running(self.containerId):
             # self.docker.printStats(self.containerId)
             self.progress.emit(i)
             time.sleep(2)
