@@ -119,7 +119,7 @@ class OWDtoxsAlignment(widget.OWWidget):
         # Pull the image in a new thread
         self.pull_image_thread = QThread()
         self.pull_image_worker = PullImageThread(self.docker, self.image_name, self.image_version)
-        self.pull_image_worker.progress[int].connect(self.pull_image_progress)
+        self.pull_image_worker.pull_progress[int].connect(self.pull_image_progress)
         self.pull_image_worker.finished.connect(self.pull_image_finished)
         self.pull_image_worker.moveToThread(self.pull_image_thread)
         self.pull_image_thread.started.connect(self.pull_image_worker.work)
