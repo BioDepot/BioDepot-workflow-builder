@@ -1,5 +1,6 @@
 import os
 import Orange.data
+from Orange.data.io import FileFormat
 from Orange.widgets import widget, gui
 from PyQt5.QtCore import QThread, pyqtSignal
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
@@ -19,22 +20,14 @@ class OWDtoxsAnalysis(widget.OWWidget):
 
     want_main_area = False
 
-    # The directory of the alignment data needed to run
-    # the container will be set by the user before the
-    # container can be run
     host_counts_dir = ""
 
-    # The default write location of all widgets should be
-    # ~/BioDepot/WidgetName/
-    # TODO is this an issue multiple containers write to the same place?
-    host_results_dir = os.path.expanduser('~') + '/BioDepot/Dtoxs_Analysis/Results'
 
     def __init__(self):
         super().__init__()
 
-        if not os.path.exists(self.host_results_dir):
-            os.makedirs(self.host_results_dir)
-        # Docker Client
+        self.result_folder_name = "/analysis_results"
+
         # This client talks to your local docker
         self.docker = DockerClient('unix:///var/run/docker.sock', 'local')
 
@@ -43,12 +36,6 @@ class OWDtoxsAnalysis(widget.OWWidget):
         self.infoLabel = gui.widgetLabel(box, 'Connect to Dtoxs Alignment or use a Directory widget'
                                               ' to specify location of UMI read counts data files')
         self.infoLabel.setWordWrap(True)
-
-        # TODO let user specify results directory
-        # self.btn_res = gui.button(None, self, "Open", callback=self.set_results_dir)
-        # self.resultsEdit = QtGui.QLineEdit(self.host_results_dir)
-        # self.buttonsArea.layout().addWidget(self.btn_res)
-        # self.buttonsArea.layout().addWidget(self.resultsEdit)
 
         self.autoRun = True
         gui.checkBox(self.controlArea, self, 'autoRun', 'Run automatically when input set')
@@ -66,6 +53,12 @@ class OWDtoxsAnalysis(widget.OWWidget):
             print('Tried to set alignment directory to none existent directory: ' + str(path))
         else:
             self.host_counts_dir = path.strip()
+            # Jimmy March-29-2017, once the counts input was set, automatically create an output fold as a sibling of "Seqs"
+            parent_path = os.path.abspath(os.path.join(self.host_counts_dir, '..'))
+            self.host_results_dir = os.path.join(parent_path + self.result_folder_name)
+            if not os.path.exists(self.host_results_dir):
+                os.makedirs(self.host_results_dir)
+
             if self.autoRun:
                 self.start_analysis()
             else:
@@ -130,7 +123,32 @@ class OWDtoxsAnalysis(widget.OWWidget):
         self.setStatusMessage('Finished!')
         self.progressBarFinished()
         self.send("Results", self.host_results_dir)
-        # TODO create Orange.data.Table from TOP-40.tsv
+
+        # Jimmy March 29 2017 added, create a dataset for DataTable widget to show TOP-40.tsv
+        tsvFile = os.path.join(self.host_results_dir, 'FDR-0.1/TOP-40.tsv');
+        tsvReader = FileFormat.get_reader(tsvFile)
+        data = None
+        try:
+            data = tsvReader.read()
+
+            # TODO Jimmy March 29 2017, tried to define domain for DataTable, didn't work
+            '''
+            domain = Orange.data.Domain(["Cell", "Plate", "Gene", "logFC", "logCPM", "PValue"], data.domain)
+
+            domain = Orange.data.Domain(data.domain.attributes, data.domain.class_vars,
+                [Orange.data.DiscreteVariable("Cell"),
+                Orange.data.DiscreteVariable("Plate"),
+                Orange.data.DiscreteVariable("Condition1"),
+                Orange.data.DiscreteVariable("Condition2"),
+                Orange.data.StringVariable("Gene"),
+                Orange.data.ContinuousVariable("logFC"),
+                Orange.data.ContinuousVariable("logCPM"),
+                Orange.data.StringVariable("PValue")])
+
+            data = data.from_table(domain, data)'''
+        except Exception as ex:
+            print (ex)
+        self.send("Top 40", data)
 
 
 """

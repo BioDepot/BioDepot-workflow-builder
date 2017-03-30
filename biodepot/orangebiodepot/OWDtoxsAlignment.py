@@ -32,21 +32,15 @@ class OWDtoxsAlignment(widget.OWWidget):
         # This client talks to your local docker
         self.docker = DockerClient('unix:///var/run/docker.sock', 'local')
 
-        # The directory of the seq data needed to run
-        # the container will be set by the user before the
-        # container can be run
         self.host_ref_dir = None
         self.host_seq_dir = None
         self.ref_dir_set = False
         self.seq_dir_set = False
 
-        # The default write location of all widgets should be
-        # ~/BioDepot/WidgetName/
+        self.result_folder_name = "/alignment_results"
+
         # TODO is this an issue if multiple containers write to the same place?
         # TODO add timestamp to directory name to differentiate runs
-        #counts_dir = '~/BioDepot/Dtoxs_Alignment/Counts'
-        #if not os.path.exists(counts_dir):
-        #    os.makedirs(counts_dir)
         # Jimmy, Mar/7/2017, I don't know what does "toHostDir" do. Since our DockerClient missed that code, I comment it temporary
         #self.host_counts_dir = counts_dir #self.docker.toHostDir(counts_dir)
 
@@ -60,6 +54,7 @@ class OWDtoxsAlignment(widget.OWWidget):
         gui.checkBox(self.controlArea, self, 'auto_run', 'Run automatically when input set')
         self.btn_run = gui.button(self.controlArea, self, "Run", callback=self.btn_run_pushed)
         self.is_running = False
+
 
 
     """
@@ -96,9 +91,12 @@ class OWDtoxsAlignment(widget.OWWidget):
         if path is None:
             self.seq_dir_set = False
         else:
-            # Jimmy, Mar-7-2-17, I don't know what does "toHostDir" do. Since our DockerClient missed that code, I comment it temporary
-            self.host_seq_dir = path # self.docker.toHostDir(path)
-            self.host_counts_dir = self.host_seq_dir + '/counts'
+            self.host_seq_dir = path
+
+            # Jimmy March-28-2017, once the seq input was set, automatically create an output fold as a sibling of "Seqs"
+            parent_path = os.path.abspath(os.path.join(self.host_seq_dir, '..'))
+            self.host_counts_dir = os.path.join(parent_path + self.result_folder_name)
+
             if not os.path.exists(self.host_counts_dir):
                 os.makedirs(self.host_counts_dir)
 
@@ -189,7 +187,6 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.setStatusMessage('Finished!')
         self.progressBarFinished()
         self.send("Counts", self.host_counts_dir)
-        # TODO create Orange.data.Table from TOP-40.tsv
 
 
 """
