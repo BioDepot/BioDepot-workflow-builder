@@ -169,8 +169,6 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.progressBarSet(val)
 
     def run_container_finished(self):
-        self.run_container_thread.terminate()
-        self.run_container_thread.wait()
         self.infoLabel.setText("Finished running alignment!")
         self.btn_run.setEnabled(True)
         self.is_running = False
@@ -211,10 +209,6 @@ class RunAlignmentThread(QThread):
         volumes = {self.host_ref_dir: self.container_ref_dir,
                    self.host_seq_dir: self.container_seq_dir,
                    self.host_counts_dir: self.container_counts_dir}
-
-        print (self.host_ref_dir)
-        print (self.host_seq_dir)
-        print (self.host_counts_dir)
 
         response = self.docker.create_container(self.image_name,
                                                 volumes=volumes,
