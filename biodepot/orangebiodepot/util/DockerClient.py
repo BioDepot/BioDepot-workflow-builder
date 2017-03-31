@@ -2,6 +2,7 @@
 from docker import APIClient
 import requests, json
 from PyQt5.QtCore import QThread, pyqtSignal
+import os
 
 
 class DockerClient:
@@ -49,7 +50,7 @@ class DockerClient:
         if type(volumes) is dict:
             binds = []
             for host_dir, container_dir  in volumes.items():
-                binds.append(host_dir + ":" + container_dir)
+                binds.append(self.to_host_directory(host_dir) + ":" + container_dir)
             host_config = self.cli.create_host_config(binds=binds)
             volumes = list(volumes.values())
         if type(commands) is list:
@@ -92,6 +93,36 @@ class DockerClient:
 
     def remove_volume(self, name):
         self.cli.remove_volume(name)
+
+    '''
+        Convert path of container back to host path
+    '''
+    def to_host_directory(self, path):
+        source = ''
+        destination = ''
+
+        # locate BwB container
+        for c in self.cli.containers():
+            if c['Image'] == 'biodepot/bwb':
+                # found BwB container, locate source and destination
+                for m in c['Mounts']:
+                    if 'docker.sock' in m['Source']:
+                        continue
+                    source = m['Source']
+                    destination = m['Destination']
+
+        if source is '' or destination is '':
+            return path
+
+        destination = os.path.join(destination, '')
+
+        # if the path is not mapping from host, nothing will be done
+        if destination not in path :
+            return path
+
+        abspath = os.path.join(source, path[path.find(destination)+len(destination) : ])
+        return abspath
+
 
 class DockerThread_BuildImage(QThread):
     build_process = pyqtSignal(['QString'])

@@ -56,7 +56,6 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.is_running = False
 
 
-
     """
     Called when the user pushes 'Run'
     """
@@ -72,8 +71,7 @@ class OWDtoxsAlignment(widget.OWWidget):
         if path is None:
             self.ref_dir_set = False
         else:
-            # Jimmy, Mar-7-2-17, I don't know what does "toHostDir" do. Since our DockerClient missed that code, I comment it temporary
-            self.host_ref_dir = path # self.docker.toHostDir(path)
+            self.host_ref_dir = path
             if self.host_ref_dir is None:
                 # TODO emit error
                 self.ref_dir_set = False
@@ -124,15 +122,13 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.pull_image_worker.finished.connect(self.pull_image_finished)
         self.pull_image_worker.start()
 
-    @pyqtSlot(int, name="pullImageProgress")
     def pull_image_progress(self, val):
         self.progressBarSet(val)
 
-    @pyqtSlot(name="pullImageFinished")
     def pull_image_finished(self):
         self.infoLabel.setText('Finished pulling \'' + self.image_name + ":" + self.image_version + '\'')
         self.progressBarFinished()
-        self.start_container()
+        self.run_container()
 
     """
     Alignment
@@ -160,23 +156,18 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.setStatusMessage('Running...')
         self.progressBarInit()
         # Run the container in a new thread
-        self.run_container_thread = QThread()
-        self.run_container_worker = RunAlignmentWorker(self.docker,
+        self.run_container_thread = RunAlignmentThread(self.docker,
                                                        self.image_name,
                                                        self.host_ref_dir,
                                                        self.host_seq_dir,
                                                        self.host_counts_dir)
-        self.run_container_worker.progress[int].connect(self.run_container_progress)
-        self.run_container_worker.finished.connect(self.run_container_finished)
-        self.run_container_worker.moveToThread(self.run_container_thread)
-        self.run_container_thread.started.connect(self.run_container_worker.work)
+        self.run_container_thread.progress.connect(self.run_container_progress)
+        self.run_container_thread.finished.connect(self.run_container_finished)
         self.run_container_thread.start()
 
-    @pyqtSlot(int, name="runContainerProgress")
     def run_container_progress(self, val):
         self.progressBarSet(val)
 
-    @pyqtSlot(name="runContainerFinished")
     def run_container_finished(self):
         self.run_container_thread.terminate()
         self.run_container_thread.wait()
@@ -192,20 +183,20 @@ class OWDtoxsAlignment(widget.OWWidget):
 """
 Run Alignment Worker
 """
-class RunAlignmentWorker(QObject):
-    progress = pyqtSignal(int, name="runContainerProgress")
-    finished = pyqtSignal(name="runContainerFinished")
+class RunAlignmentThread(QThread):
+    progress = pyqtSignal(int)
+
 
     container_ref_dir = "/root/LINCS/References"
     container_seq_dir = "/root/LINCS/Seqs"
     container_counts_dir = "/root/LINCS/Counts"
 
-    commands = ["cd /root/LINCS/; "
-                "Programs/Broad-DGE/run-alignment-analysis.sh >& run-alignment-analysis.log; "
+    commands = ["/root/LINCS/Programs/Broad-DGE/run-alignment-analysis.sh >& /root/LINCS/Counts/run-alignment-analysis.log; "
                 "exit"]
 
     def __init__(self, cli, image_name, host_ref_dir, host_seq_dir, host_counts_dir):
-        super().__init__()
+        QThread.__init__(self)
+
         self.docker = cli
         self.image_name = image_name
         self.host_ref_dir = host_ref_dir
@@ -213,18 +204,25 @@ class RunAlignmentWorker(QObject):
         self.host_counts_dir = host_counts_dir
         self.containerId = ""
 
-    def work(self):
+    def __del__(self):
+        self.wait()
+
+    def run(self):
         volumes = {self.host_ref_dir: self.container_ref_dir,
                    self.host_seq_dir: self.container_seq_dir,
                    self.host_counts_dir: self.container_counts_dir}
+
+        print (self.host_ref_dir)
+        print (self.host_seq_dir)
+        print (self.host_counts_dir)
+
         response = self.docker.create_container(self.image_name,
                                                 volumes=volumes,
                                                 commands=self.commands)
-        if response['Warnings'] is None:
+        if response['Warnings'] == None:
             self.containerId = response['Id']
             self.docker.start_container(self.containerId)
         else:
-            # TODO emit warning to Widget
             print(response['Warnings'])
 
         i = 1
@@ -236,7 +234,6 @@ class RunAlignmentWorker(QObject):
             i += 2
         # Remove the container now that it is finished
         self.docker.remove_container(self.containerId)
-        self.finished.emit()
 
 
 if __name__ == "__main__":
