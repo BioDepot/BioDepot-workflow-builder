@@ -37,7 +37,7 @@ RUN apt-get autoclean && apt-get autoremove && rm -rf /var/lib/apt/lists/*
 ## DESKTOP SETTINGS
 ADD Desktop/menu.xml  /root/.config/openbox/menu.xml 
 ADD Desktop/bg.png /root/.config/openbox/bg.png
-RUN echo "feh /root/.config/openbox/bg.png & rox-filer /data & orange-canvas" \ 
+RUN echo "feh --bg-fill /root/.config/openbox/bg.png & rox-filer /data & orange-canvas" \ 
     >> /root/.config/openbox/autostart
 ADD Desktop/rc.xml /root/.config/openbox/rc.xml
 
