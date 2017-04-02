@@ -5,7 +5,7 @@ from Orange.widgets import widget, gui
 from Orange.widgets.settings import Setting
 from AnyQt.QtCore import QObject, QThread, pyqtSignal, pyqtSlot
 
-from orangebiodepot.util.DockerClient import DockerClient, PullImageWorker
+from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
 
 class OWDtoxsAlignment(widget.OWWidget):
     name = "Dtoxs Alignment"
@@ -32,22 +32,17 @@ class OWDtoxsAlignment(widget.OWWidget):
         # This client talks to your local docker
         self.docker = DockerClient('unix:///var/run/docker.sock', 'local')
 
-        # The directory of the seq data needed to run
-        # the container will be set by the user before the
-        # container can be run
         self.host_ref_dir = None
         self.host_seq_dir = None
         self.ref_dir_set = False
         self.seq_dir_set = False
 
-        # The default write location of all widgets should be
-        # ~/BioDepot/WidgetName/
+        self.result_folder_name = "/alignment_results"
+
         # TODO is this an issue if multiple containers write to the same place?
         # TODO add timestamp to directory name to differentiate runs
-        counts_dir = '~/BioDepot/Dtoxs_Alignment/Counts'
-        if not os.path.exists(counts_dir):
-            os.makedirs(counts_dir)
-        self.host_counts_dir = self.docker.toHostDir(counts_dir)
+        # Jimmy, Mar/7/2017, I don't know what does "toHostDir" do. Since our DockerClient missed that code, I comment it temporary
+        #self.host_counts_dir = counts_dir #self.docker.toHostDir(counts_dir)
 
         # GUI
         box = gui.widgetBox(self.controlArea, "Info")
@@ -76,7 +71,7 @@ class OWDtoxsAlignment(widget.OWWidget):
         if path is None:
             self.ref_dir_set = False
         else:
-            self.host_ref_dir = self.docker.toHostDir(path)
+            self.host_ref_dir = path
             if self.host_ref_dir is None:
                 # TODO emit error
                 self.ref_dir_set = False
@@ -94,7 +89,15 @@ class OWDtoxsAlignment(widget.OWWidget):
         if path is None:
             self.seq_dir_set = False
         else:
-            self.host_seq_dir = self.docker.toHostDir(path)
+            self.host_seq_dir = path
+
+            # Jimmy March-28-2017, once the seq input was set, automatically create an output fold as a sibling of "Seqs"
+            parent_path = os.path.abspath(os.path.join(self.host_seq_dir, '..'))
+            self.host_counts_dir = os.path.join(parent_path + self.result_folder_name)
+
+            if not os.path.exists(self.host_counts_dir):
+                os.makedirs(self.host_counts_dir)
+
             if self.host_seq_dir is None:
                 # TODO emit error
                 self.seq_dir_set = False
@@ -114,25 +117,18 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.is_running = True
         self.btn_run.setEnabled(False)
         # Pull the image in a new thread
-        self.pull_image_thread = QThread()
-        self.pull_image_worker = PullImageWorker(self.docker, self.image_name, self.image_version)
-        self.pull_image_worker.progress[int].connect(self.pull_image_progress)
+        self.pull_image_worker = PullImageThread(self.docker, self.image_name, self.image_version)
+        self.pull_image_worker.pull_progress.connect(self.pull_image_progress)
         self.pull_image_worker.finished.connect(self.pull_image_finished)
-        self.pull_image_worker.moveToThread(self.pull_image_thread)
-        self.pull_image_thread.started.connect(self.pull_image_worker.work)
-        self.pull_image_thread.start()
+        self.pull_image_worker.start()
 
-    @pyqtSlot(int, name="pullImageProgress")
     def pull_image_progress(self, val):
         self.progressBarSet(val)
 
-    @pyqtSlot(name="pullImageFinished")
     def pull_image_finished(self):
-        self.pull_image_thread.terminate()
-        self.pull_image_thread.wait()
         self.infoLabel.setText('Finished pulling \'' + self.image_name + ":" + self.image_version + '\'')
         self.progressBarFinished()
-        self.start_container()
+        self.run_container()
 
     """
     Alignment
@@ -160,53 +156,45 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.setStatusMessage('Running...')
         self.progressBarInit()
         # Run the container in a new thread
-        self.run_container_thread = QThread()
-        self.run_container_worker = RunAlignmentWorker(self.docker,
+        self.run_container_thread = RunAlignmentThread(self.docker,
                                                        self.image_name,
                                                        self.host_ref_dir,
                                                        self.host_seq_dir,
                                                        self.host_counts_dir)
-        self.run_container_worker.progress[int].connect(self.run_container_progress)
-        self.run_container_worker.finished.connect(self.run_container_finished)
-        self.run_container_worker.moveToThread(self.run_container_thread)
-        self.run_container_thread.started.connect(self.run_container_worker.work)
+        self.run_container_thread.progress.connect(self.run_container_progress)
+        self.run_container_thread.finished.connect(self.run_container_finished)
         self.run_container_thread.start()
 
-    @pyqtSlot(int, name="runContainerProgress")
     def run_container_progress(self, val):
         self.progressBarSet(val)
 
-    @pyqtSlot(name="runContainerFinished")
     def run_container_finished(self):
-        self.run_container_thread.terminate()
-        self.run_container_thread.wait()
         self.infoLabel.setText("Finished running alignment!")
         self.btn_run.setEnabled(True)
         self.is_running = False
         self.btn_run.setText('Run again')
         self.setStatusMessage('Finished!')
         self.progressBarFinished()
-        self.send("Counts", self.docker.toContainerDir(self.host_counts_dir))
-        # TODO create Orange.data.Table from TOP-40.tsv
+        self.send("Counts", self.host_counts_dir)
 
 
 """
 Run Alignment Worker
 """
-class RunAlignmentWorker(QObject):
-    progress = pyqtSignal(int, name="runContainerProgress")
-    finished = pyqtSignal(name="runContainerFinished")
+class RunAlignmentThread(QThread):
+    progress = pyqtSignal(int)
+
 
     container_ref_dir = "/root/LINCS/References"
     container_seq_dir = "/root/LINCS/Seqs"
     container_counts_dir = "/root/LINCS/Counts"
 
-    commands = ["cd /root/LINCS/; "
-                "Programs/Broad-DGE/run-alignment-analysis.sh >& run-alignment-analysis.log; "
+    commands = ["/root/LINCS/Programs/Broad-DGE/run-alignment-analysis.sh >& /root/LINCS/Counts/run-alignment-analysis.log; "
                 "exit"]
 
     def __init__(self, cli, image_name, host_ref_dir, host_seq_dir, host_counts_dir):
-        super().__init__()
+        QThread.__init__(self)
+
         self.docker = cli
         self.image_name = image_name
         self.host_ref_dir = host_ref_dir
@@ -214,30 +202,32 @@ class RunAlignmentWorker(QObject):
         self.host_counts_dir = host_counts_dir
         self.containerId = ""
 
-    def work(self):
+    def __del__(self):
+        self.wait()
+
+    def run(self):
         volumes = {self.host_ref_dir: self.container_ref_dir,
                    self.host_seq_dir: self.container_seq_dir,
                    self.host_counts_dir: self.container_counts_dir}
+
         response = self.docker.create_container(self.image_name,
                                                 volumes=volumes,
                                                 commands=self.commands)
-        if response['Warnings'] is None:
+        if response['Warnings'] == None:
             self.containerId = response['Id']
             self.docker.start_container(self.containerId)
         else:
-            # TODO emit warning to Widget
             print(response['Warnings'])
 
         i = 1
         # Keep running until container is exited
-        while self.docker.isRunning(self.containerId):
+        while self.docker.container_running(self.containerId):
             # self.docker.printStats(self.containerId)
             self.progress.emit(i)
             time.sleep(2)
             i += 2
         # Remove the container now that it is finished
         self.docker.remove_container(self.containerId)
-        self.finished.emit()
 
 
 if __name__ == "__main__":

@@ -1,11 +1,9 @@
 import sys
-import numpy
-
 import Orange.data
-from Orange.widgets import widget, gui
-from PyQt5 import QtGui, QtWidgets
+from Orange.widgets import widget, gui, settings
+from PyQt5 import QtWidgets
 
-class OWDtoxsAlignment(widget.OWWidget):
+class OWDirectory(widget.OWWidget):
     name = "Directory"
     description = "Set an input as a Directory"
     category = "Data"
@@ -18,15 +16,24 @@ class OWDtoxsAlignment(widget.OWWidget):
     want_main_area = False
     want_control_area = True
 
+    # Jimmy March-28-2017, persisting path when we reload workflow, the path will still there.
+    #    use schema_only to ensure the stored path only loaded from .ows files
+    directory_path = settings.Setting('', schema_only=True)
+
     def __init__(self):
         super().__init__()
-        self.dir_edit = QtWidgets.QLineEdit()
+
+        self.dir_edit = gui.lineEdit(None, self, "directory_path") #QtWidgets.QLineEdit()
         self.btn_dir = gui.button(None, self, "☰", callback=self.get_dir, autoDefault=False)
 
         self.buttonsArea.layout().addWidget(self.btn_dir)
         self.buttonsArea.layout().addWidget(self.dir_edit)
         self.buttonsArea.layout().addSpacing(8)
         self.buttonsArea.setMinimumWidth(400)
+
+        # Jimmy March-28-2017, if we loaded settings from workflow, trigger the output channel
+        if self.directory_path is not "":
+            self.send("Dir", self.directory_path)
 
     """
     Called when button pushed
@@ -44,3 +51,20 @@ class OWDtoxsAlignment(widget.OWWidget):
             path = path.strip()
             self.dir_edit.setText(path)
             self.send("Dir", path)
+
+
+def main(argv=sys.argv):
+    from AnyQt.QtWidgets import QApplication
+    app = QApplication(list(argv))
+
+    ow = OWDirectory()
+    ow.show()
+    ow.raise_()
+
+    ow.handleNewSignals()
+    app.exec_()
+    ow.handleNewSignals()
+    return 0
+
+if __name__=="__main__":
+    sys.exit(main())

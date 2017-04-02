@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-from docker import Client
+from docker import APIClient
 import requests, json
 from PyQt5.QtCore import QThread, pyqtSignal
+import os
 
 
 class DockerClient:
     def __init__(self, url, name):
         self.url = url
         self.name = name
-        self.cli = Client(base_url=url)
+        self.cli = APIClient(base_url=url)
 
     def getClient(self):
         return self.cli
@@ -49,7 +50,7 @@ class DockerClient:
         if type(volumes) is dict:
             binds = []
             for host_dir, container_dir  in volumes.items():
-                binds.append(host_dir + ":" + container_dir)
+                binds.append(self.to_host_directory(host_dir) + ":" + container_dir)
             host_config = self.cli.create_host_config(binds=binds)
             volumes = list(volumes.values())
         if type(commands) is list:
@@ -93,6 +94,68 @@ class DockerClient:
     def remove_volume(self, name):
         self.cli.remove_volume(name)
 
+    '''
+        Convert path of container back to host path
+    '''
+    def to_host_directory(self, path):
+        source = ''
+        destination = ''
+
+        # locate BwB container
+        for c in self.cli.containers():
+            if c['Image'] == 'biodepot/bwb':
+                # found BwB container, locate source and destination
+                for m in c['Mounts']:
+                    if 'docker.sock' in m['Source']:
+                        continue
+                    source = m['Source']
+                    destination = m['Destination']
+
+        if source is '' or destination is '':
+            return path
+
+        destination = os.path.join(destination, '')
+
+        # if the path is not mapping from host, nothing will be done
+        if destination not in path :
+            return path
+
+        abspath = os.path.join(source, path[path.find(destination)+len(destination) : ])
+        return abspath
+
+
+class DockerThread_BuildImage(QThread):
+    build_process = pyqtSignal(['QString'])
+    build_complete = pyqtSignal(int)
+    def __init__(self, cli, name, dockerfile):
+        QThread.__init__(self)
+        self.docker = cli
+        self.dockerfile = dockerfile
+        self.name = name
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        imagename = self.name
+        try:
+            import io
+            f = io.BytesIO(self.dockerfile.encode('utf-8'))
+            for rawline in self.docker.getClient().build(fileobj=f, tag=imagename, stream=True):
+                for jsonstr in rawline.decode('utf-8').split('\r\n')[:-1]:
+                    log = jsonstr
+                    try:
+                        line = json.loads(jsonstr)
+                        log = line['stream']
+                    except ValueError as e:
+                        print (e)
+                    except TypeError as e:
+                        print (e)
+                    self.build_process.emit(log)
+
+        except requests.exceptions.RequestException as e:
+            # TODO emit error
+            print(e)
 
 class PullImageThread(QThread):
     pull_progress = pyqtSignal(int)
