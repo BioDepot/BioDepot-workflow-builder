@@ -35,14 +35,14 @@ RUN pip3 install -e biodepot
 RUN apt-get autoclean && apt-get autoremove && rm -rf /var/lib/apt/lists/*
 
 ## DESKTOP SETTINGS
-ADD menu.xml  /root/.config/openbox/menu.xml 
-ADD Media/logo.png /root/.config/openbox/bg.png
+ADD Desktop/menu.xml  /root/.config/openbox/menu.xml 
+ADD Desktop/bg.png /root/.config/openbox/bg.png
 RUN echo "feh /root/.config/openbox/bg.png & rox-filer /data & orange-canvas" \ 
     >> /root/.config/openbox/autostart
-ADD rc.xml /root/.config/openbox/rc.xml
+ADD Desktop/rc.xml /root/.config/openbox/rc.xml
 
 ## CMD
-ADD novnc.sh /root/novnc.sh
+ADD Desktop/novnc.sh /root/novnc.sh
 RUN chmod 0755 /root/novnc.sh
 
 
