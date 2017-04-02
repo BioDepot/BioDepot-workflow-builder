@@ -50,7 +50,7 @@
 
 <theme>
   <name>Clearlooks</name>
-  <titleLayout>NLIMC</titleLayout>
+  <titleLayout>IMCNL</titleLayout>
   <!--
       available characters are NDSLIMC, each can occur at most once.
       N: window icon
@@ -150,10 +150,10 @@
   <popupFixedPosition>
     <!-- these are used if popupPosition is set to 'Fixed' -->
 
-    <x>10</x>
+    <x>Center</x>
     <!-- positive number for distance from left edge, negative number for
          distance from right edge, or 'Center' -->
-    <y>10</y>
+    <y>Center</y>
     <!-- positive number for distance from top edge, negative number for
          distance from bottom edge, or 'Center' -->
   </popupFixedPosition>
