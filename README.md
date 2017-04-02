@@ -18,10 +18,7 @@ Currently, BwB uses docker sock binding, to run BwB:
 1. Install Docker   
 2. On Docker-enabled machines run:  
 ```  
-    docker run --rm  -p 6080:6080 \
-        -v ~/Desktop/:/data \
-        -v /var/run/docker.sock:/var/run/docker.sock  \
-        biodepot/bwb 
+docker run --rm  -p 6080:6080 -v ~/Desktop/:/data -v /var/run/docker.sock:/var/run/docker.sock  biodepot/bwb 
 ```
 3. BwB can be accessed from browser:  http://localhost:6080 (for windows machines, you'll need to know the address of your docker-machine)  
 
