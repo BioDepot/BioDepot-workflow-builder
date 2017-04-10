@@ -37,7 +37,8 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.ref_dir_set = False
         self.seq_dir_set = False
 
-        self.result_folder_name = "/alignment_results"
+        self.result_folder_name = "/Results"
+        self.aligns_folder_name = "/Aligns"
 
         # TODO is this an issue if multiple containers write to the same place?
         # TODO add timestamp to directory name to differentiate runs
@@ -91,12 +92,15 @@ class OWDtoxsAlignment(widget.OWWidget):
         else:
             self.host_seq_dir = path
 
-            # Jimmy March-28-2017, once the seq input was set, automatically create an output fold as a sibling of "Seqs"
+            # Jimmy March-28-2017, once the seq input was set, automatically create a result and aligns folder as a sibling of "Seqs"
             parent_path = os.path.abspath(os.path.join(self.host_seq_dir, '..'))
             self.host_counts_dir = os.path.join(parent_path + self.result_folder_name)
+            self.host_aligns_dir = os.path.join(parent_path + self.aligns_folder_name)
 
             if not os.path.exists(self.host_counts_dir):
                 os.makedirs(self.host_counts_dir)
+            if not os.path.exists(self.host_aligns_dir):
+                os.makedirs(self.host_aligns_dir)
 
             if self.host_seq_dir is None:
                 # TODO emit error
@@ -160,7 +164,8 @@ class OWDtoxsAlignment(widget.OWWidget):
                                                        self.image_name,
                                                        self.host_ref_dir,
                                                        self.host_seq_dir,
-                                                       self.host_counts_dir)
+                                                       self.host_counts_dir,
+                                                       self.host_aligns_dir)
         self.run_container_thread.progress.connect(self.run_container_progress)
         self.run_container_thread.finished.connect(self.run_container_finished)
         self.run_container_thread.start()
@@ -188,11 +193,12 @@ class RunAlignmentThread(QThread):
     container_ref_dir = "/root/LINCS/References"
     container_seq_dir = "/root/LINCS/Seqs"
     container_counts_dir = "/root/LINCS/Counts"
+    container_aligns_dir = "/root/LINCS/Aligns"
 
     commands = ["/root/LINCS/Programs/Broad-DGE/run-alignment-analysis.sh >& /root/LINCS/Counts/run-alignment-analysis.log; "
                 "exit"]
 
-    def __init__(self, cli, image_name, host_ref_dir, host_seq_dir, host_counts_dir):
+    def __init__(self, cli, image_name, host_ref_dir, host_seq_dir, host_counts_dir, host_aligns_dir):
         QThread.__init__(self)
 
         self.docker = cli
@@ -200,6 +206,7 @@ class RunAlignmentThread(QThread):
         self.host_ref_dir = host_ref_dir
         self.host_seq_dir = host_seq_dir
         self.host_counts_dir = host_counts_dir
+        self.host_aligns_dir = host_aligns_dir
         self.containerId = ""
 
     def __del__(self):
@@ -208,7 +215,8 @@ class RunAlignmentThread(QThread):
     def run(self):
         volumes = {self.host_ref_dir: self.container_ref_dir,
                    self.host_seq_dir: self.container_seq_dir,
-                   self.host_counts_dir: self.container_counts_dir}
+                   self.host_counts_dir: self.container_counts_dir,
+                   self.host_aligns_dir: self.container_aligns_dir}
 
         response = self.docker.create_container(self.image_name,
                                                 volumes=volumes,
