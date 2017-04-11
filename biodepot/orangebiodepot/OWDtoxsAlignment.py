@@ -158,7 +158,7 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.is_running = True
         self.infoLabel.setText('Running alignment...')
         self.setStatusMessage('Running...')
-        self.progressBarInit()
+        #self.progressBarInit()
         # Run the container in a new thread
         self.run_container_thread = RunAlignmentThread(self.docker,
                                                        self.image_name,
@@ -179,7 +179,7 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.is_running = False
         self.btn_run.setText('Run again')
         self.setStatusMessage('Finished!')
-        self.progressBarFinished()
+        #self.progressBarFinished()
         self.send("Counts", self.host_counts_dir)
 
 
@@ -227,13 +227,15 @@ class RunAlignmentThread(QThread):
         else:
             print(response['Warnings'])
 
-        i = 1
+        #i = 1
         # Keep running until container is exited
         while self.docker.container_running(self.containerId):
-            # self.docker.printStats(self.containerId)
-            self.progress.emit(i)
             time.sleep(2)
-            i += 2
+            pass
+            # self.docker.printStats(self.containerId)
+            #self.progress.emit(i)
+            #time.sleep(2)
+            #i += 2
         # Remove the container now that it is finished
         self.docker.remove_container(self.containerId)
 
