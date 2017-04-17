@@ -17,10 +17,10 @@ Currently, BwB uses docker sock binding, to run BwB:
 
 1. Install Docker   
 2. On Docker-enabled machines run:  
-```  
-docker run --rm  -p 6080:6080 -v ~/Desktop/:/data -v /var/run/docker.sock:/var/run/docker.sock  biodepot/bwb 
+``` 
+docker run --rm -p 6080:6080 -v ~/Desktop/:/data -v /var/run/docker.sock:/var/run/docker.sock biodepot/bwb
 ```
-3. BwB can be accessed from browser:  http://localhost:6080 (for windows machines, you'll need to know the address of your docker-machine)  
+3. BwB can be accessed from browser: http://localhost:6080 (for windows machines, you'll need to know the address of your docker-machine)  
 
 
 
@@ -31,10 +31,10 @@ To add a widget to BioDepot:
 2. Locate to folder orangebiodepot (eg: `~/Desktop/biodepot/orangebiodepot`)   
 3. Write the widget (or copy any of existing widgets and modify as necessary)   
 4. On BwB, run xterm and locate to the shared widget location (e.g: /data/biodepot)   
-5. Rebuild BioDepot and rerun Orange:   
+5. Rebuild BioDepot and rerun Orange:  
 
 ```
-    pip3 uninstall BioDepot 
+    pip3 uninstall BioDepot
     pip3 install -e .
     orange-canvas
 ```
