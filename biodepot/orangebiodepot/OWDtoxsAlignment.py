@@ -37,7 +37,7 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.ref_dir_set = False
         self.seq_dir_set = False
 
-        self.result_folder_name = "/Results"
+        self.result_folder_name = "/Count"
         self.aligns_folder_name = "/Aligns"
 
         # TODO is this an issue if multiple containers write to the same place?
