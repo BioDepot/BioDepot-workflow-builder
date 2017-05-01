@@ -6,6 +6,9 @@ from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
 from PyQt5.QtCore import QThread, pyqtSignal
 
 class OWSTARAlignment(widget.OWWidget):
+    RunMode_GenerateGenome = 0
+    RunMode_STAR = 1
+
     name = "Star Alignment"
     description = "Performs alignment of fastqs to bam via STAR"
     category = "RNASeq"
@@ -32,10 +35,14 @@ class OWSTARAlignment(widget.OWWidget):
 
         # GUI
         box = gui.widgetBox(self.controlArea, "Info")
-        self.info_fastq = gui.widgetLabel(box, 'Please specify a directory with fastq files.')
+        self.info_fastq = gui.widgetLabel(box, 'Please specify a directory with fastq or fasta files.')
         self.info_starindex = gui.widgetLabel(box, 'Please specify a genome directory.')
         self.info_fastq.setWordWrap(True)
         self.info_starindex.setWordWrap(True)
+
+        self.RunMode = OWSTARAlignment.RunMode_GenerateGenome
+        self.cboRunMode = gui.comboBox(self.controlArea, self, 'RunMode', label='Running Mode:', items=('Generate Genome', 'STAR Alignment'), valueType=int)
+        self.cboRunMode.setCurrentIndex(0)
 
         self.AutoStarAlignment = False
         gui.checkBox(self.controlArea, self, 'AutoStarAlignment', 'Run automatically when directory was set.')
@@ -86,7 +93,6 @@ class OWSTARAlignment(widget.OWWidget):
         elif self.bFastqDirSet and self.bStarIndexDirSet:
             self.run_staralignment()
 
-
     """
         Pull image
     """
@@ -122,10 +128,12 @@ class OWSTARAlignment(widget.OWWidget):
                                                      self.image_version,
                                                      self.fastqDirectory,
                                                      self.starindexDirectory,
-                                                     self.fastqDirectory)
+                                                     self.fastqDirectory,
+                                                     self.RunMode)
 
         self.run_staralignment_thread.analysis_progress.connect(self.run_staralignment_progress)
         self.run_staralignment_thread.finished.connect(self.run_staralignment_done)
+        self.run_staralignment_thread.analysis_message.connect(self.run_star_message)
         self.run_staralignment_thread.start()
 
     def run_staralignment_progress(self, val):
@@ -136,43 +144,25 @@ class OWSTARAlignment(widget.OWWidget):
         self.btnStarAlignment.setEnabled(True)
         self.btnStarAlignment.setText('Run again')
         self.setStatusMessage('Finished!')
-        #self.progressBarFinished()
         self.send("Directory", self.fastqDirectory)
         self.btnStarAlignment.setEnabled(True)
+
+    def run_star_message(self, msgType, message):
+        if msgType == 'warning':
+            self.warning(message)
+        elif msgType == 'error':
+            self.error(message)
 
 
 class StarAlignmentThread(QThread):
     analysis_progress = pyqtSignal(int)
+    analysis_message = pyqtSignal(str, str)     # warning/error    message
 
-    container_fastq_dir = '/data'
-    container_genome_dir = '/genome'
+    container_fastaq_dir = '/data/fastaq'
+    container_genome_dir = '/data/genome'
 
-    # docker pull biodepot/ubuntu-star
-    # quay.io/ucsc_cgl/star:2.4.2a--bcbd5122b69ff6ac4ef61958e47bde94001cfe80
-
-    parameters = ['STAR',
-                  '--runThreadN', '8',
-                  '--genomeDir', container_genome_dir]
-                  # '--outFileNamePrefix', 'rna',
-                  # '--outSAMtype', 'BAM', 'SortedByCoordinate',
-                  # '--outSAMunmapped', 'Within',
-                  # '--quantMode', 'TranscriptomeSAM',
-                  # '--outSAMattributes', 'NH', 'HI', 'AS', 'NM', 'MD',
-                  # '--outFilterType', 'BySJout',
-                  # '--outFilterMultimapNmax', '20',
-                  # '--outFilterMismatchNmax', '999',
-                  # '--outFilterMismatchNoverReadLmax', '0.04',
-                  # '--alignIntronMin', '20',
-                  # '--alignIntronMax', '1000000',
-                  # '--alignMatesGapMax', '1000000',
-                  # '--alignSJoverhangMin', '8',
-                  # '--alignSJDBoverhangMin', '1',
-                  # '--sjdbScore', '1',
-                  # '--limitBAMsortRAM', '49268954168']
-
-
-
-    def __init__(self, cli, image_name, image_version, host_fastq_dir, host_starindex_dir, host_results_dir):
+    # biodepot/ubuntu-star
+    def __init__(self, cli, image_name, image_version, host_fastq_dir, host_starindex_dir, host_results_dir, running_mode):
         QThread.__init__(self)
         self.docker = cli
         self.image_name = image_name
@@ -180,6 +170,27 @@ class StarAlignmentThread(QThread):
         self.host_fastq_dir = host_fastq_dir
         self.host_starindex_dir = host_starindex_dir
         self.host_results_dir = host_results_dir
+        self.running_mode = running_mode
+
+        self.parameters = ['STAR',
+                      '--runThreadN', '8',
+                      '--genomeDir', self.container_genome_dir]
+                    # '--outFileNamePrefix', 'rna',
+                    # '--outSAMtype', 'BAM', 'SortedByCoordinate',
+                    # '--outSAMunmapped', 'Within',
+                    # '--quantMode', 'TranscriptomeSAM',
+                    # '--outSAMattributes', 'NH', 'HI', 'AS', 'NM', 'MD',
+                    # '--outFilterType', 'BySJout',
+                    # '--outFilterMultimapNmax', '20',
+                    # '--outFilterMismatchNmax', '999',
+                    # '--outFilterMismatchNoverReadLmax', '0.04',
+                    # '--alignIntronMin', '20',
+                    # '--alignIntronMax', '1000000',
+                    # '--alignMatesGapMax', '1000000',
+                    # '--alignSJoverhangMin', '8',
+                    # '--alignSJDBoverhangMin', '1',
+                    # '--sjdbScore', '1',
+                    # '--limitBAMsortRAM', '49268954168']
 
     def __del__(self):
         self.wait()
@@ -187,19 +198,43 @@ class StarAlignmentThread(QThread):
     """
     Run should first create a container and then start it
     """
-
     def run(self):
-        self.parameters.extend(['--readFilesIn'])
 
-        self.parameters.extend([os.path.join(self.container_fastq_dir, x) for x in fnmatch.filter(os.listdir(self.host_fastq_dir), '*.fastq')])
+        if self.running_mode == OWSTARAlignment.RunMode_GenerateGenome:
+            self.parameters.extend(['--runMode', 'genomeGenerate'])
+            # search fasta files
+            fastafiles = [os.path.join(self.container_fastaq_dir, x) for x in fnmatch.filter(os.listdir(self.host_fastq_dir), '*.fa')]
+            if not fastafiles:
+                self.analysis_message.emit('error', 'No fasta files found')
+                return
+
+            self.parameters.extend(['--genomeFastaFiles'])
+            self.parameters.extend(fastafiles)
+
+        else:
+            # search fasta files
+            fastqfiles = [os.path.join(self.container_fastaq_dir, x) for x in
+                          fnmatch.filter(os.listdir(self.host_fastq_dir), '*.fastq')]
+            if not fastqfiles:
+                fastqfiles = [os.path.join(self.container_fastaq_dir, x) for x in
+                              fnmatch.filter(os.listdir(self.host_fastq_dir), '*.fastq.gz')]
+                self.parameters.extend(['--readFilesCommand', 'zcat'])
+
+            if not fastqfiles:
+                self.analysis_message.emit('error', 'No fastq files found')
+                return
+
+            self.parameters.extend(['--readFilesIn'])
+            self.parameters.extend(fastqfiles)
+
         commands = ' '.join((str(w) for w in self.parameters))
-        print(commands)
 
-        volumes = {self.host_fastq_dir: self.container_fastq_dir,
+        #print (commands)
+
+        volumes = {self.host_fastq_dir: self.container_fastaq_dir,
                    self.host_starindex_dir: self.container_genome_dir}
 
         print (volumes)
-        return
         response = self.docker.create_container(self.image_name+":"+self.image_version,
                                                 volumes=volumes,
                                                 commands=commands)
@@ -208,12 +243,10 @@ class StarAlignmentThread(QThread):
             self.docker.start_container(self.containerId)
         else:
             print(response['Warnings'])
-        i = 1
+
         # Keep running until container is exited
         while self.docker.container_running(self.containerId):
-            #self.analysis_progress.emit(i)
             self.sleep(1)
-            #i += 1
         # Remove the container now that it is finished
         self.docker.remove_container(self.containerId)
 
@@ -222,14 +255,14 @@ def main(argv=sys.argv):
     app = QApplication(list(argv))
 
     ow = OWSTARAlignment()
-    ow.setFastqInput("/Users/Jimmy/Downloads/Seqs/")
-    ow.setGenomeDir("/Users/Jimmy/Downloads/Seqs/")
+    ow.setFastqInput("/Users/Jimmy/Downloads/STAR/fasta_input")
+    ow.setGenomeDir("/Users/Jimmy/Downloads/STAR/genome")
     ow.show()
     ow.raise_()
 
     ow.handleNewSignals()
     app.exec_()
-    ow.setFastQInput(None)
+    ow.setFastqInput(None)
     ow.handleNewSignals()
     return 0
 
