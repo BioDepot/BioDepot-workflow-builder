@@ -174,7 +174,8 @@ class StarAlignmentThread(QThread):
 
         self.parameters = ['STAR',
                       '--runThreadN', '8',
-                      '--genomeDir', self.container_genome_dir]
+                      '--genomeDir', StarAlignmentThread.container_genome_dir,
+                      '--outFileNamePrefix', StarAlignmentThread.container_fastaq_dir + '/Run']
                     # '--outFileNamePrefix', 'rna',
                     # '--outSAMtype', 'BAM', 'SortedByCoordinate',
                     # '--outSAMunmapped', 'Within',
