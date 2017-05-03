@@ -32,6 +32,7 @@ class OWSTARAlignment(widget.OWWidget):
 
         self.bFastqDirSet = False
         self.bStarIndexDirSet = False
+        self.result_folder_name = "/Aligned"
 
         # GUI
         box = gui.widgetBox(self.controlArea, "Info")
@@ -62,7 +63,15 @@ class OWSTARAlignment(widget.OWWidget):
             else:
                 self.fastqDirectory = path
                 self.bFastqDirSet = True
-                self.info_fastq.setText("Fastq files: {0}".format(self.fastqDirectory))
+                self.info_fastq.setText("Fasta/q files: {0}".format(self.fastqDirectory))
+
+            host_fastq_dir = path.strip()
+            # Jimmy May-03-2017, once the fastq input was set, automatically create an output fold as a sibling of "fastq"
+            parent_path = os.path.abspath(os.path.join(host_fastq_dir, '..'))
+            self.host_results_dir = os.path.join(parent_path + self.result_folder_name)
+            if not os.path.exists(self.host_results_dir):
+                os.makedirs(self.host_results_dir)
+
         self.btnStarAlignment.setEnabled(self.bFastqDirSet and self.bStarIndexDirSet)
 
         if self.bFastqDirSet and self.bStarIndexDirSet and self.AutoStarAlignment:
@@ -128,7 +137,7 @@ class OWSTARAlignment(widget.OWWidget):
                                                      self.image_version,
                                                      self.fastqDirectory,
                                                      self.starindexDirectory,
-                                                     self.fastqDirectory,
+                                                     self.host_results_dir,
                                                      self.RunMode)
 
         self.run_staralignment_thread.analysis_progress.connect(self.run_staralignment_progress)
@@ -144,7 +153,7 @@ class OWSTARAlignment(widget.OWWidget):
         self.btnStarAlignment.setEnabled(True)
         self.btnStarAlignment.setText('Run again')
         self.setStatusMessage('Finished!')
-        output_channel = self.fastqDirectory
+        output_channel = self.host_results_dir
         if self.RunMode == OWSTARAlignment.RunMode_GenerateGenome:
             output_channel = self.starindexDirectory
         self.send("Directory", output_channel)
@@ -163,6 +172,7 @@ class StarAlignmentThread(QThread):
 
     container_fastaq_dir = '/data/fastaq'
     container_genome_dir = '/data/genome'
+    container_aligned_dir = '/data/aligned'
 
     # biodepot/ubuntu-star
     def __init__(self, cli, image_name, image_version, host_fastq_dir, host_starindex_dir, host_results_dir, running_mode):
@@ -178,8 +188,7 @@ class StarAlignmentThread(QThread):
         self.parameters = ['STAR',
                       '--runThreadN', '8',
                       '--genomeDir', StarAlignmentThread.container_genome_dir,
-                      '--outFileNamePrefix', StarAlignmentThread.container_fastaq_dir + '/Run']
-                    # '--outFileNamePrefix', 'rna',
+                      '--outFileNamePrefix', StarAlignmentThread.container_aligned_dir]
                     # '--outSAMtype', 'BAM', 'SortedByCoordinate',
                     # '--outSAMunmapped', 'Within',
                     # '--quantMode', 'TranscriptomeSAM',
@@ -236,7 +245,8 @@ class StarAlignmentThread(QThread):
         #print (commands)
 
         volumes = {self.host_fastq_dir: self.container_fastaq_dir,
-                   self.host_starindex_dir: self.container_genome_dir}
+                   self.host_starindex_dir: self.container_genome_dir,
+                   self.host_results_dir: self.container_aligned_dir}
 
         print (volumes)
         response = self.docker.create_container(self.image_name+":"+self.image_version,
