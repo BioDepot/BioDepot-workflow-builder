@@ -188,7 +188,7 @@ class StarAlignmentThread(QThread):
         self.parameters = ['STAR',
                       '--runThreadN', '8',
                       '--genomeDir', StarAlignmentThread.container_genome_dir,
-                      '--outFileNamePrefix', StarAlignmentThread.container_aligned_dir]
+                      '--outFileNamePrefix', StarAlignmentThread.container_aligned_dir+'/']
                     # '--outSAMtype', 'BAM', 'SortedByCoordinate',
                     # '--outSAMunmapped', 'Within',
                     # '--quantMode', 'TranscriptomeSAM',
@@ -242,7 +242,7 @@ class StarAlignmentThread(QThread):
 
         commands = ' '.join((str(w) for w in self.parameters))
 
-        #print (commands)
+        print (commands)
 
         volumes = {self.host_fastq_dir: self.container_fastaq_dir,
                    self.host_starindex_dir: self.container_genome_dir,
