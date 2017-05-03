@@ -144,7 +144,10 @@ class OWSTARAlignment(widget.OWWidget):
         self.btnStarAlignment.setEnabled(True)
         self.btnStarAlignment.setText('Run again')
         self.setStatusMessage('Finished!')
-        self.send("Directory", self.fastqDirectory)
+        output_channel = self.fastqDirectory
+        if self.RunMode == OWSTARAlignment.RunMode_GenerateGenome:
+            output_channel = self.starindexDirectory
+        self.send("Directory", output_channel)
         self.btnStarAlignment.setEnabled(True)
 
     def run_star_message(self, msgType, message):
