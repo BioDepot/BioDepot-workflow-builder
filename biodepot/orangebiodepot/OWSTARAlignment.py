@@ -1,6 +1,5 @@
-import sys
-import os
-import fnmatch
+import sys, os, fnmatch
+import re
 from Orange.widgets import widget, gui
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
 from PyQt5.QtCore import QThread, pyqtSignal
@@ -187,8 +186,7 @@ class StarAlignmentThread(QThread):
 
         self.parameters = ['STAR',
                       '--runThreadN', '8',
-                      '--genomeDir', StarAlignmentThread.container_genome_dir,
-                      '--outFileNamePrefix', StarAlignmentThread.container_aligned_dir+'/']
+                      '--genomeDir', StarAlignmentThread.container_genome_dir]
                     # '--outSAMtype', 'BAM', 'SortedByCoordinate',
                     # '--outSAMunmapped', 'Within',
                     # '--quantMode', 'TranscriptomeSAM',
@@ -213,6 +211,8 @@ class StarAlignmentThread(QThread):
     """
     def run(self):
 
+        commands = '';
+
         if self.running_mode == OWSTARAlignment.RunMode_GenerateGenome:
             self.parameters.extend(['--runMode', 'genomeGenerate'])
             # search fasta files
@@ -220,27 +220,51 @@ class StarAlignmentThread(QThread):
             if not fastafiles:
                 self.analysis_message.emit('error', 'No fasta files found')
                 return
-
             self.parameters.extend(['--genomeFastaFiles'])
             self.parameters.extend(fastafiles)
+            self.parameters.extend(['--outFileNamePrefix', StarAlignmentThread.container_genome_dir + '/'])
 
+            commands = ' '.join((str(w) for w in self.parameters))
         else:
-            # search fasta files
-            fastqfiles = [os.path.join(self.container_fastaq_dir, x) for x in
-                          fnmatch.filter(os.listdir(self.host_fastq_dir), '*.fastq')]
-            if not fastqfiles:
-                fastqfiles = [os.path.join(self.container_fastaq_dir, x) for x in
-                              fnmatch.filter(os.listdir(self.host_fastq_dir), '*.fastq.gz')]
-                self.parameters.extend(['--readFilesCommand', 'zcat'])
+            # search fastq files
+            fastq_files = [os.path.join(self.container_fastaq_dir, x) for x in os.listdir(self.host_fastq_dir)]
 
-            if not fastqfiles:
-                self.analysis_message.emit('error', 'No fastq files found')
+            r1, r2 = [], []
+            # Pattern convention: Look for "R1" / "R2" in the filename, or "_1" / "_2" before the extension
+            pattern = re.compile('(?:^|[._-])(R[12]|[12]\.f)')
+            for fastq in sorted(fastq_files):
+                match = pattern.search(os.path.basename(fastq))
+                if not match:
+                    print('Invalid FASTQ file: {0}, ignore it.'.format(fastq))
+                    continue
+                elif '1' in match.group():
+                    r1.append(fastq)
+                elif '2' in match.group():
+                    r2.append(fastq)
+
+            if len(r1) != len(r2):
+                self.analysis_message.emit('error', 'Check fastq names, uneven number of pairs found.')
+                print('Check fastq names, uneven number of pairs found.\nr1: {}\nr2: {}'.format(r1, r2))
                 return
 
-            self.parameters.extend(['--readFilesIn'])
-            self.parameters.extend(fastqfiles)
+            if len(r1) == 0:
+                self.analysis_message.emit('warning', 'No fastq files found.')
+                return
 
-        commands = ' '.join((str(w) for w in self.parameters))
+            # generate batch commands
+            batch_commands=[]
+            for i in range(len(r1)):
+                readin_files = ' --readFilesIn {0} {1}'.format(r1[i], r2[i])
+                readin_command = ''
+                _, file_extension = os.path.splitext(r1[i])
+                if file_extension == '.gz':
+                    readin_command = ' --readFilesCommand zcat'
+
+                basename = os.path.basename(r1[i]).split('_')[0]
+                output_prefix = ' --outFileNamePrefix {0}/{1}.'.format(StarAlignmentThread.container_aligned_dir, basename)
+                batch_commands.append(' '.join((str(w) for w in self.parameters)) + readin_files + output_prefix + readin_command)
+
+            commands = 'bash -c "' + ';'.join(c for c in batch_commands) + '"'
 
         print (commands)
 
