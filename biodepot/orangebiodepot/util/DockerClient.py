@@ -44,7 +44,7 @@ class DockerClient:
     commands is a list of bash commands to run on container
         ["pwd", "touch newfile.txt"]
     """
-    def create_container(self, name, volumes=None, commands=None):
+    def create_container(self, name, volumes=None, commands=None, environment=None):
         # TODO should we use Image ID instead of Image Name?
         host_config = None
         if type(volumes) is dict:
@@ -58,6 +58,7 @@ class DockerClient:
         return self.cli.create_container(image=name,
                                          volumes=volumes,
                                          command=commands,
+                                         environment=environment,
                                          stdin_open=True,
                                          host_config=host_config)
 

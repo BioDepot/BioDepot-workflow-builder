@@ -1,7 +1,7 @@
-import os
+import os, fnmatch
 import Orange.data
 from Orange.data.io import FileFormat
-from Orange.widgets import widget, gui
+from Orange.widgets import widget, gui, settings
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5 import QtGui, QtWidgets, QtCore
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
@@ -16,20 +16,21 @@ class OWDtoxsAnalysis(widget.OWWidget):
     image_name = "biodepot/dtoxs_analysis"
     image_version = "latest"
 
-    inputs = [("Counts", str, "set_aligns", widget.Default)]
+    inputs = [("Counts", str, "set_aligns", widget.Default),
+              ("Configs", str, "set_configs")]
     outputs = [("Results", str),("Top 40", Orange.data.Table)]
 
     want_main_area = True
     want_control_area = False
 
-    host_counts_dir = ""
-    Exp_Design_file = ""
-
+    Exp_Design_file = settings.Setting('', schema_only=True)
 
     def __init__(self):
         super().__init__()
 
-        self.result_folder_name = "/Results"
+        self.result_folder_name = "Results"
+        self.host_counts_dir = None
+        self.host_config_dir = None
 
         # This client talks to your local docker
         self.docker = DockerClient('unix:///var/run/docker.sock', 'local')
@@ -168,6 +169,7 @@ class OWDtoxsAnalysis(widget.OWWidget):
         self.infoLabel.setText(_translate("Widget",
                                           "Connect to Dtoxs Alignment or use a Directory widget to specify location of UMI read counts data files"))
         self.btn_run.setText(_translate("Widget", "Run"))
+        self.edtExpDesignFile.setText(self.Exp_Design_file)
 
     """
     Set input
@@ -183,16 +185,26 @@ class OWDtoxsAnalysis(widget.OWWidget):
             self.host_counts_dir = path.strip()
             # Jimmy March-29-2017, once the counts input was set, automatically create an output fold as a sibling of "Seqs"
             parent_path = os.path.abspath(os.path.join(self.host_counts_dir, '..'))
-            self.host_results_dir = os.path.join(parent_path + self.result_folder_name)
+            self.host_results_dir = os.path.join(parent_path, self.result_folder_name)
             if not os.path.exists(self.host_results_dir):
                 os.makedirs(self.host_results_dir)
 
-            if self.Exp_Design_file != "":
+            if os.path.exists(self.Exp_Design_file):
                 import shutil
                 shutil.copy2(self.Exp_Design_file, self.host_counts_dir)
 
-            self.infoLabel.setText('Alignment directory set.\nWaiting to run...')
+            if self.host_counts_dir and self.host_config_dir and self.Exp_Design_file:
+                self.infoLabel.setText('All set.\nWaiting to run...')
 
+    def set_configs(self, path):
+        if not type(path) is str:
+             print('Tried to set alignment directory to None')
+        elif not os.path.exists(path):
+            print('Tried to set alignment directory to none existent directory: ' + str(path))
+        else:
+            self.host_config_dir = path.strip()
+            if self.host_counts_dir and self.host_config_dir and self.Exp_Design_file:
+                self.infoLabel.setText('All set.\nWaiting to run...')
 
     def OnChooseExpFile(self):
         start_file = os.path.expanduser("~/")
@@ -203,7 +215,7 @@ class OWDtoxsAnalysis(widget.OWWidget):
 
         self.edtExpDesignFile.setText(filename)
         self.Exp_Design_file = filename
-        if self.host_counts_dir != "":
+        if self.host_counts_dir and self.host_config_dir:
             import shutil
             shutil.copy2(self.Exp_Design_file, self.host_counts_dir)
 
@@ -237,10 +249,10 @@ class OWDtoxsAnalysis(widget.OWWidget):
         if not self.docker.has_image(self.image_name, self.image_version):
             self.pull_image()
         # Make sure there is an alignment directory set
-        elif self.host_counts_dir:
+        elif self.host_counts_dir and self.host_config_dir:
             self.run_analysis()
         else:
-            self.infoLabel.setText('Set alignment directory before running.')
+            self.infoLabel.setText('Set counts and configs directory before running.')
 
     def run_analysis(self):
         self.infoLabel.setText('Running analysis...')
@@ -250,7 +262,8 @@ class OWDtoxsAnalysis(widget.OWWidget):
         self.run_analysis_thread = RunAnalysisThread(self.docker,
                                                      self.image_name,
                                                      self.host_counts_dir,
-                                                     self.host_results_dir)
+                                                     self.host_results_dir,
+                                                     self.host_config_dir)
 
         self.run_analysis_thread.analysis_progress.connect(self.run_analysis_progress)
         self.run_analysis_thread.finished.connect(self.run_analysis_done)
@@ -302,22 +315,15 @@ class RunAnalysisThread(QThread):
 
     container_aligns_dir = "/home/user/Counts"
     container_results_dir = "/home/user/Results"
+    container_config_dir = "/home/user/Configs"
 
-    # See Steps 6 and 7 of DTOXS SOP Identification of Differentially Expressed Genes
-    commands = ["Rscript /home/user/Programs/Extract-Gene-Expression-Samples.R /home/user/Counts",
-                "Rscript /home/user/Programs/Compare-Molecule-Expression.R "
-                "/home/user/Configs/Configs.LINCS.Dataset.Gene.LINCS.20150409.tsv "
-                "/home/user "
-                "/home/user/Programs"
-                ">& /home/user/Results/log.txt",
-                "exit"]
-
-    def __init__(self, cli, image_name, host_aligns_dir, host_results_dir):
+    def __init__(self, cli, image_name, host_aligns_dir, host_results_dir, host_config_dir):
         QThread.__init__(self)
         self.docker = cli
         self.image_name = image_name
         self.host_aligns_dir = host_aligns_dir
         self.host_results_dir = host_results_dir
+        self.host_config_dir = host_config_dir
 
     def __del__(self):
         self.wait()
@@ -326,11 +332,30 @@ class RunAnalysisThread(QThread):
     Run should first create a container and then start it
     """
     def run(self):
+
+        configs = [os.path.join(self.container_config_dir, x) for x in
+                      fnmatch.filter(os.listdir(self.host_config_dir), 'Configs.*')]
+        if len(configs) > 0:
+            config_file = configs[0]
+        else:
+            print('No config file found, exit.')
+            return
+
+        cmd_s1 = "Rscript /home/user/Programs/Compare-Molecule-Expression.R {} /home/user /home/user/Programs >& /home/user/Results/log.txt".format(config_file)
+
+        # See Steps 6 and 7 of DTOXS SOP Identification of Differentially Expressed Genes
+        commands = ["Rscript /home/user/Programs/Extract-Gene-Expression-Samples.R /home/user/Counts",
+                    cmd_s1,
+                    "exit"]
+
+        print(commands)
         volumes = { self.host_aligns_dir: self.container_aligns_dir,
-                    self.host_results_dir: self.container_results_dir }
+                    self.host_results_dir: self.container_results_dir,
+                    self.host_config_dir: self.container_config_dir}
+
         response = self.docker.create_container(self.image_name,
                                                 volumes=volumes,
-                                                commands=self.commands)
+                                                commands=commands)
         if response['Warnings'] == None:
             self.containerId = response['Id']
             self.docker.start_container(self.containerId)
