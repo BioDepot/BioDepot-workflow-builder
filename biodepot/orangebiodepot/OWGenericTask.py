@@ -9,7 +9,7 @@ class OWGenericTask(widget.OWWidget):
     name = "Generic Task Runner"
     description = "Run docker container"
     category = "General"
-    icon = "icons/generic_task.svg"
+    icon = "icons/container.svg"
 
     priority = 2
 
@@ -273,7 +273,7 @@ class OWGenericTask(widget.OWWidget):
             volumes[sFrom] = sTo
 
         commands = self.txtCommand.toPlainText()
-        print(commands)
+        #print(commands)
 
         self.lblMessage.setText('Running ' + imageName + ' ...')
         self.setStatusMessage('Running...')
