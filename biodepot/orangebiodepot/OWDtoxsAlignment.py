@@ -20,7 +20,7 @@ class OWDtoxsAlignment(widget.OWWidget):
     inputs = [("References", str, "set_refs"),
               ("Seqs", str, "set_seqs"),
               ("Configs", str, "set_configs"),
-              ("Params", str, "set_params")]
+              ("Barcodes", str, "set_barcodes_file")]
     outputs = [("Counts", str)]
 
     auto_run = Setting(True)
@@ -34,8 +34,8 @@ class OWDtoxsAlignment(widget.OWWidget):
         # This client talks to your local docker
         self.docker = DockerClient('unix:///var/run/docker.sock', 'local')
 
-        self.hostDirectories = {'refs': None, 'seqs': None, 'conf': None, 'param': None, 'counts': None, 'aligns': None}
-        self.labelText = {'refs': 'References: {0}', 'seqs': 'Sequences: {0}', 'conf': 'Configs: {0}', 'param': 'Params: {0}'}
+        self.hostDirectories = {'refs': None, 'seqs': None, 'conf': None, 'counts': None, 'aligns': None, 'barcodes': None}
+        self.labelText = {'refs': 'References: {0}', 'seqs': 'Sequences: {0}', 'conf': 'Configs: {0}', 'barcodes': 'Barcode file: {0}'}
 
         # folders that will created automatically
         self.result_folder_name = "Counts"
@@ -46,7 +46,7 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.lblRefs = gui.widgetLabel(box, 'References: Not Set')
         self.lblSeqs = gui.widgetLabel(box, 'Sequences: Not Set')
         self.lblConfigs = gui.widgetLabel(box, 'Configs: Not Set')
-        self.lblParams = gui.widgetLabel(box, 'Params: Not Set')
+        self.lblBarcodes = gui.widgetLabel(box, "Barcode file: Not Set")
 
         self.infoLabel = gui.widgetLabel(box, 'Waiting...')
         self.infoLabel.setWordWrap(True)
@@ -91,11 +91,6 @@ class OWDtoxsAlignment(widget.OWWidget):
     def set_configs(self, path):
         self.__set_directory__('conf', self.lblConfigs, path)
 
-
-    def set_params(self, path):
-        self.__set_directory__('param', self.lblParams, path)
-
-
     def __set_directory__(self, key, ctrlLabel, path, startContainer = True):
         # When a user removes a connected Directory widget,
         # it sends a signal with path=None
@@ -107,11 +102,16 @@ class OWDtoxsAlignment(widget.OWWidget):
             ctrlLabel.setText(self.labelText[key].format('None existent directory: {}'.format(str(path))))
         else:
             self.hostDirectories[key] = path.strip()
+            if key == 'barcodes':
+                path = os.path.basename(path)
+                self.hostDirectories['barcodes_basename'] = path
             ctrlLabel.setText(self.labelText[key].format((str(path))))
 
         if startContainer:
             self.start_container(run_btn_pushed=False)
 
+    def set_barcodes_file(self, filename):
+        self.__set_directory__('barcodes', self.lblBarcodes, filename)
     """
     Pull image
     """
@@ -184,13 +184,12 @@ Run Alignment Worker
 class RunAlignmentThread(QThread):
     progress = pyqtSignal(int)
 
-
+    container_top_dir = "/root/LINCS"
     container_ref_dir = "/root/LINCS/References"
     container_seq_dir = "/root/LINCS/Seqs"
     container_counts_dir = "/root/LINCS/Counts"
     container_aligns_dir = "/root/LINCS/Aligns"
     container_config_dir = "/root/LINCS/Configs"
-    container_param_dir = "/root/LINCS/Params"
 
     commands = ["/root/LINCS/Programs/Broad-DGE/run-alignment-analysis.sh >& /root/LINCS/Counts/run-alignment-analysis.log; "
                 "exit"]
@@ -207,6 +206,8 @@ class RunAlignmentThread(QThread):
         self.wait()
 
     def run(self):
+        target_barcode_file = os.path.join(self.container_top_dir, self.hostDirectories['barcodes_basename'])
+
         # scan config to fetch series name
         configs = [x for x in fnmatch.filter(os.listdir(self.hostDirectories['conf']), 'Configs.*')]
         if len(configs) > 0:
@@ -223,14 +224,18 @@ class RunAlignmentThread(QThread):
             print('No series name matched, exit')
             return
 
-        environment = {'ENV_SERIES_NAME': series_name}
+        environment = {'ENV_SERIES_NAME': series_name,
+                       'ENV_BARCODE_FILE': self.hostDirectories['barcodes_basename']}
+        #print(environment)
 
         volumes = { self.hostDirectories['refs']: self.container_ref_dir,
                     self.hostDirectories['seqs']: self.container_seq_dir,
                     self.hostDirectories['conf']: self.container_config_dir,
-                    self.hostDirectories['param']: self.container_param_dir,
+                    #self.hostDirectories['param']: self.container_param_dir,
                     self.hostDirectories['counts']: self.container_counts_dir,
-                    self.hostDirectories['aligns']: self.container_aligns_dir}
+                    self.hostDirectories['aligns']: self.container_aligns_dir,
+                    self.hostDirectories['barcodes']: target_barcode_file}
+        #print(volumes)
 
         response = self.docker.create_container(self.image_name,
                                                 volumes=volumes,

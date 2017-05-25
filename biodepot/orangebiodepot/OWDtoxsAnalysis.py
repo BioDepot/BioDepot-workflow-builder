@@ -17,7 +17,8 @@ class OWDtoxsAnalysis(widget.OWWidget):
     image_version = "latest"
 
     inputs = [("Counts", str, "set_aligns", widget.Default),
-              ("Configs", str, "set_configs")]
+              ("Configs", str, "set_configs"),
+              ("Params", str, "set_params")]
     outputs = [("Results", str),("Top 40", Orange.data.Table)]
 
     want_main_area = True
@@ -31,6 +32,7 @@ class OWDtoxsAnalysis(widget.OWWidget):
         self.result_folder_name = "Results"
         self.host_counts_dir = None
         self.host_config_dir = None
+        self.host_param_dir = None
 
         # This client talks to your local docker
         self.docker = DockerClient('unix:///var/run/docker.sock', 'local')
@@ -193,16 +195,26 @@ class OWDtoxsAnalysis(widget.OWWidget):
                 import shutil
                 shutil.copy2(self.Exp_Design_file, self.host_counts_dir)
 
-            if self.host_counts_dir and self.host_config_dir and self.Exp_Design_file:
+            if self.host_param_dir and self.host_config_dir and self.Exp_Design_file:
                 self.infoLabel.setText('All set.\nWaiting to run...')
 
     def set_configs(self, path):
         if not type(path) is str:
-             print('Tried to set alignment directory to None')
+             print('Tried to set configs directory to None')
         elif not os.path.exists(path):
-            print('Tried to set alignment directory to none existent directory: ' + str(path))
+            print('Tried to set configs directory to none existent directory: ' + str(path))
         else:
             self.host_config_dir = path.strip()
+            if self.host_counts_dir and self.host_param_dir and self.Exp_Design_file:
+                self.infoLabel.setText('All set.\nWaiting to run...')
+
+    def set_params(self, path):
+        if not type(path) is str:
+             print('Tried to set params directory to None')
+        elif not os.path.exists(path):
+            print('Tried to set params directory to none existent directory: ' + str(path))
+        else:
+            self.host_param_dir = path.strip()
             if self.host_counts_dir and self.host_config_dir and self.Exp_Design_file:
                 self.infoLabel.setText('All set.\nWaiting to run...')
 
@@ -215,7 +227,7 @@ class OWDtoxsAnalysis(widget.OWWidget):
 
         self.edtExpDesignFile.setText(filename)
         self.Exp_Design_file = filename
-        if self.host_counts_dir and self.host_config_dir:
+        if self.host_counts_dir and self.host_config_dir and self.host_param_dir:
             import shutil
             shutil.copy2(self.Exp_Design_file, self.host_counts_dir)
 
@@ -249,10 +261,10 @@ class OWDtoxsAnalysis(widget.OWWidget):
         if not self.docker.has_image(self.image_name, self.image_version):
             self.pull_image()
         # Make sure there is an alignment directory set
-        elif self.host_counts_dir and self.host_config_dir:
+        elif self.host_counts_dir and self.host_config_dir and self.host_param_dir:
             self.run_analysis()
         else:
-            self.infoLabel.setText('Set counts and configs directory before running.')
+            self.infoLabel.setText('Set counts, params and configs directories before running.')
 
     def run_analysis(self):
         self.infoLabel.setText('Running analysis...')
@@ -263,7 +275,8 @@ class OWDtoxsAnalysis(widget.OWWidget):
                                                      self.image_name,
                                                      self.host_counts_dir,
                                                      self.host_results_dir,
-                                                     self.host_config_dir)
+                                                     self.host_config_dir,
+                                                     self.host_param_dir)
 
         self.run_analysis_thread.analysis_progress.connect(self.run_analysis_progress)
         self.run_analysis_thread.finished.connect(self.run_analysis_done)
@@ -316,14 +329,16 @@ class RunAnalysisThread(QThread):
     container_aligns_dir = "/home/user/Counts"
     container_results_dir = "/home/user/Results"
     container_config_dir = "/home/user/Configs"
+    container_param_dir = "/home/user/Params"
 
-    def __init__(self, cli, image_name, host_aligns_dir, host_results_dir, host_config_dir):
+    def __init__(self, cli, image_name, host_aligns_dir, host_results_dir, host_config_dir, host_param_dir):
         QThread.__init__(self)
         self.docker = cli
         self.image_name = image_name
         self.host_aligns_dir = host_aligns_dir
         self.host_results_dir = host_results_dir
         self.host_config_dir = host_config_dir
+        self.host_param_dir = host_param_dir
 
     def __del__(self):
         self.wait()
@@ -351,7 +366,8 @@ class RunAnalysisThread(QThread):
         print(commands)
         volumes = { self.host_aligns_dir: self.container_aligns_dir,
                     self.host_results_dir: self.container_results_dir,
-                    self.host_config_dir: self.container_config_dir}
+                    self.host_config_dir: self.container_config_dir,
+                    self.host_param_dir: self.container_param_dir}
 
         response = self.docker.create_container(self.image_name,
                                                 volumes=volumes,
@@ -359,16 +375,12 @@ class RunAnalysisThread(QThread):
         if response['Warnings'] == None:
             self.containerId = response['Id']
             self.docker.start_container(self.containerId)
-            #self.docker.remove_container(self.containerId)
         else:
-            # TODO emit warning to Widget
             print(response['Warnings'])
-        #i = 1
+
         # Keep running until container is exited
         while self.docker.container_running(self.containerId):
-            #self.analysis_progress.emit(i * 0.55)
             self.sleep(2)
-            #i += 1
         # Remove the container now that it is finished
         self.docker.remove_container(self.containerId)
 
