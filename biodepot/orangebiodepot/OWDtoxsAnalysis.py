@@ -230,6 +230,7 @@ class OWDtoxsAnalysis(widget.OWWidget):
         if self.host_counts_dir and self.host_config_dir and self.host_param_dir:
             import shutil
             shutil.copy2(self.Exp_Design_file, self.host_counts_dir)
+            self.infoLabel.setText('All set.\nWaiting to run...')
 
     """
     Pull image
