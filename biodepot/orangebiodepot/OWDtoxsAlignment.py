@@ -224,8 +224,24 @@ class RunAlignmentThread(QThread):
             print('No series name matched, exit')
             return
 
+        # May-31-2017 Jimmy, added for scanning lanes from all fastq files
+        lanes = 6
+        try:
+            fastq_files = [x for x in fnmatch.filter(os.listdir(self.hostDirectories['seqs']), '*.fastq*')]
+            all_lanes = re.compile(r"Lane[0-9]").findall(','.join(fastq_files))
+            all_lanes = sorted(list(set(all_lanes)))
+            all_lanes = re.compile(r"\d+").findall(','.join(all_lanes))
+            all_lanes = list(map(int, all_lanes))
+            lanes = max(all_lanes)
+        except:
+            print('Error on match LANES, exit')
+            return
+
+        print('LANES=', lanes)
+
         environment = {'ENV_SERIES_NAME': series_name,
-                       'ENV_BARCODE_FILE': self.hostDirectories['barcodes_basename']}
+                       'ENV_BARCODE_FILE': self.hostDirectories['barcodes_basename'],
+                       'ENV_LANES': lanes}
         #print(environment)
 
         volumes = { self.hostDirectories['refs']: self.container_ref_dir,
@@ -262,7 +278,9 @@ if __name__ == "__main__":
 
     a = QApplication(sys.argv)
     ow = OWDtoxsAlignment()
-    ow.set_refs('/Users/Developer/')
+    ow.set_seqs('/Users/Jimmy/Developer/bioinfomatics/sample_data/dtoxs/seqs')
+    ow.set_refs('/Users/Jimmy/Developer/bioinfomatics/sample_data/dtoxs/refs')
+    ow.set_barcodes_file('/Users/Jimmy/Developer/bioinfomatics/sample_data/dtoxs/barcodes_trugrade_96_set2.dat')
     ow.set_configs('/Users/Jimmy/Developer/bioinfomatics/sample_data/dtoxs/configs')
     ow.show()
     a.exec_()
