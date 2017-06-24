@@ -6,7 +6,7 @@ from PyQt5.QtGui import QStandardItem, QFont
 from PyQt5.QtCore import QThread
 
 class OWGenericTask(widget.OWWidget):
-    name = "Generic Task Runner"
+    name = "Customized Container"
     description = "Run docker container"
     category = "General"
     icon = "icons/container.svg"
