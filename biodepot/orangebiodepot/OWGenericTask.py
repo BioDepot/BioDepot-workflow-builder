@@ -3,10 +3,10 @@ from Orange.widgets import widget
 from orangebiodepot.util.DockerClient import DockerClient
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QStandardItem, QFont
-from PyQt5.QtCore import QThread
+from PyQt5.QtCore import QThread, QDir
 
 class OWGenericTask(widget.OWWidget):
-    name = "Customized Container"
+    name = "Custom Container"
     description = "Run docker container"
     category = "General"
     icon = "icons/container.svg"
@@ -26,6 +26,8 @@ class OWGenericTask(widget.OWWidget):
 
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
 
+        icon_basedir = os.path.join(self.base_dir, 'icons/')
+
         # stylesheet
         css = '''
             QPushButton {background-color: #1588c5; color: white; height: 25px; border: 1px solid #1a8ac6; border-radius: 2px;}
@@ -41,10 +43,11 @@ class OWGenericTask(widget.OWWidget):
             QFrame#mainContent {background-color: #1588f5;border: 1px solid #c6d1da;}
             QComboBox {border: 1px solid #bdbdbd;border-radius: 3px;padding-left: 5px;color: #181818;height: 30px;}
             QComboBox::drop-down {border: 0px;width: 20px;margin-right:2px;}
-            QComboBox::down-arrow {border: 0px;image: url(icons/ui_combo_dropdown_arrow.png);background-position: center center; height: 10px; width: 10px}
             QComboBox::down-arrow:on { top: 1px;left: 1px; }
             QComboBox QAbstractItemView::item {min-height: 12px;}
         '''
+        css += 'QComboBox::down-arrow {border: 0px;image: url(' + icon_basedir + 'ui_combo_dropdown_arrow.png);background-position: center center; height: 10px; width: 10px}'
+
         self.setStyleSheet(css)
         self.vlayoutBase = QtWidgets.QVBoxLayout(self.controlArea)
         self.vlayoutBase.setContentsMargins(0, 0, 0, 0)
@@ -56,10 +59,10 @@ class OWGenericTask(widget.OWWidget):
         self.frameTitle.setMaximumHeight(35)
         self.frameTitle.setObjectName("frameTitle")
         self.lblIcon = QtWidgets.QLabel()
-        self.lblIcon.setFixedSize(QtCore.QSize(45, 45))
+        self.lblIcon.setFixedSize(QtCore.QSize(35, 35))
         self.lblIcon.setText("")
-        pixmap = QtGui.QPixmap(os.path.join(self.base_dir, "icons/generic_task.svg"))
-        pixmap.scaled(self.lblIcon.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
+        pixmap = QtGui.QPixmap(os.path.join(self.base_dir, "icons/container.svg"))
+        pixmap = pixmap.scaled(self.lblIcon.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.lblIcon.setPixmap(pixmap)
         self.lblIcon.setScaledContents(True)
         self.lblIcon.setObjectName("lblIcon")
@@ -174,6 +177,7 @@ class OWGenericTask(widget.OWWidget):
         self.controlArea.setContentsMargins(0,0,0,0)
         self.controlArea.layout().addLayout(self.vlayoutBase)
         self.controlArea.setMinimumSize(600, 500)
+        self.layout().setContentsMargins(0,0,0,0)
 
         # initialize UI components
         self.retranslateUi(self)
@@ -189,7 +193,7 @@ class OWGenericTask(widget.OWWidget):
 
     def retranslateUi(self, Widget):
         _translate = QtCore.QCoreApplication.translate
-        self.lblFormTitle.setText(_translate("Widget", "Generic Task Runner"))
+        self.lblFormTitle.setText(_translate("Widget", "Run your own container"))
         self.lblDockerImage.setText(_translate("Widget", "Select docker image:"))
         self.lblVMapping.setText(_translate("Widget", "Mount Mapping: "))
         self.lblCmd.setText(_translate("Widget", "Run command:"))
