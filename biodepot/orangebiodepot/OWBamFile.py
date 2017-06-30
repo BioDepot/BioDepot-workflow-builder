@@ -39,7 +39,7 @@ class OWBamFile(widget.OWWidget):
         defaultDir = '/root'
         if os.path.exists('/data'):
             defaultDir = '/data'
-        file = QtWidgets.QFileDialog.getOpenFileName(self, caption="Open Data File", directory=defaultDir, filter="Any file (*.*)", options=QtGui.QFileDialog.DontUseNativeDialog)
+        file = QtWidgets.QFileDialog.getOpenFileName(self, caption="Open Data File", directory=defaultDir, filter="Any file (*.*)")
         self.set_file(file)
 
     """

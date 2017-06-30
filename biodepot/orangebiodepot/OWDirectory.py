@@ -42,7 +42,7 @@ class OWDirectory(widget.OWWidget):
         defaultDir = '/root'
         if os.path.exists('/data'):
             defaultDir = '/data'
-        dir = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Directory", directory=defaultDir, options=QtGui.QFileDialog.DontUseNativeDialog)
+        dir = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Directory", directory=defaultDir)
         self.set_dir(dir)
 
     """
