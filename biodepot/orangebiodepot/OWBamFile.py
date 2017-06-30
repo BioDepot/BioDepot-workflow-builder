@@ -1,9 +1,7 @@
-import sys
-import numpy
+import sys, os
 
-import Orange.data
 from Orange.widgets import widget, gui, settings
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 
 class OWBamFile(widget.OWWidget):
     name = "File"
@@ -27,7 +25,8 @@ class OWBamFile(widget.OWWidget):
 
         self.buttonsArea.layout().addWidget(self.btn_file)
         self.buttonsArea.layout().addWidget(self.file_edit)
-        self.buttonsArea.layout().addSpacing(8)
+        self.buttonsArea.layout().setSpacing(4)
+        self.buttonsArea.layout().addSpacing(4)
         self.buttonsArea.setMinimumWidth(400)
 
         if self.file_name is not "":
@@ -37,7 +36,10 @@ class OWBamFile(widget.OWWidget):
     Called when button pushed
     """
     def get_file(self):
-        file = QtWidgets.QFileDialog.getOpenFileName(self, "Open Data File", ".", "Any file (*.*)")
+        defaultDir = '/root'
+        if os.path.exists('/data'):
+            defaultDir = '/data'
+        file = QtWidgets.QFileDialog.getOpenFileName(self, caption="Open Data File", directory=defaultDir, filter="Any file (*.*)", options=QtGui.QFileDialog.DontUseNativeDialog)
         self.set_file(file)
 
     """

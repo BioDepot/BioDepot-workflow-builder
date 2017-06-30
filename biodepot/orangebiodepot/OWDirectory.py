@@ -1,7 +1,6 @@
-import sys
-import Orange.data
+import sys, os
 from Orange.widgets import widget, gui, settings
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtGui
 
 class OWDirectory(widget.OWWidget):
     name = "Directory"
@@ -28,7 +27,8 @@ class OWDirectory(widget.OWWidget):
 
         self.buttonsArea.layout().addWidget(self.btn_dir)
         self.buttonsArea.layout().addWidget(self.dir_edit)
-        self.buttonsArea.layout().addSpacing(8)
+        self.buttonsArea.layout().setSpacing(4)
+        self.buttonsArea.layout().addSpacing(4)
         self.buttonsArea.setMinimumWidth(400)
 
         # Jimmy March-28-2017, if we loaded settings from workflow, trigger the output channel
@@ -39,7 +39,10 @@ class OWDirectory(widget.OWWidget):
     Called when button pushed
     """
     def get_dir(self):
-        dir  = QtWidgets.QFileDialog.getExistingDirectory(self)
+        defaultDir = '/root'
+        if os.path.exists('/data'):
+            defaultDir = '/data'
+        dir = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Directory", directory=defaultDir, options=QtGui.QFileDialog.DontUseNativeDialog)
         self.set_dir(dir)
 
     """
