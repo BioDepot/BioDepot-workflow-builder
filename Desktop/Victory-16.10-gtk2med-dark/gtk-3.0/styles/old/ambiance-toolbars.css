@@ -1,0 +1,201 @@
+/* primary-toolbar */
+.primary-toolbar .toolbar,
+.primary-toolbar.toolbar {
+    -GtkWidget-window-dragging: true;
+
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (shade (@tooltip_bg_color, 0.96)),
+                                     to (shade (@tooltip_bg_color, 1.4)));
+    border-bottom-color: shade (@tooltip_bg_color, 1.1);
+    border-top-color: shade (@tooltip_bg_color, 1.1);
+    border-style: solid;
+    border-width: 1px 0px 1px 0px;
+    padding: 2px;
+
+    color: @dark_fg_color;
+    text-shadow: 0 -1 shade (@tooltip_bg_color, 0.9);
+
+    -adwaita-border-gradient: none;
+}
+
+.primary-toolbar .toolbar :insensitive,
+.primary-toolbar.toolbar :insensitive {
+    text-shadow: 0 -1 shade (@tooltip_bg_color, 0.9);
+}
+
+.primary-toolbar .toolbar GtkComboBox,
+.primary-toolbar.toolbar GtkComboBox,
+.primary-toolbar .toolbar .button,
+.primary-toolbar.toolbar .button {
+    background-color: @transparent;
+    background-image: none;
+    border-radius: 0px;
+    border-width: 0px;
+/* For Hover? border-color: red; */
+    color: @tooltip_fg_color;
+    text-shadow: 0 -1 shade (@tooltip_bg_color, 0.9);
+
+    transition: none;
+
+    -adwaita-focus-border-radius: 4;
+    -adwaita-focus-border-color: alpha (@selected_bg_color, 0.5);
+    -adwaita-focus-fill-color: alpha (@selected_bg_color, 0.2);
+}
+
+.primary-toolbar .toolbar .raised .button,
+.primary-toolbar.toolbar .raised .button,
+.primary-toolbar .toolbar .raised.button,
+.primary-toolbar.toolbar .raised.button,
+.primary-toolbar .toolbar .button:hover,
+.primary-toolbar.toolbar .button:hover,
+.primary-toolbar .toolbar .button:active,
+.primary-toolbar.toolbar .button:active,
+.primary-toolbar .toolbar .button:insensitive,
+.primary-toolbar.toolbar .button:insensitive {
+    border-width: 1px;
+/* For Selected border-color: red; */
+    -adwaita-focus-border-radius: 3;
+    -adwaita-focus-fill-color: @transparent;
+    -adwaita-focus-border-color: @transparent;
+    border-color: shade (@tooltip_bg_color, 0.83);
+}
+
+.primary-toolbar GtkComboBox.combobox-entry .button {
+}
+
+.primary-toolbar GtkComboBox.combobox-entry .button,
+.primary-toolbar .toolbar .raised .button,
+.primary-toolbar.toolbar .raised .button,
+.primary-toolbar .toolbar .raised.button,
+.primary-toolbar.toolbar .raised.button,
+.primary-toolbar .toolbar .button:hover,
+.primary-toolbar.toolbar .button:hover {
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (shade (@tooltip_bg_color, 1.1)),
+                                     to (shade (@tooltip_bg_color, 0.94)));
+
+    -adwaita-border-gradient: -gtk-gradient (linear, left top, left bottom,
+                                           from (shade (@tooltip_bg_color, 0.9)),
+                                           to (shade (@tooltip_bg_color, 0.87)));
+}
+
+.primary-toolbar .toolbar .button:active,
+.primary-toolbar.toolbar .button:active {
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (shade (@tooltip_bg_color, 0.9)),
+                                     to (shade (@tooltip_bg_color, 0.95)));
+
+    text-shadow: 0 -1 shade (@tooltip_bg_color, 0.6);
+
+    -adwaita-border-gradient: -gtk-gradient (linear, left top, left bottom,
+                                           from (shade (@tooltip_bg_color, 0.75)),
+                                           to (shade (@tooltip_bg_color, 0.85)));
+}
+
+/* Focused and Focused:Hover for when opening sound settings, default selected button*/
+
+.primary-toolbar .toolbar .button:focused,
+.primary-toolbar.toolbar .button:focused
+{
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (shade (@tooltip_bg_color, 0.9)),
+                                     to (shade (@tooltip_bg_color, 0.95)));
+
+    text-shadow: 0 -1 shade (@tooltip_bg_color, 0.6);
+    border-color: shade (@tooltip_bg_color, 0.83);
+    -adwaita-border-gradient: -gtk-gradient (linear, left top, left bottom,
+                                           from (shade (@tooltip_bg_color, 0.75)),
+                                           to (shade (@tooltip_bg_color, 0.85)));
+}
+
+.primary-toolbar .toolbar .button:focused:hover,
+.primary-toolbar.toolbar .button:focused:hover
+{
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (shade (@tooltip_bg_color, 0.95)),
+                                     to (shade (@tooltip_bg_color, 1.0)));
+
+    -adwaita-border-gradient: -gtk-gradient (linear, left top, left bottom,
+                                           from (shade (@tooltip_bg_color, 0.75)),
+                                           to (shade (@tooltip_bg_color, 0.85)));
+}
+
+.primary-toolbar .toolbar .button:active:hover,
+.primary-toolbar.toolbar .button:active:hover {
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (shade (@tooltip_bg_color, 0.95)),
+                                     to (shade (@tooltip_bg_color, 1.0)));
+
+    -adwaita-border-gradient: -gtk-gradient (linear, left top, left bottom,
+                                           from (shade (@tooltip_bg_color, 0.75)),
+                                           to (shade (@tooltip_bg_color, 0.85)));
+}
+
+.primary-toolbar .toolbar .button:active:insensitive,
+.primary-toolbar.toolbar .button:active:insensitive,
+.primary-toolbar .toolbar .button:insensitive,
+.primary-toolbar.toolbar .button:insensitive {
+    text-shadow: none;
+
+    -adwaita-border-gradient: -gtk-gradient (linear, left top, left bottom,
+                                           from (shade (@tooltip_bg_color, 0.85)),
+                                           to (shade (@tooltip_bg_color, 0.95)));
+}
+
+.primary-toolbar .toolbar .button:insensitive,
+.primary-toolbar.toolbar .button:insensitive {
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (shade (@tooltip_bg_color, 1.01)),
+                                     to (shade (@tooltip_bg_color, 0.99)));
+
+}
+
+.primary-toolbar .toolbar .button:active:insensitive,
+.primary-toolbar.toolbar .button:active:insensitive {
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (shade (@tooltip_bg_color, 0.94)),
+                                     to (shade (@tooltip_bg_color, 1.02)));
+
+}
+
+.primary-toolbar .toolbar .entry,
+.primary-toolbar.toolbar .entry,
+.primary-toolbar .toolbar .entry:active,
+.primary-toolbar.toolbar .entry:active,
+.primary-toolbar .toolbar .entry:focused,
+.primary-toolbar.toolbar .entry:focused {
+    border-radius: 3px;
+
+    color: @text_color;
+
+}
+
+.primary-toolbar .toolbar .entry,
+.primary-toolbar.toolbar .entry {
+    -adwaita-border-gradient: -gtk-gradient (linear, left top, left bottom,
+                                           from (shade (@tooltip_bg_color, 0.75)),
+                                           to (shade (@tooltip_bg_color, 0.95)));
+}
+
+.primary-toolbar .toolbar .entry:insensitive,
+.primary-toolbar.toolbar .entry:insensitive {
+}
+
+.primary-toolbar .toolbar .entry:focused,
+.primary-toolbar.toolbar .entry:focused {
+    -adwaita-border-gradient: -gtk-gradient (linear, left top, left bottom,
+                                           from (shade (@selected_bg_color, 0.75)),
+                                           to (shade (@selected_bg_color, 0.8)));
+}
+
+.primary-toolbar .toolbar GtkSeparatorToolItem,
+.primary-toolbar.toolbar GtkSeparatorToolItem,
+.primary-toolbar .toolbar .separator,
+.primary-toolbar.toolbar .separator,
+.primary-toolbar .toolbar .separator:insensitive,
+.primary-toolbar.toolbar .separator:insensitive {
+    border-color: alpha (shade (@tooltip_bg_color, 0.94), 0.5);
+    border-style: solid;
+
+    -adwaita-border-gradient: none;
+}

@@ -1,0 +1,71 @@
+style "pathbar-arrows-o"
+{
+
+	ythickness					= 0
+	xthickness					= 10								#Spacing between arrow pathbar buttons
+	
+	GtkButton	:: child-displacement-y		= 0
+	GtkButton	:: child-displacement-x		= 0
+	GtkButton	:: inner-border			= {0, 13, 0, 0}							#Spacing between arrow pathbar buttons
+
+
+	fg[NORMAL]					= shade (0.6, @bg_color)
+	fg[ACTIVE]					= @fg_color
+	fg[PRELIGHT]					= @fg_color
+	fg[SELECTED]					= @fg_color
+	
+	engine "pixmap"
+	{
+		image
+		{
+		function 				= BOX
+		state					= NORMAL
+		file					= "Images/pathbar/nautilus-pathbar-normal.png"
+		border					= { 0, 13, 0, 0 }
+		stretch					= TRUE
+		}
+
+		image
+		{
+		function 				= BOX
+		state					= ACTIVE
+		file					= "Images/pathbar/nautilus-pathbar-active.png"
+		border					= { 0, 13, 0, 0 }
+		stretch					= TRUE
+		}
+
+		image
+		{
+		function 				= BOX
+		state					= PRELIGHT
+		file					= "Images/pathbar/nautilus-pathbar-prelight.png"
+		border					= { 0, 13, 0, 0 }
+		stretch					= TRUE
+		}
+
+		image
+		{
+		function 				= BOX
+		state					= SELECTED
+		file					= "Images/pathbar/nautilus-pathbar-prelight.png"
+		border					= { 0, 13, 0, 0 }
+		stretch					= TRUE
+		}
+
+		#grey square fix#
+		image
+		{
+		function 				= BOX
+		state					= INSENSITIVE
+		file					= "Images/null.png"
+		border					= { 0, 13, 0, 0 }
+		stretch					= TRUE
+		}
+	}
+}
+
+widget_class	"*<ThunarLocationButton>*<GtkToggleButton>"					style:highest		"pathbar-arrows-o"
+widget		"*ThunarLocationButton*GtkButton"						style:highest		"pathbar-arrows-o"
+widget		"*Gtk*PathBar*GtkButton"						style:rc		"pathbar-arrows-o"
+widget		"*ThunarLocationButton*GtkButton"					style:rc		"pathbar-arrows-o"
+widget		"*Thunar*LocationButton*Label*"							style		"pathbar-arrows-o"

@@ -1,0 +1,87 @@
+/* Fallback Mode Panel */
+PanelWidget,
+PanelApplet,
+PanelToplevel {
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (#fefefe),
+                                     to (#e3e3e3));
+    padding: 0;
+
+    color: @fallback_panel_fg;
+}
+
+PanelApplet {
+    border-width: 0;
+}
+
+PanelSeparator {
+    border-width: 0;
+}
+
+.gnome-panel-menu-bar,
+PanelApplet > GtkMenuBar.menubar,
+PanelApplet > GtkMenuBar.menubar.menuitem,
+PanelMenuBar.menubar,
+PanelMenuBar.menubar.menuitem {
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (#fefefe),
+                                     to (#e3e3e3));
+	color: @fallback_panel_fg;
+}
+
+PanelAppletFrame { 
+    background-color: @transparent;
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (#fefefe),
+                                     to (#e3e3e3));
+    border-width: 0;
+}
+
+PanelApplet .button {
+    -GtkButton-inner-border: 2;
+
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (#fefefe),
+                                     to (#e3e3e3));
+
+    border-color: @transparent;
+    border-radius: 0;
+    border-width: 0 1px 0 1px;
+
+    color: @fallback_panel_fg;
+    text-shadow: none;
+}
+
+PanelApplet .button:prelight:active,
+PanelApplet .button:active {
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (#CACACA),
+                                     to (#E6E6E6));
+    border-color: @transparent;
+    border-radius: 0;
+    border-width: 0 1px 0 1px;
+    color: shade (@fallback_panel_fg, 0.9);
+}
+
+PanelApplet .button:prelight {
+    background-image: -gtk-gradient (linear, left top, left bottom,
+                                     from (#fefefe),
+                                     to (#FDFDFD));
+    border-color: @transparent;
+    border-radius: 0;
+    border-width: 0 1px 0 1px;
+    color: shade (@fallback_panel_fg, 1.0);
+}
+
+ClockBox {
+    background-color: shade (@fallback_panel_bg, 1.6)
+}
+
+ClockBox:prelight:active,
+ClockBox:active {
+}
+
+WnckPager, WnckTasklist {
+    background-color: @fallback_panel_bg;
+    color: @fallback_panel_fg;
+}

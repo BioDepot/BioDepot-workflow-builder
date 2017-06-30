@@ -1,0 +1,9 @@
+style "panel-unity" = "panel"
+{
+	bg_pixmap[NORMAL]				= "Images/panel/UnityTopPanel.png"
+	bg[ACTIVE]					= shade (1.5, "#575757")
+	bg[NORMAL]					= shade (0.8, "#9A9B9B")
+	text[NORMAL]					= shade (1.0, "#F0F0F0")
+}
+
+widget		"*UnityPanel*"								style		"panel-unity"

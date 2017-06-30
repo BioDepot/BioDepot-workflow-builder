@@ -1,0 +1,121 @@
+/* default color scheme */
+@define-color bg_color #F7F7F7;
+@define-color fg_color #383838;
+@define-color base_color #ffffff;
+@define-color text_color #424242;
+@define-color selected_bg_color #A5B3BE;
+@define-color selected_fg_color #FFFFFF;
+@define-color tooltip_border_color #ABABAB;
+@define-color tooltip_bg_color #FFFFFF;
+@define-color tooltip_fg_color #575757;
+
+/* colormap actually used by the theme, to be overridden in other css files */
+@define-color theme_bg_color @bg_color;
+@define-color theme_fg_color @fg_color;
+@define-color theme_base_color @base_color;
+@define-color theme_text_color @text_color;
+@define-color theme_selected_bg_color @selected_bg_color; /*#68C0FF*/
+@define-color theme_selected_fg_color @selected_fg_color;
+@define-color theme_tooltip_border_color @tooltip_border_color;
+@define-color theme_tooltip_bg_color @tooltip_bg_color;
+@define-color theme_tooltip_fg_color @tooltip_fg_color;
+
+/* new stuff */
+
+@define-color sidebar_bg_color #F7F7F7; /* nice6E889D best6A7075 #919191 #5D5E5E 5B5C5C*/ /* #9CBFEB #757575test for near-flat*/
+@define-color sidebar_fg_color #858585; /* 83878A */
+
+@define-color sidebar_selected_bg_color #DDE1E3;
+@define-color sidebar_selected_fg_color #ffffff;
+
+@define-color sidebar_divider_color #5d5d5d; /* (@selected_bg_color, 1.6) */
+
+@define-color border_color #757575; /* C9C9C9 */
+@define-color selected_button_bg_color #BAC1C5; /* 99A4AE */
+@define-color selected_button_fg_color #FFFFFF;
+@define-color selected_button_border_color #A8AFB4;
+@define-color button_bg_color #FDFDFD;
+@define-color button_fg_color #474747;
+
+@define-color theme_scrollbar_color @selected_bg_color;
+
+@define-color infobar_bg_color #525252;
+@define-color infobar_fg_color #ffffff;
+
+@define-color scrollber_bg_color #FAFAFA;
+@define-color scrollber_border_color #C9C9C9;
+
+@define-color menubar_bg_color #F7F7F7; /* #EDEDED to match with header gradient */
+@define-color menubar_fg_color #474747;
+
+@define-color ptoolbar_bg_color #F7F7F7;
+@define-color ptoolbar_fg_color #474747;
+
+@define-color menu_light_bg_color #FAFAFA;
+@define-color menu_light_fg_color #383838;
+
+/* shadow effects */
+@define-color light_shadow #fff;
+@define-color dark_shadow #000;
+
+/* misc colors used by gtk+ */
+@define-color info_fg_color rgb (50, 49, 40);
+@define-color info_bg_color rgb (252, 246, 202);
+@define-color warning_fg_color rgb (50, 34, 12);
+@define-color warning_bg_color rgb (250, 173, 61);
+@define-color question_fg_color rgb (215, 232, 250);
+@define-color question_bg_color rgb (57, 142, 231);
+@define-color error_fg_color rgb (251, 214, 214);
+@define-color error_bg_color rgb (237, 54, 54);
+@define-color link_color #2d71b8;
+@define-color success_color #4e9a06;
+@define-color warning_color #f57900;
+@define-color error_color #cc0000;
+
+/* widget colors */
+@define-color titlebar_bg_color @theme_bg_color;
+@define-color titlebar_fg_color @theme_fg_color;
+@define-color toolbar_bg_color @theme_bg_color;
+@define-color toolbar_fg_color @theme_fg_color;
+@define-color menu_bg_color shade(@theme_bg_color, 1.18);
+@define-color menu_fg_color shade(@theme_fg_color, 1.1);
+@define-color panel_bg_color #686868;
+@define-color dark_titlebar_fg_color #fcfcfc;
+
+@define-color dark_titlebar_bg_color #373737;
+@define-color dark_titlebar_fg_color #C5C5C5;
+
+/* osd */
+@define-color osd_base #333;
+@define-color osd_fg #eee;
+@define-color osd_bg alpha(@osd_base, 0.8);
+
+/* window manager colors */
+@define-color wm_bg_a shade(@titlebar_bg_color, 1.07);
+@define-color wm_bg_b @titlebar_bg_color;
+@define-color wm_title_focused mix(@titlebar_fg_color, @titlebar_bg_color, 0.3);
+@define-color wm_title_focused_shadow shade(@titlebar_bg_color, 1.1);
+@define-color wm_title_unfocused mix(@titlebar_fg_color, @titlebar_bg_color, 0.6);
+@define-color wm_title_unfocused_shadow shade(@titlebar_bg_color, 1.05);
+@define-color wm_border_focused shade(@titlebar_bg_color, 0.7);
+@define-color wm_border_unfocused shade(@titlebar_bg_color, 0.8);
+
+/* lightdm greeter color scheme */
+@define-color lightdm_bg_color #f9f9f9;
+@define-color lightdm_fg_color #3c3c3c;
+
+@import url("gtk-widgets.css");
+
+@import url("styles/sidebar-colors-near-flat-new.css");
+@import url("styles/nautilus-sidebar-hide-divider.css");
+@import url("styles/menus-light-flat.css");
+
+@import url("styles/panel.css");
+@import url("styles/gnome-panel.css");
+@import url("styles/gnome-terminal.css");
+@import url("styles/unity.css");
+@import url("styles/gedit.css");
+@import url("styles/app-specific.css");
+@import url("styles/lightdm-gtk-greeter.css");
+@import url("styles/undershoot-overshoot.css");
+/*@import url("styles/dark-header.css"); */

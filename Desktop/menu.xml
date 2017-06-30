@@ -10,7 +10,7 @@
     <action name="Execute"><execute>orange-canvas</execute></action>
   </item>
   <item label="Terminal">
-    <action name="Execute"><execute>x-terminal-emulator</execute></action>
+    <action name="Execute"><execute>xterm -fa "Monospace" -fs 10</execute></action>
   </item>
   <item label="My Data">
     <action name="Execute"><execute>rox-filer /data</execute></action>
@@ -20,9 +20,12 @@
   <separator />
   <menu id="client-list-menu" />
   <separator />
-  <item label="ObConf">
+  <item label="Configure Openbox">
     <action name="Execute"><execute>obconf</execute></action>
   </item>
+  <item label="Appearance">
+    <action name="Execute"><execute>lxappearance</execute></action>
+  </item>c
 </menu>
 
 </openbox_menu>

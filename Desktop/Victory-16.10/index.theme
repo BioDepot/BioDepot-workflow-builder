@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=X-GNOME-Metatheme
+Name=Victory Flat 16.04
+Comment=Victory Light Flat Theme
+Encoding=UTF-8
+
+[X-GNOME-Metatheme]
+IconTheme=victory-icon-theme
+CursorTheme=DMZ-White
+ButtonLayout=:minimize,maximize,close

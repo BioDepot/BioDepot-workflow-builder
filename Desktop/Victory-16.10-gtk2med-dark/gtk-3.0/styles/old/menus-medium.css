@@ -1,0 +1,219 @@
+/* Victory (Strikes Again) Adwaita/Ambiance based theme by Darin */
+
+.menu
+{
+    padding: 1px;
+
+    background-color: @new_menu_bg;
+    color: @new_menu_fg;
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 0px;
+    border-color: shade (@new_menu_bg, 0.75);
+
+    -GtkMenuItem-arrow-scaling: 0.4;
+}
+
+.menuitem .arrow,
+.menuitem .arrow:active,
+.menuitem GtkArrow,
+.menuitem GtkArrow:active,
+.menuitem.arrow,
+.menuitem.arrow:active,
+.menuitem.GtkArrow,
+.menuitem.GtkArrow:active
+{
+color: green;
+background-image:none;
+background-color: green;
+}
+
+.menuitem *
+{
+padding: 4px 1px;
+color: @new_menu_fg;
+}
+
+.menuitem:hover,
+.menu .menuitem:hover {
+    color: red;
+}
+
+.menuitem:prelight {
+    background-image: -gtk-gradient (linear, left top, left bottom,
+				     from (shade (@new_menu_bg, 1.3)),
+				     to (shade (@new_menu_bg, 1.1)));
+    color: @new_menu_fg_prelight;
+    border-style: solid;
+    border-top-color: shade (@new_menu_bg, 1.0);
+    border-right-color: shade (@new_menu_bg, 1.0);
+    border-bottom-color: shade (@new_menu_bg, 1.15);
+    border-left-color: shade (@new_menu_bg, 1.0);
+}
+
+.menuitem *:prelight
+{
+    background-image: -gtk-gradient (linear, left top, left bottom,
+				     from (shade (@new_menu_bg, 1.3)),
+				     to (shade (@new_menu_bg, 1.1)));
+}
+
+.menuitem:insensitive,
+.menuitem *:insensitive,
+.menuitem .accelerator:insensitive
+{
+	color: shade (@new_menu_bg, 0.8);
+	text-shadow: none;
+}
+
+.menuitem .accelerator
+{
+color: shade (@new_menu_bg, 1.5);
+}
+
+.menuitem .accelerator:prelight,
+.menuitem .accelerator:active {
+color: shade (@new_menu_bg, 1.55);
+}
+
+.menuitem.separator {
+    border-color: shade (@new_menu_bg, 0.97);
+    border-style: solid;
+        border-width: 1px;
+        -GtkMenuItem-horizontal-padding: 40;
+}
+
+/* menu radio and check items are drawn differently */
+
+.menuitem.check,
+.menuitem.radio,
+.menuitem.check:prelight,
+.menuitem.radio:prelight,
+.menuitem.check:insensitive,
+.menuitem.radio:insensitive {
+    background-image: none;
+    background-color: @transparent;
+    padding: 0px;
+    border-style: none;
+}
+
+.menuitem.check:active {
+    background-image: url("../assets/menus-medium/checkbox-menuitem-checked.svg");
+}
+
+.menuitem.check:active:prelight {
+    background-image: url("../assets/menus-medium/checkbox-menuitem-checked-selected.svg");
+}
+
+.menuitem.check:active:insensitive {
+    background-image: url("../assets/menus-medium/checkbox-menuitem-checked-insensitive.svg");
+}
+
+.menuitem.check:inconsistent {
+    background-image: url("../assets/menus-medium/checkbox-menuitem-mixed.svg");
+}
+
+.menuitem.check:inconsistent:insensitive {
+    background-image: url("../assets/menus-medium/checkbox-menuitem-mixed-insensitive.svg");
+}
+
+.menuitem.radio:active {
+    background-image: url("../assets/menus-medium/radio-menuitem-checked.svg");
+}
+
+.menuitem.radio:active:prelight {
+    background-image: url("../assets/menus-medium/radio-menuitem-checked-selected.svg");
+}
+
+.menuitem.radio:active:insensitive {
+    background-image: url("../assets/menus-medium/radio-menuitem-checked-insensitive.svg");
+}
+
+.menuitem.radio:inconsistent {
+    background-image: url("../assets/menus-medium/radio-menuitem-mixed.svg");
+}
+
+.menuitem.radio:inconsistent:insensitive {
+    background-image: url("../assets/menus-medium/radio-menuitem-mixed-insensitive.svg");
+}
+
+.menuitem GtkScale.trough {
+    background-color: shade (@bg_color, 0.8);
+    border-style: none;
+}
+
+.menuitem GtkScale
+{
+    -GtkRange-slider-width: 25;
+    -GtkRange-trough-border: 0;
+    -GtkScale-slider-length: 25;
+    border-radius: 300px;
+    border-style: solid;
+    background-image: -gtk-gradient (linear, left top, left bottom,
+						from (shade (@new_menu_bg, 1.2)),
+						to (shade (@new_menu_bg, 0.7)));
+
+    -adwaita-focus-fill-color: @transparent;
+    -adwaita-focus-border-radius: 0;
+    -adwaita-focus-border-color: alpha (@selected_bg_color, 0.0);
+        
+	-adwaita-border-gradient: -gtk-gradient (linear, left top, left bottom,
+                                     from (shade (@new_menu_bg, 0.9)),
+                                       to (shade (@new_menu_bg, 0.7)));
+}
+
+.menuitem GtkScale.slider:active,
+.menuitem GtkScale.slider:hover,
+.menuitem GtkScale.slider:active:hover
+{
+    border-style: solid;
+    background-image:		-gtk-gradient (linear, left top, left bottom,
+									 from (shade (@new_menu_bg, 1.6)),
+									   to (shade (@new_menu_bg, 0.8)));
+
+	-adwaita-border-gradient:		-gtk-gradient (linear, left top, left bottom,
+                                         from (shade (@new_menu_bg, 0.94)),
+                                           to (shade (@new_menu_bg, 0.74)));
+}
+
+
+.menuitem GtkCalendar
+{
+    background-color: @new_menu_bg;
+    background-image: none;
+    border-radius: 3px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: shade (@new_menu_bg, 0.8);
+    padding: 0px;
+
+    color: @new_menu_fg;
+}
+
+.menuitem GtkCalendar.button,
+.menuitem GtkCalendar.header,
+.menuitem GtkCalendar.view 
+{
+    background-color: shade (@new_menu_bg, 0.9);
+    background-image: none;
+    border-radius: 0px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: shade (@new_menu_bg, 0.8);
+    padding: 0px;
+
+    color: @new_menu_fg;
+}
+
+
+
+.menuitem .entry {
+    background-color: shade (@new_menu_bg, 1.3);
+    background-image: none;
+
+    color: @new_menu_fg_prelight;
+
+    -adwaita-border-gradient: -gtk-gradient (linear, left top, left bottom,
+                                           from (shade (@new_menu_bg, 0.75)),
+                                           to (shade (@new_menu_bg, 0.9)));
+}

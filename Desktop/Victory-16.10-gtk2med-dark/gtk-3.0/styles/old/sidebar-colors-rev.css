@@ -1,0 +1,249 @@
+/* Victory (Strikes Again) Adwaita based theme by Darin */
+
+RBDisplayPageTree OsThumb:selected,
+RBDisplayPageTree OsScrollbar:selected,
+NautilusPlacesSidebar OsThumb:selected,
+NautilusPlacesSidebar OsScrollbar:selected,
+MarlinPlacesSidebar OsThumb:selected,
+MarlinPlacesSidebar OsScrollbar:selected,
+TotemPlaylist GtkTreeView OsThumb:selected,
+TotemPlaylist GtkTreeView OsScrollbar:selected,
+FMTreeView OsThumb:selected,
+FMTreeView OsScrollbar:selected,
+GtkFileChooserDefault .sidebar.view OsThumb:selected,
+GtkFileChooserDefault .sidebar.view OsScrollbar:selected,
+FrWindow GtkTable GtkVBox GtkScrolledWindow OsThumb:selected,
+FrWindow GtkTable GtkVBox GtkScrolledWindow OsScrollbar:selected
+{
+    background-color: mix (@sidebar_fg_color, @sidebar_bg_color, 0.45);
+}
+
+RBDisplayPageTree .cell,
+RBDisplayPageTree .cell:hover,
+TotemPlaylist GtkTreeView,
+TotemPlaylist GtkTreeView .cell:hover,
+NautilusPlacesSidebar .cell,
+NautilusPlacesSidebar .cell:hover,
+MarlinPlacesSidebar .cell,
+MarlinPlacesSidebar .cell:hover,
+FMTreeView .cell,
+GtkFileChooserDefault .sidebar.view.cell,
+FrWindow GtkTreeView .sidebar.view.cell,
+FrWindow GtkTable GtkScrolledWindow GtkTreeView .sidebar.view,
+FrWindow > GtkGrid > GtkPaned > GtkBox > GtkScrolledWindow > GtkTreeView
+{
+/*
+background-image: -gtk-gradient (linear,
+				     left top, right top,
+				     from (shade (@sidebar_selected_bg_color, 1.05)),
+                                     color-stop (0.20, shade (@sidebar_selected_bg_color, 1.03)),
+                                     color-stop (0.50, shade (@sidebar_selected_bg_color, 1.0)),
+				     to (shade (@sidebar_selected_bg_color, 0.98)));
+*/
+background-color: @sidebar_bg_color;
+color: @sidebar_fg_color;
+border-radius: 0px;
+border-width: 0px;
+padding:0px;
+}
+
+/*
+Nautilus .sidebar
+{
+background-image: none;
+background-color: green;
+color: yellow;
+border-radius: 0px;
+border-width: 1px;
+border-style: solid;
+border-color: red;
+padding:0px;
+}
+*/
+
+NautilusWindow > GtkTable > .pane-separator,
+NautilusWindow .pane-separator
+{
+background-color: shade (@sidebar_bg_color, 0.98);
+color: shade (@sidebar_bg_color, 0.98);
+border-width: 0px 1px 0px 0px;
+border-style: none;
+border-color: shade (@bg_color, 0.84);
+}
+
+NautilusWindow > GtkTable > .pane-separator:hover,
+NautilusWindow .pane-separator:hover
+{
+color: shade (@sidebar_bg_color, 0.98);
+}
+
+NautilusWindow .sidebar .frame {
+}
+
+
+/* Section may not be necessary anymore.
+
+RBDisplayPageTree .cell:hover,
+TotemPlaylist .cell:hover,
+NautilusPlacesSidebar .cell:hover,
+FMTreeView .cell:hover,
+GtkFileChooserDefault .sidebar.view:hover,
+FrWindow GtkTable GtkVBox GtkScrolledWindow GtkTreeView:hover
+{
+    color: @sidebar_fg_color;
+}
+
+Section may not be necessary anymore. */
+
+RBDisplayPageTree row:selected,
+RBDisplayPageTree row:selected:focused,
+RBDisplayPageTree row:selected:hover,
+TotemPlaylist row:selected,
+TotemPlaylist row:selected:focused,
+TotemPlaylist row:selected:hover,
+NautilusPlacesSidebar row:selected,
+NautilusPlacesSidebar row:selected:focused,
+NautilusPlacesSidebar row:selected:hover,
+MarlinPlacesSidebar row:selected,
+MarlinPlacesSidebar row:selected:focused,
+MarlinPlacesSidebar row:selected:hover,
+FMTreeView row:selected,
+FMTreeView row:selected:focused,
+FMTreeView row:selected:hover,
+GtkFileChooserDefault .sidebar.view:selected,
+GtkFileChooserDefault .sidebar.view:selected:focused,
+GtkFileChooserDefault row:selected:hover,
+FrWindow GtkTable GtkVBox GtkScrolledWindow GtkTreeView:selected,
+FrWindow GtkTable GtkVBox GtkScrolledWindow GtkTreeView:selected:focused,
+FrWindow > GtkGrid > GtkPaned > GtkBox > GtkScrolledWindow > GtkTreeView:selected,
+FrWindow > GtkGrid > GtkPaned > GtkBox > GtkScrolledWindow > GtkTreeView:selected:focused,
+FrWindow row:selected:hover
+{
+/*
+background-image: -gtk-gradient (linear,
+				     left top, right top,
+				     from (shade (@sidebar_bg_color, 1.0)),
+                                     color-stop (0.15, shade (@sidebar_bg_color, 0.97)),
+                                     color-stop (0.50, shade (@sidebar_bg_color, 0.98)),
+				     to (shade (@sidebar_bg_color, 1.0)));
+*/
+background-color: @sidebar_selected_bg_color;
+color: @sidebar_selected_fg_color;
+border-width: 1px;
+border-style: solid;
+border-color: @sidebar_selected_bg_color;
+box-shadow: none;
+}
+/*
+
+NautilusPlacesSidebar .cell:focused:selected
+{
+background-image: none;
+background-color: @transparent;
+color: @transparent;
+}
+
+*/
+
+RBDisplayPageTree GtkTreeView row:selected,
+RBDisplayPageTree GtkTreeView row:selected:focused
+{
+background-color: @sidebar_fg_color;
+color: @sidebar_bg_color;
+}
+
+GtkFileChooserDefault .sidebar.separator,
+GtkFileChooserDefault .sidebar.separator:hover
+{
+background-color: alpha (@sidebar_bg_color, 0.0);
+border-color: alpha (@sidebar_bg_color, 0.0);
+}
+
+GtkFileChooserDefault .sidebar.view .separator,
+GtkFileChooserDefault .sidebar.view .separator:hover
+{
+color: @transparent;
+}
+
+GtkFileChooserDefault .sidebar.view.separator,
+GtkFileChooserDefault .sidebar.view.separator:hover
+{
+color: @transparent;
+}
+
+/*FrWindow GtkTable GtkVBox GtkScrolledWindow GtkTreeView expander*/
+
+/*RBDisplayPageTree .scrollbar.trough,
+TotemPlaylist GtkTreeView .scrollbar.trough,
+FMTreeView .scrollbar.trough,
+GtkFileChooserDefault .sidebar.view.trough,
+FrWindow GtkTable GtkVBox GtkScrolledWindow .scrollbar.trough,*/
+MarlinPlacesSidebar .scrollbar.trough,
+NautilusPlacesSidebar .scrollbar.trough
+{
+	background-color: @sidebar_bg_color;
+}
+
+MarlinPlacesSidebar .scrollbar,
+NautilusPlacesSidebar .scrollbar
+{
+        -GtkRange-slider-width: 10;
+}
+
+
+MarlinPlacesSidebar .scrollbar.slider,
+NautilusPlacesSidebar .scrollbar.slider
+{
+        border-style: none;
+        background-image: none;
+        background-color: @base_color;
+}
+
+NautilusPlacesSidebar
+{
+color: @sidebar_fg_color;
+}
+
+/*
+
+RBDisplayPageTree .expander,
+RBDisplayPageTree .expander:hover,
+RBDisplayPageTree .expander:active,
+RBDisplayPageTree .expander:active:hover,
+RBDisplayPageTree .expander:focused:selected,
+RBDisplayPageTree .expander:selected
+
+*/
+
+
+RBDisplayPageTree .expander,
+RBDisplayPageTree .expander:hover,
+RBDisplayPageTree .expander:active,
+RBDisplayPageTree .expander:active:hover,
+RBDisplayPageTree .expander:active:selected,
+RBDisplayPageTree .expander:focused:selected,
+RBDisplayPageTree .expander:selected
+{
+background-image: none;
+background-color: @sidebar_fg_color;
+color: shade (@sidebar_bg_color, 0.89);
+}
+
+MarlinPlacesSidebar .expander,
+MarlinPlacesSidebar .expander:hover,
+MarlinPlacesSidebar .expander:active,
+MarlinPlacesSidebar .expander:active:hover,
+MarlinPlacesSidebar .expander:active:selected,
+MarlinPlacesSidebar .expander:focused:selected,
+MarlinPlacesSidebar .expander:selected
+{
+background-image: none;
+background-color: @sidebar_fg_color;
+color: shade (@sidebar_bg_color, 0.89);
+}
+
+/*
+GeditDocumentsPanel .view,
+GeditPanel .view
+* 
+GeditPanel .expander*/

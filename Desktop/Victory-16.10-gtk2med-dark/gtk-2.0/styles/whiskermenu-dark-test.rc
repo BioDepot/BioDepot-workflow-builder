@@ -1,0 +1,19 @@
+style "whiskerm"
+{
+	GtkTreeView	:: even-row-color		= "#171717"
+	GtkTreeView	:: odd-row-color		= "red"
+base[NORMAL]		= "#373737"
+bg[NORMAL]		= "#171717"
+bg[ACTIVE]		= "#171717"
+fg[NORMAL]		= @base_color
+text[NORMAL]	= @base_color
+	engine "murrine"
+	{
+	}
+}
+
+widget "whiskermenu*" style "whiskerm"
+widget "whiskermenu*GtkScrolledWindow" style "whiskerm"
+widget "whiskermenu*View*" style "whiskerm"
+widget "whiskermenu*view*" style "whiskerm"
+widget "whiskermenu*GtkEntry*" style:highest "whiskerm"

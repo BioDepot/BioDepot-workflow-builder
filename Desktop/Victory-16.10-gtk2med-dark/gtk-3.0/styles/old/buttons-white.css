@@ -1,0 +1,142 @@
+/**********
+ * button *
+ **********/
+ 
+ .button GtkArrow
+ {
+ color: shade (@fg_color, 1.5);
+ }
+
+.button,
+.inline-toolbar.toolbar .button {
+    padding: 2px;
+
+    text-shadow: 0 1 alpha (shade (@bg_color, 1.26), 0.5);
+
+    -adwaita-border-gradient: none;
+    
+        background-image:  -gtk-gradient (linear,
+				     left top, left bottom,
+				     from (#FFFFFF),
+				     to (#FAFAFA));
+    border-width: 1px;
+    border-radius: 1px;
+    border-style: solid;
+    border-color: #B3B3B3;
+
+    text-shadow: 0 0 alpha (shade (@button_bg_color, 1.25), 0.4);
+
+	color: @fg_color;
+	
+	transition: 100ms ease-in-out;
+	padding: 5px 6px;
+}
+
+GtkComboBox .button,
+GtkComboBox.combobox-entry .button
+{
+    padding: 2px 6px;
+
+    text-shadow: 0 1 alpha (shade (@bg_color, 1.26), 0.5);
+    
+	transition: 100ms ease-in-out;
+}
+
+
+/* Button Selected (by default, or by keyboard) */
+.button:focused
+{
+        background-image:  -gtk-gradient (linear,
+				     left top, left bottom,
+				     from (#FFFFFF),
+				     to (#FAFAFA));
+    border-color: @selected_bg_color;
+}
+
+.button:focused:hover,
+.button:hover,
+GtkButton .cell:hover
+{
+        background-image:  -gtk-gradient (linear,
+				     left top, left bottom,
+				     from (#FFFFFF),
+				     to (#FAFAFA));
+    border-color: @selected_bg_color;
+}
+
+.button:insensitive {
+border-color: shade (@bg_color, 0.85);
+color: shade (@bg_color, 0.3);
+}
+
+
+/************
+ * notebook *
+ ************/
+.notebook {
+	padding: 4px;
+
+	border-color: shade (@bg_color, 0.85);
+	border-style: solid;
+	border-width: 1px;
+	border-radius: 0px;
+
+	background-color: shade (@bg_color, 1.03);
+	
+		background-image:  -gtk-gradient (linear,
+				     left top, left bottom,
+				     from (shade (@bg_color, 1.02)),
+				     to (shade (@bg_color, 1.01)));
+
+	-GtkNotebook-tab-overlap: -2;
+	-GtkNotebook-tab-curvature: 2;
+	
+/************
+	-GtkWidget-focus-padding: 0;
+ ************/
+}
+
+.notebook tab {
+	border-radius: 0px;
+	padding: 8px 6px 6px 6px;
+	border-width: 1px;
+	border-style: solid;
+	background-image:  -gtk-gradient (linear,
+				     left top, left bottom,
+				     from (shade (@bg_color, 1.03)),
+                                     color-stop (0.45, shade (@bg_color, 1.0)),
+                                     color-stop (0.75, shade (@bg_color, 0.95)),
+				     to (shade (@bg_color, 0.92)));
+
+/************
+	-adwaita-focus-border-radius: 0;
+ ************/
+}
+
+.notebook tab:active,
+.notebook tab:selected {
+	border-radius: 0px;
+	padding: 8px 6px 6px 6px;
+	background-image: none;
+	background-color: shade (@bg_color, 1.02);
+	
+/************
+	-adwaita-border-gradient: -gtk-gradient (linear, left top, left bottom,
+		from (shade (@bg_color, 0.85)),
+		to (shade (@bg_color, 0.85)));
+
+	-adwaita-selected-tab-color: @selected_bg_color;
+	-adwaita-focus-fill-color: @transparent;
+ ************/
+}
+
+.notebook .button,
+.notebook .button:hover,
+.notebook .button:hover:active {
+
+        background-image:  -gtk-gradient (linear,
+				     left top, left bottom,
+				     from (#FAFAFA),
+				     to (#F8F8F8));
+
+}
