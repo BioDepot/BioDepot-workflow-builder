@@ -1,4 +1,6 @@
 import os
+import Orange.data
+from Orange.data.io import FileFormat
 from orangebiodepot.util.BwBase import OWBwBWidget
 from Orange.widgets import gui
 
@@ -14,7 +16,7 @@ class OWSTARAlignment(OWBwBWidget):
               ("Sample Table", str, "setSampleTable"),
               ("BAM files", str, "setBamFiles")]
 
-    outputs = [("Counts", str)]
+    outputs = [("Counts", str),("DataTable", Orange.data.Table)]
 
     want_main_area = False
 
@@ -84,6 +86,14 @@ class OWSTARAlignment(OWBwBWidget):
     def Event_OnRunFinished(self):
         self.btnRun.setEnabled(True)
         self.send('Counts', self.getDirectory('bamfiles'))
+        tsvFile = os.path.join(self.getDirectory('bamfiles'), 'deseq_results.csv');
+        tsvReader = FileFormat.get_reader(tsvFile)
+        data = None
+        try:
+            data = tsvReader.read()
+        except Exception as ex:
+            print(ex)
+        self.send("DataTable", data)
 
     def Event_OnRunMessage(self, message):
         self.infoLabel.setText(message)
