@@ -9,7 +9,7 @@ from .util.DockerClient import DockerClient, DockerThread_BuildImage
 from .util.UIDockerfileEditor import DockerSyntaxHighlighter
 
 
-class OWSTARAlignment(widget.OWWidget):
+class OWImageBuilder(widget.OWWidget):
     name = "Image Builder"
     description = "Build Custom Image"
     category = "General"
@@ -161,26 +161,26 @@ class OWSTARAlignment(widget.OWWidget):
         self.cboBaseImage.setMaximumSize(QtCore.QSize(16777215, 30))
         self.cboBaseImage.setObjectName("cboBaseImage")
         self.vlayout_content.addWidget(self.cboBaseImage)
-        self.lblRScript = QtWidgets.QLabel(self.mainContent)
-        self.lblRScript.setMinimumSize(QtCore.QSize(0, 25))
-        self.lblRScript.setMaximumSize(QtCore.QSize(16777215, 25))
-        self.lblRScript.setObjectName("lblRScript")
-        self.vlayout_content.addWidget(self.lblRScript)
-        self.hlayout_RScript = QtWidgets.QHBoxLayout()
-        self.hlayout_RScript.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
-        self.hlayout_RScript.setContentsMargins(0, -1, -1, -1)
-        self.hlayout_RScript.setSpacing(1)
-        self.hlayout_RScript.setObjectName("horizontalLayout")
-        self.edtRScript = QtWidgets.QLineEdit(self.mainContent)
-        self.edtRScript.setObjectName("edtRScript")
-        self.edtRScript.setReadOnly(True)
-        self.hlayout_RScript.addWidget(self.edtRScript)
-        self.btnSelectScriptFile = QtWidgets.QPushButton(self.mainContent)
-        self.btnSelectScriptFile.setMinimumSize(QtCore.QSize(24, 24))
-        self.btnSelectScriptFile.setMaximumSize(QtCore.QSize(24, 24))
-        self.btnSelectScriptFile.setObjectName("btnSelectScriptFile")
-        self.hlayout_RScript.addWidget(self.btnSelectScriptFile)
-        self.vlayout_content.addLayout(self.hlayout_RScript)
+        # self.lblRScript = QtWidgets.QLabel(self.mainContent)
+        # self.lblRScript.setMinimumSize(QtCore.QSize(0, 25))
+        # self.lblRScript.setMaximumSize(QtCore.QSize(16777215, 25))
+        # self.lblRScript.setObjectName("lblRScript")
+        # self.vlayout_content.addWidget(self.lblRScript)
+        # self.hlayout_RScript = QtWidgets.QHBoxLayout()
+        # self.hlayout_RScript.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
+        # self.hlayout_RScript.setContentsMargins(0, -1, -1, -1)
+        # self.hlayout_RScript.setSpacing(1)
+        # self.hlayout_RScript.setObjectName("horizontalLayout")
+        # self.edtRScript = QtWidgets.QLineEdit(self.mainContent)
+        # self.edtRScript.setObjectName("edtRScript")
+        # self.edtRScript.setReadOnly(True)
+        # self.hlayout_RScript.addWidget(self.edtRScript)
+        # self.btnSelectScriptFile = QtWidgets.QPushButton(self.mainContent)
+        # self.btnSelectScriptFile.setMinimumSize(QtCore.QSize(24, 24))
+        # self.btnSelectScriptFile.setMaximumSize(QtCore.QSize(24, 24))
+        # self.btnSelectScriptFile.setObjectName("btnSelectScriptFile")
+        # self.hlayout_RScript.addWidget(self.btnSelectScriptFile)
+        # self.vlayout_content.addLayout(self.hlayout_RScript)
 
         self.hlayout_dockertitle = QtWidgets.QHBoxLayout()
         self.hlayout_dockertitle.setObjectName("hlayout_dockertitle")
@@ -302,7 +302,7 @@ class OWSTARAlignment(widget.OWWidget):
         self.package_list_proxy.setSourceModel(self.model_package)
 
         # create UI events
-        self.btnSelectScriptFile.clicked.connect(self.OnChooseScriptFile)
+        #self.btnSelectScriptFile.clicked.connect(self.OnChooseScriptFile)
         self.btnBuild.clicked.connect(self.OnBuildClicked)
         self.btnOpen.clicked.connect(self.OnLoadDockerfile)
         self.btnSave.clicked.connect(self.OnSaveDockerfile)
@@ -320,8 +320,6 @@ class OWSTARAlignment(widget.OWWidget):
         self.lblSubtitle.setText(_translate("Widget", "Customize your own bioconductor image"))
         self.lblName.setText(_translate("Widget", "Image Name: "))
         self.lblBaseImage.setText(_translate("Widget", "Select base image:"))
-        self.lblRScript.setText(_translate("Widget", "Select R script:"))
-        self.btnSelectScriptFile.setText(_translate("Widget", " ☰ "))
         self.lblDockerfile.setText(_translate("Widget", "Builder detail: "))
         self.btnBuild.setText(_translate("Form", "Build"))
         self.lblDockerVersion.setText(_translate("Form", "Docker Engine: {0}"))
