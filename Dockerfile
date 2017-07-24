@@ -25,7 +25,7 @@ RUN pip3 install --upgrade pip
 RUN pip install numpy
 RUN pip3 install -r orange3/requirements-core.txt
 RUN pip3 install -r orange3/requirements-gui.txt
-RUN pip3 install docker pysam
+RUN pip3 install docker pysam beautifulsoup4
 RUN pip3 install -e orange3
 
 ## BIODEPOT

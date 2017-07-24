@@ -126,23 +126,23 @@ class DockerClient:
 
 
 class DockerThread_BuildImage(QThread):
-    build_process = pyqtSignal(['QString'])
+    build_process = pyqtSignal(str)
     build_complete = pyqtSignal(int)
-    def __init__(self, cli, name, dockerfile):
+    def __init__(self, cli, name, path, dockerfile):
         QThread.__init__(self)
         self.docker = cli
         self.dockerfile = dockerfile
         self.name = name
+        self.buildpath = path
 
     def __del__(self):
         self.wait()
 
     def run(self):
-        imagename = self.name
+        print ('Start building image {0} ---->>> \n docker file: {1} \n use path: {2}'.format(self.name, self.dockerfile, self.buildpath))
         try:
-            import io
-            f = io.BytesIO(self.dockerfile.encode('utf-8'))
-            for rawline in self.docker.getClient().build(fileobj=f, tag=imagename, stream=True):
+            #f = io.BytesIO(self.dockerfile.encode('utf-8'))
+            for rawline in self.docker.getClient().build(path=self.buildpath, tag=self.name, dockerfile=self.dockerfile, rm=True):
                 for jsonstr in rawline.decode('utf-8').split('\r\n')[:-1]:
                     log = jsonstr
                     try:
@@ -152,11 +152,20 @@ class DockerThread_BuildImage(QThread):
                         print (e)
                     except TypeError as e:
                         print (e)
+                    except KeyError as e:
+                        log = ', '.join("{!s}={!r}".format(key, val) for (key, val) in line.items())
+                    except:
+                        log = ''
+                    #print (log)
                     self.build_process.emit(log)
 
         except requests.exceptions.RequestException as e:
-            # TODO emit error
-            print(e)
+            self.build_process.emit(e.explanation)
+            self.build_complete.emit(1)
+        except Exception as e:
+            self.build_process.emit(str(e))
+            self.build_complete.emit(1)
+            return
 
 class PullImageThread(QThread):
     pull_progress = pyqtSignal(int)
