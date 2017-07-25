@@ -4,8 +4,8 @@ from Orange.data.io import FileFormat
 from orangebiodepot.util.BwBase import OWBwBWidget
 from Orange.widgets import gui
 
-class OWSTARAlignment(OWBwBWidget):
-    name = "BAM to Counts"
+class OWBam2Counts(OWBwBWidget):
+    name = "BAM to Counts Table"
     description = "Counts BAM files"
     category = "General"
     icon = "icons/bam2counts.svg"
@@ -13,18 +13,17 @@ class OWSTARAlignment(OWBwBWidget):
     priority = 10
 
     inputs = [("GTF file", str, "setGtfFile"),
-              ("Sample Table", str, "setSampleTable"),
               ("BAM files", str, "setBamFiles")]
 
-    outputs = [("Counts", str),("DataTable", Orange.data.Table)]
+    outputs = [("Counts", str), ("DataTable", Orange.data.Table)]
 
     want_main_area = False
 
-    docker_image_name = 'biodepot/bam2counts'
+    docker_image_name = 'biodepot/bam2deseq'
     docker_image_tag = 'latest'
 
     # worker numbers
-    worker_numbers = 4
+    worker_numbers = 2
 
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
@@ -32,7 +31,6 @@ class OWSTARAlignment(OWBwBWidget):
         # GUI
         box = gui.widgetBox(self.controlArea, "Info")
         self.lblGtf = gui.widgetLabel(box, 'GTF File: Not Set')
-        self.lblSampleTable = gui.widgetLabel(box, 'Sample table: Not Set')
         self.lblBamfiles = gui.widgetLabel(box, 'BAM files: Not Set')
 
         self.infoLabel = gui.widgetLabel(box, 'Waiting...')
@@ -43,9 +41,9 @@ class OWSTARAlignment(OWBwBWidget):
         self.btnRun = gui.button(self.controlArea, self, "Run", callback=self.OnRunClicked)
         self.Flag_isRunning = False
 
-        self.Initialize_InputKeys(['gtf', 'sampletable', 'bamfiles'])
+        self.Initialize_InputKeys(['gtf', 'bamfiles'])
 
-        self.setMinimumSize(500, 200)
+        self.setMinimumSize(500, 180)
 
     def OnRunClicked(self):
         self.startJob(triggerdByButton=True)
@@ -54,30 +52,24 @@ class OWSTARAlignment(OWBwBWidget):
         self.setDirectories('gtf', path, self.lblGtf)
         self.startJob()
 
-    def setSampleTable(self, path):
-        self.setDirectories('sampletable', path, self.lblSampleTable)
-        self.startJob()
-
     def setBamFiles(self, path):
         self.setDirectories('bamfiles', path, self.lblBamfiles)
         self.startJob()
 
     def startJob(self, triggerdByButton = False):
-        all_set = all(value is not None for value in [self.getDirectory('gtf'), self.getDirectory('sampletable'), self.getDirectory('bamfiles')])
+        all_set = all(value is not None for value in [self.getDirectory('gtf'), self.getDirectory('bamfiles')])
 
         if all_set and (self.auto_run or triggerdByButton):
             self.btnRun.setEnabled(False)
             top_dir = '/data'
             gtf = os.path.join(top_dir, os.path.basename(self.getDirectory('gtf')))
-            sample_table = os.path.join(top_dir, os.path.basename(self.getDirectory('sampletable')))
             bamfiles = os.path.join(top_dir, 'bamfiles')
             logfile = os.path.join(bamfiles, 'log.txt')
 
             volumes = {self.getDirectory('gtf'): gtf,
-                       self.getDirectory('sampletable'): sample_table,
                        self.getDirectory('bamfiles'): bamfiles}
 
-            cmd = 'Rscript /root/bam2counts.R {} {} {} {} >& {}'.format(gtf, sample_table, bamfiles, self.worker_numbers, logfile)
+            cmd = 'Rscript /home/root/bam2counts.R {} {} {} >& {}'.format(gtf, bamfiles, self.worker_numbers, logfile)
             commands = [cmd,"exit"]
 
             self.dockerRun(volumes, commands)
@@ -85,8 +77,8 @@ class OWSTARAlignment(OWBwBWidget):
 
     def Event_OnRunFinished(self):
         self.btnRun.setEnabled(True)
-        self.send('Counts', self.getDirectory('bamfiles'))
-        tsvFile = os.path.join(self.getDirectory('bamfiles'), 'deseq_results.csv');
+        tsvFile = os.path.join(self.getDirectory('bamfiles'), 'bamcounts.csv');
+        self.send('Counts', tsvFile)
         tsvReader = FileFormat.get_reader(tsvFile)
         data = None
         try:
