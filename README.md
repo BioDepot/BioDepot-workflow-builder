@@ -1,4 +1,4 @@
-![BwB](Media/logo.png)
+![BwB](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/Media/logo.png)
 
 [![](https://images.microbadger.com/badges/image/biodepot/bwb.svg)](https://microbadger.com/images/biodepot/bwb "Get your own image badge on microbadger.com")  [![](https://images.microbadger.com/badges/version/biodepot/bwb.svg)](https://microbadger.com/images/biodepot/bwb "Get your own version badge on microbadger.com")
 
@@ -18,7 +18,7 @@ Currently, BwB uses docker sock binding, to run BwB:
 1. Install Docker   
 2. On Docker-enabled machines run:  
 ``` 
-docker run --rm -p 6080:6080 -v ~/Desktop/:/data -v /var/run/docker.sock:/var/run/docker.sock biodepot/bwb
+docker run --rm -p 6080:6080 -v ~/Desktop:/data -v /var/run/docker.sock:/var/run/docker.sock biodepot/bwb
 ```
 3. BwB can be accessed from browser: http://localhost:6080 (for windows machines, you'll need to know the address of your docker-machine)  
 
@@ -39,7 +39,7 @@ To add a widget to BioDepot:
     orange-canvas
 ```
 
-![Screenshot](Media/Screenshot.png)
+![Screenshot](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/Media/Screenshot.png)
 
 ## More resources:
 - Demo: [Link](https://drive.google.com/file/d/0B6xuS_tbRDJ0RzN6NlJ0T1U4VUU/view?usp=sharing)
