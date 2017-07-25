@@ -22,6 +22,7 @@ RUN Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite(c('BMA','
     Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite(c('GenomicFeatures','GenomicAlignments','BiocParallel','DESeq2'),ask=FALSE)"
 
 ADD bam2counts.R /home/root/
+ADD counts2DESeq.R /home/root/
 
 CMD ["Rscript /home/root/bam2counts.R"]
 
