@@ -296,6 +296,7 @@ class OWGenericTask(widget.OWWidget):
             if len(sset) > 1:
                 otherSettings = sset[1]
                 self.cboDockerImage.setCurrentText(otherSettings["Image"])
+                self.txtCommand.setPlainText(otherSettings["Commands"])
                 item = self.model_vmap.item(otherSettings["SelectedOutput"])
                 if item:
                     self.model_vmap.item(otherSettings["SelectedOutput"], 2).setCheckState(Qt.Checked)
@@ -315,7 +316,11 @@ class OWGenericTask(widget.OWWidget):
                 break
             selectIndex += 1
 
-        otherSettings = {"Image": self.cboDockerImage.currentText(), "SelectedOutput": selectIndex}
+        otherSettings = {
+            "Image": self.cboDockerImage.currentText(),
+            "SelectedOutput": selectIndex,
+            "Commands": self.txtCommand.toPlainText()
+        }
         self.savedSettings = json.dumps([volumes, otherSettings])
 
     def _enableUIElements(self, enabled=True):
