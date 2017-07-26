@@ -3,7 +3,7 @@ from Orange.widgets import widget
 from orangebiodepot.util.DockerClient import DockerClient
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QStandardItem, QFont
-from PyQt5.QtCore import QThread, QDir
+from PyQt5.QtCore import QThread, QDir, Qt
 
 class OWGenericTask(widget.OWWidget):
     name = "Custom Container"
@@ -206,12 +206,14 @@ class OWGenericTask(widget.OWWidget):
         self.loadDockerImages()
 
         self.model_vmap = QtGui.QStandardItemModel(self.lstMapping)
-        self.model_vmap.setColumnCount(2)
-        self.model_vmap.setHorizontalHeaderLabels(['From', 'To container'])
+        self.model_vmap.itemChanged.connect(self.OnMapListSelectedChanged)
+        self.model_vmap.setColumnCount(3)
+        self.model_vmap.setHorizontalHeaderLabels(['From', 'To container', '⇢'])
         self.lstMapping.setModel(self.model_vmap)
         width = self.lstMapping.width()
-        self.lstMapping.setColumnWidth(0, 395)
+        self.lstMapping.setColumnWidth(0, 365)
         self.lstMapping.setColumnWidth(1, 170)
+        self.lstMapping.setColumnWidth(2, 30)
 
 
     def setHostMountedDir(self, directory, id):
@@ -237,9 +239,12 @@ class OWGenericTask(widget.OWWidget):
 
     def OnAddVMapping(self):
         width = self.lstMapping.width() * 0.99
-        self.lstMapping.setColumnWidth(0, width * 0.7)
+        self.lstMapping.setColumnWidth(0, width * 0.65)
         self.lstMapping.setColumnWidth(1, width * 0.3)
-        self.model_vmap.appendRow([QStandardItem(), QStandardItem()])
+        self.lstMapping.setColumnWidth(2, width * 0.05)
+        item = QStandardItem()
+        item.setCheckable(True)
+        self.model_vmap.appendRow([QStandardItem(), QStandardItem(), item])
 
     def OnDeleteVMapping(self):
         current = self.lstMapping.currentIndex()
@@ -253,6 +258,14 @@ class OWGenericTask(widget.OWWidget):
             if not item.text():
                 dir = QtWidgets.QFileDialog.getExistingDirectory(self)
                 item.setText(dir)
+
+    def OnMapListSelectedChanged(self, item):
+        if item.checkState():
+            i = 0
+            while self.model_vmap.item(i):
+                if item.row() != i:
+                    self.model_vmap.item(i, 2).setCheckState(Qt.Unchecked)
+                i += 1
 
     def _enableUIElements(self, enabled=True):
         self.btnAddMapping.setEnabled(enabled)
@@ -292,8 +305,19 @@ class OWGenericTask(widget.OWWidget):
         self.setStatusMessage('Finished!')
         # restore controls
         self._enableUIElements()
+
         # notify next procedure
-        #self.send("Output", self.fastqDirectory)
+        # found any marked output channel
+        output_str = ''
+        i = 0
+        while self.model_vmap.item(i):
+            if self.model_vmap.item(i, 2).checkState():
+                output_str = self.model_vmap.item(i, 0).text()
+                break
+            i += 1
+            
+        if output_str:
+            self.send("Output", output_str)
 
 
 class GenericDockerRunner(QThread):
@@ -327,7 +351,7 @@ def main(argv=sys.argv):
     app = QApplication(list(argv))
 
     ow = OWGenericTask()
-    ow.setHostMountedDir("/Users/Jimmy/Downloads/STAR/fasta_input", None)
+    #ow.setHostMountedDir("/Users/Jimmy/Downloads/STAR/fasta_input", None, None)
     ow.show()
     ow.raise_()
 
