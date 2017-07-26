@@ -215,7 +215,7 @@ class OWGenericTask(widget.OWWidget):
 
 
     def setHostMountedDir(self, directory, id):
-        if os.path.exists(directory):
+        if directory is not None and os.path.exists(directory):
             items = self.model_vmap.findItems(directory)
             if not items:
                 itemFrom = QStandardItem(directory)

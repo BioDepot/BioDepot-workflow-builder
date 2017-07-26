@@ -530,7 +530,7 @@ class OWImageBuilder(widget.OWWidget):
 
     def _enableUIElements(self, enabled=False):
         self.edtImageName.setEnabled(enabled)
-        self.btnSelectScriptFile.setEnabled(enabled)
+        #self.btnSelectScriptFile.setEnabled(enabled)
         self.txtDockerfile.setReadOnly(not enabled)
         self.lstPackages.setEnabled(enabled)
         self.edtPackageName.setEnabled(enabled)
