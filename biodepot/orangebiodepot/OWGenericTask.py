@@ -1,6 +1,6 @@
-import sys, os
-from Orange.widgets import widget
-from orangebiodepot.util.DockerClient import DockerClient
+import sys, os, json
+from Orange.widgets import widget, settings
+from .util.DockerClient import DockerClient
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QStandardItem, QFont
 from PyQt5.QtCore import QThread, QDir, Qt
@@ -13,13 +13,15 @@ class OWGenericTask(widget.OWWidget):
 
     priority = 2
 
-    inputs =  [("Mounted Directory", str, "setHostMountedDir", widget.Multiple)]
+    inputs =  [("Mounted Directory", str, "setHostMountedDir", widget.Multiple), ("Run Trigger", str, "triggerRun")]
     outputs = [("Output", str)]
 
     want_main_area = False
 
 
     dockerClient = DockerClient('unix:///var/run/docker.sock', 'local')
+
+    savedSettings = settings.Setting('', schema_only=True)
 
     def __init__(self):
         super().__init__()
@@ -215,6 +217,11 @@ class OWGenericTask(widget.OWWidget):
         self.lstMapping.setColumnWidth(1, 170)
         self.lstMapping.setColumnWidth(2, 30)
 
+        if self.savedSettings:
+            self._loadSettings(self.savedSettings)
+
+    def closeEvent(self, evnt):
+        self._saveSettings()
 
     def setHostMountedDir(self, directory, id):
         if directory is not None and os.path.exists(directory):
@@ -222,6 +229,9 @@ class OWGenericTask(widget.OWWidget):
             if not items:
                 itemFrom = QStandardItem(directory)
                 self.model_vmap.appendRow([itemFrom, QStandardItem()])
+
+    def triggerRun(self, anything):
+        self.OnRunContainer()
 
     def loadDockerImages(self):
         images = self.dockerClient.images()
@@ -250,6 +260,7 @@ class OWGenericTask(widget.OWWidget):
         current = self.lstMapping.currentIndex()
         if current:
             self.model_vmap.removeRow(current.row())
+            self._saveSettings()
 
     def OnVMapDoubleClicked(self, mode_index):
         column = mode_index.column()
@@ -258,6 +269,7 @@ class OWGenericTask(widget.OWWidget):
             if not item.text():
                 dir = QtWidgets.QFileDialog.getExistingDirectory(self)
                 item.setText(dir)
+                self._saveSettings()
 
     def OnMapListSelectedChanged(self, item):
         if item.checkState():
@@ -266,6 +278,45 @@ class OWGenericTask(widget.OWWidget):
                 if item.row() != i:
                     self.model_vmap.item(i, 2).setCheckState(Qt.Unchecked)
                 i += 1
+
+    def _loadSettings(self, setting):
+        sset = json.loads(setting)
+
+        if len(sset) > 0:
+            for f, t in sset[0].items():
+                self.lstMapping.setColumnWidth(0, 365)
+                self.lstMapping.setColumnWidth(1, 170)
+                self.lstMapping.setColumnWidth(2, 30)
+                itema, itemb, itemc = QStandardItem(), QStandardItem(), QStandardItem()
+                itemc.setCheckable(True)
+                itema.setText(f)
+                itemb.setText(t)
+                self.model_vmap.appendRow([itema, itemb, itemc])
+
+            if len(sset) > 1:
+                otherSettings = sset[1]
+                self.cboDockerImage.setCurrentText(otherSettings["Image"])
+                item = self.model_vmap.item(otherSettings["SelectedOutput"])
+                if item:
+                    self.model_vmap.item(otherSettings["SelectedOutput"], 2).setCheckState(Qt.Checked)
+
+    def _saveSettings(self):
+        volumes = {}
+        for row in range(self.model_vmap.rowCount()):
+            sFrom = self.model_vmap.data(self.model_vmap.index(row, 0))
+            sTo = self.model_vmap.data(self.model_vmap.index(row, 1))
+            if not sFrom or not os.path.exists(sFrom): continue
+            if not sTo: continue
+            volumes[sFrom] = sTo
+
+        selectIndex = 0
+        while self.model_vmap.item(selectIndex):
+            if self.model_vmap.item(selectIndex, 2).checkState():
+                break
+            selectIndex += 1
+
+        otherSettings = {"Image": self.cboDockerImage.currentText(), "SelectedOutput": selectIndex}
+        self.savedSettings = json.dumps([volumes, otherSettings])
 
     def _enableUIElements(self, enabled=True):
         self.btnAddMapping.setEnabled(enabled)
@@ -285,7 +336,7 @@ class OWGenericTask(widget.OWWidget):
         for row in range(self.model_vmap.rowCount()):
             sFrom = self.model_vmap.data(self.model_vmap.index(row, 0))
             sTo = self.model_vmap.data(self.model_vmap.index(row, 1))
-            if not os.path.exists(sFrom): continue
+            if not sFrom or not os.path.exists(sFrom): continue
             if not sTo: continue
             volumes[sFrom] = sTo
 
@@ -315,7 +366,7 @@ class OWGenericTask(widget.OWWidget):
                 output_str = self.model_vmap.item(i, 0).text()
                 break
             i += 1
-            
+
         if output_str:
             self.send("Output", output_str)
 
@@ -343,7 +394,7 @@ class GenericDockerRunner(QThread):
         while self.docker.container_running(self.containerId):
             self.sleep(1)
         # Remove the container now that it is finished
-        self.docker.remove_container(self.containerId)
+        #self.docker.remove_container(self.containerId)
 
 
 def main(argv=sys.argv):
