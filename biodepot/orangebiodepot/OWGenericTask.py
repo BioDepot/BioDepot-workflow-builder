@@ -228,7 +228,9 @@ class OWGenericTask(widget.OWWidget):
             items = self.model_vmap.findItems(directory)
             if not items:
                 itemFrom = QStandardItem(directory)
-                self.model_vmap.appendRow([itemFrom, QStandardItem()])
+                itemCheckbox = QStandardItem()
+                itemCheckbox.setCheckable(True)
+                self.model_vmap.appendRow([itemFrom, QStandardItem(), itemCheckbox])
 
     def triggerRun(self, anything):
         self.OnRunContainer()
@@ -399,7 +401,7 @@ class GenericDockerRunner(QThread):
         while self.docker.container_running(self.containerId):
             self.sleep(1)
         # Remove the container now that it is finished
-        #self.docker.remove_container(self.containerId)
+        self.docker.remove_container(self.containerId)
 
 
 def main(argv=sys.argv):
