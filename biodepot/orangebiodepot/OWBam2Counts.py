@@ -4,6 +4,7 @@ from Orange.data.io import FileFormat
 from orangebiodepot.util.BwBase import OWBwBWidget
 from Orange.widgets import gui
 
+
 class OWBam2Counts(OWBwBWidget):
     name = "BAM to Counts Table"
     description = "Counts BAM files"
@@ -56,7 +57,7 @@ class OWBam2Counts(OWBwBWidget):
         self.setDirectories('bamfiles', path, self.lblBamfiles)
         self.startJob()
 
-    def startJob(self, triggerdByButton = False):
+    def startJob(self, triggerdByButton=False):
         all_set = all(value is not None for value in [self.getDirectory('gtf'), self.getDirectory('bamfiles')])
 
         if all_set and (self.auto_run or triggerdByButton):
@@ -70,10 +71,9 @@ class OWBam2Counts(OWBwBWidget):
                        self.getDirectory('bamfiles'): bamfiles}
 
             cmd = 'Rscript /home/root/bam2counts.R {} {} {} >& {}'.format(gtf, bamfiles, self.worker_numbers, logfile)
-            commands = [cmd,"exit"]
+            commands = [cmd, "exit"]
 
             self.dockerRun(volumes, commands)
-
 
     def Event_OnRunFinished(self):
         self.btnRun.setEnabled(True)

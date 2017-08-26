@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-from docker import APIClient
-import requests, json
-from PyQt5.QtCore import QThread, pyqtSignal
 import os
+import json
+import requests
+from docker import APIClient
+from PyQt5.QtCore import QThread, pyqtSignal
 
 
 class DockerClient:
@@ -26,8 +26,10 @@ class DockerClient:
     def has_image(self, name, version):
         repo_tag = name + ':' + version
         for image in self.cli.images():
-            if not image['RepoTags']: continue #DK fix NoneType is not iterable
-            elif repo_tag in image['RepoTags']: return True
+            if not image['RepoTags']:
+                continue  # DK fix NoneType is not iterable
+            elif repo_tag in image['RepoTags']:
+                return True
         return False
 
     def remove_image(self, id, force=False):
@@ -49,7 +51,7 @@ class DockerClient:
         host_config = None
         if type(volumes) is dict:
             binds = []
-            for host_dir, container_dir  in volumes.items():
+            for host_dir, container_dir in volumes.items():
                 binds.append(self.to_host_directory(host_dir) + ":" + container_dir)
             host_config = self.cli.create_host_config(binds=binds)
             volumes = list(volumes.values())
@@ -101,7 +103,6 @@ class DockerClient:
     def to_host_directory(self, path):
         source = ''
         destination = ''
-
         # locate BwB container
         for c in self.cli.containers():
             if c['Image'] == 'biodepot/bwb':
@@ -112,22 +113,23 @@ class DockerClient:
                     source = m['Source']
                     destination = m['Destination']
 
-        if source is '' or destination is '':
+        if not source or not destination:
             return path
 
         destination = os.path.join(destination, '')
 
         # if the path is not mapping from host, nothing will be done
-        if destination not in path :
+        if destination not in path:
             return path
 
-        abspath = os.path.join(source, path[path.find(destination)+len(destination) : ])
+        abspath = os.path.join(source, path[path.find(destination) + len(destination):])
         return abspath
 
 
 class DockerThread_BuildImage(QThread):
     build_process = pyqtSignal(str)
     build_complete = pyqtSignal(int)
+
     def __init__(self, cli, name, path, dockerfile):
         QThread.__init__(self)
         self.docker = cli
@@ -139,9 +141,9 @@ class DockerThread_BuildImage(QThread):
         self.wait()
 
     def run(self):
-        print ('Start building image {0} ---->>> \n docker file: {1} \n use path: {2}'.format(self.name, self.dockerfile, self.buildpath))
+        print('Start building image {0} ---->>> \n docker file: {1} \n use path: {2}'.format(self.name, self.dockerfile, self.buildpath))
         try:
-            #f = io.BytesIO(self.dockerfile.encode('utf-8'))
+            # f = io.BytesIO(self.dockerfile.encode('utf-8'))
             for rawline in self.docker.getClient().build(path=self.buildpath, tag=self.name, dockerfile=self.dockerfile, rm=True):
                 for jsonstr in rawline.decode('utf-8').split('\r\n')[:-1]:
                     log = jsonstr
@@ -149,14 +151,14 @@ class DockerThread_BuildImage(QThread):
                         line = json.loads(jsonstr)
                         log = line['stream']
                     except ValueError as e:
-                        print (e)
+                        print(e)
                     except TypeError as e:
-                        print (e)
+                        print(e)
                     except KeyError as e:
                         log = ', '.join("{!s}={!r}".format(key, val) for (key, val) in line.items())
                     except:
                         log = ''
-                    #print (log)
+                    # print (log)
                     self.build_process.emit(log)
 
         except requests.exceptions.RequestException as e:
@@ -167,8 +169,10 @@ class DockerThread_BuildImage(QThread):
             self.build_complete.emit(1)
             return
 
+
 class PullImageThread(QThread):
     pull_progress = pyqtSignal(int)
+
     def __init__(self, cli, name, version):
         QThread.__init__(self)
         self.docker = cli
@@ -204,8 +208,6 @@ class PullImageThread(QThread):
                     if (len(progs) > 0):
                         self.current_progress = sum(progs.values()) / len(progs)
                         self.pull_progress.emit(self.current_progress)
-
-
         except requests.exceptions.RequestException:
             # TODO emit error
             print('Connection Exception!')

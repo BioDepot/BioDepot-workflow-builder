@@ -4,6 +4,7 @@ from Orange.data.io import FileFormat
 from orangebiodepot.util.BwBase import OWBwBWidget
 from Orange.widgets import gui
 
+
 class OWCounts2Deseq(OWBwBWidget):
     name = "Counts to DESeq"
     description = "DESeq counts table"
@@ -24,7 +25,6 @@ class OWCounts2Deseq(OWBwBWidget):
 
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-
         # GUI
         box = gui.widgetBox(self.controlArea, "Info")
         self.lblCounts = gui.widgetLabel(box, 'Counts Table: Not Set')
@@ -53,8 +53,7 @@ class OWCounts2Deseq(OWBwBWidget):
         self.setDirectories('sampletable', path, self.lblSampleTable)
         self.startJob()
 
-
-    def startJob(self, triggerdByButton = False):
+    def startJob(self, triggerdByButton=False):
         all_set = all(value is not None for value in [self.getDirectory('countstable'), self.getDirectory('sampletable')])
 
         if all_set and (self.auto_run or triggerdByButton):
@@ -71,10 +70,9 @@ class OWCounts2Deseq(OWBwBWidget):
                        self.output_dir_host: output_dir}
 
             cmd = 'Rscript /home/root/counts2DESeq.R {} {} {} >& {}'.format(counts_table, sample_table, output_dir, logfile)
-            commands = [cmd,"exit"]
+            commands = [cmd, "exit"]
 
             self.dockerRun(volumes, commands)
-
 
     def Event_OnRunFinished(self):
         self.btnRun.setEnabled(True)

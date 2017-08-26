@@ -19,7 +19,7 @@ class OWDtoxsAnalysis(widget.OWWidget):
     inputs = [("Counts", str, "set_aligns", widget.Default),
               ("Configs", str, "set_configs"),
               ("Params", str, "set_params")]
-    outputs = [("Results", str),("Top 40", Orange.data.Table)]
+    outputs = [("Results", str), ("Top 40", Orange.data.Table)]
 
     want_main_area = True
     want_control_area = False
@@ -291,7 +291,7 @@ class OWDtoxsAnalysis(widget.OWWidget):
         self.btn_run.setEnabled(True)
         self.btn_run.setText('Run again')
         self.setStatusMessage('Finished!')
-        #self.progressBarFinished()
+        # self.progressBarFinished()
         self.send("Results", self.host_results_dir)
 
         # Jimmy March 29 2017 added, create a dataset for DataTable widget to show TOP-40.tsv
@@ -317,13 +317,15 @@ class OWDtoxsAnalysis(widget.OWWidget):
 
             data = data.from_table(domain, data)'''
         except Exception as ex:
-            print (ex)
+            print(ex)
         self.send("Top 40", data)
 
 
 """
 Run Container Thread
 """
+
+
 class RunAnalysisThread(QThread):
     analysis_progress = pyqtSignal(int)
 
@@ -350,7 +352,7 @@ class RunAnalysisThread(QThread):
     def run(self):
 
         configs = [os.path.join(self.container_config_dir, x) for x in
-                      fnmatch.filter(os.listdir(self.host_config_dir), 'Configs.*')]
+                   fnmatch.filter(os.listdir(self.host_config_dir), 'Configs.*')]
         if len(configs) > 0:
             config_file = configs[0]
         else:
@@ -365,15 +367,15 @@ class RunAnalysisThread(QThread):
                     "exit"]
 
         print(commands)
-        volumes = { self.host_aligns_dir: self.container_aligns_dir,
-                    self.host_results_dir: self.container_results_dir,
-                    self.host_config_dir: self.container_config_dir,
-                    self.host_param_dir: self.container_param_dir}
+        volumes = {self.host_aligns_dir: self.container_aligns_dir,
+                   self.host_results_dir: self.container_results_dir,
+                   self.host_config_dir: self.container_config_dir,
+                   self.host_param_dir: self.container_param_dir}
 
         response = self.docker.create_container(self.image_name,
                                                 volumes=volumes,
                                                 commands=commands)
-        if response['Warnings'] == None:
+        if response['Warnings'] is None:
             self.containerId = response['Id']
             self.docker.start_container(self.containerId)
         else:
@@ -381,9 +383,10 @@ class RunAnalysisThread(QThread):
 
         # Keep running until container is exited
         while self.docker.container_running(self.containerId):
-            self.sleep(2)
+            self.sleep(1)
         # Remove the container now that it is finished
         self.docker.remove_container(self.containerId)
+
 
 if __name__ == "__main__":
     import sys

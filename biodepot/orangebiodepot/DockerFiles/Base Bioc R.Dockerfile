@@ -23,11 +23,7 @@ RUN cd /tmp && wget https://cran.r-project.org/src/base/R-latest.tar.gz && \
     cd /tmp/R-* && make -j 8 && \
     cd /tmp/R-* && make install rhome=$RHOME_DIR && rm -rf /tmp/R-*
 
-
-#install components of bioconductor for networkBMA
 RUN Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite(c('BMA','Rcpp','RcppArmadillo','RcppEigen','BH','leaps','XML', 'xml2'),ask=FALSE)"
-
-RUN Rscript -e "source('https://bioconductor.org/biocLite.R');biocLite(c('GenomicFeatures','GenomicAlignments','BiocParallel','DESeq2'),ask=FALSE)"
 
 CMD ["/bin/bash"]
 
