@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme description="" title="" version="2.0">
+	<nodes>
+		<node id="0" name="Directory" position="(54.0, 316.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="BAM files" version="" />
+		<node id="1" name="File" position="(54.0, 150.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWBamFile.OWBamFile" title="GTF file" version="" />
+		<node id="2" name="File" position="(237.0, 49.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWBamFile.OWBamFile" title="Sample Table" version="" />
+		<node id="3" name="BAM to Counts Table" position="(240.0, 227.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWBam2Counts.OWBam2Counts" title="BAM to Counts Table" version="" />
+		<node id="4" name="Counts to DESeq" position="(419.0, 211.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWCounts2DESeq.OWCounts2Deseq" title="Counts to DESeq" version="" />
+		<node id="5" name="Directory" position="(595.0, 78.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="Results" version="" />
+		<node id="6" name="Data Table" position="(415.0, 364.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Counts Table" version="" />
+		<node id="7" name="Data Table" position="(602.0, 296.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Result Table" version="" />
+		<node id="8" name="Image Builder" position="(172.0, 528.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWImageBuilder.OWImageBuilder" title="Image Builder" version="" />
+		<node id="9" name="Docker Info" position="(66.0, 527.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDocker.OWDocker" title="Docker Info" version="" />
+	</nodes>
+	<links>
+		<link enabled="true" id="0" sink_channel="GTF file" sink_node_id="3" source_channel="File" source_node_id="1" />
+		<link enabled="true" id="1" sink_channel="BAM files" sink_node_id="3" source_channel="Dir" source_node_id="0" />
+		<link enabled="true" id="2" sink_channel="Sample Table" sink_node_id="4" source_channel="File" source_node_id="2" />
+		<link enabled="true" id="3" sink_channel="Data" sink_node_id="6" source_channel="DataTable" source_node_id="3" />
+		<link enabled="true" id="4" sink_channel="Dir" sink_node_id="5" source_channel="Results" source_node_id="4" />
+		<link enabled="true" id="5" sink_channel="Data" sink_node_id="7" source_channel="DataTable" source_node_id="4" />
+		<link enabled="true" id="6" sink_channel="Counts table" sink_node_id="4" source_channel="Counts" source_node_id="3" />
+	</links>
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties format="literal" node_id="0">{'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01*\x00\x00\x019\x00\x00\x02\xbf\x00\x00\x01z\x00\x00\x01+\x00\x00\x01S\x00\x00\x02\xbe\x00\x00\x01y\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', 'directory_path': '/data/bamfiles', '__version__': 1}</properties>
+		<properties format="literal" node_id="1">{'file_name': '/data/Homo_sapiens.GRCh37.75.gtf', 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01*\x00\x00\x019\x00\x00\x02\xbf\x00\x00\x01z\x00\x00\x01+\x00\x00\x01S\x00\x00\x02\xbe\x00\x00\x01y\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', '__version__': 1}</properties>
+		<properties format="literal" node_id="2">{'file_name': '/data/sample_table.csv', 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01+\x00\x00\x01S\x00\x00\x02\xc0\x00\x00\x01\x94\x00\x00\x01,\x00\x00\x01m\x00\x00\x02\xbf\x00\x00\x01\x93\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', '__version__': 1}</properties>
+		<properties format="literal" node_id="3">{'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01C\x00\x00\x01H\x00\x00\x038\x00\x00\x02*\x00\x00\x01D\x00\x00\x01b\x00\x00\x037\x00\x00\x02)\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', '__version__': 1}</properties>
+		<properties format="literal" node_id="4">{'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01V\x00\x00\x01v\x00\x00\x03K\x00\x00\x02D\x00\x00\x01W\x00\x00\x01\x90\x00\x00\x03J\x00\x00\x02C\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', '__version__': 1}</properties>
+		<properties format="literal" node_id="5">{'savedWidgetGeometry': None, 'directory_path': '/data/bamfiles', '__version__': 1}</properties>
+		<properties format="pickle" node_id="6">gAN9cQAoWA4AAABjb2xvcl9ieV9jbGFzc3EBiFgOAAAAZGlzdF9jb2xvcl9SR0JxAihL3EvcS9xL
+/3RxA1gSAAAAc2hvd19kaXN0cmlidXRpb25zcQSJWBAAAABjb250ZXh0X3NldHRpbmdzcQVdcQZj
+T3JhbmdlLndpZGdldHMuc2V0dGluZ3MKQ29udGV4dApxBymBcQh9cQkoWAQAAAB0aW1lcQpHQdZd
+tO/l2m9YDgAAAG9yZGVyZWRfZG9tYWlucQtdcQwoWA4AAABTUlIxMDM5NTA5LmJhbXENSwKGcQ5Y
+DgAAAFNSUjEwMzk1MTIuYmFtcQ9LAoZxEFgOAAAAU1JSMTAzOTUxMy5iYW1xEUsChnESWA4AAABT
+UlIxMDM5NTE2LmJhbXETSwKGcRRYDgAAAFNSUjEwMzk1MTcuYmFtcRVLAoZxFlgOAAAAU1JSMTAz
+OTUyMC5iYW1xF0sChnEYWA4AAABTUlIxMDM5NTIxLmJhbXEZSwKGcRpYCQAAAEZlYXR1cmUgMXEb
+SwKGcRxlWAYAAAB2YWx1ZXNxHX1xHihYDQAAAHNlbGVjdGVkX3Jvd3NxH11xIEsOYVgLAAAAX192
+ZXJzaW9uX19xIUsBWA0AAABzZWxlY3RlZF9jb2xzcSJdcSMoSwBLAUsCSwNLBEsFSwZLB0sIZXVY
+BQAAAG1ldGFzcSR9cSVYCgAAAGF0dHJpYnV0ZXNxJn1xJyhoFUsCaBdLAmgbSwJoDUsCaBlLAmgR
+SwJoE0sCaA9LAnV1YmFYFQAAAHNob3dfYXR0cmlidXRlX2xhYmVsc3EoiFgLAAAAYXV0b19jb21t
+aXRxKYhYCwAAAHNlbGVjdF9yb3dzcSqIWBMAAABzYXZlZFdpZGdldEdlb21ldHJ5cStDMgHZ0MsA
+AgAAAAAAAQAAADIAAAP+AAADHgAAAB8AAACbAAACyAAAAo4AAAAAAgAAAAQAcSxoIUsBdS4=
+</properties>
+		<properties format="pickle" node_id="7">gAN9cQAoWA4AAABjb2xvcl9ieV9jbGFzc3EBiFgOAAAAZGlzdF9jb2xvcl9SR0JxAihL3EvcS9xL
+/3RxA1gSAAAAc2hvd19kaXN0cmlidXRpb25zcQSJWBAAAABjb250ZXh0X3NldHRpbmdzcQVdcQZj
+T3JhbmdlLndpZGdldHMuc2V0dGluZ3MKQ29udGV4dApxBymBcQh9cQkoWAQAAAB0aW1lcQpHQdZd
+tV3XWlFYDgAAAG9yZGVyZWRfZG9tYWlucQtdcQwoWAgAAABiYXNlTWVhbnENSwKGcQ5YDgAAAGxv
+ZzJGb2xkQ2hhbmdlcQ9LAoZxEFgFAAAAbGZjU0VxEUsChnESWAQAAABzdGF0cRNLAoZxFFgGAAAA
+cHZhbHVlcRVLAoZxFlgEAAAAcGFkanEXSwKGcRhlWAYAAAB2YWx1ZXNxGX1xGihYDQAAAHNlbGVj
+dGVkX3Jvd3NxG11xHFgLAAAAX192ZXJzaW9uX19xHUsBWA0AAABzZWxlY3RlZF9jb2xzcR5dcR91
+WAUAAABtZXRhc3EgfXEhWAoAAABhdHRyaWJ1dGVzcSJ9cSMoaBdLAmgTSwJoFUsCaA9LAmgNSwJo
+EUsCdXViYVgVAAAAc2hvd19hdHRyaWJ1dGVfbGFiZWxzcSSIWAsAAABhdXRvX2NvbW1pdHEliFgL
+AAAAc2VsZWN0X3Jvd3NxJohYEwAAAHNhdmVkV2lkZ2V0R2VvbWV0cnlxJ05oHUsBdS4=
+</properties>
+		<properties format="literal" node_id="8">{'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00:\x00\x00\x00\x18\x00\x00\x03\xc3\x00\x00\x02\xf2\x00\x00\x00;\x00\x00\x002\x00\x00\x03\xc2\x00\x00\x02\xf1\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', '__version__': 1}</properties>
+		<properties format="literal" node_id="9">{'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00:\x00\x00\x00\xdd\x00\x00\x03\xc3\x00\x00\x02%\x00\x00\x00;\x00\x00\x00\xf7\x00\x00\x03\xc2\x00\x00\x02$\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', '__version__': 1}</properties>
+	</node_properties>
+</scheme>

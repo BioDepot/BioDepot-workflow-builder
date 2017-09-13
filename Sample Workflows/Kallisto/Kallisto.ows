@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme description="" title="Kallisto" version="2.0">
+	<nodes>
+		<node id="0" name="Directory" position="(92.0, 256.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="FASTQ files" version="" />
+		<node id="1" name="File" position="(100.0, 89.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWBamFile.OWBamFile" title="FASTA file" version="" />
+		<node id="2" name="Custom Container" position="(284.0, 176.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWGenericTask.OWGenericTask" title="Kallisto" version="" />
+		<node id="3" name="Load CSV" position="(458.0, 177.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWLoadCSV.OWLoadCSV" title="Load CSV" version="" />
+		<node id="4" name="Data Table" position="(608.0, 176.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Data Table" version="" />
+	</nodes>
+	<links>
+		<link enabled="true" id="0" sink_channel="Mounted Directory" sink_node_id="2" source_channel="File" source_node_id="1" />
+		<link enabled="true" id="1" sink_channel="Mounted Directory" sink_node_id="2" source_channel="Dir" source_node_id="0" />
+		<link enabled="true" id="2" sink_channel="Directory" sink_node_id="3" source_channel="Output" source_node_id="2" />
+		<link enabled="true" id="3" sink_channel="Data" sink_node_id="4" source_channel="DataTable" source_node_id="3" />
+	</links>
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties format="literal" node_id="0">{'directory_path': '/data/kallisto', '__version__': 1, 'savedWidgetGeometry': b"\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01'\x00\x00\x00\xeb\x00\x00\x02\xbc\x00\x00\x01,\x00\x00\x01(\x00\x00\x01\x05\x00\x00\x02\xbb\x00\x00\x01+\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00"}</properties>
+		<properties format="literal" node_id="1">{'__version__': 1, 'file_name': '/data/kallisto/transcripts.fasta.gz', 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01)\x00\x00\x01\x1f\x00\x00\x02\xbe\x00\x00\x01`\x00\x00\x01*\x00\x00\x019\x00\x00\x02\xbd\x00\x00\x01_\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="2">{'savedSettings': '[{"/data/kallisto/results": "/output", "/data/kallisto": "/fastqs", "/data/kallisto/transcripts.fasta.gz": "/input/transcripts.fasta.gz"}, {"Image": "illix/kallisto_docker:latest", "Commands": "bash -c \\"kallisto index -i /input/transcripts.idx /input/transcripts.fasta.gz &amp;&amp; \\\\\\nkallisto quant -i /input/transcripts.idx -o /output -b 100 /fastqs/reads_1.fastq.gz /fastqs/reads_2.fastq.gz\\"", "SelectedOutput": 2}]', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01m\x00\x00\x00\x89\x00\x00\x03\xc6\x00\x00\x02\xcb\x00\x00\x01n\x00\x00\x00\xa3\x00\x00\x03\xc5\x00\x00\x02\xca\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="3">{'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01\xd0\x00\x00\x01h\x00\x00\x03\xc9\x00\x00\x01\xf4\x00\x00\x01\xd1\x00\x00\x01\x82\x00\x00\x03\xc8\x00\x00\x01\xf3\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', 'chooseFile': '', 'choosePath': '/data/kallisto/results', '__version__': 1, 'source': 0}</properties>
+		<properties format="pickle" node_id="4">gAN9cQAoWBUAAABzaG93X2F0dHJpYnV0ZV9sYWJlbHNxAYlYCwAAAHNlbGVjdF9yb3dzcQKIWBIA
+AABzaG93X2Rpc3RyaWJ1dGlvbnNxA4lYCwAAAGF1dG9fY29tbWl0cQSIWAsAAABfX3ZlcnNpb25f
+X3EFSwFYEAAAAGNvbnRleHRfc2V0dGluZ3NxBl1xB2NPcmFuZ2Uud2lkZ2V0cy5zZXR0aW5ncwpD
+b250ZXh0CnEIKYFxCX1xCihYCgAAAGF0dHJpYnV0ZXNxC31xDChYCgAAAGVmZl9sZW5ndGhxDUsC
+WAMAAAB0cG1xDksCWAoAAABlc3RfY291bnRzcQ9LAlgGAAAAbGVuZ3RocRBLAnVYBgAAAHZhbHVl
+c3ERfXESKFgNAAAAc2VsZWN0ZWRfY29sc3ETXXEUaAVLAVgNAAAAc2VsZWN0ZWRfcm93c3EVXXEW
+dVgEAAAAdGltZXEXR0HWYFWsDWrBWAUAAABtZXRhc3EYfXEZWA4AAABvcmRlcmVkX2RvbWFpbnEa
+XXEbKGgQSwKGcRxoDUsChnEdaA9LAoZxHmgOSwKGcR9ldWJhWA4AAABjb2xvcl9ieV9jbGFzc3Eg
+iVgOAAAAZGlzdF9jb2xvcl9SR0JxIShL3EvcS9xL/3RxIlgTAAAAc2F2ZWRXaWRnZXRHZW9tZXRy
+eXEjQzIB2dDLAAIAAAAAAUIAAAFOAAAD7QAAAx4AAAFDAAABaAAAA+wAAAMdAAAAAAAAAAAEAHEk
+dS4=
+</properties>
+	</node_properties>
+</scheme>
