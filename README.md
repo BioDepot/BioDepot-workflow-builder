@@ -20,15 +20,16 @@ Currently, BwB uses docker sock binding, to run BwB:
 1. Install Docker   
 2. On Docker-enabled machines run:  
 ``` 
-docker run --rm -p 6080:6080 -v ${PWD}:/data -v /var/run/docker.sock:/var/run/docker.sock biodepot/bwb
+docker pull biodepot/bwb:latest
+docker run -p 6080:6080 -v ${PWD}:/data -v /var/run/docker.sock:/var/run/docker.sock biodepot/bwb
 ```
 3. BwB can be accessed from browser: http://localhost:6080 (for windows machines, you'll need to know the address of your docker-machine)  
 
 ## Sample Workflows
 Some sample workflows are available: 
 1. [Adaptation of Michael Love's et al. _Aligment at Gene Level_ Alignment](Sample_Workflows/Airway). Alignment (STAR), Count matrix computation, differential gene analyses (DESeq).
-2. [DToxS RNA-Seq: Burroughs-Wheeler Aligner for alignment and EdgeR for differential gene expression](Sample_Workflows/DToxS_RNASeq)
-3. [More sample workflows](Sample_Workflows)
+2. [DToxS RNA-Seq: Burroughs-Wheeler Aligner for alignment and EdgeR for differential gene expression.](Sample_Workflows/DToxS_RNASeq)
+3. [More sample workflows.](Sample_Workflows)
 
 ## Developing Widget
 To add a widget to BioDepot:
