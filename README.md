@@ -7,6 +7,7 @@
 
 BioDepot is a self-contained tool with graphical user interface for bioinformatic workflows. The package is based on Orange 3 by Biolab and NoVnc. Widgets are mainly written in Python (Qt5, Docker-Py, PyQt5).
 
+[![Gif](https://j.gifs.com/58jYKR.gif)](https://youtu.be/VY1peA4ITog)
 
 ## Requirements  
 
@@ -23,7 +24,11 @@ docker run --rm -p 6080:6080 -v ${PWD}:/data -v /var/run/docker.sock:/var/run/do
 ```
 3. BwB can be accessed from browser: http://localhost:6080 (for windows machines, you'll need to know the address of your docker-machine)  
 
-[![Gif](https://j.gifs.com/58jYKR.gif)](https://youtu.be/VY1peA4ITog)
+## Sample Workflows
+Some sample workflows are available: 
+1. [Adaptation of Michael Love's et al. _Aligment at Gene Level_ Alignment](Sample_Workflows/Airway). Alignment (STAR), Count matrix computation, differential gene analyses (DESeq).
+2. [DToxS RNA-Seq: Burroughs-Wheeler Aligner for alignment and EdgeR for differential gene expression](Sample_Workflow/DToxS_RNASeq)
+3. [More sample workflows](Sample_Workflow)
 
 ## Developing Widget
 To add a widget to BioDepot:
@@ -43,6 +48,6 @@ To add a widget to BioDepot:
 ![Screenshot](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/Media/Screenshot.png)
 
 ## More resources:
-- Demo: [Link](https://drive.google.com/file/d/0B6xuS_tbRDJ0RzN6NlJ0T1U4VUU/view?usp=sharing)
+- Demo: [Link](https://youtu.be/VY1peA4ITog)
 - Manual: [Manual](https://github.com/kristiyanto/BioDepot-workflow-builder/blob/master/simplified_manual.pdf)
 
