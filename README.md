@@ -27,8 +27,8 @@ docker run --rm -p 6080:6080 -v ${PWD}:/data -v /var/run/docker.sock:/var/run/do
 ## Sample Workflows
 Some sample workflows are available: 
 1. [Adaptation of Michael Love's et al. _Aligment at Gene Level_ Alignment](Sample_Workflows/Airway). Alignment (STAR), Count matrix computation, differential gene analyses (DESeq).
-2. [DToxS RNA-Seq: Burroughs-Wheeler Aligner for alignment and EdgeR for differential gene expression](Sample_Workflow/DToxS_RNASeq)
-3. [More sample workflows](Sample_Workflow)
+2. [DToxS RNA-Seq: Burroughs-Wheeler Aligner for alignment and EdgeR for differential gene expression](Sample_Workflows/DToxS_RNASeq)
+3. [More sample workflows](Sample_Workflows)
 
 ## Developing Widget
 To add a widget to BioDepot:
