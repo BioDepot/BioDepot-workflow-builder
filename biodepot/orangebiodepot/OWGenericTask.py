@@ -97,13 +97,23 @@ class OWGenericTask(widget.OWWidget):
         self.lblDockerImage.setMaximumHeight(25)
         self.vlayout_main.addWidget(self.lblDockerImage)
 
+        self.hlayout_images = QtWidgets.QHBoxLayout()
+        self.hlayout_images.setObjectName("hlayout_iamges")
+        self.hlayout_images.setSpacing(2)
+
         self.cboDockerImage = QtWidgets.QComboBox(self.mainContent)
         self.cboDockerImage.setMinimumHeight(30)
         self.cboDockerImage.setMaximumHeight(30)
         self.cboDockerImage.setObjectName("cboDockerImage")
         self.delegate4Combo = QtWidgets.QStyledItemDelegate()
         self.cboDockerImage.setItemDelegate(self.delegate4Combo)
-        self.vlayout_main.addWidget(self.cboDockerImage)
+        self.hlayout_images.addWidget(self.cboDockerImage)
+        self.btnRefreshImage = QtWidgets.QPushButton("R", self.mainContent)
+        self.btnRefreshImage.setFixedSize(QtCore.QSize(25, 25))
+        self.btnRefreshImage.setObjectName("btnRefreshImage")
+        self.hlayout_images.addWidget(self.btnRefreshImage)
+
+        self.vlayout_main.addLayout(self.hlayout_images)
 
         self.vlayout_main.addItem(
             QtWidgets.QSpacerItem(-1, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
@@ -189,6 +199,7 @@ class OWGenericTask(widget.OWWidget):
         self.btnDeleteMapping.clicked.connect(self.OnDeleteVMapping)
         self.lstMapping.doubleClicked.connect(self.OnVMapDoubleClicked)
         self.btnRun.clicked.connect(self.OnRunContainer)
+        self.btnRefreshImage.clicked.connect(self.OnRefreshImageClicked)
 
 
         self.InitializeUI()
@@ -237,6 +248,7 @@ class OWGenericTask(widget.OWWidget):
 
     def loadDockerImages(self):
         images = self.dockerClient.images()
+        self.cboDockerImage.clear()
         if not type(images) is list:
             self.cboDockerImage.addItem('No Docker Image', 'NULL')
         else:
@@ -263,6 +275,9 @@ class OWGenericTask(widget.OWWidget):
         if current:
             self.model_vmap.removeRow(current.row())
             self._saveSettings()
+
+    def OnRefreshImageClicked(self):
+        self.loadDockerImages()
 
     def OnVMapDoubleClicked(self, mode_index):
         column = mode_index.column()
