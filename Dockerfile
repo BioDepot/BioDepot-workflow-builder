@@ -30,6 +30,7 @@ RUN pip3 install -e orange3
 
 ## BIODEPOT
 ADD biodepot biodepot
+ADD Tutorials /root/tutorials
 RUN pip3 install -e biodepot
 
 ## DESKTOP SETTINGS

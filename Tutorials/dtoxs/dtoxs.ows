@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme description="" title="dtoxs plate-2" version="2.0">
+	<nodes>
+		<node id="0" name="Directory" position="(74.0, 77.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="references" version="" />
+		<node id="1" name="Directory" position="(73.0, 199.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="fastq files" version="" />
+		<node id="2" name="Dtoxs Alignment" position="(264.0, 150.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDtoxsAlignment.OWDtoxsAlignment" title="Dtoxs Alignment" version="" />
+		<node id="3" name="Dtoxs Analysis" position="(407.0, 149.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDtoxsAnalysis.OWDtoxsAnalysis" title="Dtoxs Analysis" version="" />
+		<node id="4" name="Directory" position="(599.0, 79.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="Results" version="" />
+		<node id="5" name="Data Table" position="(600.0, 256.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Data Table" version="" />
+		<node id="6" name="Directory" position="(75.0, 313.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="Configs" version="" />
+		<node id="7" name="File" position="(77.0, 434.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWBamFile.OWBamFile" title="Barcodes" version="" />
+	</nodes>
+	<links>
+		<link enabled="true" id="0" sink_channel="References" sink_node_id="2" source_channel="Dir" source_node_id="0" />
+		<link enabled="true" id="1" sink_channel="Seqs" sink_node_id="2" source_channel="Dir" source_node_id="1" />
+		<link enabled="true" id="2" sink_channel="Counts" sink_node_id="3" source_channel="Counts" source_node_id="2" />
+		<link enabled="true" id="3" sink_channel="Dir" sink_node_id="4" source_channel="Results" source_node_id="3" />
+		<link enabled="true" id="4" sink_channel="Data" sink_node_id="5" source_channel="Top 40" source_node_id="3" />
+		<link enabled="true" id="5" sink_channel="Configs" sink_node_id="2" source_channel="Dir" source_node_id="6" />
+		<link enabled="true" id="6" sink_channel="Barcodes" sink_node_id="2" source_channel="File" source_node_id="7" />
+	</links>
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties format="literal" node_id="0">{'__version__': 1, 'savedWidgetGeometry': None, 'directory_path': ''}</properties>
+		<properties format="literal" node_id="1">{'__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc2\x00\x00\x01\xa4\x00\x00\x01*\x00\x00\x01\\\x00\x00\x02\xc1\x00\x00\x01\xa3\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', 'directory_path': '/root/tutorials/dtoxs/Seqs'}</properties>
+		<properties format="literal" node_id="2">{'auto_run': True, '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00\xfb\x00\x00\x00\xf3\x00\x00\x02\xf0\x00\x00\x01\xf4\x00\x00\x00\xfc\x00\x00\x01\r\x00\x00\x02\xef\x00\x00\x01\xf3\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="3">{'Exp_Design_file': '/root/tutorials/dtoxs/RNAseq-Experiment-Design.20150409.txt', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00\xd5\x00\x00\x01T\x00\x00\x03\x16\x00\x00\x02\x83\x00\x00\x00\xd6\x00\x00\x01n\x00\x00\x03\x15\x00\x00\x02\x82\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="4">{'__version__': 1, 'savedWidgetGeometry': None, 'directory_path': ''}</properties>
+		<properties format="literal" node_id="5">{'__version__': 1, 'show_distributions': False, 'select_rows': True, 'dist_color_RGB': (220, 220, 220, 255), 'show_attribute_labels': True, 'color_by_class': True, 'savedWidgetGeometry': None, 'context_settings': [], 'auto_commit': True}</properties>
+		<properties format="literal" node_id="6">{'__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc2\x00\x00\x01\xa4\x00\x00\x01*\x00\x00\x01\\\x00\x00\x02\xc1\x00\x00\x01\xa3\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', 'directory_path': '/root/tutorials/dtoxs/Configs'}</properties>
+		<properties format="literal" node_id="7">{'file_name': '/root/tutorials/dtoxs/barcodes_trugrade_96_set1.dat', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc2\x00\x00\x01\xa4\x00\x00\x01*\x00\x00\x01\\\x00\x00\x02\xc1\x00\x00\x01\xa3\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+	</node_properties>
+</scheme>
