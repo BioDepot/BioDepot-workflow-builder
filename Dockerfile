@@ -39,9 +39,20 @@ RUN echo "feh --bg-fill /root/.config/openbox/bg.png & rox-filer /data & orange-
     >> /root/.config/openbox/autostart
 ENV QT_STYLE_OVERRIDE=gtk
 ADD Desktop/rc.xml /root/.config/openbox/rc.xml
-ADD Desktop/Victory-16.10 /root/.themes/Victory-16.10
-ADD Desktop/Victory-16.10-gtk2med-dark /root/.themes/Victory-16.10-gtk2med-dark
-ADD Desktop/Flat-Remix /root/.icons/Flat-Remix
+
+COPY Desktop/Victory-16.10.tar.gz /root/.themes/Victory-16.10.tar.gz
+COPY Desktop/Victory-16.10-gtk2med-dark.tar.gz /root/.themes/Victory-16.10-gtk2med-dark.tar.gz
+COPY Desktop/Flat-Remix.tar.gz /root/.themes/Flat-Remix.tar.gz
+
+WORKDIR /root/.themes
+
+RUN tar -zvxf Victory-16.10.tar.gz && \
+    tar -zvxf Victory-16.10-gtk2med-dark.tar.gz && \
+    tar -zvxf Flat-Remix.tar.gz && \
+    rm Victory-16.10.tar.gz && rm Victory-16.10-gtk2med-dark.tar.gz && rm Flat-Remix.tar.gz
+
+WORKDIR /root
+
 ADD Desktop/settings.ini /root/.config/gtk-3.0/settings.ini
 ADD Desktop/gtkrc-2.0 /root/.gtkrc-2.0
 
