@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <scheme description="" title="Dtoxs setup" version="2.0">
 	<nodes>
-		<node id="0" name="Custom Container" position="(278.0, 142.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWGenericTask.OWGenericTask" title="Run Setup" version="" />
+		<node id="0" name="Custom Container" position="(278.0, 141.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWGenericTask.OWGenericTask" title="Run Setup" version="" />
 	</nodes>
 	<links />
 	<annotations>
@@ -10,6 +10,6 @@
 	</annotations>
 	<thumbnail />
 	<node_properties>
-		<properties format="literal" node_id="0">{'savedSettings': '[{"/data/tutorials/dtoxs": "/setup"}, {"Image": "biodepot/bwb:latest", "Commands": "/setup/download_reference.sh", "SelectedOutput": 1}]', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00\xcd\x00\x00\x00p\x00\x00\x03*\x00\x00\x02\xa1\x00\x00\x00\xce\x00\x00\x00\x8a\x00\x00\x03)\x00\x00\x02\xa0\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="0">{'__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00\xcd\x00\x00\x00p\x00\x00\x03*\x00\x00\x02\xa1\x00\x00\x00\xce\x00\x00\x00\x8a\x00\x00\x03)\x00\x00\x02\xa0\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', 'savedSettings': '[{"/data/": "/data"}, {"Image": "biodepot/bwb:latest", "Commands": "/root/tutorials/dtoxs/download_reference.sh", "SelectedOutput": 1}]'}</properties>
 	</node_properties>
 </scheme>
