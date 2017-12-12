@@ -1,29 +1,28 @@
 
-DTOXS Tutorial
+# Tutorial: Dtoxs workflow
 
-## Start BwB
-``` 
-docker run -p 6080:6080 -v ${PWD}:/data -v /var/run/docker.sock:/var/run/docker.sock biodepot/bwb
+## Preparation 
+Start the [Terminal] inside the Bwb desktop.
+![terminal](media/dtoxs_tutorial_start_terminal.png)
+
+## Copy tutorial folder to /data
+Inside the Bwb container, the tutorial folder locate at `/root/tutorials`, copy this folder to /data (which mounted from the host).
+
+Command:
 ```
-
-## Open Dtoxs workflow
-OWS file: /root/tutorials/dtoxs/dtoxs.ows
-![OpenOWS](media/open_ows.png)
-
-
-## Download Reference data
-```sh
-cp [BioDepot-Workflow-Builder]/Tutorials/dtoxs/download_reference.sh ./
-
-chmod +x download_reference.sh
-./download_reference.sh
+cp -r /root/tutorials /data
 ```
+![cp](media/dtoxs_tutorial_cp.png)
 
-## Set Reference directory
-![SetRef](media/set_reference.png)
+## Run setup workflow
+The setup workflow helps to download reference data for running Dtoxs workflow.
+Open `setup.ows` workflow in `/data/tutorials/dtoxs`, then run this workflow which will fetch the data automatically.
+
+![setup1](media/dtoxs_tutorial_setup.png)
+![setup2](media/dtoxs_tutorial_setup2.png)
 
 
 ## Run pipeline
-The alignment step should be run automatically when `Reference` was set. Once the alignment was finished, start the analysis step.
+Open `dtoxs.ows` workflow in `/data/tutorials/dtoxs`, the workflow will be started automatically (Be sure the setup workflow was run before run dtoxs workflow, otherwise there will be no results since the input data is not ready). Once the alignment was finished, start the analysis step by double click the [Dtoxs Analysis] icon and [Run].
 
-![StartAnalysis](media/start_analysis.png)
+![run](media/dtoxs_tutorial_runpipeline.png)
