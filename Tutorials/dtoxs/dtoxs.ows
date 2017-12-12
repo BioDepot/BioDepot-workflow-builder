@@ -9,7 +9,7 @@
 		<node id="5" name="Data Table" position="(600.0, 256.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Data Table" version="" />
 		<node id="6" name="Directory" position="(79.0, 429.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="Configs" version="" />
 		<node id="7" name="File" position="(77.0, 310.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWBamFile.OWBamFile" title="Barcodes" version="" />
-		<node id="8" name="Directory" position="(259.0, 31.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="Params" version="" />
+		<node id="8" name="Directory" position="(259.0, 30.0)" project_name="BioDepot" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="Params" version="" />
 	</nodes>
 	<links>
 		<link enabled="true" id="0" sink_channel="References" sink_node_id="2" source_channel="Dir" source_node_id="0" />
@@ -25,14 +25,29 @@
 	<annotations />
 	<thumbnail />
 	<node_properties>
-		<properties format="literal" node_id="0">{'directory_path': '/data/References', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x014\x00\x00\x00\xff\x00\x00\x02\xcd\x00\x00\x01a\x00\x00\x015\x00\x00\x01\x19\x00\x00\x02\xcc\x00\x00\x01`\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
-		<properties format="literal" node_id="1">{'directory_path': '/root/tutorials/dtoxs/Seqs', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc2\x00\x00\x01\xa4\x00\x00\x01*\x00\x00\x01\\\x00\x00\x02\xc1\x00\x00\x01\xa3\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
-		<properties format="literal" node_id="2">{'__version__': 1, 'auto_run': True, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01\x9b\x00\x00\x00\xf3\x00\x00\x03\x90\x00\x00\x01\xf4\x00\x00\x01\x9c\x00\x00\x01\r\x00\x00\x03\x8f\x00\x00\x01\xf3\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
-		<properties format="literal" node_id="3">{'Exp_Design_file': '/root/tutorials/dtoxs/RNAseq-Experiment-Design.20150409.txt', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01\x0e\x00\x00\x01R\x00\x00\x03O\x00\x00\x02\x81\x00\x00\x01\x0f\x00\x00\x01l\x00\x00\x03N\x00\x00\x02\x80\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
-		<properties format="literal" node_id="4">{'directory_path': '/root/tutorials/dtoxs/Results', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc2\x00\x00\x01\xa4\x00\x00\x01*\x00\x00\x01\\\x00\x00\x02\xc1\x00\x00\x01\xa3\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
-		<properties format="literal" node_id="5">{'dist_color_RGB': (220, 220, 220, 255), 'show_attribute_labels': True, 'auto_commit': True, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00\xa0\x00\x00\x00l\x00\x00\x03K\x00\x00\x02z\x00\x00\x00\xa1\x00\x00\x00\x86\x00\x00\x03J\x00\x00\x02y\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00', '__version__': 1, 'color_by_class': True, 'show_distributions': False, 'select_rows': True, 'context_settings': []}</properties>
-		<properties format="literal" node_id="6">{'directory_path': '/root/tutorials/dtoxs/Configs', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc2\x00\x00\x01\xa4\x00\x00\x01*\x00\x00\x01\\\x00\x00\x02\xc1\x00\x00\x01\xa3\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
-		<properties format="literal" node_id="7">{'__version__': 1, 'file_name': '/root/tutorials/dtoxs/barcodes_trugrade_96_set1.dat', 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc2\x00\x00\x01\xa4\x00\x00\x01*\x00\x00\x01\\\x00\x00\x02\xc1\x00\x00\x01\xa3\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
-		<properties format="literal" node_id="8">{'directory_path': '/root/tutorials/dtoxs/Params', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc2\x00\x00\x01\xa4\x00\x00\x01*\x00\x00\x01\\\x00\x00\x02\xc1\x00\x00\x01\xa3\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="0">{'directory_path': '/data/tutorials/dtoxs/References', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x013\x00\x00\x00\xe5\x00\x00\x02\xcc\x00\x00\x01G\x00\x00\x014\x00\x00\x00\xff\x00\x00\x02\xcb\x00\x00\x01F\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="1">{'directory_path': '/data/tutorials/dtoxs/Seqs', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01(\x00\x00\x01(\x00\x00\x02\xc1\x00\x00\x01\x8a\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc0\x00\x00\x01\x89\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="2">{'auto_run': True, '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01\x9a\x00\x00\x00\xd9\x00\x00\x03\x8f\x00\x00\x01\xda\x00\x00\x01\x9b\x00\x00\x00\xf3\x00\x00\x03\x8e\x00\x00\x01\xd9\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="3">{'Exp_Design_file': '/data/tutorials/dtoxs/RNAseq-Experiment-Design.20150409.txt', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01\r\x00\x00\x018\x00\x00\x03N\x00\x00\x02g\x00\x00\x01\x0e\x00\x00\x01R\x00\x00\x03M\x00\x00\x02f\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="4">{'directory_path': '/data/tutorials/dtoxs/Results', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01(\x00\x00\x01(\x00\x00\x02\xc1\x00\x00\x01\x8a\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc0\x00\x00\x01\x89\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="pickle" node_id="5">gAN9cQAoWA4AAABkaXN0X2NvbG9yX1JHQnEBKEvcS9xL3Ev/dHECWAsAAABfX3ZlcnNpb25fX3ED
+SwFYEgAAAHNob3dfZGlzdHJpYnV0aW9uc3EEiVgLAAAAYXV0b19jb21taXRxBYhYEwAAAHNhdmVk
+V2lkZ2V0R2VvbWV0cnlxBkMyAdnQywACAAAAAAABAAAAMgAAA/4AAAMeAAAAoAAAAGwAAANJAAAC
+XwAAAAACAAAABABxB1gQAAAAY29udGV4dF9zZXR0aW5nc3EIXXEJY09yYW5nZS53aWRnZXRzLnNl
+dHRpbmdzCkNvbnRleHQKcQopgXELfXEMKFgGAAAAdmFsdWVzcQ19cQ4oWA0AAABzZWxlY3RlZF9j
+b2xzcQ9dcRBoA0sBWA0AAABzZWxlY3RlZF9yb3dzcRFdcRJ1WAQAAAB0aW1lcRNHQdaL1mo3tjZY
+CgAAAGF0dHJpYnV0ZXNxFH1xFShYBAAAAENlbGxxFl1xF1gBAAAAQXEYYVgFAAAAbG9nRkNxGUsC
+WAoAAABDb25kaXRpb24xcRpdcRtYBAAAAENUUkxxHGFYCgAAAENvbmRpdGlvbjJxHV1xHihYAwAA
+AEFMRXEfWAMAAABET01xIFgDAAAARFRQcSFYAwAAAEVOVHEiWAMAAABMT1BxI1gDAAAAU09ScSRY
+BwAAAFNPUitVUlNxJVgDAAAAU1VOcSZYBwAAAFNVTitBTEVxJ1gHAAAAU1VOK0RPTXEoWAcAAABT
+VU4rTE9QcSlYBwAAAFNVTitVUlNxKlgDAAAAVFJTcStYBwAAAFRSUytET01xLFgHAAAAVFJTK0xP
+UHEtWAcAAABUUlMrVVJTcS5lWAYAAABQVmFsdWVxL0sCWAYAAABsb2dDUE1xMEsCWAUAAABQbGF0
+ZXExXXEyWAEAAAAxcTNhdVgFAAAAbWV0YXNxNH1xNVgEAAAAR2VuZXE2SwNzdWJhWA4AAABjb2xv
+cl9ieV9jbGFzc3E3iFgVAAAAc2hvd19hdHRyaWJ1dGVfbGFiZWxzcTiIWAsAAABzZWxlY3Rfcm93
+c3E5iHUu
+</properties>
+		<properties format="literal" node_id="6">{'directory_path': '/data/tutorials/dtoxs/Configs', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01(\x00\x00\x01(\x00\x00\x02\xc1\x00\x00\x01\x8a\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc0\x00\x00\x01\x89\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="7">{'file_name': '/data/tutorials/dtoxs/barcodes_trugrade_96_set1.dat', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01(\x00\x00\x01(\x00\x00\x02\xc1\x00\x00\x01\x8a\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc0\x00\x00\x01\x89\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
+		<properties format="literal" node_id="8">{'directory_path': '/data/tutorials/dtoxs/Params', '__version__': 1, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01(\x00\x00\x01(\x00\x00\x02\xc1\x00\x00\x01\x8a\x00\x00\x01)\x00\x00\x01B\x00\x00\x02\xc0\x00\x00\x01\x89\x00\x00\x00\x00\x00\x00\x00\x00\x04\x00'}</properties>
 	</node_properties>
 </scheme>

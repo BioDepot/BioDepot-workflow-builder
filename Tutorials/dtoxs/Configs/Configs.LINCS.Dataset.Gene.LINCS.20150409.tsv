@@ -128,7 +128,7 @@ state_name_ctrl	CTRL
 # Method of calculating dispersion: "common", "trended", "tagwise", or "auto".
 dispersion	trended
 # Top-n genes selected
-n_top	1000000
+n_top	40
 # Generate statistic results for only DEGs or all genes.
 deg_only	FALSE
 # Base of read counts normalization: 1000000 for RNA data and 10000 for protein data.
