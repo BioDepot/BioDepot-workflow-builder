@@ -3,6 +3,7 @@
 
 ## Preparation 
 Start the [Terminal] inside the Bwb desktop.
+
 ![terminal](media/dtoxs_tutorial_start_terminal.png)
 
 ## Copy tutorial folder to /data
@@ -12,6 +13,7 @@ Command:
 ```
 cp -r /root/tutorials /data
 ```
+
 ![cp](media/dtoxs_tutorial_cp.png)
 
 ## Run setup workflow
@@ -19,6 +21,7 @@ The setup workflow helps to download reference data for running Dtoxs workflow.
 Open `setup.ows` workflow in `/data/tutorials/dtoxs`, then run this workflow which will fetch the data automatically.
 
 ![setup1](media/dtoxs_tutorial_setup.png)
+
 ![setup2](media/dtoxs_tutorial_setup2.png)
 
 
