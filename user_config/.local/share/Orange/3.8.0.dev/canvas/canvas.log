@@ -1,0 +1,44 @@
+Adding search path 'orange' for prefix, 'canvas_icons'
+Setting up Canvas main window.
+'CanvasScene(objectName='', ...)' intitialized.
+Setting registry 'None on 'CanvasScene(objectName='', ...)'.
+'CanvasScene(objectName='', ...)' cleared.
+'CanvasScene(objectName='', ...)' intitialized.
+Setting registry 'None on 'CanvasScene(objectName='', ...)'.
+Setting scheme '<Orange.canvas.scheme.widgetsscheme.WidgetsScheme object at 0x7f07e88133a8>' on 'CanvasScene(objectName='', ...)'
+Running widget discovery process.
+Ignoring '/orange3/Orange/widgets/data/contexthandlers.py'.
+Could not import 'Orange.widgets.visualize.owparallelcoordinates'.
+Traceback (most recent call last):
+  File "/orange3/Orange/canvas/registry/discovery.py", line 261, in iter_widget_descriptions
+    module = asmodule(name)
+  File "/orange3/Orange/canvas/registry/discovery.py", line 493, in asmodule
+    return __import__(module, fromlist=[""])
+  File "/orange3/Orange/widgets/visualize/owparallelcoordinates.py", line 14, in <module>
+    from Orange.widgets.visualize.owparallelgraph import OWParallelGraph
+  File "/orange3/Orange/widgets/visualize/owparallelgraph.py", line 17, in <module>
+    from Orange.widgets.utils.plot import OWPlot, UserAxis, AxisStart, AxisEnd, OWCurve, OWPoint, PolygonCurve, \
+ImportError: cannot import name 'OWPlot'
+Could not import 'Orange.widgets.visualize.owparallelgraph'.
+Traceback (most recent call last):
+  File "/orange3/Orange/canvas/registry/discovery.py", line 261, in iter_widget_descriptions
+    module = asmodule(name)
+  File "/orange3/Orange/canvas/registry/discovery.py", line 493, in asmodule
+    return __import__(module, fromlist=[""])
+  File "/orange3/Orange/widgets/visualize/owparallelgraph.py", line 17, in <module>
+    from Orange.widgets.utils.plot import OWPlot, UserAxis, AxisStart, AxisEnd, OWCurve, OWPoint, PolygonCurve, \
+ImportError: cannot import name 'OWPlot'
+Ignoring '/orange3/Orange/widgets/visualize/owscatterplotgraph.py'.
+Ignoring '/orange3/Orange/widgets/visualize/owtreeviewer2d.py'.
+Ignoring '/orange3/Orange/widgets/visualize/owviswidget.py'.
+Ignoring '/orange3/Orange/widgets/visualize/pythagorastreeviewer.py'.
+Ignoring '/orange3/Orange/widgets/evaluate/contexthandlers.py'.
+Ignoring '/orange3/Orange/widgets/evaluate/utils.py'.
+Setting registry '<Orange.canvas.registry.qt.QtWidgetRegistry object at 0x7f07e6089f78> on 'CanvasScene(objectName='', ...)'.
+Local doc root '/orange3/doc/visual-programming/build/htmlhelp/index.html' does not exist
+Created <class 'Orange.canvas.help.provider.HtmlIndexProvider'> provider for Orange3 3.8.0.dev0+06db21c
+Entering main event loop.
+'CanvasScene(objectName='', ...)' cleared.
+'CanvasScene(objectName='', ...)' intitialized.
+Setting registry '<Orange.canvas.registry.qt.QtWidgetRegistry object at 0x7fe851104f78> on 'CanvasScene(objectName='', ...)'.
+Setting scheme '<Orange.canvas.scheme.widgetsscheme.WidgetsScheme object at 0x7fe8081920d8>' on 'CanvasScene(objectName='', ...)'

@@ -1,69 +1,93 @@
 FROM ubuntu:latest
-MAINTAINER Daniel Kristiyanto
+MAINTAINER lhhung<lhhung@uw.edu>
 
 ENV DEBIAN_FRONTEND noninteractive
+ENV HOME /root
+#base files/utils to be used inside container
+RUN apt-get update \
+    && apt-get install -y --force-yes --no-install-recommends supervisor \
+        pwgen sudo nano \
+        net-tools \
+        fluxbox feh xterm x11vnc xvfb \
+        gtk2-engines-murrine ttf-ubuntu-font-family \
+        fonts-wqy-microhei \
+        language-pack-zh-hant language-pack-gnome-zh-hant \
+        nginx \
+        mesa-utils libgl1-mesa-dri \
+    && apt-get autoclean -y \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+    
+#files for  vnc framebuffer
+RUN apt-get update && apt-get install -y wget \
+    && chdir /tmp \
+    && wget 'https://launchpad.net/~fcwu-tw/+archive/ubuntu/ppa/+build/8270310/+files/x11vnc_0.9.14-1.1ubuntu1_amd64.deb' \
+    && wget 'https://launchpad.net/~fcwu-tw/+archive/ubuntu/ppa/+files/x11vnc-data_0.9.14-1.1ubuntu1_all.deb' \
+    && dpkg -i /tmp/x11vnc*.deb \
+    && apt-get autoclean -y \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/* \
+    && chdir /root && rm /tmp/*.deb    
 
-WORKDIR /root
+#files for web interface noVNC
+ADD web /web/
+RUN apt-get update && apt-get install -y docker.io  build-essential gcc python-pip python-dev python3-pip \
+    && pip install --upgrade pip \
+    && pip install -U setuptools \
+    && pip install -r /web/requirements.txt \
+    && pip3 install docker \
+    && apt-get remove -y gcc build-essential python-pip python-dev python3-pip \
+    && apt-get autoclean -y \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+    
+ADD noVNC /noVNC/
 
-## REQUIRED PACKAGES
-RUN apt-get update && apt-get install -yq git x11vnc wget nano unzip xvfb openbox lxappearance rox-filer geany menu gtk2-engines-murrine \
-    gtk2-engines-pixbuf build-essential python3 python3-dev python3-pip virtualenv libssl-dev \
-    net-tools feh python3-pyqt5 libqt5webkit5-dev python3-pyqt5.qtsvg \
-    python3-pyqt5.qtwebkit && \
-    apt-get clean && apt-get autoclean && apt-get autoremove && rm -rf /var/lib/apt/lists/*
+#files for orange and biodepot
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends virtualenv libssl-dev libqt5webkit5-dev python3-pyqt5 python3-pyqt5.qtsvg python3-pyqt5.qtwebkit
 
-## NOVNC
-RUN git clone https://github.com/kanaka/noVNC.git && \
-    cd noVNC/utils && git clone https://github.com/kanaka/websockify websockify
-
-## ORANGE3
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 RUN virtualenv --python=python3 --system-site-packages orange3venv
 RUN source orange3venv/bin/activate
-RUN git clone https://github.com/biolab/orange3.git 
-RUN pip3 install --upgrade pip
-RUN pip install numpy
-RUN pip3 install -r orange3/requirements-core.txt
-RUN pip3 install -r orange3/requirements-gui.txt
-RUN pip3 install docker pysam beautifulsoup4
-RUN pip3 install -e orange3
+#ADD biodepot biodepot
+RUN apt-get update && apt-get install -y build-essential gcc git python-dev python3-dev python3-pip python-pip\
+    && git clone https://github.com/biolab/orange3.git \
+    && pip3 install --upgrade pip \
+    && pip install numpy \
+    && pip3 install -U setuptools \
+    && pip3 install -r orange3/requirements-core.txt \
+    && pip3 install -r orange3/requirements-gui.txt \
+    && pip3 install docker pysam beautifulsoup4\
+    && pip3 install -e orange3 \
+#    && apt-get remove -y git gcc build-essential python3-pip python-pip \
+    && apt-get remove -y git gcc build-essential \
+    && apt-get autoclean -y \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+    
+#nginx and supervisor setup
+ADD supervisord.conf /etc/supervisor/conf.d/
+ADD nginx.conf /etc/nginx/sites-enabled/default
 
-## BIODEPOT
+#put biodepot here and keep pip for rapid updates
 ADD biodepot biodepot
-ADD Tutorials /root/tutorials
-RUN pip3 install -e biodepot
+RUN pip3 install -e biodepot 
 
-## DESKTOP SETTINGS
-ADD Desktop/menu.xml  /root/.config/openbox/menu.xml 
-ADD Desktop/bg.png /root/.config/openbox/bg.png
-RUN echo "feh --bg-fill /root/.config/openbox/bg.png & rox-filer /data & orange-canvas" \ 
-    >> /root/.config/openbox/autostart
-ENV QT_STYLE_OVERRIDE=gtk
-ADD Desktop/rc.xml /root/.config/openbox/rc.xml
-
-COPY Desktop/Victory-16.10.tar.gz /root/.themes/Victory-16.10.tar.gz
-COPY Desktop/Victory-16.10-gtk2med-dark.tar.gz /root/.themes/Victory-16.10-gtk2med-dark.tar.gz
-COPY Desktop/Flat-Remix.tar.gz /root/.themes/Flat-Remix.tar.gz
-
-WORKDIR /root/.themes
-
-RUN tar -zvxf Victory-16.10.tar.gz && \
-    tar -zvxf Victory-16.10-gtk2med-dark.tar.gz && \
-    tar -zvxf Flat-Remix.tar.gz && \
-    rm Victory-16.10.tar.gz && rm Victory-16.10-gtk2med-dark.tar.gz && rm Flat-Remix.tar.gz
-
-WORKDIR /root
-
-ADD Desktop/settings.ini /root/.config/gtk-3.0/settings.ini
-ADD Desktop/gtkrc-2.0 /root/.gtkrc-2.0
-
-## CMD
-ADD Desktop/novnc.sh /root/novnc.sh
-RUN chmod 0755 /root/novnc.sh
-
+ADD startup.sh /
 EXPOSE 6080
-
-## START
 WORKDIR /data
-CMD /root/novnc.sh
+
+#Change app name to Bwb
+RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
+
+#set up some config files
+COPY fluxbox_config/ /root/.fluxbox/
+COPY user_config/ /root/
+
+#Add tutorial
+COPY Tutorials/ /root/tutorials/
+
+#start it up
+CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
 

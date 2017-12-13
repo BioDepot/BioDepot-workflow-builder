@@ -1,0 +1,4 @@
+unbind ^w main
+bind ^F whereis main
+unbind ^T search
+bind ^L gotoline search
