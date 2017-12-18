@@ -3,6 +3,7 @@ import json
 import requests
 from docker import APIClient
 from PyQt5.QtCore import QThread, pyqtSignal
+import socket
 
 
 class DockerClient:
@@ -10,6 +11,7 @@ class DockerClient:
         self.url = url
         self.name = name
         self.cli = APIClient(base_url=url)
+        self.bwb_instance_id = socket.gethostname()
 
     def getClient(self):
         return self.cli
@@ -105,13 +107,16 @@ class DockerClient:
         destination = ''
         # locate BwB container
         for c in self.cli.containers():
-            if c['Image'] == 'biodepot/bwb':
-                # found BwB container, locate source and destination
+            container_id = c['Id']
+            if len(container_id) < 12: 
+                continue
+            if container_id[:12] == self.bwb_instance_id:
                 for m in c['Mounts']:
                     if 'docker.sock' in m['Source']:
                         continue
                     source = m['Source']
                     destination = m['Destination']
+                break
 
         if not source or not destination:
             return path
