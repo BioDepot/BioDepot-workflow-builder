@@ -101,11 +101,13 @@ class DockerClient:
         Convert path of container back to host path
     '''
     def to_host_directory(self, path):
+        with open('/etc/dockerid', 'r') as myfile:
+            dockerid=myfile.read().replace('\n', '')
         source = ''
         destination = ''
-        # locate BwB container
+        # locate BwB container - get doesn't seem to work
         for c in self.cli.containers():
-            if c['Image'] == 'biodepot/bwb':
+            if c['Id'] == dockerid:
                 # found BwB container, locate source and destination
                 for m in c['Mounts']:
                     if 'docker.sock' in m['Source']:
