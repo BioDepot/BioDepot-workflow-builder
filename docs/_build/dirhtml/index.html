@@ -1,0 +1,354 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>BioDepot-Workflow-builder (Bwb) &#8212; Bwb 1.0 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex/" />
+    <link rel="search" title="Search" href="search/" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="biodepot-workflow-builder-bwb">
+<span id="biodepot-workflow-builder-bwb"></span><h1>BioDepot-Workflow-builder (Bwb)<a class="headerlink" href="#biodepot-workflow-builder-bwb" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="manual">
+<span id="manual"></span><h1>MANUAL<a class="headerlink" href="#manual" title="Permalink to this headline">¶</a></h1>
+<p><img alt="" src="_images/image19.png" /> <img alt="" src="_images/image23.png" /></p>
+<p>Bioinformatics Group
+University of Washington Tacoma</p>
+<div class="section" id="general-information">
+<span id="general-information"></span><h2>GENERAL INFORMATION<a class="headerlink" href="#general-information" title="Permalink to this headline">¶</a></h2>
+<p>The BioDepot-workflow-builder (Bwb) can be used to build bioinformatics workflows by combining  interchangeable and encapsulated widgets, allowing researchers to easily implement and test new algorithms and observe how the outputs differ. Widgets call  Docker containers to execute software tools that could potentially be written in a different programming language, require different system configurations and/or developed by different research groups.</p>
+<p>Docker Image    : <a class="reference external" href="https://hub.docker.com/r/biodepot/bwb/">https://hub.docker.com/r/biodepot/bwb/</a></p>
+<p>Source code : <a class="reference external" href="https://github.com/BioDepot/BioDepot-workflow-builder">https://github.com/BioDepot/BioDepot-workflow-builder</a></p>
+<p>Demo video  : <a class="reference external" href="https://youtu.be/VY1peA4ITog">https://youtu.be/VY1peA4ITog</a>
+.</p>
+<div class="section" id="overview-running-bwb">
+<span id="overview-running-bwb"></span><h3>Overview: Running Bwb<a class="headerlink" href="#overview-running-bwb" title="Permalink to this headline">¶</a></h3>
+<div class="lower_alpha"></div>1\. Install Docker
+2\. Start the container with Bwb by executing the following Docker command by typing into a window (Linux) or on the Docker command line (Windows/macOs)
+```bash 
+    docker run --rm   -p 6080:6080 \
+    -v  ~/Desktop/:/data  \
+    -v  /var/run/docker.sock:/var/run/docker.sock \
+    biodepot/bwb
+```
+3\. Open a browser and connect to the Bwb container by typing the following url in the address bar of your browser. In Linux the url is:<p><a class="reference external" href="http://localhost:6080">http://localhost:6080</a></p>
+<p>For cloud instances and remote servers use the ip of the instance or remote server instead of localhost.</p>
+<p>For Windows and Macs the url is <a class="reference external" href="http://192:168:99:100:6080">http://192:168:99:100:6080</a></p>
+<p>For Windows and Macs the IP may vary depending on your setup - instructions are <a class="reference external" href="#findip">here</a> to find it)</p>
+<p>4. To quit the container, right click inside the browser and choose the QUIT container option. Alternatively, you can also stop it by finding the container id and stopping the container. Quitting the browser just closes the viewport to the container - it does not stop the container.</p>
+</div>
+</div>
+<div class="section" id="installing-and-starting-docker">
+<span id="installing-and-starting-docker"></span><h2>Installing and starting Docker<a class="headerlink" href="#installing-and-starting-docker" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="linux">
+<span id="linux"></span><h3>Linux<a class="headerlink" href="#linux" title="Permalink to this headline">¶</a></h3>
+<p><a name="DockerInstall"></a>
+1. Update your package manager index.</p>
+<p>On Debian based distros such as Ubuntu the package manager is apt-get</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get -y update
+</pre></div>
+</div>
+<p>On Redhat based distros such as Fedora/Centos the package manager is dnf or yum  on older systems</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo dnf -y update
+</pre></div>
+</div>
+<p>2. Install Docker.
+Ubuntu;</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo apt-get -y install docker-engine
+</pre></div>
+</div>
+<p>Fedora/Centos:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo dnf -y install docker
+</pre></div>
+</div>
+<p>3.  Start the Docker daemon.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo service docker start
+</pre></div>
+</div>
+<p>4.  Verify docker is installed correctly.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>sudo docker run hello-world
+</pre></div>
+</div>
+<p>The last command downloads a test image and runs it in a container. When the container runs, it prints an informational message. Then, it exits</p>
+<p>For more information please refer to -</p>
+<p><a class="reference external" href="https://docs.docker.com/engine/installation/">https://docs.docker.com/engine/installation/linux/ubuntulinux/</a></p>
+</div>
+<div class="section" id="macos">
+<span id="macos"></span><h3>macOS<a class="headerlink" href="#macos" title="Permalink to this headline">¶</a></h3>
+<p>1. Download the Docker package -  <a class="reference external" href="https://download.docker.com/mac/stable/Docker.dmg">Docker for Mac</a>
+2. To install Docker: double-click Docker.dmg to open the installer, then drag Moby the whale to the Applications folder.</p>
+<p><img alt="" src="_images/image1.png" /></p>
+<p>3. To start Docker: double-click Docker.app in the Applications folder. (In the example below, the Applications folder is in &quot;grid&quot; view mode.)</p>
+<p><img alt="" src="_images/image13.png" /></p>
+<p>You will be asked to authorize Docker.app with your system password after you launch it. Privileged access is needed to install networking components and links to the Docker apps.The whale in the top status bar indicates that Docker is running, and accessible from a terminal.</p>
+<p><img alt="" src="_images/image16.png" /></p>
+</div>
+<div class="section" id="windows">
+<span id="windows"></span><h3>Windows<a class="headerlink" href="#windows" title="Permalink to this headline">¶</a></h3>
+<p>1. To install Docker,</p>
+<ul class="simple">
+<li>download to the package - <a class="reference external" href="https://download.docker.com/win/stable/Docker%20for%20Windows%20Installer.exe">Docker for Windows</a></li>
+<li>go to folder where the installation file (Installer.exe) is saved and run (double-click) the installation file.</li>
+<li>click the installer link to download.</li>
+<li>follow the install wizard to accept the license, authorize the installer, and proceed with the install.</li>
+<li>when it completes, the installer reports it was successful:</li>
+<li>click the finish button to complete the installation.
+<img alt="" src="_images/image21.png" /></li>
+</ul>
+<p>2.  To start Docker,</p>
+<ul class="simple">
+<li>search for Docker, select the app in the search results, and click it (or hit Return).
+<img alt="" src="_images/image11.png" /></li>
+<li>when the whale in the status bar stays steady, Docker is up-and-running, and accessible from any terminal window.
+<img alt="" src="_images/image20.png" /></li>
+</ul>
+<ul class="simple">
+<li>if the whale is hidden in the Notifications area, click the up arrow on the taskbar to show it. To learn more, see <a class="reference external" href="https://docs.docker.com/docker-for-windows/#docker-settings">Docker Settings</a>.</li>
+<li>If you just installed the app, you also get a popup success message with suggested next steps, and a link to this documentation.
+<img alt="" src="_images/image15.png" /></li>
+</ul>
+</div>
+<div class="section" id="on-the-cloud">
+<span id="on-the-cloud"></span><h3>On The Cloud<a class="headerlink" href="#on-the-cloud" title="Permalink to this headline">¶</a></h3>
+<p>On the cloud, BwB can also be run on any cloud instance. Please refer to the Linux and Windows instructions to install Docker on the cloud instance.</p>
+<div class="section" id="amazon-aws">
+<span id="amazon-aws"></span><h4>Amazon AWS<a class="headerlink" href="#amazon-aws" title="Permalink to this headline">¶</a></h4>
+<p>1.  Login to your console and create a new EC2 instance of ubuntu (Here we are using ubuntu you can choose operating system of your choice)</p>
+<p>2.  Select the configuration and click on &quot;Review and Launch&quot;</p>
+<p>3.  You will be prompted to associate a ssh key pair with the instance, you can use an existing key pair or create a new one. The key will be downloaded onto the computer  which will be later used to ssh into the machine.
+<img alt="" src="_images/image9.png" /></p>
+<p>4.  Once the instance is running select your instance and scroll right for security groups.</p>
+<p>5.  From &quot;Actions&quot; button select &quot;Edit inbound rules&quot;</p>
+<p><img alt="" src="_images/image5.png" /></p>
+<p>6.  Add a new http rule for port 6080 to access the GUI from the container</p>
+<p><img alt="" src="_images/image10.png" /></p>
+<p>7.  Copy the public dns of the instance</p>
+<p><img alt="" src="_images/image22.png" /></p>
+<p>8.  SSH into the instance by typing the following command into the terminal.
+(Type the commands in the directory where the ssh key of AWS instance was downloaded)</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span> <span class="c1">#(demo.pem is name of the key)</span>
+ chmod <span class="m">400</span> demo.pem     <span class="sb">`</span>
+ ssh -i demo.pem ubuntu@public-dns-of-aws-instance
+</pre></div>
+</div>
+<p>9.  After you are logged use the instructions <a class="reference external" href="#DockerInstall">here</a> to install Docker on Linux.</p>
+<p>10. Configure the firewall using the instructions here <a class="reference external" href="http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/authorizing-access-to-an-instance.html">http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/authorizing-access-to-an-instance.html</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="starting-bwb">
+<span id="starting-bwb"></span><h2>Starting Bwb<a class="headerlink" href="#starting-bwb" title="Permalink to this headline">¶</a></h2>
+<p>After you have installed Docker on your machine, you are now ready to start your Bwb session to create and execute Docker container workflows. Bwb comes inside its own Docker container so it is first necessary to launch Docker as shown in the previous sections depending on which platform is being used.</p>
+<p>Then run the following commands on command prompt / terminal.
+1.  Download the docker image containing Bwb.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>docker pull biodepot/bwb:latest
+</pre></div>
+</div>
+<p><img alt="" src="_images/image2.png" /></p>
+<p>2.  Start the Bwb container</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>docker run --rm -p <span class="m">6080</span>:6080 -v <span class="si">${</span><span class="nv">PWD</span><span class="si">}</span>:/data -v /var/run/docker.sock:/var/run/docker.sock biodepot/bwb
+</pre></div>
+</div>
+<p>This command will launch a mini-webserver and start a windowing environment inside the container. The Bwb application is automatically launched upon running the container and appears as a maximized window on the Desktop inside the container. In the above command we have set the port to be 6080 and the current directory is mapped to the /data directory inside the container. However, all this is hidden from view until the user connects to the container using a browser.</p>
+<p>To access the container open up a browser window and type in the IP of the container and port that it is listening to into the address bar. For a local installation using Linux, the IP of the container is localhost or 127.0.0.1 so the user would type localhost:6080 into the address bar of the browser. For a remote installation, the ip is the ip of the server.
+<a name="findip"></a>
+For Macs and Windows machines the local ip is usually <a class="reference external" href="http://192:168:99:100:6080">192:168:99:100</a> but if that does not work you can find the IP with the following command in a terminal if using Linux/MacOS or in the Docker window if using Windows.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>docker ps
+</pre></div>
+</div>
+<p>More information about finding Docker IP is available here: <a class="reference external" href="https://docs.docker.com/machine/reference/ip/">https://docs.docker.com/machine/reference/ip</a></p>
+<p>Once connected. A window similar to Figure 1 should appear showing a maximized Bwb window. The interface is a standard windowing one implemented using fluxbox. The icons in the upper right hand corner are used to iconify (hide), minimize/maximize and close the window. Clicking on the area taskbar at the bottom can be used to toggle between windows or hide/show them. In the Bwb window itself is a large drawing canvas. Right-clicking on the canvas brings up the tool menu which has a list of all the available widgets. Widgets can also be dragged onto the canvas from the toolbox on the left. Bwb starts with the Bwb widget toolbox section open. The original Orange ML widgets for machine learning are also available. The different toolbox sections can be opened by clicking on the toolbox banner.</p>
+<p>Note that the Bwb windowing system is inside the browser window. You still have access to whatever windowing system you are using on your host machine. If your browser closes or go to another url, nothing happens to Bwb - the browser merely provides a viewport to the Bwb container. Refreshing or reconnecting the browser to the container IP allows you to interact with Bwb again.</p>
+<p><img alt=" " src="_images/image4.png" /></p>
+<p>Figure 1: Maximized Bwb window</p>
+<p><img alt=" " src="_images/image8.png" /></p>
+<p>Figure 2:  Multiple Bwb windows on Desktop</p>
+<p>If we hide/iconify the window by clicking on the taskbar or clicking on the iconify button in the upper right hand corner of the window, we see the Desktop itself as shown in figure 2. Right clicking on the Desktop brings up a menu of available applications and the option to QUIT the container. Unlike closing the browser window, this command will actually kill the webserver resulting in the container being stopped. The menu also gives the option of opening another Bwb instance or a terminal. Multiple applications can be launched at same time - and the user even has the option of using different workspaces (up to 4) to quickly cycle through different windows.</p>
+</div>
+<div class="section" id="widgets">
+<span id="widgets"></span><h2>WIDGETS<a class="headerlink" href="#widgets" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="using-widgets">
+<span id="using-widgets"></span><h3>Using widgets<a class="headerlink" href="#using-widgets" title="Permalink to this headline">¶</a></h3>
+<p><img alt=" " src="_images/image12.png" /></p>
+<p>Figure 3:  Different types of widgets</p>
+<p>The widget is the main unit of the workflow. Available  widgets are available in the toolbox on the left hand side of the Bwb window. Widgets can specify input, output or software modules. Widgets are dragged from the toolbox onto the canvas and connected to indicate the flow of data. the output of a widget becomes the input of the next connected widget. In this way an analytical pipeline consisting of different modules can transform input data into the final output results.  Many of the software widgets utilize Docker containers that require docker engine. When widgets that are using Docker containers are used, the container will be automatically downloaded from DockerHub if it is not available locally.</p>
+</div>
+<div class="section" id="detailed-description-of-individual-widgets">
+<span id="detailed-description-of-individual-widgets"></span><h3>Detailed description of individual widgets<a class="headerlink" href="#detailed-description-of-individual-widgets" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="custom-container-widget">
+<span id="custom-container-widget"></span><h4>Custom container widget<a class="headerlink" href="#custom-container-widget" title="Permalink to this headline">¶</a></h4>
+<p>This widget is designed to facilitate the task of importing existing scripts and executables into Bwb without writing a full widget. Three elements are specified, a container with the required executables and dependencies, a set of mount points that point to where the input and output files will reside, and a starting command, for example to run a script. The example below shows how this can be used to run an R script that converts bamfiles to counts. Python and Perl scripts can be run changing the container to one that has Python and/or Perl installed.  Stock containers for all the major scripting languages and packages such as Bioconductor are available on Docker Hub.</p>
+<p><img alt=" " src="_images/image7.png" /></p>
+<p><img alt=" " src="_images/image17.png" /></p>
+</div>
+<div class="section" id="load-csv">
+<span id="load-csv"></span><h4>Load CSV<a class="headerlink" href="#load-csv" title="Permalink to this headline">¶</a></h4>
+<p>This widget plays a role as bridge between CSV file and the [Data Table] widget of Orange. It widget support two kind of sources (channels): a CSV file or a directory. If the source is a directory, the widget will scan that folder and list all CSV or TSV files. The CSV or TSV file will be loaded when user select them or specify the particular file name.</p>
+<p><img alt=" " src="_images/image18.png" /></p>
+<p><img alt=" " src="_images/image14.png" /></p>
+<p>The above example showsthe output of <em>Bam to Counts connected</em> to the Directory of <em>Load Counts Table</em>. Once the procedure Bam to Counts finished, it will send <code><em>/data/bamfiles</em></code> to [Load CSV] widget, the [Load CSV] widget will scan this folder list all *.csv or *.tsv files.</p>
+</div>
+</div>
+</div>
+<div class="section" id="widget-development-guide">
+<span id="widget-development-guide"></span><h2>WIDGET DEVELOPMENT GUIDE<a class="headerlink" href="#widget-development-guide" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="development-environment">
+<span id="development-environment"></span><h3>1. Development environment<a class="headerlink" href="#development-environment" title="Permalink to this headline">¶</a></h3>
+<p>Biodepot-workflow-builder (Bwb) is based on Orange, here is Orange official website:</p>
+<p><a class="reference external" href="http://orange.biolab.si/">http://orange.biolab.si/</a>, please take a look for Orange and understand what is Orange and the concept of widget.</p>
+<p>The programming language for widget development is Python and the framework that used to create GUI is PyQT. Therefore some knowledge of Python and QuickTime is helpful for widget development. In addition, instead of native Docker commands, the python API is used to call Docker and a familiarity with DockerPy is also helpful.</p>
+<p>The Bwb container itself has all the necessary dependencies for developing new widgets. However, it only comes installed with a basic editor and work needs to be saved and imported from the mounted user directory. In the future we may release a version of the the Bwb that is specialized for developing widgets. In the future we may release a version of the the Bwb that is specialized for developing widgets.</p>
+<p>For now we recommend installing Python 3.5, pyQT5 and Orange locally to develop and test widgets. The code  and instructions are at the Orange github <a class="reference external" href="https://github.com/biolab/orange3">https://github.com/biolab/orange3</a></p>
+</div>
+<div class="section" id="widget-development-overview">
+<span id="widget-development-overview"></span><h3>Widget development overview<a class="headerlink" href="#widget-development-overview" title="Permalink to this headline">¶</a></h3>
+<p>A widget consists of a python script that defines the inputs/outputs, names, and supporting files such as icons along with the actual commands to be executed. In the case of Bwb, these are usually, docker commands that are accessed using the Python API (DockerPy).</p>
+<p>Orange provides a very useful tutorial for developing a widget. <a class="reference external" href="http://orange-development.readthedocs.io/tutorial.html">http://orange-development.readthedocs.io/tutorial.html</a></p>
+<p>Once a widget has been written or downloaded from an github or other repository it needs to be installed so that Orange3 can recognize it. For development and testing we do this locally.</p>
+<p>1.  Navigate to the widget folder where setup.py exists and install the widget by typing</p>
+<div class="highlight-Python"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> 
+</pre></div>
+</div>
+<p>We use parameter -e here to install the widget as develop mode so that the package just linked to Python environment rather than copied into site-packages.</p>
+<p>2.  Run Orange3</p>
+<p>3. When the widget is ready for installation into Bwb, clone the github repository of Bwb (<a class="reference external" href="https://github.com/BioDepot/BioDepot-workflow-builder">https://github.com/BioDepot/BioDepot-workflow-builder</a>) and copy the widget into the Biodepot directory. Rebuild the container using the Dockerfile i.e.</p>
+<p>(Run from the git directory)</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>docker build -t mybwb .
+</pre></div>
+</div>
+<p>The new container can be run as before, except the name of the new image (in the example mybwb), is substituted for the stock image biodepot/bwb:latest</p>
+</div>
+<div class="section" id="using-bwbase-to-develop-widgets">
+<span id="using-bwbase-to-develop-widgets"></span><h3>Using BwBase to develop widgets<a class="headerlink" href="#using-bwbase-to-develop-widgets" title="Permalink to this headline">¶</a></h3>
+<p><img alt=" " src="_images/image3.png" /></p>
+<p>There is considerable boilerplate code in developing a containerized widget. To minimize the amount of repetitive code that needs to be written, we provide the BwBase class. The schema for an instance of this class is shown above for a widget connected the OWBam2Counts widget. BwBase handles tasks related to calling the Docker API, such as pulling an image and starting a container. It also takes care of the directories when connected with other widgets (in the example above, the OWBam2Counts widget).</p>
+<p>The key individual components of the class are:</p>
+<div class="section" id="event-onrunmessage">
+<span id="event-onrunmessage"></span><h4>Event_OnRunMessage:<a class="headerlink" href="#event-onrunmessage" title="Permalink to this headline">¶</a></h4>
+<p>Triggered by BwBase to indicate the status of docker container, for now, the possible values are: Running and Finished.</p>
+</div>
+<div class="section" id="event-onrunfinished">
+<span id="event-onrunfinished"></span><h4>Event_OnRunFinished:<a class="headerlink" href="#event-onrunfinished" title="Permalink to this headline">¶</a></h4>
+<p>Triggered when the docker container was exited.</p>
+</div>
+<div class="section" id="dockerrun-self-volumes-none-commands-none-environments-none">
+<span id="dockerrun-self-volumes-none-commands-none-environments-none"></span><h4>dockerRun(self, volumes = None, commands = None, environments = None)<a class="headerlink" href="#dockerrun-self-volumes-none-commands-none-environments-none" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">volumes</span><span class="p">:</span> <span class="n">dictionary</span> <span class="n">that</span> <span class="n">define</span> <span class="n">the</span> <span class="n">mapping</span> <span class="n">between</span> <span class="n">host</span> <span class="ow">and</span> <span class="n">container</span>
+
+<span class="n">commands</span><span class="p">:</span> <span class="nb">list</span> <span class="n">of</span> <span class="n">commands</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="p">[</span><span class="s2">&quot;echo hello&quot;</span><span class="p">,</span> <span class="s2">&quot;exit&quot;</span><span class="p">]</span>
+
+<span class="n">environments</span><span class="p">:</span> <span class="n">dictionary</span> <span class="n">of</span> <span class="n">environments</span> <span class="n">variables</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="setdirectories-self-key-path-ctrllabel-none">
+<span id="setdirectories-self-key-path-ctrllabel-none"></span><h4>setDirectories(self, key, path, ctrlLabel = None)<a class="headerlink" href="#setdirectories-self-key-path-ctrllabel-none" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">Store</span> <span class="n">the</span> <span class="n">path</span> <span class="n">of</span> <span class="n">directories</span><span class="o">.</span>
+
+<span class="n">key</span><span class="p">:</span> <span class="n">the</span> <span class="n">name</span> <span class="n">of</span> <span class="n">this</span> <span class="n">path</span><span class="o">.</span>
+
+<span class="n">path</span><span class="p">:</span> <span class="n">real</span> <span class="n">full</span> <span class="n">path</span><span class="o">.</span>
+
+<span class="n">ctrlLabel</span><span class="p">:</span> <span class="n">optional</span><span class="p">,</span> <span class="n">used</span> <span class="n">to</span> <span class="n">display</span> <span class="n">the</span> <span class="n">path</span> <span class="n">on</span> <span class="n">label</span><span class="o">.</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="getdirectory-self-key">
+<span id="getdirectory-self-key"></span><h4>getDirectory(self, key)<a class="headerlink" href="#getdirectory-self-key" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">return</span> <span class="n">the</span> <span class="n">stored</span> <span class="n">path</span> <span class="n">by</span> <span class="n">name</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>A Hello world example as following:</p>
+<p><img alt=" " src="_images/image6.png" /></p>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Bwb</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search/" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Ling-Hong Hung.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/index.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
