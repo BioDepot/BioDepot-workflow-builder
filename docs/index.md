@@ -35,7 +35,7 @@ Demo video	: [https://youtu.be/VY1peA4ITog](https://youtu.be/VY1peA4ITog)
 
 For cloud instances and remote servers use the ip of the instance or remote server instead of localhost.
 
-For Windows and Macs the url is [http://192:168:99:100:6080](http://192:168:99:100:6080) 
+For Windows and Macs the url is [http://192.168.99.100:6080](http://192.168.99.100:6080) 
 
 For Windows and Macs the IP may vary depending on your setup - instructions are [here](#findip) to find it)
 
