@@ -9,19 +9,18 @@ The setup workflow widget downloads the tutorial files (for example the human re
 
   
  After Bwb launches, open `/root/tutorials/dtoxs/Setup.ows` workflow. This is done by choosing open from the File menu as shown below.
- <table><tr><td>
-  ![open](media/open.png)
- </td></tr></table>
+
+  ![](media/open.png)
 
 Once the dialog opens up navigate to the /root/tutorials/dtoxs/ directory and choose the Setup.ows file to open
 
-  ![open](media/open_setup.png)
+  ![open2](media/open_setup.png)
 
 You should see a single widget:
  
  ![setup1](media/dtoxs_tutorial_setup.png)
  
- After double-clicking on the icon you should see the custom container form below.
+After double-clicking on the icon you should see the custom container form below.
 
 ![setup2](media/dtoxs_tutorial_setup2.png)
 
@@ -48,17 +47,12 @@ Start the analysis step by double click the [Dtoxs Analysis] icon and [Run].
 ![run](media/dtoxs_tutorial_runpipeline.png)
 
 This should take a few minutes to finish. When it is done you can click on the Table widget to see a list of the top 40 differentially expressed genes for the sample data.
- <table><tr><td>
-  ![open](media/table.png)
- </td></tr></table>
 
+  ![open3](media/table.png)
 
 The Analysis widget in the pipeline is also connected to the Results directory. Clicking on the widget gives the full path of the directory. The complete results have been written to this directory.
 
-
- <table><tr><td>
   ![open](media/results.png)
- </td></tr></table>
 
 To quit the tutorial - choose quit from the File menu. Then right-click on the Desktop and choose Quit Container to quit the Bwb container.
 
