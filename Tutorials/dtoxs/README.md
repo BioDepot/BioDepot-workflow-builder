@@ -38,7 +38,7 @@ Once the data has been downloaded by the widget you should see a 'Finished!' fla
 
 When this is finished you should see a new tutorial directory in your local ~/Desktop directory. This will contain all the necessary files for you to run the DToxS pipeline.
 
-## Run DetoxS pipeline
+## Run DToxS pipeline
 
 Open `/data/tutorials/dtoxs/dtoxs.ows` workflow.  The workflow is set to start the analyses step automatically. The sample input files are very small and should only take a few seconds to complete the alignment step. Under the alignment widget you should see the Running indicator. This becomes a Finished indicator when the alignment is done.
 
