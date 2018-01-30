@@ -36,7 +36,7 @@ Click on the start button to run the script and download all the files needed to
 
 Once the data has been downloaded by the widget you should see a 'Finished!' flag under the widget.
 
-When this is finished you should see a new tutorial directory in your local ~/Desktop directory. This will contain all the necessary files for you to run the DetoxS pipeline.
+When this is finished you should see a new tutorial directory in your local ~/Desktop directory. This will contain all the necessary files for you to run the DToxS pipeline.
 
 ## Run DetoxS pipeline
 
