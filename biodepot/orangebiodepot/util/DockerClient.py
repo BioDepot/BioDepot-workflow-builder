@@ -25,7 +25,7 @@ class DockerClient:
     def images(self):
         return self.cli.images(all=True)
 
-    def has_image(self, name, version):
+    def has_image(self, name, version="latest"):
         repo_tag = name + ':' + version
         for image in self.cli.images():
             if not image['RepoTags']:
@@ -36,7 +36,10 @@ class DockerClient:
 
     def remove_image(self, id, force=False):
         self.cli.remove_image(id, force=force)
-
+        
+    def pull_image(self, id):
+        self.cli.pull(id)
+        
     def containers(self, all=True):
         return self.cli.containers(all=all)
 

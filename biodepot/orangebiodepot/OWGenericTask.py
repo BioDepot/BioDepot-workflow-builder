@@ -6,15 +6,15 @@ from PyQt5.QtGui import QStandardItem, QFont
 from PyQt5.QtCore import QThread, QDir, Qt
 
 class OWGenericTask(widget.OWWidget):
-    name = "Custom Container"
-    description = "Run docker container"
-    category = "General"
-    icon = "icons/container.svg"
+    name = 'Custom Container'
+    description = 'Run docker container'
+    category = 'General'
+    icon = 'icons/container.svg'
 
     priority = 2
 
-    inputs =  [("Mounted Directory", str, "setHostMountedDir", widget.Multiple), ("Run Trigger", str, "triggerRun")]
-    outputs = [("Output", str)]
+    inputs =  [('Mounted Directory', str, 'setHostMountedDir', widget.Multiple), ('Run Trigger', str, 'triggerRun')]
+    outputs = [('Output', str)]
 
     want_main_area = False
 
@@ -40,7 +40,7 @@ class OWGenericTask(widget.OWWidget):
             QFrame#frameTitle {background: #1588c5; color: #1588c5}
             QFrame#frameSubtitle {background: #1998de; }
             QFrame#frameSearchName {background: #1998de; }
-            QFrame[frameShape="4"] { color: #c6d1da; }
+            QFrame[frameShape='4'] { color: #c6d1da; }
             QLabel#lblFormTitle{ background-color: #daeaf7;padding-left: 5px;}
             QFrame#mainContent {background-color: #1588f5;border: 1px solid #c6d1da;}
             QComboBox {border: 1px solid #bdbdbd;border-radius: 3px;padding-left: 5px;color: #181818;height: 30px;}
@@ -54,22 +54,22 @@ class OWGenericTask(widget.OWWidget):
         self.vlayoutBase = QtWidgets.QVBoxLayout(self.controlArea)
         self.vlayoutBase.setContentsMargins(0, 0, 0, 0)
         self.vlayoutBase.setSpacing(0)
-        self.vlayoutBase.setObjectName("vlayoutBase")
+        self.vlayoutBase.setObjectName('vlayoutBase')
 
         self.frameTitle = QtWidgets.QFrame()
         self.frameTitle.setMinimumHeight(35)
         self.frameTitle.setMaximumHeight(35)
-        self.frameTitle.setObjectName("frameTitle")
+        self.frameTitle.setObjectName('frameTitle')
         self.lblIcon = QtWidgets.QLabel()
         self.lblIcon.setFixedSize(QtCore.QSize(35, 35))
-        self.lblIcon.setText("")
-        pixmap = QtGui.QPixmap(os.path.join(self.base_dir, "icons/container.svg"))
+        self.lblIcon.setText('')
+        pixmap = QtGui.QPixmap(os.path.join(self.base_dir, 'icons/container.svg'))
         pixmap = pixmap.scaled(self.lblIcon.size(), QtCore.Qt.KeepAspectRatio, QtCore.Qt.SmoothTransformation)
         self.lblIcon.setPixmap(pixmap)
         self.lblIcon.setScaledContents(True)
-        self.lblIcon.setObjectName("lblIcon")
+        self.lblIcon.setObjectName('lblIcon')
         self.lblFormTitle = QtWidgets.QLabel()
-        self.lblFormTitle.setObjectName("lblFormTitle")
+        self.lblFormTitle.setObjectName('lblFormTitle')
 
         self.hlayout_title = QtWidgets.QHBoxLayout(self.frameTitle)
         self.hlayout_title.setContentsMargins(0, 0, 0, 0)
@@ -98,19 +98,20 @@ class OWGenericTask(widget.OWWidget):
         self.vlayout_main.addWidget(self.lblDockerImage)
 
         self.hlayout_images = QtWidgets.QHBoxLayout()
-        self.hlayout_images.setObjectName("hlayout_iamges")
+        self.hlayout_images.setObjectName('hlayout_iamges')
         self.hlayout_images.setSpacing(2)
 
         self.cboDockerImage = QtWidgets.QComboBox(self.mainContent)
         self.cboDockerImage.setMinimumHeight(30)
         self.cboDockerImage.setMaximumHeight(30)
-        self.cboDockerImage.setObjectName("cboDockerImage")
+        self.cboDockerImage.setObjectName('cboDockerImage')
+        self.cboDockerImage.setEditable(True);
         self.delegate4Combo = QtWidgets.QStyledItemDelegate()
         self.cboDockerImage.setItemDelegate(self.delegate4Combo)
         self.hlayout_images.addWidget(self.cboDockerImage)
-        self.btnRefreshImage = QtWidgets.QPushButton("R", self.mainContent)
+        self.btnRefreshImage = QtWidgets.QPushButton('R', self.mainContent)
         self.btnRefreshImage.setFixedSize(QtCore.QSize(25, 25))
-        self.btnRefreshImage.setObjectName("btnRefreshImage")
+        self.btnRefreshImage.setObjectName('btnRefreshImage')
         self.hlayout_images.addWidget(self.btnRefreshImage)
 
         self.vlayout_main.addLayout(self.hlayout_images)
@@ -119,7 +120,7 @@ class OWGenericTask(widget.OWWidget):
             QtWidgets.QSpacerItem(-1, 10, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
 
         self.hlayout_mapping = QtWidgets.QHBoxLayout()
-        self.hlayout_mapping.setObjectName("hlayout_mapping")
+        self.hlayout_mapping.setObjectName('hlayout_mapping')
         self.hlayout_mapping.setSpacing(5)
 
         self.lblVMapping = QtWidgets.QLabel()
@@ -132,10 +133,10 @@ class OWGenericTask(widget.OWWidget):
 
         self.btnAddMapping = QtWidgets.QPushButton(self.mainContent)
         self.btnAddMapping.setFixedSize(QtCore.QSize(20, 20))
-        self.btnAddMapping.setObjectName("btnAddMapping")
+        self.btnAddMapping.setObjectName('btnAddMapping')
         self.btnDeleteMapping = QtWidgets.QPushButton(self.mainContent)
         self.btnDeleteMapping.setFixedSize(QtCore.QSize(20, 20))
-        self.btnDeleteMapping.setObjectName("btnDeleteMapping")
+        self.btnDeleteMapping.setObjectName('btnDeleteMapping')
         self.hlayout_mapping.addWidget(self.btnAddMapping)
         self.hlayout_mapping.addWidget(self.btnDeleteMapping)
 
@@ -145,7 +146,7 @@ class OWGenericTask(widget.OWWidget):
         self.vlayoutBase.addWidget(self.mainContent)
 
         self.lstMapping = QtWidgets.QTableView(self.mainContent)
-        self.lstMapping.setObjectName("lstMapping")
+        self.lstMapping.setObjectName('lstMapping')
         self.lstMapping.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         self.lstMapping.verticalHeader().setVisible(False)
         self.vlayout_main.addWidget(self.lstMapping)
@@ -156,7 +157,7 @@ class OWGenericTask(widget.OWWidget):
         self.vlayout_main.addWidget(self.lblCmd)
 
         self.txtCommand = QtWidgets.QPlainTextEdit(self.mainContent)
-        self.txtCommand.setObjectName("txtCommand")
+        self.txtCommand.setObjectName('txtCommand')
         self.vlayout_main.addWidget(self.txtCommand)
 
         self.vlayout_main.addItem(QtWidgets.QSpacerItem(-1, 5, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
@@ -171,16 +172,16 @@ class OWGenericTask(widget.OWWidget):
 
         # buttons area
         self.hlayout_buttons = QtWidgets.QHBoxLayout()
-        self.hlayout_buttons.setObjectName("hlayout_buttons")
+        self.hlayout_buttons.setObjectName('hlayout_buttons')
         self.hlayout_buttons.setSpacing(5)
         self.lblMessage = QtWidgets.QLabel()
         self.lblMessage.setMinimumHeight(25)
         self.lblMessage.setMaximumHeight(25)
-        self.lblMessage.setObjectName("lblMessage")
+        self.lblMessage.setObjectName('lblMessage')
         self.hlayout_buttons.addWidget(self.lblMessage)
         self.btnRun = QtWidgets.QPushButton(self.mainContent)
         self.btnRun.setFixedSize(QtCore.QSize(90, 30))
-        self.btnRun.setObjectName("btnRun")
+        self.btnRun.setObjectName('btnRun')
         self.hlayout_buttons.addItem(
             QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum))
         self.hlayout_buttons.addWidget(self.btnRun)
@@ -206,14 +207,14 @@ class OWGenericTask(widget.OWWidget):
 
     def retranslateUi(self, Widget):
         _translate = QtCore.QCoreApplication.translate
-        self.lblFormTitle.setText(_translate("Widget", "Run your own container"))
-        self.lblDockerImage.setText(_translate("Widget", "Select docker image:"))
-        self.lblVMapping.setText(_translate("Widget", "Mount Mapping: "))
-        self.lblCmd.setText(_translate("Widget", "Run command:"))
+        self.lblFormTitle.setText(_translate('Widget', 'Run your own container'))
+        self.lblDockerImage.setText(_translate('Widget', 'Select docker image:'))
+        self.lblVMapping.setText(_translate('Widget', 'Mount Mapping: '))
+        self.lblCmd.setText(_translate('Widget', 'Run command:'))
 
-        self.btnAddMapping.setText(_translate("Widget", "+"))
-        self.btnDeleteMapping.setText(_translate("Widget", "-"))
-        self.btnRun.setText(_translate("Widget", "Start"))
+        self.btnAddMapping.setText(_translate('Widget', '+'))
+        self.btnDeleteMapping.setText(_translate('Widget', '-'))
+        self.btnRun.setText(_translate('Widget', 'Start'))
 
     def InitializeUI(self):
         self.loadDockerImages()
@@ -312,11 +313,11 @@ class OWGenericTask(widget.OWWidget):
 
             if len(sset) > 1:
                 otherSettings = sset[1]
-                self.cboDockerImage.setCurrentText(otherSettings["Image"])
-                self.txtCommand.setPlainText(otherSettings["Commands"])
-                item = self.model_vmap.item(otherSettings["SelectedOutput"])
+                self.cboDockerImage.setCurrentText(otherSettings['Image'])
+                self.txtCommand.setPlainText(otherSettings['Commands'])
+                item = self.model_vmap.item(otherSettings['SelectedOutput'])
                 if item:
-                    self.model_vmap.item(otherSettings["SelectedOutput"], 2).setCheckState(Qt.Checked)
+                    self.model_vmap.item(otherSettings['SelectedOutput'], 2).setCheckState(Qt.Checked)
 
     def _saveSettings(self):
         volumes = {}
@@ -334,9 +335,9 @@ class OWGenericTask(widget.OWWidget):
             selectIndex += 1
 
         otherSettings = {
-            "Image": self.cboDockerImage.currentText(),
-            "SelectedOutput": selectIndex,
-            "Commands": self.txtCommand.toPlainText()
+            'Image': self.cboDockerImage.currentText(),
+            'SelectedOutput': selectIndex,
+            'Commands': self.txtCommand.toPlainText()
         }
         self.savedSettings = json.dumps([volumes, otherSettings])
 
@@ -364,7 +365,17 @@ class OWGenericTask(widget.OWWidget):
 
         commands = self.txtCommand.toPlainText()
         #print(commands)
-
+        repoVersion=imageName.split(':')
+        repo=repoVersion[0];
+        version='latest'
+        if len(repoVersion) > 1:
+            version = repoVersion[1]
+        imageName=repo+':'+version
+        selfContainerFlag=self.dockerClient.has_image(repo,version)
+        if not selfContainerFlag:
+            self.lblMessage.setText('Pulling ' + imageName + ' ...')
+            self.setStatusMessage('Pulling...')
+            self.dockerClient.pull_image(imageName)	
         self.lblMessage.setText('Running ' + imageName + ' ...')
         self.setStatusMessage('Running...')
 
@@ -374,7 +385,7 @@ class OWGenericTask(widget.OWWidget):
         self.running_thread.start()
 
     def ThreadEvent_OnRunCompleted(self):
-        self.lblMessage.setText("")
+        self.lblMessage.setText('')
         self.setStatusMessage('Finished!')
         # restore controls
         self._enableUIElements()
@@ -390,7 +401,7 @@ class OWGenericTask(widget.OWWidget):
             i += 1
 
         if output_str:
-            self.send("Output", output_str)
+            self.send('Output', output_str)
 
 
 class GenericDockerRunner(QThread):
@@ -424,7 +435,7 @@ def main(argv=sys.argv):
     app = QApplication(list(argv))
 
     ow = OWGenericTask()
-    #ow.setHostMountedDir("/Users/Jimmy/Downloads/STAR/fasta_input", None, None)
+    #ow.setHostMountedDir('/Users/Jimmy/Downloads/STAR/fasta_input', None, None)
     ow.show()
     ow.raise_()
 
@@ -432,5 +443,5 @@ def main(argv=sys.argv):
     app.exec_()
     return 0
 
-if __name__=="__main__":
+if __name__=='__main__':
     sys.exit(main())
