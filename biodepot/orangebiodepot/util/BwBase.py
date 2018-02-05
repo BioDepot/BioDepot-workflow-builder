@@ -59,7 +59,8 @@ class OWBwBWidget(widget.OWWidget):
             self._hostDirectories[k] = None
 
     def setDirectories(self, key, path, ctrlLabel = None):
-        labelTitle = ctrlLabel.text().split(':')[0] + ': {}'
+        if ctrlLabel:
+            labelTitle = ctrlLabel.text().split(':')[0] + ': {}'
         # When a user removes a connected Directory widget,
         # it sends a signal with path=None
         if path is None:
@@ -74,7 +75,9 @@ class OWBwBWidget(widget.OWWidget):
 
 
     def getDirectory(self, key):
-        return self._hostDirectories[key]
+        if key in self._hostDirectories:
+            return self._hostDirectories[key]
+        return None
 
     """
     Pull image
@@ -135,3 +138,48 @@ class OWBwBWidget(widget.OWWidget):
         self.setStatusMessage('Finished!')
         self.Event_OnRunMessage('Finished!')
         self.Event_OnRunFinished()
+        
+    def generateCmd (self, executables = [], flags = {}, args = []):
+        #flags are key value pairs - values begin with = if they are to be joined with the key i.e. --name=John and not --name John 
+        cmdStr=''
+        for executable in executables:
+            cmdStr += executable + ' '
+        #short flags no args first
+        #short flags args
+        #long flags no args
+        #long flags args
+        #flags no dashs
+        #flags no args
+        for flagName, flagValue in flags.items():
+            if (flagName[:1] == '-') and (flagName[:2] != '--') and (not flagValue):
+                cmdStr +=  flagName + ' '
+        for flagName,flagValue in flags.items():
+            if (flagName[:1] == '-') and (flagName[:2] != '--') and flagValue:
+                if(flagValue[:1] == '='):
+                    cmdStr +=  flagName + flagValue + ' '
+                else:
+                    cmdStr +=  flagName + ' ' + flagValue + ' '
+        for flagName, flagValue in flags.items():
+            if (flagName[:2] == '--')  and (not flagValue):
+                cmdStr +=  flagName + ' '
+        for flagName,flagValue in flags.items():
+            if (flagName[:2] == '--')  and flagValue:
+                if(flagValue[:1] == '='):
+                    cmdStr +=  flagName + flagValue + ' '
+                else:
+                    cmdStr +=  flagName + ' ' + flagValue + ' '
+        for flagName, flagValue in flags.items():
+            if (flagName[:1] != '-')  and (not flagValue):
+                cmdStr +=  flagName + ' '
+        for flagName,flagValue in flags.items():
+            if (flagName[:1] != '-')  and flagValue:
+                if(flagValue[:1] == '='):
+                    cmdStr +=  flagName + flagValue + ' '
+                else:
+                    cmdStr +=  flagName + ' ' + flagValue + ' '          
+        for arg in args:
+            cmdStr += arg + ' '
+        #remove any extra space
+        if cmdStr:
+            cmdStr[:-1]
+        return cmdStr

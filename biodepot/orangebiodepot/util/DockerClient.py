@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+import subprocess
 from docker import APIClient
 from PyQt5.QtCore import QThread, pyqtSignal
 import socket
@@ -26,12 +27,12 @@ class DockerClient:
         return self.cli.images(all=True)
 
     def has_image(self, name, version="latest"):
-        repo_tag = name + ':' + version
-        for image in self.cli.images():
-            if not image['RepoTags']:
-                continue  # DK fix NoneType is not iterable
-            elif repo_tag in image['RepoTags']:
-                return True
+        if not name:
+            return False
+        repoTag = name + ':' + version
+        conId=subprocess.check_output(['docker', 'images', '-q', repoTag])
+        if conId:
+            return True
         return False
 
     def remove_image(self, id, force=False):
