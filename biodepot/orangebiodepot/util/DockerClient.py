@@ -13,6 +13,9 @@ class DockerClient:
         self.name = name
         self.cli = APIClient(base_url=url)
         self.bwb_instance_id = socket.gethostname()
+        self.volumeSource = None
+        self.volumeDestination = None
+        self.findVolumeMapping()
 
     def getClient(self):
         return self.cli
@@ -51,11 +54,22 @@ class DockerClient:
     }
     commands is a list of bash commands to run on container
         ["pwd", "touch newfile.txt"]
+    
     """
-    def create_container(self, name, volumes=None, commands=None, environment=None):
+    def create_container(self, name, volumes=None, commands=None, environment=None, hostVolumes=None):
+        #hostVolues is a dict with keys being the container volumes
         # TODO should we use Image ID instead of Image Name?
         host_config = None
-        if type(volumes) is dict:
+  
+        if not (hostVolumes is None):
+            binds = []
+            for container_dir, host_dir in hostVolumes.items():
+                binds.append(self.to_host_directory(host_dir) + ":" + container_dir)
+            host_config = self.cli.create_host_config(binds=binds)
+            volumes = list(hostVolumes.keys())           
+        elif type(volumes) is dict:
+        # this is backwards - it is possible to have the same host directory mapped to multiple containers but not the other way
+        # keep this so as not to break early widgets
             binds = []
             for host_dir, container_dir in volumes.items():
                 binds.append(self.to_host_directory(host_dir) + ":" + container_dir)
@@ -106,10 +120,8 @@ class DockerClient:
     '''
         Convert path of container back to host path
     '''
-    def to_host_directory(self, path):
-        source = ''
-        destination = ''
-        # locate BwB container
+    
+    def findVolumeMapping(self):
         for c in self.cli.containers():
             container_id = c['Id']
             if len(container_id) < 12: 
@@ -117,21 +129,25 @@ class DockerClient:
             if container_id[:12] == self.bwb_instance_id:
                 for m in c['Mounts']:
                     if not ('docker.sock' in m['Source']):
-                        source = m['Source']
-                        destination = m['Destination']
-                    break
-                break
+                        self.volumeSource = m['Source']
+                        self.volumeDestination = m['Destination']
+                    return
 
-        if not source or not destination:
+    def to_host_directory(self, path):
+        if not  self.volumeSource or not self.volumeDestination:
+            return path
+        cleanDestination = os.path.normpath(self.volumeDestination)
+        cleanPath= os.path.normpath(path)
+        cleanSource=os.path.normpath(self.volumeSource)
+        
+        #check if it is already relative to host path
+        if cleanSource in cleanPath:
             return path
 
-        cleanDestination = os.path.normpath(destination)
-        cleanPath= os.path.normpath(path)
-
-        # if the path is not mapping from host, will return None since it cannot be defined
+        # if the path is not mapping from host, will return path
         if cleanDestination not in cleanPath:
-            return "bad mapping "+ cleanDestination + " "+cleanPath
-        abspath = os.path.normpath(str.join(os.sep,(source, path[path.find(destination) + len(destination):])))
+            return path
+        abspath = os.path.normpath(str.join(os.sep,(cleanSource, path[path.find(cleanDestination) + len(cleanDestination):])))
         return abspath
 
 class DockerThread_BuildImage(QThread):

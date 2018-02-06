@@ -20,7 +20,7 @@ class LocalContainerRunner(QThread):
         self.wait()
 
     def run(self):
-        response = self.docker.create_container(self.image_name, volumes=self.volumes, commands=self.commands, environment=self.environments)
+        response = self.docker.create_container(self.image_name, hostVolumes=self.volumes, commands=self.commands, environment=self.environments)
         if response['Warnings'] == None:
             self.containerId = response['Id']
             self.docker.start_container(self.containerId)
@@ -66,9 +66,6 @@ class OWBwBWidget(widget.OWWidget):
         if path is None:
             self._hostDirectories[key] = None
             if ctrlLabel is not None: ctrlLabel.setText(labelTitle.format('Not Set'))
-        elif not os.path.exists(path):
-            self._hostDirectories[key] = None
-            if ctrlLabel is not None: ctrlLabel.setText(labelTitle.format('None existent directory: {}'.format(str(path))))
         else:
             self._hostDirectories[key] = path.strip()
             if ctrlLabel is not None: ctrlLabel.setText(labelTitle.format((str(path))))

@@ -65,9 +65,9 @@ class OWCounts2Deseq(OWBwBWidget):
             output_dir = os.path.join(top_dir, 'output')
             logfile = os.path.join(output_dir, 'log.txt')
 
-            volumes = {self.getDirectory('countstable'): counts_table,
-                       self.getDirectory('sampletable'): sample_table,
-                       self.output_dir_host: output_dir}
+            volumes = {counts_table : self.getDirectory('countstable'),
+                       sample_table : self.getDirectory('sampletable'),
+                       output_dir : self.output_dir_host }
 
             cmd = 'Rscript /home/root/counts2DESeq.R {} {} {} >& {}'.format(counts_table, sample_table, output_dir, logfile)
             commands = [cmd, "exit"]

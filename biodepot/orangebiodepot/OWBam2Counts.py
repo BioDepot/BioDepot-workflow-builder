@@ -67,8 +67,8 @@ class OWBam2Counts(OWBwBWidget):
             bamfiles = os.path.join(top_dir, 'bamfiles')
             logfile = os.path.join(bamfiles, 'log.txt')
 
-            volumes = {self.getDirectory('gtf'): gtf,
-                       self.getDirectory('bamfiles'): bamfiles}
+            volumes = {gtf : self.getDirectory('gtf'),
+                       bamfiles : self.getDirectory('bamfiles')}
 
             cmd = 'Rscript /home/root/bam2counts.R {} {} {} >& {}'.format(gtf, bamfiles, self.worker_numbers, logfile)
             commands = [cmd, "exit"]
