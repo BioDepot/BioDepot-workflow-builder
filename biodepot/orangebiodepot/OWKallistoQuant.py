@@ -23,9 +23,11 @@ class OWKallistoQuant(OWBwBWidget):
     hostOutputDir = settings.Setting('/data', schema_only=True)
     hostIndexFile = settings.Setting('/data/kallisto_hg38.idx', schema_only=True)
     hostFastqDir = settings.Setting('/data/fastq', schema_only=True)
-    pseudoBam = settings.Setting(False, schema_only=True)
+#    pseudoBam = settings.Setting(False, schema_only=True)
     nThreads = settings.Setting(1, schema_only=True)
     nThreadsChecked = settings.Setting(False, schema_only=True)
+    nBootstraps=settings.Setting(0, schema_only=True)
+    nBootstrapsChecked = settings.Setting(False, schema_only=True)
     hostIndexFileConnected = settings.Setting(False, schema_only=True)
     hostFastqDirConnected = settings.Setting(False, schema_only=True)
     
@@ -34,9 +36,9 @@ class OWKallistoQuant(OWBwBWidget):
         self.conOutputDir="/root/output"
         self.conFastqDir="/root/fastq"
         self.conIndexDir="/root/index"
-        for attr in ('hostFastqDir','hostIndexFile','hostOutputDir'):
-            path=getattr(self,attr)
-            setattr(self,attr,self.dockerClient.to_host_directory(path))
+        #for attr in ('hostFastqDir','hostIndexFile','hostOutputDir'):
+        #    path=getattr(self,attr)
+        #    setattr(self,attr,self.dockerClient.to_host_directory(path))
         self.setDirectories(self.conOutputDir,self.hostOutputDir)
         self.drawGUI()
 
@@ -58,9 +60,11 @@ class OWKallistoQuant(OWBwBWidget):
         self.browseHostFastqDirBtn=gui.button(self.hostFastqDirBox, self, "☰ Browse", callback=self.browseHostFastqDir, autoDefault=True, width=80, disabled=self.hostFastqDirConnected)
         
         parmBox = gui.vBox(optionsBox, "Optional flags")
-        gui.checkBox(parmBox, self, "pseudoBam", "Output pseudoBam files")
+#        gui.checkBox(parmBox, self, "pseudoBam", "Output pseudoBam files")
         gui.spin(parmBox, self, "nThreads", minv=1, maxv=128,
         label="Nthreads:", checked='nThreadsChecked')
+        gui.spin(parmBox, self, "nBootstraps", minv=1, maxv=128,
+        label="Bootstrap samples:", checked='nBootstrapsChecked')
         btnRun = gui.button(optionsBox, self, "Run", callback=self.OnRunClicked)
 
     def OnRunClicked(self):
@@ -76,9 +80,18 @@ class OWKallistoQuant(OWBwBWidget):
                 self.infoLabel.setText("Incorrect mapping of directory to " + conDir)
                 return
             volumes[conDir]=self.getDirectory(conDir)
-        volumes['/root/logs']=self.dockerClient.to_host_directory('/data/logs')
-        bareCmd=self.generateCmd(('kallisto', 'quant'),{"-i":self.conIndexFile,"-o":self.conOutputDir},args=[])
-        cmd="bash -c 'find "+ self.conFastqDir+"/*.fastq.* -type f | sort | xargs " + bareCmd + " >& /root/logs/log'"
+        
+        flags={"-i":self.conIndexFile,"-o":self.conOutputDir}
+        #if self.pseudoBam :
+            #flags['--pseudobam']=None
+        if self.nThreadsChecked :
+            flags['-t']=str(self.nThreads)
+        if self.nBootstrapsChecked :
+            flags['-b']=str(self.nBootstraps)
+        logFile=os.path.join(self.conOutputDir,'kallistoLog')
+        bareCmd=self.generateCmd(('kallisto', 'quant'),flags,args=[])
+        cmd="bash -c 'find "+ self.conFastqDir+"/*.fastq.* -type f | sort | xargs " + bareCmd + " >& {}'".format(logFile)
+#        self.infoLabel.setText(cmd)
         self.dockerRun(volumes,cmd)
 
     def Event_OnRunFinished(self):
@@ -96,7 +109,8 @@ class OWKallistoQuant(OWBwBWidget):
             self.hostFastqDirConnected = False
             self.hostFastqDir = None
         else:
-            self.hostFastqDir=self.dockerClient.to_host_directory(path)
+            #self.hostFastqDir=self.dockerClient.to_host_directory(path)
+            self.hostFastqDir=path
             self.hostFastqDirConnected = True
         self.setDirectories(self.conFastqDir,self.hostFastqDir)
         self.browseHostFastqDirBtn.setEnabled(not self.hostFastqDirConnected)
@@ -110,7 +124,8 @@ class OWKallistoQuant(OWBwBWidget):
             self.hostIndexFile = None
             self.hostIndexDir = None
         else:
-            self.hostIndexFile=self.dockerClient.to_host_directory(path)
+            #self.hostIndexFile=self.dockerClient.to_host_directory(path)
+            self.hostIndexFile=path
             self.hostIndexDir=os.path.dirname(self.hostIndexFile)
             self.hostIndexFileConnected = True
         self.setDirectories(self.conIndexDir,self.hostIndexDir)
@@ -124,7 +139,7 @@ class OWKallistoQuant(OWBwBWidget):
         if os.path.exists('/data'):
             defaultDir = '/data'
         self.hostOutputDir = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Output Directory", directory=defaultDir)
-        self.hostOutputDir=self.dockerClient.to_host_directory(self.hostOutputDir)
+        #self.hostOutputDir=self.dockerClient.to_host_directory(self.hostOutputDir)
         self.setDirectories(self.conOutputDir,self.hostOutputDir)
 
     def browseIndexFile(self):
@@ -132,7 +147,7 @@ class OWKallistoQuant(OWBwBWidget):
         if os.path.exists('/data'):
             defaultDir = '/data'
         self.hostIndexFile = QtWidgets.QFileDialog.getOpenFileName(self, "Locate Index File", defaultDir)[0]
-        self.hostIndexFile =self.dockerClient.to_host_directory(self.hostIndexFile)
+        #self.hostIndexFile =self.dockerClient.to_host_directory(self.hostIndexFile)
         self.hostIndexDir=os.path.dirname(self.hostIndexFile)
         self.setDirectories(self.conIndexDir,self.hostIndexDir)
         self.conIndexFile=os.path.normpath(str.join(os.sep,(self.conIndexDir,os.path.basename(self.hostIndexFile))))
@@ -142,7 +157,7 @@ class OWKallistoQuant(OWBwBWidget):
         if os.path.exists('/data'):
             defaultDir = '/data'
         self.hostFastqPath = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Fastq Directory", directory=defaultDir)
-        self.hostFastqPath=self.dockerClient.to_host_directory(self.hostFastqPath)
+        #self.hostFastqPath=self.dockerClient.to_host_directory(self.hostFastqPath)
         self.setDirectories(self.conFastqDir,self.hostFastqPath)
 
     def setRunTrigger(self):
