@@ -116,24 +116,23 @@ class DockerClient:
                 continue
             if container_id[:12] == self.bwb_instance_id:
                 for m in c['Mounts']:
-                    if 'docker.sock' in m['Source']:
-                        continue
-                    source = m['Source']
-                    destination = m['Destination']
+                    if not ('docker.sock' in m['Source']):
+                        source = m['Source']
+                        destination = m['Destination']
+                    break
                 break
 
         if not source or not destination:
             return path
 
-        destination = os.path.join(destination, '')
+        cleanDestination = os.path.normpath(destination)
+        cleanPath= os.path.normpath(path)
 
-        # if the path is not mapping from host, nothing will be done
-        if destination not in path:
-            return path
-
-        abspath = os.path.join(source, path[path.find(destination) + len(destination):])
+        # if the path is not mapping from host, will return None since it cannot be defined
+        if cleanDestination not in cleanPath:
+            return "bad mapping "+ cleanDestination + " "+cleanPath
+        abspath = os.path.normpath(str.join(os.sep,(source, path[path.find(destination) + len(destination):])))
         return abspath
-
 
 class DockerThread_BuildImage(QThread):
     build_process = pyqtSignal(str)

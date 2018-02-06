@@ -1,6 +1,6 @@
 import sys, os, json
 from Orange.widgets import widget, settings
-from .util.DockerClient import DockerClient
+from .util.DockerClient import DockerClient,PullImageThread
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtGui import QStandardItem, QFont
 from PyQt5.QtCore import QThread, QDir, Qt
@@ -199,12 +199,10 @@ class OWGenericTask(widget.OWWidget):
         self.btnAddMapping.clicked.connect(self.OnAddVMapping)
         self.btnDeleteMapping.clicked.connect(self.OnDeleteVMapping)
         self.lstMapping.doubleClicked.connect(self.OnVMapDoubleClicked)
-        self.btnRun.clicked.connect(self.OnRunContainer)
+        self.btnRun.clicked.connect(self.pull_image)
         self.btnRefreshImage.clicked.connect(self.OnRefreshImageClicked)
-
-
         self.InitializeUI()
-
+        
     def retranslateUi(self, Widget):
         _translate = QtCore.QCoreApplication.translate
         self.lblFormTitle.setText(_translate('Widget', 'Run your own container'))
@@ -231,6 +229,50 @@ class OWGenericTask(widget.OWWidget):
 
         if self.savedSettings:
             self._loadSettings(self.savedSettings)
+            
+    def pull_image(self):
+        #disable UI elements
+        self._enableUIElements(False)
+        imageName = self.cboDockerImage.currentText()
+        # get dir mapping
+        self.volumes = {}
+        for row in range(self.model_vmap.rowCount()):
+            sFrom = self.model_vmap.data(self.model_vmap.index(row, 0))
+            sTo = self.model_vmap.data(self.model_vmap.index(row, 1))
+            if not sFrom or not os.path.exists(sFrom): continue
+            if not sTo: continue
+            self.volumes[sFrom] = sTo
+            
+        self.commands = self.txtCommand.toPlainText()
+        #print(commands)
+        repoVersion=imageName.split(':')
+        self.repo=repoVersion[0];
+        self.version='latest'
+        if len(repoVersion) > 1:
+            self.version = repoVersion[1]
+        self.imageName=self.repo+':'+self.version
+        
+        selfContainerFlag=self.dockerClient.has_image(self.repo,self.version)
+        if selfContainerFlag:
+            self.run_container()
+        else:
+            self.pull_image_worker = PullImageThread(self.dockerClient, self.repo, self.version)
+            self.pull_image_worker.pull_progress.connect(self.pull_image_progress)
+            self.pull_image_worker.finished.connect(self.pull_image_finished)
+            self.lblMessage.setText('Pulling  ' + self.repo + ":" + self.version)
+            self.setStatusMessage("Downloading...")
+            self.progressBarInit()
+            self.is_running = True
+            self.pull_image_worker.start() 
+                     
+    def pull_image_progress(self, val):
+        self.progressBarSet(val)
+
+    def pull_image_finished(self):
+        self.lblMessage.setText('Finished pulling \'' + self.repo + ":" + self.version + '\'')
+        self.progressBarFinished()
+        self.run_container()
+        
 
     def closeEvent(self, evnt):
         self._saveSettings()
@@ -320,13 +362,13 @@ class OWGenericTask(widget.OWWidget):
                     self.model_vmap.item(otherSettings['SelectedOutput'], 2).setCheckState(Qt.Checked)
 
     def _saveSettings(self):
-        volumes = {}
+        self.volumes = {}
         for row in range(self.model_vmap.rowCount()):
             sFrom = self.model_vmap.data(self.model_vmap.index(row, 0))
             sTo = self.model_vmap.data(self.model_vmap.index(row, 1))
             if not sFrom or not os.path.exists(sFrom): continue
             if not sTo: continue
-            volumes[sFrom] = sTo
+            self.volumes[sFrom] = sTo
 
         selectIndex = 0
         while self.model_vmap.item(selectIndex):
@@ -339,7 +381,7 @@ class OWGenericTask(widget.OWWidget):
             'SelectedOutput': selectIndex,
             'Commands': self.txtCommand.toPlainText()
         }
-        self.savedSettings = json.dumps([volumes, otherSettings])
+        self.savedSettings = json.dumps([self.volumes, otherSettings])
 
     def _enableUIElements(self, enabled=True):
         self.btnAddMapping.setEnabled(enabled)
@@ -349,38 +391,11 @@ class OWGenericTask(widget.OWWidget):
         self.lstMapping.setEnabled(enabled)
         self.txtCommand.setReadOnly(not enabled)
 
-    def OnRunContainer(self):
-        #disable UI elements
-        self._enableUIElements(False)
-
-        imageName = self.cboDockerImage.currentText()
-        # get dir mapping
-        volumes = {}
-        for row in range(self.model_vmap.rowCount()):
-            sFrom = self.model_vmap.data(self.model_vmap.index(row, 0))
-            sTo = self.model_vmap.data(self.model_vmap.index(row, 1))
-            if not sFrom or not os.path.exists(sFrom): continue
-            if not sTo: continue
-            volumes[sFrom] = sTo
-
-        commands = self.txtCommand.toPlainText()
-        #print(commands)
-        repoVersion=imageName.split(':')
-        repo=repoVersion[0];
-        version='latest'
-        if len(repoVersion) > 1:
-            version = repoVersion[1]
-        imageName=repo+':'+version
-        selfContainerFlag=self.dockerClient.has_image(repo,version)
-        if not selfContainerFlag:
-            self.lblMessage.setText('Pulling ' + imageName + ' ...')
-            self.setStatusMessage('Pulling...')
-            self.dockerClient.pull_image(imageName)	
-        self.lblMessage.setText('Running ' + imageName + ' ...')
+    def run_container(self):
+        self.lblMessage.setText('Running ' + self.imageName + ' ...')
         self.setStatusMessage('Running...')
-
         # Run the container in a new thread
-        self.running_thread = GenericDockerRunner(self.dockerClient, imageName, volumes, commands)
+        self.running_thread = GenericDockerRunner(self.dockerClient, self.imageName, self.volumes, self.commands)
         self.running_thread.finished.connect(self.ThreadEvent_OnRunCompleted)
         self.running_thread.start()
 
