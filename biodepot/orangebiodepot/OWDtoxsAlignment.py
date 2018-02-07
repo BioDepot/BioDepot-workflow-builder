@@ -41,6 +41,10 @@ class OWDtoxsAlignment(widget.OWWidget):
         # folders that will created automatically
         self.result_folder_name = "Counts"
         self.aligns_folder_name = "Aligns"
+        
+        #add this to make sure the the checkboxes don't disable each other
+        if self.waitOnTrigger and self.auto_run:
+            self.auto_run=False
 
         # GUI
         box = gui.widgetBox(self.controlArea, "Info")
@@ -53,13 +57,16 @@ class OWDtoxsAlignment(widget.OWWidget):
         self.infoLabel.setWordWrap(True)
         self.triggerReceived=False
 
-        gui.checkBox(self.controlArea, self, 'auto_run', 'Run automatically when input set')
-        gui.checkBox(self.controlArea, self, 'waitOnTrigger','Run when trigger signal received')
+        self.auto_runBox=gui.checkBox(self.controlArea, self, 'auto_run', 'Run automatically when input set',callback=self.setRunType)
+        self.waitOnTriggerBox=gui.checkBox(self.controlArea, self, 'waitOnTrigger','Run when trigger signal received',callback=self.setRunType)
         self.btn_run = gui.button(self.controlArea, self, "Run", callback=self.btn_run_pushed)
         self.is_running = False
 
         self.setMinimumSize(500, 200)
 
+    def setRunType(self):
+        if self.waitOnTrigger and self.auto_run:
+            self.auto_run=False
     """
     Called when the user pushes 'Run'
     """
