@@ -33,7 +33,29 @@ class LocalContainerRunner(QThread):
         # Remove the container when it is finished
         self.docker.remove_container(self.containerId)
 
-
+class ConnectionDict:
+    def __init__(self, inputDict):
+        self._dict=inputDict #we do want the name not a copy - i.e. the inputDict should change
+        
+    def add (self, slot, connectionId=None):
+        if slot in self._dict:
+            self._dict[slot].append(connectionId)
+        else:
+            self._dict[slot]=[connectionId]
+            
+    def remove (self, slot, connectionId=None):
+        if slot in self._dict:
+            try:
+                self._dict[slot].remove(connectionId)
+            except ValueError:
+                pass            
+    def isConnected (self, slot):
+        if self._dict is None:
+            return False
+        if (slot in self._dict) and (self._dict[slot]):
+            return True
+        return False
+        
 class OWBwBWidget(widget.OWWidget):
 
     dockerClient = DockerClient('unix:///var/run/docker.sock', 'local')

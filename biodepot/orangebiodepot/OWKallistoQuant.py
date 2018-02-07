@@ -2,9 +2,9 @@ import os
 import glob
 from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient
-from orangebiodepot.util.BwBase import OWBwBWidget
+from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict
 from PyQt5 import QtWidgets, QtGui
-
+    
 class OWKallistoQuant(OWBwBWidget):
     name = "Kallisto Quant"
     description = 'Alignment and quantification of reads from fastq files'
@@ -28,8 +28,8 @@ class OWKallistoQuant(OWBwBWidget):
     nThreadsChecked = settings.Setting(False, schema_only=True)
     nBootstraps=settings.Setting(0, schema_only=True)
     nBootstrapsChecked = settings.Setting(False, schema_only=True)
-    hostIndexFileConnected = settings.Setting(False, schema_only=True)
-    hostFastqDirConnected = settings.Setting(False, schema_only=True)
+    #this is a dict of lists of form {inputSlot:(widgetId1,widgetId2..widgetIdN) where None is a valid entry for the case when there are no Multiple connections }
+    inputConnectionsStore = settings.Setting({},schema_only=True);
     
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
@@ -39,6 +39,7 @@ class OWKallistoQuant(OWBwBWidget):
         #for attr in ('hostFastqDir','hostIndexFile','hostOutputDir'):
         #    path=getattr(self,attr)
         #    setattr(self,attr,self.dockerClient.to_host_directory(path))
+        self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self.setDirectories(self.conOutputDir,self.hostOutputDir)
         self.drawGUI()
 
@@ -51,13 +52,13 @@ class OWKallistoQuant(OWBwBWidget):
         gui.lineEdit(outputBox, self, 'hostOutputDir')
         browseOutputBtn=gui.button(outputBox, self, "☰ Browse", callback=self.browseOutputDir, autoDefault=True, width=80)
         
-        self.hostIndexFileBox = gui.vBox(optionsBox, "Choose index file",disabled=self.hostIndexFileConnected)
-        self.hostIndexFileLedit=gui.lineEdit(self.hostIndexFileBox, self, 'hostIndexFile',disabled=self.hostIndexFileConnected)
-        self.browseIndexBtn=gui.button(self.hostIndexFileBox, self, "☰ Browse", callback=self.browseIndexFile, autoDefault=True, width=80, disabled=self.hostIndexFileConnected)
+        self.hostIndexFileBox = gui.vBox(optionsBox, "Choose index file",disabled=self.inputConnections.isConnected('hostIndexFile'))
+        self.hostIndexFileLedit=gui.lineEdit(self.hostIndexFileBox, self, 'hostIndexFile',disabled=self.inputConnections.isConnected('hostIndexFile'))
+        self.browseIndexBtn=gui.button(self.hostIndexFileBox, self, "☰ Browse", callback=self.browseIndexFile, autoDefault=True, width=80, disabled=self.inputConnections.isConnected('hostIndexFile'))
         
-        self.hostFastqDirBox = gui.vBox(optionsBox, "Choose fastq directory",disabled=self.hostFastqDirConnected)
-        self.hostFastqDirLedit=gui.lineEdit(self.hostFastqDirBox, self, 'hostFastqDir',disabled=self.hostFastqDirConnected)
-        self.browseHostFastqDirBtn=gui.button(self.hostFastqDirBox, self, "☰ Browse", callback=self.browseHostFastqDir, autoDefault=True, width=80, disabled=self.hostFastqDirConnected)
+        self.hostFastqDirBox = gui.vBox(optionsBox, "Choose fastq directory",disabled=self.inputConnections.isConnected('hostFastqDir'))
+        self.hostFastqDirLedit=gui.lineEdit(self.hostFastqDirBox, self, 'hostFastqDir',disabled=self.inputConnections.isConnected('hostFastqDir'))
+        self.browseHostFastqDirBtn=gui.button(self.hostFastqDirBox, self, "☰ Browse", callback=self.browseHostFastqDir, autoDefault=True, width=80, disabled=self.inputConnections.isConnected('hostFastqDir'))
         
         parmBox = gui.vBox(optionsBox, "Optional flags")
 #        gui.checkBox(parmBox, self, "pseudoBam", "Output pseudoBam files")
@@ -103,35 +104,34 @@ class OWKallistoQuant(OWBwBWidget):
         self.infoLabel.setText(message)
 
     def setHostFastqDir(self, path, sourceId=None):
-        #This only works for single connections
-        #change to Dict to keep track of connections
         if path is None:
-            self.hostFastqDirConnected = False
+            self.inputConnections.remove('hostFastqDir',sourceId)
             self.hostFastqDir = None
         else:
-            #self.hostFastqDir=self.dockerClient.to_host_directory(path)
             self.hostFastqDir=path
-            self.hostFastqDirConnected = True
+            self.inputConnections.add('hostFastqDir',sourceId)
+            
         self.setDirectories(self.conFastqDir,self.hostFastqDir)
-        self.browseHostFastqDirBtn.setEnabled(not self.hostFastqDirConnected)
-        self.hostFastqDirLedit.setEnabled(not self.hostFastqDirConnected)
-        self.hostFastqDirBox.setEnabled(not self.hostFastqDirConnected)
+        
+        self.browseHostFastqDirBtn.setEnabled(not self.inputConnections.isConnected('hostFastqDir'))
+        self.hostFastqDirLedit.setEnabled(not self.inputConnections.isConnected('hostFastqDir'))
+        self.hostFastqDirBox.setEnabled(not self.inputConnections.isConnected('hostFastqDir'))
 
 
     def setHostIndexFile(self, path, sourceId=None):
         if path is None:
-            self.hostIndexFileConnected = False
+            self.inputConnections.remove('hostIndexFile',sourceId)
             self.hostIndexFile = None
             self.hostIndexDir = None
         else:
-            #self.hostIndexFile=self.dockerClient.to_host_directory(path)
             self.hostIndexFile=path
             self.hostIndexDir=os.path.dirname(self.hostIndexFile)
-            self.hostIndexFileConnected = True
+            self.inputConnections.add('hostIndexFile',sourceId)
         self.setDirectories(self.conIndexDir,self.hostIndexDir)
-        self.browseIndexBtn.setEnabled(not self.hostIndexFileConnected)
-        self.hostIndexFileLedit.setEnabled(not self.hostIndexFileConnected)
-        self.hostIndexFileBox.setEnabled(not self.hostIndexFileConnected)
+        
+        self.browseIndexBtn.setEnabled(not self.inputConnections.isConnected('hostIndexFile'))
+        self.hostIndexFileLedit.setEnabled(not self.inputConnections.isConnected('hostIndexFile'))
+        self.hostIndexFileBox.setEnabled(not self.inputConnections.isConnected('hostIndexFile'))
         self.conIndexFile=os.path.normpath(str.join(os.sep,(self.conIndexDir,os.path.basename(self.hostIndexFile))))
         
     def browseOutputDir(self):
@@ -139,7 +139,6 @@ class OWKallistoQuant(OWBwBWidget):
         if os.path.exists('/data'):
             defaultDir = '/data'
         self.hostOutputDir = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Output Directory", directory=defaultDir)
-        #self.hostOutputDir=self.dockerClient.to_host_directory(self.hostOutputDir)
         self.setDirectories(self.conOutputDir,self.hostOutputDir)
 
     def browseIndexFile(self):
@@ -147,7 +146,6 @@ class OWKallistoQuant(OWBwBWidget):
         if os.path.exists('/data'):
             defaultDir = '/data'
         self.hostIndexFile = QtWidgets.QFileDialog.getOpenFileName(self, "Locate Index File", defaultDir)[0]
-        #self.hostIndexFile =self.dockerClient.to_host_directory(self.hostIndexFile)
         self.hostIndexDir=os.path.dirname(self.hostIndexFile)
         self.setDirectories(self.conIndexDir,self.hostIndexDir)
         self.conIndexFile=os.path.normpath(str.join(os.sep,(self.conIndexDir,os.path.basename(self.hostIndexFile))))
@@ -157,11 +155,12 @@ class OWKallistoQuant(OWBwBWidget):
         if os.path.exists('/data'):
             defaultDir = '/data'
         self.hostFastqPath = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Fastq Directory", directory=defaultDir)
-        #self.hostFastqPath=self.dockerClient.to_host_directory(self.hostFastqPath)
         self.setDirectories(self.conFastqDir,self.hostFastqPath)
 
     def setRunTrigger(self):
         if self.readyToGo():
             self.startJob
+
+            
 
     
