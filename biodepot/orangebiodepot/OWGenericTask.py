@@ -407,7 +407,7 @@ class OWGenericTask(widget.OWWidget):
 
         # notify next procedure
         # found any marked output channel
-        output_str = ''
+        output_str = 'Finished'
         i = 0
         while self.model_vmap.item(i):
             if self.model_vmap.item(i, 2).checkState():

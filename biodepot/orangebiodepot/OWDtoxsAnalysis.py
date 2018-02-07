@@ -197,6 +197,8 @@ class OWDtoxsAnalysis(widget.OWWidget):
 
             if self.host_param_dir and self.host_config_dir and self.Exp_Design_file:
                 self.infoLabel.setText('All set.\nWaiting to run...')
+                #run by default when all is set - TODO add a checkbox to this
+                self.start_analysis()
 
     def set_configs(self, path):
         if not type(path) is str:

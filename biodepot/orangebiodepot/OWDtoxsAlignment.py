@@ -20,11 +20,13 @@ class OWDtoxsAlignment(widget.OWWidget):
     inputs = [("References", str, "set_refs"),
               ("Seqs", str, "set_seqs"),
               ("Configs", str, "set_configs"),
-              ("Barcodes", str, "set_barcodes_file")]
+              ("Barcodes", str, "set_barcodes_file"),
+              ("Trigger",str,"onTrigger")]
     outputs = [("Counts", str)]
-
-    auto_run = Setting(True)
-
+   
+    hostDirectories = Setting({'refs': None, 'seqs': None, 'conf': None, 'counts': None, 'aligns': None, 'barcodes': None},schema_only=True)
+    auto_run=Setting(False, schema_only=True)
+    waitOnTrigger=Setting(False, schema_only=True)
     want_main_area = False
 
     def __init__(self):
@@ -33,8 +35,7 @@ class OWDtoxsAlignment(widget.OWWidget):
         # Docker Client
         # This client talks to your local docker
         self.docker = DockerClient('unix:///var/run/docker.sock', 'local')
-
-        self.hostDirectories = {'refs': None, 'seqs': None, 'conf': None, 'counts': None, 'aligns': None, 'barcodes': None}
+        
         self.labelText = {'refs': 'References: {0}', 'seqs': 'Sequences: {0}', 'conf': 'Configs: {0}', 'barcodes': 'Barcode file: {0}'}
 
         # folders that will created automatically
@@ -43,15 +44,17 @@ class OWDtoxsAlignment(widget.OWWidget):
 
         # GUI
         box = gui.widgetBox(self.controlArea, "Info")
-        self.lblRefs = gui.widgetLabel(box, 'References: Not Set')
-        self.lblSeqs = gui.widgetLabel(box, 'Sequences: Not Set')
-        self.lblConfigs = gui.widgetLabel(box, 'Configs: Not Set')
-        self.lblBarcodes = gui.widgetLabel(box, "Barcode file: Not Set")
+        self.lblRefs = gui.widgetLabel(box, 'References: Set') if self.hostDirectories['refs'] else gui.widgetLabel(box, 'References: Not Set')
+        self.lblSeqs = gui.widgetLabel(box, 'Sequences: Set') if self.hostDirectories['seqs'] else gui.widgetLabel(box, 'Sequences: Not Set')
+        self.lblConfigs = gui.widgetLabel(box, 'Configs: Set') if self.hostDirectories['conf'] else gui.widgetLabel(box, 'Configs: Not Set')
+        self.lblBarcodes = gui.widgetLabel(box, "Barcode file: Set") if self.hostDirectories['barcodes'] else gui.widgetLabel(box, 'Barcode file: Not Set')
 
         self.infoLabel = gui.widgetLabel(box, 'Waiting...')
         self.infoLabel.setWordWrap(True)
+        self.triggerReceived=False
 
         gui.checkBox(self.controlArea, self, 'auto_run', 'Run automatically when input set')
+        gui.checkBox(self.controlArea, self, 'waitOnTrigger','Run when trigger signal received')
         self.btn_run = gui.button(self.controlArea, self, "Run", callback=self.btn_run_pushed)
         self.is_running = False
 
@@ -72,6 +75,11 @@ class OWDtoxsAlignment(widget.OWWidget):
     """
     Set seqs
     """
+    def onTrigger(self, value, sourceId=None):
+        if value and self.waitOnTrigger:
+            self.triggerReceived=True
+            self.start_container()    
+    
     def set_seqs(self, path):
         self.__set_directory__('seqs', self.lblSeqs, path, startContainer=False)
 
@@ -94,10 +102,11 @@ class OWDtoxsAlignment(widget.OWWidget):
     def __set_directory__(self, key, ctrlLabel, path, startContainer = True):
         # When a user removes a connected Directory widget,
         # it sends a signal with path=None
+        # do not check for non-existence if waiting for signal (download)
         if path is None:
             self.hostDirectories[key] = None
             ctrlLabel.setText(self.labelText[key].format('Not Set'))
-        elif not os.path.exists(path):
+        elif not os.path.exists(path) and not self.waitOnTrigger:
             self.hostDirectories[key] = None
             ctrlLabel.setText(self.labelText[key].format('None existent directory: {}'.format(str(path))))
         else:
@@ -142,8 +151,8 @@ class OWDtoxsAlignment(widget.OWWidget):
         # Make sure both inputs are set
         all_set = all(value is not None for value in self.hostDirectories.values())
 
-        if all_set:
-            if not self.is_running and (self.auto_run or run_btn_pushed):
+        if all_set and not self.is_running:
+            if run_btn_pushed or (self.auto_run and not self.waitOnTrigger) or (self.waitOnTrigger and self.triggerReceived):
                 # Make sure the docker image is downloaded
                 if not self.docker.has_image(self.image_name, self.image_version):
                     self.pull_image()
