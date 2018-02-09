@@ -1,7 +1,8 @@
 import os
-from AnyQt.QtCore import QThread, pyqtSignal
-from Orange.widgets import widget
+from AnyQt.QtCore import QThread, pyqtSignal, Qt
+from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
+from PyQt5 import QtWidgets, QtGui
 
 class LocalContainerRunner(QThread):
     progress = pyqtSignal(int)
@@ -59,6 +60,7 @@ class ConnectionDict:
 class OWBwBWidget(widget.OWWidget):
 
     dockerClient = DockerClient('unix:///var/run/docker.sock', 'local')
+    #defaultFileIcon=QtGui.QIcon('/data/file.png')
 
     def __init__(self, image_name, image_tag):
         super().__init__()
@@ -69,7 +71,23 @@ class OWBwBWidget(widget.OWWidget):
         self._dockerCommands = None
         self._dockerEnvironments = None
         self._Flag_isRunning = False
-
+    """
+    GUI elements
+    """
+    def bwbFileEntry(self, widget, button, ledit, icon=defaultFileIcon,label=None,entryType='file'):
+        button.setStyleSheet("border: 1px solid #1a8ac6; border-radius: 2px;")
+        button.setIcon(icon)
+        ledit.setClearButtonEnabled(True)
+        ledit.setPlaceholderText("Enter {}".format(entryType))    
+        myLayout=QtGui.QHBoxLayout()
+        if label:
+            myLabel=QtGui.QLabel(label)
+            myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter) 
+            myLayout.addWidget(myLabel)
+        myLayout.addWidget(ledit)
+        myLayout.addWidget(button)
+        widget.layout().addLayout(myLayout)
+    
     def Event_OnRunFinished(self):
         raise Exception('Event_OnRunFinished not implemented!')
 
@@ -202,3 +220,4 @@ class OWBwBWidget(widget.OWWidget):
         if cmdStr:
             cmdStr[:-1]
         return cmdStr
+

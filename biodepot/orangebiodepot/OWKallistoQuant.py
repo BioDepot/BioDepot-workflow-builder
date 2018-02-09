@@ -41,6 +41,7 @@ class OWKallistoQuant(OWBwBWidget):
         #    setattr(self,attr,self.dockerClient.to_host_directory(path))
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self.setDirectories(self.conOutputDir,self.hostOutputDir)
+        self.defaultFileIcon=QtGui.QIcon('icons/file.png')
         self.drawGUI()
 
     def drawGUI(self):
@@ -48,18 +49,18 @@ class OWKallistoQuant(OWBwBWidget):
         self.infoLabel = gui.widgetLabel(controlBox, 'Waiting...')
         self.infoLabel.setWordWrap(True)
         optionsBox = gui.widgetBox(self.controlArea, "Options")
-        outputBox = gui.vBox(optionsBox, "Choose output directory")
-        gui.lineEdit(outputBox, self, 'hostOutputDir')
-        browseOutputBtn=gui.button(outputBox, self, "☰ Browse", callback=self.browseOutputDir, autoDefault=True, width=80)
+        self.outputLedit=gui.lineEdit(None, self, 'hostOutputDir')
+        self.browseOutputBtn=gui.button(None, self, "", callback=self.browseOutputDir, autoDefault=True, width=19, height=19)
+        self.bwbFileEntry(optionsBox,self.browseOutputBtn,self.outputLedit, label='Output directory:   ', entryType='directory')
         
-        self.hostIndexFileBox = gui.vBox(optionsBox, "Choose index file",disabled=self.inputConnections.isConnected('hostIndexFile'))
-        self.hostIndexFileLedit=gui.lineEdit(self.hostIndexFileBox, self, 'hostIndexFile',disabled=self.inputConnections.isConnected('hostIndexFile'))
-        self.browseIndexBtn=gui.button(self.hostIndexFileBox, self, "☰ Browse", callback=self.browseIndexFile, autoDefault=True, width=80, disabled=self.inputConnections.isConnected('hostIndexFile'))
+        self.hostIndexFileLedit=gui.lineEdit(None, self, 'hostIndexFile',disabled=self.inputConnections.isConnected('hostIndexFile'))
+        self.browseIndexBtn=gui.button(None, self, "", callback=self.browseIndexFile, autoDefault=True,  width=19, height=19, disabled=self.inputConnections.isConnected('hostIndexFile'))
+        self.bwbFileEntry(optionsBox,self.browseIndexBtn, self.hostIndexFileLedit, label='Index file:               ', entryType='file')
         
-        self.hostFastqDirBox = gui.vBox(optionsBox, "Choose fastq directory",disabled=self.inputConnections.isConnected('hostFastqDir'))
-        self.hostFastqDirLedit=gui.lineEdit(self.hostFastqDirBox, self, 'hostFastqDir',disabled=self.inputConnections.isConnected('hostFastqDir'))
-        self.browseHostFastqDirBtn=gui.button(self.hostFastqDirBox, self, "☰ Browse", callback=self.browseHostFastqDir, autoDefault=True, width=80, disabled=self.inputConnections.isConnected('hostFastqDir'))
-        
+        self.hostFastqDirLedit=gui.lineEdit(None, self, 'hostFastqDir',disabled=self.inputConnections.isConnected('hostFastqDir'))
+        self.browseHostFastqDirBtn=gui.button(None, self, "", callback=self.browseHostFastqDir, autoDefault=True, width=19, height=19, disabled=self.inputConnections.isConnected('hostFastqDir'))
+        self.bwbFileEntry(optionsBox,self.browseHostFastqDirBtn, self.hostFastqDirLedit, label='Fastq directory:      ', entryType='directory')      
+                           
         parmBox = gui.vBox(optionsBox, "Optional flags")
 #        gui.checkBox(parmBox, self, "pseudoBam", "Output pseudoBam files")
         gui.spin(parmBox, self, "nThreads", minv=1, maxv=128,
@@ -107,6 +108,7 @@ class OWKallistoQuant(OWBwBWidget):
         if path is None:
             self.inputConnections.remove('hostFastqDir',sourceId)
             self.hostFastqDir = None
+            self.hostFastqDirLedit.clear()
         else:
             self.hostFastqDir=path
             self.inputConnections.add('hostFastqDir',sourceId)
@@ -115,14 +117,13 @@ class OWKallistoQuant(OWBwBWidget):
         
         self.browseHostFastqDirBtn.setEnabled(not self.inputConnections.isConnected('hostFastqDir'))
         self.hostFastqDirLedit.setEnabled(not self.inputConnections.isConnected('hostFastqDir'))
-        self.hostFastqDirBox.setEnabled(not self.inputConnections.isConnected('hostFastqDir'))
-
 
     def setHostIndexFile(self, path, sourceId=None):
         if path is None:
             self.inputConnections.remove('hostIndexFile',sourceId)
             self.hostIndexFile = None
             self.hostIndexDir = None
+            self.hostIndexFileLedit.clear()
         else:
             self.hostIndexFile=path
             self.hostIndexDir=os.path.dirname(self.hostIndexFile)
@@ -131,7 +132,6 @@ class OWKallistoQuant(OWBwBWidget):
         
         self.browseIndexBtn.setEnabled(not self.inputConnections.isConnected('hostIndexFile'))
         self.hostIndexFileLedit.setEnabled(not self.inputConnections.isConnected('hostIndexFile'))
-        self.hostIndexFileBox.setEnabled(not self.inputConnections.isConnected('hostIndexFile'))
         self.conIndexFile=os.path.normpath(str.join(os.sep,(self.conIndexDir,os.path.basename(self.hostIndexFile))))
         
     def browseOutputDir(self):
@@ -154,8 +154,8 @@ class OWKallistoQuant(OWBwBWidget):
         defaultDir = '/root'
         if os.path.exists('/data'):
             defaultDir = '/data'
-        self.hostFastqPath = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Fastq Directory", directory=defaultDir)
-        self.setDirectories(self.conFastqDir,self.hostFastqPath)
+        self.hostFastqDir = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Fastq Directory", directory=defaultDir)
+        self.setDirectories(self.conFastqDir,self.hostFastqDir)
 
     def setRunTrigger(self):
         if self.readyToGo():
