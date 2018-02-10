@@ -60,7 +60,7 @@ class ConnectionDict:
 class OWBwBWidget(widget.OWWidget):
 
     dockerClient = DockerClient('unix:///var/run/docker.sock', 'local')
-    #defaultFileIcon=QtGui.QIcon('/data/file.png')
+    defaultFileIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/file.png')
 
     def __init__(self, image_name, image_tag):
         super().__init__()

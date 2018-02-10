@@ -41,7 +41,7 @@ class OWKallistoQuant(OWBwBWidget):
         #    setattr(self,attr,self.dockerClient.to_host_directory(path))
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self.setDirectories(self.conOutputDir,self.hostOutputDir)
-        self.defaultFileIcon=QtGui.QIcon('icons/file.png')
+        #self.defaultFileIcon=QtGui.QIcon('icons/file.png')
         self.drawGUI()
 
     def drawGUI(self):
