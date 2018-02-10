@@ -61,6 +61,9 @@ class OWBwBWidget(widget.OWWidget):
 
     dockerClient = DockerClient('unix:///var/run/docker.sock', 'local')
     defaultFileIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/file.png')
+    fileEntry=QtGui.QGridLayout()
+    fileEntry.setSpacing(5)
+    nextRow=1;
 
     def __init__(self, image_name, image_tag):
         super().__init__()
@@ -83,10 +86,11 @@ class OWBwBWidget(widget.OWWidget):
         if label:
             myLabel=QtGui.QLabel(label)
             myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter) 
-            myLayout.addWidget(myLabel)
-        myLayout.addWidget(ledit)
-        myLayout.addWidget(button)
-        widget.layout().addLayout(myLayout)
+            self.fileEntry.addWidget(myLabel,self.nextRow,0)
+        self.fileEntry.addWidget(ledit,self.nextRow,1)
+        self.fileEntry.addWidget(button,self.nextRow,2)
+        widget.layout().addLayout(self.fileEntry)
+        self.nextRow+=1
     
     def Event_OnRunFinished(self):
         raise Exception('Event_OnRunFinished not implemented!')
