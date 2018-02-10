@@ -41,7 +41,7 @@ class OWKallistoQuant(OWBwBWidget):
         #    setattr(self,attr,self.dockerClient.to_host_directory(path))
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self.setDirectories(self.conOutputDir,self.hostOutputDir)
-        #self.defaultFileIcon=QtGui.QIcon('icons/file.png')
+        self.defaultFileIcon=QtGui.QIcon('icons/file.png')
         self.drawGUI()
 
     def drawGUI(self):
@@ -51,17 +51,17 @@ class OWKallistoQuant(OWBwBWidget):
         optionsBox = gui.widgetBox(self.controlArea, "Options")
         self.outputLedit=gui.lineEdit(None, self, 'hostOutputDir')
         self.browseOutputBtn=gui.button(None, self, "", callback=self.browseOutputDir, autoDefault=True, width=19, height=19)
-        self.bwbFileEntry(optionsBox,self.browseOutputBtn,self.outputLedit, label='Output directory:   ', entryType='directory')
+        self.bwbFileEntry(optionsBox,self.browseOutputBtn,self.outputLedit, label='Output directory:', entryType='directory')
         
         self.hostIndexFileLedit=gui.lineEdit(None, self, 'hostIndexFile',disabled=self.inputConnections.isConnected('hostIndexFile'))
         self.browseIndexBtn=gui.button(None, self, "", callback=self.browseIndexFile, autoDefault=True,  width=19, height=19, disabled=self.inputConnections.isConnected('hostIndexFile'))
-        self.bwbFileEntry(optionsBox,self.browseIndexBtn, self.hostIndexFileLedit, label='Index file:               ', entryType='file')
+        self.bwbFileEntry(optionsBox,self.browseIndexBtn, self.hostIndexFileLedit, label='Index file:', entryType='file')
         
         self.hostFastqDirLedit=gui.lineEdit(None, self, 'hostFastqDir',disabled=self.inputConnections.isConnected('hostFastqDir'))
         self.browseHostFastqDirBtn=gui.button(None, self, "", callback=self.browseHostFastqDir, autoDefault=True, width=19, height=19, disabled=self.inputConnections.isConnected('hostFastqDir'))
-        self.bwbFileEntry(optionsBox,self.browseHostFastqDirBtn, self.hostFastqDirLedit, label='Fastq directory:      ', entryType='directory')      
+        self.bwbFileEntry(optionsBox,self.browseHostFastqDirBtn, self.hostFastqDirLedit, label='Fastq directory: ', entryType='directory')      
                            
-        parmBox = gui.vBox(optionsBox, "Optional flags")
+        parmBox = gui.vBox(optionsBox, " ")
 #        gui.checkBox(parmBox, self, "pseudoBam", "Output pseudoBam files")
         gui.spin(parmBox, self, "nThreads", minv=1, maxv=128,
         label="Nthreads:", checked='nThreadsChecked')

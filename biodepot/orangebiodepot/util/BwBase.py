@@ -85,11 +85,12 @@ class OWBwBWidget(widget.OWWidget):
         myLayout=QtGui.QHBoxLayout()
         if label:
             myLabel=QtGui.QLabel(label)
-            myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter) 
+            myLabel.setAlignment(Qt.AlignLeft | Qt.AlignVCenter) 
             self.fileEntry.addWidget(myLabel,self.nextRow,0)
         self.fileEntry.addWidget(ledit,self.nextRow,1)
         self.fileEntry.addWidget(button,self.nextRow,2)
-        widget.layout().addLayout(self.fileEntry)
+        if self.nextRow == 1:
+            widget.layout().addLayout(self.fileEntry)
         self.nextRow+=1
     
     def Event_OnRunFinished(self):
