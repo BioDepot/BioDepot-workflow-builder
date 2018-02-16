@@ -286,11 +286,11 @@ class OWImageBuilder(widget.OWWidget):
         self.mainArea.layout().addLayout(self.vlayoutBase)
         self.mainArea.layout().setContentsMargins(0, 0, 0, 0)
 
-
+        #LHH commented out to add scrollbars 
         # set window size
-        width = 900
-        height = 700
-        self.mainArea.setMinimumSize(width, height)
+        #width = 900
+        #height = 700
+        #self.mainArea.setMinimumSize(width, height)
 
         # initialize UI components
         self.retranslateUi(self)
@@ -309,7 +309,14 @@ class OWImageBuilder(widget.OWWidget):
         self.cboBaseImage.currentIndexChanged.connect(self.OnBaseImageSelectChanged)
         self.edtPackageName.textChanged.connect(self.OnPackageNameChanged)
         self.model_package.itemChanged.connect(self.OnPackageListSelectedChanged)
-
+        
+        #LHH patch to add scrollbars
+        self.scroll_area = QtWidgets.QScrollArea(
+            verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
+        )
+        self.scroll_area.setWidget(self.mainContent)
+        self.scroll_area.setWidgetResizable(True)
+        self.mainArea.layout().addWidget(self.scroll_area)
         self.InitializeUI()
         #self.show()
 
@@ -616,7 +623,7 @@ class OWImageBuilder(widget.OWWidget):
             msg.setInformativeText("Typical image name:\n    registry/image-name[:version] \n\n"
                                    "For example: \n    biodepot/bwb:latest")
             msg.setIcon(QtWidgets.QMessageBox.Warning)
-            msg.exec()
+            #msg.exec()
             self.edtImageName.setFocus()
             return
 
