@@ -84,7 +84,7 @@ RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
 
 #devfiles
 
-RUN apt-get update && apt-get install -y wget geany firefox inkscape
+RUN apt-get update && apt-get install -y wget geany firefox inkscape gimp openssh-client
 
 #set up some config files
 COPY fluxbox_config/ /root/.fluxbox/

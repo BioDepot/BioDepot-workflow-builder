@@ -133,7 +133,7 @@ class DockerClient:
                         self.volumeDestination = m['Destination']
                     return
 
-    def to_host_directory(self, path):
+    def to_host_directory(self, path, returnNone=False):
         if not  self.volumeSource or not self.volumeDestination:
             return path
         cleanDestination = os.path.normpath(self.volumeDestination)
@@ -146,6 +146,8 @@ class DockerClient:
 
         # if the path is not mapping from host, will return path
         if cleanDestination not in cleanPath:
+            if returnNone:
+                return None
             return path
         abspath = os.path.normpath(str.join(os.sep,(cleanSource, path[path.find(cleanDestination) + len(cleanDestination):])))
         return abspath

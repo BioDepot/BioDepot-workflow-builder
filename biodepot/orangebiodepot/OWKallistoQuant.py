@@ -18,15 +18,14 @@ class OWKallistoQuant(OWBwBWidget):
     docker_image_name = "biodepot/kallisto"
     docker_image_tag = "latest"
     setting=settings.Setting
-    inputs = [("fastqDir", str, 'setfastqDir', widget.Multiple),
+    inputs = [("fastqFiles", str, 'setfastqFiles', widget.Multiple),
               ("indexFile", str, 'setindexFile')]
     outputs = [("outputDir", str)]
     
     #persistent settings
     outputDir = settings.Setting('/data', schema_only=True)
     indexFile = settings.Setting('/data/kallisto_hg38.idx', schema_only=True)
-    fastqDir = settings.Setting('/data/fastq', schema_only=True)
-#    pseudoBam = settings.Setting(False, schema_only=True)
+    fastqFiles = settings.Setting('/data/fastq', schema_only=True)
     nThreads = settings.Setting(1, schema_only=True)
     nThreadsChecked = settings.Setting(False, schema_only=True)
     nBootstraps=settings.Setting(0, schema_only=True)
@@ -36,18 +35,6 @@ class OWKallistoQuant(OWBwBWidget):
     
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        self.con=ContainerPaths()
-        self.con.outputDir="/root/output"
-        self.con.fastqDir="/root/fastq"
-        self.con.indexDir="/root/index"
-        self.inputConnections=ConnectionDict(self.inputConnectionsStore)
-        self.setDirectories(self.con.outputDir,self.outputDir)
-        #init gui elements
-        self.ledit=BwbGuiElement()
-        self.button=BwbGuiElement()
-        self.checkbox=BwbGuiElement()
-        self.checkboxValue=BwbGuiValue()
-        self.spin=BwbGuiElement()
         self.data={
             'name':'Kallisto Quant',
             'description':'Alignment and quantification of reads from fastq files',
@@ -58,17 +45,23 @@ class OWKallistoQuant(OWBwBWidget):
             'docker_image_name' : 'biodepot/kallisto',
             'docker_image_tag' : 'latest',
             'persistentSettings' : 'all',
-            'inputs'   : OrderedDict([ ('indexFile', str),
-                                       ('fastqDir', str)
+            'command' : 'kallisto quant',
+            'inputTrigger' : True,
+            'inputs'   : OrderedDict([ ('indexFile', {'type':str, 'callback' : None}),
+                                       ('fastqFiles',  {'type':str, 'callback' : None})
                                     ]),
-            'outputs'  : OrderedDict([ ('outputDir', str)
+            'outputs'  : OrderedDict([ ('outputDir', {'type':str, 'output' : {'value': 'outputDir', 'type': str, 'valueType' :'attribute'}, 'callback' : None})
                                     ]),
-            'requiredParameters' : ['outputDir','indexFile','fastqDir'],
-            'parameters': OrderedDict([('outputDir',{'flags':['-i','--output-dir='], 'label':'Output directory', 'type': "directory"}),
+            'volumeMappings' : [{'conVolume':'/root/output','bwbVolume':'outputDir','default':'/data/output'},
+                                {'conVolume':'/root/fastq' , 'bwbVolume':'fastqFiles' ,'default':'/data/fastq'},
+                                {'conVolume':'/root/reference', 'bwbVolume':'indexFile','default':'/data/reference'}
+                               ],
+            'requiredParameters' : ['outputDir','indexFile','fastqFiles'],
+            'parameters': OrderedDict([('outputDir',{'flags':['-o','--output-dir='], 'label':'Output directory', 'type': "directory"}),
                                        ('indexFile',{'flags':['-i','--index='], 'label':'Index file', 'type':'file'}),
-                                       ('fastqDir' ,{'flags':[],'label':'fastq directory', 'type': "directory",'filePattern':["*.fastq.*"]}),
+                                       ('fastqFiles' ,{'flags':[],'label':'fastq files', 'type': "files",'filePattern':["*.fastq.*"]}),
                                        ('bias',     {'flags':['--bias'],'label':'Perform sequence based bias correction','type': 'binary'}),
-                                       ('bootstrap',{'flags':['-b','--bootstrap-samples='],'label':'Number of bootstrap samples','type': 'int','default':0}),
+                                       ('bootstrap',{'flags':['-b','--bootstrap-samples='],'label':'Number of bootstrap samples','type': 'int','default': 1}),
                                        ('seed',     {'flags':['--seed='],'label':'Seed for bootstrap sampling','type': 'int','gui':'Ledit', 'default' : 42}),
                                        ('plaintext',{'flags':['--plaintext'],'label':'Output plaintext instead of HDF5','type': 'bool', 'default' : False}),                                         
                                        ('fusion',   {'flags':['--fusion'],'label':'Search for fusion genes','type': 'bool', 'default' : False}),
@@ -86,44 +79,40 @@ class OWKallistoQuant(OWBwBWidget):
                            ]
                           )
         }
+        self.initVolumes()
+        self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-
-    def OnRunClicked(self):
-        self.startJob()
-
-    def OnSettingsChanged(self):
-        self.drawGui()
-
+    
     def startJob(self):
-        volumes = {}
-        for conDir in (self.con.outputDir,self.con.fastqDir,self.con.indexDir):
-            if not self.getDirectory(conDir):
-                self.infoLabel.setText("Incorrect mapping of directory to " + conDir)
-                return
-            volumes[conDir]=self.getDirectory(conDir)
-        
-        flags={"-i":self.con.indexFile,"-o":self.con.outputDir}
-        if self.nThreadsChecked :
-            flags['-t']=str(self.nThreads)
-        if self.nBootstrapsChecked :
-            flags['-b']=str(self.nBootstraps)
-        logFile=os.path.join(self.con.outputDir,'kallistoLog')
-        bareCmd=self.generateCmd(('kallisto', 'quant'),flags,args=[])
-        cmd="bash -c 'find "+ self.con.fastqDir+"/*.fastq.* -type f | sort | xargs " + bareCmd + " >& {}'".format(logFile)
-#        self.infoLabel.setText(cmd)
-        self.dockerRun(volumes,cmd)
+        self.hostVolumes = {}
+        #check for missing parameters and volumes
+        missingParms=self.checkRequiredParms()
+        if missingParms:
+            self.infoLabel.setText("missing required parameters: {}".format(missingParms))
+            return
+        missingVols=self.getRequiredVols()
+        if missingVols:
+            self.infoLabel.setText("missing or incorrect volume mappings to: {}".format(missingVols))
+            return
+        cmd=self.generateCmdFromData()
+        #cmd="bash -c 'find "+ self.con.fastqFiles +"/*.fastq.* -type f | sort | xargs " + bareCmd + "'"
+        #sys.stderr.write("{}\n".format(bareCmd))
+        sys.stderr.write("{}\n".format(cmd))
+        for c,v in self.hostVolumes.items():
+            sys.stderr.write("{}:{}\n".format(v,c))
+        self.dockerRun(self.hostVolumes,cmd)
 
+    #minimum event handlers
     def Event_OnRunFinished(self):
         self.infoLabel.setText("Finished")
-        self.send("outputDir", self.outputDir)
-        #self.send("runTrigger", "done")
         
     def Event_OnRunMessage(self, message):
         self.infoLabel.setText(message)
-    
-    def setfastqDir(self, path, sourceId=None):
-        self.setDir(path,'fastqDir',sourceId=sourceId)
+        
+    #input callbacks
+    def setfastqFiles(self, path, sourceId=None):
+        self.setFile(path,'fastqFiles',sourceId=sourceId)
 
     def setindexFile(self, path, sourceId=None):
         self.setFile(path,'indexFile',sourceId=sourceId)
-    
+
