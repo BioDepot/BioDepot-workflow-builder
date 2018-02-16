@@ -7,6 +7,12 @@ from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
 from PyQt5 import QtWidgets, QtGui
 
+from AnyQt.QtWidgets import (
+    QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
+    QDoubleSpinBox, QComboBox, QSpinBox, QListView, QLabel,
+    QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
+    QSizePolicy, QApplication, QCheckBox
+)
 #dummy classes
 class ContainerPaths():
     pass
@@ -117,7 +123,7 @@ class OWBwBWidget(widget.OWWidget):
     def initVolumes(self):
         for mapping in self.data['volumeMappings']:
             bwbVolAttr=mapping['bwbVolume']
-            if self.data['parameters'][bwbVolAttr]['type'] is 'file' or self.data['parameters'][bwbVolAttr]['type'] is 'files':
+            if self.data['parameters'][bwbVolAttr]['type'] is 'file':
               bwbVolAttr= bwbVolAttr+'Dir'
             if not hasattr(self, bwbVolAttr) :
                 setattr(self,bwbVolAttr,None)
@@ -189,16 +195,24 @@ class OWBwBWidget(widget.OWWidget):
     GUI elements
     """
     def drawGUI(self):
-        self.nextRow=1
-        consoleBox = gui.widgetBox(self.controlArea, "Status")
+        self.scroll_area = QScrollArea(
+            verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
+        )
+        self.bigBox=gui.widgetBox(self.controlArea)
+        self.scroll_area.setWidget(self.bigBox)
+        self.scroll_area.setWidgetResizable(True)
+        self.controlArea.layout().addWidget(self.scroll_area)
+        
+        consoleBox = gui.widgetBox(self.bigBox, "Status")
         self.infoLabel = gui.widgetLabel(consoleBox, 'Waiting...')
         self.infoLabel.setWordWrap(True)
-        self.requiredBox = gui.widgetBox(self.controlArea, "Required parameters")
-        self.optionalBox = gui.widgetBox(self.controlArea, "Optional parameters")
+        self.requiredBox = gui.widgetBox(self.bigBox, "Required parameters")
+        self.optionalBox = gui.widgetBox(self.bigBox, "Optional parameters")
         self.drawRequiredElements()
         self.drawOptionalElements()
-        controlBox = gui.vBox(self.controlArea, "Execution controls")
+        controlBox = gui.vBox(self.bigBox, "Execution controls")
         btnRun = gui.button(controlBox, self, "Run", callback=self.OnRunClicked)
+  
 
     def OnRunClicked(self):
         self.startJob()
@@ -379,12 +393,9 @@ class OWBwBWidget(widget.OWWidget):
             setattr(self,dirAttr,os.path.dirname(myFile))
             self.setDirectoriesAttr(dirAttr)
         elif filetype is 'files':
-            myFiles=QtWidgets.QFileDialog.getOpenFileNames(self, "Locate file", defaultDir)[0]
+            myFiles=QtWidgets.QFileDialog.getOpenFileNames(self, "Locate file", defaultDir)
             if myFiles:
-                setattr(self,attr, ' '.join(myFiles))
-                dirAttr=attr+"Dir"
-                setattr(self,dirAttr,os.path.dirname(myFiles[0]))
-                self.setDirectoriesAttr(dirAttr)               
+                setattr(self,attr, ' '.join(myFiles[0]))
             else:
                 setattr(self,attr,None)
         else:
