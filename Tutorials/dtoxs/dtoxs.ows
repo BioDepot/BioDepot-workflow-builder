@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme description="" title="dtoxs plate-2" version="2.0">
+	<nodes>
+		<node id="0" name="Directory" position="(74.0, 143.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="references" version="" />
+		<node id="1" name="Directory" position="(73.0, 245.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="fastq files" version="" />
+		<node id="2" name="Dtoxs Alignment" position="(364.0, 214.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxsAlignment.OWDtoxsAlignment" title="Dtoxs Alignment" version="" />
+		<node id="3" name="Dtoxs Analysis" position="(574.0, 212.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxsAnalysis.OWDtoxsAnalysis" title="Dtoxs Analysis" version="" />
+		<node id="4" name="Directory" position="(763.0, 206.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="Results" version="" />
+		<node id="5" name="Data Table" position="(770.0, 335.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Data Table" version="" />
+		<node id="6" name="Directory" position="(78.0, 470.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="Configs" version="" />
+		<node id="7" name="Directory" position="(358.0, 92.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDirectory.OWDirectory" title="Params" version="" />
+		<node id="8" name="Custom Container" position="(74.0, 41.0)" project_name="Bwb" qualified_name="orangebiodepot.OWGenericTask.OWGenericTask" title="Download files" version="" />
+		<node id="9" name="File" position="(78.0, 350.0)" project_name="Bwb" qualified_name="orangebiodepot.OWFile.OWBamFile" title="Barcodes" version="" />
+	</nodes>
+	<links>
+		<link enabled="true" id="0" sink_channel="Counts" sink_node_id="3" source_channel="Counts" source_node_id="2" />
+		<link enabled="true" id="1" sink_channel="Dir" sink_node_id="4" source_channel="Results" source_node_id="3" />
+		<link enabled="true" id="2" sink_channel="Data" sink_node_id="5" source_channel="Top 40" source_node_id="3" />
+		<link enabled="true" id="3" sink_channel="Configs" sink_node_id="3" source_channel="Dir" source_node_id="6" />
+		<link enabled="true" id="4" sink_channel="Params" sink_node_id="3" source_channel="Dir" source_node_id="7" />
+		<link enabled="true" id="5" sink_channel="Seqs" sink_node_id="2" source_channel="Dir" source_node_id="1" />
+		<link enabled="true" id="6" sink_channel="Configs" sink_node_id="2" source_channel="Dir" source_node_id="6" />
+		<link enabled="true" id="7" sink_channel="References" sink_node_id="2" source_channel="Dir" source_node_id="0" />
+		<link enabled="true" id="8" sink_channel="Trigger" sink_node_id="2" source_channel="Output" source_node_id="8" />
+		<link enabled="true" id="9" sink_channel="Barcodes" sink_node_id="2" source_channel="File" source_node_id="9" />
+	</links>
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties format="literal" node_id="0">{'dirname': '/data/tutorials/dtoxs/References', '__version__': 1, 'controlAreaVisible': True, 'inputConnections': {}, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x01\xff\x00\x00\x01\x97\x00\x00\x02:\x00\x00\x00\x00\x00\x00\x01\xff\x00\x00\x01\x97\x00\x00\x02:\x00\x00\x00\x00\x00\x00\x00\x00\x06@'}</properties>
+		<properties format="literal" node_id="1">{'dirname': '/data/tutorials/dtoxs/Seqs', '__version__': 1, 'controlAreaVisible': True, 'inputConnections': {}, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00\xe9\x00\x00\x01\xff\x00\x00\x02\x80\x00\x00\x02U\x00\x00\x00\xe9\x00\x00\x02\x17\x00\x00\x02\x80\x00\x00\x02R\x00\x00\x00\x00\x00\x00\x00\x00\x06@'}</properties>
+		<properties format="literal" node_id="2">{'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00\xff\x00\x00\x01\x90\x00\x00\x03p\x00\x00\x02\x8a\x00\x00\x00\xff\x00\x00\x01\x90\x00\x00\x03p\x00\x00\x02\x8a\x00\x00\x00\x00\x00\x00\x00\x00\x06@', 'controlAreaVisible': True, 'waitOnTrigger': True, '__version__': 1, 'auto_run': False, 'hostDirectories': {'seqs': '/data/tutorials/dtoxs/Seqs', 'aligns': '/data/tutorials/dtoxs/Aligns', 'barcodes_basename': 'barcodes_trugrade_96_set1.dat', 'counts': '/data/tutorials/dtoxs/Counts', 'barcodes': '/data/tutorials/dtoxs/barcodes_trugrade_96_set1.dat', 'conf': '/data/tutorials/dtoxs/Configs', 'refs': '/data/tutorials/dtoxs/References'}}</properties>
+		<properties format="literal" node_id="3">{'__version__': 1, 'controlAreaVisible': True, 'Exp_Design_file': '/data/tutorials/dtoxs/RNAseq-Experiment-Design.20150409.txt', 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x03$\x00\x00\x00\x00\x00\x00\x05c\x00\x00\x01.\x00\x00\x03$\x00\x00\x00\x18\x00\x00\x05c\x00\x00\x01+\x00\x00\x00\x00\x00\x00\x00\x00\x06@'}</properties>
+		<properties format="literal" node_id="4">{'dirname': '/data/tutorials/dtoxs/Results', '__version__': 1, 'controlAreaVisible': True, 'inputConnections': {None: '/data/tutorials/dtoxs/Results'}, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x03$\x00\x00\x00W\x00\x00\x04\xbb\x00\x00\x00\xad\x00\x00\x03$\x00\x00\x00o\x00\x00\x04\xbb\x00\x00\x00\xaa\x00\x00\x00\x00\x00\x00\x00\x00\x06@'}</properties>
+		<properties format="pickle" node_id="5">gAN9cQAoWBAAAABjb250ZXh0X3NldHRpbmdzcQFdcQJjT3JhbmdlLndpZGdldHMuc2V0dGluZ3MK
+Q29udGV4dApxAymBcQR9cQUoWAoAAABhdHRyaWJ1dGVzcQZ9cQcoWAoAAABDb25kaXRpb24ycQhd
+cQkoWAMAAABBTEVxClgDAAAARE9NcQtYAwAAAERUUHEMWAMAAABFTlRxDVgDAAAATE9QcQ5YAwAA
+AFNPUnEPWAcAAABTT1IrVVJTcRBYAwAAAFNVTnERWAcAAABTVU4rQUxFcRJYBwAAAFNVTitET01x
+E1gHAAAAU1VOK0xPUHEUWAcAAABTVU4rVVJTcRVYAwAAAFRSU3EWWAcAAABUUlMrRE9NcRdYBwAA
+AFRSUytMT1BxGFgHAAAAVFJTK1VSU3EZZVgGAAAAbG9nQ1BNcRpLAlgFAAAAbG9nRkNxG0sCWAYA
+AABQVmFsdWVxHEsCWAoAAABDb25kaXRpb24xcR1dcR5YBAAAAENUUkxxH2FYBAAAAENlbGxxIF1x
+IVgBAAAAQXEiYVgFAAAAUGxhdGVxI11xJFgBAAAAMXElYXVYBQAAAG1ldGFzcSZ9cSdYBAAAAEdl
+bmVxKEsDc1gEAAAAdGltZXEpR0HWohX1eMBZWAYAAAB2YWx1ZXNxKn1xKyhYDQAAAHNlbGVjdGVk
+X2NvbHNxLF1xLVgLAAAAX192ZXJzaW9uX19xLksBWA0AAABzZWxlY3RlZF9yb3dzcS9dcTB1dWJh
+WA4AAABjb2xvcl9ieV9jbGFzc3ExiFgOAAAAZGlzdF9jb2xvcl9SR0JxMihL3EvcS9xL/3RxM1gS
+AAAAY29udHJvbEFyZWFWaXNpYmxlcTSIWAsAAABhdXRvX2NvbW1pdHE1iFgLAAAAc2VsZWN0X3Jv
+d3NxNohYEgAAAHNob3dfZGlzdHJpYnV0aW9uc3E3iVgVAAAAc2hvd19hdHRyaWJ1dGVfbGFiZWxz
+cTiIaC5LAVgTAAAAc2F2ZWRXaWRnZXRHZW9tZXRyeXE5QzIB2dDLAAIAAAAAAfAAAAEiAAAFDwAA
+AzAAAAHwAAABOgAABQ8AAAMtAAAAAAAAAAAGQHE6dS4=
+</properties>
+		<properties format="literal" node_id="6">{'dirname': '/data/tutorials/dtoxs/Configs', '__version__': 1, 'controlAreaVisible': True, 'inputConnections': {}, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01V\x00\x00\x01\xff\x00\x00\x02\xed\x00\x00\x02U\x00\x00\x01V\x00\x00\x02\x17\x00\x00\x02\xed\x00\x00\x02R\x00\x00\x00\x00\x00\x00\x00\x00\x06@'}</properties>
+		<properties format="literal" node_id="7">{'dirname': '/data/tutorials/dtoxs/Params', '__version__': 1, 'controlAreaVisible': True, 'inputConnections': {}, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x03$\x00\x00\x00\x00\x00\x00\x04\xbb\x00\x00\x00V\x00\x00\x03$\x00\x00\x00\x18\x00\x00\x04\xbb\x00\x00\x00S\x00\x00\x00\x00\x00\x00\x00\x00\x06@'}</properties>
+		<properties format="literal" node_id="8">{'__version__': 1, 'savedSettings': '[{"/data/": "/data"}, {"Image": "biodepot/bwb:latest", "SelectedOutput": 1, "Commands": "/root/tutorials/dtoxs/download_reference.sh"}]', 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x03$\x00\x00\x00\x00\x00\x00\x05\xf5\x00\x00\x02\xaa\x00\x00\x03$\x00\x00\x00\x18\x00\x00\x05\xf5\x00\x00\x02\xa7\x00\x00\x00\x00\x00\x00\x00\x00\x06@', 'controlAreaVisible': True}</properties>
+		<properties format="literal" node_id="9">{'filename': '/data/tutorials/dtoxs/barcodes_trugrade_96_set1.dat', '__version__': 1, 'controlAreaVisible': True, 'inputConnections': {}, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02J\x00\x00\x01C\x00\x00\x03\xe1\x00\x00\x01~\x00\x00\x02J\x00\x00\x01C\x00\x00\x03\xe1\x00\x00\x01~\x00\x00\x00\x00\x00\x00\x00\x00\x06@'}</properties>
+	</node_properties>
+</scheme>

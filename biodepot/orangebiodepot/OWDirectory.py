@@ -22,6 +22,13 @@ class OWDirectory(widget.OWWidget):
     
     def __init__(self):
         super().__init__()
+        css = '''
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
+        QPushButton:pressed { background-color: #158805; border-style: inset;}
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
+        QPushButton:hover {background-color: #1588f5; }
+        '''  
+        self.setStyleSheet(css)
         icon=QtGui.QIcon('/biodepot/orangebiodepot/icons/bluefile.png')
         disabledFlag=True
         if not self.inputConnections:
