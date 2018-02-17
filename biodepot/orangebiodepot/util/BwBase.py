@@ -211,8 +211,15 @@ class OWBwBWidget(widget.OWWidget):
         self.drawRequiredElements()
         self.drawOptionalElements()
         controlBox = gui.vBox(self.bigBox, "Execution controls")
-        btnRun = gui.button(controlBox, self, "Run", callback=self.OnRunClicked)
-  
+        btnRun = gui.button(controlBox, self, "Start", callback=self.OnRunClicked)
+        css = '''
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
+        QPushButton:pressed { background-color: #158805; border-style: inset;}
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
+        QPushButton:hover {background-color: #1588f5; }
+        ''' 
+        btnRun.setStyleSheet(css)
+        btnRun.setFixedSize(50,20)
 
     def OnRunClicked(self):
         self.startJob()
@@ -469,7 +476,7 @@ class OWBwBWidget(widget.OWWidget):
             ledit.clear()
         else:
             if self.data['parameters'][attr]['type'] is 'files' :
-                setattr(self,attr,re.split(r'[ ,;]',path))
+                setattr(self,attr,path)
                 #only store the path for the first file
                 #it will work for manually entered files in different directories if the files are accessible via another mountpoint
                 setattr(self,dirAttr,os.path.dirname(path[0]))     

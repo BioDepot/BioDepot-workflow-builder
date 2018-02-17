@@ -17,23 +17,32 @@ class OWDirectory(widget.OWWidget):
 
     # Jimmy March-28-2017, persisting path when we reload workflow, the path will still there.
     #    use schema_only to ensure the stored path only loaded from .ows files
-    directory_path = settings.Setting('', schema_only=True)
-
+    dirname= settings.Setting('', schema_only=True)
+    inputConnections = settings.Setting({},schema_only=True)
+    
     def __init__(self):
         super().__init__()
-
-        self.dir_edit = gui.lineEdit(None, self, "directory_path") #QtWidgets.QLineEdit()
-        self.btn_dir = gui.button(None, self, "☰", callback=self.get_dir, autoDefault=False)
-
-        self.buttonsArea.layout().addWidget(self.btn_dir)
+        icon=QtGui.QIcon('/biodepot/orangebiodepot/icons/bluefile.png')
+        disabledFlag=True
+        if not self.inputConnections:
+            disabledFlag=False
+        self.dir_edit = gui.lineEdit(None, self, "dirname",disabled=disabledFlag)
+        self.btn_send=gui.button(None, self, " Enter ", callback=self.sendDirEdit, autoDefault=False,disabled=disabledFlag)
+        self.btn_dir = gui.button(None, self, "", callback=self.get_dir, autoDefault=False,disabled=disabledFlag)
+        self.btn_dir.setStyleSheet("border: 1px solid #1a8ac6; border-radius: 2px;")
+        self.btn_dir.setIcon(icon)
+        self.btn_send.setStyleSheet("border: 1px solid #1a8ac6; border-radius: 2px; heighr 25")
+        self.dir_edit.setClearButtonEnabled(True)
+        self.dir_edit.setPlaceholderText("Enter directory")
         self.buttonsArea.layout().addWidget(self.dir_edit)
+        self.buttonsArea.layout().addWidget(self.btn_dir)
+        self.buttonsArea.layout().addWidget(self.btn_send)
         self.buttonsArea.layout().setSpacing(4)
         self.buttonsArea.layout().addSpacing(4)
         self.buttonsArea.setMinimumWidth(400)
 
-        # Jimmy March-28-2017, if we loaded settings from workflow, trigger the output channel
-        if self.directory_path is not "":
-            self.send("Dir", self.directory_path)
+        if self.dirname is not None:
+            self.send("Dir", self.dirname)
 
     """
     Called when button pushed
@@ -42,32 +51,30 @@ class OWDirectory(widget.OWWidget):
         defaultDir = '/root'
         if os.path.exists('/data'):
             defaultDir = '/data'
-        dir = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Directory", directory=defaultDir)
-        self.set_dir(dir)
+        self.dirname = QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate directory", directory=defaultDir)
+    
+    def sendDirEdit(self):
+        self.send("Dir",self.dirname)
+        
+    def findInputValue(self):
+        #checks inputConnections and returns first one for now
+        if not self.inputConnections:
+            return None
+        for sourceId in self.inputConnections:
+            return self.inputConnections[sourceId]
 
-    """
-    Called when input set or button pushed
-    """
-    def set_dir(self, path):
-        # Make sure path isn't empty or whitespace
-        if type(path) is str and path.strip():
-            path = path.strip()
-            self.dir_edit.setText(path)
-            self.send("Dir", path)
-
-
-def main(argv=sys.argv):
-    from AnyQt.QtWidgets import QApplication
-    app = QApplication(list(argv))
-
-    ow = OWDirectory()
-    ow.show()
-    ow.raise_()
-
-    ow.handleNewSignals()
-    app.exec_()
-    ow.handleNewSignals()
-    return 0
-
-if __name__=="__main__":
-    sys.exit(main())
+    def set_dir (self, path, sourceId=None):
+        if self.inputConnections and path is None:
+            self.inputConnections.pop(sourceId,None) 
+        elif path:
+            self.inputConnections[sourceId]=path
+        else:
+            return
+        inputPath=self.findInputValue()
+        self.dir_edit.setEnabled(inputPath is None)
+        self.btn_dir.setEnabled(inputPath is None)
+        self.btn_send.setEnabled(inputPath is None)
+    
+        if inputPath:
+            self.dirname=inputPath
+            self.send('Dir',inputPath)
