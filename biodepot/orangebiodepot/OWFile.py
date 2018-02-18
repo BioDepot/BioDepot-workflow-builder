@@ -1,5 +1,5 @@
 import sys, os
-from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, ContainerPaths, BwbGuiElement, BwbGuiValue
+from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict
 from Orange.widgets import widget, gui, settings
 from PyQt5 import QtWidgets, QtGui
 

@@ -4,7 +4,7 @@ import sys
 from collections import OrderedDict
 from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient
-from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, ContainerPaths, BwbGuiElement, BwbGuiValue
+from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, ContainerPaths, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
 
@@ -18,8 +18,8 @@ class OWKallistoQuant(OWBwBWidget):
     docker_image_name = "biodepot/kallisto"
     docker_image_tag = "latest"
     setting=settings.Setting
-    inputs = [("fastqFiles", str, 'setfastqFiles', widget.Multiple),
-              ("indexFile", str, 'setindexFile')]
+    inputs = [("fastqFiles", str, '_set_fastqFiles', widget.Multiple),
+              ("indexFile", str, '_set_indexFile')]
     outputs = [("outputDir", str)]
     
     #persistent settings
@@ -52,9 +52,9 @@ class OWKallistoQuant(OWBwBWidget):
                                     ]),
             'outputs'  : OrderedDict([ ('outputDir', {'type':str, 'output' : {'value': 'outputDir', 'type': str, 'valueType' :'attribute'}, 'callback' : None})
                                     ]),
-            'volumeMappings' : [{'conVolume':'/root/output','bwbVolume':'outputDir','default':'/data/output'},
-                                {'conVolume':'/root/fastq' , 'bwbVolume':'fastqFiles' ,'default':'/data/fastq'},
-                                {'conVolume':'/root/reference', 'bwbVolume':'indexFile','default':'/data/reference'}
+            'volumeMappings' : [{'conVolume':'/root/output','attr':'outputDir','default':'/data/output'},
+                                {'conVolume':'/root/fastq' , 'attr':'fastqFiles'},
+                                {'conVolume':'/root/reference', 'attr':'indexFile','default':'/data/reference'}
                                ],
             'requiredParameters' : ['outputDir','indexFile','fastqFiles'],
             'parameters': OrderedDict([('outputDir',{'flags':['-o','--output-dir='], 'label':'Output directory', 'type': "directory"}),
@@ -69,8 +69,8 @@ class OWKallistoQuant(OWBwBWidget):
                                        ('single-overhang',   {'flags':['--single-overhang'],'label':'Include reads that go beyond transcript start','type': 'bool', 'default' : False}),                                       
                                        ('fr-stranded',   {'flags':['--fr-stranded'],'label':'strand specific read - first read forward','type': 'bool', 'default' : False}),
                                        ('rf-stranded',   {'flags':['--rf-stranded'],'label':'strand specific read - first read reverse','type': 'bool', 'default' : False}),
-                                       ('fragment-length',   {'flags':['-l','--fragment-length'],'label':'estimated fragment length','type': 'double', 'default' : None}),
-                                       ('stdev',    {'flags':['-s','--sd'],'label':'standard deviation of fragment length','type': 'double', 'default' : None}),
+                                       ('fragment-length',   {'flags':['-l','--fragment-length'],'label':'Estimated fragment length','type': 'double', 'default' : None}),
+                                       ('stdev',    {'flags':['-s','--sd'],'label':'Standard deviation of fragment length','type': 'double', 'default' : None}),
                                        ('nThreads' ,{'flags':['-t','--threads='],'label':'Number of threads','type': 'int','default':1}),
                                        ('pseudoBam',{'flags':['--pseudobam'],'label':'Save alignments to BAM file','type': 'bool','default':False}),                                                                            
                                        ('genomeBam',{'flags':['--genomebam'],'label':'Project alignments to sorted BAM file','type': 'bool','default':False}),
@@ -110,9 +110,9 @@ class OWKallistoQuant(OWBwBWidget):
         self.infoLabel.setText(message)
         
     #input callbacks
-    def setfastqFiles(self, path, sourceId=None):
-        self.setFile(path,'fastqFiles',sourceId=sourceId)
+    def _set_fastqFiles(self, path, sourceId=None):
+        self.handleInputs(path,'fastqFiles',sourceId=sourceId)
 
-    def setindexFile(self, path, sourceId=None):
-        self.setFile(path,'indexFile',sourceId=sourceId)
+    def _set_indexFile(self, path, sourceId=None):
+        self.handleInputs(path,'indexFile',sourceId=sourceId)
 

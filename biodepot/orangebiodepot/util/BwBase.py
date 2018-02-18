@@ -17,12 +17,47 @@ from AnyQt.QtWidgets import (
 class ContainerPaths():
     pass
     
-class BwbGuiElement():
-    pass
+class BwbGuiElements():
+    #keep track of List of Gui elements
+    def __init__(self,required=None,active=None):
+        self._dict={}
+        self.required=required
+        self.active={}
+    def add(self,attr,guiElement):
+        if attr not in self._dict:
+            self._dict[attr]=[]
+        self._dict[attr].append(guiElement)
+        #sys.stderr.write('add item {} {} {}\n'.format(attr,guiElement,self._dict[attr]))
+        
+    def disable(self,attr): #gray out to disable
+        if attr in self._dict:
+            for g in self._dict[attr]:
+                #sys.stderr.write('ditem {}\n'.format(g))
+                g.setDisabled(True)
 
-class BwbGuiValue():
-    pass      
+    def enable(self,attr,value):
+        if attr in self._dict:
+            for g in self._dict[attr]:
+                #sys.stderr.write('en-item {}\n'.format(g))
+                g.setEnabled(True)
+                if hasattr(g,'isChecked'): #checkbox
+                    if type(value) == bool:
+                        g.setChecked(value)
+                    else:
+                        g.setChecked(True)
+                elif hasattr(g,'clear'):
+                    g.clear()
     
+    def checkTheBox(self, attr,state=True): 
+        #if there is a checkBox associated with it then we check or uncheck it - gui.spinBox and checkboxes
+        if attr in self._dict[attr]:
+            for g in self._dict[attr]:
+                if hasattr(g,'isChecked'):
+                    g.isChecked(state)
+                elif hasattr(g,'checked'):
+                    if g.checked is not None:
+                        g.checked=state
+                
 class LocalContainerRunner(QThread):
     progress = pyqtSignal(int)
 
@@ -57,9 +92,9 @@ class LocalContainerRunner(QThread):
 class ConnectionDict:
     def __init__(self, inputDict):
         self._dict=inputDict #we do want the name not a copy - i.e. the inputDict should change
-        
+
     def add (self, slot, connectionId=None):
-        if slot in self._dict:
+        if slot in self._dict and connectionId not in self._dict[slot]:
             self._dict[slot].append(connectionId)
         else:
             self._dict[slot]=[connectionId]
@@ -70,10 +105,13 @@ class ConnectionDict:
                 self._dict[slot].remove(connectionId)
             except ValueError:
                 pass
+            #need to update the volumes
+        
     def isConnected (self, slot):
         if self._dict is None:
             return False
         if (slot in self._dict) and (self._dict[slot]):
+            sys.stderr.write('slot {} dict {}\n'.format(slot,self._dict[slot]))
             return True
         return False
     
@@ -111,29 +149,23 @@ class OWBwBWidget(widget.OWWidget):
         #for container paths
         self.con=ContainerPaths()
         #gui element sub-attributes
-        self.ledit=BwbGuiElement()
-        self.button=BwbGuiElement()
-        self.checkbox=BwbGuiElement()
-        self.checkboxValue=BwbGuiValue()
-        self.spin=BwbGuiElement()
+        self.bgui=BwbGuiElements()
+        #self.button=BwbGuiElement()
+        #self.checkbox=BwbGuiElement()
+        #self.checkboxValue=BwbGuiValue()
+        #self.spin=BwbGuiElement()
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         #volume mapping
 
 
     def initVolumes(self):
+        #initializes container volumes
         for mapping in self.data['volumeMappings']:
-            bwbVolAttr=mapping['bwbVolume']
-            if self.data['parameters'][bwbVolAttr]['type'] is 'file':
-              bwbVolAttr= bwbVolAttr+'Dir'
+            bwbVolAttr=mapping['attr']
             if not hasattr(self, bwbVolAttr) :
                 setattr(self,bwbVolAttr,None)
             bwbVol=getattr(self,bwbVolAttr)
             setattr(self.con, bwbVolAttr, mapping['conVolume'])
-            cvol=getattr(self.con,bwbVolAttr)
-            if not bwbVol and 'default' in mapping:
-                bwbVol= mapping['default']
-            if bwbVol:
-                self.setDirectories(cvol,bwbVol)
                 
     def bwbPathToContainerPath(self, path, isFile=False,returnNone=False):
         #converts the path entered relative to the bwb mountpoint
@@ -152,7 +184,7 @@ class OWBwBWidget(widget.OWWidget):
         #return shortest path
         for mapping in self.data['volumeMappings']:
             conVol = mapping['conVolume']  
-            bwbVol = self.getDirectory(conVol)
+            bwbVol = self.hostVolumes[conVol]
             hostVol=os.path.normpath(self.dockerClient.to_host_directory(bwbVol,returnNone=False))
             prefix=None
             if hostVol == hostPath:
@@ -186,9 +218,22 @@ class OWBwBWidget(widget.OWWidget):
     def getRequiredVols(self):
         for mapping in self.data['volumeMappings']:
             conVol=mapping['conVolume']
-            if not self.getDirectory(conVol):
+            attr=mapping['attr']
+            if not hasattr(self,attr):
                 return conVol
-            self.hostVolumes[conVol]=self.getDirectory(conVol)
+            if not getattr(self,attr):
+                return conVol
+            bwbVol=getattr(self,attr)
+            if not bwbVol and 'default' in mapping:
+                bwbVol= mapping['default']
+            if self.data['parameters'][attr]['type'] is 'file':
+                bwbVol=os.path.dirname(os.path.normpath(bwbVol))
+            elif self.data['parameters'][attr]['type'] is 'files':
+                files=re.split(r'[ ,;]',bwbVol)
+                bwbVol=os.path.dirname(os.path.normpath(files[0]))
+            else:
+               bwbVol=os.path.normpath(bwbVol)
+            self.hostVolumes[conVol]=bwbVol
         return None
  
     """
@@ -236,7 +281,7 @@ class OWBwBWidget(widget.OWWidget):
             if ('gui' in pvalue and pvalue['gui'] is not 'FileDir') or ( pvalue['type'] is  not 'file' and pvalue['type'] is  not 'directory' and pvalue['type'] is  not 'files'):
                 continue
             self.drawFileDirElements(pname, pvalue, box=self.requiredBox,layout=self.fileDirRequiredLayout)              
-                                        
+                                    
         for pname in self.data['requiredParameters']:
             pvalue=self.data['parameters'][pname]                
             if ('gui' in pvalue and pvalue['gui'] is not 'Ledit') or (pvalue['type'] is  not 'double') and (pvalue['type'] is  not 'text'):
@@ -276,14 +321,14 @@ class OWBwBWidget(widget.OWWidget):
                 pvalue=self.data['parameters'][pname]                
                 if ('gui' in pvalue and pvalue['gui'] is not 'Ledit') or (pvalue['type'] is  not 'double') and (pvalue['type'] is  not 'text'):
                     continue
-                self.drawLedit(pname,pvalue,self.optionalBox,layout=self.leditOptionalLayout)           
+                self.drawLedit(pname,pvalue,self.optionalBox,layout=self.leditOptionalLayout,addCheckbox=True)           
                 
         for pname in self.data['parameters']:
             if pname not in self.data['requiredParameters']:
                 pvalue=self.data['parameters'][pname]                
                 if ('gui' in pvalue and pvalue['gui'] is not 'Spin') or (pvalue['type'] is  not 'int'):
                     continue
-                self.drawSpin(pname,pvalue,self.optionalBox)
+                self.drawSpin(pname,pvalue,self.optionalBox,addCheckbox=True)
                 
         for pname in self.data['parameters']:
             if pname not in self.data['requiredParameters']:
@@ -293,71 +338,61 @@ class OWBwBWidget(widget.OWWidget):
                 self.drawCheckbox(pname,pvalue,self.optionalBox)
 
     def drawCheckbox(self,pname,pvalue,box=None):
+        #for booleans - their value is the same as the checkbox state
         cb=gui.checkBox(box, self, pname, pvalue['label'])
-        setattr(self.checkbox,pname,cb)
+        checkAttr=pname+'Checked'
+        setattr(self,pname,False)
+        setattr(self,checkAttr,getattr(self,pname))
+        self.bgui.add(pname,cb)    
                       
-    def drawSpin(self,pname,pvalue,box=None):
-        checkattr=pname+'Checked'
-        if not hasattr(self,checkattr):
-            setattr(self,checkattr,None)
-        if getattr(self,checkattr) is None:
-            setattr(self,checkattr, False)
-        
-        mySpin=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkattr)
+    def drawSpin(self,pname,pvalue,box=None,addCheckbox=False):
+        #for drawSpin - we use the origin version which already has a checkbox connected
+        #TODO could change this to the same way we handle ledits with separate cbo
+        cbState=False
+        checkAttr=None
+        if addCheckbox:
+            checkAttr=pname+'Checked'
+            setattr(self,checkAttr,cbState)
+        mySpin=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkAttr, disabled=cbState)
         if getattr(self,pname) is None:
             mySpin.clear()
-        setattr(self.spin,pname,mySpin)
+        self.bgui.add(pname,mySpin)
         
-    def drawLedit(self,pname,pvalue,box=None,layout=None):
-        checkattr=pname+'Checked'
-        if not hasattr(self,checkattr):
-            setattr(self,checkattr,None)
-        if getattr(self,checkattr) is None:
-            setattr(self,checkattr, False)
-        setattr(self.checkbox,pname,gui.checkBox(None, self, checkattr,label=None))
-        checkbox=getattr(self.checkbox,pname)
-        setattr(self.ledit,pname,gui.lineEdit(None, self, pname,disabled=not checkbox.isChecked()))
-        ledit=getattr(self.ledit,pname)
-        checkbox.stateChanged.connect(lambda : ledit.setEnabled(checkbox.isChecked()))
+    def drawLedit(self,pname,pvalue,box=None,layout=None,addCheckbox=False):
+        checkAttr=None
+        checkbox=None
+        ledit=gui.lineEdit(None, self, pname,disabled=addCheckbox)
+        if addCheckbox:
+            checkAttr=pname+'Checked'
+            setattr(self,checkAttr,False)
+            checkbox=gui.checkBox(None, self,checkAttr,label=None)
+            checkbox.stateChanged.connect(lambda : ledit.setEnabled(checkbox.isChecked()))
+            self.bgui.add(pname,checkbox)
+        self.bwbLedit(box,checkbox,ledit,layout=layout, label=pvalue['label'])
         #check if the value is none - then we clear it
         if getattr(self,pname) is None:
             ledit.clear()
-        self.bwbLedit(box,checkbox,ledit,layout=layout, label=pvalue['label'])
-               
-    def drawFileDirElements(self,pname, pvalue, box=None, layout=None, addCheckbox=None):
+        self.bgui.add(pname,ledit)
+
+    def drawFileDirElements(self,pname, pvalue, box=None, layout=None, addCheckbox=False):
         #note that using lambda does not work in this function - truncates string variable so partial used instead
         #draw required elements'
         checkbox=None
-        disabled=False
-        if addCheckbox:
-            disabled=True
-            checkattr=pname+'Checked'
-            if not hasattr(self,checkattr):
-                setattr(self,checkattr,None)
-            if getattr(self,checkattr) is None:
-                setattr(self,checkattr, False)
-            setattr(self.checkbox,pname,gui.checkBox(None, self, checkattr,label=None))
-            checkbox=getattr(self.checkbox,pname)
-            disabled=not checkbox.isChecked()
-
-        if pname in self.data['inputs']:
-            setattr(self.ledit,pname,gui.lineEdit(None, self, pname,
-                    disabled=self.inputConnections.isConnected(pname)))
-            disabled=self.inputConnections.isConnected(pname)
-        else:
-            setattr(self.ledit,pname,gui.lineEdit(None, self, pname,disabled=disabled))
-            
-        setattr(self.button, pname, gui.button(None, self, "", 
-                    callback= partial(self.browseFileDir, attr= str(pname) ,filetype=pvalue['type']), autoDefault=True, width=19, height=19,disabled=disabled))
-        ledit=getattr(self.ledit,pname)
-        button=getattr(self.button,pname)
+        ledit=gui.lineEdit(None, self, pname,disabled=addCheckbox)
+        button=gui.button(None, self, "", callback= partial(self.browseFileDir, attr= str(pname) ,filetype=pvalue['type']), 
+                          autoDefault=True, width=19, height=19,disabled=addCheckbox)
         if getattr(self,pname) is None:
             ledit.clear()
-        
-        if checkbox:
+        if addCheckbox:
+            checkAttr=pname+'Checked'
+            setattr(self,checkAttr,False)
+            checkbox=gui.checkBox(None, self,checkAttr,label=None)
             checkbox.stateChanged.connect(lambda : ledit.setEnabled(checkbox.isChecked() and not self.inputConnections.isConnected(pname) ))
             checkbox.stateChanged.connect(lambda : button.setEnabled(checkbox.isChecked() and not self.inputConnections.isConnected(pname) ))
+            self.bgui.add(pname,checkbox)
         self.bwbFileEntry(box,button,ledit,layout=layout,label=pvalue['label']+':', entryType=pvalue['type'], checkbox=checkbox)
+        self.bgui.add(pname,ledit)
+        self.bgui.add(pname,button)
  
     def bwbFileEntry(self, widget, button, ledit, icon=defaultFileIcon,layout=None, label=None,entryType='file', checkbox=None):
         button.setStyleSheet("border: 1px solid #1a8ac6; border-radius: 2px;")
@@ -381,10 +416,11 @@ class OWBwBWidget(widget.OWWidget):
     def bwbLedit(self, widget,checkbox ,ledit, layout=None, label=None):
         ledit.setClearButtonEnabled(True)
         ledit.setPlaceholderText("Enter parameter")
-        layout.addWidget(checkbox,layout.nextRow,0)    
-        layout.addWidget(QtGui.QLabel(label),layout.nextRow,1)
-        layout.addWidget(ledit,layout.nextRow,2)
-        
+        colNum=1
+        if(checkbox):
+            layout.addWidget(checkbox,layout.nextRow,0)    
+        layout.addWidget(QtGui.QLabel(label),layout.nextRow,colNum)
+        layout.addWidget(ledit,layout.nextRow,colNum+1)
         if layout.nextRow == 1:
             widget.layout().addLayout(layout)
         layout.nextRow+=1
@@ -431,66 +467,24 @@ class OWBwBWidget(widget.OWWidget):
             self._hostDirectories[containerPath] = None
         else:
             self._hostDirectories[containerPath] = hostPath.strip()
-        
-    def setDirectories(self, key, path):
-        if path is None:
-            self._hostDirectories[key] = None
-        else:
-            self._hostDirectories[key] = path.strip()
-
-    def setDir (self, path, attr, sourceId=None):
-        #generic function for inputs
-        ledit=None
-        button=None
-        if(hasattr(self.ledit,attr)):
-            ledit=getattr(self.ledit,attr)
-        if(hasattr(self.ledit,attr)):
-            button=getattr(self.button,attr)
-        if path is None:
+    
+    def handleInputs(self, value, attr, sourceId=None):
+        if value is None:
             self.inputConnections.remove(attr,sourceId)
             setattr(self,attr,None)
-            if(ledit):
-                ledit.clear()
         else:
-            setattr(self,attr,path)
             self.inputConnections.add(attr,sourceId)
-            self.setDirectoriesAttr(attr)
-            if(button):
-                button.setEnabled(not self.inputConnections.isConnected(attr))
-            if(ledit):
-                ledit.setEnabled(not self.inputConnections.isConnected(attr))
+            setattr(self,attr,value)
+        self.updateGui(attr,value)
         
-    def setFile (self, path, attr, sourceId=None):
-        #generic function for inputs
-        ledit=None
-        button=None
-        if(hasattr(self.ledit,attr)):
-            ledit=getattr(self.ledit,attr)
-        if(hasattr(self.ledit,attr)):
-            button=getattr(self.button,attr)
-        dirAttr=attr+'Dir'            
-        if path is None:
-            self.inputConnections.remove(attr,sourceId)
-            setattr(self,attr,None)
-            setattr(self,dirAttr,None)
-            ledit.clear()
+    def updateGui(self,attr,value):
+        if self.inputConnections.isConnected(attr):
+            sys.stderr.write('disabling {}\n'.format(attr))
+            self.bgui.disable(attr)
         else:
-            if self.data['parameters'][attr]['type'] is 'files' :
-                setattr(self,attr,path)
-                #only store the path for the first file
-                #it will work for manually entered files in different directories if the files are accessible via another mountpoint
-                setattr(self,dirAttr,os.path.dirname(path[0]))     
-            else:
-                setattr(self,attr,path)
-                setattr(self,dirAttr,os.path.dirname(path))
-            self.inputConnections.add(attr,sourceId)
-        cvol=getattr(self.con,dirAttr)
-        self.setDirectories(cvol,path)    
-        if hasattr(self.ledit,attr):
-            ledit.setEnabled(not self.inputConnections.isConnected(attr))
-        if  hasattr(self.button,attr):
-            button.setEnabled(not self.inputConnections.isConnected(attr))
-
+            sys.stderr.write('enabling {} with {}\n'.format(attr,value))
+            self.bgui.enable(attr,value)
+            
     def getDirectory(self, key):
         if key in self._hostDirectories:
             return self._hostDirectories[key]
@@ -565,9 +559,6 @@ class OWBwBWidget(widget.OWWidget):
             checkattr=pname+'Checked'
             if hasattr(self,checkattr) and getattr(self,checkattr):
                 addFlag=True
-            elif hasattr(self.checkbox,pname):
-                cb=getattr(self.checkbox,pname)
-                addFlag=cb.isChecked()
             if pname in self.data['requiredParameters']:
                 sys.stderr.write('{} is required\n'.format(pname))
                 addFlag=True
