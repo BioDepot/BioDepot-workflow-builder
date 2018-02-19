@@ -30,6 +30,8 @@ class OWKallistoQuant(OWBwBWidget):
     nThreadsChecked = settings.Setting(False, schema_only=True)
     nBootstraps=settings.Setting(0, schema_only=True)
     nBootstrapsChecked = settings.Setting(False, schema_only=True)
+    runMode=settings.Setting(0, schema_only=True)
+    runTriggers=settings.Setting([], schema_only=True)
     #this is a dict of lists of form {inputSlot:(widgetId1,widgetId2..widgetIdN) where None is a valid entry for the case when there are no Multiple connections }
     inputConnectionsStore = settings.Setting({},schema_only=True);
     
@@ -46,7 +48,6 @@ class OWKallistoQuant(OWBwBWidget):
             'docker_image_tag' : 'latest',
             'persistentSettings' : 'all',
             'command' : 'kallisto quant',
-            'inputTrigger' : True,
             'inputs'   : OrderedDict([ ('indexFile', {'type':str, 'callback' : None}),
                                        ('fastqFiles',  {'type':str, 'callback' : None})
                                     ]),
@@ -82,32 +83,6 @@ class OWKallistoQuant(OWBwBWidget):
         self.initVolumes()
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    
-    def startJob(self):
-        self.hostVolumes = {}
-        #check for missing parameters and volumes
-        missingParms=self.checkRequiredParms()
-        if missingParms:
-            self.infoLabel.setText("missing required parameters: {}".format(missingParms))
-            return
-        missingVols=self.getRequiredVols()
-        if missingVols:
-            self.infoLabel.setText("missing or incorrect volume mappings to: {}".format(missingVols))
-            return
-        cmd=self.generateCmdFromData()
-        #cmd="bash -c 'find "+ self.con.fastqFiles +"/*.fastq.* -type f | sort | xargs " + bareCmd + "'"
-        #sys.stderr.write("{}\n".format(bareCmd))
-        sys.stderr.write("{}\n".format(cmd))
-        for c,v in self.hostVolumes.items():
-            sys.stderr.write("{}:{}\n".format(v,c))
-        self.dockerRun(self.hostVolumes,cmd)
-
-    #minimum event handlers
-    def Event_OnRunFinished(self):
-        self.infoLabel.setText("Finished")
-        
-    def Event_OnRunMessage(self, message):
-        self.infoLabel.setText(message)
         
     #input callbacks
     def _set_fastqFiles(self, path, sourceId=None):
