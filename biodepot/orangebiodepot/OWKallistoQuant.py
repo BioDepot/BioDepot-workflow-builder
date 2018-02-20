@@ -1,6 +1,6 @@
 import os
 import glob
-import sys
+import sys, jsonpickle
 from collections import OrderedDict
 from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient
@@ -90,4 +90,7 @@ class OWKallistoQuant(OWBwBWidget):
 
     def _set_indexFile(self, path, sourceId=None):
         self.handleInputs(path,'indexFile',sourceId=sourceId)
+        
+    def handleOutputs(self):
+        self.send('outputDir',self.outputDir)
 

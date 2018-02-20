@@ -70,6 +70,9 @@ RUN apt-get update && apt-get install -y build-essential gcc git python-dev pyth
 ADD supervisord.conf /etc/supervisor/conf.d/
 ADD nginx.conf /etc/nginx/sites-enabled/default
 
+#json pickle 
+RUN pip3 install --user jsonpickle
+
 #put biodepot here and keep pip for rapid updates
 ADD biodepot biodepot
 RUN pip3 install -e biodepot 
