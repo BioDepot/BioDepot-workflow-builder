@@ -16,6 +16,19 @@ from AnyQt.QtWidgets import (
 #dummy classes
 class ContainerPaths():
     pass
+#from stackOverlfow
+class CheckableComboBox(QtGui.QComboBox):
+    def __init__(self):
+        super(CheckableComboBox, self).__init__()
+        self.view().pressed.connect(self.handleItemPressed)
+        self.setModel(QtGui.QStandardItemModel(self))
+
+    def handleItemPressed(self, index):
+        item = self.model().itemFromIndex(index)
+        if item.checkState() == QtCore.Qt.Checked:
+            item.setCheckState(QtCore.Qt.Unchecked)
+        else:
+            item.setCheckState(QtCore.Qt.Checked)
     
 class BwbGuiElements():
     #keep track of List of Gui elements
@@ -23,16 +36,15 @@ class BwbGuiElements():
         self._dict={}
         self.required=required
         self.active={}
+        
     def add(self,attr,guiElement):
         if attr not in self._dict:
             self._dict[attr]=[]
         self._dict[attr].append(guiElement)
-        #sys.stderr.write('add item {} {} {}\n'.format(attr,guiElement,self._dict[attr]))
-        
+                
     def disable(self,attr): #gray out to disable
         if attr in self._dict:
             for g in self._dict[attr]:
-                #sys.stderr.write('ditem {}\n'.format(g))
                 g.setDisabled(True)
 
     def enable(self,attr,value):
@@ -47,16 +59,6 @@ class BwbGuiElements():
                         g.setChecked(True)
                 elif hasattr(g,'clear'):
                     g.clear()
-    
-    def checkTheBox(self, attr,state=True): 
-        #if there is a checkBox associated with it then we check or uncheck it - gui.spinBox and checkboxes
-        if attr in self._dict[attr]:
-            for g in self._dict[attr]:
-                if hasattr(g,'isChecked'):
-                    g.isChecked(state)
-                elif hasattr(g,'checked'):
-                    if g.checked is not None:
-                        g.checked=state
                 
 class LocalContainerRunner(QThread):
     progress = pyqtSignal(int)
@@ -88,7 +90,6 @@ class LocalContainerRunner(QThread):
         # Remove the container when it is finished
         self.docker.remove_container(self.containerId)
 
-
 class ConnectionDict:
     def __init__(self, inputDict):
         self._dict=inputDict #we do want the name not a copy - i.e. the inputDict should change
@@ -111,10 +112,8 @@ class ConnectionDict:
         if self._dict is None:
             return False
         if (slot in self._dict) and (self._dict[slot]):
-            sys.stderr.write('slot {} dict {}\n'.format(slot,self._dict[slot]))
             return True
         return False
-    
         
 class OWBwBWidget(widget.OWWidget):
 
@@ -148,16 +147,11 @@ class OWBwBWidget(widget.OWWidget):
         setattr(self.leditRequiredLayout,'nextRow',1)
         #for container paths
         self.con=ContainerPaths()
-        #gui element sub-attributes
+        #keep track of gui elements associated with each attribute
         self.bgui=BwbGuiElements()
-        #self.button=BwbGuiElement()
-        #self.checkbox=BwbGuiElement()
-        #self.checkboxValue=BwbGuiValue()
-        #self.spin=BwbGuiElement()
+        #keep track of all the connections - n
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
-        #volume mapping
-
-
+        
     def initVolumes(self):
         #initializes container volumes
         for mapping in self.data['volumeMappings']:
@@ -206,7 +200,6 @@ class OWBwBWidget(widget.OWWidget):
             if returnNone:
                 return conPath
             return path
-                    
             
     def checkRequiredParms(self):
         for parm in self.data['requiredParameters']:
@@ -256,15 +249,9 @@ class OWBwBWidget(widget.OWWidget):
         self.drawRequiredElements()
         self.drawOptionalElements()
         controlBox = gui.vBox(self.bigBox, "Execution controls")
-        btnRun = gui.button(controlBox, self, "Start", callback=self.OnRunClicked)
-        css = '''
-        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
-        QPushButton:pressed { background-color: #158805; border-style: inset;}
-        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
-        QPushButton:hover {background-color: #1588f5; }
-        ''' 
-        btnRun.setStyleSheet(css)
-        btnRun.setFixedSize(50,20)
+        self.drawExec(box=controlBox)
+        #check if the requirements to be run are met
+        self.checkTrigger()
 
     def OnRunClicked(self):
         self.startJob()
@@ -393,7 +380,83 @@ class OWBwBWidget(widget.OWWidget):
         self.bwbFileEntry(box,button,ledit,layout=layout,label=pvalue['label']+':', entryType=pvalue['type'], checkbox=checkbox)
         self.bgui.add(pname,ledit)
         self.bgui.add(pname,button)
- 
+        
+    def drawExec(self, box=None):
+        #initialize the exec state
+        self.execLayout=QtGui.QGridLayout()
+        self.execLayout.setSpacing(5)
+        self.cboRunMode=QtGui.QComboBox()
+        self.cboRunMode.addItem('Manual')
+        self.cboRunMode.addItem('Automatic')
+        self.cboRunMode.addItem('Triggered')
+        self.cboRunMode.setCurrentIndex(self.runMode)
+        self.execBtn=QtGui.QToolButton(self)
+        self.execBtn.setText('Select Triggers')
+        self.execMenu=QtGui.QMenu(self)
+
+        self.triggerMenu={}
+        for attr in self.data["inputs"]:
+            action=self.execMenu.addAction(attr)
+            action.setCheckable(True)
+            action.setChecked( bool(attr in self.runTriggers))
+            action.changed.connect(self.chooseTrigger)
+            self.triggerMenu[action]=attr
+        self.execBtn.setMenu(self.execMenu)
+        self.execBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
+        if self.runMode is 2:
+            self.execBtn.setEnabled(True)
+        else:
+            self.execBtn.setEnabled(False) 
+        self.cboRunMode.currentIndexChanged.connect(self.runModeChange)
+        myLabel=QtGui.QLabel('RunMode:')
+        myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter) 
+        css = '''
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
+        QPushButton:pressed { background-color: #158805; border-style: inset;}
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
+        QPushButton:hover {background-color: #1588f5; }
+        ''' 
+        btnRun = gui.button(None, self, "Start", callback=self.OnRunClicked)
+        btnRun.setStyleSheet(css)
+        btnRun.setFixedSize(50,20)
+        self.execLayout.addWidget(btnRun,1,0)
+        self.execLayout.addWidget(myLabel,1,1)
+        self.execLayout.addWidget(self.cboRunMode,1,2)
+        self.execLayout.addWidget(self.execBtn,1,3)
+        box.layout().addLayout(self.execLayout)
+
+    def runModeChange(self):
+        self.runMode=self.cboRunMode.currentIndex()
+        if self.runMode is 2:
+            self.execBtn.setEnabled(True)
+        else:
+            self.execBtn.setEnabled(False)
+        self.checkTrigger()
+    
+    def chooseTrigger(self):
+        action=self.execMenu.sender()
+        attr=self.triggerMenu[action]
+        checked=action.isChecked()
+        if attr is None or checked is None:
+            return
+        if checked and attr not in self.runTriggers:
+            self.runTriggers.append(attr)
+        if not checked and attr in self.runTriggers:
+            self.runTriggers.remove(attr)
+                   
+    def checkTrigger(self):
+        #this should be checked any time there is a change
+        if self.runMode is 0: #manual - only go on start button
+            return
+        elif self.runMode is 1: #automatic same as pushing start button
+            self.OnRunClicked()
+        else:
+            #check if the input triggers are set
+            for trigger in runTriggers:
+                if not inputConnections.isConnected(trigger):
+                    return
+            self.OnRunClicked()
+
     def bwbFileEntry(self, widget, button, ledit, icon=defaultFileIcon,layout=None, label=None,entryType='file', checkbox=None):
         button.setStyleSheet("border: 1px solid #1a8ac6; border-radius: 2px;")
         button.setIcon(icon)
@@ -434,7 +497,6 @@ class OWBwBWidget(widget.OWWidget):
             setattr(self,attr,myFile)
             dirAttr=attr+"Dir"
             setattr(self,dirAttr,os.path.dirname(myFile))
-            self.setDirectoriesAttr(dirAttr)
         elif filetype is 'files':
             myFiles=QtWidgets.QFileDialog.getOpenFileNames(self, "Locate file", defaultDir)
             if myFiles:
@@ -444,29 +506,10 @@ class OWBwBWidget(widget.OWWidget):
         else:
             myDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate directory", directory=defaultDir)
             setattr(self,attr,myDir)
-            self.setDirectoriesAttr(attr)
-
-    def Event_OnRunFinished(self):
-        raise Exception('Event_OnRunFinished not implemented!')
-
-    def Event_OnRunMessage(self, message):
-        raise Exception('Event_OnRunMessage not implemented!')
-
+ 
     def Initialize_InputKeys(self, keys):
         for k in keys:
             self._hostDirectories[k] = None
-
-    def setDirectoriesAttr(self, attr):
-        if not hasattr(self,attr):
-            setattr(self,attr,None)
-        if not hasattr(self.con,attr):
-            setattr(self.con,attr,None) 
-        containerPath=getattr(self.con,attr)
-        hostPath=getattr(self,attr)
-        if hostPath is None:
-            self._hostDirectories[containerPath] = None
-        else:
-            self._hostDirectories[containerPath] = hostPath.strip()
     
     def handleInputs(self, value, attr, sourceId=None):
         if value is None:
@@ -475,7 +518,9 @@ class OWBwBWidget(widget.OWWidget):
         else:
             self.inputConnections.add(attr,sourceId)
             setattr(self,attr,value)
+            self.checkTrigger()
         self.updateGui(attr,value)
+        
         
     def updateGui(self,attr,value):
         if self.inputConnections.isConnected(attr):
@@ -484,11 +529,6 @@ class OWBwBWidget(widget.OWWidget):
         else:
             sys.stderr.write('enabling {} with {}\n'.format(attr,value))
             self.bgui.enable(attr,value)
-            
-    def getDirectory(self, key):
-        if key in self._hostDirectories:
-            return self._hostDirectories[key]
-        return None
 
     """
     Pull image
@@ -515,6 +555,20 @@ class OWBwBWidget(widget.OWWidget):
     """
     Run container
     """
+    def startJob(self):
+        self.hostVolumes = {}
+        #check for missing parameters and volumes
+        missingParms=self.checkRequiredParms()
+        if missingParms:
+            self.infoLabel.setText("missing required parameters: {}".format(missingParms))
+            return
+        missingVols=self.getRequiredVols()
+        if missingVols:
+            self.infoLabel.setText("missing or incorrect volume mappings to: {}".format(missingVols))
+            return
+        cmd=self.generateCmdFromData()
+        self.dockerRun(self.hostVolumes,cmd)
+        
     def dockerRun(self, volumes = None, commands = None, environments = None):
         if not self._Flag_isRunning:
             self._dockerVolumes = volumes
@@ -554,6 +608,10 @@ class OWBwBWidget(widget.OWWidget):
         flags={}
         args=[]
         for pname, pvalue in self.data['parameters'].items():
+            #possible to have an requirement or parameter that is not in the executable line
+            #this is indicated by the absence of a flags field
+            if 'flags' not in pvalue:
+                continue
             #if required or checked then it is added to the flags
             addFlag=False
             checkattr=pname+'Checked'
@@ -651,3 +709,10 @@ class OWBwBWidget(widget.OWWidget):
             cmdStr[:-1]
         return cmdStr
 
+    def Event_OnRunFinished(self):
+        self.infoLabel.setText("Finished")
+        self.handleOutputs()
+        
+    def Event_OnRunMessage(self, message):
+        self.infoLabel.setText(message)
+    
