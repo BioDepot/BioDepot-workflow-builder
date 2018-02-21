@@ -219,9 +219,9 @@ class OWBwBWidget(widget.OWWidget):
             bwbVol=getattr(self,attr)
             if not bwbVol and 'default' in mapping:
                 bwbVol= mapping['default']
-            if self.data['parameters'][attr]['type'] is 'file':
+            if self.data['parameters'][attr]['type'] =='file':
                 bwbVol=os.path.dirname(os.path.normpath(bwbVol))
-            elif self.data['parameters'][attr]['type'] is 'files':
+            elif self.data['parameters'][attr]['type'] =='files':
                 files=re.split(r'[ ,;]',bwbVol)
                 bwbVol=os.path.dirname(os.path.normpath(files[0]))
             else:
@@ -265,25 +265,25 @@ class OWBwBWidget(widget.OWWidget):
                 setattr(self,pname,pvalue['default'])
         for pname in self.data['requiredParameters']:
             pvalue=self.data['parameters'][pname]
-            if ('gui' in pvalue and pvalue['gui'] is not 'FileDir') or ( pvalue['type'] is  not 'file' and pvalue['type'] is  not 'directory' and pvalue['type'] is  not 'files'):
+            if ('gui' in pvalue and pvalue['gui'] != 'FileDir') or ( pvalue['type'] != 'file' and pvalue['type'] != 'directory' and pvalue['type'] != 'files'):
                 continue
             self.drawFileDirElements(pname, pvalue, box=self.requiredBox,layout=self.fileDirRequiredLayout)              
                                     
         for pname in self.data['requiredParameters']:
             pvalue=self.data['parameters'][pname]                
-            if ('gui' in pvalue and pvalue['gui'] is not 'Ledit') or (pvalue['type'] is  not 'double') and (pvalue['type'] is  not 'text'):
+            if ('gui' in pvalue and pvalue['gui'] != 'Ledit') or (pvalue['type'] != 'double') and (pvalue['type'] != 'text'):
                 continue
             self.drawLedit(pname,pvalue,self.requiredBox,layout=self.leditRequiredLayout)           
             
         for pname in self.data['requiredParameters']:
             pvalue=self.data['parameters'][pname]                
-            if ('gui' in pvalue and pvalue['gui'] is not 'Spin') or (pvalue['type'] is  not 'int'):
+            if ('gui' in pvalue and pvalue['gui'] != 'Spin') or (pvalue['type'] != 'int'):
                 continue
             self.drawSpin(pname,pvalue,self.requiredBox)
             
         for pname in self.data['requiredParameters']:
             pvalue=self.data['parameters'][pname]                
-            if ('gui' in pvalue and pvalue['gui'] is not 'bool') or (pvalue['type'] is  not 'bool'):
+            if ('gui' in pvalue and pvalue['gui'] != 'bool') or (pvalue['type'] != 'bool'):
                 continue
             self.drawCheckbox(pname,pvalue,self.requiredBox)
                                 
@@ -299,30 +299,31 @@ class OWBwBWidget(widget.OWWidget):
         for pname in self.data['parameters']:
             if pname not in self.data['requiredParameters']:
                 pvalue=self.data['parameters'][pname]                
-                if ('gui' in pvalue and pvalue['gui'] is not 'FileDir') or (pvalue['type'] is  not 'file') and (pvalue['type'] is  not 'directory'):
+                if ('gui' in pvalue and pvalue['gui'] != 'FileDir') or (pvalue['type'] != 'file') and (pvalue['type'] != 'directory'):
                     continue
                 self.drawFileDirElements(pname, pvalue, box=self.optionalBox,layout=self.fileDirOptionalLayout,addCheckbox=True)
                                             
         for pname in self.data['parameters']:
             if pname not in self.data['requiredParameters']:
                 pvalue=self.data['parameters'][pname]                
-                if ('gui' in pvalue and pvalue['gui'] is not 'Ledit') or (pvalue['type'] is  not 'double') and (pvalue['type'] is  not 'text'):
+                if ('gui' in pvalue and pvalue['gui'] != 'Ledit') or (pvalue['type'] != 'double') and (pvalue['type'] != 'text'):
                     continue
                 self.drawLedit(pname,pvalue,self.optionalBox,layout=self.leditOptionalLayout,addCheckbox=True)           
                 
         for pname in self.data['parameters']:
             if pname not in self.data['requiredParameters']:
                 pvalue=self.data['parameters'][pname]                
-                if ('gui' in pvalue and pvalue['gui'] is not 'Spin') or (pvalue['type'] is  not 'int'):
+                if ('gui' in pvalue and pvalue['gui'] != 'Spin') or (pvalue['type'] != 'int'):
                     continue
                 self.drawSpin(pname,pvalue,self.optionalBox,addCheckbox=True)
                 
         for pname in self.data['parameters']:
             if pname not in self.data['requiredParameters']:
                 pvalue=self.data['parameters'][pname]                
-                if ('gui' in pvalue and pvalue['gui'] is not 'bool') or (pvalue['type'] is  not 'bool'):
+                if ('gui' in pvalue and pvalue['gui'] != 'bool') or (pvalue['type'] != 'bool'):
                     continue
                 self.drawCheckbox(pname,pvalue,self.optionalBox)
+
 
     def drawCheckbox(self,pname,pvalue,box=None):
         #for booleans - their value is the same as the checkbox state
@@ -366,7 +367,7 @@ class OWBwBWidget(widget.OWWidget):
         #draw required elements'
         checkbox=None
         ledit=gui.lineEdit(None, self, pname,disabled=addCheckbox)
-        button=gui.button(None, self, "", callback= partial(self.browseFileDir, attr= str(pname) ,filetype=pvalue['type']), 
+        button=gui.button(None, self, "", callback= partial(self.browseFileDir, attr= pname ,filetype=pvalue['type']), 
                           autoDefault=True, width=19, height=19,disabled=addCheckbox)
         if getattr(self,pname) is None:
             ledit.clear()
@@ -403,7 +404,7 @@ class OWBwBWidget(widget.OWWidget):
             self.triggerMenu[action]=attr
         self.execBtn.setMenu(self.execMenu)
         self.execBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
-        if self.runMode is 2:
+        if self.runMode ==2:
             self.execBtn.setEnabled(True)
         else:
             self.execBtn.setEnabled(False) 
@@ -427,7 +428,7 @@ class OWBwBWidget(widget.OWWidget):
 
     def runModeChange(self):
         self.runMode=self.cboRunMode.currentIndex()
-        if self.runMode is 2:
+        if self.runMode ==2:
             self.execBtn.setEnabled(True)
         else:
             self.execBtn.setEnabled(False)
@@ -446,13 +447,13 @@ class OWBwBWidget(widget.OWWidget):
                    
     def checkTrigger(self):
         #this should be checked any time there is a change
-        if self.runMode is 0: #manual - only go on start button
+        if self.runMode ==0: #manual - only go on start button
             return
-        elif self.runMode is 1: #automatic same as pushing start button
+        elif self.runMode ==1: #automatic same as pushing start button
             self.OnRunClicked()
         else:
             #check if the input triggers are set
-            for trigger in runTriggers:
+            for trigger in self.runTriggers:
                 if not inputConnections.isConnected(trigger):
                     return
             self.OnRunClicked()
@@ -492,13 +493,13 @@ class OWBwBWidget(widget.OWWidget):
         defaultDir = '/root'
         if os.path.exists('/data'):
             defaultDir = '/data'
-        if filetype is 'file':
+        if filetype =='file':
             myFile=QtWidgets.QFileDialog.getOpenFileName(self, "Locate file", defaultDir)[0]
             setattr(self,attr,myFile)
             dirAttr=attr+"Dir"
             setattr(self,dirAttr,os.path.dirname(myFile))
-        elif filetype is 'files':
-            myFiles=QtWidgets.QFileDialog.getOpenFileNames(self, "Locate file", defaultDir)
+        elif filetype =='files':
+            myFiles=QtWidgets.QFileDialog.getOpenFileNames(self, "Locate file(s)", defaultDir)
             if myFiles:
                 setattr(self,attr, ' '.join(myFiles[0]))
             else:
@@ -624,21 +625,21 @@ class OWBwBWidget(widget.OWWidget):
                 sys.stderr.write('{} is not required\n'.format(pname))
             if addFlag:
                 if pvalue['flags']:
-                    if pvalue['type'] is 'bool':
+                    if pvalue['type'] == 'bool':
                         flags[pvalue['flags'][0]] = None
-                    elif pvalue['type'] is 'file':
+                    elif pvalue['type'] == 'file':
                         filename=str(getattr(self,pname))
                         if filename:
                             hostFilename=self.bwbPathToContainerPath(filename, isFile=True,returnNone=False)
                             flags[pvalue['flags'][0]]=str(hostFilename)
-                    elif pvalue['type'] is 'files':
+                    elif pvalue['type'] == 'files':
                         files=re.split(r'[ ,;]',getattr(self,pname))
                         if files:
                             hostFiles=[]
                             for f in files:
                                 hostFiles.append(self.bwbPathToContainerPath(filename, isFile=True,returnNone=False))
                             flags[pvalue['flags'][0]]=' '.join(hostFiles)                    
-                    elif pvalue['type'] is 'directory':
+                    elif pvalue['type'] == 'directory':
                         path=str(getattr(self,pname))
                         if path:
                             hostPath=self.bwbPathToContainerPath(path, returnNone=False)
@@ -646,16 +647,16 @@ class OWBwBWidget(widget.OWWidget):
                     else:                        
                         flags[pvalue['flags'][0]]=str(getattr(self,pname))
                 else:
-                    if pvalue['type'] is 'file':
+                    if pvalue['type'] == 'file':
                         filename=str(getattr(self,pname))
                         if filename:
                             hostFilename=self.bwbPathToContainerPath(filename, isFile=True,returnNone=False)
                             args.append(hostFilename)
-                    elif pvalue['type'] is 'files':
+                    elif pvalue['type'] =='files':
                         files=re.split(r'[ ,;]',getattr(self,pname))
                         for f in files:
                             args.append(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))                   
-                    elif pvalue['type'] is 'directory':
+                    elif pvalue['type'] =='directory':
                         path=str(getattr(self,pname))
                         if path:
                             hostPath=self.bwbPathToContainerPath(path, returnNone=False)
