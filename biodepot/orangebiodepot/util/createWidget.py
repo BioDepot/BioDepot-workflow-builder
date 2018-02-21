@@ -99,6 +99,7 @@ def createWidget(inputJson,outputWidget, registerFlag=False):
                 f.write('        if hasattr(self,"{}"):\n'.format(attr))
                 f.write('            outputValue=getattr(self,"{}")\n'.format(attr))
                 f.write('        self.send("{}", outputValue)\n'.format(attr))
+        f.close()
         if registerFlag:
             register(inputJson,outputWidget,data['icon'])
 
