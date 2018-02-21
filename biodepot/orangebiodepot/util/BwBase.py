@@ -16,19 +16,6 @@ from AnyQt.QtWidgets import (
 #dummy classes
 class ContainerPaths():
     pass
-#from stackOverlfow
-class CheckableComboBox(QtGui.QComboBox):
-    def __init__(self):
-        super(CheckableComboBox, self).__init__()
-        self.view().pressed.connect(self.handleItemPressed)
-        self.setModel(QtGui.QStandardItemModel(self))
-
-    def handleItemPressed(self, index):
-        item = self.model().itemFromIndex(index)
-        if item.checkState() == QtCore.Qt.Checked:
-            item.setCheckState(QtCore.Qt.Unchecked)
-        else:
-            item.setCheckState(QtCore.Qt.Checked)
     
 class BwbGuiElements():
     #keep track of List of Gui elements
@@ -255,7 +242,10 @@ class OWBwBWidget(widget.OWWidget):
         self.checkTrigger()
 
     def OnRunClicked(self):
-        self.startJob()
+        if hasattr (self,'userStartJob'):
+            self.userStartJob()
+        else:
+            self.startJob()
                 
     def drawRequiredElements(self):
         for pname in self.data['requiredParameters']:
@@ -384,31 +374,40 @@ class OWBwBWidget(widget.OWWidget):
         self.bgui.add(pname,button)
         
     def drawExec(self, box=None):
+        #find out if there are triggers
+        self.candidateTriggers=[]
+        for pname in self.data['inputs']:
+            if not(pname in self.data['requiredParameters']):
+                self.candidateTriggers.append(pname)
+             
         #initialize the exec state
         self.execLayout=QtGui.QGridLayout()
         self.execLayout.setSpacing(5)
         self.cboRunMode=QtGui.QComboBox()
         self.cboRunMode.addItem('Manual')
         self.cboRunMode.addItem('Automatic')
-        self.cboRunMode.addItem('Triggered')
+        if self.candidateTriggers:
+            self.cboRunMode.addItem('Triggered')
+        elif self.runMode == 2: #reset in case there is a change in an older workflow
+            self.runMode=0
         self.cboRunMode.setCurrentIndex(self.runMode)
-        self.execBtn=QtGui.QToolButton(self)
-        self.execBtn.setText('Select Triggers')
-        self.execMenu=QtGui.QMenu(self)
-
-        self.triggerMenu={}
-        for attr in self.data["inputs"]:
-            action=self.execMenu.addAction(attr)
-            action.setCheckable(True)
-            action.setChecked( bool(attr in self.runTriggers))
-            action.changed.connect(self.chooseTrigger)
-            self.triggerMenu[action]=attr
-        self.execBtn.setMenu(self.execMenu)
-        self.execBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
-        if self.runMode ==2:
-            self.execBtn.setEnabled(True)
-        else:
-            self.execBtn.setEnabled(False) 
+        if self.candidateTriggers:
+            self.execBtn=QtGui.QToolButton(self)
+            self.execBtn.setText('Select Triggers')
+            self.execMenu=QtGui.QMenu(self)
+            self.triggerMenu={}
+            for attr in self.candidateTriggers:
+                action=self.execMenu.addAction(attr)
+                action.setCheckable(True)
+                action.setChecked( bool(attr in self.runTriggers))
+                action.changed.connect(self.chooseTrigger)
+                self.triggerMenu[action]=attr
+            self.execBtn.setMenu(self.execMenu)
+            self.execBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
+            if self.runMode ==2:
+                self.execBtn.setEnabled(True)
+            else:
+                self.execBtn.setEnabled(False) 
         self.cboRunMode.currentIndexChanged.connect(self.runModeChange)
         myLabel=QtGui.QLabel('RunMode:')
         myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter) 
@@ -424,15 +423,17 @@ class OWBwBWidget(widget.OWWidget):
         self.execLayout.addWidget(btnRun,1,0)
         self.execLayout.addWidget(myLabel,1,1)
         self.execLayout.addWidget(self.cboRunMode,1,2)
-        self.execLayout.addWidget(self.execBtn,1,3)
+        if self.candidateTriggers:
+            self.execLayout.addWidget(self.execBtn,1,3)
         box.layout().addLayout(self.execLayout)
 
     def runModeChange(self):
         self.runMode=self.cboRunMode.currentIndex()
-        if self.runMode ==2:
-            self.execBtn.setEnabled(True)
-        else:
-            self.execBtn.setEnabled(False)
+        if self.candidateTriggers:
+            if self.runMode == 2: 
+                self.execBtn.setEnabled(True)
+            else:
+                self.execBtn.setEnabled(False)
         self.checkTrigger()
     
     def chooseTrigger(self):
@@ -452,7 +453,7 @@ class OWBwBWidget(widget.OWWidget):
             return
         elif self.runMode ==1: #automatic same as pushing start button
             self.OnRunClicked()
-        else:
+        elif self.candidateTriggers:
             #check if the input triggers are set
             for trigger in self.runTriggers:
                 if not inputConnections.isConnected(trigger):

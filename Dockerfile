@@ -91,6 +91,9 @@ COPY user_config/ /root/
 #Add tutorial
 COPY Tutorials/ /root/tutorials/
 
+#Add widget creator
+RUN ln -s /biodepot/orangebiodepot/util/createWidget /usr/bin/createWidget 
+
 #start it up
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
 
