@@ -233,6 +233,7 @@ class OWBwBWidget(widget.OWWidget):
     GUI elements
     """
     def drawGUI(self):
+        self.setStyleSheet(":disabled { color: #282828}")
         self.scroll_area = QScrollArea(
             verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
         )
