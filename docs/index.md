@@ -247,47 +247,79 @@ The above example showsthe output of _Bam to Counts connected_ to the Directory 
 
 ### 1. Development environment
 
-Biodepot-workflow-builder (Bwb) is based on Orange, here is Orange official website: 
+We provide additional tools in a the biodepot/bwb-widget-dev for development of widgets. This includes a full-fledged editor, geany, some graphics tools for making icons and firefox for cutting pasting from stack overflow and other resources and for editing json files inside the container.
 
-[http://orange.biolab.si/](http://orange.biolab.si/), please take a look for Orange and understand what is Orange and the concept of widget.
+### Bwb widget development
 
-The programming language for widget development is Python and the framework that used to create GUI is PyQT. Therefore some knowledge of Python and QuickTime is helpful for widget development. In addition, instead of native Docker commands, the python API is used to call Docker and a familiarity with DockerPy is also helpful. 
-
-The Bwb container itself has all the necessary dependencies for developing new widgets. However, it only comes installed with a basic editor and work needs to be saved and imported from the mounted user directory. In the future we may release a version of the the Bwb that is specialized for developing widgets. In the future we may release a version of the the Bwb that is specialized for developing widgets. 
-
-For now we recommend installing Python 3.5, pyQT5 and Orange locally to develop and test widgets. The code  and instructions are at the Orange github [https://github.com/biolab/orange3](https://github.com/biolab/orange3)
-
-
-### Widget development overview
-
+#### Introduction
 A widget consists of a python script that defines the inputs/outputs, names, and supporting files such as icons along with the actual commands to be executed. In the case of Bwb, these are usually, docker commands that are accessed using the Python API (DockerPy).
 
-Orange provides a very useful tutorial for developing a widget. [http://orange-development.readthedocs.io/tutorial.html](http://orange-development.readthedocs.io/tutorial.html)
+Orange provides a very tutorial for developing a widget from scratch. [http://orange-development.readthedocs.io/tutorial.html](http://orange-development.readthedocs.io/tutorial.html)
 
-Once a widget has been written or downloaded from an github or other repository it needs to be installed so that Orange3 can recognize it. For development and testing we do this locally.
+#### Automated generation of widgets from json descriptor files
+We have greatly simplified and automated the widget development process. The user provides the details of the executable or script, the inputs, outputs, flags and arguments in a json file. The createWidget scripit then creates the Python script and copies it to the correct location. The widget then appears on the next launch of the Bwb process which can be done without closing the container. This is made possible by refactoring and abstracting the code in a BwBase class.
 
+The construction of a widget is reduced to editing a Json file. For more complicated widgets - the automatically produced python script can be customized and the defaults extended or overridden if desired The fields are described below.
 
-1\.  Navigate to the widget folder where setup.py exists and install the widget by typing
+There 3 steps to creating and sharing a widget:
 
-```Python
-pip3 install -e 
-```
-We use parameter -e here to install the widget as develop mode so that the package just linked to Python environment rather than copied into site-packages. 
+1	Edit json file
+2	Running createWidget tool to make widget
+3	Save copy of biodepot file and rebuild container
 
-2\.  Run Orange3
+The main step is creating or editing the json file which is given below:
 
-3\. When the widget is ready for installation into Bwb, clone the github repository of Bwb ([https://github.com/BioDepot/BioDepot-workflow-builder](https://github.com/BioDepot/BioDepot-workflow-builder)) and copy the widget into the Biodepot directory. Rebuild the container using the Dockerfile i.e.
+#### Description of json descriptor 
 
-(Run from the git directory)
+The json file describes a dict structure in Python which will be read into the dict *data* in the widget python script.
 
-```bash
-docker build -t mybwb .
-```
+There are 15 primary fields to the object
 
-The new container can be run as before, except the name of the new image (in the example mybwb), is substituted for the stock image biodepot/bwb:latest
-
-
-### Using BwBase to develop widgets
+**'name' : **<*str*> -name of widget
+**'category : **<*str*> -may be used in future to group widgets by function
+**'icon' :** <*str*> -path of icon file to be used by bwb
+**'priority' :**  <*int*>  -priority of widget
+**'want_main_area' :** <*bool*> -use only if custom code needs second drawing area
+**'docker_image_name' :** <*str*> - name of docker image to launch
+**'docker_image_tag' :**  <*str*> tag of docker image e.g. latest
+**'persistent_settings' :** <*str* or *list*> - 'all', 'none' or list of settings values that will be saved and restored upon launch
+**'command' :** <*str*> the command that will be launched 
+**'inputs'** : <*OrderedDict*> -attributes that can obtain values from other widgets
+	\<*str*> attribute to be input : <*dict*>
+		**'type' :**
+			 
+	callback            'inputs'   : OrderedDict([ ('indexFile', {'type':str, 'callback' : None}),
+                                       ('fastqFiles',  {'type':str, 'callback' : None})
+                                    ]),
+            'outputs'  : OrderedDict([ ('outputDir', {'type':str})
+                                    ]),
+            'volumeMappings' : [{'conVolume':'/root/output','attr':'outputDir','default':'/data/output'},
+                                {'conVolume':'/root/fastq' , 'attr':'fastqFiles'},
+                                {'conVolume':'/root/reference', 'attr':'indexFile','default':'/data/reference'}
+                               ],
+            'requiredParameters' : ['outputDir','indexFile','fastqFiles'],
+            'parameters': OrderedDict([('outputDir',{'flags':['-o','--output-dir='], 'label':'Output directory', 'type': "directory"}),
+                                       ('indexFile',{'flags':['-i','--index='], 'label':'Index file', 'type':'file'}),
+                                       ('fastqFiles' ,{'flags':[],'label':'fastq files', 'type': "files",'filePattern':["*.fastq.*"]}),
+                                       ('bias',     {'flags':['--bias'],'label':'Perform sequence based bias correction','type': 'binary'}),
+                                       ('bootstrap',{'flags':['-b','--bootstrap-samples='],'label':'Number of bootstrap samples','type': 'int','default': 1}),
+                                       ('seed',     {'flags':['--seed='],'label':'Seed for bootstrap sampling','type': 'int','gui':'Ledit', 'default' : 42}),
+                                       ('plaintext',{'flags':['--plaintext'],'label':'Output plaintext instead of HDF5','type': 'bool', 'default' : False}),                                         
+                                       ('fusion',   {'flags':['--fusion'],'label':'Search for fusion genes','type': 'bool', 'default' : False}),
+                                       ('single',   {'flags':['--single'],'label':'Quantify single-end reads','type': 'bool', 'default' : False}),    
+                                       ('single_overhang',   {'flags':['--single-overhang'],'label':'Include reads that go beyond transcript start','type': 'bool', 'default' : False}),                                       
+                                       ('fr_stranded',   {'flags':['--fr-stranded'],'label':'strand specific read - first read forward','type': 'bool', 'default' : False}),
+                                       ('rf_stranded',   {'flags':['--rf-stranded'],'label':'strand specific read - first read reverse','type': 'bool', 'default' : False}),
+                                       ('fragment_length',   {'flags':['-l','--fragment-length'],'label':'Estimated fragment length','type': 'double', 'default' : None}),
+                                       ('stdev',    {'flags':['-s','--sd'],'label':'Standard deviation of fragment length','type': 'double', 'default' : None}),
+                                       ('nThreads' ,{'flags':['-t','--threads='],'label':'Number of threads','type': 'int','default':1}),
+                                       ('pseudoBam',{'flags':['--pseudobam'],'label':'Save alignments to BAM file','type': 'bool','default':False}),                                                                            
+                                       ('genomeBam',{'flags':['--genomebam'],'label':'Project alignments to sorted BAM file','type': 'bool','default':False}),
+                                       ('gtf' ,{'flags':['--gtf'],'label':'GTF file', 'type': "file"}),                                                                                
+                                       ('chromosomes' ,{'flags':['-c','--chromosomes'],'label':'Chromosome file', 'type': "file"})
+                           ]
+                          )
+        }
 
 
 ![ ](images/image3.png  "BwBase class")

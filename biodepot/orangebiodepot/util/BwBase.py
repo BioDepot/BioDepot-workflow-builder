@@ -570,7 +570,10 @@ class OWBwBWidget(widget.OWWidget):
             self.infoLabel.setText("missing or incorrect volume mappings to: {}".format(missingVols))
             return
         cmd=self.generateCmdFromData()
-        self.dockerRun(self.hostVolumes,cmd)
+        self.envVars=None
+        self.getEnvironmentVariables()
+        sys.stderr.write('envs {}\n'.format(self.envVars))
+        self.dockerRun(self.hostVolumes,cmd,environments=self.envVars)
         
     def dockerRun(self, volumes = None, commands = None, environments = None):
         if not self._Flag_isRunning:
@@ -711,7 +714,18 @@ class OWBwBWidget(widget.OWWidget):
         if cmdStr:
             cmdStr[:-1]
         return cmdStr
-
+        
+    def getEnvironmentVariables(self):
+        for pname in self.data['parameters']:
+            pvalue=self.data['parameters']
+            if 'env' in pvalue and getattr(self,pname) is not None:
+                self.envVars[pvalue['env']] = getattr(self,pname)
+        #now assign static environment variables 
+        if 'env' in self.data:
+            for e in self.data['env']:
+                if e not in self.envVars:
+                    self.envVars[e]=self.data['env'][e]
+                    
     def Event_OnRunFinished(self):
         self.infoLabel.setText("Finished")
         self.handleOutputs()
