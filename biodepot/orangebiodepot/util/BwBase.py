@@ -372,6 +372,9 @@ class OWBwBWidget(widget.OWWidget):
         self.bwbFileEntry(box,button,ledit,layout=layout,label=pvalue['label']+':', entryType=pvalue['type'], checkbox=checkbox)
         self.bgui.add(pname,ledit)
         self.bgui.add(pname,button)
+    
+    def drawFilesBox (self,pname, pvalue, box=None, layout=None, addCheckbox=False):
+        pass
         
     def drawExec(self, box=None):
         #find out if there are triggers
@@ -501,11 +504,16 @@ class OWBwBWidget(widget.OWWidget):
             dirAttr=attr+"Dir"
             setattr(self,dirAttr,os.path.dirname(myFile))
         elif filetype =='files':
-            myFiles=QtWidgets.QFileDialog.getOpenFileNames(self, "Locate file(s)", defaultDir)
+            filesDialog = QtWidgets.QFileDialog()
+            filesDialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog,True) #necessary to ensure that the order of the elements chosen is kept
+            myFiles=filesDialog.getOpenFileNames(self, "Locate file(s)", defaultDir)
             if myFiles:
-                setattr(self,attr, ' '.join(myFiles[0]))
-            else:
-                setattr(self,attr,None)
+                myStr=' '.join(myFiles[0])
+                if hasattr(self,attr) and getattr(self,attr):
+                    oldStr=getattr(self,attr)
+                    setattr(self,attr, ' '.join([oldStr,myStr]))
+                else:
+                    setattr(self,attr,myStr)
         else:
             myDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate directory", directory=defaultDir)
             setattr(self,attr,myDir)
