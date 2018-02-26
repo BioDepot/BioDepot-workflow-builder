@@ -1,4 +1,4 @@
-import os
+import os, sys
 import json
 import requests
 import subprocess
@@ -13,9 +13,8 @@ class DockerClient:
         self.name = name
         self.cli = APIClient(base_url=url)
         self.bwb_instance_id = socket.gethostname()
-        self.volumeSource = None
-        self.volumeDestination = None
-        self.findVolumeMapping()
+        self.bwbMounts={}
+        self.findVolumeMappings()
 
     def getClient(self):
         return self.cli
@@ -64,7 +63,7 @@ class DockerClient:
         if not (hostVolumes is None):
             binds = []
             for container_dir, host_dir in hostVolumes.items():
-                binds.append(self.to_host_directory(host_dir) + ":" + container_dir)
+                binds.append(self.to_best_host_directory(host_dir) + ":" + container_dir)
             host_config = self.cli.create_host_config(binds=binds)
             volumes = list(hostVolumes.keys())           
         elif type(volumes) is dict:
@@ -72,7 +71,7 @@ class DockerClient:
         # keep this so as not to break early widgets
             binds = []
             for host_dir, container_dir in volumes.items():
-                binds.append(self.to_host_directory(host_dir) + ":" + container_dir)
+                binds.append(self.to_best_host_directory(host_dir) + ":" + container_dir)
             host_config = self.cli.create_host_config(binds=binds)
             volumes = list(volumes.values())
         if type(commands) is list:
@@ -116,39 +115,45 @@ class DockerClient:
 
     def remove_volume(self, name):
         self.cli.remove_volume(name)
-
-    '''
-        Convert path of container back to host path
-    '''
     
-    def findVolumeMapping(self):
+    def findVolumeMappings(self):
         for c in self.cli.containers():
             container_id = c['Id']
             if len(container_id) < 12: 
                 continue
             if container_id[:12] == self.bwb_instance_id:
                 for m in c['Mounts']:
-                    if not ('docker.sock' in m['Source']):
-                        self.volumeSource = m['Source']
-                        self.volumeDestination = m['Destination']
-                    return
+                    if not ('/var/run' in m['Source']):
+                        self.bwbMounts[m['Source']]=m['Destination']
 
-    def to_host_directory(self, path, returnNone=False):
-        if not  self.volumeSource or not self.volumeDestination:
+    def to_best_host_directory(self, path, returnNone=False):
+        if self.bwbMounts == {}:
             return path
-        cleanDestination = os.path.normpath(self.volumeDestination)
-        cleanPath= os.path.normpath(path)
-        cleanSource=os.path.normpath(self.volumeSource)
+        bestPath = None
+        for source, dest in self.bwbMounts.items():
+            absPath=self.to_host_directory(path, source, dest)
+            if absPath is not None:
+                if bestPath is None:
+                    bestPath=absPath
+                elif len(absPath) < len(bestPath):
+                    bestPath=absPath
+        if bestPath is None:
+            if returnNone:
+                return None
+            return path
+        return bestPath
         
+    def to_host_directory(self, path, source,dest):
+        cleanDestination = os.path.normpath(dest)
+        cleanPath= os.path.normpath(path)
+        cleanSource=os.path.normpath(source)        
         #check if it is already relative to host path
         if cleanSource in cleanPath:
             return path
 
         # if the path is not mapping from host, will return path
         if cleanDestination not in cleanPath:
-            if returnNone:
-                return None
-            return path
+            return None
         abspath = os.path.normpath(str.join(os.sep,(cleanSource, path[path.find(cleanDestination) + len(cleanDestination):])))
         return abspath
 

@@ -68,7 +68,8 @@ def createWidget(inputJson,outputWidget, registerFlag=False):
         f.write('    pset=functools.partial(settings.Setting,schema_only=True)\n')
         f.write('    runMode=pset(0)\n')
         f.write('    runTriggers=pset([])\n')
-        f.write('    inputConnectionsStore=pset({})\n')    
+        f.write('    inputConnectionsStore=pset({})\n')
+        f.write('    optionsChecked=pset({})\n')
         for pname,pvalue in data['parameters'].items():
             if 'default' in pvalue and pvalue['default'] is not None:
                 f.write('    {}=pset({})\n'.format(pname,str(pvalue['default'])))
