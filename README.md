@@ -1,7 +1,7 @@
 # BioDepot-Workflow-builder (Bwb)
 # MANUAL
 
-![](images/image19.png) ![](images/image23.png) 
+![](/docs/images/image19.png) ![](/docs/images/image23.png) 
    
 
 Bioinformatics Group
@@ -85,15 +85,15 @@ For more information please refer to -
 1\. Download the Docker package -  [Docker for Mac](https://download.docker.com/mac/stable/Docker.dmg)
 2\. To install Docker: double-click Docker.dmg to open the installer, then drag Moby the whale to the Applications folder.		
 
-![](images/image1.png) 
+![](/docs/images/image1.png) 
 
 3\. To start Docker: double-click Docker.app in the Applications folder. (In the example below, the Applications folder is in "grid" view mode.)
 
-![](images/image13.png)     
+![](/docs/images/image13.png)     
 
 You will be asked to authorize Docker.app with your system password after you launch it. Privileged access is needed to install networking components and links to the Docker apps.The whale in the top status bar indicates that Docker is running, and accessible from a terminal.
 
-![](images/image16.png) 
+![](/docs/images/image16.png) 
 
 
 ### Windows
@@ -106,18 +106,18 @@ You will be asked to authorize Docker.app with your system password after you la
  * follow the install wizard to accept the license, authorize the installer, and proceed with the install.
  * when it completes, the installer reports it was successful:
  * click the finish button to complete the installation. 
-![](images/image21.png) 
+![](/docs/images/image21.png) 
 
 2\.  To start Docker,
 * search for Docker, select the app in the search results, and click it (or hit Return).
-![](images/image11.png) 
+![](/docs/images/image11.png) 
 * when the whale in the status bar stays steady, Docker is up-and-running, and accessible from any terminal window.
-![](images/image20.png) 
+![](/docs/images/image20.png) 
 
 
 * if the whale is hidden in the Notifications area, click the up arrow on the taskbar to show it. To learn more, see [Docker Settings](https://docs.docker.com/docker-for-windows/#docker-settings).
 * If you just installed the app, you also get a popup success message with suggested next steps, and a link to this documentation. 
-![](images/image15.png) 
+![](/docs/images/image15.png) 
 
 
 ### On The Cloud
@@ -132,21 +132,21 @@ On the cloud, BwB can also be run on any cloud instance. Please refer to the Lin
 2\.  Select the configuration and click on "Review and Launch"
 
 3\.  You will be prompted to associate a ssh key pair with the instance, you can use an existing key pair or create a new one. The key will be downloaded onto the computer  which will be later used to ssh into the machine.
-![](images/image9.png) 
+![](/docs/images/image9.png) 
 
 4\.  Once the instance is running select your instance and scroll right for security groups.
 
 5\.  From "Actions" button select "Edit inbound rules" 
 
-![](images/image5.png) 
+![](/docs/images/image5.png) 
 
 6\.  Add a new http rule for port 6080 to access the GUI from the container
 
-![](images/image10.png) 
+![](/docs/images/image10.png) 
 
 7\.  Copy the public dns of the instance 
 
-![](images/image22.png) 
+![](/docs/images/image22.png) 
 
 8\.  SSH into the instance by typing the following command into the terminal. 
 (Type the commands in the directory where the ssh key of AWS instance was downloaded)
@@ -170,7 +170,7 @@ Then run the following commands on command prompt / terminal.
 ```bash
 docker pull biodepot/bwb:latest
 ```
-![](images/image2.png) 
+![](/docs/images/image2.png) 
     
 2\.  Start the Bwb container 
 
@@ -194,11 +194,11 @@ Once connected. A window similar to Figure 1 should appear showing a maximized B
 
 Note that the Bwb windowing system is inside the browser window. You still have access to whatever windowing system you are using on your host machine. If your browser closes or go to another url, nothing happens to Bwb - the browser merely provides a viewport to the Bwb container. Refreshing or reconnecting the browser to the container IP allows you to interact with Bwb again.
 
-![ ](images/image4.png  "Figure 1: Maximized Bwb window")
+![ ](/docs/images/image4.png  "Figure 1: Maximized Bwb window")
 
 Figure 1: Maximized Bwb window
 
-![ ](images/image8.png  "Figure 2: Multiple Bwb windows on Desktop")
+![ ](/docs/images/image8.png  "Figure 2: Multiple Bwb windows on Desktop")
 
 Figure 2:  Multiple Bwb windows on Desktop
 
@@ -210,7 +210,7 @@ If we hide/iconify the window by clicking on the taskbar or clicking on the icon
 ### Using widgets
 
 
-![ ](images/image12.png  "Figure 3: Different types of widgets")
+![ ](/docs/images/image12.png  "Figure 3: Different types of widgets")
 
 Figure 3:  Different types of widgets
 
@@ -224,17 +224,17 @@ The widget is the main unit of the workflow. Available  widgets are available in
 
 This widget is designed to facilitate the task of importing existing scripts and executables into Bwb without writing a full widget. Three elements are specified, a container with the required executables and dependencies, a set of mount points that point to where the input and output files will reside, and a starting command, for example to run a script. The example below shows how this can be used to run an R script that converts bamfiles to counts. Python and Perl scripts can be run changing the container to one that has Python and/or Perl installed.  Stock containers for all the major scripting languages and packages such as Bioconductor are available on Docker Hub.
 
-![ ](images/image7.png  "Custom container widget")
+![ ](/docs/images/image7.png  "Custom container widget")
  
-![ ](images/image17.png  "Custom container widget form")
+![ ](/docs/images/image17.png  "Custom container widget form")
 
 #### Load CSV
 
 This widget plays a role as bridge between CSV file and the [Data Table] widget of Orange. It widget support two kind of sources (channels): a CSV file or a directory. If the source is a directory, the widget will scan that folder and list all CSV or TSV files. The CSV or TSV file will be loaded when user select them or specify the particular file name.
 
-![ ](images/image18.png  "Load CSV widget")
+![ ](/docs/images/image18.png  "Load CSV widget")
 
-![ ](images/image14.png  "Load CSV inputs")
+![ ](/docs/images/image14.png  "Load CSV inputs")
 
 
 The above example showsthe output of _Bam to Counts connected_ to the Directory of _Load Counts Table_. Once the procedure Bam to Counts finished, it will send <code><em>/data/bamfiles</em></code> to [Load CSV] widget, the [Load CSV] widget will scan this folder list all *.csv or *.tsv files.
