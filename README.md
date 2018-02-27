@@ -307,14 +307,23 @@ The json file describes a dict structure in Python which will be read into the d
 There are 17 primary fields to the object
 
 **'name' : **  <*str*> -name of widget
+
 **'category : ** <*str*> -may be used in future to group widgets by function
+
 **'icon' :** <*str*> -path of icon file to be used by bwb
+
 **'priority' :**  <*int*>  -priority of widget - used to determine which widget to evaluate first when there are multiple outputs
+
 **'want_main_area' :** <*bool*> -use only if custom code needs second drawing area
+
 **'docker_image_name' :** <*str*> - name of docker image to launch
+
 **'docker_image_tag' :**  <*str*> tag of docker image e.g. latest
+
 **'persistent_settings' :** <*str* or *list*> - 'all', 'none' or list of settings values that will be saved and restored upon launch
+
 **'command' :** <*str*> the command that will be launched 
+
 **'groups' :** <*dict*> - group parameters together - currently not used but will be used to provide support for linked entries such as exclusive checkboxes
 ```python
 	{
