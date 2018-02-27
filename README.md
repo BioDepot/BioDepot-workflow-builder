@@ -384,8 +384,11 @@ A sample json file is in the /biodepot/orangebiodepot/json directory
 The abstraction of the widget details is handled by the Bwb class which is responsible for the following tasks:
 
 1\. Keeping track of connections
+
 2\. Handling input signals
+
 3\. Drawing the GUI form 
+
 4\. Calling the Docker API to launch the executable
 
 #### Keeping track of connections
@@ -398,8 +401,11 @@ A signal is sent to an input when it is connected to an output, disconnected fro
 There are 4 main elements that are drawn:
 
 1\. Status box - error messages and progress and other informational messages are displayed here
+
 2\. Required parameters - the form for the parameters required to run the widget are here
+
 3\. Optional parmeters - a list of optional parameters is placed here
+
 4\. Execution box - whether the widget is run automatically, manually, or semi-automatically depending on runTriggers is set here
 
 The master methid is the **drawGUI ** method which draws the Status box and calls **drawRequiredElements**, **drawOptionalElements**, and **drawExec** to draw the other elements. It then calls **checkTrigger **to see if it should start running the Docker process.
