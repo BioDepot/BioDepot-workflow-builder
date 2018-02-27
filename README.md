@@ -306,9 +306,9 @@ The json file describes a dict structure in Python which will be read into the d
 
 There are 17 primary fields to the object
 
-**'name' : **  <*str*> -name of widget
+**'name' :**  <*str*> -name of widget
 
-**'category : ** <*str*> -may be used in future to group widgets by function
+**'category' :** <*str*> -may be used in future to group widgets by function
 
 **'icon' :** <*str*> -path of icon file to be used by bwb
 
