@@ -90,10 +90,13 @@ class ConnectionDict:
 
     def remove (self, slot, connectionId=None):
         if slot in self._dict:
-            try:
-                self._dict[slot].remove(connectionId)
-            except ValueError:
-                pass
+            if connectionId is None:
+                del self._dict[slot]
+            else:
+                try:
+                    self._dict[slot].remove(connectionId)
+                except ValueError:
+                    pass
             #need to update the volumes
 
     def isConnected (self, slot):
