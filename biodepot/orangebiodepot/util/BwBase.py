@@ -165,7 +165,8 @@ class OWBwBWidget(widget.OWWidget):
         self.scroll_area.setWidget(self.bigBox)
         self.scroll_area.setWidgetResizable(True)
         self.controlArea.layout().addWidget(self.scroll_area)
-
+        controlBox = gui.vBox(self.bigBox)
+        self.drawExec(box=controlBox)
         consoleBox = gui.widgetBox(self.bigBox, "Status")
         self.infoLabel = gui.widgetLabel(consoleBox, 'Waiting...')
         self.infoLabel.setWordWrap(True)
@@ -173,8 +174,7 @@ class OWBwBWidget(widget.OWWidget):
         self.optionalBox = gui.widgetBox(self.bigBox, "Optional parameters")
         self.drawRequiredElements()
         self.drawOptionalElements()
-        controlBox = gui.vBox(self.bigBox, "Execution controls")
-        self.drawExec(box=controlBox)
+
         #check if the requirements to be run are met
         self.checkTrigger()
 
