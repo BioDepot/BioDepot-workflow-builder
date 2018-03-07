@@ -426,7 +426,6 @@ class OWBwBWidget(widget.OWWidget):
             ledit.setEnabled(True)
         if value is None or clearLedit:
             ledit.clear()
-
         
     def drawFileDirElements(self,pname, pvalue, box=None, layout=None, addCheckbox=False):
         checkbox=None
@@ -551,7 +550,7 @@ class OWBwBWidget(widget.OWWidget):
         boxEdit.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
         boxEdit.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         boxEdit.setStyleSheet(":disabled { color: #282828}")
-        boxEdit.setFixedHeight(60)
+        boxEdit.setMinimumHeight(60)
         #fill boxEdit
         if hasattr(self,pname):
             fileStr=getattr(self,pname)
@@ -600,7 +599,7 @@ class OWBwBWidget(widget.OWWidget):
         label=QtGui.QLabel(pvalue['label']+':')
         label.setAlignment(Qt.AlignTop)
         layout.addWidget(label,layout.nextRow,startCol)
-        layout.addWidget(myBox,layout.nextRow,1, 1, 3)
+        layout.addWidget(myBox,layout.nextRow,1,1,2)
         
         layout.nextRow = layout.nextRow + 1
         #line layout     
