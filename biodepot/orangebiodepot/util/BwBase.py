@@ -13,6 +13,17 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
+
+
+#for selecting multiple directories
+class getExistingDirectories(QtWidgets.QFileDialog):
+    def __init__(self, *args):
+        super(getExistingDirectories, self).__init__(*args)
+        self.setOption(self.DontUseNativeDialog, True)
+        self.setFileMode(self.Directory)
+        self.setOption(self.ShowDirsOnly, True)
+        self.findChildren(QtWidgets.QListView)[0].setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.findChildren(QtWidgets.QTreeView)[0].setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 #dummy class
 class ContainerPaths():
     pass
@@ -80,17 +91,28 @@ class BwbGuiElements():
         return False
 
     def enable(self,attr,value):
-        #value is passed because it could be None and is used to signal a ledit clear
-        #cannot use the value of ledit text because for some reason it is text 'None'
+        clearLedit=False
+        if value is None:
+            clearLedit=True
         if attr in self._updateCallbacks:
             self._updateCallbacks[attr]() 
         if attr in self._dict:
             if attr in self._enableCallbacks:
-                self._enableCallbacks[attr](attr,value,self._dict[attr])
+                self._enableCallbacks[attr](value,clearLedit)
             else:
                 for g in self._dict[attr]:
                     self.enableElement(g)
         return True
+        
+    def disableAll(self):
+        for attr in self._dict.keys():
+            self.disable(attr)
+
+            
+    def reenableAll(self,OWself):
+        for attr in self._dict.keys():
+            if not OWself.inputConnections.isConnected(attr) :
+                self.enable(attr,getattr(OWself,attr))
 
 class LocalContainerRunner(QThread):
     progress = pyqtSignal(int)
@@ -262,7 +284,7 @@ class OWBwBWidget(widget.OWWidget):
             if not ('parameters' in self.data) or not ( pname in self.data['parameters']):
                 continue
             pvalue=self.data['parameters'][pname]
-            if ('gui' in pvalue and pvalue['gui'] != 'files' and pvalue['gui'] != 'directories') or ( pvalue['type'] != 'files' and pvalue['type'] != 'directories'):
+            if ('gui' in pvalue and pvalue['gui'][-4:] != 'list') or ( pvalue['type'][-4:] != 'list' ):
                 continue
             self.drawFilesBox(pname, pvalue, box=self.requiredBox,layout=self.fileDirRequiredLayout)
 
@@ -324,7 +346,7 @@ class OWBwBWidget(widget.OWWidget):
                 continue
             if pname not in self.data['requiredParameters']:
                 pvalue=self.data['parameters'][pname]
-                if ('gui' in pvalue and pvalue['gui'] != 'files' and pvalue['gui'] != 'directories') or (pvalue['type'] != 'files') and (pvalue['type'] != 'directories'):
+                if ('gui' in pvalue and pvalue['gui'][-4:] != 'list') or ( pvalue['type'][-4:] != 'list' ):                    
                     continue
                 self.drawFilesBox (pname, pvalue, box=self.optionalBox,layout=self.fileDirOptionalLayout,addCheckbox=True)
                 
@@ -372,7 +394,7 @@ class OWBwBWidget(widget.OWWidget):
         mySpin=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
         if getattr(self,pname) is None:
             mySpin.clear()
-        self.bgui.add(pname,mySpin,enableCallback=self.enableSpin)
+        self.bgui.add(pname,mySpin,enableCallback=lambda value: self.enableSpin(value,mySpin))
         
     def drawLedit(self,pname,pvalue,box=None,layout=None,addCheckbox=False):
         checkAttr=None
@@ -389,23 +411,20 @@ class OWBwBWidget(widget.OWWidget):
         #check if the value is none - then we clear it
         if getattr(self,pname) is None:
             ledit.clear()
-        self.bgui.add(pname,ledit,enableCallback=self.enableLedit)
+        self.bgui.add(pname,ledit,enableCallback=lambda value,clearLedit: self.enableLedit(value,clearLedit,checkbox,ledit))
         if addCheckbox:
             self.updateCheckbox(pname,checkbox.isChecked(),ledit.text())
     
-    def enableLedit(self,pname,value,elements):
-        if len(elements) == 2:
-            cb=elements[0]
-            ledit=elements[1]
+    def enableLedit(self,value,clearLedit,cb,ledit):
+        if cb:
             cb.setEnabled(True)
             if cb.isChecked():
                 ledit.setEnabled(True)
             else:
                 ledit.setEnabled(False)
         else:
-            ledit=elements[0]
             ledit.setEnabled(True)
-        if value is None:
+        if value is None or clearLedit:
             ledit.clear()
 
         
@@ -426,19 +445,12 @@ class OWBwBWidget(widget.OWWidget):
             self.bgui.add(pname,checkbox)
         self.bwbFileEntry(box,button,ledit,layout=layout,label=pvalue['label']+':', entryType=pvalue['type'], checkbox=checkbox)
         self.bgui.add(pname,ledit)
-        self.bgui.add(pname,button,enableCallback=self.enableFileDir)
+        self.bgui.add(pname,button,enableCallback=lambda value, clearLedit: self.enableFileDir(value, clearLedit, checkbox,ledit,button))
         if addCheckbox:
             self.updateCheckbox(pname,checkbox.isChecked(),ledit.text())
             
-    def enableFileDir(self,pname,value,elements):
-        sys.stderr.write('callback filedir {} with value {}\n'.format(pname,value))
-        ledit=None
-        btn=None
-        cb=None
-        if len(elements) == 3:
-            cb=elements[0]
-            ledit=elements[1]
-            btn=elements[2]
+    def enableFileDir(self,value, clearLedit, cb,ledit,btn):
+        if cb:
             cb.setEnabled(True)
             if cb.isChecked():
                 ledit.setEnabled(True)
@@ -447,46 +459,34 @@ class OWBwBWidget(widget.OWWidget):
                 ledit.setEnabled(False)
                 btn.setEnabled(False)                
         else:
-            ledit=elements[0]
-            btn=elements[1]
             ledit.setEnabled(True)
             btn.setEnabled(True)
-        if value is None:
+        if value is None or clearLedit:
             ledit.clear()
             
-    def drawFilesBoxBtnRules(self,elements):
-        [ledit,boxEdit,addBtn,removeBtn,browseBtn]=elements
+    def drawFilesBoxBtnRules(self,boxEdit,ledit,addBtn,removeBtn):
         if not ledit.text():
             ledit.clear()
             addBtn.setEnabled(False)
         if not boxEdit.selectedItems():
             removeBtn.setEnabled(False)
             
-    def enableFilesBox(self,pname,value,elements):
-        sys.stderr.write('callback filedir {} with value {}\n'.format(pname,value))
-        checkbox=None
-        startIndex=0
-        if len(elements) == 6:
-            checkbox=elements[0]
+    def enableFilesBox(self, value, clearLedit, checkbox,browseBtn,boxEdit,ledit,addBtn,removeBtn):
+        #first element is checkbox
+        #last element is browseBtn if it exists
+        if checkbox:
             checkbox.setEnabled(True)
-            startIndex=1
-        [boxEdit,ledit,browseBtn,addBtn,removeBtn]=elements[startIndex:]
         ledit.clear()
-        if value is None: #explicitly check for this to avoid text None from appearing
-
-            boxEdit.clear()
-        else:
+        boxEdit.clear()
+        if value:
             boxEdit.addItems(str.splitlines(value))
         if not checkbox or checkbox.isChecked():
             for g in  [boxEdit,ledit,browseBtn,addBtn,removeBtn]:
-                g.setEnabled(True)
-        else:
-            for g in  [boxEdit,ledit,browseBtn,addBtn,removeBtn]:
-                g.setEnabled(False)           
+                if g:
+                    g.setEnabled(True)          
+        self.drawFilesBoxBtnRules(boxEdit,ledit,addBtn,removeBtn)
         
-        self.drawFilesBoxBtnRules([boxEdit,ledit,browseBtn,addBtn,removeBtn])
-        
-    def updateFilesBox(self,attr,ledit,boxEdit): #updates for input
+    def updateFilesBox(self,attr,ledit,boxEdit): #updates for input - called before and after addition and deletion of input
         if hasattr(self,attr):
             value=getattr(self,attr)
             ledit.clear()
@@ -495,23 +495,56 @@ class OWBwBWidget(widget.OWWidget):
             else:
                 boxEdit.clear()
                 boxEdit.addItems(str.splitlines(value))
+                self.updateBoxEditValue(attr,boxEdit)
             
+    def updateBoxEditValue(self,attr,boxEdit):
+        myItems=[]
+        sys.stderr.write('{} objects in {}\n'.format(boxEdit.count(),boxEdit))
+        for i in range(boxEdit.count()):
+            myItems.append(boxEdit.item(i).text())
+            sys.stderr.write('add item number {} value {}\n'.format(i,boxEdit.item(i).text()))
+        if myItems:
+            setattr(self,attr,"\n".join(myItems))
+        
     def drawFilesBox (self,pname, pvalue, box=None, layout=None, addCheckbox=False):
-        #for multiple files draw a widget list with a line edit below and buttons to browse, add, delete, submit and reload
+        #for multiple files or directories draw a widget list with a line edit below and buttons to browse, add, delete, submit and reload
+        #is used for multiple entry of any type
+        
         disabledFlag=False
         checkbox=None
+        browseBtn=None
+        
         if addCheckbox or self.inputConnections.isConnected(pname):
             disabledFlag=True
+        
+        elements=[]
+        #add checkbox if necessary
+        if addCheckbox:
+            value=None
+            if hasattr(self,pname):
+                value=getattr(self,pname)
+            checkAttr=pname+'Checked' #this is not actually used but needed for orange gui checkbox element
+            setattr(self,checkAttr,self.optionsChecked[pname])
+            checkbox=gui.checkBox(None, self,checkAttr,label=None)
+            checkbox.stateChanged.connect(lambda : self.updateCheckbox(pname,checkbox.isChecked(),value=value))
+            elements.append(checkbox)
+            
         #line edit for manual file entry
         leditAttr=pname+'Ledit'
         if not hasattr(self,leditAttr):
             setattr(self,leditAttr,None);
         ledit = gui.lineEdit(None, self,leditAttr,disabled=addCheckbox)
         ledit.setClearButtonEnabled(True)
-        ledit.setPlaceholderText("Enter file(s)")
+        if pvalue['type'] == 'file list':
+            ledit.setPlaceholderText("Enter file")
+        elif pvalue['type'] == 'directory list':
+            ledit.setPlaceholderText("Enter directory")
+        else:
+            ledit.setPlaceholderText("Enter parameter")
+        
         ledit.setStyleSheet(":disabled { color: #282828}")
-        if getattr(self,pname) is None:
-            ledit.clear()
+        ledit.clear()
+        elements.append(ledit)
 
         #setup boxEdit
         boxEdit=QtGui.QListWidget(self)
@@ -525,35 +558,34 @@ class OWBwBWidget(widget.OWWidget):
             if fileStr:
                 boxEdit.addItems(str.splitlines(fileStr))
         boxEdit.setDisabled(disabledFlag)
+        elements.append(boxEdit)
+        
         #buttons
-        addBtn=gui.button(None, self, "", callback=lambda: self.addLedit(ledit,boxEdit,addBtn), autoDefault=False,disabled=disabledFlag)
-        removeBtn=gui.button(None, self, "", callback=lambda: self.removeItem(boxEdit,removeBtn), autoDefault=False,disabled=disabledFlag)
-        browseBtn = gui.button(None, self, "", callback=partial(self.browseFilesDirs, boxEdit=boxEdit), autoDefault=False,disabled=disabledFlag)
+        addBtn=gui.button(None, self, "", callback=lambda: self.addLedit(pname,ledit,boxEdit,addBtn), autoDefault=False,disabled=disabledFlag)
+        removeBtn=gui.button(None, self, "", callback=lambda: self.removeItem(pname,boxEdit,removeBtn), autoDefault=False,disabled=disabledFlag)
+        if  pvalue['type'] == 'file list':
+            browseBtn = gui.button(None, self, "", callback=partial(self.browseFiles, boxEdit=boxEdit,attr=pname), autoDefault=False,disabled=disabledFlag)
+        elif pvalue['type'] == 'directory list':
+            browseBtn = gui.button(None, self, "", callback=partial(self.browseDirs, boxEdit=boxEdit,attr=pname), autoDefault=False,disabled=disabledFlag)
         #set styles
         buttonStyle='background: None; border: None ; border-radius: 0;'
-        for btn in (addBtn,removeBtn,browseBtn):
-            btn.setStyleSheet(buttonStyle)
         
-        elements=[ledit,boxEdit,addBtn,removeBtn,browseBtn]
-        #add checkbox if necessary
-        if addCheckbox:
-            value=None
-            if hasattr(self,pname):
-                value=getattr(self,pname)
-            checkAttr=pname+'Checked'
-            setattr(self,checkAttr,self.optionsChecked[pname])
-            checkbox=gui.checkBox(None, self,checkAttr,label=None)
-            checkbox.stateChanged.connect(lambda : self.updateCheckbox(pname,checkbox.isChecked(),value=value))
-            elements=[checkbox,ledit,boxEdit,addBtn,removeBtn,browseBtn]
+        
+        for btn in (addBtn,removeBtn,browseBtn):
+            if btn:
+                btn.setStyleSheet(buttonStyle)
+                elements.append(btn)      
+     
         #set icons
-        self.bgui.addList(pname,elements,enableCallback=self.enableFilesBox,updateCallback=lambda: self.updateFilesBox(pname,ledit,boxEdit))
-        browseBtn.setIcon(self.browseIcon)
+        self.bgui.addList(pname,elements,enableCallback=lambda value, clearLedit: self.enableFilesBox(value,clearLedit, checkbox,browseBtn,boxEdit,ledit,addBtn,removeBtn),updateCallback=lambda: self.updateFilesBox(pname,ledit,boxEdit))
+        if browseBtn:
+            browseBtn.setIcon(self.browseIcon)
         addBtn.setIcon(self.addIcon)
         removeBtn.setIcon(self.removeIcon)
         
         #check rules for buttons    
         
-        self.drawFilesBoxBtnRules([ledit,boxEdit,addBtn,removeBtn,browseBtn])
+        self.drawFilesBoxBtnRules(boxEdit,ledit,addBtn,removeBtn)
         
         #connects from ledit and boxEdit to buttons
         ledit.textChanged.connect(lambda: addBtn.setEnabled(bool(ledit.text())))
@@ -579,27 +611,37 @@ class OWBwBWidget(widget.OWWidget):
             startCol=1
         
         lineLayout.addWidget(ledit,1,startCol+1)
-        lineLayout.addWidget(browseBtn,1,startCol+2)
+        if browseBtn:
+            lineLayout.addWidget(browseBtn,1,startCol+2)
+        else:
+            startCol=startCol-1
         lineLayout.addWidget(addBtn,1,startCol+3)
         lineLayout.addWidget(removeBtn,1,startCol+4)
        
         #now add the two layouts to the bigBox layout
         filesBoxLeditLayout.addWidget(boxEdit)
         filesBoxLeditLayout.addLayout(lineLayout)
-        
+        self.updateBoxEditValue(pname,boxEdit)
     
-    def addLedit(self,ledit,boxEdit,addBtn):
+    def addLedit(self,attr,ledit,boxEdit,addBtn):
+        #adds text in ledit to items in boxEdit
         if ledit.text():
             boxEdit.addItem(ledit.text())
+            sys.stderr.write('adding {} to {}\n'.format(ledit.text(),attr))
             ledit.clear()
             addBtn.setEnabled(False)
+            self.updateBoxEditValue(attr,boxEdit)
+            sys.stderr.write('boxEdit values is {}\n'.format(getattr(self,attr)))
+            
 
-    def removeItem(self,boxEdit,removeBtn):
+    def removeItem(self,attr,boxEdit,removeBtn):
         if boxEdit.selectedItems():
             for item in boxEdit.selectedItems():
                 boxEdit.takeItem(boxEdit.row(item))
+            self.updateBoxEditValue(attr,boxEdit)
         if not boxEdit.count():
             removeBtn.setEnabled(False)
+
         
     def drawExec(self, box=None):
         #find out if there are triggers
@@ -719,11 +761,20 @@ class OWBwBWidget(widget.OWWidget):
             widget.layout().addLayout(layout)
         layout.nextRow+=1
    
-    def browseFilesDirs(self,boxEdit):
+    def browseFiles(self,boxEdit,attr=None):
         defaultDir = '/root'
         if os.path.exists('/data'):
             defaultDir = '/data'
         boxEdit.addItems(QtWidgets.QFileDialog.getOpenFileNames(self, caption="Choose files", directory=defaultDir, filter="Any file (*.*)")[0])
+        if attr:
+            self.updateBoxEditValue(attr,boxEdit)
+        
+    def browseDirs(self,boxEdit,attr=None):
+        dlg=getExistingDirectories()
+        if dlg.exec_() == QtWidgets.QDialog.Accepted:
+            self.boxEdit.addItems(dlg.selectedFiles())
+            if attr:
+                self.updateBoxEditValue(attr,boxEdit)
 
     def browseFileDir(self, attr, filetype=None):
         defaultDir = '/root'
@@ -735,17 +786,6 @@ class OWBwBWidget(widget.OWWidget):
                 setattr(self,attr,myFile)
                 dirAttr=attr+"Dir"
                 setattr(self,dirAttr,os.path.dirname(myFile))
-        elif filetype =='files':
-            filesDialog = QtWidgets.QFileDialog()
-            filesDialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog,True) #necessary to ensure that the order of the elements chosen is kept
-            myFiles=filesDialog.getOpenFileNames(self, "Locate file(s)", defaultDir)
-            if myFiles:
-                myStr="\n".join(myFiles[0])
-                if hasattr(self,attr) and getattr(self,attr):
-                    oldStr=getattr(self,attr)
-                    setattr(self,attr, "\n".join([oldStr,myStr]))
-                else:
-                    setattr(self,attr,myStr)
         else:
             myDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate directory", directory=defaultDir)
             if myDir:
@@ -761,8 +801,8 @@ class OWBwBWidget(widget.OWWidget):
             self.bgui.disable(pname,ignoreCheckbox=True)
             sys.stderr.write('disabled\n')
     
-    def enableSpin(self,pname,value,guiElements):
-        (cb,spin)=guiElements[0]
+    def enableSpin(self,value,clearLedit, guiSpin):
+        (cb,spin)=mySpin
         if cb.isChecked():
             spin.setEnabled(True)
         else:
@@ -810,7 +850,8 @@ class OWBwBWidget(widget.OWWidget):
             return
         #get ready to start
         attrList=self.__dict__.keys()
-        self.disabledList=self.disableAll(attrList)
+        self.bgui.disableAll()
+        self.disableExec()
         cmd=self.generateCmdFromData()
         self.envVars={}
         self.getEnvironmentVariables()
@@ -820,7 +861,8 @@ class OWBwBWidget(widget.OWWidget):
         try:
             self.dockerRun(self.hostVolumes,cmd,environments=self.envVars)
         except:
-            self.reenableAll(disabledList)
+            self.bgui.reenableAll(self)
+            self.reenableExec()
 
     def checkRequiredParms(self):
         for parm in self.data['requiredParameters']:
@@ -868,10 +910,14 @@ class OWBwBWidget(widget.OWWidget):
                 if hasattr(self,pname) and getattr(self,pname):
                     addFlag=True
             if pname in self.data['requiredParameters']:
-                sys.stderr.write('{} is required\n'.format(pname))
+                sys.stderr.write('{} with is required\n'.format(pname))
+                if hasattr(self,pname):
+                    sys.stderr.write('{} value is {}\n'.format(pname,getattr(self,pname)))
                 addFlag=True
             else:
                 sys.stderr.write('{} is not required\n'.format(pname))
+                if hasattr(self,pname):
+                    sys.stderr.write('{} value is {}\n'.format(pname,getattr(self,pname)))                
             if addFlag:
                 if pvalue['flags']:
                     if pvalue['type'] == 'bool':
@@ -881,7 +927,7 @@ class OWBwBWidget(widget.OWWidget):
                         if filename:
                             hostFilename=self.bwbPathToContainerPath(filename, isFile=True,returnNone=False)
                             flags[pvalue['flags'][0]]=str(hostFilename)
-                    elif pvalue['type'] == 'files':
+                    elif pvalue['type'] == 'file list':
                         files=str.splitlines(getattr(self,pname))
                         if files:
                             hostFiles=[]
@@ -893,6 +939,8 @@ class OWBwBWidget(widget.OWWidget):
                         if path:
                             hostPath=self.bwbPathToContainerPath(path, returnNone=False)
                             flags[pvalue['flags'][0]]=str(hostPath)
+                    elif pvalue['type'][-4:] =='list':
+                        flags[pvalue['flags'][0]]=getattr(self,pname)
                     else:
                         flags[pvalue['flags'][0]]=str(getattr(self,pname))
                 else:
@@ -901,7 +949,7 @@ class OWBwBWidget(widget.OWWidget):
                         if filename:
                             hostFilename=self.bwbPathToContainerPath(filename, isFile=True,returnNone=False)
                             args.append(hostFilename)
-                    elif pvalue['type'] =='files':
+                    elif pvalue['type'] =='file list':
                         files=str.splitlines(getattr(self,pname))
                         for f in files:
                             args.append(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
@@ -910,6 +958,10 @@ class OWBwBWidget(widget.OWWidget):
                         if path:
                             hostPath=self.bwbPathToContainerPath(path, returnNone=False)
                             args.append(hostPath)
+                    elif pvalue['type'][-4:] =='list':
+                        myItems=str.splitlines(getattr(self,pname))
+                        sys.stderr.write('list value name {} values {}\n'.format(pname,myItems))
+                        args.extend(myItems)
                     else:
                         args.append(str(getattr(self,pname)))
         return self.generateCmdFromBash([self.data['command']],flags,args=args)
@@ -1038,7 +1090,8 @@ class OWBwBWidget(widget.OWWidget):
 
     def Event_OnRunFinished(self):
         self.infoLabel.setText("Finished")
-        self.reenableAll(self.disabledList)
+        self.bgui.reenableAll(self)
+        self.reenableExec()
         self.handleOutputs()
 
     def Event_OnRunMessage(self, message):
@@ -1095,24 +1148,12 @@ class OWBwBWidget(widget.OWWidget):
                 bestPath=bwbVol
         return bestPath
 
-    def disableAll(self,attrList):
-        disabledList=[]
-        for attr in attrList:
-            if self.bgui.disable(attr):
-                disabledList.append(attr)
-        #disable exec stuff - should write a separate callback
+    def disableExec(self):
         self.btnRun.setText('Running')
         self.btnRun.setEnabled(False)
         self.cboRunMode.setEnabled(False)
-        return disabledList
             
-    def reenableAll(self,attrList):
-        for attr in attrList:
-            if not self.inputConnections.isConnected(attr) :
-                value=None
-                if hasattr(self,attr):
-                    value = getattr(self,attr)
-                self.bgui.enable(attr,value)
+    def reenableExec(self):
         self.btnRun.setText('Start')
         self.btnRun.setEnabled(True)
         self.cboRunMode.setEnabled(True)
