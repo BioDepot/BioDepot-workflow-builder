@@ -240,8 +240,6 @@ class OWBwBWidget(widget.OWWidget):
         self.scroll_area.setWidget(self.bigBox)
         self.scroll_area.setWidgetResizable(True)
         self.controlArea.layout().addWidget(self.scroll_area)
-        controlBox = gui.vBox(self.bigBox)
-        self.drawExec(box=controlBox)
         consoleBox = gui.widgetBox(self.bigBox,None)
         self.infoLabel = gui.widgetLabel(consoleBox, None)
         self.infoLabel.setWordWrap(True)
@@ -261,7 +259,10 @@ class OWBwBWidget(widget.OWWidget):
             
         #check if the requirements to be run are met
         self.checkTrigger()
+        controlBox = QtGui.QVBoxLayout()
+        self.drawExec(box=self.controlArea.layout())
 
+        
     def drawRequiredElements(self):
         for pname in self.data['requiredParameters']:
             if not ('parameters' in self.data) or not (pname in self.data['parameters']):
@@ -402,7 +403,7 @@ class OWBwBWidget(widget.OWWidget):
         mySpin=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
         if getattr(self,pname) is None:
             mySpin.clear()
-        self.bgui.add(pname,mySpin,enableCallback=lambda value: self.enableSpin(value,mySpin))
+        self.bgui.add(pname,mySpin,enableCallback=lambda value,clearLedit  : self.enableSpin(value,clearLedit,mySpin))
         
     def drawLedit(self,pname,pvalue,box=None,layout=None,addCheckbox=False):
         checkAttr=None
@@ -809,7 +810,7 @@ class OWBwBWidget(widget.OWWidget):
             sys.stderr.write('disabled\n')
     
     def enableSpin(self,value,clearLedit, guiSpin):
-        (cb,spin)=mySpin
+        (cb,spin)=guiSpin
         if cb.isChecked():
             spin.setEnabled(True)
         else:
@@ -903,6 +904,7 @@ class OWBwBWidget(widget.OWWidget):
         flags={}
         args=[]
         for pname, pvalue in self.data['parameters'].items():
+           
             #possible to have an requirement or parameter that is not in the executable line
             #this is indicated by the absence of a flags field
             if 'flags' not in pvalue:
@@ -913,6 +915,7 @@ class OWBwBWidget(widget.OWWidget):
             if pname in self.optionsChecked and self.optionsChecked[pname]:
                 addFlag=True
             #also need to check for booleans which are not tracked by optionsChecked
+            
             if pvalue['type'] == 'bool':
                 if hasattr(self,pname) and getattr(self,pname):
                     addFlag=True
@@ -924,9 +927,10 @@ class OWBwBWidget(widget.OWWidget):
             else:
                 sys.stderr.write('{} is not required\n'.format(pname))
                 if hasattr(self,pname):
-                    sys.stderr.write('{} value is {}\n'.format(pname,getattr(self,pname)))                
+                    sys.stderr.write('{} value is {}\n'.format(pname,getattr(self,pname)))
+            sys.stderr.write('gencmd name {} value {} addFlag {} type {} flags {}\n'.format(pname,pvalue,addFlag,pvalue['type'],pvalue['flags']))
             if addFlag:
-                if pvalue['flags']:
+                if pvalue['flags'] and pvalue['flags'][0]:
                     if pvalue['type'] == 'bool':
                         flags[pvalue['flags'][0]] = None
                     elif pvalue['type'] == 'file':
@@ -939,7 +943,7 @@ class OWBwBWidget(widget.OWWidget):
                         if files:
                             hostFiles=[]
                             for f in files:
-                                hostFiles.append(self.bwbPathToContainerPath(filename, isFile=True,returnNone=False))
+                                hostFiles.append(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
                             flags[pvalue['flags'][0]]="\n".join(hostFiles)
                     elif pvalue['type'] == 'directory':
                         path=str(getattr(self,pname))
@@ -958,6 +962,7 @@ class OWBwBWidget(widget.OWWidget):
                             args.append(hostFilename)
                     elif pvalue['type'] =='file list':
                         files=str.splitlines(getattr(self,pname))
+                        sys.stderr.write('files are {}\n'.format(files))
                         for f in files:
                             args.append(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
                     elif pvalue['type'] =='directory':
@@ -986,28 +991,28 @@ class OWBwBWidget(widget.OWWidget):
         #flags no dashs
         #flags no args
         for flagName, flagValue in flags.items():
-            if (flagName[:1] == '-') and (flagName[:2] != '--') and (not flagValue):
+            if (flagName and flagName[:1] == '-') and (flagName[:2] != '--') and (not flagValue):
                 cmdStr +=  flagName + ' '
         for flagName,flagValue in flags.items():
-            if (flagName[:1] == '-') and (flagName[:2] != '--') and flagValue:
+            if (flagName and flagName[:1] == '-') and (flagName[:2] != '--') and flagValue:
                 if(flagValue[:1] == '='):
                     cmdStr +=  flagName + flagValue + ' '
                 else:
                     cmdStr +=  flagName + ' ' + flagValue + ' '
         for flagName, flagValue in flags.items():
-            if (flagName[:2] == '--')  and (not flagValue):
+            if (flagName and flagName[:2] == '--')  and (not flagValue):
                 cmdStr +=  flagName + ' '
         for flagName,flagValue in flags.items():
-            if (flagName[:2] == '--')  and flagValue:
+            if (flagName and flagName[:2] == '--')  and flagValue:
                 if(flagValue[:1] == '='):
                     cmdStr +=  flagName + flagValue + ' '
                 else:
                     cmdStr +=  flagName + ' ' + flagValue + ' '
         for flagName, flagValue in flags.items():
-            if (flagName[:1] != '-')  and (not flagValue):
+            if (flagName and flagName[:1] != '-')  and (not flagValue):
                 cmdStr +=  flagName + ' '
         for flagName,flagValue in flags.items():
-            if (flagName[:1] != '-')  and flagValue:
+            if (flagName and flagName[:1] != '-')  and flagValue:
                 if(flagValue[:1] == '='):
                     cmdStr +=  flagName + flagValue + ' '
                 else:
