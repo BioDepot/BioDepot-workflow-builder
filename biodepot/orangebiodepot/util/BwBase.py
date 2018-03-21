@@ -375,10 +375,17 @@ class OWBwBWidget(widget.OWWidget):
                 pvalue=self.data['parameters'][pname]
                 if ('gui' in pvalue and pvalue['gui'] != 'bool') or (pvalue['type'] != 'bool'):
                     continue
+                sys.stderr.write('drawOpt pname {} pvalue {}\n'.format(pname, pvalue))
                 self.drawCheckbox(pname,pvalue,self.optionalBox)
 
     def drawCheckbox(self,pname,pvalue, box=None):
         #for booleans - their value is the same as the checkbox state
+        sys.stderr.write('drawCB pname {} pvalue {} label {}\n'.format(pname, pvalue,pvalue['label']))
+        if not hasattr(self,pname):
+            if 'default' in pvalue:
+                setattr(self,pname,pvalue['default'])
+            else:
+                setattr(self,pname,False)
         cb=gui.checkBox(box, self, pname, pvalue['label'])
         checkAttr=pname+'Checked'
         setattr(self,checkAttr,getattr(self,pname))
@@ -388,6 +395,7 @@ class OWBwBWidget(widget.OWWidget):
     def drawSpin(self,pname,pvalue, box=None,addCheckbox=False):
         #for drawSpin - we use the origin version which already has a checkbox connected
         #TODO could change this to the same way we handle ledits with separate cbo
+        checkAttr=None
         if addCheckbox:
             checkAttr=pname+'Checked'
             setattr(self,checkAttr,self.optionsChecked[pname])
@@ -883,7 +891,7 @@ class OWBwBWidget(widget.OWWidget):
                 bwbVol= mapping['default']
             if self.data['parameters'][attr]['type'] =='file':
                 bwbVol=os.path.dirname(os.path.normpath(bwbVol))
-            elif self.data['parameters'][attr]['type'] =='files':
+            elif self.data['parameters'][attr]['type'] =='files' or self.data['parameters'][attr]['type'] =='file list':
                 files=str.splitlines(bwbVol)
                 bwbVol=self.findTopDirectory(files)
             else:
@@ -957,7 +965,7 @@ class OWBwBWidget(widget.OWWidget):
                         if path:
                             hostPath=self.bwbPathToContainerPath(path, returnNone=False)
                             args.append(hostPath)
-                    elif pvalue['type'][-4:] =='list':
+                    elif pvalue['type'][-4:] =='list' or pvalue['type'][-4:] =='List':
                         myItems=str.splitlines(getattr(self,pname))
                         sys.stderr.write('list value name {} values {}\n'.format(pname,myItems))
                         args.extend(myItems)

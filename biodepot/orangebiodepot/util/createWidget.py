@@ -30,12 +30,19 @@ from PyQt5 import QtWidgets, QtGui
 '''
 
     
-def createWidget(inputJson,outputWidget, registerFlag=False): 
+def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None): 
     data={}
-    with open(inputJson) as f:
-        data=jsonpickle.decode(f.read())
-    f.close()
-
+    if inputJson:
+        with open(inputJson) as f:
+            data=jsonpickle.decode(f.read())
+        f.close()
+    elif inputData:
+        data=inputData
+        dataJ=jsonpickle.encode(data)
+        inputJson=os.path.splitext(outputWidget)[0]+'.json'
+        with open(inputJson,"w") as f:
+            f.write(dataJ)
+        f.close()
             
     #write preInit
     with open(outputWidget,'w') as f:
