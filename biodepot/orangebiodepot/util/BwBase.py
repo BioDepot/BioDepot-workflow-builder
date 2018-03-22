@@ -396,14 +396,33 @@ class OWBwBWidget(widget.OWWidget):
     def drawSpin(self,pname,pvalue, box=None,addCheckbox=False):
         #for drawSpin - we use the origin version which already has a checkbox connected
         #TODO could change this to the same way we handle ledits with separate cbo
+        #the gui spin box returns either (cb,sbox) or just sbox depending on whether there is a checkabox
+        checkBox=None
         checkAttr=None
         if addCheckbox:
             checkAttr=pname+'Checked'
             setattr(self,checkAttr,self.optionsChecked[pname])
-        mySpin=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
+        default=0
+        if default in pvalue:
+            default=pvalue['default']
+        if pvalue['type'] == 'int':
+            if not hasattr(self,pname):
+                setattr(self,pname,int(default))
+            else:
+                setattr(self,pname,int(getattr(self,pname)))
+        else:
+            if not hasattr(self,pname):
+                setattr(self,pname,float(default))
+            else:
+                setattr(self,pname,float(getattr(self,pname)))
+        if addCheckbox:
+            (checkBox,mySpin)=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
+        else:
+             mySpin=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
+           
         if getattr(self,pname) is None:
             mySpin.clear()
-        self.bgui.add(pname,mySpin,enableCallback=lambda value,clearLedit  : self.enableSpin(value,clearLedit,mySpin))
+        self.bgui.add(pname,mySpin,enableCallback=lambda value,clearLedit  : self.enableSpin(value,clearLedit,checkBox,mySpin))
         
     def drawLedit(self,pname,pvalue,box=None,layout=None,addCheckbox=False):
         checkAttr=None
@@ -451,7 +470,10 @@ class OWBwBWidget(widget.OWWidget):
             sys.stderr.write('updating filedir {}\n'.format(pname))
             checkbox.stateChanged.connect(lambda : self.updateCheckbox(pname,checkbox.isChecked(),getattr(self,pname)))
             self.bgui.add(pname,checkbox)
-        self.bwbFileEntry(box,button,ledit,layout=layout,label=pvalue['label']+':', entryType=pvalue['type'], checkbox=checkbox)
+        labelValue=pvalue['label']
+        if labelValue is None:
+            labelValue=""
+        self.bwbFileEntry(box,button,ledit,layout=layout,label=labelValue+':', entryType=pvalue['type'], checkbox=checkbox)
         self.bgui.add(pname,ledit)
         self.bgui.add(pname,button,enableCallback=lambda value, clearLedit: self.enableFileDir(value, clearLedit, checkbox,ledit,button))
         if addCheckbox:
@@ -809,13 +831,16 @@ class OWBwBWidget(widget.OWWidget):
             self.bgui.disable(pname,ignoreCheckbox=True)
             sys.stderr.write('disabled\n')
     
-    def enableSpin(self,value,clearLedit, guiSpin):
-        (cb,spin)=guiSpin
-        if cb.isChecked():
+    def enableSpin(self,value,clearLedit,cb,spin):
+        
+        if cb is None:
             spin.setEnabled(True)
         else:
-            spin.setEnabled(False)
-        cb.setEnabled(True)
+            if cb.isChecked():
+                spin.setEnabled(True)
+            else:
+                spin.setEnabled(False)
+            cb.setEnabled(True)
             
     def updateSpinCheckbox(self,pname):
         checkAttr=pname+'Checked'
