@@ -1,11 +1,12 @@
 import os
 import re
 import sys
+import logging
 from functools import partial
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 
 from AnyQt.QtWidgets import (
     QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
@@ -233,22 +234,19 @@ class OWBwBWidget(widget.OWWidget):
 #Drawing the GUI
     def drawGUI(self):
         self.setStyleSheet(":disabled { color: #282828}")
-        self.scroll_area = QScrollArea(
+        self.topScrollArea = QScrollArea(
             verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
         )
-        self.bigBox=gui.widgetBox(self.controlArea)
-        self.scroll_area.setWidget(self.bigBox)
-        self.scroll_area.setWidgetResizable(True)
-        self.controlArea.layout().addWidget(self.scroll_area)
-        consoleBox = gui.widgetBox(self.bigBox,None)
-        self.infoLabel = gui.widgetLabel(consoleBox, None)
-        self.infoLabel.setWordWrap(True)
+        self.topBox=gui.widgetBox(self.controlArea)
+        self.topScrollArea.setWidget(self.topBox)
+        self.topScrollArea.setWidgetResizable(True)
+        self.controlArea.layout().addWidget(self.topScrollArea)
         if 'requiredParameters' in self.data and self.data['requiredParameters']:
-            self.requiredBox = gui.widgetBox(self.bigBox, "Required parameters")
+            self.requiredBox = gui.widgetBox(self.topBox, "Required parameters")
             self.drawRequiredElements()
             
         if self.findOptionalElements():
-            self.optionalBox = gui.widgetBox(self.bigBox, "Optional parameters")
+            self.optionalBox = gui.widgetBox(self.topBox, "Optional parameters")
             self.drawOptionalElements()
             
         #disable connected elements
@@ -259,6 +257,19 @@ class OWBwBWidget(widget.OWWidget):
             
         #check if the requirements to be run are met
         self.checkTrigger()
+        outputLabel=QtGui.QLabel('Console')
+        self.controlArea.layout().addWidget(outputLabel)
+
+        self.console=QtGui.QTextEdit()
+        self.console.setReadOnly(True)
+        pal=QtGui.QPalette()
+        pal.setColor(QtGui.QPalette.Base,Qt.black)
+        pal.setColor(QtGui.QPalette.Text,Qt.green)
+        self.console.setPalette(pal)
+        self.console.setAutoFillBackground(True)
+        #XStream.stdout().messageWritten.connect( textBox.insertPlainText )
+        #XStream.stderr().messageWritten.connect( textBox.insertPlainText )
+        self.controlArea.layout().addWidget(self.console)
         controlBox = QtGui.QVBoxLayout()
         self.drawExec(box=self.controlArea.layout())
 
@@ -875,11 +886,11 @@ class OWBwBWidget(widget.OWWidget):
         #check for missing parameters and volumes
         missingParms=self.checkRequiredParms()
         if missingParms:
-            self.infoLabel.setText("missing required parameters: {}".format(missingParms))
+            self.console.append("missing required parameters: {}".format(missingParms))
             return
         missingVols=self.getRequiredVols()
         if missingVols:
-            self.infoLabel.setText("missing or incorrect volume mappings to: {}".format(missingVols))
+            self.console.append("missing or incorrect volume mappings to: {}".format(missingVols))
             return
         #get ready to start
         attrList=self.__dict__.keys()
@@ -893,9 +904,11 @@ class OWBwBWidget(widget.OWWidget):
         sys.stderr.write('cmd {}\n'.format(cmd))
         try:
             self.dockerRun(self.hostVolumes,cmd,environments=self.envVars)
-        except:
+            self.console.append("Running cmd {}\nvolumes {}\nEnv {}\n\n".format(cmd,self.hostVolumes,self.envVars))
+        except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
+            self.console.append("unable to start Docker command "+ str(e))
 
     def checkRequiredParms(self):
         for parm in self.data['requiredParameters']:
@@ -1126,13 +1139,13 @@ class OWBwBWidget(widget.OWWidget):
             self.startJob()
 
     def Event_OnRunFinished(self):
-        self.infoLabel.setText("Finished")
+        self.console.append("Finished")
         self.bgui.reenableAll(self)
         self.reenableExec()
         self.handleOutputs()
 
     def Event_OnRunMessage(self, message):
-        self.infoLabel.setText(message)
+        self.console.append(message)
 
 #Utilities
     def bwbPathToContainerPath(self, path, isFile=False,returnNone=False):
@@ -1194,3 +1207,5 @@ class OWBwBWidget(widget.OWWidget):
         self.btnRun.setText('Start')
         self.btnRun.setEnabled(True)
         self.cboRunMode.setEnabled(True)
+        
+
