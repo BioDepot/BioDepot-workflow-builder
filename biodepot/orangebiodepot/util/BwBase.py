@@ -5,7 +5,7 @@ import logging
 from functools import partial
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
-from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
+from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 
 from AnyQt.QtWidgets import (
@@ -114,36 +114,6 @@ class BwbGuiElements():
         for attr in self._dict.keys():
             if not OWself.inputConnections.isConnected(attr) :
                 self.enable(attr,getattr(OWself,attr))
-
-class LocalContainerRunner(QThread):
-    progress = pyqtSignal(int)
-
-    def __init__(self, cli, image_name, volumes, commands, environments = None):
-        QThread.__init__(self)
-        self.docker = cli
-        self.image_name = image_name
-        self.volumes = volumes
-        self.commands = commands
-        self.environments = environments
-        self.containerId = ""
-        self.Flag_isRunning = False
-
-    def __del__(self):
-        self.wait()
-
-    def run(self):
-        response = self.docker.create_container(self.image_name, hostVolumes=self.volumes, commands=self.commands, environment=self.environments)
-        if response['Warnings'] == None:
-            self.containerId = response['Id']
-            self.docker.start_container(self.containerId)
-        else:
-            print(response['Warnings'])
-
-        # Keep running until container is exited
-        while self.docker.container_running(self.containerId):
-            self.sleep(1)
-        # Remove the container when it is finished
-        self.docker.remove_container(self.containerId)
 
 class ConnectionDict:
     def __init__(self, inputDict):
@@ -267,10 +237,9 @@ class OWBwBWidget(widget.OWWidget):
         pal.setColor(QtGui.QPalette.Text,Qt.green)
         self.console.setPalette(pal)
         self.console.setAutoFillBackground(True)
-        #XStream.stdout().messageWritten.connect( textBox.insertPlainText )
-        #XStream.stderr().messageWritten.connect( textBox.insertPlainText )
         self.controlArea.layout().addWidget(self.console)
         controlBox = QtGui.QVBoxLayout()
+        self.pConsole=ConsoleProcess(console=self.console,finishHandler=self.onRunFinished)
         self.drawExec(box=self.controlArea.layout())
 
         
@@ -728,7 +697,7 @@ class OWBwBWidget(widget.OWWidget):
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
         QPushButton:hover {background-color: #1588f5; }
         '''
-        self.btnRun = gui.button(None, self, "Start", callback=self.OnRunClicked)
+        self.btnRun = gui.button(None, self, "Start", callback=self.onRunClicked)
         self.btnRun.setStyleSheet(css)
         self.btnRun.setFixedSize(60,20)
         self.execLayout.addWidget(self.btnRun,1,0)
@@ -763,13 +732,13 @@ class OWBwBWidget(widget.OWWidget):
         if self.runMode ==0: #manual - only go on start button
             return
         elif self.runMode ==1: #automatic same as pushing start button
-            self.OnRunClicked()
+            self.onRunClicked()
         elif self.candidateTriggers:
             #check if the input triggers are set
             for trigger in self.runTriggers:
                 if not inputConnections.isSet(trigger):
                     return
-            self.OnRunClicked()
+            self.onRunClicked()
 
     def bwbFileEntry(self, widget, button, ledit, icon=browseIcon,layout=None, label=None,entryType='file', checkbox=None):
         button.setStyleSheet("border: 1px solid #1a8ac6; border-radius: 2px;")
@@ -899,16 +868,16 @@ class OWBwBWidget(widget.OWWidget):
         cmd=self.generateCmdFromData()
         self.envVars={}
         self.getEnvironmentVariables()
-        sys.stderr.write('envs {}\n'.format(self.envVars))
-        sys.stderr.write('volumes {}\n'.format(self.hostVolumes))
-        sys.stderr.write('cmd {}\n'.format(cmd))
         try:
-            self.dockerRun(self.hostVolumes,cmd,environments=self.envVars)
-            self.console.append("Running cmd {}\nvolumes {}\nEnv {}\n\n".format(cmd,self.hostVolumes,self.envVars))
+            imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
+            self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
+            self.setStatusMessage('Running...')
+            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
-            self.console.append("unable to start Docker command "+ str(e))
+            self.pConsole.writeMessage("unable to start Docker command "+ str(e))
+            self.setStatusMessage('Error')
 
     def checkRequiredParms(self):
         for parm in self.data['requiredParameters']:
@@ -944,7 +913,7 @@ class OWBwBWidget(widget.OWWidget):
         for pname, pvalue in self.data['parameters'].items():
            
             #possible to have an requirement or parameter that is not in the executable line
-            #this is indicated by the absence of a flags field
+            #this is indicated by the absence of a flags field and arguments 
             if 'flags' not in pvalue:
                 continue
             #if required or checked then it is added to the flags
@@ -1066,6 +1035,7 @@ class OWBwBWidget(widget.OWWidget):
         #dynamic environment variables
         for pname in self.data['parameters']:
             pvalue=self.data['parameters'][pname]
+            sys.stderr.write("getEnv pname {} pvalue{}\n".format(pname,pvalue))
             sys.stderr.write('checking var {} with value {} for env {}\n'.format(pname,getattr(self,pname),list(pvalue.keys())))
             if 'env' in pvalue and getattr(self,pname) is not None:
                 self.envVars[pvalue['env']] = getattr(self,pname)
@@ -1076,76 +1046,31 @@ class OWBwBWidget(widget.OWWidget):
                 if e not in self.envVars:
                     self.envVars[e]=self.data['env'][e]
 
-#Docker run/pull (Jiamings code)
-    def dockerRun(self, volumes = None, commands = None, environments = None):
-        if not self._Flag_isRunning:
-            self._dockerVolumes = volumes
-            self._dockerCommands = commands
-            self._dockerEnvironments = environments
-            # Make sure the docker image is downloaded
-            if not self.dockerClient.has_image(self._dockerImageName, self._dockerImageTag):
-                self.__dockerPullImage__()
-            else:
-                self.__dockerRealRun__()
-
-    def __dockerRealRun__(self):
-        self._Flag_isRunning = True
-        self.setStatusMessage('Running...')
-        self.Event_OnRunMessage('Running \'' + self._dockerImageName + '\'')
-        # Run the container in a new thread
-        self.containerThread = LocalContainerRunner(
-                                self.dockerClient,
-                                '{}:{}'.format(self._dockerImageName, self._dockerImageTag),
-                                self._dockerVolumes,
-                                self._dockerCommands,
-                                self._dockerEnvironments)
-        self.containerThread.progress.connect(self.__dockerRunProgress__)
-        self.containerThread.finished.connect(self.__dockerRunDone__)
-        self.containerThread.start()
-
-    def __dockerRunProgress__(self, val):
-        self.progressBarSet(val)
-
-    def __dockerRunDone__(self):
-        self._Flag_isRunning = False
-        self.setStatusMessage('Finished!')
-        self.Event_OnRunMessage('Finished!')
-        self.Event_OnRunFinished()
-
-    def __dockerPullImage__(self):
-        self.Event_OnRunMessage('Pulling \'' + self._dockerImageName + ":" + self._dockerImageTag+ '\' from Dockerhub...')
-        self.setStatusMessage("Downloading...")
-        self.progressBarInit()
-        self._Flag_isRunning = True
-        # Pull the image in a new thread
-        self.pullImageThread = PullImageThread(self.dockerClient, self._dockerImageName, self._dockerImageTag)
-        self.pullImageThread.pull_progress.connect(self.__dockerPullProgress__)
-        self.pullImageThread.finished.connect(self.__dockerPullDone__)
-        self.pullImageThread.start()
-
-    def __dockerPullProgress__(self, val):
-        self.progressBarSet(val)
-
-    def __dockerPullDone__(self):
-        self.Event_OnRunMessage('Finished pulling \'' + self._dockerImageName + ":" + self._dockerImageTag + '\'')
-        self.progressBarFinished()
-        self.__dockerRealRun__()
-
 #Event handlers
-    def OnRunClicked(self):
+    def onRunClicked(self):
         if hasattr (self,'userStartJob'):
             self.userStartJob()
         else:
             self.startJob()
 
-    def Event_OnRunFinished(self):
-        self.console.append("Finished")
+    def onRunFinished(self,code=None,status=None):
+        self.pConsole.writeMessage("Finished")
+        if code is not None:
+           self.pConsole.writeMessage("Exit code is {}".format(code))
+        if status is not None:
+           self.pConsole.writeMessage("Exit status is {}".format(status))
+        self.setStatusMessage('Finished')
         self.bgui.reenableAll(self)
         self.reenableExec()
         self.handleOutputs()
-
-    def Event_OnRunMessage(self, message):
-        self.console.append(message)
+    
+    def onRunError(self,error):
+        self.bgui.reenableAll(self)
+        self.reenableExec()
+        self.console.writeMessage("Error occurred {}\n".format(error),color=Qt.red)
+        
+    def onRunMessage(self, message):
+        self.pConsole.writeMessage(message)
 
 #Utilities
     def bwbPathToContainerPath(self, path, isFile=False,returnNone=False):

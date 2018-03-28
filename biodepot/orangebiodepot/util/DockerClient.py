@@ -3,10 +3,33 @@ import json
 import requests
 import subprocess
 from docker import APIClient
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import QThread, pyqtSignal,QProcess, Qt
+from PyQt5 import QtWidgets, QtGui, QtCore
 import socket
 
+class ConsoleProcess():
+    #subclass that attaches a process and pipes the output to textedit widget console widget
+    def __init__(self, console=None, errorHandler=None, finishHandler=None):
+        self.process=QProcess()
+        self.console=console
+        if console:
+            self.process.readyReadStandardOutput.connect(lambda: self.writeConsole(self.process, console,self.process.readAllStandardOutput,Qt.white))
+            self.process.readyReadStandardError.connect(lambda: self.writeConsole(self.process, console,self.process.readAllStandardError,Qt.red))
+        if finishHandler:
+            self.process.finished.connect(finishHandler)
+            
+    def writeConsole(self,process,console,read,color):
+        console.setTextColor(color)
+        console.append(read().data().decode('utf8'))
+        #console.append('</span>')
+    
+    def writeMessage(self,message,color=Qt.green):
+        #for bwb messages
+        self.console.setTextColor(color)
+        self.console.append(message)
+    
 
+        
 class DockerClient:
     def __init__(self, url, name):
         self.url = url
@@ -55,6 +78,24 @@ class DockerClient:
         ["pwd", "touch newfile.txt"]
     
     """
+    def create_container_cli(self, name, volumes=None, commands=None, environment=None, hostVolumes=None, consoleProc=None):
+        #skips DockerPy and creates the command line equivalent
+        volumeMappings=''
+        for container_dir, host_dir in hostVolumes.items():
+            volumeMappings=volumeMappings+"-v {}:{} ".format(self.to_best_host_directory(host_dir),container_dir)
+        envs=''
+        for env, var in environment.items():
+            #strip whitespace
+            env.strip()
+            #strip quotes if present
+            if env[0] == env[-1] and env.startswith(("'",'"')):
+                env=env[1:-1]
+            envs=envs+ "-e {}={} ".format(env,var)
+        dockerCmd='docker run -i --rm {} {} {} bash -c "{}"'.format(volumeMappings,envs,name,commands)
+        sys.stderr.write('Docker command is {}\n'.format(dockerCmd))
+        consoleProc.process.start('/bin/bash',['-c',dockerCmd])
+        
+        
     def create_container(self, name, volumes=None, commands=None, environment=None, hostVolumes=None):
         #hostVolues is a dict with keys being the container volumes
         # TODO should we use Image ID instead of Image Name?
@@ -82,7 +123,6 @@ class DockerClient:
                                          environment=environment,
                                          stdin_open=True,
                                          host_config=host_config)
-
     def start_container(self, id):
         return self.cli.start(id)
 
