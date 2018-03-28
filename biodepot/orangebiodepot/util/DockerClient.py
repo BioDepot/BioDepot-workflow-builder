@@ -27,7 +27,11 @@ class ConsoleProcess():
         #for bwb messages
         self.console.setTextColor(color)
         self.console.append(message)
-    
+        
+    def stop(self,message=None):
+        self.process.kill()
+        if message:
+            self.writeMessage(message)
 
         
 class DockerClient:
@@ -91,9 +95,10 @@ class DockerClient:
             if env[0] == env[-1] and env.startswith(("'",'"')):
                 env=env[1:-1]
             envs=envs+ "-e {}={} ".format(env,var)
+        #create container
         dockerCmd='docker run -i --rm {} {} {} bash -c "{}"'.format(volumeMappings,envs,name,commands)
-        sys.stderr.write('Docker command is {}\n'.format(dockerCmd))
         consoleProc.process.start('/bin/bash',['-c',dockerCmd])
+        
         
         
     def create_container(self, name, volumes=None, commands=None, environment=None, hostVolumes=None):

@@ -700,11 +700,16 @@ class OWBwBWidget(widget.OWWidget):
         self.btnRun = gui.button(None, self, "Start", callback=self.onRunClicked)
         self.btnRun.setStyleSheet(css)
         self.btnRun.setFixedSize(60,20)
+        self.btnStop = gui.button(None, self, "Stop", callback=self.onStopClicked)
+        self.btnStop.setStyleSheet(css)
+        self.btnStop.setFixedSize(60,20)
+        self.btnStop.setEnabled(False)
         self.execLayout.addWidget(self.btnRun,1,0)
-        self.execLayout.addWidget(myLabel,1,1)
-        self.execLayout.addWidget(self.cboRunMode,1,2)
+        self.execLayout.addWidget(self.btnStop,1,1)
+        self.execLayout.addWidget(myLabel,1,2)
+        self.execLayout.addWidget(self.cboRunMode,1,3)
         if self.candidateTriggers:
-            self.execLayout.addWidget(self.execBtn,1,3)
+            self.execLayout.addWidget(self.execBtn,1,4)
         box.layout().addLayout(self.execLayout)
 
     def runModeChange(self):
@@ -1052,7 +1057,14 @@ class OWBwBWidget(widget.OWWidget):
             self.userStartJob()
         else:
             self.startJob()
-
+            
+    def onStopClicked(self):
+        self.pConsole.stop('Stopped by user')
+        self.setStatusMessage('Stopped')
+        self.bgui.reenableAll(self)
+        self.reenableExec()
+        self.handleOutputs()
+        
     def onRunFinished(self,code=None,status=None):
         self.pConsole.writeMessage("Finished")
         if code is not None:
@@ -1126,11 +1138,13 @@ class OWBwBWidget(widget.OWWidget):
     def disableExec(self):
         self.btnRun.setText('Running')
         self.btnRun.setEnabled(False)
+        self.btnStop.setEnabled(True)
         self.cboRunMode.setEnabled(False)
             
     def reenableExec(self):
         self.btnRun.setText('Start')
         self.btnRun.setEnabled(True)
+        self.btnStop.setEnabled(False)
         self.cboRunMode.setEnabled(True)
         
 
