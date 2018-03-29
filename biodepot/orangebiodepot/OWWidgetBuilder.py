@@ -136,9 +136,10 @@ class OWWidgetBuilder(widget.OWWidget):
         self.data['persistentSettings']='all'
         #add required elements
         reqList=[]
-        for pname,pvalue in self.data['parameters'].items():
-            if not pvalue['optional']:
-                reqList.append(pname)
+        if 'parameters' in self.data:
+            for pname,pvalue in self.data['parameters'].items():
+                if not pvalue['optional']:
+                    reqList.append(pname)
         self.data['requiredParameters']=reqList
         #add volume mappings
         if 'volumes' in self.data:
@@ -149,35 +150,37 @@ class OWWidgetBuilder(widget.OWWidget):
             self.data.pop('volumes',None)
         #replace text str with type(str)
         for pname in ('inputs','outputs'):
-            for key, myDict in self.data[pname].items():
-                if myDict['type'] == 'str':
-                    myDict['type'] = type('str')
+            if pname in self.data:
+                for key, myDict in self.data[pname].items():
+                    if myDict['type'] == 'str':
+                        myDict['type'] = type('str')
         #replace flag with flags list
-        for key, myDict in self.data['parameters'].items():
-            if 'flag' in myDict:
-                myDict['flags']=[myDict['flag']]
-                sys.stderr.write('converting flag for key {} flag {} new flag {}\n'.format(key,myDict['flag'],myDict['flags']))
+        if 'parameters' in self.data:
+            for key, myDict in self.data['parameters'].items():
+                if 'flag' in myDict:
+                    myDict['flags']=[myDict['flag']]
+                    sys.stderr.write('converting flag for key {} flag {} new flag {}\n'.format(key,myDict['flag'],myDict['flags']))
             #myDict.pop('flag',None)
         #for now just keep default, flags, 
         #also make all defaults false for booleans - will fix these kluges after cleaning up BwBase code
         
-        for key, myDict in self.data['parameters'].items():
-            newDict={}
-            if myDict['default'] is not None:
-                newDict['default']=myDict['default']
-            elif 'type' in myDict and myDict['type'] == 'bool':
-                newDict['default']=False
-            if 'flags' in myDict:
-                newDict['flags']=myDict['flags']
-            elif 'argument' in myDict and myDict['argument'] == True:
-                newDict['flags']=[]
-            if 'label' in myDict:
-                newDict['label']=myDict['label']
-            else:
-                newDict['label']=None
-            if 'type' in myDict and myDict['type']:
-                newDict['type']=myDict['type']
-            self.data['parameters'][key]=newDict 
+            for key, myDict in self.data['parameters'].items():
+                newDict={}
+                if myDict['default'] is not None:
+                    newDict['default']=myDict['default']
+                elif 'type' in myDict and myDict['type'] == 'bool':
+                    newDict['default']=False
+                if 'flags' in myDict:
+                    newDict['flags']=myDict['flags']
+                elif 'argument' in myDict and myDict['argument'] == True:
+                    newDict['flags']=[]
+                if 'label' in myDict:
+                    newDict['label']=myDict['label']
+                else:
+                    newDict['label']=None
+                if 'type' in myDict and myDict['type']:
+                    newDict['type']=myDict['type']
+                self.data['parameters'][key]=newDict 
     
               
     def saveJson(self):
