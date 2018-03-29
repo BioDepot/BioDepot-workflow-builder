@@ -26,12 +26,12 @@ class OWDetoxSAlignment(OWBwBWidget):
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
     topDir=pset(None)
-    barcodesFile=pset(barcodes_trugrade_96_set4.dat)
+    barcodesFile=pset("barcodes_trugrade_96_set1.dat")
     lanes=pset(6)
-    seriesName=pset(20150409)
+    seriesName=pset("20150409")
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/biodepot/orangebiodepot/json/OWDtoxsAlignment.json") as f:
+        with open("/biodepot/orangebiodepot/json/DtoxSAlignment.json") as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
