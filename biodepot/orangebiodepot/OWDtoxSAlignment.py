@@ -5,19 +5,21 @@ import functools
 import jsonpickle
 from collections import OrderedDict
 from Orange.widgets import widget, gui, settings
+import Orange.data
+from Orange.data.io import FileFormat
 from orangebiodepot.util.DockerClient import DockerClient
-from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, ContainerPaths, BwbGuiElements
+from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
 class OWDetoxSAlignment(OWBwBWidget):
     name = "DetoxSAlignment"
-    description = "Alignment part of DetoxS standard operating procedure (SOP)"
-    category = "RNASeq"
+    description = "Alignment part of DetoxS standard operating procedure (SOP"
+    category = "RNA-Seq"
     priority = 10
     icon = "/biodepot/orangebiodepot/icons/dtoxs-alignment2.svg"
     want_main_area = False
     docker_image_name = "biodepot/dtoxs_alignment"
-    docker_image_tag = "latest"
+    docker_image_tag = "1.0"
     inputs = [("barcodesFile",str,"handleInputsbarcodesFile"),("topDir",str,"handleInputstopDir"),("trigger",str,"handleInputstrigger")]
     outputs = [("CountsDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -26,7 +28,7 @@ class OWDetoxSAlignment(OWBwBWidget):
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
     topDir=pset(None)
-    barcodesFile=pset("barcodes_trugrade_96_set1.dat")
+    barcodesFile=pset("barcodes_trugrade_96_set4.dat")
     lanes=pset(6)
     seriesName=pset("20150409")
     def __init__(self):

@@ -3,6 +3,7 @@ import re
 import sys
 import logging
 from functools import partial
+from pathlib import Path
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
@@ -15,7 +16,6 @@ from AnyQt.QtWidgets import (
     QSizePolicy, QApplication, QCheckBox
 )
 
-
 #for selecting multiple directories
 class getExistingDirectories(QtWidgets.QFileDialog):
     def __init__(self, *args):
@@ -25,9 +25,7 @@ class getExistingDirectories(QtWidgets.QFileDialog):
         self.setOption(self.ShowDirsOnly, True)
         self.findChildren(QtWidgets.QListView)[0].setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.findChildren(QtWidgets.QTreeView)[0].setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-#dummy class
-class ContainerPaths():
-    pass
+        self.findChildren(QtWidgets.QTreeView)[0].setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
 class BwbGuiElements():
     #keep track of List of Gui elements
@@ -162,13 +160,8 @@ class OWBwBWidget(widget.OWWidget):
 #Initialization
     def __init__(self, image_name, image_tag):
         super().__init__()
-        self._hostDirectories = {}
         self._dockerImageName = image_name
         self._dockerImageTag = image_tag
-        self._dockerVolumes = None
-        self._dockerCommands = None
-        self._dockerEnvironments = None
-        self._Flag_isRunning = False
         #drawing layouts for gui
         #file directory
         self.filesBoxLayout=QtGui.QVBoxLayout()
@@ -185,8 +178,6 @@ class OWBwBWidget(widget.OWWidget):
         self.leditOptionalLayout.setSpacing(5)
         setattr(self.leditOptionalLayout,'nextRow',1)
         setattr(self.leditRequiredLayout,'nextRow',1)
-        #for container paths
-        self.con=ContainerPaths()
         #keep track of gui elements associated with each attribute
         self.bgui=BwbGuiElements()
         #keep track of all the connections - n
@@ -194,12 +185,11 @@ class OWBwBWidget(widget.OWWidget):
 
     def initVolumes(self):
         #initializes container volumes
-        for mapping in self.data['volumeMappings']:
-            bwbVolAttr=mapping['attr']
-            if not hasattr(self, bwbVolAttr) :
-                setattr(self,bwbVolAttr,None)
-            bwbVol=getattr(self,bwbVolAttr)
-            setattr(self.con, bwbVolAttr, mapping['conVolume'])
+        if 'volumeMappings' in self.data and self.data['volumeMappings']:
+            for mapping in self.data['volumeMappings']:
+                bwbVolAttr=mapping['attr']
+                if not hasattr(self, bwbVolAttr) :
+                    setattr(self,bwbVolAttr,None)
 
 #Drawing the GUI
     def drawGUI(self):
@@ -248,6 +238,7 @@ class OWBwBWidget(widget.OWWidget):
             if not ('parameters' in self.data) or not (pname in self.data['parameters']):
                 continue
             pvalue=self.data['parameters'][pname]
+            sys.stderr.write('drawing element for for pname {} pvalue {}\n'.format(pname,pvalue))
             if not hasattr(self,pname):
                 setattr(self,pname,None)
             if (getattr(self,pname) is None) and ('default' in pvalue):
@@ -271,9 +262,11 @@ class OWBwBWidget(widget.OWWidget):
 
         for pname in self.data['requiredParameters']:
             if not ('parameters' in self.data) or not( pname in self.data['parameters']):
+
                 continue
             pvalue=self.data['parameters'][pname]
-            if ('gui' in pvalue and pvalue['gui'] != 'Ledit') or (pvalue['type'] != 'double') and (pvalue['type'] != 'text'):
+            if ('gui' in pvalue and pvalue['gui'] != 'Ledit') or (pvalue['type'] != 'double' and pvalue['type'] != 'str' and pvalue['type'] != type('text')):
+                sys.stderr.write('type is {} {}\n'.format(pvalue['type'],type('text')))
                 continue
             self.drawLedit(pname,pvalue,self.requiredBox,layout=self.leditRequiredLayout)
 
@@ -336,7 +329,7 @@ class OWBwBWidget(widget.OWWidget):
                 continue
             if pname not in self.data['requiredParameters']:
                 pvalue=self.data['parameters'][pname]
-                if ('gui' in pvalue and pvalue['gui'] != 'Ledit') or (pvalue['type'] != 'double') and (pvalue['type'] != 'text'):
+                if ('gui' in pvalue and pvalue['gui'] != 'Ledit') or (pvalue['type'] != 'double') and (pvalue['type'] != type ('text') ):
                     continue
                 self.drawLedit(pname,pvalue,self.optionalBox,layout=self.leditOptionalLayout,addCheckbox=True)
 
@@ -643,7 +636,6 @@ class OWBwBWidget(widget.OWWidget):
             self.updateBoxEditValue(attr,boxEdit)
             sys.stderr.write('boxEdit values is {}\n'.format(getattr(self,attr)))
             
-
     def removeItem(self,attr,boxEdit,removeBtn):
         if boxEdit.selectedItems():
             for item in boxEdit.selectedItems():
@@ -651,7 +643,6 @@ class OWBwBWidget(widget.OWWidget):
             self.updateBoxEditValue(attr,boxEdit)
         if not boxEdit.count():
             removeBtn.setEnabled(False)
-
         
     def drawExec(self, box=None):
         #find out if there are triggers
@@ -816,8 +807,7 @@ class OWBwBWidget(widget.OWWidget):
             self.bgui.disable(pname,ignoreCheckbox=True)
             sys.stderr.write('disabled\n')
     
-    def enableSpin(self,value,clearLedit,cb,spin):
-        
+    def enableSpin(self,value,clearLedit,cb,spin):        
         if cb is None:
             spin.setEnabled(True)
         else:
@@ -892,148 +882,159 @@ class OWBwBWidget(widget.OWWidget):
         return None
 
     def getRequiredVols(self):
+        #get all the autoMaps
+        #the mountpoint is passed because it will be converted later into the global hostpath
+        bwbDict={}
+        if 'autoMap' in self.data and self.data['autoMap']:
+            for bwbVolume, containerVolume in self.dockerClient.bwbMounts.items():
+                self.hostVolumes[containerVolume]=bwbVolume
+                bwbDict[containerVolume]=bwbVolume
         for mapping in self.data['volumeMappings']:
             conVol=mapping['conVolume']
             attr=mapping['attr']
-            if not hasattr(self,attr):
-                return conVol
-            if not getattr(self,attr):
-                return conVol
-            bwbVol=getattr(self,attr)
-            if not bwbVol and 'default' in mapping:
-                bwbVol= mapping['default']
-            if self.data['parameters'][attr]['type'] =='file':
-                bwbVol=os.path.dirname(os.path.normpath(bwbVol))
-            elif self.data['parameters'][attr]['type'] =='files' or self.data['parameters'][attr]['type'] =='file list':
-                files=str.splitlines(bwbVol)
-                bwbVol=self.findTopDirectory(files)
-            else:
-               bwbVol=os.path.normpath(bwbVol)
-            self.hostVolumes[conVol]=bwbVol
+            if not hasattr(self,attr) or not getattr(self,attr):
+                if 'autoMap' in self.data and self.data['autoMap'] and conVol in bwbDict:
+                    setattr(self,attr,bwbDict[conVol])
+                else:
+                    return conVol
+            self.hostVolumes[conVol]=getattr(self,attr)
         return None
-
+    
+    def joinFlagValue(self,flag,value):
+        if flag:
+            if flag.strip()[-1] == '=':
+                return flag.strip()+value.strip()
+            return flag.strip()+ ' ' +value.strip()
+        return value
+    
+    def flagString(self, pname):
+        if 'parameters' in self.data and pname in self.data['parameters']:
+            pvalue= self.data['parameters'][pname]
+            sys.stderr.write('pname {} pvalue {}\n'.format(pname,pvalue))
+            if('flag' in pvalue  and hasattr(self,pname)):
+                flagName=pvalue['flag']
+                flagValue=getattr(self,pname)
+                if pvalue['type'] == 'bool':
+                    if flagValue:
+                        return flagName
+                    return None
+                elif pvalue['type'] == 'file':
+                    filename=str(flagValue)
+                    if filename:
+                        hostFilename=self.bwbPathToContainerPath(filename, isFile=True,returnNone=False)
+                        sys.stderr.write('orig file {} convert to container {}\n'.format(filename,hostFilename))
+                        return self.joinFlagValue(flagName,hostFilename)
+                    return None
+                elif pvalue['type'] == 'file list':
+                    files=str.splitlines(flagValue)
+                    if files:
+                        hostFiles=[]
+                        for f in files:
+                            hostFiles.append(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))                
+                        return " ".join(flagName,hostFiles)
+                    return None
+                elif pvalue['type'] == 'directory':
+                    path=str(flagValue)
+                    if path:
+                        hostPath=self.bwbPathToContainerPath(path, returnNone=False)
+                    return self.joinFlagValue(flagName,str(hostPath))
+                elif pvalue['type'][-4:] =='list':
+                    return " ".join(flagName,flagValue)
+                elif flagValue:
+                    return self.joinFlagValue(flagName,flagValue)
+            
+        return None
+            
     def generateCmdFromData (self):
-        flags={}
+        flags=[]
         args=[]
         for pname, pvalue in self.data['parameters'].items():
-           
             #possible to have an requirement or parameter that is not in the executable line
             #this is indicated by the absence of a flags field and arguments 
             if 'flags' not in pvalue:
-                continue
+                continue            
             #if required or checked then it is added to the flags
-            addFlag=False
+            addParms=False
             #checkattr is needed for the orange gui checkboxes but is not otherwise updated 
             if pname in self.optionsChecked and self.optionsChecked[pname]:
-                addFlag=True
+                addParms=True
+                
             #also need to check for booleans which are not tracked by optionsChecked
-            
-            if pvalue['type'] == 'bool':
-                if hasattr(self,pname) and getattr(self,pname):
-                    addFlag=True
-            if pname in self.data['requiredParameters']:
-                sys.stderr.write('{} with is required\n'.format(pname))
-                if hasattr(self,pname):
-                    sys.stderr.write('{} value is {}\n'.format(pname,getattr(self,pname)))
-                addFlag=True
-            else:
-                sys.stderr.write('{} is not required\n'.format(pname))
-                if hasattr(self,pname):
-                    sys.stderr.write('{} value is {}\n'.format(pname,getattr(self,pname)))
-            sys.stderr.write('gencmd name {} value {} addFlag {} type {} flags {}\n'.format(pname,pvalue,addFlag,pvalue['type'],pvalue['flags']))
-            if addFlag:
-                if pvalue['flags'] and pvalue['flags'][0]:
-                    if pvalue['type'] == 'bool':
-                        flags[pvalue['flags'][0]] = None
-                    elif pvalue['type'] == 'file':
-                        filename=str(getattr(self,pname))
-                        if filename:
-                            hostFilename=self.bwbPathToContainerPath(filename, isFile=True,returnNone=False)
-                            flags[pvalue['flags'][0]]=str(hostFilename)
-                    elif pvalue['type'] == 'file list':
-                        files=str.splitlines(getattr(self,pname))
-                        if files:
-                            hostFiles=[]
-                            for f in files:
-                                hostFiles.append(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
-                            flags[pvalue['flags'][0]]="\n".join(hostFiles)
-                    elif pvalue['type'] == 'directory':
-                        path=str(getattr(self,pname))
-                        if path:
-                            hostPath=self.bwbPathToContainerPath(path, returnNone=False)
-                            flags[pvalue['flags'][0]]=str(hostPath)
-                    elif pvalue['type'][-4:] =='list':
-                        flags[pvalue['flags'][0]]=getattr(self,pname)
-                    else:
-                        flags[pvalue['flags'][0]]=str(getattr(self,pname))
-                else:
-                    if pvalue['type'] == 'file':
-                        filename=str(getattr(self,pname))
-                        if filename:
-                            hostFilename=self.bwbPathToContainerPath(filename, isFile=True,returnNone=False)
-                            args.append(hostFilename)
-                    elif pvalue['type'] =='file list':
-                        files=str.splitlines(getattr(self,pname))
-                        sys.stderr.write('files are {}\n'.format(files))
-                        for f in files:
-                            args.append(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
-                    elif pvalue['type'] =='directory':
-                        path=str(getattr(self,pname))
-                        if path:
-                            hostPath=self.bwbPathToContainerPath(path, returnNone=False)
-                            args.append(hostPath)
-                    elif pvalue['type'][-4:] =='list' or pvalue['type'][-4:] =='List':
-                        myItems=str.splitlines(getattr(self,pname))
-                        sys.stderr.write('list value name {} values {}\n'.format(pname,myItems))
-                        args.extend(myItems)
-                    else:
-                        args.append(str(getattr(self,pname)))
-        return self.generateCmdFromBash([self.data['command']],flags,args=args)
+            if pvalue['type'] == 'bool'and hasattr(self,pname) and getattr(self,pname):
+                addParms=True
+                
+            if pname in self.data['requiredParameters'] and hasattr(self,pname):
+                addParms=True
 
-    def generateCmdFromBash (self, executables = [], flags = {}, args = []):
-        sys.stderr.write('executables {} flags {} args {}\n'.format(executables,flags,args))
-        #flags are key value pairs - values begin with = if they are to be joined with the key i.e. --name=John and not --name John
-        cmdStr=''
+            if addParms:
+                fStr=self.flagString(pname)
+                if pvalue['flags'] and pvalue['flags'][0]:
+                    if fStr:
+                        flags.append(fStr)
+                elif fStr:
+                    args.append(fStr)
+        return self.generateCmdFromBash(self.data['command'],flags=flags,args=args)
+
+    def replaceVars(self,cmd,pnames,varSeen):
+        pattern = r'\_bwb\{([^\}]+)\}'
+        regex = re.compile(pattern)
+        subs=[]
+        sys.stderr.write('command is {}\n'.format(cmd))
+        for match in regex.finditer(cmd):
+            sys.stderr.write('matched {}\n'.format(match.group(1)))
+            sub=match.group(1)
+            if sub not in subs:
+                subs.append(sub)
+        for sub in subs:
+            #remove front and trailing spaces
+            #create match
+            matchStr='_bwb{' + sub +'}'
+            psub=sub.strip()
+            sys.stderr.write('looking for {} in {}\n'.format(psub,pnames))
+            if psub in pnames:
+                fStr=self.flagString(psub)
+                sys.stderr.write('psub {} is  in {}\n'.format(psub,pnames))
+                sys.stderr.write('fstr {}\n'.format(fStr))
+                if fStr:
+                    sys.stderr.write('replace matchStr {} in cmd {} with fStr {}\n'.format(matchStr,cmd,fStr))
+                    cmd=cmd.replace(matchStr,fStr)
+                    sys.stderr.write('to give new cmd {}\n'.format(cmd))
+                    varSeen[fStr]=True
+                else:
+                    cmd=cmd.replace(matchStr,'')
+            else:
+                cmd=cmd.replace(matchStr,'')
+        return cmd
+        
+    def generateCmdFromBash (self, executables, flags = [], args = []):
+        #by default all flags and arguments are applied to final command
+        #use positional _bwb{} variables so specify flags and arguments if there are multiple commands
+        #unused args and flags are applied to the final command
+
+        cmdStr="bash -c '"
+        varSeen={}
+        sys.stderr.write('execs {}\n'.format(executables))
+        sys.stderr.write('executables {}\n'.format(executables))
         for executable in executables:
-            cmdStr += executable + ' '
-        #short flags no args first
-        #short flags args
-        #long flags no args
-        #long flags args
-        #flags no dashs
-        #flags no args
-        for flagName, flagValue in flags.items():
-            if (flagName and flagName[:1] == '-') and (flagName[:2] != '--') and (not flagValue):
-                cmdStr +=  flagName + ' '
-        for flagName,flagValue in flags.items():
-            if (flagName and flagName[:1] == '-') and (flagName[:2] != '--') and flagValue:
-                if(flagValue[:1] == '='):
-                    cmdStr +=  flagName + flagValue + ' '
-                else:
-                    cmdStr +=  flagName + ' ' + flagValue + ' '
-        for flagName, flagValue in flags.items():
-            if (flagName and flagName[:2] == '--')  and (not flagValue):
-                cmdStr +=  flagName + ' '
-        for flagName,flagValue in flags.items():
-            if (flagName and flagName[:2] == '--')  and flagValue:
-                if(flagValue[:1] == '='):
-                    cmdStr +=  flagName + flagValue + ' '
-                else:
-                    cmdStr +=  flagName + ' ' + flagValue + ' '
-        for flagName, flagValue in flags.items():
-            if (flagName and flagName[:1] != '-')  and (not flagValue):
-                cmdStr +=  flagName + ' '
-        for flagName,flagValue in flags.items():
-            if (flagName and flagName[:1] != '-')  and flagValue:
-                if(flagValue[:1] == '='):
-                    cmdStr +=  flagName + flagValue + ' '
-                else:
-                    cmdStr +=  flagName + ' ' + flagValue + ' '
-        for arg in args:
-            cmdStr += arg + ' '
-        #remove any extra space
-        if cmdStr:
-            cmdStr[:-1]
+            lastExecutable= (executable == executables[-1])
+            sys.stderr.write('Orig executable {} flags {} args {}\n'.format(executable,flags,args))
+            pnames=None
+            if 'parameters' in self.data:
+                pnames=self.data['parameters'].keys()
+            executable=self.replaceVars(executable,pnames,varSeen)
+            sys.stderr.write('New executable {} flags {} args {}\n'.format(executable,flags,args))
+            cmdStr += executable +' '
+            #extra args and flags go after last executable
+            if lastExecutable:
+                for flag in flags:
+                    if flag not in varSeen:
+                        cmdStr+=flag + ' '
+                for arg in args:
+                    if arg not in varSeen:
+                        cmdStr+= arg + ' '
+                cmdStr+="'"
+            else:
+                cmdStr+=" && "
         return cmdStr
 
     def getEnvironmentVariables(self):
@@ -1100,15 +1101,18 @@ class OWBwBWidget(widget.OWWidget):
         #now get all the possible submappings to volumeMappings by comparing the true hostmappings
         #if submap is found convert the common path to the container path
         #return shortest path
-        for mapping in self.data['volumeMappings']:
-            conVol = mapping['conVolume']
-            bwbVol = self.hostVolumes[conVol]
+        sys.stderr.write('dirPath {} pathFile {} hostPath {}\n'.format(dirPath,pathFile,hostPath))
+        for conVol, bwbVol in self.hostVolumes.items():
             hostVol=os.path.normpath(self.dockerClient.to_best_host_directory(bwbVol,returnNone=False))
+            sys.stderr.write('checking conVol {} bwbVol {} hostVol {}\ncommon {}\n'.format(conVol,bwbVol,hostVol,os.path.commonpath([hostVol,hostPath])))
             prefix=None
             if hostVol == hostPath:
                 prefix=""
-            elif len(hostVol) < len(hostPath):
-                prefix=os.path.commonpath([hostVol,hostPath])
+            elif Path(hostVol) in Path(hostPath).parents:
+                prefix=str(Path(hostPath).relative_to(hostVol))
+                sys.stderr.write('prefix is {}\n'.format(prefix))
+                if prefix == '.':
+                    prefix=''
             if prefix is not None :
                 cleanConVol=os.path.normpath(conVol)
                 myConPath= os.path.normpath(str.join(os.sep,(cleanConVol, prefix)))

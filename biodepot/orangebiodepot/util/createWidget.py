@@ -23,8 +23,10 @@ import functools
 import jsonpickle
 from collections import OrderedDict
 from Orange.widgets import widget, gui, settings
+import Orange.data
+from Orange.data.io import FileFormat
 from orangebiodepot.util.DockerClient import DockerClient
-from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, ContainerPaths, BwbGuiElements
+from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
 '''
@@ -80,15 +82,15 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         for pname,pvalue in data['parameters'].items():
             if 'default' in pvalue and pvalue['default'] is not None:
                 #if it is not a number or dict type then keep quotes
-                #lists are stored as strings separated by \n currently
                 if pvalue['type'] == 'int' or  pvalue['type'] == 'float' or pvalue['type'] == 'double' or pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
                     f.write('    {}=pset({})\n'.format(pname,pvalue['default']))
                 else:
                     f.write('    {}=pset("{}")\n'.format(pname,pvalue['default']))
-            else:
-               
-                if pvalue['type'] == type('str') or pvalue['type'][-4:] == 'list' or pvalue['type'][-4:] == 'List':
-                   f.write('    {}=pset("")\n'.format(pname),None)
+            else:               
+                if pvalue['type'] == type('str') :
+                    f.write('    {}=pset("")\n'.format(pname),None)
+                elif pvalue['type'][-4:] == 'list' or pvalue['type'][-4:] == 'List':
+                    f.write('    {}=pset([])\n'.format(pname))
                 elif pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
                     f.write('    {}=pset({{}})\n'.format(pname))
                 else:

@@ -80,7 +80,7 @@ class WidgetItem():
         
 class OWWidgetBuilder(widget.OWWidget):
     name = "WidgetBuilder"
-    description = "Set one or more data files"
+    description = "Build a new widget from a set of bash commands and a Docker container"
     category = "Data"
     icon = "icons/build.png"
     priority = 2
@@ -131,6 +131,8 @@ class OWWidgetBuilder(widget.OWWidget):
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
             'priority','icon','inputs','outputs','volumes','parameters','command','autoMap'):
             self.data[attr]=deepcopy(getattr(self,attr))
+        #separate multiple commands
+        self.data['command']=self.data['command'].split('\n')
         
         #add persistance
         self.data['persistentSettings']='all'
@@ -142,7 +144,7 @@ class OWWidgetBuilder(widget.OWWidget):
                     reqList.append(pname)
         self.data['requiredParameters']=reqList
         #add volume mappings
-        if 'volumes' in self.data:
+        if 'volumes' in self.data and self.data['volumes']:
             myMappings=[]
             for attr, volume in self.data['volumes'].items():
                 myMappings.append({'conVolume':volume['containerVolume'], 'attr' : attr})
@@ -154,32 +156,30 @@ class OWWidgetBuilder(widget.OWWidget):
                 for key, myDict in self.data[pname].items():
                     if myDict['type'] == 'str':
                         myDict['type'] = type('str')
-        #replace flag with flags list
-        if 'parameters' in self.data:
-            for key, myDict in self.data['parameters'].items():
-                if 'flag' in myDict:
-                    myDict['flags']=[myDict['flag']]
-                    sys.stderr.write('converting flag for key {} flag {} new flag {}\n'.format(key,myDict['flag'],myDict['flags']))
-            #myDict.pop('flag',None)
+
         #for now just keep default, flags, 
         #also make all defaults false for booleans - will fix these kluges after cleaning up BwBase code
         
             for key, myDict in self.data['parameters'].items():
                 newDict={}
-                if myDict['default'] is not None:
+                if  'default' in myDict and myDict['default'] is not None:
                     newDict['default']=myDict['default']
                 elif 'type' in myDict and myDict['type'] == 'bool':
                     newDict['default']=False
-                if 'flags' in myDict:
-                    newDict['flags']=myDict['flags']
-                elif 'argument' in myDict and myDict['argument'] == True:
-                    newDict['flags']=[]
+                if 'flag' in myDict:
+                    newDict['flag']=myDict['flag']
+                #arguments are the same as having a null flag value
+                #parameters that are not arguments e.g. environment variables will not have a flag key    
+                if 'argument' in myDict and myDict['argument'] == True:
+                    newDict['flag']=None
                 if 'label' in myDict:
                     newDict['label']=myDict['label']
                 else:
                     newDict['label']=None
                 if 'type' in myDict and myDict['type']:
                     newDict['type']=myDict['type']
+                if 'env' in myDict and myDict['env']:
+                    newDict['env']=myDict['env']
                 self.data['parameters'][key]=newDict 
     
               
@@ -256,7 +256,7 @@ class OWWidgetBuilder(widget.OWWidget):
             self.drawLedit(pname,layout=leditRequiredLayout)
         self.drawLedit('priority',layout=leditRequiredLayout)
         #file entry for icon
-        self.drawLedit('icon',layout=leditRequiredLayout,browseButton=partial(self.browseFileDir, attr='icon'))
+        self.drawLedit('icon',layout=leditRequiredLayout,addBrowseButton=True, fileType=None)
 
         #listwidgets for inputs and outputs 
         #define widgetItems for the different widgetLists
@@ -667,7 +667,7 @@ class OWWidgetBuilder(widget.OWWidget):
     def drawIOListWidget (self, pname, layout=None):
         nameBox=self.makeLedit(pname+'nameLedit','Enter name','Name')
         callbackBox=self.makeLedit(pname+'callbackLedit','Enter callback', 'callback',addCheckBox=True)
-        comboBox=self.makeComboBox(pname,'Type:',['str'])       
+        comboBox=self.makeComboBox(pname,'Type:',['str','Orange.data.Table'])       
         widgetList=[('name',nameBox),('callback',callbackBox),('type',comboBox)]
         self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
 
@@ -675,7 +675,7 @@ class OWWidgetBuilder(widget.OWWidget):
         nameBox=self.makeLedit(pname+'Name','Enter name','Name')
         volumeBox=self.makeLedit(pname+'volumeLedit','Enter volume','Additional volume')
         widgetList=[('name',nameBox),('containerVolume',volumeBox)]
-        autoMapCb=self.makeCheckBox ('AutoMap','Pass current Bwb volumes to container',default=True,persist=True,track=True)
+        autoMapCb=self.makeCheckBox ('autoMap','Pass current Bwb volumes to container',default=True,persist=True,track=True)
         self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList,otherWidgets=[autoMapCb])
         
     def drawParamsListWidget (self, pname, layout=None):
@@ -691,7 +691,7 @@ class OWWidgetBuilder(widget.OWWidget):
         #connect argument checkbox to disabling the flag checkbox
         flagBox.checkBox.stateChanged.connect(lambda : (not flagBox.checkBox.isChecked()) or (argumentCb.setChecked(False)))
         argumentCb.stateChanged.connect(lambda : (not argumentCb.isChecked()) or (flagBox.checkBox.setChecked(False) or flagBox.ledit.clear()))       
-        comboBox=self.makeComboBox(pname,'Type:',['str','file','directory','directory list','file list','bool','text','int','double'])
+        comboBox=self.makeComboBox(pname,'Type:',['str','file','file list','directory','directory list','bool','bool list','text','text list','int','int list','double','double list'])
         widgetList=[('name',nameBox),
                     ('type',comboBox),
                     ('flag',flagBox), 
@@ -703,15 +703,15 @@ class OWWidgetBuilder(widget.OWWidget):
                    ]
         self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
 
-    def drawLedit(self,pname,layout=None,browseButton=None):
+    def drawLedit(self,pname,layout=None,addBrowseButton=False,fileType=None):
         #make labeledLedit combo layout
         labelLedit=self.makeLedit(pname,'Enter '+ pname, label=pname+':')
         self.initAllStates(pname,labelLedit)
         labelLedit.ledit.textChanged.connect(lambda: self.updateAllStates(pname,labelLedit,labelLedit.getState()))
         layout.addWidget(labelLedit.label,layout.nextRow,0)
-        if browseButton:
+        if addBrowseButton:
             layout.addWidget(labelLedit.ledit,layout.nextRow,1,1,1)
-            button=gui.button(None, self, "", callback= browseButton,autoDefault=True, width=19, height=19)
+            button=gui.button(None, self, "", callback= lambda : self.browseFileDir(pname,ledit=labelLedit.ledit,fileType=fileType),autoDefault=True, width=19, height=19)
             button.setIcon(self.browseIcon)
             layout.addWidget(button,layout.nextRow,2)
         else:
@@ -732,7 +732,7 @@ class OWWidgetBuilder(widget.OWWidget):
             self.allStates[attr]=widget.getState()
         setattr(self,attr,widget.getStateValue(self.allStates[attr]))
             
-    def browseFileDir(self, attr,fileType=None):
+    def browseFileDir(self, attr,ledit=None,fileType=None):
         defaultDir = '/root'
         if os.path.exists('/data'):
             defaultDir = '/data'
@@ -742,6 +742,8 @@ class OWWidgetBuilder(widget.OWWidget):
             myFileDir=QtWidgets.QFileDialog.getOpenFileName(self, "Locate file", defaultDir)[0]
         if myFileDir:
             setattr(self,attr,myFileDir)
+        if ledit:
+            ledit.setText(myFileDir)
             
     def  updateCheckBoxLayout(self, cb, layout):
         if cb.isChecked():

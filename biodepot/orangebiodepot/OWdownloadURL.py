@@ -5,8 +5,10 @@ import functools
 import jsonpickle
 from collections import OrderedDict
 from Orange.widgets import widget, gui, settings
+import Orange.data
+from Orange.data.io import FileFormat
 from orangebiodepot.util.DockerClient import DockerClient
-from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, ContainerPaths, BwbGuiElements
+from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
 class OWdownloadURL(OWBwBWidget):
@@ -18,7 +20,7 @@ class OWdownloadURL(OWBwBWidget):
     want_main_area = False
     docker_image_name = "biodepot/alpine-download"
     docker_image_tag = "1.0"
-    inputs = [("directory",str,"handleInputsdirectory"),("URL",str,"handleInputsURL"),("trigger",str,"handleInputstrigger")]
+    inputs = [("directory",str,"handleInputsdirectory"),("trigger",str,"handleInputstrigger")]
     outputs = [("directory",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
@@ -26,8 +28,7 @@ class OWdownloadURL(OWBwBWidget):
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
     directory=pset(None)
-    URL=pset(None)
-    decompress=pset(True)
+    URL=pset([])
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open("/biodepot/orangebiodepot/json/downloadURL.json") as f:
@@ -38,8 +39,6 @@ class OWdownloadURL(OWBwBWidget):
         self.drawGUI()
     def handleInputsdirectory(self, value, sourceId=None):
         self.handleInputs(value, "directory", sourceId=None)
-    def handleInputsURL(self, value, sourceId=None):
-        self.handleInputs(value, "URL", sourceId=None)
     def handleInputstrigger(self, value, sourceId=None):
         self.handleInputs(value, "trigger", sourceId=None)
     def handleOutputs(self):
