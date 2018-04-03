@@ -160,6 +160,7 @@ class OWBwBWidget(widget.OWWidget):
 #Initialization
     def __init__(self, image_name, image_tag):
         super().__init__()
+        self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self._dockerImageName = image_name
         self._dockerImageTag = image_tag
         #drawing layouts for gui
@@ -181,8 +182,7 @@ class OWBwBWidget(widget.OWWidget):
         #keep track of gui elements associated with each attribute
         self.bgui=BwbGuiElements()
         #keep track of all the connections - n
-        self.inputConnections=ConnectionDict(self.inputConnectionsStore)
-
+        
     def initVolumes(self):
         #initializes container volumes
         if 'volumeMappings' in self.data and self.data['volumeMappings']:
@@ -216,7 +216,7 @@ class OWBwBWidget(widget.OWWidget):
                self.bgui.disable(attr)
             
         #check if the requirements to be run are met
-        self.checkTrigger()
+        
         outputLabel=QtGui.QLabel('Console')
         self.controlArea.layout().addWidget(outputLabel)
 
@@ -231,6 +231,7 @@ class OWBwBWidget(widget.OWWidget):
         controlBox = QtGui.QVBoxLayout()
         self.pConsole=ConsoleProcess(console=self.console,finishHandler=self.onRunFinished)
         self.drawExec(box=self.controlArea.layout())
+        self.checkTrigger()
 
         
     def drawRequiredElements(self):
@@ -357,9 +358,18 @@ class OWBwBWidget(widget.OWWidget):
         sys.stderr.write('drawCB pname {} pvalue {} label {}\n'.format(pname, pvalue,pvalue['label']))
         if not hasattr(self,pname):
             if 'default' in pvalue:
-                setattr(self,pname,pvalue['default'])
+                if type (pvalue['default']) is str:
+                    if pvalue['default'] ==  'True':
+                       setattr(self,pname,True)
+                    if pvalue['default'] ==  'False':
+                       setattr(self,pname,False)
+                    else:
+                        raise Exception ('{} is boolean - default values must be True or False not {}'.format(pname,pvalue['default']))
+                elif type (pvalue['default']) is bool:
+                    setattr(self,pname,pvalue['default'])
             else:
                 setattr(self,pname,False)
+        sys.stderr.write('draw CB pname {} value {}\n'.format(pname,getattr(self,pname)))
         cb=gui.checkBox(box, self, pname, pvalue['label'])
         checkAttr=pname+'Checked'
         setattr(self,checkAttr,getattr(self,pname))
@@ -381,13 +391,17 @@ class OWBwBWidget(widget.OWWidget):
         if pvalue['type'] == 'int':
             if not hasattr(self,pname):
                 setattr(self,pname,int(default))
-            else:
+            elif getattr(self,pname):
                 setattr(self,pname,int(getattr(self,pname)))
+            else:
+                setattr(self,pname,int(default))
         else:
             if not hasattr(self,pname):
                 setattr(self,pname,float(default))
+            elif getattr(self,pname):
+                setattr(self,pname,int(getattr(self,pname)))
             else:
-                setattr(self,pname,float(getattr(self,pname)))
+                setattr(self,pname,float(default))
         if addCheckbox:
             (checkBox,mySpin)=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
         else:
@@ -482,7 +496,7 @@ class OWBwBWidget(widget.OWWidget):
         ledit.clear()
         boxEdit.clear()
         if value:
-            boxEdit.addItems(str.splitlines(value))
+            boxEdit.addItems(value)
         if not checkbox or checkbox.isChecked():
             for g in  [boxEdit,ledit,browseBtn,addBtn,removeBtn]:
                 if g:
@@ -497,7 +511,7 @@ class OWBwBWidget(widget.OWWidget):
                 boxEdit.clear()
             else:
                 boxEdit.clear()
-                boxEdit.addItems(str.splitlines(value))
+                boxEdit.addItems(value)
                 self.updateBoxEditValue(attr,boxEdit)
             
     def updateBoxEditValue(self,attr,boxEdit):
@@ -507,7 +521,7 @@ class OWBwBWidget(widget.OWWidget):
             myItems.append(boxEdit.item(i).text())
             sys.stderr.write('add item number {} value {}\n'.format(i,boxEdit.item(i).text()))
         if myItems:
-            setattr(self,attr,"\n".join(myItems))
+            setattr(self,attr,myItems)
         
     def drawFilesBox (self,pname, pvalue, box=None, layout=None, addCheckbox=False):
         #for multiple files or directories draw a widget list with a line edit below and buttons to browse, add, delete, submit and reload
@@ -557,9 +571,11 @@ class OWBwBWidget(widget.OWWidget):
         boxEdit.setMinimumHeight(60)
         #fill boxEdit
         if hasattr(self,pname):
-            fileStr=getattr(self,pname)
-            if fileStr:
-                boxEdit.addItems(str.splitlines(fileStr))
+            fileList=getattr(self,pname)
+            if type(fileList) is not list:
+                boxEdit.addItems([fileList])
+            else:
+                boxEdit.addItems(fileList)
         boxEdit.setDisabled(disabledFlag)
         elements.append(boxEdit)
         
@@ -650,7 +666,6 @@ class OWBwBWidget(widget.OWWidget):
         for pname in self.data['inputs']:
             if not(pname in self.data['requiredParameters']):
                 self.candidateTriggers.append(pname)
-
         #initialize the exec state
         self.execLayout=QtGui.QGridLayout()
         self.execLayout.setSpacing(5)
@@ -729,10 +744,10 @@ class OWBwBWidget(widget.OWWidget):
             return
         elif self.runMode ==1: #automatic same as pushing start button
             self.onRunClicked()
-        elif self.candidateTriggers:
+        elif self.runTriggers:
             #check if the input triggers are set
             for trigger in self.runTriggers:
-                if not inputConnections.isSet(trigger):
+                if not self.inputConnections.isSet(trigger):
                     return
             self.onRunClicked()
 
@@ -889,15 +904,16 @@ class OWBwBWidget(widget.OWWidget):
             for bwbVolume, containerVolume in self.dockerClient.bwbMounts.items():
                 self.hostVolumes[containerVolume]=bwbVolume
                 bwbDict[containerVolume]=bwbVolume
-        for mapping in self.data['volumeMappings']:
-            conVol=mapping['conVolume']
-            attr=mapping['attr']
-            if not hasattr(self,attr) or not getattr(self,attr):
-                if 'autoMap' in self.data and self.data['autoMap'] and conVol in bwbDict:
-                    setattr(self,attr,bwbDict[conVol])
-                else:
-                    return conVol
-            self.hostVolumes[conVol]=getattr(self,attr)
+        if 'volumeMappings' in self.data and self.data['volumeMappings']:
+            for mapping in self.data['volumeMappings']:
+                conVol=mapping['conVolume']
+                attr=mapping['attr']
+                if not hasattr(self,attr) or not getattr(self,attr):
+                    if 'autoMap' in self.data and self.data['autoMap'] and conVol in bwbDict:
+                        setattr(self,attr,bwbDict[conVol])
+                    else:
+                        return conVol
+                self.hostVolumes[conVol]=getattr(self,attr)
         return None
     
     def joinFlagValue(self,flag,value):
@@ -926,7 +942,8 @@ class OWBwBWidget(widget.OWWidget):
                         return self.joinFlagValue(flagName,hostFilename)
                     return None
                 elif pvalue['type'] == 'file list':
-                    files=str.splitlines(flagValue)
+                    #files=str.splitlines(flagValue)
+                    files=flagValue
                     if files:
                         hostFiles=[]
                         for f in files:
@@ -939,7 +956,10 @@ class OWBwBWidget(widget.OWWidget):
                         hostPath=self.bwbPathToContainerPath(path, returnNone=False)
                     return self.joinFlagValue(flagName,str(hostPath))
                 elif pvalue['type'][-4:] =='list':
-                    return " ".join(flagName,flagValue)
+                    if flagName:
+                        return flagName +" ".join(flagValue)
+                    else:
+                        return " ".join(flagValue)
                 elif flagValue:
                     return self.joinFlagValue(flagName,flagValue)
             
@@ -951,7 +971,7 @@ class OWBwBWidget(widget.OWWidget):
         for pname, pvalue in self.data['parameters'].items():
             #possible to have an requirement or parameter that is not in the executable line
             #this is indicated by the absence of a flags field and arguments 
-            if 'flags' not in pvalue:
+            if 'flag' not in pvalue:
                 continue            
             #if required or checked then it is added to the flags
             addParms=False
@@ -968,7 +988,7 @@ class OWBwBWidget(widget.OWWidget):
 
             if addParms:
                 fStr=self.flagString(pname)
-                if pvalue['flags'] and pvalue['flags'][0]:
+                if pvalue['flag']:
                     if fStr:
                         flags.append(fStr)
                 elif fStr:
@@ -1031,7 +1051,7 @@ class OWBwBWidget(widget.OWWidget):
                         cmdStr+=flag + ' '
                 for arg in args:
                     if arg not in varSeen:
-                        cmdStr+= arg + ' '
+                        cmdStr+= str(arg) + ' '
                 cmdStr+="'"
             else:
                 cmdStr+=" && "
@@ -1064,7 +1084,6 @@ class OWBwBWidget(widget.OWWidget):
         self.setStatusMessage('Stopped')
         self.bgui.reenableAll(self)
         self.reenableExec()
-        self.handleOutputs()
         
     def onRunFinished(self,code=None,status=None):
         self.pConsole.writeMessage("Finished")
@@ -1095,13 +1114,14 @@ class OWBwBWidget(widget.OWWidget):
             dirPath=os.path.dirname(path)
             pathFile=os.path.basename(path)
             hostPath=os.path.normpath(self.dockerClient.to_best_host_directory(dirPath,returnNone=False))
+            sys.stderr.write('dirPath {} pathFile {} hostPath {}\n'.format(dirPath,pathFile,hostPath))
         else:
             hostPath=os.path.normpath(self.dockerClient.to_best_host_directory(path,returnNone=False))
+            sys.stderr.write('hostPath {}\n'.format(hostPath))
         conPath=None
         #now get all the possible submappings to volumeMappings by comparing the true hostmappings
         #if submap is found convert the common path to the container path
         #return shortest path
-        sys.stderr.write('dirPath {} pathFile {} hostPath {}\n'.format(dirPath,pathFile,hostPath))
         for conVol, bwbVol in self.hostVolumes.items():
             hostVol=os.path.normpath(self.dockerClient.to_best_host_directory(bwbVol,returnNone=False))
             sys.stderr.write('checking conVol {} bwbVol {} hostVol {}\ncommon {}\n'.format(conVol,bwbVol,hostVol,os.path.commonpath([hostVol,hostPath])))

@@ -63,9 +63,13 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         f.write('    docker_image_name = "{}"\n'.format(data['docker_image_name']))
         f.write('    docker_image_tag = "{}"\n'.format(data['docker_image_tag']))
         #inputs and outputs
-        inputStr='['
-        for attr, value  in data['inputs'].items():
-                inputStr= inputStr+ '("{}",{},"handleInputs{}"),'.format(attr,deClass(str(value['type'])),attr)
+        if 'inputs' in data:
+            inputStr='['
+            for attr, values  in data['inputs'].items():
+                if 'callback' in  values and values['callback']:
+                    inputStr= inputStr+ '("{}",{},"{}"),'.format(attr,deClass(str(values['type'])),values['callback'])
+                else:
+                    inputStr= inputStr+ '("{}",{},"handleInputs{}"),'.format(attr,deClass(str(values['type'])),attr)
         inputStr=inputStr[:-1]+']'
         f.write('    inputs = {}\n'.format(inputStr))
         outputStr='['
@@ -82,13 +86,15 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         for pname,pvalue in data['parameters'].items():
             if 'default' in pvalue and pvalue['default'] is not None:
                 #if it is not a number or dict type then keep quotes
-                if pvalue['type'] == 'int' or  pvalue['type'] == 'float' or pvalue['type'] == 'double' or pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
+                if pvalue['type'] == 'int' or  pvalue['type'] == 'float' or pvalue['type'] == 'double' or pvalue['type'] == 'bool' or pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
                     f.write('    {}=pset({})\n'.format(pname,pvalue['default']))
                 else:
                     f.write('    {}=pset("{}")\n'.format(pname,pvalue['default']))
             else:               
                 if pvalue['type'] == type('str') :
                     f.write('    {}=pset("")\n'.format(pname),None)
+                if pvalue['type'] == 'bool' :
+                    f.write('    {}=pset(False)\n'.format(pname))
                 elif pvalue['type'][-4:] == 'list' or pvalue['type'][-4:] == 'List':
                     f.write('    {}=pset([])\n'.format(pname))
                 elif pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
@@ -106,17 +112,24 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         f.write('        self.inputConnections = ConnectionDict(self.inputConnectionsStore)\n')
         f.write('        self.drawGUI()\n')
         #input callbacks
-        for attr, value in data['inputs'].items():
-            f.write('    def handleInputs{}(self, value, sourceId=None):\n'.format(attr))
-            f.write('        self.handleInputs(value, "{}", sourceId=None)\n'.format(attr))
-        #output callback
-        f.write('    def handleOutputs(self):\n'.format(attr))
-        for attr in data['outputs']:
-            if 'outputValue' in data['outputs']:
-                outputValue=data['outputs']['outputValue']
-                f.write('        self.send("{}", {}\n'.format(attr,outputValue))
-            else:
-                f.write('        outputValue=None\n')
+        if 'inputs' in data:
+            for attr, values in data['inputs'].items():
+                if 'callback' in  values and values['callback']:
+                    f.write('    def {}(self,value, "{}", sourceId=None):\n'.format(values["callback"],attr))
+                    f.write('        #User code here\n')
+                    f.write('        self.handleInputs(value, "{}", sourceId=None)\n'.format(attr))
+                else:
+                    f.write('    def handleInputs{}(self, value, sourceId=None):\n'.format(attr))
+                    f.write('        self.handleInputs(value, "{}", sourceId=None)\n'.format(attr)) 
+            
+        if 'outputs' in data and data['outputs']:
+            #generic omnibus output handler - change if you want to customize outputs
+            f.write('    def handleOutputs(self):\n'.format(attr))
+            for attr,values in data['outputs'].items():
+                if 'default' in values and values['default'] is not None:
+                    f.write('        outputValue="{}"\n'.format(values['default']))
+                else:
+                    f.write('        outputValue=None\n')
                 f.write('        if hasattr(self,"{}"):\n'.format(attr))
                 f.write('            outputValue=getattr(self,"{}")\n'.format(attr))
                 f.write('        self.send("{}", outputValue)\n'.format(attr))

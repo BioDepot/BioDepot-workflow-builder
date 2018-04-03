@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+import json
 import jsonpickle
 from orangebiodepot.util.createWidget import createWidget, register
 from copy import deepcopy
@@ -159,13 +160,27 @@ class OWWidgetBuilder(widget.OWWidget):
 
         #for now just keep default, flags, 
         #also make all defaults false for booleans - will fix these kluges after cleaning up BwBase code
-        
+        if 'parameters' in self.data:
             for key, myDict in self.data['parameters'].items():
                 newDict={}
                 if  'default' in myDict and myDict['default'] is not None:
-                    newDict['default']=myDict['default']
-                elif 'type' in myDict and myDict['type'] == 'bool':
-                    newDict['default']=False
+                    #make sure that these are the correct type
+                    if myDict['type'] == 'bool':
+                        if myDict['default'] == 'False':
+                            newDict['default']=False
+                        elif myDict['default'] == 'True':
+                            newDict['default']=True
+                        else:
+                            raise Exception ('{} is boolean - default values must be True or False not {}'.format(pname,myDict['default']))
+                    elif 'type' in myDict and myDict['type'] == 'int':
+                        newDict['default']=int(myDict['default'])
+                    elif 'type' in myDict and (myDict['type'] == 'double' or myDict['type'] == 'float') :
+                        newDict['default']=float(myDict['default'])                
+                    elif  'type' in myDict and myDict['type'] == 'str' :
+                        newDict['default']=str(myDict['default'])
+                    else:
+                        newDict['default']=json.loads(myDict['default'])
+                
                 if 'flag' in myDict:
                     newDict['flag']=myDict['flag']
                 #arguments are the same as having a null flag value
@@ -263,8 +278,8 @@ class OWWidgetBuilder(widget.OWWidget):
         #top level widgets are drawXXX - these can have multiple substituents
         #lower level widgets are makeXXX - these can also have multiple substituents
         
-        self.drawIOListWidget('inputs',layout=leditRequiredLayout)
-        self.drawIOListWidget('outputs',layout=leditRequiredLayout)
+        self.drawIListWidget('inputs',layout=leditRequiredLayout)
+        self.drawOListWidget('outputs',layout=leditRequiredLayout)
         self.drawVolumeListWidget('volumes',layout=leditRequiredLayout)
         self.drawParamsListWidget('parameters',layout=leditRequiredLayout)
         self.drawCommand('command',layout=leditRequiredLayout)
@@ -664,12 +679,20 @@ class OWWidgetBuilder(widget.OWWidget):
         filesBoxLeditLayout.addWidget(boxEdit)
         filesBoxLeditLayout.addLayout(lineLayout)
         
-    def drawIOListWidget (self, pname, layout=None):
+    def drawIListWidget (self, pname, layout=None):
         nameBox=self.makeLedit(pname+'nameLedit','Enter name','Name')
         callbackBox=self.makeLedit(pname+'callbackLedit','Enter callback', 'callback',addCheckBox=True)
-        comboBox=self.makeComboBox(pname,'Type:',['str','Orange.data.Table'])       
+        comboBox=self.makeComboBox(pname,'Type:',['str','Orange.data.Table'])   
         widgetList=[('name',nameBox),('callback',callbackBox),('type',comboBox)]
         self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
+        
+    def drawOListWidget (self, pname, layout=None):
+        nameBox=self.makeLedit(pname+'nameLedit','Enter name','Name')
+        defaultBox=self.makeLedit(pname+'defaultLedit','Enter default', 'Default value',addCheckBox=True)
+        comboBox=self.makeComboBox(pname,'Type:',['str','Orange.data.Table'])       
+        widgetList=[('name',nameBox),('default',defaultBox),('type',comboBox)]
+        self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
+
 
     def drawVolumeListWidget (self,pname,layout=None):
         nameBox=self.makeLedit(pname+'Name','Enter name','Name')

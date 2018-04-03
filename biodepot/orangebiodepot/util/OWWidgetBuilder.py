@@ -260,8 +260,8 @@ class OWWidgetBuilder(widget.OWWidget):
         #top level widgets are drawXXX - these can have multiple substituents
         #lower level widgets are makeXXX - these can also have multiple substituents
         
-        self.drawIOListWidget('inputs',layout=leditRequiredLayout)
-        self.drawIOListWidget('outputs',layout=leditRequiredLayout)
+        self.drawIListWidget('inputs',layout=leditRequiredLayout)
+        self.drawOListWidget('outputs',layout=leditRequiredLayout)
         self.drawVolumeListWidget('volumes',layout=leditRequiredLayout)
         self.drawParamsListWidget('parameters',layout=leditRequiredLayout)
         self.drawCommand('command',layout=leditRequiredLayout)
@@ -661,11 +661,18 @@ class OWWidgetBuilder(widget.OWWidget):
         filesBoxLeditLayout.addWidget(boxEdit)
         filesBoxLeditLayout.addLayout(lineLayout)
         
-    def drawIOListWidget (self, pname, layout=None):
+    def drawIListWidget (self, pname, layout=None):
         nameBox=self.makeLedit(pname+'nameLedit','Enter name','Name')
         callbackBox=self.makeLedit(pname+'callbackLedit','Enter callback', 'callback',addCheckBox=True)
         comboBox=self.makeComboBox(pname,'Type:',['str'])       
         widgetList=[('name',nameBox),('callback',callbackBox),('type',comboBox)]
+        self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
+        
+    def drawOListWidget (self, pname, layout=None):
+        nameBox=self.makeLedit(pname+'nameLedit','Enter name','Name')
+        defaultBox=self.makeLedit(pname+'defaultLedit','Enter default', 'callback',addCheckBox=True)
+        comboBox=self.makeComboBox(pname,'Type:',['str'])       
+        widgetList=[('name',nameBox),('default',defaultBox),('type',comboBox)]
         self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
 
     def drawVolumeListWidget (self,pname,layout=None):

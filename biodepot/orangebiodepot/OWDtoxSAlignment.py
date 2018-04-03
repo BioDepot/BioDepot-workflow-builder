@@ -13,7 +13,7 @@ from PyQt5 import QtWidgets, QtGui
 
 class OWDetoxSAlignment(OWBwBWidget):
     name = "DetoxSAlignment"
-    description = "Alignment part of DetoxS standard operating procedure (SOP"
+    description = "Alignment part of DetoxS standard operating procedure (SOP)"
     category = "RNA-Seq"
     priority = 10
     icon = "/biodepot/orangebiodepot/icons/dtoxs-alignment2.svg"
@@ -21,7 +21,7 @@ class OWDetoxSAlignment(OWBwBWidget):
     docker_image_name = "biodepot/dtoxs_alignment"
     docker_image_tag = "1.0"
     inputs = [("barcodesFile",str,"handleInputsbarcodesFile"),("topDir",str,"handleInputstopDir"),("trigger",str,"handleInputstrigger")]
-    outputs = [("CountsDir",str)]
+    outputs = [("topDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     runTriggers=pset([])
@@ -47,6 +47,6 @@ class OWDetoxSAlignment(OWBwBWidget):
         self.handleInputs(value, "trigger", sourceId=None)
     def handleOutputs(self):
         outputValue=None
-        if hasattr(self,"CountsDir"):
-            outputValue=getattr(self,"CountsDir")
-        self.send("CountsDir", outputValue)
+        if hasattr(self,"topDir"):
+            outputValue=getattr(self,"topDir")
+        self.send("topDir", outputValue)

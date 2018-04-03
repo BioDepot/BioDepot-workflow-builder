@@ -44,7 +44,7 @@ class OWDtoxsAnalysis(OWBwBWidget):
     def handleInputsTrigger(self, value, sourceId=None):
         self.handleInputs(value, "Trigger", sourceId=None)
     def handleOutputs(self):
-        outputValue=None
+        outputValue="/dat"
         if hasattr(self,"ResultsDirectory"):
             outputValue=getattr(self,"ResultsDirectory")
         self.send("ResultsDirectory", outputValue)
