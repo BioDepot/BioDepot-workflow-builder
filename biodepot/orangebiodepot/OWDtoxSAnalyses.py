@@ -44,11 +44,11 @@ class OWDtoxsAnalysis(OWBwBWidget):
     def handleInputsTrigger(self, value, sourceId=None):
         self.handleInputs(value, "Trigger", sourceId=None)
     def handleOutputs(self):
-        outputValue="/dat"
-        if hasattr(self,"ResultsDirectory"):
-            outputValue=getattr(self,"ResultsDirectory")
-        self.send("ResultsDirectory", outputValue)
-        outputValue=None
-        if hasattr(self,"Top40"):
-            outputValue=getattr(self,"Top40")
-        self.send("Top40", outputValue)
+        resultsDir=os.path.join(self.RepositoryDirectory,'Results') 
+        tsvFile = os.path.join(resultsDir, 'FDR-0.1/TOP-40.tsv');
+        tsvReader = FileFormat.get_reader(tsvFile)
+        data = None
+        data = tsvReader.read()
+        self.send("ResultsDirectory", resultsDir)
+        self.send("Top40", data)
+
