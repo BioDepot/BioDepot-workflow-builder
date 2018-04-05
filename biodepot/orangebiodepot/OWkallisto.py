@@ -5,19 +5,21 @@ import functools
 import jsonpickle
 from collections import OrderedDict
 from Orange.widgets import widget, gui, settings
+import Orange.data
+from Orange.data.io import FileFormat
 from orangebiodepot.util.DockerClient import DockerClient
-from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, ContainerPaths, BwbGuiElements
+from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWKallistoQuant(OWBwBWidget):
-    name = "Kallisto Quant"
+class OWkallisto_quant(OWBwBWidget):
+    name = "kallisto_quant"
     description = "Alignment and quantification of reads from fastq files"
-    category = "RNASeq"
+    category = "RNA-seq"
     priority = 10
     icon = "/biodepot/orangebiodepot/icons/kallisto-analysis.svg"
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
-    docker_image_tag = "latest"
+    docker_image_tag = "0.44"
     inputs = [("indexFile",str,"handleInputsindexFile"),("fastqFiles",str,"handleInputsfastqFiles")]
     outputs = [("outputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -27,9 +29,8 @@ class OWKallistoQuant(OWBwBWidget):
     optionsChecked=pset({})
     outputDir=pset(None)
     indexFile=pset(None)
-    fastqFiles=pset(None)
-    bias=pset(None)
-    bootstrap=pset(1)
+    fastqFiles=pset([])
+    bootstrap=pset(30)
     seed=pset(42)
     plaintext=pset(False)
     fusion=pset(False)
@@ -43,10 +44,9 @@ class OWKallistoQuant(OWBwBWidget):
     pseudoBam=pset(False)
     genomeBam=pset(False)
     gtf=pset(None)
-    chromosomes=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/biodepot/orangebiodepot/json/kallistoQuant.json") as f:
+        with open("/biodepot/orangebiodepot/json/kallisto.json") as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
