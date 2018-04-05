@@ -26,7 +26,38 @@ class getExistingDirectories(QtWidgets.QFileDialog):
         self.findChildren(QtWidgets.QListView)[0].setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.findChildren(QtWidgets.QTreeView)[0].setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.findChildren(QtWidgets.QTreeView)[0].setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+class BwbGridLayout():
+    #adds methods to keep track of rows and columns
+    def __init__(self, spacing=5, startCol=0,startRow=0):
+        self._layout=QtGui.QGridLayout()
+        self._layout.setSpacing(spacing)
+        self.nextCol=startCol
+        self.nextRow=startRow
 
+    def addWidget(self,widget,space=None,width=None,height=1,linefeed=None):
+        if space is not None:
+            self.nextCol+=space
+        if width is not None:
+            self._layout.addWidget(widget,self.nextRow,self.nextCol,width,height)
+            self.nextCol+=width
+        else:
+            self._layout.addWidget(widget,self.nextRow,self.nextCol)
+            self.nextCol+=1
+        if linefeed is not None:
+            self.nextRow+=linefeed
+            self.nextCol=0
+            
+    def addSpace(self,space=1):
+        self.nextCol+=space
+        
+    def addLinefeed(self,lf=1,startCol=0):
+        self.nextCol=startCol
+        self.nextRow+=lf
+    
+    
+    def layout(self):
+        return self._layout
+            
 class BwbGuiElements():
     #keep track of List of Gui elements
     #add support for initialization callbacks
@@ -166,19 +197,13 @@ class OWBwBWidget(widget.OWWidget):
         #drawing layouts for gui
         #file directory
         self.filesBoxLayout=QtGui.QVBoxLayout()
-        self.fileDirRequiredLayout=QtGui.QGridLayout()
-        self.fileDirRequiredLayout.setSpacing(5)
-        self.fileDirOptionalLayout=QtGui.QGridLayout()
-        self.fileDirOptionalLayout.setSpacing(5)
-        setattr(self.fileDirOptionalLayout,'nextRow',1)
-        setattr(self.fileDirRequiredLayout,'nextRow',1)
+        self.fileDirRequiredLayout=BwbGridLayout()
+        self.fileDirOptionalLayout=BwbGridLayout()
+
         #lineEdits
-        self.leditRequiredLayout=QtGui.QGridLayout()
-        self.leditRequiredLayout.setSpacing(5)
-        self.leditOptionalLayout=QtGui.QGridLayout()
-        self.leditOptionalLayout.setSpacing(5)
-        setattr(self.leditOptionalLayout,'nextRow',1)
-        setattr(self.leditRequiredLayout,'nextRow',1)
+        self.leditRequiredLayout=BwbGridLayout()
+        self.leditOptionalLayout=BwbGridLayout()
+        
         #keep track of gui elements associated with each attribute
         self.bgui=BwbGuiElements()
         #keep track of all the connections - n
@@ -214,12 +239,10 @@ class OWBwBWidget(widget.OWWidget):
             attr=i.name
             if self.inputConnections.isConnected(attr):
                self.bgui.disable(attr)
-            
-        #check if the requirements to be run are met
-        
-        outputLabel=QtGui.QLabel('Console')
-        self.controlArea.layout().addWidget(outputLabel)
-
+        consoleControlLayout=BwbGridLayout()
+        self.controlArea.layout().addLayout(consoleControlLayout.layout())
+        setattr(consoleControlLayout,'added',True)
+        self.drawConsoleControl(box=None,layout=consoleControlLayout)
         self.console=QtGui.QTextEdit()
         self.console.setReadOnly(True)
         pal=QtGui.QPalette()
@@ -233,7 +256,34 @@ class OWBwBWidget(widget.OWWidget):
         self.drawExec(box=self.controlArea.layout())
         self.checkTrigger()
 
-        
+    def drawConsoleControl(self,box=None,layout=None):
+        css = '''
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
+        QPushButton:pressed { background-color: #158805; border-style: inset;}
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
+        QPushButton:hover {background-color: #1588f5; }
+        '''
+        layout.addWidget(QtGui.QLabel('Console: '))
+        pname='saveLog'
+        pvalue={ 'type' : 'directory', 'label' : 'AutoLog'}
+        if not hasattr(self,pname):
+            setattr(self,pname,None)
+
+        self.btnConsoleClear = gui.button(None, self, "Clear", callback=self.clearConsole)
+        self.btnConsoleClear.setStyleSheet(css)
+        self.btnConsoleClear.setFixedSize(60,20)
+        self.btnConsoleSave = gui.button(None, self, "Save", callback=self.saveConsole)
+        self.btnConsoleSave.setStyleSheet(css)
+        self.btnConsoleSave.setFixedSize(60,20)
+        layout.addWidget(self.btnConsoleClear)
+        layout.addWidget(self.btnConsoleSave)
+        self.drawFileDirElements(pname, pvalue, box=box,layout=layout, addCheckbox=True)
+
+    def clearConsole(self):
+        pass
+    def saveConsole(self):
+        pass
+        #consoleControlLayout.addWidget(outputLabel,0,0)    
     def drawRequiredElements(self):
         for pname in self.data['requiredParameters']:
             if not ('parameters' in self.data) or not (pname in self.data['parameters']):
@@ -429,6 +479,7 @@ class OWBwBWidget(widget.OWWidget):
         self.bgui.add(pname,ledit,enableCallback=lambda value,clearLedit: self.enableLedit(value,clearLedit,checkbox,ledit))
         if addCheckbox:
             self.updateCheckbox(pname,checkbox.isChecked(),ledit.text())
+        return {'ledit' : ledit, 'checkbox' : checkbox}
     
     def enableLedit(self,value,clearLedit,cb,ledit):
         if cb:
@@ -452,6 +503,8 @@ class OWBwBWidget(widget.OWWidget):
             ledit.clear()
         if addCheckbox:
             checkAttr=pname+'Checked'
+            if pname not in self.optionsChecked:
+                self.optionsChecked[pname]=False
             setattr(self,checkAttr,self.optionsChecked[pname])
             checkbox=gui.checkBox(None, self,checkAttr,label=None)
             sys.stderr.write('updating filedir {}\n'.format(pname))
@@ -460,6 +513,7 @@ class OWBwBWidget(widget.OWWidget):
         labelValue=pvalue['label']
         if labelValue is None:
             labelValue=""
+        sys.stderr.write('adding filedir for pname {} using layout {}\n'.format(pname,layout))    
         self.bwbFileEntry(box,button,ledit,layout=layout,label=labelValue+':', entryType=pvalue['type'], checkbox=checkbox)
         self.bgui.add(pname,ledit)
         self.bgui.add(pname,button,enableCallback=lambda value, clearLedit: self.enableFileDir(value, clearLedit, checkbox,ledit,button))
@@ -618,28 +672,22 @@ class OWBwBWidget(widget.OWWidget):
         startCol=0
         label=QtGui.QLabel(pvalue['label']+':')
         label.setAlignment(Qt.AlignTop)
-        layout.addWidget(label,layout.nextRow,startCol)
-        layout.addWidget(myBox,layout.nextRow,1,1,2)
-        
-        layout.nextRow = layout.nextRow + 1
+        layout.addWidget(label)
+        layout.addWidget(myBox,width=2,linefeed=1)
         #line layout     
-        lineLayout=QtGui.QGridLayout()
+        lineLayout=BwbGridLayout()
         
         if addCheckbox:
-            lineLayout.addWidget(checkbox,1,0)
-            startCol=1
-        
-        lineLayout.addWidget(ledit,1,startCol+1)
+            lineLayout.addWidget(checkbox)
+        lineLayout.addWidget(ledit)
         if browseBtn:
-            lineLayout.addWidget(browseBtn,1,startCol+2)
-        else:
-            startCol=startCol-1
-        lineLayout.addWidget(addBtn,1,startCol+3)
-        lineLayout.addWidget(removeBtn,1,startCol+4)
+            lineLayout.addWidget(browseBtn)
+        lineLayout.addWidget(addBtn)
+        lineLayout.addWidget(removeBtn)
        
         #now add the two layouts to the bigBox layout
         filesBoxLeditLayout.addWidget(boxEdit)
-        filesBoxLeditLayout.addLayout(lineLayout)
+        filesBoxLeditLayout.addLayout(lineLayout.layout())
         self.updateBoxEditValue(pname,boxEdit)
     
     def addLedit(self,attr,ledit,boxEdit,addBtn):
@@ -756,31 +804,32 @@ class OWBwBWidget(widget.OWWidget):
         button.setIcon(icon)
         ledit.setClearButtonEnabled(True)
         ledit.setPlaceholderText("Enter {}".format(entryType))
-        col=0
         if checkbox:
-            layout.addWidget(checkbox,layout.nextRow,col)
-            col+=1
+            layout.addWidget(checkbox)
         if label:
             #myLabel=QtGui.QLabel(label)
             #myLabel.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            layout.addWidget(QtGui.QLabel(label),layout.nextRow,col)
-        layout.addWidget(ledit,layout.nextRow,col+1)
-        layout.addWidget(button,layout.nextRow,col+2)
-        if layout.nextRow == 1:
-            widget.layout().addLayout(layout)
-        layout.nextRow+=1
+            layout.addWidget(QtGui.QLabel(label))
+        layout.addWidget(ledit)
+        layout.addWidget(button)
+        if not hasattr (layout,'added') or not getattr(layout,'added'):
+            widget.layout().addLayout(layout.layout())
+            setattr(layout,'added',True)
+        layout.addLinefeed()
 
     def bwbLedit(self, widget,checkbox ,ledit, layout=None, label=None):
         ledit.setClearButtonEnabled(True)
         ledit.setPlaceholderText("Enter parameter")
-        colNum=1
         if(checkbox):
-            layout.addWidget(checkbox,layout.nextRow,0)
-        layout.addWidget(QtGui.QLabel(label),layout.nextRow,colNum)
-        layout.addWidget(ledit,layout.nextRow,colNum+1)
-        if layout.nextRow == 1:
-            widget.layout().addLayout(layout)
-        layout.nextRow+=1
+            layout.addWidget(checkbox)
+            layout.addWidget(QtGui.QLabel(label))
+        else:
+            layout.addWidget(QtGui.QLabel(label),space=1)
+        layout.addWidget(ledit)
+        if not hasattr (layout,'added') or not getattr(layout,'added'):
+            widget.layout().addLayout(layout.layout())
+            setattr(layout,'added',True)
+        layout.addLinefeed()
    
     def browseFiles(self,boxEdit,attr=None):
         defaultDir = '/root'
