@@ -121,16 +121,22 @@ class BwbGuiElements():
         return False
 
     def enable(self,attr,value):
+        sys.stderr.write('checking attr {}\n'.format(attr))
         clearLedit=False
         if value is None:
             clearLedit=True
         if attr in self._updateCallbacks:
+            sys.stderr.write('applying update for attr {}\n'.format(attr))
             self._updateCallbacks[attr]() 
         if attr in self._dict:
+            sys.stderr.write('found attr in dict {}\n'.format(attr))
             if attr in self._enableCallbacks:
+                sys.stderr.write('enable callback for {}\n'.format(attr))
                 self._enableCallbacks[attr](value,clearLedit)
             else:
+                sys.stderr.write('enable for {}\n'.format(attr))
                 for g in self._dict[attr]:
+                    sys.stderr.write('enable element {}\n'.format(g))
                     self.enableElement(g)
         return True
         
@@ -239,10 +245,13 @@ class OWBwBWidget(widget.OWWidget):
             attr=i.name
             if self.inputConnections.isConnected(attr):
                self.bgui.disable(attr)
+        
+        #make a box for the console and console control - not abs necessary but it might help with future org and with the size hinting system
+        self.consoleBox = gui.widgetBox(self.controlArea)
         consoleControlLayout=BwbGridLayout()
-        self.controlArea.layout().addLayout(consoleControlLayout.layout())
-        setattr(consoleControlLayout,'added',True)
-        self.drawConsoleControl(box=None,layout=consoleControlLayout)
+        self.consoleBox.layout().addLayout(consoleControlLayout.layout())
+        setattr(consoleControlLayout,'added',True)        
+        self.drawConsoleControl(box=self.consoleBox,layout=consoleControlLayout)
         self.console=QtGui.QTextEdit()
         self.console.setReadOnly(True)
         pal=QtGui.QPalette()
@@ -250,7 +259,7 @@ class OWBwBWidget(widget.OWWidget):
         pal.setColor(QtGui.QPalette.Text,Qt.green)
         self.console.setPalette(pal)
         self.console.setAutoFillBackground(True)
-        self.controlArea.layout().addWidget(self.console)
+        self.consoleBox.layout().addWidget(self.console)
         controlBox = QtGui.QVBoxLayout()
         self.pConsole=ConsoleProcess(console=self.console,finishHandler=self.onRunFinished)
         self.drawExec(box=self.controlArea.layout())
@@ -277,8 +286,15 @@ class OWBwBWidget(widget.OWWidget):
         self.btnConsoleSave.setFixedSize(60,20)
         layout.addWidget(self.btnConsoleClear)
         layout.addWidget(self.btnConsoleSave)
-        self.drawFileDirElements(pname, pvalue, box=box,layout=layout, addCheckbox=True)
-
+        self.drawFileDirElements(pname, pvalue, box=box,layout=layout, addCheckbox=True)        
+        #keep track of buttons separately because the drawFileDir routine has its own callback for enabling the elements
+        #should fix this at some point to check which elements have been dealt with using a dict or work out a recursive scheme with elements 
+        btnPname=pname+'Btns'
+        if not hasattr(self,btnPname):
+            setattr(self,btnPname,None)
+        self.bgui.add(btnPname,self.btnConsoleClear)
+        self.bgui.add(btnPname,self.btnConsoleSave)
+        
     def clearConsole(self):
         self.console.clear()
         
