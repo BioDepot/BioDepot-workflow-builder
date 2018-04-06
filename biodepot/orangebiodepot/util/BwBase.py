@@ -280,9 +280,18 @@ class OWBwBWidget(widget.OWWidget):
         self.drawFileDirElements(pname, pvalue, box=box,layout=layout, addCheckbox=True)
 
     def clearConsole(self):
-        pass
+        self.console.clear()
+        
     def saveConsole(self):
-        pass
+        defaultDir = '/root'
+        if os.path.exists('/data'):
+            defaultDir = '/data'
+        fileName = QtWidgets.QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","Text files (*.txt);;All Files (*)")[0]
+        with open(fileName, 'w') as myFile:
+            myFile.write(str(self.console.toPlainText()))
+            myFile.close()
+
+
         #consoleControlLayout.addWidget(outputLabel,0,0)    
     def drawRequiredElements(self):
         for pname in self.data['requiredParameters']:
