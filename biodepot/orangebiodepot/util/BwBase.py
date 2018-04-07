@@ -994,7 +994,7 @@ class OWBwBWidget(widget.OWWidget):
         if flag:
             if flag.strip()[-1] == '=':
                 return flag.strip()+value.strip()
-            return flag.strip()+ ' ' +value.strip()
+            return flag.strip()+ ' ' + str(value).strip()
         return value
     
     def flagString(self, pname):
@@ -1018,11 +1018,16 @@ class OWBwBWidget(widget.OWWidget):
                 elif pvalue['type'] == 'file list':
                     #files=str.splitlines(flagValue)
                     files=flagValue
+                    sys.stderr.write('flagnName {} files are {}\n'.format(flagName,files))
                     if files:
                         hostFiles=[]
                         for f in files:
-                            hostFiles.append(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))                
-                        return " ".join(flagName,hostFiles)
+                            hostFiles.append(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
+                            sys.stderr.write('flagnName {} adding file {} hostFiles {}\n'.format(flagName,f,hostFiles))
+                        if flagName:
+                            return " ".join([flagName] + hostFiles)
+                        else:
+                            return " ".join(hostFiles)
                     return None
                 elif pvalue['type'] == 'directory':
                     path=str(flagValue)
