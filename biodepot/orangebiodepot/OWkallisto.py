@@ -19,7 +19,7 @@ class OWkallisto_quant(OWBwBWidget):
     icon = "/biodepot/orangebiodepot/icons/kallisto-analysis.svg"
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
-    docker_image_tag = "0.44"
+    docker_image_tag = "0.44.0"
     inputs = [("indexFile",str,"handleInputsindexFile"),("fastqFiles",str,"handleInputsfastqFiles")]
     outputs = [("outputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)

@@ -89,7 +89,7 @@ COPY fluxbox_config/ /root/.fluxbox/
 COPY user_config/ /root/
 
 #Add tutorial
-COPY Tutorials/ /root/tutorials/
+#COPY Tutorials/ /root/tutorials/
 
 #Add widget creator
 RUN ln -s /biodepot/orangebiodepot/util/createWidget /usr/bin/createWidget 
