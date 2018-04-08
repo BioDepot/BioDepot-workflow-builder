@@ -224,6 +224,7 @@ class OWBwBWidget(widget.OWWidget):
 
 #Drawing the GUI
     def drawGUI(self):
+        
         self.setStyleSheet(":disabled { color: #282828}")
         self.topScrollArea = QScrollArea(
             verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
@@ -234,10 +235,18 @@ class OWBwBWidget(widget.OWWidget):
         self.controlArea.layout().addWidget(self.topScrollArea)
         if 'requiredParameters' in self.data and self.data['requiredParameters']:
             self.requiredBox = gui.widgetBox(self.topBox, "Required parameters")
+            self.requiredBox.layout().addLayout(self.fileDirRequiredLayout.layout())
+            setattr(self.fileDirRequiredLayout.layout(),'added',True)
+            self.requiredBox.layout().addLayout(self.leditRequiredLayout.layout())
+            setattr(self.leditRequiredLayout.layout(),'added',True)              
             self.drawRequiredElements()
             
         if self.findOptionalElements():
             self.optionalBox = gui.widgetBox(self.topBox, "Optional parameters")
+            self.optionalBox.layout().addLayout(self.fileDirOptionalLayout.layout())
+            setattr(self.fileDirOptionalLayout.layout(),'added',True)
+            self.optionalBox.layout().addLayout(self.leditOptionalLayout.layout())
+            setattr(self.leditOptionalLayout.layout(),'added',True)              
             self.drawOptionalElements()
             
         #disable connected elements
@@ -314,7 +323,6 @@ class OWBwBWidget(widget.OWWidget):
             if not ('parameters' in self.data) or not (pname in self.data['parameters']):
                 continue
             pvalue=self.data['parameters'][pname]
-            sys.stderr.write('drawing element for for pname {} pvalue {}\n'.format(pname,pvalue))
             if not hasattr(self,pname):
                 setattr(self,pname,None)
             if (getattr(self,pname) is None) and ('default' in pvalue):
@@ -334,7 +342,8 @@ class OWBwBWidget(widget.OWWidget):
             pvalue=self.data['parameters'][pname]
             if ('gui' in pvalue and pvalue['gui'][-4:] != 'list') or ( pvalue['type'][-4:] != 'list' ):
                 continue
-            self.drawFilesBox(pname, pvalue, box=self.requiredBox,layout=self.fileDirRequiredLayout)
+            sys.stderr.write('drawing textBox for  pname {} pvalue {}\n'.format(pname,pvalue))
+            self.drawTextBox(pname, pvalue, box=self.requiredBox,layout=self.fileDirRequiredLayout)
 
         for pname in self.data['requiredParameters']:
             if not ('parameters' in self.data) or not( pname in self.data['parameters']):
@@ -398,7 +407,7 @@ class OWBwBWidget(widget.OWWidget):
                 pvalue=self.data['parameters'][pname]
                 if ('gui' in pvalue and pvalue['gui'][-4:] != 'list') or ( pvalue['type'][-4:] != 'list' ):                    
                     continue
-                self.drawFilesBox (pname, pvalue, box=self.optionalBox,layout=self.fileDirOptionalLayout,addCheckbox=True)
+                self.drawTextBox (pname, pvalue, box=self.optionalBox,layout=self.fileDirOptionalLayout,addCheckbox=True)
                 
         for pname in self.data['parameters']:
             if not ('parameters' in self.data) or not ( pname in self.data['parameters']):
@@ -560,14 +569,14 @@ class OWBwBWidget(widget.OWWidget):
         if value is None or clearLedit:
             ledit.clear()
             
-    def drawFilesBoxBtnRules(self,boxEdit,ledit,addBtn,removeBtn):
+    def drawTextBoxBtnRules(self,boxEdit,ledit,addBtn,removeBtn):
         if not ledit.text():
             ledit.clear()
             addBtn.setEnabled(False)
         if not boxEdit.selectedItems():
             removeBtn.setEnabled(False)
             
-    def enableFilesBox(self, value, clearLedit, checkbox,browseBtn,boxEdit,ledit,addBtn,removeBtn):
+    def enableTextBox(self, value, clearLedit, checkbox,browseBtn,boxEdit,ledit,addBtn,removeBtn):
         #first element is checkbox
         #last element is browseBtn if it exists
         if checkbox:
@@ -580,9 +589,9 @@ class OWBwBWidget(widget.OWWidget):
             for g in  [boxEdit,ledit,browseBtn,addBtn,removeBtn]:
                 if g:
                     g.setEnabled(True)          
-        self.drawFilesBoxBtnRules(boxEdit,ledit,addBtn,removeBtn)
+        self.drawTextBoxBtnRules(boxEdit,ledit,addBtn,removeBtn)
         
-    def updateFilesBox(self,attr,ledit,boxEdit): #updates for input - called before and after addition and deletion of input
+    def updateTextBox(self,attr,ledit,boxEdit): #updates for input - called before and after addition and deletion of input
         if hasattr(self,attr):
             value=getattr(self,attr)
             ledit.clear()
@@ -602,9 +611,11 @@ class OWBwBWidget(widget.OWWidget):
         if myItems:
             setattr(self,attr,myItems)
         
-    def drawFilesBox (self,pname, pvalue, box=None, layout=None, addCheckbox=False):
+    def drawTextBox (self,pname, pvalue, box=None, layout=None, addCheckbox=False):
         #for multiple files or directories draw a widget list with a line edit below and buttons to browse, add, delete, submit and reload
         #is used for multiple entry of any type
+        
+        sys.stderr.write('adding text box for pname{} pvalue {} box {} layout {} addCheckbox {}\n'.format(pname,pvalue,box,layout,addCheckbox))
         
         disabledFlag=False
         checkbox=None
@@ -641,24 +652,31 @@ class OWBwBWidget(widget.OWWidget):
         ledit.setStyleSheet(":disabled { color: #282828}")
         ledit.clear()
         elements.append(ledit)
-
-        #setup boxEdit
+        
+        #add boxEdit layout
+        layoutAttr=pname+'Layout'
+        setattr(self,layoutAttr,self.addBoxEdit(pname,pvalue,layout,ledit,addCheckbox,elements=elements,disabledFlag=disabledFlag))
+    
+    def addBoxEdit(self,pname,pvalue,layout,ledit,addCheckbox,elements=None,disabledFlag=False):
+        #setup boxEdit - boxEdit element values other than the list itself are not tracked and not saved in settings 
         boxEdit=QtGui.QListWidget(self)
         boxEdit.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
         boxEdit.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         boxEdit.setStyleSheet(":disabled { color: #282828}")
         boxEdit.setMinimumHeight(60)
-        #fill boxEdit
-        if hasattr(self,pname):
-            fileList=getattr(self,pname)
-            if type(fileList) is not list:
-                boxEdit.addItems([fileList])
-            else:
-                boxEdit.addItems(fileList)
-        boxEdit.setDisabled(disabledFlag)
-        elements.append(boxEdit)
         
+        #fill boxEdit - ONLY part that is tracked
+        if hasattr(self,pname):
+            entryList=getattr(self,pname)
+            if type(entryList) is not list:
+                boxEdit.addItems([entryList])
+            else:
+                boxEdit.addItems(entryList)
+        boxEdit.setDisabled(disabledFlag)
+        if elements:
+            elements.append(boxEdit)
         #buttons
+        browseBtn=None
         addBtn=gui.button(None, self, "", callback=lambda: self.addLedit(pname,ledit,boxEdit,addBtn), autoDefault=False,disabled=disabledFlag)
         removeBtn=gui.button(None, self, "", callback=lambda: self.removeItem(pname,boxEdit,removeBtn), autoDefault=False,disabled=disabledFlag)
         if  pvalue['type'] == 'file list':
@@ -667,15 +685,13 @@ class OWBwBWidget(widget.OWWidget):
             browseBtn = gui.button(None, self, "", callback=partial(self.browseDirs, boxEdit=boxEdit,attr=pname), autoDefault=False,disabled=disabledFlag)
         #set styles
         buttonStyle='background: None; border: None ; border-radius: 0;'
-        
-        
         for btn in (addBtn,removeBtn,browseBtn):
             if btn:
                 btn.setStyleSheet(buttonStyle)
                 elements.append(btn)      
      
         #set icons
-        self.bgui.addList(pname,elements,enableCallback=lambda value, clearLedit: self.enableFilesBox(value,clearLedit, checkbox,browseBtn,boxEdit,ledit,addBtn,removeBtn),updateCallback=lambda: self.updateFilesBox(pname,ledit,boxEdit))
+        self.bgui.addList(pname,elements,enableCallback=lambda value, clearLedit: self.enableTextBox(value,clearLedit, checkbox,browseBtn,boxEdit,ledit,addBtn,removeBtn),updateCallback=lambda: self.updateTextBox(pname,ledit,boxEdit))
         if browseBtn:
             browseBtn.setIcon(self.browseIcon)
         addBtn.setIcon(self.addIcon)
@@ -683,7 +699,7 @@ class OWBwBWidget(widget.OWWidget):
         
         #check rules for buttons    
         
-        self.drawFilesBoxBtnRules(boxEdit,ledit,addBtn,removeBtn)
+        self.drawTextBoxBtnRules(boxEdit,ledit,addBtn,removeBtn)
         
         #connects from ledit and boxEdit to buttons
         ledit.textChanged.connect(lambda: addBtn.setEnabled(bool(ledit.text())))
@@ -709,12 +725,14 @@ class OWBwBWidget(widget.OWWidget):
             lineLayout.addWidget(browseBtn)
         lineLayout.addWidget(addBtn)
         lineLayout.addWidget(removeBtn)
-       
-        #now add the two layouts to the bigBox layout
+        
         filesBoxLeditLayout.addWidget(boxEdit)
         filesBoxLeditLayout.addLayout(lineLayout.layout())
+        
+        #just in case the state has changed while drawing this - do an update
         self.updateBoxEditValue(pname,boxEdit)
-    
+        return filesBoxLeditLayout
+        
     def addLedit(self,attr,ledit,boxEdit,addBtn):
         #adds text in ledit to items in boxEdit
         if ledit.text():
