@@ -52,8 +52,7 @@ class BwbGridLayout():
         
     def addLinefeed(self,lf=1,startCol=0):
         self.nextCol=startCol
-        self.nextRow+=lf
-    
+        self.nextRow+=lf    
     
     def layout(self):
         return self._layout
@@ -655,9 +654,9 @@ class OWBwBWidget(widget.OWWidget):
         
         #add boxEdit layout
         layoutAttr=pname+'Layout'
-        setattr(self,layoutAttr,self.addBoxEdit(pname,pvalue,layout,ledit,addCheckbox,elements=elements,disabledFlag=disabledFlag))
+        setattr(self,layoutAttr,self.addBoxEdit(pname,pvalue,layout,ledit,checkbox,elements=elements,disabledFlag=disabledFlag))
     
-    def addBoxEdit(self,pname,pvalue,layout,ledit,addCheckbox,elements=None,disabledFlag=False):
+    def addBoxEdit(self,pname,pvalue,layout,ledit,checkbox,elements=None,disabledFlag=False):
         #setup boxEdit - boxEdit element values other than the list itself are not tracked and not saved in settings 
         boxEdit=QtGui.QListWidget(self)
         boxEdit.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
@@ -689,7 +688,6 @@ class OWBwBWidget(widget.OWWidget):
             if btn:
                 btn.setStyleSheet(buttonStyle)
                 elements.append(btn)      
-     
         #set icons
         self.bgui.addList(pname,elements,enableCallback=lambda value, clearLedit: self.enableTextBox(value,clearLedit, checkbox,browseBtn,boxEdit,ledit,addBtn,removeBtn),updateCallback=lambda: self.updateTextBox(pname,ledit,boxEdit))
         if browseBtn:
@@ -718,7 +716,7 @@ class OWBwBWidget(widget.OWWidget):
         #line layout     
         lineLayout=BwbGridLayout()
         
-        if addCheckbox:
+        if checkbox:
             lineLayout.addWidget(checkbox)
         lineLayout.addWidget(ledit)
         if browseBtn:
@@ -1054,7 +1052,7 @@ class OWBwBWidget(widget.OWWidget):
                     return self.joinFlagValue(flagName,str(hostPath))
                 elif pvalue['type'][-4:] =='list':
                     if flagName:
-                        return flagName +" ".join(flagValue)
+                        return flagName +" " + " ".join(flagValue)
                     else:
                         return " ".join(flagValue)
                 elif flagValue:

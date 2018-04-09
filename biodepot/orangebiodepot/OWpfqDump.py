@@ -28,6 +28,11 @@ class OWpfastqDump(OWBwBWidget):
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
     IDs=pset([])
+    nthreads=pset(1)
+    OutputDir=pset("/data")
+    tempdir=pset("/data")
+    version=pset(False)
+    help=pset(False)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open("/biodepot/orangebiodepot/json/pfqDump.json") as f:

@@ -176,10 +176,10 @@ class OWWidgetBuilder(widget.OWWidget):
                         newDict['default']=int(myDict['default'])
                     elif 'type' in myDict and (myDict['type'] == 'double' or myDict['type'] == 'float') :
                         newDict['default']=float(myDict['default'])                
-                    elif  'type' in myDict and myDict['type'] == 'str' :
+                    elif  'type' in myDict and (myDict['type'] == 'str' or myDict['type'] == 'file' or myDict['type'] == 'directory') :
                         newDict['default']=str(myDict['default'])
                     else:
-                        newDict['default']=json.loads(myDict['default'])
+                        newDict['default']=myDict['default']
                 
                 if 'flag' in myDict:
                     newDict['flag']=myDict['flag']

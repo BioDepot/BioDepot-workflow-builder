@@ -84,6 +84,9 @@ WORKDIR /data
 #Change app name to Bwb
 RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
 
+#patch orange3
+COPY orangePatches/scheme.py /orange3/Orange/canvas/scheme/scheme.py
+
 #set up some config files
 COPY fluxbox_config/ /root/.fluxbox/
 COPY user_config/ /root/
