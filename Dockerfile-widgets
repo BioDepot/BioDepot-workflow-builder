@@ -99,7 +99,7 @@ COPY dev-files/menu /root/.fluxbox/
 COPY dev-files/geany/ /root/.config/
 
 #patch orange3
-COPY orangePatches/scheme.py /orange3/Orange/canvas/scheme/scheme.py
+COPY orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
 
 #Add tutorial
 #COPY Tutorials/ /root/tutorials/

@@ -85,7 +85,7 @@ WORKDIR /data
 RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
 
 #patch orange3
-COPY orangePatches/scheme.py /orange3/Orange/canvas/scheme/scheme.py
+COPY orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
 
 #set up some config files
 COPY fluxbox_config/ /root/.fluxbox/
