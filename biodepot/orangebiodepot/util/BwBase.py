@@ -170,11 +170,15 @@ class ConnectionDict:
                     pass
             #need to update the volumes
 
-    def isConnected (self, slot):
+    def isConnected (self, slot, connectionId=None):
         if self._dict is None:
             return False
-        if (slot in self._dict):
-            return True
+        if slot in self._dict:
+            if connectionId:
+                if connectionId in self._dict[slot]:
+                    return True
+            else:
+                return True
         return False
 
     def isSet (self, slot): #same as is connected but checks for non null value
@@ -934,10 +938,15 @@ class OWBwBWidget(widget.OWWidget):
             sys.stderr.write('removing {} disabled {}\n'.format(attr,self.inputConnections.isConnected(attr)))
             setattr(self,attr,None) #this gives text None in ledit for some reason
         else:
+            wasConnected=False
+            if self.inputConnections.isConnected(attr,connectionId=sourceId):
+                wasConnected=True
             self.inputConnections.add(attr,sourceId)
-            sys.stderr.write('handler adding input: attr {} value {}\n'.format(attr,value))
+            sys.stderr.write('handler adding input: attr {} value {} wasConnected {}\n'.format(attr,value,wasConnected))
             setattr(self,attr,value)
-            self.checkTrigger()
+            if wasConnected:
+                #then this is a send signal not a addition of a new connection
+                self.checkTrigger()
         self.updateGui(attr,value)
 
     def updateGui(self,attr,value,removeFlag=False):
@@ -1180,16 +1189,20 @@ class OWBwBWidget(widget.OWWidget):
         self.bgui.reenableAll(self)
         self.reenableExec()
         
-    def onRunFinished(self,code=None,status=None):
+    def onRunFinished(self,code=None,status=None, stopped=False):
         self.pConsole.writeMessage("Finished")
         if code is not None:
            self.pConsole.writeMessage("Exit code is {}".format(code))
         if status is not None:
            self.pConsole.writeMessage("Exit status is {}".format(status))
-        self.setStatusMessage('Finished')
         self.bgui.reenableAll(self)
         self.reenableExec()
-        self.handleOutputs()
+        if not stopped:
+            if code or status:
+                self.setStatusMessage("Error")
+            self.setStatusMessage('Finished')
+            self.handleOutputs()
+        stopped=False
     
     def onRunError(self,error):
         self.bgui.reenableAll(self)

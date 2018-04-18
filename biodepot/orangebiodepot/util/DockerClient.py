@@ -12,11 +12,12 @@ class ConsoleProcess():
     def __init__(self, console=None, errorHandler=None, finishHandler=None):
         self.process=QProcess()
         self.console=console
+        self.stopped=False
         if console:
             self.process.readyReadStandardOutput.connect(lambda: self.writeConsole(self.process, console,self.process.readAllStandardOutput,Qt.white))
             self.process.readyReadStandardError.connect(lambda: self.writeConsole(self.process, console,self.process.readAllStandardError,Qt.red))
         if finishHandler:
-            self.process.finished.connect(finishHandler)
+            self.process.finished.connect(lambda: finishHandler(stopped=self.stopped))
             
     def writeConsole(self,process,console,read,color):
         console.setTextColor(color)
@@ -29,6 +30,7 @@ class ConsoleProcess():
         self.console.append(message)
         
     def stop(self,message=None):
+        self.stopped=True
         self.process.kill()
         if message:
             self.writeMessage(message)

@@ -11,14 +11,14 @@ from orangebiodepot.util.DockerClient import DockerClient
 from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWpfastqDump(OWBwBWidget):
-    name = "pfastqDump"
+class OWfastqDump(OWBwBWidget):
+    name = "fastqDump"
     description = "Download fastq files from GEO"
     category = "Utilities"
     priority = 10
     icon = "/biodepot/orangebiodepot/icons/pfqDump.png"
     want_main_area = False
-    docker_image_name = "biodepot/pfastq-dump"
+    docker_image_name = "biodepot/sratools"
     docker_image_tag = "1.0"
     inputs = [("Trigger",str,"handleInputsTrigger")]
     outputs = [("OutputDir",str)]
@@ -27,15 +27,51 @@ class OWpfastqDump(OWBwBWidget):
     runTriggers=pset([])
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
-    IDs=pset([])
-    nthreads=pset(1)
+    accession=pset(None)
     OutputDir=pset("/data")
     tempdir=pset("/data")
     version=pset(False)
     help=pset(False)
+    sraids=pset([])
+    tableName=pset(None)
+    splitSpot=pset(False)
+    minSpotID=pset(None)
+    maxSpotID=pset(None)
+    spotGroups=pset([])
+    clip=pset(False)
+    minReadLen=pset(None)
+    readFilter=pset(None)
+    qualFilter=pset(None)
+    qualFilter1=pset(None)
+    aligned=pset(False)
+    unaligned=pset(False)
+    alignedRegion=pset(None)
+    matePairDistance=pset(None)
+    useStdout=pset(False)
+    gzip=pset(False)
+    bzip2=pset(False)
+    splitFiles=pset(False)
+    split3=pset(False)
+    spotGroup=pset(False)
+    groupinDirs=pset(False)
+    keepEmpty=pset(False)
+    dumpcs=pset(None)
+    qOffset=pset(33)
+    fasta=pset(False)
+    suppressQual=pset(False)
+    origfmt=pset(False)
+    readids=pset(False)
+    helicos=pset(False)
+    deflineSeq=pset(None)
+    deflineQual=pset(None)
+    disablemt=pset(False)
+    logLevel=pset(None)
+    verbose=pset(False)
+    ncbiError=pset(False)
+    legacyError=pset(False)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/biodepot/orangebiodepot/json/pfqDump.json") as f:
+        with open("/biodepot/orangebiodepot/json/fqdump.json") as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
