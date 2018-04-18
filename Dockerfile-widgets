@@ -102,7 +102,7 @@ COPY dev-files/geany/ /root/.config/
 COPY orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
 
 #Add tutorial
-#COPY Tutorials/ /root/tutorials/
+COPY tutorials/ /root/tutorials/
 
 #Add widget creator
 RUN ln -s /biodepot/orangebiodepot/util/createWidget /usr/bin/createWidget
