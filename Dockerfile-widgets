@@ -83,6 +83,12 @@ ADD startup.sh /
 EXPOSE 6080
 WORKDIR /data
 
+#install rsync
+RUN apt-get update && apt-get install -y rsync \
+    && apt-get autoclean -y \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
 #Change app name to Bwb
 RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
 

@@ -9,7 +9,7 @@ from collections import OrderedDict
 from functools import partial
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
-from orangebiodepot.util.DockerClient import DockerClient, PullImageThread
+from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui
 
 from AnyQt.QtWidgets import (
@@ -120,13 +120,39 @@ class OWWidgetBuilder(widget.OWWidget):
         registerBtn = gui.button(None, self, "Register Widget", callback=self.registerWidget)
         registerBtn.setStyleSheet(css)
         registerBtn.setFixedSize(150,20)
+        rebuildBtn = gui.button(None, self, "Rebuild container", callback=self.rebuildWidget)
+        rebuildBtn.setStyleSheet(css)
+        rebuildBtn.setFixedSize(150,20)
         box=QtGui.QHBoxLayout()
         box.addWidget(saveBtn)
         box.addWidget(createBtn)
         box.addWidget(registerBtn)
+        box.addWidget(rebuildBtn)
         box.addStretch(1)
         layout.addLayout(box)
-    
+    def rebuildWidget(self):
+        defaultDir = '/root'
+        if os.path.exists('/data'):
+            defaultDir = '/data'
+        myDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Bwb directory", directory=defaultDir)
+        (imageName,accept)=QtGui.QInputDialog.getText(self,"New image name", "Enter image name",QtGui.QLineEdit.Normal,"biodepot/bwb")
+        if imageName:
+            qm = QtGui.QMessageBox
+            ret=qm.question(self,'', "Are you sure you want to rebuild {} from directory {} ?".format(imageName,myDir), qm.Yes | qm.No)
+            if ret == qm.Yes:
+                self.console=QtGui.QTextEdit()
+                self.console.setReadOnly(True)
+                pal=QtGui.QPalette()
+                pal.setColor(QtGui.QPalette.Base,Qt.black)
+                pal.setColor(QtGui.QPalette.Text,Qt.green)
+                self.console.setPalette(pal)
+                self.console.setAutoFillBackground(True)
+                self.console.show()
+                self.pConsole=ConsoleProcess(console=self.console,finishHandler=None)
+                cmd='rsync -av /biodepot/orangebiodepot/ {}/biodepot/orangebiodepot/ --delete '.format(myDir) 
+                cmd+= '&& docker build -t {} {}'.format(imageName,myDir)
+                consoleProc.process.start('bash -c',['-c',cmd])
+        
     def buildData(self):
         self.data={}
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
