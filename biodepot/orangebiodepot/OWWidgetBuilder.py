@@ -148,11 +148,13 @@ class OWWidgetBuilder(widget.OWWidget):
                 self.console.setPalette(pal)
                 self.console.setAutoFillBackground(True)
                 self.console.show()
-                self.pConsole=ConsoleProcess(console=self.console,finishHandler=None)
+                self.pConsole=ConsoleProcess(console=self.console,finishHandler=self.finishRebuild)
                 cmd='rsync -av /biodepot/orangebiodepot/ {}/biodepot/orangebiodepot/ --delete '.format(myDir) 
                 cmd+= '&& docker build -t {} {}'.format(imageName,myDir)
-                consoleProc.process.start('bash -c',['-c',cmd])
-        
+                self.pConsole.process.start('/bin/bash',['-c',cmd])
+    def finishRebuild(self,stopped=None):
+        pass
+        #self.pcconsole.close()     
     def buildData(self):
         self.data={}
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
