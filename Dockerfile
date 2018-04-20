@@ -1,9 +1,3 @@
-FROM ubuntu:latest
-MAINTAINER lhhung<lhhung@uw.edu>
-
-ENV DEBIAN_FRONTEND noninteractive
-ENV HOME /root
-#base files/utils to be used inside container
 RUN apt-get update \
     && apt-get install -y --force-yes --no-install-recommends supervisor \
         pwgen sudo nano \
@@ -32,7 +26,7 @@ RUN apt-get update && apt-get install -y wget \
 #files for web interface noVNC
 ADD web /web/
 RUN apt-get update && apt-get install -y docker.io  build-essential gcc python-pip python-dev python3-pip \
-    && pip install --upgrade pip \
+    && pip install --upgrade pip==9.0.3 \
     && pip install -U setuptools \
     && pip install -r /web/requirements.txt \
     && pip3 install docker \
@@ -50,10 +44,9 @@ RUN apt-get update \
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 RUN virtualenv --python=python3 --system-site-packages orange3venv
 RUN source orange3venv/bin/activate
-#ADD biodepot biodepot
-RUN apt-get update && apt-get install -y build-essential gcc git python-dev python3-dev python3-pip python-pip\
-    && git clone https://github.com/biolab/orange3.git \
-    && pip3 install --upgrade pip \
+COPY orange3 orange3
+RUN apt-get update && apt-get install -y build-essential gcc python-dev python3-dev python3-pip python-pip\
+    && pip3 install --upgrade pip==9.0.3 \
     && pip install numpy \
     && pip3 install -U setuptools \
     && pip3 install -r orange3/requirements-core.txt \
@@ -61,7 +54,7 @@ RUN apt-get update && apt-get install -y build-essential gcc git python-dev pyth
     && pip3 install docker pysam beautifulsoup4\
     && pip3 install -e orange3 \
 #    && apt-get remove -y git gcc build-essential python3-pip python-pip \
-    && apt-get remove -y git gcc build-essential \
+    && apt-get remove -y gcc build-essential \
     && apt-get autoclean -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
@@ -70,8 +63,26 @@ RUN apt-get update && apt-get install -y build-essential gcc git python-dev pyth
 ADD supervisord.conf /etc/supervisor/conf.d/
 ADD nginx.conf /etc/nginx/sites-enabled/default
 
-#json pickle 
+#jsonpickle
+
 RUN pip3 install --user jsonpickle
+
+#put biodepot here and keep pip for rapid updates
+ADD biodepot biodepot
+RUN pip3 install -e biodepot 
+
+ADD startup.sh /
+EXPOSE 6080
+WORKDIR /data
+
+#install rsync
+RUN apt-get update && apt-get install -y rsync \
+    && apt-get autoclean -y \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
+#Change app name to Bwb
+RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
 
 #put biodepot here and keep pip for rapid updates
 ADD biodepot biodepot

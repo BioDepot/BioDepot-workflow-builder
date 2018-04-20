@@ -197,6 +197,7 @@ class OWBwBWidget(widget.OWWidget):
     submitIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/submit.png')
     reloadIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/reload.png')
     
+    
 #Initialization
     def __init__(self, image_name, image_tag):
         super().__init__()
@@ -215,7 +216,17 @@ class OWBwBWidget(widget.OWWidget):
         
         #keep track of gui elements associated with each attribute
         self.bgui=BwbGuiElements()
-        #keep track of all the connections - n
+        #keep track of all the connections
+        self.triggerReady={}
+        for k,v, in self.inputConnectionsStore.items():
+            sys.stderr.write("starting connections {} {}\n".format(k,v))
+        for trigger in self.runTriggers:
+            if self.inputConnections.isConnected(trigger):
+                sys.stderr.write("INIT trigger {} to True\n".format(trigger))
+                self.triggerReady[trigger]=True
+            else:
+                sys.stderr.write("INIT trigger {} to FALSE\n".format(trigger))
+                self.triggerReady[trigger]=False
         
     def initVolumes(self):
         #initializes container volumes
@@ -224,6 +235,7 @@ class OWBwBWidget(widget.OWWidget):
                 bwbVolAttr=mapping['attr']
                 if not hasattr(self, bwbVolAttr) :
                     setattr(self,bwbVolAttr,None)
+
 
 #Drawing the GUI
     def drawGUI(self):
@@ -828,8 +840,16 @@ class OWBwBWidget(widget.OWWidget):
             return
         if checked and attr not in self.runTriggers:
             self.runTriggers.append(attr)
+            self.triggerReady[attr]=self.isTriggerReady(attr)
         if not checked and attr in self.runTriggers:
-            self.runTriggers.remove(attr)
+            self.runTriggers.pop(attr)
+            self.triggerReady.pop(attr)
+    
+    def isTriggerReady(self, attr):
+        #trigger is ready to go if attr is connected to input
+        if(inputConnections.isConnected(attr)):
+            return True
+        return False
 
     def checkTrigger(self):
         #this should be checked any time there is a change
@@ -837,10 +857,12 @@ class OWBwBWidget(widget.OWWidget):
             return
         elif self.runMode ==1: #automatic same as pushing start button
             self.onRunClicked()
-        elif self.runTriggers:
+        elif self.runTriggers:            
             #check if the input triggers are set
             for trigger in self.runTriggers:
-                if not self.inputConnections.isSet(trigger):
+                if trigger not in self.triggerReady:
+                    return
+                if not self.triggerReady[trigger] or not self.inputConnections.isSet(trigger):
                     return
             self.onRunClicked()
 
@@ -932,21 +954,21 @@ class OWBwBWidget(widget.OWWidget):
         
 #Handle inputs
     def handleInputs(self, value, attr, sourceId=None):
-        sys.stderr.write('handler: attr {} value {}\n'.format(attr,value))
+        sys.stderr.write('checking inputs handler: attr {} value {}\n'.format(attr,value))
         if value is None:
             self.inputConnections.remove(attr,sourceId)
-            sys.stderr.write('removing {} disabled {}\n'.format(attr,self.inputConnections.isConnected(attr)))
+            sys.stderr.write('sig handler removing {} disabled {}\n'.format(attr,self.inputConnections.isConnected(attr)))
             setattr(self,attr,None) #this gives text None in ledit for some reason
+            if attr in self.runTriggers:
+                self.triggerReady[attr]=False
         else:
-            wasConnected=False
-            if self.inputConnections.isConnected(attr,connectionId=sourceId):
-                wasConnected=True
             self.inputConnections.add(attr,sourceId)
-            sys.stderr.write('handler adding input: attr {} value {} wasConnected {}\n'.format(attr,value,wasConnected))
+            sys.stderr.write('sig handler adding input: attr {} value {}\n'.format(attr,value,))
             setattr(self,attr,value)
-            if wasConnected:
-                #then this is a send signal not a addition of a new connection
-                self.checkTrigger()
+            self.checkTrigger()
+            if attr in self.runTriggers:
+                sys.stderr.write("trigger value for attr {} is {}\n".format(attr,self.triggerReady[attr])) 
+                self.triggerReady[attr]=True
         self.updateGui(attr,value)
 
     def updateGui(self,attr,value,removeFlag=False):
