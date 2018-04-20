@@ -22,8 +22,9 @@ RUN apt-get update \
 #files for  vnc framebuffer
 RUN apt-get update && apt-get install -y wget \
     && chdir /tmp \
-    && wget 'https://github.com/BioDepot/BioDepot-workflow-builder/blob/master/noVNC/x11vnc-data_0.9.14-1.1ubuntu1_all.deb' \
-    && wget 'https://github.com/BioDepot/BioDepot-workflow-builder/blob/master/noVNC/x11vnc_0.9.14-1.1ubuntu1_amd64.deb' \
+    && wget --no-check-certificate --content-disposition \
+    https://github.com/BioDepot/BioDepot-workflow-builder/blob/master/noVNC/x11vnc-data_0.9.14-1.1ubuntu1_all.deb?raw=true  \
+    && wget --no-check-certificate --content-disposition \   https://github.com/BioDepot/BioDepot-workflow-builder/blob/master/noVNC/x11vnc_0.9.14-1.1ubuntu1_amd64.deb?raw=true \
     && dpkg -i /tmp/x11vnc*.deb \
     && apt-get autoclean -y \
     && apt-get autoremove -y \
