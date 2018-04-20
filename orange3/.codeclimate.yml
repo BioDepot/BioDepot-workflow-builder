@@ -1,0 +1,31 @@
+engines:
+ duplication:
+   enabled: false
+   config:
+     languages:
+       python:
+         python_version: 3
+         mass_threshold: 50
+   exclude_paths:
+     - doc/
+ pep8:
+   enabled: false
+ radon:
+   enabled: true
+   config:
+     threshold: "C"
+ eslint:
+   enabled: false
+ shellcheck:
+   enabled: false
+ csslint:
+   enabled: false
+
+ratings:
+ paths:
+ - "**.py"
+ - "**.js"
+ - "**.sh"
+ - "**.css"
+
+exclude_paths:
