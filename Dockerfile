@@ -1,3 +1,10 @@
+FROM ubuntu:18.04
+MAINTAINER lhhung<lhhung@uw.edu>
+#Dockerfile for widget development container
+
+ENV DEBIAN_FRONTEND noninteractive
+ENV HOME /root
+#base files/utils to be used inside container
 RUN apt-get update \
     && apt-get install -y --force-yes --no-install-recommends supervisor \
         pwgen sudo nano \
@@ -13,10 +20,10 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
     
 #files for  vnc framebuffer
-RUN apt-get update && apt-get install -y wget \
+RUN apt-get update && apt-get install -y wget libssl1.0 \
     && chdir /tmp \
-    && wget 'https://launchpad.net/~fcwu-tw/+archive/ubuntu/ppa/+build/8270310/+files/x11vnc_0.9.14-1.1ubuntu1_amd64.deb' \
-    && wget 'https://launchpad.net/~fcwu-tw/+archive/ubuntu/ppa/+files/x11vnc-data_0.9.14-1.1ubuntu1_all.deb' \
+    && wget --no-check-certificate --content-disposition https://github.com/BioDepot/BioDepot-workflow-builder/blob/master/noVNC/x11vnc-data_0.9.14-1.1ubuntu1_all.deb?raw=true  \
+    && wget --no-check-certificate --content-disposition https://github.com/BioDepot/BioDepot-workflow-builder/blob/master/noVNC/x11vnc_0.9.14-1.1ubuntu1_amd64.deb?raw=true \
     && dpkg -i /tmp/x11vnc*.deb \
     && apt-get autoclean -y \
     && apt-get autoremove -y \
@@ -84,36 +91,18 @@ RUN apt-get update && apt-get install -y rsync \
 #Change app name to Bwb
 RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
 
-#put biodepot here and keep pip for rapid updates
-ADD biodepot biodepot
-RUN pip3 install -e biodepot 
-
-ADD startup.sh /
-EXPOSE 6080
-WORKDIR /data
-
-#install rsync
-RUN apt-get update && apt-get install -y rsync \
-    && apt-get autoclean -y \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
-
-
-#Change app name to Bwb
-RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
-
-#patch orange3
-COPY orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
-
 #set up some config files
 COPY fluxbox_config/ /root/.fluxbox/
 COPY user_config/ /root/
+
+#patch orange3
+COPY orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
 
 #Add tutorial
 COPY tutorials/ /root/tutorials/
 
 #Add widget creator
-RUN ln -s /biodepot/orangebiodepot/util/createWidget /usr/bin/createWidget 
+RUN ln -s /biodepot/orangebiodepot/util/createWidget /usr/bin/createWidget
 
 #start it up
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
