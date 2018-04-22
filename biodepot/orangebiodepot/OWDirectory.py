@@ -148,6 +148,7 @@ class OWBamDirectory(widget.OWWidget):
         self.btn_add.setEnabled(False)
         self.btn_directory.setEnabled(True)
         self.boxEdit.setEnabled(True)
+        self.send("Directory",None)
         
     def set_directory (self, path):
         if path is None:

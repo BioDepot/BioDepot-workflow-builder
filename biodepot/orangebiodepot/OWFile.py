@@ -144,6 +144,7 @@ class OWBamFile(widget.OWWidget):
         self.btn_add.setEnabled(False)
         self.btn_file.setEnabled(True)
         self.boxEdit.setEnabled(True)
+        self.send("File",None)
         
     def set_file (self, path):
         if path is None:

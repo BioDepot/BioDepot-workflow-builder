@@ -216,17 +216,9 @@ class OWBwBWidget(widget.OWWidget):
         
         #keep track of gui elements associated with each attribute
         self.bgui=BwbGuiElements()
-        #keep track of all the connections
-        self.triggerReady={}
-        for k,v, in self.inputConnectionsStore.items():
-            sys.stderr.write("starting connections {} {}\n".format(k,v))
-        for trigger in self.runTriggers:
-            if self.inputConnections.isConnected(trigger):
-                sys.stderr.write("INIT trigger {} to True\n".format(trigger))
-                self.triggerReady[trigger]=True
-            else:
-                sys.stderr.write("INIT trigger {} to FALSE\n".format(trigger))
-                self.triggerReady[trigger]=False
+        #For compatibility if triggers are not being kept
+        if not hasattr(self,'triggerReady'):
+            self.triggerReady={}
         
     def initVolumes(self):
         #initializes container volumes
@@ -840,17 +832,11 @@ class OWBwBWidget(widget.OWWidget):
             return
         if checked and attr not in self.runTriggers:
             self.runTriggers.append(attr)
-            self.triggerReady[attr]=self.isTriggerReady(attr)
+            self.triggerReady[attr]=True
         if not checked and attr in self.runTriggers:
             self.runTriggers.pop(attr)
             self.triggerReady.pop(attr)
     
-    def isTriggerReady(self, attr):
-        #trigger is ready to go if attr is connected to input
-        if(inputConnections.isConnected(attr)):
-            return True
-        return False
-
     def checkTrigger(self):
         #this should be checked any time there is a change
         if self.runMode ==0: #manual - only go on start button

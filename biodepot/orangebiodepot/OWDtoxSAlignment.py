@@ -25,6 +25,7 @@ class OWDetoxSAlignment(OWBwBWidget):
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     runTriggers=pset([])
+    triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
     topDir=pset(None)

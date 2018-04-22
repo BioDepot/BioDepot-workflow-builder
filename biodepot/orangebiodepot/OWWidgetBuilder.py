@@ -18,6 +18,26 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
+class DragAndDropList(QtGui.QListWidget):
+     #overloads the Drag and dropEvents to emit code
+     itemMoved = pyqtSignal(int, int) # Old index, new index, item
+     def __init__(self, parent=None, **args):
+         super(DragAndDropList, self).__init__(parent, **args)
+         self.setAcceptDrops(True)
+         self.setDragEnabled(True)
+         self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+         self.drag_item = None
+         self.drag_row = None
+
+     def dropEvent(self, event):
+         super(DragAndDropList, self).dropEvent(event)
+         self.itemMoved.emit(self.drag_row, self.row(self.drag_item))
+         self.drag_item = None
+         
+     def startDrag(self, supportedActions):
+         self.drag_item = self.currentItem()
+         self.drag_row = self.row(self.drag_item)
+         super(DragAndDropList, self).startDrag(supportedActions)
 
 class WidgetItem():
     #each widget item has:
@@ -394,7 +414,9 @@ class OWWidgetBuilder(widget.OWWidget):
             removeBtn.setEnabled(False)
             addBtn.setEnabled(True)
             
-             
+    def onItemMoved(self,oldRow,newRow,qWidgetList):
+        qWidgetList.states[oldRow],qWidgetList.states[newRow]=qWidgetList.states[newRow],qWidgetList.states[oldRow]
+
     def drawCommand(self,pname,layout=None):
         labelTextBox=self.makeTextBox(pname,label='Enter command:')
         self.initAllStates(pname,labelTextBox)
@@ -647,7 +669,7 @@ class OWWidgetBuilder(widget.OWWidget):
         #logic is handled by add remove buttons
         if not hasattr(self,pname):
             setattr(self,pname,None); 
-        boxEdit=QtGui.QListWidget(self)
+        boxEdit=DragAndDropList(self)
         boxEdit.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
         boxEdit.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         boxEdit.setStyleSheet(":disabled { color: #282828}")
@@ -662,12 +684,14 @@ class OWWidgetBuilder(widget.OWWidget):
         lineItem=WidgetItem(OrderedDict(lineWidgets),{})
         setattr(boxEdit,'updateAllStates',lambda: self.qwUpdateAllStates(pname,boxEdit,lineItem))
         self.qwInitAllStates(pname,boxEdit,lineItem)
+        setattr(boxEdit,'oldRow',boxEdit.currentRow())
         #buttons
         addBtn=gui.button(None, self, "", callback=lambda: self.addListWidget(addBtn,boxEdit,lineItem), autoDefault=False)
         removeBtn=gui.button(None, self, "", callback=lambda: self.removeListWidget(removeBtn,boxEdit,lineItem), autoDefault=False)
         removeBtn.setEnabled(bool(boxEdit.selectedItems()))
         boxEdit.itemSelectionChanged.connect(lambda: removeBtn.setEnabled(bool(boxEdit.selectedItems())))
         boxEdit.itemSelectionChanged.connect(lambda: self.onListWidgetSelect(boxEdit,addBtn,removeBtn,lineItem))
+        boxEdit.itemMoved.connect(lambda oldRow,newRow : self.onItemMoved(oldRow,newRow,boxEdit))
         addBtn.setIcon(self.addIcon)
         removeBtn.setIcon(self.removeIcon)
         #set button styles
