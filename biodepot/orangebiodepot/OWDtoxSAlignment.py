@@ -11,8 +11,8 @@ from orangebiodepot.util.DockerClient import DockerClient
 from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWDetoxSAlignment(OWBwBWidget):
-    name = "DetoxSAlignment"
+class OWDtoxSAlignment(OWBwBWidget):
+    name = "DtoxSAlignment"
     description = "Alignment part of DetoxS standard operating procedure (SOP)"
     category = "RNA-Seq"
     priority = 10

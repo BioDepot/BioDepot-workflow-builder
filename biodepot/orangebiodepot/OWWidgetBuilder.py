@@ -31,12 +31,11 @@ class DragAndDropList(QtGui.QListWidget):
 
      def dropEvent(self, event):
          super(DragAndDropList, self).dropEvent(event)
-         self.itemMoved.emit(self.drag_row, self.row(self.drag_item))
+         self.itemMoved.emit(self.drag_row, self.currentRow())
          self.drag_item = None
          
      def startDrag(self, supportedActions):
-         self.drag_item = self.currentItem()
-         self.drag_row = self.row(self.drag_item)
+         self.drag_row = self.currentRow()
          super(DragAndDropList, self).startDrag(supportedActions)
 
 class WidgetItem():
@@ -415,7 +414,11 @@ class OWWidgetBuilder(widget.OWWidget):
             addBtn.setEnabled(True)
             
     def onItemMoved(self,oldRow,newRow,qWidgetList):
-        qWidgetList.states[oldRow],qWidgetList.states[newRow]=qWidgetList.states[newRow],qWidgetList.states[oldRow]
+        sys.stderr.write("oldRow is {} newRow is {}\n".format(oldRow,newRow))
+        temp=qWidgetList.states[oldRow]
+        qWidgetList.states[newRow+1:oldRow+1]=qWidgetList.states[newRow:oldRow]
+        qWidgetList.states[newRow]=temp
+        qWidgetList.updateAllStates()
 
     def drawCommand(self,pname,layout=None):
         labelTextBox=self.makeTextBox(pname,label='Enter command:')
