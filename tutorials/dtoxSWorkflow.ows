@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme description="" title="" version="2.0">
+	<nodes>
+		<node id="0" name="downloadURL" position="(107.0, 267.0)" project_name="Bwb" qualified_name="orangebiodepot.OWdownloadURL.OWdownloadURL" title="Download data" version="" />
+		<node id="1" name="DtoxSAlignment" position="(271.0, 266.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxSAlignment.OWDtoxSAlignment" title="DtoxSAlignment" version="" />
+		<node id="2" name="Dtoxs Analysis" position="(467.0, 266.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxSAnalyses.OWDtoxsAnalysis" title="Dtoxs Analysis" version="" />
+		<node id="3" name="downloadURL" position="(273.0, 116.0)" project_name="Bwb" qualified_name="orangebiodepot.OWdownloadURL.OWdownloadURL" title="Download complete counts" version="" />
+		<node id="4" name="Data Table" position="(639.0, 266.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Data Table" version="" />
+	</nodes>
+	<links>
+		<link enabled="true" id="0" sink_channel="Data" sink_node_id="4" source_channel="Top40" source_node_id="2" />
+		<link enabled="true" id="1" sink_channel="RepositoryDirectory" sink_node_id="2" source_channel="topDir" source_node_id="1" />
+		<link enabled="true" id="2" sink_channel="trigger" sink_node_id="1" source_channel="directory" source_node_id="0" />
+	</links>
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties format="literal" node_id="0">{'URL': ['https://drive.google.com/file/d/1rI9pEIN3noWDedKk8biNS4S3kv-hni6w/view?usp=sharing'], 'controlAreaVisible': True, 'decompress': True, 'directory': '/data/LINCS', 'inputConnectionsStore': {}, 'optionsChecked': {'decompressdecompress': False, 'saveLog': False, 'decompress': False}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x05\x0c\x00\x00\x02\xf0\x00\x00\x02\xe7\x00\x00\x01k\x00\x00\x05\x0c\x00\x00\x02\xed\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
+		<properties format="literal" node_id="1">{'barcodesFile': 'barcodes_trugrade_96_set4.dat', 'controlAreaVisible': True, 'inputConnectionsStore': {}, 'lanes': 6, 'optionsChecked': {'saveLog': False}, 'runMode': 2, 'runTriggers': ['trigger'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x04\xcd\x00\x00\x02\xbc\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x04\xcd\x00\x00\x02\xbc\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'seriesName': '20150409', 'topDir': '/data/LINCS', 'triggerReady': {'trigger': True}, '__version__': 1}</properties>
+		<properties format="literal" node_id="2">{'ConfigurationFile': '/data/LINCS/Configs/Configs.LINCS.Dataset.Gene.LINCS.20150409.tsv', 'RepositoryDirectory': '', 'controlAreaVisible': True, 'inputConnectionsStore': {}, 'optionsChecked': {'saveLog': False}, 'runMode': 1, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x04\xf3\x00\x00\x02\xe0\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x04\xf3\x00\x00\x02\xe0\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
+		<properties format="literal" node_id="3">{'URL': ['https://drive.google.com/file/d/1JG37zedb4ZfVPUENQVXPbm-_6MtD_LBo/view?usp=sharing'], 'controlAreaVisible': True, 'decompress': True, 'directory': '/data/LINCS', 'inputConnectionsStore': {}, 'optionsChecked': {'decompressdecompress': False, 'saveLog': False, 'decompress': False}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x04\xcf\x00\x00\x02\xa0\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x04\xcf\x00\x00\x02\xa0\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
+		<properties format="literal" node_id="4">{'auto_commit': True, 'color_by_class': True, 'controlAreaVisible': True, 'dist_color_RGB': (220, 220, 220, 255), 'savedWidgetGeometry': None, 'select_rows': True, 'show_attribute_labels': True, 'show_distributions': False, '__version__': 1, 'context_settings': []}</properties>
+	</node_properties>
+</scheme>
