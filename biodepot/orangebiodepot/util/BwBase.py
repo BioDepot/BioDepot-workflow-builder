@@ -380,7 +380,7 @@ class OWBwBWidget(widget.OWWidget):
     
     def findOptionalElements(self):
        #checks that there are optional elements
-        if not 'parameters' in self.data:
+        if not 'parameters' in self.data or not self.data['parameters']:
             return False
         for pname in self.data['parameters']:
             if pname not in self.data['requiredParameters']:

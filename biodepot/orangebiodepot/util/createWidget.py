@@ -63,7 +63,7 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         f.write('    docker_image_name = "{}"\n'.format(data['docker_image_name']))
         f.write('    docker_image_tag = "{}"\n'.format(data['docker_image_tag']))
         #inputs and outputs
-        if 'inputs' in data:
+        if 'inputs' in data and data['inputs']:
             inputStr='['
             for attr, values  in data['inputs'].items():
                 if 'callback' in  values and values['callback']:
@@ -73,7 +73,8 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         inputStr=inputStr[:-1]+']'
         f.write('    inputs = {}\n'.format(inputStr))
         outputStr='['
-        for attr, value  in data['outputs'].items():
+        if 'outputs' in data and data['outputs']:
+            for attr, value  in data['outputs'].items():
                 outputStr= outputStr+ '("{}",{}),'.format(attr,deClass(str(value['type'])))
         outputStr=outputStr[:-1]+']'
         f.write('    outputs = {}\n'.format(outputStr))
@@ -84,24 +85,25 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         f.write('    triggerReady=pset({})\n')
         f.write('    inputConnectionsStore=pset({})\n')
         f.write('    optionsChecked=pset({})\n')
-        for pname,pvalue in data['parameters'].items():
-            if 'default' in pvalue and pvalue['default'] is not None:
-                #if it is not a number or dict type then keep quotes
-                if pvalue['type'] == 'int' or  pvalue['type'] == 'float' or pvalue['type'] == 'double' or pvalue['type'] == 'bool' or pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
-                    f.write('    {}=pset({})\n'.format(pname,pvalue['default']))
-                else:
-                    f.write('    {}=pset("{}")\n'.format(pname,pvalue['default']))
-            else:               
-                if pvalue['type'] == type('str') :
-                    f.write('    {}=pset("")\n'.format(pname),None)
-                if pvalue['type'] == 'bool' :
-                    f.write('    {}=pset(False)\n'.format(pname))
-                elif pvalue['type'][-4:] == 'list' or pvalue['type'][-4:] == 'List':
-                    f.write('    {}=pset([])\n'.format(pname))
-                elif pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
-                    f.write('    {}=pset({{}})\n'.format(pname))
-                else:
-                    f.write('    {}=pset(None)\n'.format(pname))
+        if 'parameters' in data and data['parameters']:
+            for pname,pvalue in data['parameters'].items():
+                if 'default' in pvalue and pvalue['default'] is not None:
+                    #if it is not a number or dict type then keep quotes
+                    if pvalue['type'] == 'int' or  pvalue['type'] == 'float' or pvalue['type'] == 'double' or pvalue['type'] == 'bool' or pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
+                        f.write('    {}=pset({})\n'.format(pname,pvalue['default']))
+                    else:
+                        f.write('    {}=pset("{}")\n'.format(pname,pvalue['default']))
+                else:               
+                    if pvalue['type'] == type('str') :
+                        f.write('    {}=pset("")\n'.format(pname),None)
+                    if pvalue['type'] == 'bool' :
+                        f.write('    {}=pset(False)\n'.format(pname))
+                    elif pvalue['type'][-4:] == 'list' or pvalue['type'][-4:] == 'List':
+                        f.write('    {}=pset([])\n'.format(pname))
+                    elif pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
+                        f.write('    {}=pset({{}})\n'.format(pname))
+                    else:
+                        f.write('    {}=pset(None)\n'.format(pname))
         f.write('    def __init__(self):\n')        
         f.write('        super().__init__(self.docker_image_name, self.docker_image_tag)\n')
         joinedName=data['name'].replace(' ','')
@@ -113,7 +115,7 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         f.write('        self.inputConnections = ConnectionDict(self.inputConnectionsStore)\n')
         f.write('        self.drawGUI()\n')
         #input callbacks
-        if 'inputs' in data:
+        if 'inputs' in data and data['inputs']:
             for attr, values in data['inputs'].items():
                 if 'callback' in  values and values['callback']:
                     f.write('    def {}(self,value, "{}", sourceId=None):\n'.format(values["callback"],attr))

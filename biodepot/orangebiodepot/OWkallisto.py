@@ -19,12 +19,13 @@ class OWkallisto_quant(OWBwBWidget):
     icon = "/biodepot/orangebiodepot/icons/kallisto-analysis.svg"
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
-    docker_image_tag = "0.44.0"
-    inputs = [("indexFile",str,"handleInputsindexFile"),("fastqFiles",str,"handleInputsfastqFiles")]
+    docker_image_tag = "0.44"
+    inputs = [("indexFile",str,"handleInputsindexFile"),("fastqFiles",str,"handleInputsfastqFiles"),("trigger",str,"handleInputstrigger")]
     outputs = [("outputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     runTriggers=pset([])
+    triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
     outputDir=pset(None)
@@ -56,6 +57,8 @@ class OWkallisto_quant(OWBwBWidget):
         self.handleInputs(value, "indexFile", sourceId=None)
     def handleInputsfastqFiles(self, value, sourceId=None):
         self.handleInputs(value, "fastqFiles", sourceId=None)
+    def handleInputstrigger(self, value, sourceId=None):
+        self.handleInputs(value, "trigger", sourceId=None)
     def handleOutputs(self):
         outputValue=None
         if hasattr(self,"outputDir"):

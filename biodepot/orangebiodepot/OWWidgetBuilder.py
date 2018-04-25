@@ -194,7 +194,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.data['persistentSettings']='all'
         #add required elements
         reqList=[]
-        if 'parameters' in self.data:
+        if 'parameters' in self.data and self.data['parameters']:
             for pname,pvalue in self.data['parameters'].items():
                 if not pvalue['optional']:
                     reqList.append(pname)
@@ -215,7 +215,7 @@ class OWWidgetBuilder(widget.OWWidget):
 
         #for now just keep default, flags, 
         #also make all defaults false for booleans - will fix these kluges after cleaning up BwBase code
-        if 'parameters' in self.data:
+        if 'parameters' in self.data and self.data['parameters']:
             for key, myDict in self.data['parameters'].items():
                 newDict={}
                 if  'default' in myDict and myDict['default'] is not None:
