@@ -20,16 +20,16 @@ class OWsleuth(OWBwBWidget):
     want_main_area = False
     docker_image_name = "biodepot/ubuntu-sleuth"
     docker_image_tag = "1.0"
-    inputs = [("directory",str,"handleInputsdirectory"),("trigger",str,"handleInputstrigger")]
-    outputs = [("outputDirectory",str),("topGenes",Orange.data.Table)]
+    inputs = [("kallistoDirectory",str,"handleInputskallistoDirectory"),("trigger",str,"handleInputstrigger")]
+    outputs = [("OutputDirectory",str),("topGenes",Orange.data.Table)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     runTriggers=pset([])
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
-    directory=pset(None)
-    outputDirectory=pset(None)
+    kallistoDirectory=pset(None)
+    full_model=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open("/biodepot/orangebiodepot/json/sleuth.json") as f:
@@ -38,15 +38,15 @@ class OWsleuth(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputsdirectory(self, value, sourceId=None):
-        self.handleInputs(value, "directory", sourceId=None)
+    def handleInputskallistoDirectory(self, value, sourceId=None):
+        self.handleInputs(value, "kallistoDirectory", sourceId=None)
     def handleInputstrigger(self, value, sourceId=None):
         self.handleInputs(value, "trigger", sourceId=None)
     def handleOutputs(self):
-        outputValue="/data"
-        if hasattr(self,"outputDirectory"):
-            outputValue=getattr(self,"outputDirectory")
-        self.send("outputDirectory", outputValue)
+        outputValue=None
+        if hasattr(self,"OutputDirectory"):
+            outputValue=getattr(self,"OutputDirectory")
+        self.send("OutputDirectory", outputValue)
         outputValue=None
         if hasattr(self,"topGenes"):
             outputValue=getattr(self,"topGenes")
