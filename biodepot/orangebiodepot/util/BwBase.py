@@ -324,11 +324,66 @@ class OWBwBWidget(widget.OWWidget):
             myFile.close()
 
 
-        #consoleControlLayout.addWidget(outputLabel,0,0)    
-    def drawRequiredElements(self):
-        for pname in self.data['parameters']:
+        #consoleControlLayout.addWidget(outputLabel,0,0) 
+    def drawElements(self, elementList,isOptional=False):
+        for pname in elementList:
+            if not ('parameters' in self.data) or not ( pname in self.data['parameters']):
+                continue
             pvalue=self.data['parameters'][pname]
-            sys.stderr.write('list of pname {} type {}\n'.format(pname,pvalue['type']))
+            if ('gui' in pvalue and pvalue['gui'] != 'file' and pvalue['gui'] != 'directory') or ( pvalue['type'] != 'file' and pvalue['type'] != 'directory'):
+                continue
+            if isOptional:
+                self.drawFileDirElements(pname, pvalue, box=self.optionalBox,layout=self.fileDirOptionalLayout,addCheckbox=True)
+            else:
+                self.drawFileDirElements(pname, pvalue, box=self.requiredBox,layout=self.fileDirRequiredLayout)
+            
+        for pname in elementList:
+            if not ('parameters' in self.data) or not ( pname in self.data['parameters']):
+                continue
+            pvalue=self.data['parameters'][pname]
+            if ('gui' in pvalue and pvalue['gui'][-4:] != 'list') or ( pvalue['type'][-4:] != 'list' ):
+                continue
+            sys.stderr.write('drawing textBox for  pname {} pvalue {}\n'.format(pname,pvalue))
+            if isOptional:
+                self.drawTextBox (pname, pvalue, box=self.optionalBox,layout=self.fileDirOptionalLayout,addCheckbox=True)
+            else:
+                self.drawTextBox(pname, pvalue, box=self.requiredBox,layout=self.fileDirRequiredLayout)
+
+        for pname in elementList:
+            if not ('parameters' in self.data) or not( pname in self.data['parameters']):
+                continue
+            pvalue=self.data['parameters'][pname]
+            if ('gui' in pvalue and pvalue['gui'] != 'Ledit') or (pvalue['type'] != 'double' and pvalue['type'] != 'str' and pvalue['type'] != type('text')):
+                sys.stderr.write('type is {} {}\n'.format(pvalue['type'],type('text')))
+                continue
+            if isOptional:
+                self.drawLedit(pname,pvalue,self.optionalBox,layout=self.leditOptionalLayout,addCheckbox=True)
+            else:
+                self.drawLedit(pname,pvalue,self.requiredBox,layout=self.leditRequiredLayout)
+                
+        for pname in elementList:
+            if not ('parameters' in self.data) or not ( pname in self.data['parameters']):
+                continue
+            pvalue=self.data['parameters'][pname]
+            if ('gui' in pvalue and pvalue['gui'] != 'Spin') or (pvalue['type'] != 'int'):
+                continue
+            if isOptional:
+                self.drawSpin(pname,pvalue,self.optionalBox,addCheckbox=True)
+            else:
+                self.drawSpin(pname,pvalue,self.requiredBox)
+
+        for pname in elementList:
+            if not ('parameters' in self.data) or not ( pname in self.data['parameters']):
+                continue
+            pvalue=self.data['parameters'][pname]
+            if ('gui' in pvalue and pvalue['gui'] != 'bool') or (pvalue['type'] != 'bool'):
+                continue
+            if isOptional:
+                self.drawCheckbox(pname,pvalue,self.optionalBox)
+            else:
+                self.drawCheckbox(pname,pvalue,self.requiredBox)
+        
+    def drawRequiredElements(self):
         for pname in self.data['requiredParameters']:
             if not ('parameters' in self.data) or not (pname in self.data['parameters']):
                 continue
@@ -337,66 +392,10 @@ class OWBwBWidget(widget.OWWidget):
                 setattr(self,pname,None)
             if (getattr(self,pname) is None) and ('default' in pvalue):
                 setattr(self,pname,pvalue['default'])
-        self.drawElements(self.data['requiredParameters'],required=True)
-         
-    def drawElements(self,pnames,required=False):
-        for pname in pnames:
-            pvalue=self.data['parameters'][pname]
-            if not ('parameters' in self.data) or not ( pname in self.data['parameters']):
-                continue
-            if ('gui' in pvalue and pvalue['gui'] != 'file' and pvalue['gui'] != 'directory') or ( pvalue['type'] != 'file' and pvalue['type'] != 'directory'):
-                continue
-            if required:
-                self.drawFileDirElements(pname, pvalue, box=self.requiredBox,layout=self.fileDirRequiredLayout)
-            else:
-                self.drawFileDirElements(pname, pvalue, box=self.optionalBox,layout=self.fileDirOptionalLayout,addCheckbox=True)
-            
-        for pname in pnames:
-            if not ('parameters' in self.data) or not ( pname in self.data['parameters']):
-                continue
-            pvalue=self.data['parameters'][pname]
-            if ('gui' in pvalue and pvalue['gui'][-4:] != 'list') or ( pvalue['type'][-4:] != 'list' ):
-                continue
-            if required:
-                self.drawTextBox(pname, pvalue, box=self.requiredBox,layout=self.fileDirRequiredLayout)
-            else:
-                self.drawTextBox (pname, pvalue, box=self.optionalBox,layout=self.fileDirOptionalLayout,addCheckbox=True)
+        self.drawElements(self.data['requiredParameters'])
 
-        for pname in pnames:
-            if not ('parameters' in self.data) or not( pname in self.data['parameters']):
 
-                continue
-            pvalue=self.data['parameters'][pname]
-            if ('gui' in pvalue and pvalue['gui'] != 'Ledit') or (pvalue['type'] != 'double' and pvalue['type'] != 'str' and pvalue['type'] != type('text')):
-                sys.stderr.write('type is {} {}\n'.format(pvalue['type'],type('text')))
-                continue
-            if required:
-                self.drawLedit(pname,pvalue,self.requiredBox,layout=self.leditRequiredLayout)
-            else:
-                self.drawLedit(pname,pvalue,self.optionalBox,layout=self.leditOptionalLayout,addCheckbox=True)
-
-        for pname in pnames:
-            if not ('parameters' in self.data) or not ( pname in self.data['parameters']):
-                continue
-            pvalue=self.data['parameters'][pname]
-            if ('gui' in pvalue and pvalue['gui'] != 'Spin') or (pvalue['type'] != 'int'):
-                continue
-            if required:
-                self.drawSpin(pname,pvalue,self.requiredBox)
-            else:
-                self.drawSpin(pname,pvalue,self.optionalBox,addCheckbox=True)
-
-        for pname in pnames:
-            if not ('parameters' in self.data) or not ( pname in self.data['parameters']):
-                continue
-            pvalue=self.data['parameters'][pname]
-            if ('gui' in pvalue and pvalue['gui'] != 'bool') or (pvalue['type'] != 'bool'):
-                continue
-            if required:
-                self.drawCheckbox(pname,pvalue,self.requiredBox)
-            else:
-                self.drawCheckbox(pname,pvalue,self.optionalBox)
-            
+    
     def findOptionalElements(self):
        #checks that there are optional elements
         if not 'parameters' in self.data or not self.data['parameters']:
@@ -405,9 +404,9 @@ class OWBwBWidget(widget.OWWidget):
             if pname not in self.data['requiredParameters']:
                 return True
         return False
-     
+ 
     def drawOptionalElements(self):
-        optionalPnames=[]
+        optionalList=[]
         for pname in self.data['parameters']:
             if pname not in self.data['requiredParameters']:
                 pvalue=self.data['parameters'][pname]
@@ -417,9 +416,9 @@ class OWBwBWidget(widget.OWWidget):
                     setattr(self,pname,pvalue['default'])
                 if not (pname in self.optionsChecked):
                     self.optionsChecked[pname]=False
-                optionalPnames.append(pname)
-        self.drawElements(optionalPnames,required=False)
-
+                optionalList.append(pname)    
+        self.drawElements(optionalList,isOptional=True)
+            
 
     def drawCheckbox(self,pname,pvalue, box=None):
         #for booleans - their value is the same as the checkbox state
@@ -451,6 +450,8 @@ class OWBwBWidget(widget.OWWidget):
         checkBox=None
         checkAttr=None
         if addCheckbox:
+            if pname not in self.optionsChecked:
+                self.optionsChecked[pname]=False
             checkAttr=pname+'Checked'
             setattr(self,checkAttr,self.optionsChecked[pname])
         default=0
@@ -484,6 +485,8 @@ class OWBwBWidget(widget.OWWidget):
         checkbox=None
         ledit=gui.lineEdit(None, self, pname,disabled=addCheckbox)
         if addCheckbox:
+            if pname not in self.optionsChecked:
+                self.optionsChecked[pname]=False
             checkAttr=pname+'Checked'
             setattr(self,checkAttr,self.optionsChecked[pname])
             checkbox=gui.checkBox(None, self,checkAttr,label=None)

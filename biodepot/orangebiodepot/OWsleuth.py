@@ -19,8 +19,8 @@ class OWsleuth(OWBwBWidget):
     icon = "/biodepot/orangebiodepot/icons/sleuth2.png"
     want_main_area = False
     docker_image_name = "biodepot/ubuntu-sleuth"
-    docker_image_tag = "1.0"
-    inputs = [("kallistoDirectory",str,"handleInputskallistoDirectory"),("trigger",str,"handleInputstrigger")]
+    docker_image_tag = "18.04-4.5.1-py27-0.29"
+    inputs = [("trigger",str,"handleInputstrigger")]
     outputs = [("OutputDirectory",str),("topGenes",Orange.data.Table)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
@@ -28,8 +28,22 @@ class OWsleuth(OWBwBWidget):
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
-    kallistoDirectory=pset(None)
+    experimental_description=pset(None)
     full_model=pset(None)
+    filter_fun=pset(None)
+    norm_fun_counts=pset(None)
+    norm_fun_tpm=pset(None)
+    aggregation_column=pset("ext_gene")
+    transformation_function=pset(None)
+    num_cores=pset(1)
+    read_bootstrap_tpm=pset(False)
+    extra_bootstrap_summary=pset(False)
+    column=pset(None)
+    wald=pset(False)
+    nTopGenes=pset(40)
+    output_file=pset(None)
+    qvalue=pset(0.05)
+    geneNamesFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open("/biodepot/orangebiodepot/json/sleuth.json") as f:
@@ -38,8 +52,6 @@ class OWsleuth(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputskallistoDirectory(self, value, sourceId=None):
-        self.handleInputs(value, "kallistoDirectory", sourceId=None)
     def handleInputstrigger(self, value, sourceId=None):
         self.handleInputs(value, "trigger", sourceId=None)
     def handleOutputs(self):
