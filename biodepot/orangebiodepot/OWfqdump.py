@@ -30,7 +30,6 @@ class OWfastqDump(OWBwBWidget):
     optionsChecked=pset({})
     accession=pset(None)
     OutputDir=pset("/data")
-    tempdir=pset("/data")
     fqdversion=pset(False)
     help=pset(False)
     sraids=pset([])

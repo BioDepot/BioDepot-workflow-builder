@@ -98,7 +98,7 @@ class DockerClient:
                 env=env[1:-1]
             envs=envs+ "-e {}={} ".format(env,var)
         #create container
-        dockerCmd='docker run -i --rm {} {} {} {}'.format(volumeMappings,envs,name,commands)
+        dockerCmd='docker run -i --rm --init {} {} {} {}'.format(volumeMappings,envs,name,commands)
         sys.stderr.write('Docker command is\n{}\n'.format(dockerCmd))
         consoleProc.process.start('/bin/bash',['-c',dockerCmd])
         
