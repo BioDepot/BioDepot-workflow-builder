@@ -1122,8 +1122,11 @@ class OWBwBWidget(widget.OWWidget):
         #by default all flags and arguments are applied to final command
         #use positional _bwb{} variables so specify flags and arguments if there are multiple commands
         #unused args and flags are applied to the final command
-
+        
+        #multi executable commands need to use bash -c 'cmd1 && cmd2' type syntax - note this can cause problems when stopping container
         cmdStr="bash -c '"
+        if len(executables) == 1:
+            cmdStr=""
         varSeen={}
         sys.stderr.write('execs {}\n'.format(executables))
         sys.stderr.write('executables {}\n'.format(executables))
@@ -1144,7 +1147,8 @@ class OWBwBWidget(widget.OWWidget):
                 for arg in args:
                     if arg not in varSeen:
                         cmdStr+= str(arg) + ' '
-                cmdStr+="'"
+                if len(executables) >1:
+                    cmdStr+="'"
             else:
                 cmdStr+=" && "
         return cmdStr
