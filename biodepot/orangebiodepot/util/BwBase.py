@@ -452,10 +452,10 @@ class OWBwBWidget(widget.OWWidget):
         if addCheckbox:
             if pname not in self.optionsChecked:
                 self.optionsChecked[pname]=False
-            checkAttr=pname+'Checked'
-            setattr(self,checkAttr,self.optionsChecked[pname])
+            checkAttr=pname+'Checked'  
+            setattr(self,checkAttr,self.optionsChecked[pname]) 
         default=0
-        if default in pvalue:
+        if 'default' in pvalue:
             default=pvalue['default']
         if pvalue['type'] == 'int':
             if not hasattr(self,pname):
@@ -1062,9 +1062,14 @@ class OWBwBWidget(widget.OWWidget):
         args=[]
         for pname, pvalue in self.data['parameters'].items():
             #possible to have an requirement or parameter that is not in the executable line
-            #this is indicated by the absence of a flags field and arguments 
-            if 'flag' not in pvalue:
-                continue            
+            #environment variables can have a Null value in the flags field
+            #arguments are the only type that have no flag
+            if 'argument' in pvalue:
+                fStr=self.flagString(pname)
+                args.append(fStr)
+                continue
+            if 'flag' not in pvalue or pvalue['flag'] is None:
+                continue
             #if required or checked then it is added to the flags
             addParms=False
             #checkattr is needed for the orange gui checkboxes but is not otherwise updated 
@@ -1083,8 +1088,7 @@ class OWBwBWidget(widget.OWWidget):
                 if pvalue['flag']:
                     if fStr:
                         flags.append(fStr)
-                elif fStr:
-                    args.append(fStr)
+                        
         return self.generateCmdFromBash(self.data['command'],flags=flags,args=args)
 
     def replaceVars(self,cmd,pnames,varSeen):
@@ -1157,11 +1161,20 @@ class OWBwBWidget(widget.OWWidget):
         #dynamic environment variables
         for pname in self.data['parameters']:
             pvalue=self.data['parameters'][pname]
-            sys.stderr.write("getEnv pname {} pvalue{}\n".format(pname,pvalue))
-            sys.stderr.write('checking var {} with value {} for env {}\n'.format(pname,getattr(self,pname),list(pvalue.keys())))
             if 'env' in pvalue and getattr(self,pname) is not None:
-                self.envVars[pvalue['env']] = getattr(self,pname)
-                sys.stderr.write('var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
+                checkAttr=pname+'Checked'
+                setenv=False
+                if pname in self.optionsChecked and self.optionsChecked[pname]:
+                    self.envVars[pvalue['env']] = getattr(self,pname)
+                    sys.stderr.write('optional var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
+                elif hasattr(self,checkAttr):
+                    if getattr(self,checkAttr):
+                        self.envVars[pvalue['env']] = getattr(self,pname)
+                        sys.stderr.write('optional var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
+                else:
+                    self.envVars[pvalue['env']] = getattr(self,pname)
+                    sys.stderr.write('var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
+                    
         #now assign static environment variables
         if 'env' in self.data:
             for e in self.data['env']:

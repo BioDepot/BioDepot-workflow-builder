@@ -19,7 +19,7 @@ class OWkallisto_quant(OWBwBWidget):
     icon = "/biodepot/orangebiodepot/icons/kallistoquant.png"
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
-    docker_image_tag = "0.44"
+    docker_image_tag = "0.44.0"
     inputs = [("indexFile",str,"handleInputsindexFile"),("fastqFiles",str,"handleInputsfastqFiles"),("trigger",str,"handleInputstrigger")]
     outputs = [("outputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -45,6 +45,7 @@ class OWkallisto_quant(OWBwBWidget):
     pseudoBam=pset(False)
     genomeBam=pset(False)
     gtf=pset(None)
+    multiSample=pset(1)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open("/biodepot/orangebiodepot/json/kallisto.json") as f:

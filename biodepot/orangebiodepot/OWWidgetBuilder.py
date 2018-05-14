@@ -218,7 +218,9 @@ class OWWidgetBuilder(widget.OWWidget):
         if 'parameters' in self.data and self.data['parameters']:
             for key, myDict in self.data['parameters'].items():
                 newDict={}
+                
                 if  'default' in myDict and myDict['default'] is not None:
+                    sys.stderr.write('key is {} default is {}\n'.format(key,myDict['default']))
                     #make sure that these are the correct type
                     if myDict['type'] == 'bool':
                         if myDict['default'] == 'False':
@@ -229,6 +231,7 @@ class OWWidgetBuilder(widget.OWWidget):
                             raise Exception ('{} is boolean - default values must be True or False not {}'.format(pname,myDict['default']))
                     elif 'type' in myDict and myDict['type'] == 'int':
                         newDict['default']=int(myDict['default'])
+                        sys.stderr.write('key is {} new default is {}\n'.format(key,myDict['default']))
                     elif 'type' in myDict and (myDict['type'] == 'double' or myDict['type'] == 'float') :
                         newDict['default']=float(myDict['default'])                
                     elif  'type' in myDict and (myDict['type'] == 'str' or myDict['type'] == 'file' or myDict['type'] == 'directory') :
@@ -239,9 +242,8 @@ class OWWidgetBuilder(widget.OWWidget):
                 if 'flag' in myDict:
                     newDict['flag']=myDict['flag']
                 #arguments are the same as having a null flag value
-                #parameters that are not arguments e.g. environment variables will not have a flag key    
-                if 'argument' in myDict and myDict['argument'] == True:
-                    newDict['flag']=None
+                if 'argument' in myDict and myDict['argument']:
+                    newDict['argument'] = True
                 if 'label' in myDict:
                     newDict['label']=myDict['label']
                 else:
