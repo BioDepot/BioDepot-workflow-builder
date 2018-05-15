@@ -9,6 +9,28 @@ from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 
+
+class DragAndDropList(QtGui.QListWidget):
+     #overloads the Drag and dropEvents to emit code
+     itemMoved = pyqtSignal(int, int) # Old index, new index, item
+     def __init__(self, parent=None, **args):
+         super(DragAndDropList, self).__init__(parent, **args)
+         self.setAcceptDrops(True)
+         self.setDragEnabled(True)
+         self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+         self.drag_item = None
+         self.drag_row = None
+
+     def dropEvent(self, event):
+         super(DragAndDropList, self).dropEvent(event)
+         self.itemMoved.emit(self.drag_row, self.currentRow())
+         self.drag_item = None
+         
+     def startDrag(self, supportedActions):
+         self.drag_row = self.currentRow()
+         super(DragAndDropList, self).startDrag(supportedActions)
+
+
 from AnyQt.QtWidgets import (
     QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
     QDoubleSpinBox, QComboBox, QSpinBox, QListView, QLabel,
@@ -644,9 +666,12 @@ class OWBwBWidget(widget.OWWidget):
         layoutAttr=pname+'Layout'
         setattr(self,layoutAttr,self.addBoxEdit(pname,pvalue,layout,ledit,checkbox,elements=elements,disabledFlag=disabledFlag))
     
+        
     def addBoxEdit(self,pname,pvalue,layout,ledit,checkbox,elements=None,disabledFlag=False):
         #setup boxEdit - boxEdit element values other than the list itself are not tracked and not saved in settings 
-        boxEdit=QtGui.QListWidget(self)
+        if not hasattr(self,pname):
+            setattr(self,pname,None); 
+        boxEdit=DragAndDropList(self)
         boxEdit.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
         boxEdit.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         boxEdit.setStyleSheet(":disabled { color: #282828}")
@@ -690,6 +715,9 @@ class OWBwBWidget(widget.OWWidget):
         #connects from ledit and boxEdit to buttons
         ledit.textChanged.connect(lambda: addBtn.setEnabled(bool(ledit.text())))
         boxEdit.itemSelectionChanged.connect(lambda: removeBtn.setEnabled(bool(boxEdit.selectedItems())))
+        
+        #connect to changes in drag and drop
+        boxEdit.itemMoved.connect(lambda : self.updateBoxEditValue(pname,boxEdit))
         
         #layout section
         filesBoxLeditLayout=QtGui.QVBoxLayout()

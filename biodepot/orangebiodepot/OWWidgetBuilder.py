@@ -8,6 +8,7 @@ from copy import deepcopy
 from collections import OrderedDict
 from functools import partial
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
+from orangebiodepot.util.BwBase import DragAndDropList
 from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui
@@ -18,25 +19,6 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
-class DragAndDropList(QtGui.QListWidget):
-     #overloads the Drag and dropEvents to emit code
-     itemMoved = pyqtSignal(int, int) # Old index, new index, item
-     def __init__(self, parent=None, **args):
-         super(DragAndDropList, self).__init__(parent, **args)
-         self.setAcceptDrops(True)
-         self.setDragEnabled(True)
-         self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
-         self.drag_item = None
-         self.drag_row = None
-
-     def dropEvent(self, event):
-         super(DragAndDropList, self).dropEvent(event)
-         self.itemMoved.emit(self.drag_row, self.currentRow())
-         self.drag_item = None
-         
-     def startDrag(self, supportedActions):
-         self.drag_row = self.currentRow()
-         super(DragAndDropList, self).startDrag(supportedActions)
 
 class WidgetItem():
     #each widget item has:
