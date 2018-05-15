@@ -6,18 +6,20 @@ from docker import APIClient
 from PyQt5.QtCore import QThread, pyqtSignal,QProcess, Qt
 from PyQt5 import QtWidgets, QtGui, QtCore
 import socket
+import datetime
 
 class ConsoleProcess():
     #subclass that attaches a process and pipes the output to textedit widget console widget
     def __init__(self, console=None, errorHandler=None, finishHandler=None):
         self.process=QProcess()
         self.console=console
-        self.stopped=False
+        self.cidFile=""
+        self.state='stopped'
         if console:
             self.process.readyReadStandardOutput.connect(lambda: self.writeConsole(self.process, console,self.process.readAllStandardOutput,Qt.white))
             self.process.readyReadStandardError.connect(lambda: self.writeConsole(self.process, console,self.process.readAllStandardError,Qt.red))
         if finishHandler:
-            self.process.finished.connect(lambda: finishHandler(stopped=self.stopped))
+            self.process.finished.connect(finishHandler)
             
     def writeConsole(self,process,console,read,color):
         console.setTextColor(color)
@@ -30,10 +32,20 @@ class ConsoleProcess():
         self.console.append(message)
         
     def stop(self,message=None):
-        self.stopped=True
+        self.state='stopped'
+        #we need to write our own code to 
+        with open (self.cidFile,'r') as f:
+            cid=f.read()
+        stopCmd='docker stop {} '.format(cid)
+        sys.stderr.write('Stop command: {}'.format(stopCmd))
+        os.system(stopCmd)
         self.process.kill()
+        self.cleanup()
         if message:
             self.writeMessage(message)
+            
+    def cleanup(self):
+        os.unlink(self.cidFile)
 
         
 class DockerClient:
@@ -98,11 +110,12 @@ class DockerClient:
                 env=env[1:-1]
             envs=envs+ "-e {}={} ".format(env,var)
         #create container
-        dockerCmd='docker run -i --rm --init {} {} {} {}'.format(volumeMappings,envs,name,commands)
+        consoleProc.cidFile='/tmp/'+ str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':', '.')
+        dockerCmd='docker run -i --rm --init --cidfile={} {} {} {} {}'.format(consoleProc.cidFile,volumeMappings,envs,name,commands)
         sys.stderr.write('Docker command is\n{}\n'.format(dockerCmd))
+        consoleProc.state='running'
         consoleProc.process.start('/bin/bash',['-c',dockerCmd])
-        
-        
+
         
     def create_container(self, name, volumes=None, commands=None, environment=None, hostVolumes=None):
         #hostVolues is a dict with keys being the container volumes

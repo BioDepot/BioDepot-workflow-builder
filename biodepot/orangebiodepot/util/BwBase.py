@@ -968,6 +968,7 @@ class OWBwBWidget(widget.OWWidget):
         try:
             imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
+            self.status='running'
             self.setStatusMessage('Running...')
             self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole)
         except BaseException as e:
@@ -1191,10 +1192,11 @@ class OWBwBWidget(widget.OWWidget):
     def onStopClicked(self):
         self.pConsole.stop('Stopped by user')
         self.setStatusMessage('Stopped')
+        self.status='stopped'
         self.bgui.reenableAll(self)
         self.reenableExec()
         
-    def onRunFinished(self,code=None,status=None, stopped=False):
+    def onRunFinished(self,code=None,status=None):
         self.pConsole.writeMessage("Finished")
         if code is not None:
            self.pConsole.writeMessage("Exit code is {}".format(code))
@@ -1202,12 +1204,14 @@ class OWBwBWidget(widget.OWWidget):
            self.pConsole.writeMessage("Exit status is {}".format(status))
         self.bgui.reenableAll(self)
         self.reenableExec()
-        if not stopped:
+        if self.status != 'stopped' and self.status != 'finished':
             if code or status:
                 self.setStatusMessage("Error")
-            self.setStatusMessage('Finished')
-            self.handleOutputs()
-        stopped=False
+                self.status='error'
+            else:
+                self.setStatusMessage('Finished')
+                self.satus='finished'
+                self.handleOutputs()
     
     def onRunError(self,error):
         self.bgui.reenableAll(self)
