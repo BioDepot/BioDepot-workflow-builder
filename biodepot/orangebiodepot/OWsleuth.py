@@ -21,7 +21,7 @@ class OWsleuth(OWBwBWidget):
     docker_image_name = "biodepot/ubuntu-sleuth"
     docker_image_tag = "18.04-4.5.1-py27-0.29"
     inputs = [("trigger",str,"handleInputstrigger")]
-    outputs = [("OutputDirectory",str),("topGenes",Orange.data.Table)]
+    outputs = [("output_file",str),("topGenes",Orange.data.Table)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     runTriggers=pset([])
@@ -56,9 +56,9 @@ class OWsleuth(OWBwBWidget):
         self.handleInputs(value, "trigger", sourceId=None)
     def handleOutputs(self):
         outputValue=None
-        if hasattr(self,"OutputDirectory"):
-            outputValue=getattr(self,"OutputDirectory")
-        self.send("OutputDirectory", outputValue)
+        if hasattr(self,"output_file"):
+            outputValue=getattr(self,"output_file")
+        self.send("output_file", outputValue)
         outputValue=None
         if hasattr(self,"topGenes"):
             outputValue=getattr(self,"topGenes")
