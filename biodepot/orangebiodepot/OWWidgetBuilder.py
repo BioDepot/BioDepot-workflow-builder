@@ -190,7 +190,7 @@ class OWWidgetBuilder(widget.OWWidget):
             self.data.pop('volumes',None)
         #replace text str with type(str)
         for pname in ('inputs','outputs'):
-            if pname in self.data:
+            if pname in self.data and self.data[pname]:
                 for key, myDict in self.data[pname].items():
                     if myDict['type'] == 'str':
                         myDict['type'] = type('str')
