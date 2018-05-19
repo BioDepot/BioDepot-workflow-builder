@@ -11,25 +11,39 @@ from orangebiodepot.util.DockerClient import DockerClient
 from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWStarIndex(OWBwBWidget):
-    name = "Star Index"
-    description = "Creates reference for STAR align "
+class OWStarindex(OWBwBWidget):
+    name = "Star index"
+    description = "Construct indices for STAR aligner "
     category = "RNA-seq"
     priority = 10
     icon = "/biodepot/orangebiodepot/icons/starIndex.png"
     want_main_area = False
     docker_image_name = "biodepot/alpine-star"
-    docker_image_tag = "3.7:020201"
-    inputs = [("trigger",str,"handleInputstrigger")]
-    outputs = [("outputDir",str)]
+    docker_image_tag = "3.7-020201"
+    inputs = [("Trigger",str,"handleInputsTrigger")]
+    outputs = [("genomeDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     runTriggers=pset([])
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
+    genomeDir=pset(None)
     genomeFastaFiles=pset([])
-    genomeChrBinNbits=pset(18)
+    genomeChrBinNbits=pset("18")
+    genomeSAindexNbases=pset(14)
+    genomeSAsparseD=pset(1)
+    genomeSuffixLengthMax=pset(-1)
+    runThreadN=pset(1)
+    sjdbGTFfile=pset(None)
+    sjdbFileChrStartEnd =pset([])
+    sjdbGTFchrPrefix =pset("chr")
+    sjdbGTFfeatureExon=pset("exon")
+    sjdbGTFtagExonParentTranscript=pset("transcript_id")
+    sjdbGTFtagExonParentGene=pset("gene_id")
+    sjdbOverhang=pset(100)
+    sjdbScore=pset(2)
+    sjdbInsertSave =pset("Basic")
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open("/biodepot/orangebiodepot/json/starIndex.json") as f:
@@ -38,10 +52,10 @@ class OWStarIndex(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputstrigger(self, value, sourceId=None):
-        self.handleInputs(value, "trigger", sourceId=None)
+    def handleInputsTrigger(self, value, sourceId=None):
+        self.handleInputs(value, "Trigger", sourceId=None)
     def handleOutputs(self):
         outputValue=None
-        if hasattr(self,"outputDir"):
-            outputValue=getattr(self,"outputDir")
-        self.send("outputDir", outputValue)
+        if hasattr(self,"genomeDir"):
+            outputValue=getattr(self,"genomeDir")
+        self.send("genomeDir", outputValue)

@@ -52,3 +52,4 @@ class OWDtoxsAnalysis(OWBwBWidget):
         data = tsvReader.read()
         self.send("ResultsDirectory", resultsDir)
         self.send("Top40", data)
+

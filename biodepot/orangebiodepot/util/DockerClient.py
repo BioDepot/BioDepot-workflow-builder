@@ -23,7 +23,7 @@ class ConsoleProcess():
             
     def writeConsole(self,process,console,read,color):
         console.setTextColor(color)
-        console.append(read().data().decode('utf8'))
+        console.append(read().data().decode('utf-8',errors="ignore"))
         #console.append('</span>')
     
     def writeMessage(self,message,color=Qt.green):
