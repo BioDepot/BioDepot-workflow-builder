@@ -728,7 +728,7 @@ class OWBwBWidget(widget.OWWidget):
         label=QtGui.QLabel(pvalue['label']+':')
         label.setAlignment(Qt.AlignTop)
         layout.addWidget(label)
-        layout.addWidget(myBox,width=2,linefeed=1)
+        layout.addWidget(myBox,width=2,linefeed=2)
         #line layout     
         lineLayout=BwbGridLayout()
         

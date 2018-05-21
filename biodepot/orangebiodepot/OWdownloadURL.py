@@ -28,9 +28,10 @@ class OWdownloadURL(OWBwBWidget):
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
-    directory=pset(None)
     URL=pset([])
     decompress=pset(True)
+    directory=pset(None)
+    concatenateFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open("/biodepot/orangebiodepot/json/downloadURL.json") as f:
