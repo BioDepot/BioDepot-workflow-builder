@@ -171,8 +171,11 @@ class OWWidgetBuilder(widget.OWWidget):
             if hasattr(self,attr):
                 self.data[attr]=deepcopy(getattr(self,attr))
         #separate multiple commands
-        if 'command' in self.data and self.data['command'] and '\n' in self.data['command']: 
-            self.data['command']=self.data['command'].split('\n')
+        if 'command' in self.data and self.data['command']: 
+            if '\n' in self.data['command']:
+                self.data['command']=self.data['command'].split('\n')
+            else:
+                self.data['command']=[self.data['command']]
         
         #add persistance -all for now - add option to for transient data later
         self.data['persistentSettings']='all'
