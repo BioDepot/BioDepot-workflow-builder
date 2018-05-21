@@ -168,12 +168,15 @@ class OWWidgetBuilder(widget.OWWidget):
         self.data={}
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
             'priority','icon','inputs','outputs','volumes','parameters','command','autoMap'):
-            self.data[attr]=deepcopy(getattr(self,attr))
+            if hasattr(self,attr):
+                self.data[attr]=deepcopy(getattr(self,attr))
         #separate multiple commands
-        self.data['command']=self.data['command'].split('\n')
+        if 'command' in self.data and self.data['command'] and '\n' in self.data['command']: 
+            self.data['command']=self.data['command'].split('\n')
         
-        #add persistance
+        #add persistance -all for now - add option to for transient data later
         self.data['persistentSettings']='all'
+        
         #add required elements
         reqList=[]
         if 'parameters' in self.data and self.data['parameters']:

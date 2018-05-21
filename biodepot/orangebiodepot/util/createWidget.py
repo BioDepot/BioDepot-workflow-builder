@@ -70,14 +70,15 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
                     inputStr= inputStr+ '("{}",{},"{}"),'.format(attr,deClass(str(values['type'])),values['callback'])
                 else:
                     inputStr= inputStr+ '("{}",{},"handleInputs{}"),'.format(attr,deClass(str(values['type'])),attr)
-        inputStr=inputStr[:-1]+']'
-        f.write('    inputs = {}\n'.format(inputStr))
-        outputStr='['
+            inputStr=inputStr[:-1]+']'
+            f.write('    inputs = {}\n'.format(inputStr))
+        
         if 'outputs' in data and data['outputs']:
+            outputStr='['
             for attr, value  in data['outputs'].items():
                 outputStr= outputStr+ '("{}",{}),'.format(attr,deClass(str(value['type'])))
-        outputStr=outputStr[:-1]+']'
-        f.write('    outputs = {}\n'.format(outputStr))
+            outputStr=outputStr[:-1]+']'
+            f.write('    outputs = {}\n'.format(outputStr))
         #permanent settings
         f.write('    pset=functools.partial(settings.Setting,schema_only=True)\n')
         f.write('    runMode=pset(0)\n')
