@@ -727,13 +727,14 @@ class OWBwBWidget(widget.OWWidget):
         startCol=0
         label=QtGui.QLabel(pvalue['label']+':')
         label.setAlignment(Qt.AlignTop)
+        if checkbox:
+            layout.addWidget(checkbox)
         layout.addWidget(label)
         layout.addWidget(myBox,width=2,linefeed=2)
         #line layout     
         lineLayout=BwbGridLayout()
         
-        if checkbox:
-            lineLayout.addWidget(checkbox)
+
         lineLayout.addWidget(ledit)
         if browseBtn:
             lineLayout.addWidget(browseBtn)
@@ -1233,8 +1234,8 @@ class OWBwBWidget(widget.OWWidget):
         self.bgui.reenableAll(self)
         self.reenableExec()
         if self.status != 'stopped' and self.status != 'finished':
-            if code or status:
-                self.setStatusMessage("Error")
+            if status:
+                self.setStatusMessage("Error Code {}".format(code))
                 self.status='error'
             else:
                 self.setStatusMessage('Finished')

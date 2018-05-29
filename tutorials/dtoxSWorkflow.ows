@@ -1,30 +1,30 @@
 <?xml version='1.0' encoding='utf-8'?>
 <scheme description="" title="" version="2.0">
 	<nodes>
-		<node id="0" name="downloadURL" position="(105.0, 273.0)" project_name="Bwb" qualified_name="orangebiodepot.OWdownloadURL.OWdownloadURL" title="Download data" version="" />
-		<node id="1" name="Dtoxs Analysis" position="(467.0, 271.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxSAnalyses.OWDtoxsAnalysis" title="Dtoxs Analysis" version="" />
-		<node id="2" name="downloadURL" position="(273.0, 116.0)" project_name="Bwb" qualified_name="orangebiodepot.OWdownloadURL.OWdownloadURL" title="Download complete counts" version="" />
-		<node id="3" name="Data Table" position="(628.0, 272.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Data Table" version="" />
-		<node id="4" name="DtoxSAlignment" position="(272.0, 272.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxSAlignment.OWDtoxSAlignment" title="DtoxSAlignment" version="" />
+		<node id="0" name="downloadURL" position="(217.0, 231.0)" project_name="Bwb" qualified_name="orangebiodepot.OWdownloadURL.OWdownloadURL" title="Download sample directories" version="" />
+		<node id="1" name="downloadURL" position="(397.0, 86.0)" project_name="Bwb" qualified_name="orangebiodepot.OWdownloadURL.OWdownloadURL" title="Download complete Counts" version="" />
+		<node id="2" name="Dtoxs Analysis" position="(630.0, 231.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxSAnalyses.OWDtoxsAnalysis" title="Dtoxs Analysis" version="" />
+		<node id="3" name="Data Table" position="(824.0, 231.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Data Table" version="" />
+		<node id="4" name="DtoxSAlignment" position="(410.0, 230.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxSAlignment.OWDtoxSAlignment" title="DtoxSAlignment" version="" />
 	</nodes>
 	<links>
-		<link enabled="true" id="0" sink_channel="Data" sink_node_id="3" source_channel="Top40" source_node_id="1" />
-		<link enabled="true" id="1" sink_channel="RepositoryDirectory" sink_node_id="1" source_channel="topDir" source_node_id="4" />
-		<link enabled="true" id="2" sink_channel="topDir" sink_node_id="4" source_channel="directory" source_node_id="0" />
+		<link enabled="true" id="0" sink_channel="Data" sink_node_id="3" source_channel="Top40" source_node_id="2" />
+		<link enabled="true" id="1" sink_channel="RepositoryDirectory" sink_node_id="2" source_channel="topDir" source_node_id="4" />
+		<link enabled="true" id="2" sink_channel="trigger" sink_node_id="4" source_channel="directory" source_node_id="0" />
 	</links>
 	<annotations />
 	<thumbnail />
 	<node_properties>
-		<properties format="literal" node_id="0">{'URL': ['https://drive.google.com/file/d/1rI9pEIN3noWDedKk8biNS4S3kv-hni6w/view?usp=sharing'], 'controlAreaVisible': True, 'decompress': True, 'directory': '/data/LINCS', 'inputConnectionsStore': {}, 'optionsChecked': {'decompressdecompress': False, 'saveLog': False, 'decompress': False}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01;\x00\x00\x05P\x00\x00\x03D\x00\x00\x02\xe7\x00\x00\x01;\x00\x00\x05P\x00\x00\x03D\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
-		<properties format="literal" node_id="1">{'ConfigurationFile': '/data/LINCS/Configs/Configs.LINCS.Dataset.Gene.LINCS.20150409.tsv', 'RepositoryDirectory': '/data/LINCS', 'controlAreaVisible': True, 'inputConnectionsStore': {'Trigger': [None], 'RepositoryDirectory': [None]}, 'optionsChecked': {'saveLog': False}, 'runMode': 1, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x04\xf3\x00\x00\x02\xe0\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x04\xf3\x00\x00\x02\xe0\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
-		<properties format="literal" node_id="2">{'URL': ['https://drive.google.com/file/d/1JG37zedb4ZfVPUENQVXPbm-_6MtD_LBo/view?usp=sharing'], 'controlAreaVisible': True, 'decompress': True, 'directory': '/data/LINCS', 'inputConnectionsStore': {}, 'optionsChecked': {'decompressdecompress': False, 'saveLog': False, 'decompress': False}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x06\xaa\x00\x00\x03I\x00\x00\x00\x00\x00\x00\x00\x18\x00\x00\x06\xaa\x00\x00\x03F\x00\x00\x00\x00\x02\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
+		<properties format="literal" node_id="0">{'URL': ['https://drive.google.com/file/d/1rI9pEIN3noWDedKk8biNS4S3kv-hni6w/view?usp=sharing'], 'concatenateFile': '', 'controlAreaVisible': True, 'decompress': True, 'directory': '/data', 'inputConnectionsStore': {}, 'optionsChecked': {'decompress': False, 'saveLog': False, 'concatenateFile': False}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xb2\x00\x00\x01\x07\x00\x00\x06\x00\x00\x00\x03c\x00\x00\x02\xb2\x00\x00\x01\x1f\x00\x00\x06\x00\x00\x00\x03`\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
+		<properties format="literal" node_id="1">{'URL': ['https://drive.google.com/file/d/1JG37zedb4ZfVPUENQVXPbm-_6MtD_LBo/view?usp=sharing'], 'concatenateFile': '', 'controlAreaVisible': True, 'decompress': True, 'directory': '/data/LINCS', 'inputConnectionsStore': {}, 'optionsChecked': {'decompress': False, 'saveLog': False, 'concatenateFile': False}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xb2\x00\x00\x00\x9b\x00\x00\x058\x00\x00\x03h\x00\x00\x02\xb2\x00\x00\x00\xb3\x00\x00\x058\x00\x00\x03e\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
+		<properties format="literal" node_id="2">{'ConfigurationFile': '/data/LINCS/Configs/Configs.LINCS.Dataset.Gene.LINCS.20150409.tsv', 'RepositoryDirectory': '/data/LINCS', 'controlAreaVisible': True, 'inputConnectionsStore': {'RepositoryDirectory': [None]}, 'optionsChecked': {'saveLog': False}, 'runMode': 1, 'runTriggers': ['Trigger'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x03\x91\x00\x00\x00\x1e\x00\x00\x06]\x00\x00\x02@\x00\x00\x03\x91\x00\x00\x00\x1e\x00\x00\x06]\x00\x00\x02@\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
 		<properties format="pickle" node_id="3">gAN9cQAoWAsAAABhdXRvX2NvbW1pdHEBiFgOAAAAY29sb3JfYnlfY2xhc3NxAohYEgAAAGNvbnRy
 b2xBcmVhVmlzaWJsZXEDiFgOAAAAZGlzdF9jb2xvcl9SR0JxBChL3EvcS9xL/3RxBVgTAAAAc2F2
-ZWRXaWRnZXRHZW9tZXRyeXEGQzIB2dDLAAIAAAAAAbsAAACDAAAE2gAAAnYAAAG7AAAAgwAABNoA
-AAJ2AAAAAAAAAAAGq3EHWAsAAABzZWxlY3Rfcm93c3EIiFgVAAAAc2hvd19hdHRyaWJ1dGVfbGFi
+ZWRXaWRnZXRHZW9tZXRyeXEGQzIB2dDLAAIAAAAAAYYAAAA3AAAEpQAAAioAAAGGAAAANwAABKUA
+AAIqAAAAAAAAAAAGq3EHWAsAAABzZWxlY3Rfcm93c3EIiFgVAAAAc2hvd19hdHRyaWJ1dGVfbGFi
 ZWxzcQmIWBIAAABzaG93X2Rpc3RyaWJ1dGlvbnNxColYCwAAAF9fdmVyc2lvbl9fcQtLAVgQAAAA
 Y29udGV4dF9zZXR0aW5nc3EMXXENY09yYW5nZS53aWRnZXRzLnNldHRpbmdzCkNvbnRleHQKcQ4p
-gXEPfXEQKFgEAAAAdGltZXERR0HWwCJCoSWDWAYAAAB2YWx1ZXNxEn1xEyhYDQAAAHNlbGVjdGVk
+gXEPfXEQKFgEAAAAdGltZXERR0HWw3RVWfJsWAYAAAB2YWx1ZXNxEn1xEyhYDQAAAHNlbGVjdGVk
 X2NvbHNxFF1xFVgNAAAAc2VsZWN0ZWRfcm93c3EWXXEXaAtLAXVYCgAAAGF0dHJpYnV0ZXNxGH1x
 GShYBAAAAENlbGxxGl1xG1gBAAAAQXEcYVgFAAAAUGxhdGVxHV1xHlgBAAAAMXEfYVgKAAAAQ29u
 ZGl0aW9uMXEgXXEhWAQAAABDVFJMcSJhWAoAAABDb25kaXRpb24ycSNdcSQoWAMAAABBTEVxJVgD
@@ -34,6 +34,6 @@ WAcAAABTVU4rVVJTcTBYAwAAAFRSU3ExWAcAAABUUlMrRE9NcTJYBwAAAFRSUytMT1BxM1gHAAAA
 VFJTK1VSU3E0ZVgFAAAAbG9nRkNxNUsCWAYAAABsb2dDUE1xNksCWAYAAABQVmFsdWVxN0sCdVgF
 AAAAbWV0YXNxOH1xOVgEAAAAR2VuZXE6SwNzdWJhdS4=
 </properties>
-		<properties format="literal" node_id="4">{'barcodesFile': 'barcodes_trugrade_96_set4.dat', 'controlAreaVisible': True, 'inputConnectionsStore': {'topDir': [None]}, 'lanes': 6, 'optionsChecked': {'saveLog': False}, 'runMode': 1, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x04\x97\x00\x00\x02^\x00\x00\x02\xe7\x00\x00\x01k\x00\x00\x04\x97\x00\x00\x02[\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'seriesName': '20150409', 'topDir': '/data/LINCS', 'triggerReady': {}, '__version__': 1}</properties>
+		<properties format="literal" node_id="4">{'barcodesFile': 'barcodes_trugrade_96_set4.dat', 'controlAreaVisible': True, 'inputConnectionsStore': {'trigger': [None]}, 'lanes': 6, 'optionsChecked': {'saveLog': False}, 'runMode': 1, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x057\x00\x00\x03\x0c\x00\x00\x02\xe7\x00\x00\x01k\x00\x00\x057\x00\x00\x03\t\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'seriesName': '20150409', 'topDir': '/data/LINCS', 'triggerReady': {}, '__version__': 1}</properties>
 	</node_properties>
 </scheme>
