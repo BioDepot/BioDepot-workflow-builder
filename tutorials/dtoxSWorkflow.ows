@@ -1,21 +1,21 @@
 <?xml version='1.0' encoding='utf-8'?>
 <scheme description="" title="" version="2.0">
 	<nodes>
-		<node id="0" name="downloadURL" position="(217.0, 231.0)" project_name="Bwb" qualified_name="orangebiodepot.OWdownloadURL.OWdownloadURL" title="Download sample directories" version="" />
+		<node id="0" name="downloadURL" position="(222.0, 239.0)" project_name="Bwb" qualified_name="orangebiodepot.OWdownloadURL.OWdownloadURL" title="Download sample directories" version="" />
 		<node id="1" name="downloadURL" position="(432.0, 83.0)" project_name="Bwb" qualified_name="orangebiodepot.OWdownloadURL.OWdownloadURL" title="Download complete Counts" version="" />
-		<node id="2" name="Data Table" position="(782.0, 232.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Data Table" version="" />
-		<node id="3" name="DtoxSAlignment" position="(411.0, 231.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxSAlignment.OWDtoxSAlignment" title="DtoxSAlignment" version="" />
-		<node id="4" name="Dtoxs Analysis" position="(606.0, 231.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxSAnalyses.OWDtoxsAnalysis" title="Dtoxs Analysis" version="" />
+		<node id="2" name="Data Table" position="(783.0, 236.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Data Table" version="" />
+		<node id="3" name="Dtoxs Analysis" position="(597.0, 236.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxSAnalyses.OWDtoxsAnalysis" title="Dtoxs Analysis" version="" />
+		<node id="4" name="DtoxSAlignment" position="(421.0, 238.0)" project_name="Bwb" qualified_name="orangebiodepot.OWDtoxSAlignment.OWDtoxSAlignment" title="DtoxSAlignment" version="" />
 	</nodes>
 	<links>
-		<link enabled="true" id="0" sink_channel="trigger" sink_node_id="3" source_channel="directory" source_node_id="0" />
-		<link enabled="true" id="1" sink_channel="Data" sink_node_id="2" source_channel="Top40" source_node_id="4" />
-		<link enabled="true" id="2" sink_channel="RepositoryDirectory" sink_node_id="4" source_channel="topDir" source_node_id="3" />
+		<link enabled="true" id="0" sink_channel="Data" sink_node_id="2" source_channel="Top40" source_node_id="3" />
+		<link enabled="true" id="1" sink_channel="trigger" sink_node_id="4" source_channel="directory" source_node_id="0" />
+		<link enabled="true" id="2" sink_channel="Trigger" sink_node_id="3" source_channel="topDir" source_node_id="4" />
 	</links>
 	<annotations />
 	<thumbnail />
 	<node_properties>
-		<properties format="literal" node_id="0">{'URL': ['https://drive.google.com/file/d/1rI9pEIN3noWDedKk8biNS4S3kv-hni6w/view?usp=sharing'], 'concatenateFile': '', 'controlAreaVisible': True, 'decompress': True, 'directory': '/data', 'inputConnectionsStore': {}, 'optionsChecked': {'decompress': False, 'saveLog': False, 'concatenateFile': False}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xb2\x00\x00\x01\x07\x00\x00\x06\x00\x00\x00\x03c\x00\x00\x02\xb2\x00\x00\x01\x1f\x00\x00\x06\x00\x00\x00\x03`\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
+		<properties format="literal" node_id="0">{'URL': ['https://drive.google.com/open?id=16QHgiI_9QYuCukjZQmw03u7w374R3kt1'], 'concatenateFile': '', 'controlAreaVisible': True, 'decompress': True, 'directory': '/data', 'inputConnectionsStore': {}, 'optionsChecked': {'decompress': False, 'saveLog': False, 'concatenateFile': False}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xb2\x00\x00\x01\x07\x00\x00\x06\x00\x00\x00\x03c\x00\x00\x02\xb2\x00\x00\x01\x1f\x00\x00\x06\x00\x00\x00\x03`\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
 		<properties format="literal" node_id="1">{'URL': ['https://drive.google.com/file/d/1JG37zedb4ZfVPUENQVXPbm-_6MtD_LBo/view?usp=sharing'], 'concatenateFile': '', 'controlAreaVisible': True, 'decompress': True, 'directory': '/data/LINCS', 'inputConnectionsStore': {}, 'optionsChecked': {'decompress': False, 'saveLog': False, 'concatenateFile': False}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xb2\x00\x00\x00\x9b\x00\x00\x058\x00\x00\x03h\x00\x00\x02\xb2\x00\x00\x00\xb3\x00\x00\x058\x00\x00\x03e\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
 		<properties format="pickle" node_id="2">gAN9cQAoWAsAAABhdXRvX2NvbW1pdHEBiFgOAAAAY29sb3JfYnlfY2xhc3NxAohYEgAAAGNvbnRy
 b2xBcmVhVmlzaWJsZXEDiFgOAAAAZGlzdF9jb2xvcl9SR0JxBChL3EvcS9xL/3RxBVgTAAAAc2F2
@@ -23,7 +23,7 @@ ZWRXaWRnZXRHZW9tZXRyeXEGQzIB2dDLAAIAAAAAAYYAAAA3AAAEpQAAAioAAAGGAAAANwAABKUA
 AAIqAAAAAAAAAAAGq3EHWAsAAABzZWxlY3Rfcm93c3EIiFgVAAAAc2hvd19hdHRyaWJ1dGVfbGFi
 ZWxzcQmIWBIAAABzaG93X2Rpc3RyaWJ1dGlvbnNxColYCwAAAF9fdmVyc2lvbl9fcQtLAVgQAAAA
 Y29udGV4dF9zZXR0aW5nc3EMXXENY09yYW5nZS53aWRnZXRzLnNldHRpbmdzCkNvbnRleHQKcQ4p
-gXEPfXEQKFgEAAAAdGltZXERR0HWw3W9GfhwWAYAAAB2YWx1ZXNxEn1xEyhYDQAAAHNlbGVjdGVk
+gXEPfXEQKFgEAAAAdGltZXERR0HWxICk6UNtWAYAAAB2YWx1ZXNxEn1xEyhYDQAAAHNlbGVjdGVk
 X2NvbHNxFF1xFVgNAAAAc2VsZWN0ZWRfcm93c3EWXXEXaAtLAXVYCgAAAGF0dHJpYnV0ZXNxGH1x
 GShYBAAAAENlbGxxGl1xG1gBAAAAQXEcYVgFAAAAUGxhdGVxHV1xHlgBAAAAMXEfYVgKAAAAQ29u
 ZGl0aW9uMXEgXXEhWAQAAABDVFJMcSJhWAoAAABDb25kaXRpb24ycSNdcSQoWAMAAABBTEVxJVgD
@@ -33,7 +33,7 @@ WAcAAABTVU4rVVJTcTBYAwAAAFRSU3ExWAcAAABUUlMrRE9NcTJYBwAAAFRSUytMT1BxM1gHAAAA
 VFJTK1VSU3E0ZVgFAAAAbG9nRkNxNUsCWAYAAABsb2dDUE1xNksCWAYAAABQVmFsdWVxN0sCdVgF
 AAAAbWV0YXNxOH1xOVgEAAAAR2VuZXE6SwNzdWJhdS4=
 </properties>
-		<properties format="literal" node_id="3">{'barcodesFile': 'barcodes_trugrade_96_set4.dat', 'controlAreaVisible': True, 'inputConnectionsStore': {'trigger': [None]}, 'lanes': 6, 'optionsChecked': {'saveLog': False}, 'runMode': 2, 'runTriggers': ['trigger'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01;\x00\x00\x057\x00\x00\x02\xf4\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x057\x00\x00\x02\xf1\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'seriesName': '20150409', 'topDir': '/data/LINCS', 'triggerReady': {'trigger': True}, '__version__': 1}</properties>
-		<properties format="literal" node_id="4">{'ConfigurationFile': '/data/LINCS/Configs/Configs.LINCS.Dataset.Gene.LINCS.20150409.tsv', 'RepositoryDirectory': '/data/LINCS', 'controlAreaVisible': True, 'inputConnectionsStore': {'RepositoryDirectory': [None]}, 'optionsChecked': {'saveLog': False}, 'runMode': 1, 'runTriggers': ['Trigger'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x03\x91\x00\x00\x00\x1e\x00\x00\x06]\x00\x00\x02@\x00\x00\x03\x91\x00\x00\x00\x1e\x00\x00\x06]\x00\x00\x02@\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {'Trigger': False}, '__version__': 1}</properties>
+		<properties format="literal" node_id="3">{'ConfigurationFile': '/data/LINCS/Configs/Configs.LINCS.Dataset.Gene.LINCS.20150409.tsv', 'RepositoryDirectory': '/data/LINCS', 'controlAreaVisible': True, 'inputConnectionsStore': {}, 'optionsChecked': {'saveLog': False}, 'runMode': 2, 'runTriggers': ['Trigger'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x03\x91\x00\x00\x00\x1e\x00\x00\x06]\x00\x00\x02@\x00\x00\x03\x91\x00\x00\x00\x1e\x00\x00\x06]\x00\x00\x02@\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {'Trigger': True}, '__version__': 1}</properties>
+		<properties format="literal" node_id="4">{'barcodesFile': 'barcodes_trugrade_96_set4.dat', 'controlAreaVisible': True, 'inputConnectionsStore': {}, 'lanes': 6, 'optionsChecked': {'saveLog': False}, 'runMode': 2, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01;\x00\x00\x057\x00\x00\x02\xd9\x00\x00\x02\xe7\x00\x00\x01;\x00\x00\x057\x00\x00\x02\xd9\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'seriesName': '20150409', 'topDir': '/data/LINCS', 'triggerReady': {}, '__version__': 1}</properties>
 	</node_properties>
 </scheme>

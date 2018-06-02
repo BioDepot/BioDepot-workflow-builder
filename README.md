@@ -220,24 +220,6 @@ The widget is the main unit of the workflow. Available  widgets are available in
 ### Detailed description of individual widgets
 
 
-#### Custom container widget
-
-This widget is designed to facilitate the task of importing existing scripts and executables into Bwb without writing a full widget. Three elements are specified, a container with the required executables and dependencies, a set of mount points that point to where the input and output files will reside, and a starting command, for example to run a script. The example below shows how this can be used to run an R script that converts bamfiles to counts. Python and Perl scripts can be run changing the container to one that has Python and/or Perl installed.  Stock containers for all the major scripting languages and packages such as Bioconductor are available on Docker Hub.
-
-![ ](/docs/images/image7.png  "Custom container widget")
- 
-![ ](/docs/images/image17.png  "Custom container widget form")
-
-#### Load CSV
-
-This widget plays a role as bridge between CSV file and the [Data Table] widget of Orange. It widget support two kind of sources (channels): a CSV file or a directory. If the source is a directory, the widget will scan that folder and list all CSV or TSV files. The CSV or TSV file will be loaded when user select them or specify the particular file name.
-
-![ ](/docs/images/image18.png  "Load CSV widget")
-
-![ ](/docs/images/image14.png  "Load CSV inputs")
-
-
-The above example showsthe output of _Bam to Counts connected_ to the Directory of _Load Counts Table_. Once the procedure Bam to Counts finished, it will send <code><em>/data/bamfiles</em></code> to [Load CSV] widget, the [Load CSV] widget will scan this folder list all *.csv or *.tsv files.
 
 
 ## WIDGET DEVELOPMENT GUIDE
@@ -256,6 +238,7 @@ Alternatively the image can be built from source using the Dockerfile
 cd <github repo>
 docker build -f ./Dockerfile-widgets -t biodepot/bwb-widget-dev .
 ```
+As the development widget is not yet linked to the github, it is better to build the widget locally
 
 ###Overview of widgets and pipelines
 
@@ -287,8 +270,11 @@ Mount points (i.e. how should the internally written datafiles be mapped to the 
 Thus a Bwb widget must obtain information from this information either from inputs or through the GUI. Only dynamic parameters need to come from inputs. The number of required inputs is fairly small and allows us to define the widget with a fairly simple set of parameters that can be stored in a json file and used to automatically create the widget python file as described in the next section
 
 
-#### Automated generation of widgets from json descriptor files
-We have greatly simplified and automated the widget development process. The user provides the details of the executable or script, the inputs, outputs, flags and arguments in a json file. The createWidget scripit then creates the Python script and copies it to the correct location. The widget then appears on the next launch of the Bwb process which can be done without closing the container. This is made possible by refactoring and abstracting the code in a BwBase class.
+#### Generation of widgets using the widget builder
+
+We have greatly simplified and automated the widget development process. The user provides the details of the executable or script, the inputs, outputs, flags and arguments by filling a form provided by the widget builder. This is then converted into a json file which stores the parameters. A barebones python widget file is also created. This instantiates the BwBase base class which provides all the necessary functionality. The user can supersede the default implementation by adding his or her own code.
+
+The widget then appears on the next launch of the Bwb process which can be done without closing the container. This is made possible by refactoring and abstracting the code in a BwBase class.
 
 The construction of a widget is reduced to editing a Json file. For more complicated widgets - the automatically produced python script can be customized and the defaults extended or overridden if desired The fields are described below.
 

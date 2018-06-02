@@ -45,11 +45,14 @@ class OWDtoxsAnalysis(OWBwBWidget):
     def handleInputsTrigger(self, value, sourceId=None):
         self.handleInputs(value, "Trigger", sourceId=None)
     def handleOutputs(self):
-        resultsDir=os.path.join(self.RepositoryDirectory,'Results') 
+        resultsDir=os.path.join(getattr(self,"RepositoryDirectory"), 'Results');
+        self.send("ResultsDirectory",resultsDir)
         tsvFile = os.path.join(resultsDir, 'FDR-0.1/TOP-40.tsv');
         tsvReader = FileFormat.get_reader(tsvFile)
-        data = None
-        data = tsvReader.read()
-        self.send("ResultsDirectory", resultsDir)
-        self.send("Top40", data)
-
+        if os.path.isfile(tsvFile):
+            try:
+                data = tsvReader.read()
+            except Exception as e:
+                sys.stderr.write('unable to read output data exception {}\n'.format(e.message))
+            return
+            self.send("Top40", data)
