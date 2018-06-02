@@ -19,7 +19,7 @@ class OWDtoxSAlignment(OWBwBWidget):
     icon = "/biodepot/orangebiodepot/icons/dtoxs-alignment2.svg"
     want_main_area = False
     docker_image_name = "biodepot/dtoxs_alignment"
-    docker_image_tag = "1.0"
+    docker_image_tag = "alpine-bwa-python-3.7-0.7.15-r1140-2.7.14-1.0"
     inputs = [("barcodesFile",str,"handleInputsbarcodesFile"),("topDir",str,"handleInputstopDir"),("trigger",str,"handleInputstrigger")]
     outputs = [("topDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)

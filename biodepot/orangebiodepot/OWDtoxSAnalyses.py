@@ -19,7 +19,7 @@ class OWDtoxsAnalysis(OWBwBWidget):
     icon = "/biodepot/orangebiodepot/icons/dtoxs-analysis2.svg"
     want_main_area = False
     docker_image_name = "biodepot/dtoxs_analysis"
-    docker_image_tag = "1.0"
+    docker_image_tag = "ubuntu-bioc-r-16.04-3.6-3.43-1.0"
     inputs = [("RepositoryDirectory",str,"handleInputsRepositoryDirectory"),("ConfigurationFile",str,"handleInputsConfigurationFile"),("Trigger",str,"handleInputsTrigger")]
     outputs = [("ResultsDirectory",str),("Top40",Orange.data.Table)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -49,10 +49,6 @@ class OWDtoxsAnalysis(OWBwBWidget):
         self.send("ResultsDirectory",resultsDir)
         tsvFile = os.path.join(resultsDir, 'FDR-0.1/TOP-40.tsv');
         tsvReader = FileFormat.get_reader(tsvFile)
-        if os.path.isfile(tsvFile):
-            try:
-                data = tsvReader.read()
-            except Exception as e:
-                sys.stderr.write('unable to read output data exception {}\n'.format(e.message))
-            return
-            self.send("Top40", data)
+        data = tsvReader.read()
+        self.send("Top40", data)
+
