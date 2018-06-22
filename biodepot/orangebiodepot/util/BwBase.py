@@ -30,7 +30,6 @@ class DragAndDropList(QtGui.QListWidget):
          self.drag_row = self.currentRow()
          super(DragAndDropList, self).startDrag(supportedActions)
 
-
 from AnyQt.QtWidgets import (
     QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
     QDoubleSpinBox, QComboBox, QSpinBox, QListView, QLabel,
@@ -238,7 +237,10 @@ class OWBwBWidget(widget.OWWidget):
         
         #keep track of gui elements associated with each attribute
         self.bgui=BwbGuiElements()
+        
         #For compatibility if triggers are not being kept
+        
+        
         if not hasattr(self,'triggerReady'):
             self.triggerReady={}
         
@@ -494,9 +496,9 @@ class OWBwBWidget(widget.OWWidget):
             else:
                 setattr(self,pname,float(default))
         if addCheckbox:
-            (checkBox,mySpin)=gui.spin(box, self, pname, minv=1, maxv=1000000000, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
+            (checkBox,mySpin)=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
         else:
-             mySpin=gui.spin(box, self, pname, minv=1, maxv=1000000000, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
+             mySpin=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
            
         if getattr(self,pname) is None:
             mySpin.clear()
@@ -846,13 +848,17 @@ class OWBwBWidget(widget.OWWidget):
             self.runTriggers.pop(attr)
             self.triggerReady.pop(attr)
     
-    def checkTrigger(self):
+    def checkTrigger(self,inputReceived=False):
         #this should be checked any time there is a change
+        #but only triggers when an input is received
         if self.runMode ==0: #manual - only go on start button
             return
         elif self.runMode ==1: #automatic same as pushing start button
             self.onRunClicked()
-        elif self.runTriggers:            
+            return
+        elif self.runTriggers:
+            if not inputReceived:
+                return            
             #check if the input triggers are set
             for trigger in self.runTriggers:
                 if trigger not in self.triggerReady:
@@ -960,7 +966,7 @@ class OWBwBWidget(widget.OWWidget):
             self.inputConnections.add(attr,sourceId)
             sys.stderr.write('sig handler adding input: attr {} value {}\n'.format(attr,value,))
             setattr(self,attr,value)
-            self.checkTrigger()
+            self.checkTrigger(inputReceived=True)
             if attr in self.runTriggers:
                 sys.stderr.write("trigger value for attr {} is {}\n".format(attr,self.triggerReady[attr])) 
                 self.triggerReady[attr]=True
