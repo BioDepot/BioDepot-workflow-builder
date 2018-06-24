@@ -4,14 +4,14 @@
 #
 
 # Orange tabs
-Data
-Visualize
-Model
-Evaluate
-Unsupervised
-Associate
-Text
-Genomics
+#Data
+#Visualize
+#Model
+#Evaluate
+#Unsupervised
+#Associate
+#Text
+#Genomics
 
 
 # RedR tabs; as soon as there is any name conflict with Orange tabs, we'll have ordering problems ...

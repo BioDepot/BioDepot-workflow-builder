@@ -13,11 +13,11 @@ import Orange
 def widget_discovery(discovery):
     dist = pkg_resources.get_distribution("Orange3")
     pkgs = [
-        "Orange.widgets.data",
-        "Orange.widgets.visualize",
-        "Orange.widgets.model",
-        "Orange.widgets.evaluate",
-        "Orange.widgets.unsupervised",
+#        "Orange.widgets.data",
+#        "Orange.widgets.visualize",
+#        "Orange.widgets.model",
+#        "Orange.widgets.evaluate",
+#        "Orange.widgets.unsupervised",
     ]
     for pkg in pkgs:
         discovery.process_category_package(pkg, distribution=dist)
