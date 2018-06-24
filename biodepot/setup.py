@@ -1,12 +1,5 @@
 from setuptools import setup
-
-#setup(name="Bwb",
-#      packages=["orangebiodepot"],
-#      package_data={"orangebiodepot": ["icons/*.svg"]},
-#      classifiers=["Example :: Invalid"],
-#      entry_points={"orange.widgets": "Bwb = orangebiodepot"},
-#      )
-setup(name="Bwb-core",
+setup(name="Bwb_core",
       packages=["Bwb_core"],
       package_data={"Bwb_core": ["icons/*.svg"]},
       classifiers=["Example :: Invalid"],
