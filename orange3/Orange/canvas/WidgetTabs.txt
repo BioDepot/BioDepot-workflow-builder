@@ -11,7 +11,12 @@
 #Unsupervised
 #Associate
 #Text
-#Genomics
+Bwb
+Bwb-core
+Utilities
+RNA-seq
+Miscellaneous
+User
 
 
 # RedR tabs; as soon as there is any name conflict with Orange tabs, we'll have ordering problems ...
