@@ -1,0 +1,1 @@
+{"autoMap": true, "category": "Miscellaneous", "command": ["echo 'hello world'"], "description": "hello-world", "docker_image_name": "biodepot/alpine-file-utils", "docker_image_tag": "latest", "icon": "/data/user.png", "inputs": null, "name": "Test", "outputs": null, "parameters": null, "persistentSettings": "all", "priority": "10", "requiredParameters": [], "volumes": null}

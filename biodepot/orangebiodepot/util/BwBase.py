@@ -771,9 +771,10 @@ class OWBwBWidget(widget.OWWidget):
     def drawExec(self, box=None):
         #find out if there are triggers
         self.candidateTriggers=[]
-        for pname in self.data['inputs']:
-            if not(pname in self.data['requiredParameters']):
-                self.candidateTriggers.append(pname)
+        if self.data['inputs'] is not None:
+            for pname in self.data['inputs']:
+                if not(pname in self.data['requiredParameters']):
+                    self.candidateTriggers.append(pname)
         #initialize the exec state
         self.execLayout=QtGui.QGridLayout()
         self.execLayout.setSpacing(5)
@@ -1096,6 +1097,8 @@ class OWBwBWidget(widget.OWWidget):
     def generateCmdFromData (self):
         flags=[]
         args=[]
+        if self.data['parameters'] is None:
+            return self.generateCmdFromBash(self.data['command'],flags=flags,args=args)
         for pname, pvalue in self.data['parameters'].items():
             #possible to have an requirement or parameter that is not in the executable line
             #environment variables can have a Null value in the flags field
@@ -1173,8 +1176,8 @@ class OWBwBWidget(widget.OWWidget):
         for executable in executables:
             lastExecutable= (executable == executables[-1])
             sys.stderr.write('Orig executable {} flags {} args {}\n'.format(executable,flags,args))
-            pnames=None
-            if 'parameters' in self.data:
+            pnames=[]
+            if 'parameters' in self.data and self.data['parameters'] is not None:
                 pnames=self.data['parameters'].keys()
             executable=self.replaceVars(executable,pnames,varSeen)
             sys.stderr.write('New executable {} flags {} args {}\n'.format(executable,flags,args))
@@ -1195,21 +1198,22 @@ class OWBwBWidget(widget.OWWidget):
 
     def getEnvironmentVariables(self):
         #dynamic environment variables
-        for pname in self.data['parameters']:
-            pvalue=self.data['parameters'][pname]
-            if 'env' in pvalue and getattr(self,pname) is not None:
-                checkAttr=pname+'Checked'
-                setenv=False
-                if pname in self.optionsChecked and self.optionsChecked[pname]:
-                    self.envVars[pvalue['env']] = getattr(self,pname)
-                    sys.stderr.write('optional var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
-                elif hasattr(self,checkAttr):
-                    if getattr(self,checkAttr):
+        if 'parameters' in self.data and self.data['parameters'] is not None:
+            for pname in self.data['parameters']:
+                pvalue=self.data['parameters'][pname]
+                if 'env' in pvalue and getattr(self,pname) is not None:
+                    checkAttr=pname+'Checked'
+                    setenv=False
+                    if pname in self.optionsChecked and self.optionsChecked[pname]:
                         self.envVars[pvalue['env']] = getattr(self,pname)
                         sys.stderr.write('optional var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
-                else:
-                    self.envVars[pvalue['env']] = getattr(self,pname)
-                    sys.stderr.write('var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
+                    elif hasattr(self,checkAttr):
+                        if getattr(self,checkAttr):
+                            self.envVars[pvalue['env']] = getattr(self,pname)
+                            sys.stderr.write('optional var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
+                    else:
+                        self.envVars[pvalue['env']] = getattr(self,pname)
+                        sys.stderr.write('var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
                     
         #now assign static environment variables
         if 'env' in self.data:
@@ -1245,8 +1249,9 @@ class OWBwBWidget(widget.OWWidget):
                 self.status='error'
             else:
                 self.setStatusMessage('Finished')
-                self.satus='finished'
-                self.handleOutputs()
+                self.status='finished'
+                if hasattr(self,'handleOutputs'):
+                    self.handleOutputs()
     
     def onRunError(self,error):
         self.bgui.reenableAll(self)

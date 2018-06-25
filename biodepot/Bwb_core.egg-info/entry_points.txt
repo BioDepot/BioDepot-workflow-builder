@@ -1,0 +1,3 @@
+[orange.widgets]
+Bwb-core = Bwb_core
+

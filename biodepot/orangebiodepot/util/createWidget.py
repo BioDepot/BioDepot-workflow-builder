@@ -31,9 +31,24 @@ from PyQt5 import QtWidgets, QtGui
 
 '''
 
-    
+def findDirectory(inputJson):
+    with open(inputJson) as f:
+        data=jsonpickle.decode(f.read())
+    f.close()
+    return checkCategory(data['category'])
+      
+def checkCategory(category):
+    categories=['Bwb-core','RNA-seq','Utilities','Miscellaneous','User']
+    if category in categories:
+        directory=category.replace('-','_');
+        return directory
+    else:
+        sys.stderr.write('*WARNING* {} not a recognized category - will place widget in User directory\n'.format(category))
+        return 'User'
+        
 def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None): 
     data={}
+    directory='User'
     if inputJson:
         with open(inputJson) as f:
             data=jsonpickle.decode(f.read())
@@ -45,7 +60,7 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         with open(inputJson,"w") as f:
             f.write(dataJ)
         f.close()
-            
+    directory=checkCategory(data['category'])        
     #write preInit
     with open(outputWidget,'w') as f:
         f.write(WIDGET_HEADING)
@@ -56,8 +71,8 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         f.write('    category = "{}"\n'.format(data['category']))
         f.write('    priority = 10\n')
         iconFile=data['icon']
-        if os.path.dirname(iconFile) != '/biodepot/orangebiodepot/icons':
-            iconFile = '/biodepot/orangebiodepot/icons/' + os.path.basename(iconFile)
+        if os.path.dirname(iconFile) != '/biodepot/'+directory+'/icons':
+            iconFile = '/biodepot/'+directory+'/icons/' + os.path.basename(iconFile)
         f.write('    icon = "{}"\n'.format(iconFile))
         f.write('    want_main_area = False\n')
         f.write('    docker_image_name = "{}"\n'.format(data['docker_image_name']))
@@ -108,7 +123,7 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         f.write('    def __init__(self):\n')        
         f.write('        super().__init__(self.docker_image_name, self.docker_image_tag)\n')
         joinedName=data['name'].replace(' ','')
-        f.write('        with open("/biodepot/orangebiodepot/json/{}") as f:\n'.format(os.path.basename(inputJson)))
+        f.write('        with open("/biodepot/{}/json/{}") as f:\n'.format(directory,os.path.basename(inputJson)))
         f.write('            self.data=jsonpickle.decode(f.read())\n')
         f.write('            f.close()\n')
         #init
@@ -142,18 +157,19 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
             register(inputJson,outputWidget,data['icon'])
 
 def register(jsonFile,widgetFile,iconFile):
+    directory=findDirectory(jsonFile)
     sys.stderr.write('moving files to correct biodepot locations\n')
-    if os.path.dirname(jsonFile) != '/biodepot/orangebiodepot/json':
-        newjsonFile = '/biodepot/orangebiodepot/json/' + os.path.basename(jsonFile)
+    if os.path.dirname(jsonFile) != '/biodepot/'+ directory + '/json':
+        newjsonFile = '/biodepot/' + directory+ '/json/' + os.path.basename(jsonFile)
         copyfile(jsonFile, newjsonFile)
-    if os.path.dirname(iconFile) != '/biodepot/orangebiodepot/icons':
-        newiconFile = '/biodepot/orangebiodepot/icons/' + os.path.basename(iconFile)
+    if os.path.dirname(iconFile) != '/biodepot/' + directory + '/icons':
+        newiconFile = '/biodepot/' + directory + '/icons/' + os.path.basename(iconFile)
         copyfile(iconFile, newiconFile)   
-    if os.path.dirname(widgetFile) != '/biodepot/orangebiodepot':
+    if os.path.dirname(widgetFile) != '/biodepot/'+ directory:
         basename=os.path.basename(widgetFile)
         if basename[:2] != 'OW':
             basename='OW'+basename
-        newwidgetFile = '/biodepot/orangebiodepot/' + basename
+        newwidgetFile = '/biodepot/'+directory + '/' + basename
         copyfile(widgetFile, newwidgetFile)
 
 def usage():

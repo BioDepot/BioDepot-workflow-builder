@@ -13,7 +13,7 @@ class OWImageBuilder(widget.OWWidget):
     name = "Image Builder"
     description = "Build Custom Image"
     category = "Bwb-core"
-    icon = "icons/image-builder.svg"
+    icon = "icons/imagebuilder.png"
 
     priority = 2
 

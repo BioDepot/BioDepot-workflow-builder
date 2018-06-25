@@ -81,7 +81,7 @@ class WidgetItem():
 
         
 class OWWidgetBuilder(widget.OWWidget):
-    name = "WidgetBuilder"
+    name = "Widget Builder"
     description = "Build a new widget from a set of bash commands and a Docker container"
     category = "Bwb-core"
     icon = "icons/build.png"
@@ -151,7 +151,7 @@ class OWWidgetBuilder(widget.OWWidget):
                 self.console.setAutoFillBackground(True)
                 self.console.show()
                 self.pConsole=ConsoleProcess(console=self.console,finishHandler=self.finishRebuild)
-                cmd='rsync -av /biodepot/bwb/ {}/biodepot/bwb/ --delete '.format(myDir) 
+                cmd='rsync -av /biodepot/ {}/biodepot/ --delete '.format(myDir) 
                 cmd+= '&& docker build -t {} {}'.format(imageName,myDir)
                 self.registerBtn.setEnabled(False)
                 self.rebuildBtn.setEnabled(False)
@@ -279,11 +279,11 @@ class OWWidgetBuilder(widget.OWWidget):
         QPushButton:hover {background-color: #1588f5; }
         '''  
         self.setStyleSheet(css)
-        self.browseIcon=QtGui.QIcon('/biodepot/bwb/icons/bluefile.png')
-        self.addIcon=QtGui.QIcon('/biodepot/bwb/icons/add.png')
-        self.removeIcon=QtGui.QIcon('/biodepot/bwb/icons/remove.png')
-        self.submitIcon=QtGui.QIcon('/biodepot/bwb/icons/submit.png')
-        self.reloadIcon=QtGui.QIcon('/biodepot/bwb/icons/reload.png')
+        self.browseIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/bluefile.png')
+        self.addIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/add.png')
+        self.removeIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/remove.png')
+        self.submitIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/submit.png')
+        self.reloadIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/reload.png')
         
         #initialize the attr list
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
