@@ -105,7 +105,7 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
             for pname,pvalue in data['parameters'].items():
                 if 'default' in pvalue and pvalue['default'] is not None:
                     #if it is not a number or dict type then keep quotes
-                    if pvalue['type'] == 'int' or  pvalue['type'] == 'float' or pvalue['type'] == 'double' or pvalue['type'] == 'bool' or pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
+                    if pvalue['type'] == 'int' or  pvalue['type'] == 'float' or pvalue['type'] == 'double' or pvalue['type'] == 'bool' or pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict' or pvalue['type'][-4:] == 'list':
                         f.write('    {}=pset({})\n'.format(pname,pvalue['default']))
                     else:
                         f.write('    {}=pset("{}")\n'.format(pname,pvalue['default']))

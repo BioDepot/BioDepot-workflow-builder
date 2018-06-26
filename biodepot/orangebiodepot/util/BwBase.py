@@ -416,6 +416,9 @@ class OWBwBWidget(widget.OWWidget):
                 setattr(self,pname,None)
             if (getattr(self,pname) is None) and ('default' in pvalue):
                 setattr(self,pname,pvalue['default'])
+                sys.stderr.write('set {} to default {} with type {} - current value {} of type {}\n'.format(pname,pvalue['default'],type(pvalue['default']),getattr(self,pname),type(getattr(self,pname))))
+            else:
+                sys.stderr.write('{} has prevous value {} of type {}\n'.format(pname,getattr(self,pname),type(getattr(self,pname))))
         self.drawElements(self.data['requiredParameters'])
 
 
@@ -682,10 +685,11 @@ class OWBwBWidget(widget.OWWidget):
         #fill boxEdit - ONLY part that is tracked
         if hasattr(self,pname):
             entryList=getattr(self,pname)
-            if type(entryList) is not list:
-                boxEdit.addItems([entryList])
-            else:
+            sys.stderr.write('filling with {} of type {}\n'.format(entryList,type(entryList)))
+            if type(entryList) == list:
                 boxEdit.addItems(entryList)
+            else:
+                boxEdit.addItems([entryList])
         boxEdit.setDisabled(disabledFlag)
         if elements:
             elements.append(boxEdit)

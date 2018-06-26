@@ -3,6 +3,7 @@ import re
 import sys
 import json
 import jsonpickle
+import csv
 from orangebiodepot.util.createWidget import createWidget, register
 from copy import deepcopy
 from collections import OrderedDict
@@ -217,6 +218,12 @@ class OWWidgetBuilder(widget.OWWidget):
                             newDict['default']=True
                         else:
                             raise Exception ('{} is boolean - default values must be True or False not {}'.format(pname,myDict['default']))
+                    #check for lists - these are treated as column delimited
+                    elif 'type' in myDict and 'list' in myDict['type']:
+                        reader=csv.reader([myDict['default']],skipinitialspace=True)
+                        for row in reader:
+                            newDict['default']=row
+                            sys.stderr.write('default list is type{} {}\n'.format(type(newDict['default']),newDict['default']))
                     elif 'type' in myDict and myDict['type'] == 'int':
                         newDict['default']=int(myDict['default'])
                         sys.stderr.write('key is {} new default is {}\n'.format(key,myDict['default']))

@@ -1,10 +1,12 @@
 RNA_seq/OWDtoxSAlignment.py
 RNA_seq/OWDtoxSAnalyses.py
+RNA_seq/OWdeseq2.py
 RNA_seq/OWkallisto.py
 RNA_seq/OWkallistoIndex.py
 RNA_seq/OWsleuth.py
 RNA_seq/OWstarAlign.py
 RNA_seq/OWstarIndex.py
+RNA_seq/OWstartodeseq2.py
 RNA_seq/__init__.py
 RNA_seq.egg-info/PKG-INFO
 RNA_seq.egg-info/SOURCES.txt
