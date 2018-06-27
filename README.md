@@ -263,15 +263,23 @@ We have greatly simplified and automated the widget development process. The use
 .
 There 4 steps to creating and sharing a widget:
 
-1\.	Edit json file
+1\. 	Edit json file
+
 2\.	Running createWidget tool to make widget python file
+
 3\.	Save widget files to the correct location in the running Bwb container
-4\.	Save the changes made to the Bwb container to a local repository and rebuild the image so that the widgets are saved in Bwb containers l	launched in th future.
+
+4\.	Save the changes made to the Bwb container to a local repository and rebuild the image so that the widgets are saved in Bwb containers launched in th future.
+
 
 These 4 steps are all handled by the widget builder. 
+
 1\.	Fill out the form to define the data for the json file
+
 2\.	Click on the create widget button to generate the json and python files. These can be edited manually too.
+
 3\.	Click on the register widget button to move the json and python files to the correct locations inside the current Bwb container. The new widgets will appear the next time you launch a Bwb instance.
+
 4\.	Click on the rebuild container button and enter the local Bwb repository you wish to save the changes to. A new image will be built based on the files in the new repository. If you don't do this step, the changes will disappear with the new container.
 
 
