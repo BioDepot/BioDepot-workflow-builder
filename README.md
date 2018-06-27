@@ -1,7 +1,7 @@
 # BioDepot-Workflow-builder (Bwb)
 # MANUAL
 
-![](/docs/images/image19.png) ![](/docs/images/image23.png) 
+![](./docs/images/image19.png) ![](./docs/images/image23.png) 
    
 
 Bioinformatics Group
@@ -15,8 +15,7 @@ Docker Image	: [https://hub.docker.com/r/biodepot/bwb/](https://hub.docker.com/r
 
 Source code	: [https://github.com/BioDepot/BioDepot-workflow-builder](https://github.com/BioDepot/BioDepot-workflow-builder)
 
-Demo video	: [https://youtu.be/VY1peA4ITog](https://youtu.be/VY1peA4ITog) 
-.
+
 ### Overview: Running Bwb
 <div class="lower_alpha"></div>1\. Install Docker
 2\. Start the container with Bwb by executing the following Docker command by typing into a window (Linux) or on the Docker command line (Windows/macOs)
@@ -85,39 +84,42 @@ For more information please refer to -
 1\. Download the Docker package -  [Docker for Mac](https://download.docker.com/mac/stable/Docker.dmg)
 2\. To install Docker: double-click Docker.dmg to open the installer, then drag Moby the whale to the Applications folder.		
 
-![](/docs/images/image1.png) 
+![](./docs/images/image1.png) 
 
 3\. To start Docker: double-click Docker.app in the Applications folder. (In the example below, the Applications folder is in "grid" view mode.)
 
-![](/docs/images/image13.png)     
+![](./docs/images/image13.png)     
 
 You will be asked to authorize Docker.app with your system password after you launch it. Privileged access is needed to install networking components and links to the Docker apps.The whale in the top status bar indicates that Docker is running, and accessible from a terminal.
 
-![](/docs/images/image16.png) 
+![](./docs/images/image16.png) 
 
 
 ### Windows
 
 1\. To install Docker,
 
- * download to the package - [Docker for Windows](https://download.docker.com/win/stable/Docker%20for%20Windows%20Installer.exe)   
+For Windows 10 Pro (with HyperV) download to the package - [Docker for Windows](https://download.docker.com/win/stable/Docker%20for%20Windows%20Installer.exe)
+
+For other versions of Windows, the older toolbox version that uses VirtualBox will need to be installed which is available [here](https://download.docker.com/win/stable/DockerToolbox.exe)
+
  * go to folder where the installation file (Installer.exe) is saved and run (double-click) the installation file. 
  * click the installer link to download.
  * follow the install wizard to accept the license, authorize the installer, and proceed with the install.
  * when it completes, the installer reports it was successful:
  * click the finish button to complete the installation. 
-![](/docs/images/image21.png) 
+![](./docs/images/image21.png) 
 
 2\.  To start Docker,
 * search for Docker, select the app in the search results, and click it (or hit Return).
-![](/docs/images/image11.png) 
+![](./docs/images/image11.png) 
 * when the whale in the status bar stays steady, Docker is up-and-running, and accessible from any terminal window.
-![](/docs/images/image20.png) 
+![](./docs/images/image20.png) 
 
 
 * if the whale is hidden in the Notifications area, click the up arrow on the taskbar to show it. To learn more, see [Docker Settings](https://docs.docker.com/docker-for-windows/#docker-settings).
 * If you just installed the app, you also get a popup success message with suggested next steps, and a link to this documentation. 
-![](/docs/images/image15.png) 
+![](./docs/images/image15.png) 
 
 
 ### On The Cloud
@@ -132,21 +134,21 @@ On the cloud, BwB can also be run on any cloud instance. Please refer to the Lin
 2\.  Select the configuration and click on "Review and Launch"
 
 3\.  You will be prompted to associate a ssh key pair with the instance, you can use an existing key pair or create a new one. The key will be downloaded onto the computer  which will be later used to ssh into the machine.
-![](/docs/images/image9.png) 
+![](./docs/images/image9.png) 
 
 4\.  Once the instance is running select your instance and scroll right for security groups.
 
 5\.  From "Actions" button select "Edit inbound rules" 
 
-![](/docs/images/image5.png) 
+![](./docs/images/image5.png) 
 
 6\.  Add a new http rule for port 6080 to access the GUI from the container
 
-![](/docs/images/image10.png) 
+![](./docs/images/image10.png) 
 
 7\.  Copy the public dns of the instance 
 
-![](/docs/images/image22.png) 
+![](./docs/images/image22.png) 
 
 8\.  SSH into the instance by typing the following command into the terminal. 
 (Type the commands in the directory where the ssh key of AWS instance was downloaded)
@@ -170,7 +172,7 @@ Then run the following commands on command prompt / terminal.
 ```bash
 docker pull biodepot/bwb:latest
 ```
-![](/docs/images/image2.png) 
+![](./docs/images/image2.png) 
     
 2\.  Start the Bwb container 
 
@@ -194,15 +196,15 @@ Once connected. A window similar to Figure 1 should appear showing a maximized B
 
 Note that the Bwb windowing system is inside the browser window. You still have access to whatever windowing system you are using on your host machine. If your browser closes or go to another url, nothing happens to Bwb - the browser merely provides a viewport to the Bwb container. Refreshing or reconnecting the browser to the container IP allows you to interact with Bwb again.
 
-![ ](/docs/images/image4.png  "Figure 1: Maximized Bwb window")
+![ ](./docs/images/image4.png  "Figure 1: Maximized Bwb window")
 
 Figure 1: Maximized Bwb window
 
-![ ](/docs/images/image8.png  "Figure 2: Multiple Bwb windows on Desktop")
+![ ](./docs/images/image8.png  "Figure 2: Multiple Bwb windows on Desktop")
 
 Figure 2:  Multiple Bwb windows on Desktop
 
-If we hide/iconify the window by clicking on the taskbar or clicking on the iconify button in the upper right hand corner of the window, we see the Desktop itself as shown in figure 2. Right clicking on the Desktop brings up a menu of available applications and the option to QUIT the container. Unlike closing the browser window, this command will actually kill the webserver resulting in the container being stopped. The menu also gives the option of opening another Bwb instance or a terminal. Multiple applications can be launched at same time - and the user even has the option of using different workspaces (up to 4) to quickly cycle through different windows.
+If we hide/iconify the window by clicking on the taskbar or clicking on the iconify button in the upper right hand corner of the window, we see the Desktop itself as shown in figure 2. Right clicking on the Desktop brings up a menu of available applications and the option to QUIT the container. Unlike closing the browser window, this command will actually kill the webserver resulting in the container being stopped. The menu also gives the option of opening another Bwb instance or a terminal. Multiple applications can be launched at same time - and the user has the option of using different workspaces (up to 4) to quickly cycle through different windows. This is especially useful for widget development
 
 ## WIDGETS 
 
@@ -210,7 +212,7 @@ If we hide/iconify the window by clicking on the taskbar or clicking on the icon
 ### Using widgets
 
 
-![ ](/docs/images/image12.png  "Figure 3: Different types of widgets")
+![ ](./docs/images/image12.png  "Figure 3: Different types of widgets")
 
 Figure 3:  Different types of widgets
 
@@ -242,51 +244,38 @@ As the development widget is not yet linked to the github, it is better to build
 
 ###Overview of widgets and pipelines
 
-Widgets in Bwb represent single tasks, such as an executable, script or a basic operation such as entering the name of a file or directory, or displaying results. Executables and script widgets also define the environment that they are to be run in by specifying a docker container. When a widget A is connected to widget B, one or more outputs of A are connected to the inputs of B. When building the pipeline, the Bwb/OrangeML engine manages and keeps track of the connections and sends a signal to each widget when a connection is made or removed. Widgets each have input handlers that update the state of the widget. For example when an input file connection is removed, the widget input handler may wish to change the input file value to None or to a default value. When the pipeline construction is finished, the graph and persistent variables are stored in an .ows file.
+Widgets in Bwb represent single tasks, such as an executable, script or a basic operation such as entering the name of a file or directory, or displaying results. Executables and script widgets also define the environment that they are to be run in by specifying a docker container. When a widget A is connected to widget B, one or more outputs of A are connected to the inputs of B. When building the pipeline, the engine manages and keeps track of the connections and sends a signal to each widget when a connection is made or removed. Widgets each have input handlers that update the state of the widget. For example when an input file connection is removed, the widget input handler may wish to change the input file value to None or to a default value. When the pipeline construction is finished, the graph and persistent variables are stored in an .ows file.
  
-When the pipeline is to be run, the Bwb/OrangeML engine follows the graph, executing each widget and then propagating the output to connected widgets which are then executed, until the entire graph is traversed. Widgets can be set to run automatically once all required inputs have been received or to wait for human intervention.
+When the pipeline is to be run, the Bwb/Orange engine follows the graph, executing each widget and then propagating the output to connected widgets which are then executed, until the entire graph is traversed. Widgets can be set to run automatically once all required inputs have been received or to wait for human intervention. Bwb also allows for automatic execution (once all the required elements are present, the widget will execute) and for triggered execution. Once a signal is received by a trigger and all required elements are set or present, the widget will execute. Triggered execution allows for modules to run sequentially in a pipeline.
 
-Each widget is defined in as a Python file which is kept in the /biodepot/orangebiodepot directory for Bwb widgets. The python file defines an instance of the Orange widget class with the following elements:
-
-Inputs - Each input corresponds to an attribute of the widget class of which must have a corresponding callback function which will handle information from connected outputs from other widgets. Disconnection events and connection events also send signals to the callback handler.
-
-Output(s) - A widget may also define an attribute to store output that can server as a connection to another widget's input. 
-
-Persistent variables - these attributes will be pickled and stored with the ows files and restored when the pipeline is restored.
-
-GUI elements - These are Quicktime (Qt5 wrapped for Python in PyQt5) based GUI elements to allow the user to interact with the widget i.e. entering values for parameters or specifying that the widget should begin execution.
-
-Callback functions: functions that handle events from the Gui elements or the inputs.
+The orange library uses a python scripts to define each widget. Bwb also uses a json file to store the data needed to form the widget. Bwb has a widget builder allows the user to define a widget by filling a form. The widget builder then produces a python script and json file to define the widget. This makes it possible to quickly convert existing executables and pipelines to Bwb widgets and workflows.
 
 
-### Bwb widgets
+### Bwb widget structure
 
-Bwb mainly handles executables and scripts that are called from the Unix bash command line. In addition, Bwb executables and scripts also specify their enviroment by specifying the Docker container that runs them. In addition, we also need to specify mountpoints where the container can read and write data from and to the user file system. The necessary elements to specify a typical step in a Dockerized Bwb pipeline are thus:
+Bwb widgets consist of three main scrollable windows. The topmost contains entries that are required before the widget can execute (eg. fastq files for alignent). The window below contains optional parameters (eg. number of threads to be used). The bottom window controls execution of the widget and displays a terminal with messages from the widget. When a widget is executed, it starts a command inside a Docker container. Docker will search locally for the container and if it does not find it, will look to download it from the Dockerhub repositories. All the containers provided with Bwb are arvailable through the BioDepot dockerhub [repo](https://hub.docker.com/r/biodepot)
 
-Docker container
-Command to be run in the docker container (including flags and arguments)
-Mount points (i.e. how should the internally written datafiles be mapped to the user files)
-
-Thus a Bwb widget must obtain information from this information either from inputs or through the GUI. Only dynamic parameters need to come from inputs. The number of required inputs is fairly small and allows us to define the widget with a fairly simple set of parameters that can be stored in a json file and used to automatically create the widget python file as described in the next section
-
+Containers, as a rule, are meant to carry dependencies and smaller supporting files needed by the executable. This is why they are so portable and require no installation to run. Larger input files that may depend on the user (eg data fastq files), are handled by mapping the user volume to a container path that is accessible. The software and scripts inside the container always see the same paths regardless of where the user data actually resides.
 
 #### Generation of widgets using the widget builder
 
-We have greatly simplified and automated the widget development process. The user provides the details of the executable or script, the inputs, outputs, flags and arguments by filling a form provided by the widget builder. This is then converted into a json file which stores the parameters. A barebones python widget file is also created. This instantiates the BwBase base class which provides all the necessary functionality. The user can supersede the default implementation by adding his or her own code.
+We have greatly simplified and automated the widget development process. The user provides the details of the executable or script, the inputs, outputs, flags and arguments by filling a form provided by the widget builder. This is then converted into a json file which stores the parameters. A barebones python widget file is also created. This instantiates the BwBase base class which provides all the necessary functionality for the 3 basic windows. Default graphical input types are drawn depending on the type of the variable to be entered. For example a variable expecting a file list will cause a texbox with file navigation buttons to be drawn, whereas a string variable will cause a line edit element to be drawn. The user can supersede the default implementation by adding his or her own code.
+.
+There 4 steps to creating and sharing a widget:
 
-The widget then appears on the next launch of the Bwb process which can be done without closing the container. This is made possible by refactoring and abstracting the code in a BwBase class.
+1\.	Edit json file
+2\.	Running createWidget tool to make widget python file
+3\.	Save widget files to the correct location in the running Bwb container
+4\.	Save the changes made to the Bwb container to a local repository and rebuild the image so that the widgets are saved in Bwb containers l	launched in th future.
 
-The construction of a widget is reduced to editing a Json file. For more complicated widgets - the automatically produced python script can be customized and the defaults extended or overridden if desired The fields are described below.
+These 4 steps are all handled by the widget builder. 
+1\.	Fill out the form to define the data for the json file
+2\.	Click on the create widget button to generate the json and python files. These can be edited manually too.
+3\.	Click on the register widget button to move the json and python files to the correct locations inside the current Bwb container. The new widgets will appear the next time you launch a Bwb instance.
+4\.	Click on the rebuild container button and enter the local Bwb repository you wish to save the changes to. A new image will be built based on the files in the new repository. If you don't do this step, the changes will disappear with the new container.
 
-There 3 steps to creating and sharing a widget:
 
-1	Edit json file
-2	Running createWidget tool to make widget
-3	Save copy of biodepot file and rebuild container
-
-The main step is creating or editing the json file which is given below:
-
-#### Description of json descriptor 
+#### Description of json descriptors (Note that some of this may be outdated) 
 
 The json file describes a dict structure in Python which will be read into the dict *data* in the widget python script.
 
