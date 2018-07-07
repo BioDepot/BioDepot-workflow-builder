@@ -18,8 +18,8 @@ class OWStarAlign(OWBwBWidget):
     priority = 10
     icon = "/biodepot/RNA_seq/icons/staralign.png"
     want_main_area = False
-    docker_image_name = "biodepot/alpine-star"
-    docker_image_tag = "3.7-2.5.2b"
+    docker_image_name = "biodepot/debian-star"
+    docker_image_tag = "8.11-slim-2.6.0c"
     inputs = [("trigger",str,"handleInputstrigger"),("outFileNamePrefix",str,"handleInputsoutFileNamePrefix")]
     outputs = [("outFileNamePrefix",str),("genomeDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -28,11 +28,13 @@ class OWStarAlign(OWBwBWidget):
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
+    readFilesIn=pset([])
+    apelist=pset(False)
+    spelist=pset(False)
     parametersFiles=pset(None)
     sysShell=pset("/bin/sh")
     runThreadN=pset(1)
     runRNGseed=pset(777)
-    readFilesIn=pset([])
     readFilesCommand=pset(None)
     readMapNumber=pset(-1)
     readMatesLengthsIn=pset("NotEqual")
