@@ -642,6 +642,8 @@ class OWBwBWidget(widget.OWWidget):
         #add checkbox if necessary
         if addCheckbox:
             value=None
+            if pname not in self.optionsChecked:
+                self.optionsChecked[pname]=False
             if hasattr(self,pname):
                 value=getattr(self,pname)
             checkAttr=pname+'Checked' #this is not actually used but needed for orange gui checkbox element
@@ -1206,18 +1208,21 @@ class OWBwBWidget(widget.OWWidget):
             for pname in self.data['parameters']:
                 pvalue=self.data['parameters'][pname]
                 if 'env' in pvalue and getattr(self,pname) is not None:
+                    sys.stderr.write('env for var {} value {}\n'.format(pname,getattr(self,pname)))
                     checkAttr=pname+'Checked'
                     setenv=False
-                    if pname in self.optionsChecked and self.optionsChecked[pname]:
-                        self.envVars[pvalue['env']] = getattr(self,pname)
-                        sys.stderr.write('optional var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
-                    elif hasattr(self,checkAttr):
-                        if getattr(self,checkAttr):
-                            self.envVars[pvalue['env']] = getattr(self,pname)
-                            sys.stderr.write('optional var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
+                    #check if boolean
+                    if pvalue['type'] == 'bool':
+                        if getattr(self,pname) is True:
+                           self.envVars[pvalue['env']] = getattr(self,pname) 
                     else:
-                        self.envVars[pvalue['env']] = getattr(self,pname)
-                        sys.stderr.write('var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
+                        if pname in self.optionsChecked:
+                            if self.optionsChecked[pname]:
+                                self.envVars[pvalue['env']] = getattr(self,pname)
+                                sys.stderr.write('env optional var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
+                        else:
+                            self.envVars[pvalue['env']] = getattr(self,pname)
+                            sys.stderr.write('var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
                     
         #now assign static environment variables
         if 'env' in self.data:
