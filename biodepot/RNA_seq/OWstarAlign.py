@@ -20,8 +20,8 @@ class OWStarAlign(OWBwBWidget):
     want_main_area = False
     docker_image_name = "biodepot/debian-star"
     docker_image_tag = "8.11-slim-2.6.0c"
-    inputs = [("trigger",str,"handleInputstrigger"),("outFileNamePrefix",str,"handleInputsoutFileNamePrefix")]
-    outputs = [("outFileNamePrefix",str),("genomeDir",str)]
+    inputs = [("trigger",str,"handleInputstrigger"),("outputDir",str,"handleInputsoutputDir")]
+    outputs = [("outputDir",str),("genomeDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     runTriggers=pset([])
@@ -46,7 +46,7 @@ class OWStarAlign(OWBwBWidget):
     clip3pAfterAdapterNbases=pset(['0'])
     limitIObufferSize=pset(150000000)
     limitOutSAMoneReadBytes=pset(100000)
-    outFileNamePrefix=pset("./")
+    outputDir=pset("")
     outTmpDir=pset("")
     outStd=pset("Log")
     outReadsUnmapped=pset("")
@@ -141,6 +141,8 @@ class OWStarAlign(OWBwBWidget):
     twopass1readsN =pset(-1)
     genomeDir=pset("/data/GenomeDir")
     genomeLoad=pset("NoSharedMemory")
+    outputFilePrefix=pset(None)
+    multipleSample=pset(False)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open("/biodepot/RNA_seq/json/starAlign.json") as f:
@@ -151,13 +153,13 @@ class OWStarAlign(OWBwBWidget):
         self.drawGUI()
     def handleInputstrigger(self, value, sourceId=None):
         self.handleInputs(value, "trigger", sourceId=None)
-    def handleInputsoutFileNamePrefix(self, value, sourceId=None):
-        self.handleInputs(value, "outFileNamePrefix", sourceId=None)
+    def handleInputsoutputDir(self, value, sourceId=None):
+        self.handleInputs(value, "outputDir", sourceId=None)
     def handleOutputs(self):
         outputValue="/data"
-        if hasattr(self,"outFileNamePrefix"):
-            outputValue=getattr(self,"outFileNamePrefix")
-        self.send("outFileNamePrefix", outputValue)
+        if hasattr(self,"outputDir"):
+            outputValue=getattr(self,"outputDir")
+        self.send("outputDir", outputValue)
         outputValue="/data/GenomeDir"
         if hasattr(self,"genomeDir"):
             outputValue=getattr(self,"genomeDir")

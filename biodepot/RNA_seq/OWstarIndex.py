@@ -18,8 +18,8 @@ class OWStarindex(OWBwBWidget):
     priority = 10
     icon = "/biodepot/RNA_seq/icons/starIndex.png"
     want_main_area = False
-    docker_image_name = "biodepot/debian-star"
-    docker_image_tag = "8.11-slim-2.6.0c"
+    docker_image_name = "biodepot/alpine-star"
+    docker_image_tag = "3.7-020201"
     inputs = [("Trigger",str,"handleInputsTrigger")]
     outputs = [("genomeDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -28,7 +28,6 @@ class OWStarindex(OWBwBWidget):
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
-    rmode=pset("genomeGenerate")
     genomeDir=pset(None)
     genomeFastaFiles=pset([])
     genomeChrBinNbits=pset("18")
