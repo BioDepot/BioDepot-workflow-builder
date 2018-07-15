@@ -917,7 +917,7 @@ class OWBwBWidget(widget.OWWidget):
     def browseDirs(self,boxEdit,attr=None):
         dlg=getExistingDirectories()
         if dlg.exec_() == QtWidgets.QDialog.Accepted:
-            self.boxEdit.addItems(dlg.selectedFiles())
+            boxEdit.addItems(dlg.selectedFiles())
             if attr:
                 self.updateBoxEditValue(attr,boxEdit)
 
