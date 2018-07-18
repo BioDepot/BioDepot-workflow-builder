@@ -20,7 +20,7 @@ class OWStartoDESeq2(OWBwBWidget):
     want_main_area = False
     docker_image_name = "biodepot/star2deseq"
     docker_image_tag = "1.0-alpine-3.7"
-    inputs = [("outputDirs",str,"handleInputsoutputDirs"),("inputDirs",str,"handleInputsinputDirs"),("Trigger",str,"handleInputsTrigger")]
+    inputs = [("inputDirs",str,"handleInputsinputDirs"),("Trigger",str,"handleInputsTrigger")]
     outputs = [("outputFile",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
@@ -28,11 +28,10 @@ class OWStartoDESeq2(OWBwBWidget):
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
-    outputFile=pset("DESeqCounts.tsv")
+    outputFile=pset(None)
     inputFile=pset("ReadsPerGene.out.tab")
     column=pset(4)
     inputDirs=pset([])
-    outputDirs=pset([])
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open("/biodepot/RNA_seq/json/startodeseq2.json") as f:
@@ -41,8 +40,6 @@ class OWStartoDESeq2(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputsoutputDirs(self, value, sourceId=None):
-        self.handleInputs(value, "outputDirs", sourceId=None)
     def handleInputsinputDirs(self, value, sourceId=None):
         self.handleInputs(value, "inputDirs", sourceId=None)
     def handleInputsTrigger(self, value, sourceId=None):
