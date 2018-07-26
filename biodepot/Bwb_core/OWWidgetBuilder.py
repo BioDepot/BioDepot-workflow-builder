@@ -4,7 +4,8 @@ import sys
 import json
 import jsonpickle
 import csv
-from orangebiodepot.util.createWidget import createWidget, register
+from pathlib import Path
+from orangebiodepot.util.createWidget import createWidget, findDirectory, findIconFile
 from copy import deepcopy
 from collections import OrderedDict
 from functools import partial
@@ -13,6 +14,7 @@ from orangebiodepot.util.BwBase import DragAndDropList
 from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtWidgets import QInputDialog, QLineEdit
 
 from AnyQt.QtWidgets import (
     QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
@@ -80,7 +82,6 @@ class WidgetItem():
             element.setState(None)
             self.states[key]=None
 
-        
 class OWWidgetBuilder(widget.OWWidget):
     name = "Widget Builder"
     description = "Build a new widget from a set of bash commands and a Docker container"
@@ -97,6 +98,28 @@ class OWWidgetBuilder(widget.OWWidget):
     allStates=pset({})
     allAttrs=pset({})
     
+    def register(self,widgetPath,widgetName):
+        jsonFile="{}/{}.json".format(widgetPath,widgetName)
+        directory=findDirectory(jsonFile)
+        destParentPath='/biodepot/' + directory
+        destPath=destParentPath +'/' + widgetName;
+        
+        if os.path.realpath(widgetPath) != os.path.realpath(destPath):
+            #check if it exists
+            if os.path.exists(destPath):
+                qm = QtGui.QMessageBox
+                ret=qm.question(self,'', "{} exists - OverWrite ?".format(widgetName), qm.Yes | qm.No)
+                if ret == qm.No:
+                    return
+                os.system("rm {} -rf ".format(destPath))
+            os.system("cp -r {} {}".format(widgetPath,destPath))
+        #make linkages
+        os.system ("ln -sf ../{}/{}.json {}/json/{}.json ".format(widgetName,widgetName,destParentPath,widgetName) )
+        os.system ("ln -sf  {}/{}.py {}/OW{}.py".format(widgetName,widgetName,destParentPath,widgetName))
+        #get icon file from Python file
+        iconFile=findIconFile(widgetPath+'/'+widgetName+'.py')
+        os.system ("ln -sf ../{}/{} {}/icons/{}".format(widgetName,iconFile,destParentPath,iconFile))
+        
     def drawExec(self, layout=None):
         css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
@@ -113,12 +136,18 @@ class OWWidgetBuilder(widget.OWWidget):
         #button=gui.button(None, self, "", callback= partial(self.browseFileDir, attr='gitHub',fileType='Directory'),autoDefault=True, width=19, height=19)
         #button.setIcon(self.browseIcon)
         #layout.addWidget(button,layout.nextRow,2)
-        self.saveBtn = gui.button(None, self, "Save json", callback=self.saveJson)
-        self.saveBtn.setStyleSheet(css)
-        self.saveBtn.setFixedSize(80,20)
-        self.createBtn = gui.button(None, self, "Create Widget", callback=self.saveWidget)
-        self.createBtn.setStyleSheet(css)
-        self.createBtn.setFixedSize(120,20)
+        # self.saveJsonBtn = gui.button(None, self, "Save json", callback=self.saveJson)
+        # self.saveJsonBtn.setStyleSheet(css)
+        # self.saveJsonBtn.setFixedSize(80,20)
+        self.saveWidgetBtn = gui.button(None, self, "Save Widget", callback=self.saveWidget)
+        self.saveWidgetBtn.setStyleSheet(css)
+        self.saveWidgetBtn.setFixedSize(120,20)
+        self.saveWidgetAsBtn = gui.button(None, self, "Save Widget As", callback=self.saveWidgetAs)
+        self.saveWidgetAsBtn.setStyleSheet(css)
+        self.saveWidgetAsBtn.setFixedSize(120,20)
+        self.loadWidgetBtn = gui.button(None, self, "Load Widget", callback=self.loadWidget)
+        self.loadWidgetBtn.setStyleSheet(css)
+        self.loadWidgetBtn.setFixedSize(150,20)
         self.registerBtn = gui.button(None, self, "Register Widget", callback=self.registerWidget)
         self.registerBtn.setStyleSheet(css)
         self.registerBtn.setFixedSize(150,20)
@@ -126,18 +155,18 @@ class OWWidgetBuilder(widget.OWWidget):
         self.rebuildBtn.setStyleSheet(css)
         self.rebuildBtn.setFixedSize(150,20)
         box=QtGui.QHBoxLayout()
-        box.addWidget(self.saveBtn)
-        box.addWidget(self.createBtn)
+        box.addWidget(self.saveWidgetBtn)
+        box.addWidget(self.saveWidgetAsBtn)
+        box.addWidget(self.loadWidgetBtn)
         box.addWidget(self.registerBtn)
         box.addWidget(self.rebuildBtn)
         box.addStretch(1)
         layout.addLayout(box)
         
+    def loadWidget(self):
+        pass
     def rebuildWidget(self):
-        defaultDir = '/root'
-        if os.path.exists('/data'):
-            defaultDir = '/data'
-        myDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Bwb directory", directory=defaultDir)
+        myDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Bwb directory", directory=self.defaultDir)
         (imageName,accept)=QtGui.QInputDialog.getText(self,"New image name", "Enter image name",QtGui.QLineEdit.Normal,"biodepot/bwb")
         if imageName:
             qm = QtGui.QMessageBox
@@ -156,14 +185,16 @@ class OWWidgetBuilder(widget.OWWidget):
                 cmd+= '&& docker build -t {} {}'.format(imageName,myDir)
                 self.registerBtn.setEnabled(False)
                 self.rebuildBtn.setEnabled(False)
-                self.createBtn.setEnabled(False)
-                self.saveBtn.setEnabled(False)
+                self.saveWidgetBtn.setEnabled(False)
+                self.saveWidgetAsBtn.setEnabled(False)
+                self.loadWidgetBtn.setEnabled(False)
                 self.pConsole.process.start('/bin/bash',['-c',cmd])
     def finishRebuild(self,stopped=None):
         self.registerBtn.setEnabled(True)
         self.rebuildBtn.setEnabled(True)
-        self.createBtn.setEnabled(True)
-        self.saveBtn.setEnabled(True)        
+        self.saveWidgetBtn.setEnabled(True)
+        self.saveWidgetAsBtn.setEnabled(True)
+        self.loadWidgetBtn.setEnabled(True)        
         #self.pcconsole.close()     
     def buildData(self):
         self.data={}
@@ -171,6 +202,7 @@ class OWWidgetBuilder(widget.OWWidget):
             'priority','icon','inputs','outputs','volumes','parameters','command','autoMap'):
             if hasattr(self,attr):
                 self.data[attr]=deepcopy(getattr(self,attr))
+        
         #separate multiple commands
         if 'command' in self.data and self.data['command']: 
             if '\n' in self.data['command']:
@@ -248,8 +280,6 @@ class OWWidgetBuilder(widget.OWWidget):
                 if 'env' in myDict and myDict['env']:
                     newDict['env']=myDict['env']
                 self.data['parameters'][key]=newDict 
-    
-              
     def saveJson(self):
         self.buildData()
         #get json filename
@@ -260,29 +290,69 @@ class OWWidgetBuilder(widget.OWWidget):
             with open(jSaveFile,"w") as f:
                 f.write(dataJ)
             f.close()
-            
+    
     def saveWidget(self):
+        if not self.widgetDir:
+            self.saveWidgetAs()
+            return
+        if not self.widgetName:
+            head, tail =os.path.split(self.widgetDir)
+            self.widgetName=tail
+        Path(self.widgetDir).mkdir(parents=True,exist_ok=True)
+        self.buildData()
+        outputWidget=self.widgetDir+'/'+self.widgetName+'.py'
+        createWidget(None,outputWidget,self.widgetName,inputData=self.data)
+                    
+    def saveWidgetAs(self):
         self.buildData()
         #get json filename
-        outputWidget=QtWidgets.QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","Python Files (*.py);;All Files (*)")[0]
-        if outputWidget:
-            createWidget(None,outputWidget,inputData=self.data)
-            
+        self.outputDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose directory to save the widget in", directory=self.defaultDir)
+        if self.outputDir:
+            if not self.widgetName:
+                #get a generic name if necessary
+                if 'name' not in self.data or not self.data['name']:
+                    self.data['name']= "generic{}".format(os.getpid())
+                #Clean up name and replace all runs of whitespace with a single dash     
+                niceName=re.sub(r"[^\w\s]", '',self.data['name'])
+                niceName = re.sub(r"\s+", '_', niceName)
+            nameDir, okPressed = QInputDialog.getText(self, "Widget directory ","Enter widget directory:", QLineEdit.Normal, niceName)
+            if (okPressed): 
+                self.widgetName=nameDir
+                self.widgetDir=self.outputDir+'/'+ self.widgetName
+                Path(self.widgetDir).mkdir(parents=True,exist_ok=True)
+                outputWidget="{}/{}.py".format(self.widgetDir,self.widgetName)
+                createWidget(None,outputWidget,self.widgetName,inputData=self.data)
+        
+    def getDefaultDir(self):
+        defaultDir = '/root'
+        if os.path.exists('/data'):
+            defaultDir = '/data' 
+        return defaultDir
+        
     def registerWidget(self):
-        self.buildData()
-        jsonFile=QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()","Choose json file","json Files (*.json);;All Files (*)")[0]
-        if jsonFile:
-            widgetFile=QtWidgets.QFileDialog.getOpenFileName(self,"QFileDialog.getOpenFileName()","Choose widget file","Python Files (*.py);;All Files (*)")[0]
-            if widgetFile:
-                register(jsonFile,widgetFile,self.data['icon'])
+        if self.widgetDir:
+            startDir=self.widgetDir
+        else:
+            startDir=self.defaultDir
+        registerWidgetDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose widget to register", directory=startDir)
+        if registerWidgetDir:
+            widgetName=os.path.split(registerWidgetDir)[-1]
+            self.register(registerWidgetDir,widgetName)
+            
+    def pickleData(data,filename):
+        with open('filename', 'wb') as outfp:
+            pickle.dump(data, outfp, protocol=pickle.HIGHEST_PROTOCOL)
 
+        
+    def unPickleData(filename):
+        with open('filename', 'rb') as infp:
+            return pickle.load(infp)
                     
     def __init__(self):
         super().__init__()
         css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
-        QPushButton:pressed { background-color: #158805; border-style: inset;}
-        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
+        QPushButton:pressed { background-color: #158805; border-style: inset;}       QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
         QPushButton:hover {background-color: #1588f5; }
         '''  
         self.setStyleSheet(css)
@@ -291,7 +361,10 @@ class OWWidgetBuilder(widget.OWWidget):
         self.removeIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/remove.png')
         self.submitIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/submit.png')
         self.reloadIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/reload.png')
-        
+        self.outputWidget=""
+        self.defaultDir=self.getDefaultDir()
+        self.widgetDir=None
+        self.widgetName=None
         #initialize the attr list
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
                      'priority','icon','inputs','outputs','volumes','parameters','command','autoMap'):
@@ -354,7 +427,6 @@ class OWWidgetBuilder(widget.OWWidget):
             qWidgetItem.blankState()
         qWidgetList.updateAllStates()
 
-        
     def removeListWidget(self,removeBtn,qWidgetList,qWidgetItem):
         if qWidgetList.selectedItems():
             for item in qWidgetList.selectedItems():
@@ -457,8 +529,7 @@ class OWWidgetBuilder(widget.OWWidget):
         else:
             widget.textBox.setEnabled(state[0])
             widget.textBox.setPlainText(state[1])
-        
-        
+
     #workhorse widget
     def makeLedit(self,leditAttr,text=None,label=None,addCheckBox=False,initialValue=None):
         leditLabel=None
@@ -552,7 +623,6 @@ class OWWidgetBuilder(widget.OWWidget):
             else:
                 ledit.clear()
                 
-       
     def makeComboBox (self,pname,label, elements):
         comboBoxLabel=QtGui.QLabel(label)
         comboBox=QtGui.QComboBox()
@@ -663,7 +733,6 @@ class OWWidgetBuilder(widget.OWWidget):
             checkBox.setEnabled(state[0])
             checkBox.setChecked(state[1])
 
-    
     def makeListWidget(self,pname,boxEdit):
         #setup boxEdit
         #logic is handled by add remove buttons
@@ -816,15 +885,14 @@ class OWWidgetBuilder(widget.OWWidget):
         setattr(self,attr,widget.getStateValue(self.allStates[attr]))
             
     def browseFileDir(self, attr,ledit=None,fileType=None):
-        defaultDir = '/root'
-        if os.path.exists('/data'):
-            defaultDir = '/data'
+        self.defaultDir = self.getDefaultDir()
         if fileType == 'Directory':
-            myFileDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate directory", directory=defaultDir)
+            myFileDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate directory", directory=self.defaultDir)
         else:
-            myFileDir=QtWidgets.QFileDialog.getOpenFileName(self, "Locate file", defaultDir)[0]
+            myFileDir=QtWidgets.QFileDialog.getOpenFileName(self, "Locate file", self.defaultDir)[0]
         if myFileDir:
             setattr(self,attr,myFileDir)
+            self.defaultDir=myFileDir
         if ledit:
             ledit.setText(myFileDir)
             
@@ -854,3 +922,4 @@ class OWWidgetBuilder(widget.OWWidget):
                     widget.setEnabled(False)
                 else:
                     widget.setEnabled(True)
+

@@ -1,0 +1,1 @@
+{"autoMap": true, "category": "User", "command": ["echo 'hello world'"], "description": "None", "docker_image_name": "biodepot/alpine", "docker_image_tag": "latest", "icon": "/data/biomart.png", "inputs": null, "name": "myTest", "outputs": null, "parameters": null, "persistentSettings": "all", "priority": "10", "requiredParameters": [], "volumes": null}

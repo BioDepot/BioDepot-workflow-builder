@@ -5,6 +5,9 @@ import sys, re, os, getopt
 from collections import OrderedDict
 import jsonpickle
 import pprint
+from PyQt5 import QtWidgets, QtGui
+from PyQt5.QtWidgets import QInputDialog, QLineEdit
+
 def deClass(string):
     #removes the <class 'id'> and returns id
     if string[:6] == '<class':
@@ -15,6 +18,11 @@ def deClass(string):
             return string
     return string
     
+def findIconFile(widgetFile):
+    with open(widgetFile,'r') as f:
+        data=f.read()
+    f.close()
+    return os.path.basename(re.findall(r'icon = "(.*?)"',data)[0])
 
 WIDGET_HEADING ='''import os
 import glob
@@ -46,7 +54,9 @@ def checkCategory(category):
         sys.stderr.write('*WARNING* {} not a recognized category - will place widget in User directory\n'.format(category))
         return 'User'
         
-def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None): 
+def createWidget(inputJson,outputWidget,widgetName,inputData=None):
+    defaultIconFile='/biodepot/Bwb_core/icons/default.png'
+    widgetPath = os.path.dirname(os.path.realpath(outputWidget)) 
     data={}
     directory='User'
     if inputJson:
@@ -71,9 +81,11 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
         f.write('    category = "{}"\n'.format(data['category']))
         f.write('    priority = 10\n')
         iconFile=data['icon']
-        if os.path.dirname(iconFile) != '/biodepot/'+directory+'/icons':
-            iconFile = '/biodepot/'+directory+'/icons/' + os.path.basename(iconFile)
-        f.write('    icon = "{}"\n'.format(iconFile))
+        if not iconFile or not os.path.exists(iconFile):
+            iconFile = defaultIconFile
+        copyfile(iconFile,widgetPath+'/'+ os.path.basename(iconFile))
+        finalIconFile = '/biodepot/'+directory + '/' + widgetName + '/' + os.path.basename(iconFile)
+        f.write('    icon = "{}"\n'.format(finalIconFile))
         f.write('    want_main_area = False\n')
         f.write('    docker_image_name = "{}"\n'.format(data['docker_image_name']))
         f.write('    docker_image_tag = "{}"\n'.format(data['docker_image_tag']))
@@ -153,60 +165,5 @@ def createWidget(inputJson,outputWidget, registerFlag=False, inputData=None):
                 f.write('            outputValue=getattr(self,"{}")\n'.format(attr))
                 f.write('        self.send("{}", outputValue)\n'.format(attr))
         f.close()
-        if registerFlag:
-            register(inputJson,outputWidget,data['icon'])
 
-def register(jsonFile,widgetFile,iconFile):
-    directory=findDirectory(jsonFile)
-    sys.stderr.write('moving files to correct biodepot locations\n')
-    if os.path.dirname(jsonFile) != '/biodepot/'+ directory + '/json':
-        newjsonFile = '/biodepot/' + directory+ '/json/' + os.path.basename(jsonFile)
-        copyfile(jsonFile, newjsonFile)
-    if os.path.dirname(iconFile) != '/biodepot/' + directory + '/icons':
-        newiconFile = '/biodepot/' + directory + '/icons/' + os.path.basename(iconFile)
-        copyfile(iconFile, newiconFile)   
-    if os.path.dirname(widgetFile) != '/biodepot/'+ directory:
-        basename=os.path.basename(widgetFile)
-        if basename[:2] != 'OW':
-            basename='OW'+basename
-        newwidgetFile = '/biodepot/'+directory + '/' + basename
-        copyfile(widgetFile, newwidgetFile)
 
-def usage():
-    sys.stderr.write('createWidgetTest -i <parms.json> -o <widget.py>\n')
-    sys.stderr.write('add -r or --register flag to save widget, json and icon files to correct places in biodepot container\n')    
-
-def main(args):
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "hri:o:", ["help", "output=" ,"input=","register"])
-    except getopt.GetoptError as err:
-        # print help information and exit:
-        print(err)  # will print something like "option -a not recognized"
-        usage()
-        sys.exit(2)
-    outputWidget = None
-    verbose = False
-    inputJson= None
-    register=False
-    for o, a in opts:
-        if o == "-v":
-            verbose = True
-        elif o in ("-h", "--help"):
-            usage()
-            sys.exit()
-        elif o in ("-o", "--output"):
-            outputWidget = a
-        elif o in ("-i", "--input"):
-            inputJson = a            
-        elif o in ("-r", "--register"):
-            register = True   
-        else:
-            assert False, "unhandled option"
-    if not outputWidget and not inputJson:
-        usage()
-        sys.exit(2)
-    sys.stderr.write('From json file {} creating widget file {}\n'.format(inputJson,outputWidget))
-    createWidget(inputJson,outputWidget,registerFlag=register)
-    return 0
-if __name__ == "__main__":
-   main(sys.argv[1:])

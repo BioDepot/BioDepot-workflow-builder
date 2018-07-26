@@ -1,0 +1,11 @@
+*.sh text eol=lf
+*.py	text eol=lf
+*.h	text eol=lf
+*.c text eol=lf
+*.cpp text eol=lf
+*.R text eol=lf
+*.txt text eol=lf
+*.json text eol=lf
+*.png binary
+*.jpg binary
+*.svg binary
