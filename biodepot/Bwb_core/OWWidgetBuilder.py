@@ -3,6 +3,7 @@ import re
 import sys
 import json
 import jsonpickle
+import pickle
 import csv
 from pathlib import Path
 from orangebiodepot.util.createWidget import createWidget, findDirectory, findIconFile
@@ -164,7 +165,21 @@ class OWWidgetBuilder(widget.OWWidget):
         layout.addLayout(box)
         
     def loadWidget(self):
-        pass
+        if self.widgetDir:
+            startDir=self.widgetDir
+        else:
+            startDir=self.defaultDir
+        loadWidgetDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose widget to load", directory=startDir)
+        if loadWidgetDir:
+            widgetName=os.path.split(loadWidgetDir)[-1]
+            allAttrsFile="{}/{}.attrs".format(loadWidgetDir,widgetName)
+            allStatesFile="{}/{}.states".format(loadWidgetDir,widgetName)
+            self.allAttrs=self.unPickleData(allAttrsFile)
+            self.allStates=self.unPickleData(allStatesFile)
+            self.widgetDir=loadWidgetDir
+        self.startWidget()
+            
+            
     def rebuildWidget(self):
         myDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Bwb directory", directory=self.defaultDir)
         (imageName,accept)=QtGui.QInputDialog.getText(self,"New image name", "Enter image name",QtGui.QLineEdit.Normal,"biodepot/bwb")
@@ -292,37 +307,39 @@ class OWWidgetBuilder(widget.OWWidget):
             f.close()
     
     def saveWidget(self):
-        if not self.widgetDir:
+        if not self.widgetDir or not self.widgetName:
             self.saveWidgetAs()
             return
-        if not self.widgetName:
-            head, tail =os.path.split(self.widgetDir)
-            self.widgetName=tail
-        Path(self.widgetDir).mkdir(parents=True,exist_ok=True)
-        self.buildData()
-        outputWidget=self.widgetDir+'/'+self.widgetName+'.py'
-        createWidget(None,outputWidget,self.widgetName,inputData=self.data)
+        self.pickleWidget()
                     
     def saveWidgetAs(self):
-        self.buildData()
+        niceName=self.widgetName
+        if not niceName:
+            #get a generic name if necessary
+            if 'name' in self.allAttrs or not self.allAttrs['name']:
+                self.allAttrs['name']= "generic{}".format(os.getpid())
+                #Clean up name and replace all runs of whitespace with a single dash     
+                niceName=re.sub(r"[^\w\s]", '',self.allAttrs['name'])
+                niceName = re.sub(r"\s+", '_', niceName)
+        nameDir, okPressed = QInputDialog.getText(self, "Widget directory ","Enter widget name:", QLineEdit.Normal, niceName)
         #get json filename
         self.outputDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose directory to save the widget in", directory=self.defaultDir)
         if self.outputDir:
-            if not self.widgetName:
-                #get a generic name if necessary
-                if 'name' not in self.data or not self.data['name']:
-                    self.data['name']= "generic{}".format(os.getpid())
-                #Clean up name and replace all runs of whitespace with a single dash     
-                niceName=re.sub(r"[^\w\s]", '',self.data['name'])
-                niceName = re.sub(r"\s+", '_', niceName)
-            nameDir, okPressed = QInputDialog.getText(self, "Widget directory ","Enter widget directory:", QLineEdit.Normal, niceName)
             if (okPressed): 
                 self.widgetName=nameDir
                 self.widgetDir=self.outputDir+'/'+ self.widgetName
-                Path(self.widgetDir).mkdir(parents=True,exist_ok=True)
-                outputWidget="{}/{}.py".format(self.widgetDir,self.widgetName)
-                createWidget(None,outputWidget,self.widgetName,inputData=self.data)
-        
+                self.pickleWidget()
+    
+    def pickleWidget(self):
+        self.buildData()
+        Path(self.widgetDir).mkdir(parents=True,exist_ok=True)
+        outputWidget="{}/{}.py".format(self.widgetDir,self.widgetName)
+        createWidget(None,outputWidget,self.widgetName,inputData=self.data)
+        allStatesFile="{}/{}.states".format(self.widgetDir,self.widgetName)
+        allAttrsFile="{}/{}.attrs".format(self.widgetDir,self.widgetName)
+        self.pickleData(self.allStates,allStatesFile)
+        self.pickleData(self.allAttrs,allAttrsFile) 
+                   
     def getDefaultDir(self):
         defaultDir = '/root'
         if os.path.exists('/data'):
@@ -339,14 +356,28 @@ class OWWidgetBuilder(widget.OWWidget):
             widgetName=os.path.split(registerWidgetDir)[-1]
             self.register(registerWidgetDir,widgetName)
             
-    def pickleData(data,filename):
-        with open('filename', 'wb') as outfp:
-            pickle.dump(data, outfp, protocol=pickle.HIGHEST_PROTOCOL)
+    def pickleData(self,data,filename,jsonFlag=False):
+        if jsonFlag:
+            myJdata=jsonpickle.encode(data)
+            with open(filename,"w") as f:
+                f.write(myJdata)
+            f.close()
+        else:
+            with open(filename, 'wb') as f:
+                pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
+            f.close()
 
         
-    def unPickleData(filename):
-        with open('filename', 'rb') as infp:
-            return pickle.load(infp)
+    def unPickleData(self,filename,jsonFlag=False):
+        if jsonFlag:
+            with open(filename,'r') as f:
+                data=jsonpickle.decode(f)
+            f.close()
+        else:
+            with open(filename, 'rb') as f:
+                data=pickle.load(f)
+            f.close()
+        return data
                     
     def __init__(self):
         super().__init__()
@@ -365,6 +396,15 @@ class OWWidgetBuilder(widget.OWWidget):
         self.defaultDir=self.getDefaultDir()
         self.widgetDir=None
         self.widgetName=None
+        self.startWidget()
+        
+    def clearLayout(self,layout):
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+    
+    def startWidget(self):
         #initialize the attr list
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
                      'priority','icon','inputs','outputs','volumes','parameters','command','autoMap'):
@@ -372,8 +412,7 @@ class OWWidgetBuilder(widget.OWWidget):
                 setattr(self,attr,self.allAttrs[attr])
             else:
                 setattr(self,attr,None)
-                self.allAttrs[attr]=None
-    
+                self.allAttrs[attr]=None        
         #set up basic gui 
         self.setStyleSheet(":disabled { color: #282828}")
         self.scroll_area = QScrollArea(
@@ -382,6 +421,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.bigBox=gui.widgetBox(self.controlArea)
         self.scroll_area.setWidget(self.bigBox)
         self.scroll_area.setWidgetResizable(True)
+        self.clearLayout(self.controlArea.layout())
         self.controlArea.layout().addWidget(self.scroll_area)
         
         controlBox = gui.vBox(self.bigBox)
@@ -409,7 +449,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.drawParamsListWidget('parameters',layout=leditRequiredLayout)
         self.drawCommand('command',layout=leditRequiredLayout)
         self.drawExec(self.controlArea.layout())
-    
+        
     def updateCheckBox(self,checkBox,widget=None):
         if(checkBox.isEnabled()):
             widget.setEnabled(checkBox.isChecked())
