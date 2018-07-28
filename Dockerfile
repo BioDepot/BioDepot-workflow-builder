@@ -103,6 +103,7 @@ COPY tutorials/ /root/tutorials/
 
 #Add widget creator
 RUN ln -s /biodepot/orangebiodepot/util/createWidget /usr/bin/createWidget
+RUN ln -s /biodepot/Bwb_core/OWWidgetBuilder.py /orange3/Orange/canvas/document/OWWidgetBuilder.py
 
 #start it up
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
