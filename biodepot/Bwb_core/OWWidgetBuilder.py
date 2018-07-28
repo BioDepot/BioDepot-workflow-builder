@@ -11,7 +11,6 @@ from copy import deepcopy
 from collections import OrderedDict
 from functools import partial
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
-from orangebiodepot.util.BwBase import DragAndDropList
 from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui
@@ -23,7 +22,26 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
+class DragAndDropList(QtGui.QListWidget):
+    #overloads the Drag and dropEvents to emit code
+    itemMoved = pyqtSignal(int, int) # Old index, new index, item
+    def __init__(self, parent=None, **args):
+        super(DragAndDropList, self).__init__(parent, **args)
+        self.setAcceptDrops(True)
+        self.setDragEnabled(True)
+        self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+        self.drag_item = None
+        self.drag_row = None
 
+    def dropEvent(self, event):
+        super(DragAndDropList, self).dropEvent(event)
+        self.itemMoved.emit(self.drag_row, self.currentRow())
+        self.drag_item = None
+     
+    def startDrag(self, supportedActions):
+        self.drag_row = self.currentRow()
+        super(DragAndDropList, self).startDrag(supportedActions)
+        
 class WidgetItem():
     #each widget item has:
     #A set of gui widgets that correspond to the name and each parameter
@@ -164,12 +182,13 @@ class OWWidgetBuilder(widget.OWWidget):
         box.addStretch(1)
         layout.addLayout(box)
         
-    def loadWidget(self):
+    def loadWidget(self,loadWidgetDir=None):
         if self.widgetDir:
             startDir=self.widgetDir
         else:
             startDir=self.defaultDir
-        loadWidgetDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose widget to load", directory=startDir)
+        if not loadWidgetDir:
+            loadWidgetDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose widget to load", directory=startDir)
         if loadWidgetDir:
             widgetName=os.path.split(loadWidgetDir)[-1]
             allAttrsFile="{}/{}.attrs".format(loadWidgetDir,widgetName)
@@ -379,7 +398,7 @@ class OWWidgetBuilder(widget.OWWidget):
             f.close()
         return data
                     
-    def __init__(self):
+    def __init__(self,widgetID=None):
         super().__init__()
         css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
@@ -396,6 +415,15 @@ class OWWidgetBuilder(widget.OWWidget):
         self.defaultDir=self.getDefaultDir()
         self.widgetDir=None
         self.widgetName=None
+        self.widgetDir=None
+        sys.stderr.write('widgetID is {}\n'.format(widgetID))
+        if widgetID:
+            widgetSplit=widgetID.split('.')
+            widgetSplit[-1]=widgetSplit[-1][2:]
+            self.widgetName=widgetSplit[-1]
+            self.widgetDir='/biodepot/{}'.format('/'.join(widgetSplit))
+            sys.stderr.write('widgetDir is {} widgetName is {}\n'.format(self.widgetDir,self.widgetName))
+            self.loadWidget(loadWidgetDir=self.widgetDir)
         self.startWidget()
         
     def clearLayout(self,layout):
@@ -405,7 +433,6 @@ class OWWidgetBuilder(widget.OWWidget):
                 child.widget().deleteLater()
     
     def startWidget(self):
-        #initialize the attr list
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
                      'priority','icon','inputs','outputs','volumes','parameters','command','autoMap'):
             if attr in self.allAttrs:

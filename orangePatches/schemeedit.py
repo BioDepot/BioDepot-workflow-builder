@@ -11,6 +11,7 @@ import logging
 import itertools
 import unicodedata
 import copy
+import os.path
 
 from operator import attrgetter
 from urllib.parse import urlencode
@@ -44,7 +45,7 @@ from ..canvas import items
 from . import interactions
 from . import commands
 from . import quickmenu
-
+from . import OWWidgetBuilder
 
 log = logging.getLogger(__name__)
 
@@ -158,6 +159,8 @@ class SchemeEditWidget(QWidget):
         self.__widgetMenu.addSeparator()
         self.__widgetMenu.addAction(self.__renameAction)
         self.__widgetMenu.addAction(self.__removeSelectedAction)
+        self.__widgetMenu.addSeparator()
+        self.__widgetMenu.addAction(self.__editWidgetAction)
         self.__widgetMenu.addSeparator()
         self.__widgetMenu.addAction(self.__helpAction)
         if log.isEnabledFor(logging.DEBUG):
@@ -277,7 +280,13 @@ class SchemeEditWidget(QWidget):
                     triggered=self.removeSelected,
                     enabled=False
                     )
-
+        self.__editWidgetAction = \
+            QAction(self.tr("Edit widget"), self,
+                    objectName="edit-widget",
+                    toolTip=self.tr("Edit the widget"),
+                    triggered=self.editWidget,
+                    enabled=False)
+                    
         self.__showSettingsAction = \
             QAction(self.tr("Show settings"), self,
                     objectName="show-settings",
@@ -785,6 +794,7 @@ class SchemeEditWidget(QWidget):
         command = commands.RenameNodeCommand(self.__scheme, node, title)
         self.__undoStack.push(command)
 
+
     def addLink(self, link):
         """
         Add a `link` (:class:`.SchemeLink`) to the scheme.
@@ -837,6 +847,7 @@ class SchemeEditWidget(QWidget):
                     commands.RemoveAnnotationCommand(self.__scheme, annot)
                 )
         self.__undoStack.endMacro()
+        
 
     def showSettings(self):
         """
@@ -1259,7 +1270,9 @@ class SchemeEditWidget(QWidget):
         self.__renameAction.setEnabled(len(nodes) == 1)
         self.__duplicateSelectedAction.setEnabled(bool(nodes))
         self.__showSettingsAction.setEnabled(len(nodes) == 1)
-
+        if len(nodes) == 1 and self.__checkAttrsStatesFiles(nodes[0]):
+            self.__editWidgetAction.setEnabled(len(nodes) == 1)
+        
         if len(nodes) > 1:
             self.__openSelectedAction.setText(self.tr("Open All"))
         else:
@@ -1467,7 +1480,34 @@ class SchemeEditWidget(QWidget):
         selected = self.selectedNodes()
         if len(selected) == 1:
             self.editNodeTitle(selected[0])
+            
+    def editWidget(self):
+        """
+        Check that only one widget is selected - if so then edit it
+        """
+        selected = self.selectedNodes()
+        if len(selected) == 1:
+            self.__editSelectedWidget(selected[0])
+            
+    def __editSelectedWidget(self, node):
+        myWidget = self.scheme().widget_for_node(node)
+        desc = myWidget.get_widget_description()
+        widget=OWWidgetBuilder.OWWidgetBuilder(widgetID=desc['id'])
+        widget.showNormal()
+        widget.raise_()
+        widget.activateWindow()
 
+    def __checkAttrsStatesFiles(self,node):
+        myWidget = self.scheme().widget_for_node(node)
+        desc = myWidget.get_widget_description()      
+        widgetSplit=desc['id'].split('.')
+        widgetSplit[-1]=widgetSplit[-1][2:]
+        attrsFile='/biodepot/{}/{}.attrs'.format('/'.join(widgetSplit),widgetSplit[-1])
+        statesFile='/biodepot/{}/{}.states'.format('/'.join(widgetSplit),widgetSplit[-1])
+        if os.path.isfile(attrsFile) and os.path.isfile(statesFile):
+            return True
+        return False
+              
     def __onHelpAction(self):
         """
         Help was requested for the selected widget.

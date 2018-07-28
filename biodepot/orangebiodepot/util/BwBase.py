@@ -9,7 +9,12 @@ from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 
-
+from AnyQt.QtWidgets import (
+    QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
+    QDoubleSpinBox, QComboBox, QSpinBox, QListView, QLabel,
+    QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
+    QSizePolicy, QApplication, QCheckBox
+)
 class DragAndDropList(QtGui.QListWidget):
      #overloads the Drag and dropEvents to emit code
      itemMoved = pyqtSignal(int, int) # Old index, new index, item
@@ -29,14 +34,6 @@ class DragAndDropList(QtGui.QListWidget):
      def startDrag(self, supportedActions):
          self.drag_row = self.currentRow()
          super(DragAndDropList, self).startDrag(supportedActions)
-
-from AnyQt.QtWidgets import (
-    QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
-    QDoubleSpinBox, QComboBox, QSpinBox, QListView, QLabel,
-    QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
-    QSizePolicy, QApplication, QCheckBox
-)
-
 #for selecting multiple directories
 class getExistingDirectories(QtWidgets.QFileDialog):
     def __init__(self, *args):
