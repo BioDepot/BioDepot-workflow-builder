@@ -13,13 +13,13 @@ from PyQt5 import QtWidgets, QtGui
 
 class OWDtoxSAlignment(OWBwBWidget):
     name = "DtoxSAlignment"
-    description = "Alignment part of DetoxS standard operating procedure (SOP)"
+    description = "Alignment part of DtoxS standard operating procedure (SOP)"
     category = "RNA-seq"
     priority = 10
-    icon = "/biodepot/RNA_seq/icons/dtoxs-alignment2.svg"
+    icon = "/biodepot/RNA_seq/DtoxSAlignment/dtoxs-alignment2.svg"
     want_main_area = False
     docker_image_name = "biodepot/dtoxs_alignment"
-    docker_image_tag = "alpine-bwa-python-3.7-0.7.15-r1140-2.7.14-1.0"
+    docker_image_tag = "1.0__alpine-3.7__bwa-0.715-r1140__python-2.7.14__072818"
     inputs = [("barcodesFile",str,"handleInputsbarcodesFile"),("topDir",str,"handleInputstopDir"),("trigger",str,"handleInputstrigger")]
     outputs = [("topDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)

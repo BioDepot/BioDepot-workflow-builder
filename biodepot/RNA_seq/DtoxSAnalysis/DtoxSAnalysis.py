@@ -11,15 +11,15 @@ from orangebiodepot.util.DockerClient import DockerClient
 from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWDtoxsAnalysis(OWBwBWidget):
-    name = "Dtoxs Analysis"
+class OWDtoxSAnalysis(OWBwBWidget):
+    name = "DtoxSAnalysis"
     description = "Step 2 of Dtoxs SOP. Uses edgeR for differential expression analysis"
     category = "RNA-seq"
     priority = 10
-    icon = "/biodepot/RNA_seq/icons/dtoxs-analysis2.svg"
+    icon = "/biodepot/RNA_seq/DtoxSAnalysis/dtoxs-analysis2.svg"
     want_main_area = False
     docker_image_name = "biodepot/dtoxs_analysis"
-    docker_image_tag = "ubuntu-bioc-r-16.04-3.6-3.43-1.0"
+    docker_image_tag = "1.0__ubuntu-16.04__bioc-3.6__r-3.4.3__072818"
     inputs = [("RepositoryDirectory",str,"handleInputsRepositoryDirectory"),("ConfigurationFile",str,"handleInputsConfigurationFile"),("Trigger",str,"handleInputsTrigger")]
     outputs = [("ResultsDirectory",str),("Top40",Orange.data.Table)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -32,7 +32,7 @@ class OWDtoxsAnalysis(OWBwBWidget):
     ConfigurationFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/biodepot/RNA_seq/json/DtoxSAnalyses.json") as f:
+        with open("/biodepot/RNA_seq/json/DtoxSAnalysis.json") as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
@@ -51,4 +51,3 @@ class OWDtoxsAnalysis(OWBwBWidget):
         tsvReader = FileFormat.get_reader(tsvFile)
         data = tsvReader.read()
         self.send("Top40", data)
-

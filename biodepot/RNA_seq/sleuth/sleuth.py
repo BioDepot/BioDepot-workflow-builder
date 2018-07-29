@@ -16,10 +16,10 @@ class OWsleuth(OWBwBWidget):
     description = "Analysis of kallisto quantified RNA-seq files"
     category = "RNA-seq"
     priority = 10
-    icon = "/biodepot/RNA_seq/icons/sleuth2.png"
+    icon = "/biodepot/RNA_seq/sleuth/sleuth2.png"
     want_main_area = False
-    docker_image_name = "biodepot/ubuntu-sleuth"
-    docker_image_tag = "18.04-4.5.1-py27-0.29"
+    docker_image_name = "biodepot/sleuth"
+    docker_image_tag = "0.29.0__ubuntu-18.04__r-4.5.1__python-2.7.13__072818"
     inputs = [("trigger",str,"handleInputstrigger")]
     outputs = [("output_file",str),("topGenes",Orange.data.Table)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -59,25 +59,7 @@ class OWsleuth(OWBwBWidget):
         if hasattr(self,"output_file"):
             outputValue=getattr(self,"output_file")
         self.send("output_file", outputValue)
-        sys.stderr.write('output_file is {}\n'.format(outputValue))
-        if outputValue:
-            self.sendTable(outputValue)
-        
-    def sendTable(self,filename):
-        outname=filename+'.tsv'
-        
-        with open (filename, 'r') as fin, open (outname,'w') as fout:
-            line=fin.readline()
-            fout.write(line)
-            for line in fin:
-                fout.write(line.split("\t",1)[1])
-            fin.close()
-            fout.close()
-        tsvReader = FileFormat.get_reader(outname)
-        dataTable= tsvReader.read()
-        self.send("topGenes", dataTable)
-        os.unlink(outname)
-
-
-        
-    
+        outputValue=None
+        if hasattr(self,"topGenes"):
+            outputValue=getattr(self,"topGenes")
+        self.send("topGenes", outputValue)

@@ -11,15 +11,15 @@ from orangebiodepot.util.DockerClient import DockerClient
 from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWkallisto_quant(OWBwBWidget):
-    name = "kallisto_quant"
+class OWkallistoquant(OWBwBWidget):
+    name = "kallisto quant"
     description = "Alignment and quantification of reads from fastq files"
     category = "RNA-seq"
     priority = 10
-    icon = "/biodepot/RNA_seq/icons/kallistoquant.png"
+    icon = "/biodepot/RNA_seq/kallistoQuant/kallistoquant.png"
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
-    docker_image_tag = "0.44.0"
+    docker_image_tag = "0.44.0__ubuntu-16.04__072818"
     inputs = [("indexFile",str,"handleInputsindexFile"),("fastqFiles",str,"handleInputsfastqFiles"),("trigger",str,"handleInputstrigger")]
     outputs = [("outputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -48,7 +48,7 @@ class OWkallisto_quant(OWBwBWidget):
     multiSample=pset(1)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/biodepot/RNA_seq/json/kallisto.json") as f:
+        with open("/biodepot/RNA_seq/json/kallistoQuant.json") as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

@@ -16,10 +16,10 @@ class OWkallistoindex(OWBwBWidget):
     description = "Generates index files for kallisto"
     category = "RNA-seq"
     priority = 10
-    icon = "/biodepot/RNA_seq/icons/kallistoindex.png"
+    icon = "/biodepot/RNA_seq/kallistoIndex/kallistoindex.png"
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
-    docker_image_tag = "0.44"
+    docker_image_tag = "0.44.0__ubuntu-16.04__072818"
     inputs = [("trigger",str,"handleInputstrigger")]
     outputs = [("outputFilename",str)]
     pset=functools.partial(settings.Setting,schema_only=True)

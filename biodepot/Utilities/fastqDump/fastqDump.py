@@ -16,10 +16,10 @@ class OWfastqDump(OWBwBWidget):
     description = "Download fastq files from GEO"
     category = "Utilities"
     priority = 10
-    icon = "/biodepot/Utilities/icons/pfqDump.png"
+    icon = "/biodepot/Utilities/fastqDump/pfqDump.png"
     want_main_area = False
-    docker_image_name = "biodepot/sratools"
-    docker_image_tag = "1.0"
+    docker_image_name = "biodepot/sratoolkit"
+    docker_image_tag = "sratoolkit__2.8.2-1__minideb-jessie__072818"
     inputs = [("Trigger",str,"handleInputsTrigger")]
     outputs = [("OutputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)

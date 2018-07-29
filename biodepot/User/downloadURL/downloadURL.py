@@ -14,9 +14,9 @@ from PyQt5 import QtWidgets, QtGui
 class OWdownloadURL(OWBwBWidget):
     name = "downloadURL"
     description = "Downloads files from URL"
-    category = "Utilities"
+    category = "Utility"
     priority = 10
-    icon = "/biodepot/Utilities/downloadURL/download.png"
+    icon = "/biodepot/User/downloadURL/download.png"
     want_main_area = False
     docker_image_name = "biodepot/downloadurl"
     docker_image_tag = "alpine-3.7__072818"
@@ -34,7 +34,7 @@ class OWdownloadURL(OWBwBWidget):
     concatenateFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/biodepot/Utilities/json/downloadURL.json") as f:
+        with open("/biodepot/User/json/downloadURL.json") as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
