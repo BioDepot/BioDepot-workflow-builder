@@ -59,7 +59,20 @@ class OWsleuth(OWBwBWidget):
         if hasattr(self,"output_file"):
             outputValue=getattr(self,"output_file")
         self.send("output_file", outputValue)
-        outputValue=None
-        if hasattr(self,"topGenes"):
-            outputValue=getattr(self,"topGenes")
-        self.send("topGenes", outputValue)
+        sys.stderr.write('output_file is {}\n'.format(outputValue))
+        if outputValue:
+            self.sendTable(outputValue)
+    def sendTable(self,filename):
+        outname=filename+'.tsv'
+        with open (filename, 'r') as fin, open (outname,'w') as fout:
+            line=fin.readline()
+            fout.write(line)
+            for line in fin:
+                fout.write(line.split("\t",1)[1])
+            fin.close()
+            fout.close()
+        tsvReader = FileFormat.get_reader(outname)
+        dataTable= tsvReader.read()
+        self.send("topGenes", dataTable)
+        os.unlink(outname)
+
