@@ -16,10 +16,10 @@ class OWStarAlign(OWBwBWidget):
     description = "Star aligner alignment module"
     category = "RNA-seq"
     priority = 10
-    icon = "/biodepot/RNA_seq/icons/staralign.png"
+    icon = "/biodepot/RNA_seq/starAlign/staralign.png"
     want_main_area = False
-    docker_image_name = "biodepot/debian-star"
-    docker_image_tag = "8.11-slim-2.6.0c"
+    docker_image_name = "biodepot/star"
+    docker_image_tag = "2.6.0c__debian-8.11-slim__072918"
     inputs = [("trigger",str,"handleInputstrigger"),("outputDir",str,"handleInputsoutputDir")]
     outputs = [("outputDir",str),("genomeDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
