@@ -19,7 +19,7 @@ class OWfastqDump(OWBwBWidget):
     icon = "/biodepot/Utilities/fastqDump/pfqDump.png"
     want_main_area = False
     docker_image_name = "biodepot/sratoolkit"
-    docker_image_tag = "sratoolkit__2.8.2-1__minideb-jessie__072818"
+    docker_image_tag = "2.8.2-1__minideb-jessie__072818"
     inputs = [("Trigger",str,"handleInputsTrigger")]
     outputs = [("OutputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)

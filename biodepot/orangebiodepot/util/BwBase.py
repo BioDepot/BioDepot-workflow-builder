@@ -496,9 +496,9 @@ class OWBwBWidget(widget.OWWidget):
             else:
                 setattr(self,pname,float(default))
         if addCheckbox:
-            (checkBox,mySpin)=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
+            (checkBox,mySpin)=gui.spin(box, self, pname, minv=-2147483648, maxv=2147483647, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
         else:
-             mySpin=gui.spin(box, self, pname, minv=1, maxv=128, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
+             mySpin=gui.spin(box, self, pname, minv=-2147483648, maxv=2147483647, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
            
         if getattr(self,pname) is None:
             mySpin.clear()

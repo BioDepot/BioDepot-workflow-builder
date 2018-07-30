@@ -1,3 +1,4 @@
+User/OWdownloadURL.py
 User/OWmyTest.py
 User/__init__.py
 User.egg-info/PKG-INFO

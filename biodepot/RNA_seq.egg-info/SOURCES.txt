@@ -1,8 +1,8 @@
 RNA_seq/OWDtoxSAlignment.py
-RNA_seq/OWDtoxSAnalyses.py
+RNA_seq/OWDtoxSAnalysis.py
 RNA_seq/OWdeseq2.py
-RNA_seq/OWkallisto.py
 RNA_seq/OWkallistoIndex.py
+RNA_seq/OWkallistoQuant.py
 RNA_seq/OWsleuth.py
 RNA_seq/OWstarAlign.py
 RNA_seq/OWstarIndex.py
