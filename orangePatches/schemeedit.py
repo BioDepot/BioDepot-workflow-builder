@@ -1272,6 +1272,8 @@ class SchemeEditWidget(QWidget):
         self.__showSettingsAction.setEnabled(len(nodes) == 1)
         if len(nodes) == 1 and self.__checkAttrsStatesFiles(nodes[0]):
             self.__editWidgetAction.setEnabled(len(nodes) == 1)
+        else:
+            self.__editWidgetAction.setEnabled(len(nodes) == 0)
         
         if len(nodes) > 1:
             self.__openSelectedAction.setText(self.tr("Open All"))
