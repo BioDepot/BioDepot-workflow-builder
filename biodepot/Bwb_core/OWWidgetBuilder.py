@@ -14,7 +14,7 @@ from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
 from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import QInputDialog, QLineEdit
+from PyQt5.QtWidgets import QInputDialog, QLineEdit, QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget, QVBoxLayout
 
 from AnyQt.QtWidgets import (
     QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
@@ -22,6 +22,25 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
+class tabbedWindow(QTabWidget):
+   def __init__(self, parent = None):
+      super(tabbedWindow, self).__init__(parent)
+      self.general = QWidget()
+      self.inputs = QWidget()
+      self.outputs = QWidget()
+      self.volumes = QWidget()
+      self.parameters= QWidget()
+      self.command= QWidget()
+
+      self.addTab(self.general,"General")
+      self.addTab(self.inputs,"Inputs")
+      self.addTab(self.outputs,"Outputs")
+      self.addTab(self.volumes,"Volumes")
+      self.addTab(self.parameters,"Parameters")
+      self.addTab(self.command,"Command")
+
+      
+
 class DragAndDropList(QtGui.QListWidget):
     #overloads the Drag and dropEvents to emit code
     itemMoved = pyqtSignal(int, int) # Old index, new index, item
@@ -397,7 +416,7 @@ class OWWidgetBuilder(widget.OWWidget):
                 data=pickle.load(f)
             f.close()
         return data
-                    
+
     def __init__(self,widgetID=None):
         super().__init__()
         css = '''
@@ -424,7 +443,8 @@ class OWWidgetBuilder(widget.OWWidget):
             self.widgetDir='/biodepot/{}'.format('/'.join(widgetSplit))
             sys.stderr.write('widgetDir is {} widgetName is {}\n'.format(self.widgetDir,self.widgetName))
             self.loadWidget(loadWidgetDir=self.widgetDir)
-        self.startWidget()
+        else:
+            self.startWidget()
         
     def clearLayout(self,layout):
         while layout.count():
@@ -439,44 +459,84 @@ class OWWidgetBuilder(widget.OWWidget):
                 setattr(self,attr,self.allAttrs[attr])
             else:
                 setattr(self,attr,None)
-                self.allAttrs[attr]=None        
+                self.allAttrs[attr]=None     
+        self.tabs = tabbedWindow()
+        self.controlArea.layout().addWidget(self.tabs)
+        self.tabs.general.setLayout(QVBoxLayout())
+        self.generalBox=gui.widgetBox(self.tabs.general)
         #set up basic gui 
         self.setStyleSheet(":disabled { color: #282828}")
         self.scroll_area = QScrollArea(
             verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
         )
-        self.bigBox=gui.widgetBox(self.controlArea)
-        self.scroll_area.setWidget(self.bigBox)
+        self.scroll_area.setWidget(self.generalBox)
         self.scroll_area.setWidgetResizable(True)
-        self.clearLayout(self.controlArea.layout())
-        self.controlArea.layout().addWidget(self.scroll_area)
+        self.tabs.general.layout().addWidget(self.scroll_area)
+        #self.clearLayout(self.controlArea.layout())
+        #self.controlArea.layout().addWidget(self.scroll_area)
         
-        controlBox = gui.vBox(self.bigBox)
+        #controlBox = gui.vBox(self.generalBox)
         #self.drawExec(box=controlBox)ne)
-        requiredBox = gui.widgetBox(self.bigBox, "Widget entries")
+        #requiredBox = gui.widgetBox(self.generalBox, "Widget entries")
         #draw Ledits for the frequired elements
-        leditRequiredLayout=QtGui.QGridLayout()
-        leditRequiredLayout.setSpacing(5)
-        setattr(leditRequiredLayout,'nextRow',1)        
-        requiredBox.layout().addLayout(leditRequiredLayout)
+        leditGeneralLayout=self.getLeditLayout(self.generalBox)
         for pname in ['name','description','category','docker_image_name','docker_image_tag']:
-            self.drawLedit(pname,layout=leditRequiredLayout)
-        self.drawLedit('priority',layout=leditRequiredLayout)
+            self.drawLedit(pname,layout=leditGeneralLayout)
+        self.drawLedit('priority',layout=leditGeneralLayout)
         #file entry for icon
-        self.drawLedit('icon',layout=leditRequiredLayout,addBrowseButton=True, fileType=None)
+        self.drawLedit('icon',layout=leditGeneralLayout,addBrowseButton=True, fileType=None)
 
         #listwidgets for inputs and outputs 
         #define widgetItems for the different widgetLists
         #top level widgets are drawXXX - these can have multiple substituents
         #lower level widgets are makeXXX - these can also have multiple substituents
+        inputsBox=gui.widgetBox(self.tabs.inputs)
+        self.tabs.inputs.setLayout(QVBoxLayout())
+        self.tabs.inputs.layout().addWidget(self.getScrollArea(inputsBox))    
+        inputsLayout=self.getLeditLayout(inputsBox)
+        self.drawIListWidget('inputs',layout=inputsLayout)
         
-        self.drawIListWidget('inputs',layout=leditRequiredLayout)
-        self.drawOListWidget('outputs',layout=leditRequiredLayout)
-        self.drawVolumeListWidget('volumes',layout=leditRequiredLayout)
-        self.drawParamsListWidget('parameters',layout=leditRequiredLayout)
-        self.drawCommand('command',layout=leditRequiredLayout)
+        outputsBox=gui.widgetBox(self.tabs.outputs)
+        self.tabs.outputs.setLayout(QVBoxLayout())
+        self.tabs.outputs.layout().addWidget(self.getScrollArea(outputsBox))    
+        outputsLayout=self.getLeditLayout(outputsBox)       
+        self.drawOListWidget('outputs',layout=outputsLayout)
+        
+        volumesBox=gui.widgetBox(self.tabs.volumes)
+        self.tabs.volumes.setLayout(QVBoxLayout())
+        self.tabs.volumes.layout().addWidget(self.getScrollArea(volumesBox))    
+        volumesLayout=self.getLeditLayout(volumesBox)       
+        self.drawVolumeListWidget('volumes',layout=volumesLayout)
+        
+        parametersBox=gui.widgetBox(self.tabs.parameters)
+        self.tabs.parameters.setLayout(QVBoxLayout())
+        self.tabs.parameters.layout().addWidget(self.getScrollArea(parametersBox))    
+        parametersLayout=self.getLeditLayout(parametersBox)
+        self.drawParamsListWidget('parameters',layout=parametersLayout)
+        
+        commandBox=gui.widgetBox(self.tabs.command)
+        self.tabs.command.setLayout(QVBoxLayout())
+        self.tabs.command.layout().addWidget(self.getScrollArea(commandBox))    
+        commandLayout=self.getLeditLayout(commandBox)
+        self.drawCommand('command',layout=commandLayout)
+        
         self.drawExec(self.controlArea.layout())
-        
+    
+    def getScrollArea(self, box):
+        scroll_area = QScrollArea(
+            verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
+        )
+        scroll_area.setWidget(box)
+        scroll_area.setWidgetResizable(True)
+        return scroll_area
+    
+    def getLeditLayout(self,box):
+        layout=QtGui.QGridLayout()
+        layout.setSpacing(5)
+        setattr(layout,'nextRow',1)
+        box.layout().addLayout(layout)
+        return layout
+                          
     def updateCheckBox(self,checkBox,widget=None):
         if(checkBox.isEnabled()):
             widget.setEnabled(checkBox.isChecked())
@@ -560,7 +620,7 @@ class OWWidgetBuilder(widget.OWWidget):
         labelTextBox=self.makeTextBox(pname,label='Enter command:')
         self.initAllStates(pname,labelTextBox)
         labelTextBox.textBox.textChanged.connect(lambda: self.updateAllStates(pname,labelTextBox,labelTextBox.getState()))
-        layout.addWidget(labelTextBox.label,layout.nextRow,0)
+        #layout.addWidget(labelTextBox.label,layout.nextRow,0)
         layout.addWidget(labelTextBox.textBox,layout.nextRow,1,1,4)
         layout.nextRow = layout.nextRow + 1
     
@@ -842,9 +902,9 @@ class OWWidgetBuilder(widget.OWWidget):
         #add to the main parameters box
         myBox=gui.vBox(None)
         myBox.layout().addLayout(filesBoxLeditLayout)
-        label=QtGui.QLabel(pname+':')
-        label.setAlignment(Qt.AlignTop)
-        layout.addWidget(label,layout.nextRow,0)
+        #label=QtGui.QLabel(pname+':')
+        #label.setAlignment(Qt.AlignTop)
+        #layout.addWidget(label,layout.nextRow,0)
         #otherwidgets here
         if otherWidgets:
             for widget in otherWidgets:
