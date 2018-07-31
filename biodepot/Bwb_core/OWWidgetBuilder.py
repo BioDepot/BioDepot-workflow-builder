@@ -26,18 +26,18 @@ class tabbedWindow(QTabWidget):
     def __init__(self, parent = None):
         super(tabbedWindow, self).__init__(parent)
         
-    def add(self,title):
+    def add(self,title,minHeight=240):
         tab=QWidget()
-        tab.setMinimumHeight(240)
+        tab.setMinimumHeight(minHeight)
         self.addTab(tab,title)
         box=gui.widgetBox(tab)
         tab.setLayout(QVBoxLayout())
         tab.layout().addWidget(self.getScrollArea(box))    
         return self.getLeditLayout(box)
         
-    def addBox(self,title):
+    def addBox(self,title,minHeight=240):
         tab=QWidget()
-        tab.setMinimumHeight(240)
+        tab.setMinimumHeight(minHeight)
         self.addTab(tab,title)
         box=gui.widgetBox(tab)
         tab.setLayout(QVBoxLayout())

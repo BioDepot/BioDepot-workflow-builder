@@ -2,6 +2,8 @@ import os
 import re
 import sys
 import logging
+sys.path.append("/biodepot/Bwb_core")
+from OWWidgetBuilder import tabbedWindow
 from functools import partial
 from pathlib import Path
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
@@ -252,17 +254,12 @@ class OWBwBWidget(widget.OWWidget):
 
 #Drawing the GUI
     def drawGUI(self):
+        self.tabs = tabbedWindow()
+        self.controlArea.layout().addWidget(self.tabs)
+        self.setStyleSheet(":disabled { color: #282828}")        
         
-        self.setStyleSheet(":disabled { color: #282828}")
-        self.topScrollArea = QScrollArea(
-            verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
-        )
-        self.topBox=gui.widgetBox(self.controlArea)
-        self.topScrollArea.setWidget(self.topBox)
-        self.topScrollArea.setWidgetResizable(True)
-        self.controlArea.layout().addWidget(self.topScrollArea)
         if 'requiredParameters' in self.data and self.data['requiredParameters']:
-            self.requiredBox = gui.widgetBox(self.topBox, "Required parameters")
+            self.requiredBox,requiredLayout=self.tabs.addBox('Required entries',minHeight=160)
             self.requiredBox.layout().addLayout(self.fileDirRequiredLayout.layout())
             setattr(self.fileDirRequiredLayout.layout(),'added',True)
             self.requiredBox.layout().addLayout(self.leditRequiredLayout.layout())
@@ -270,7 +267,8 @@ class OWBwBWidget(widget.OWWidget):
             self.drawRequiredElements()
             
         if self.findOptionalElements():
-            self.optionalBox = gui.widgetBox(self.topBox, "Optional parameters")
+            self.optionalBox,optionalLayout=self.tabs.addBox('Optional entries',minHeight=160)
+            #self.optionalBox = gui.widgetBox(self.topBox, "Optional parameters")
             self.optionalBox.layout().addLayout(self.fileDirOptionalLayout.layout())
             setattr(self.fileDirOptionalLayout.layout(),'added',True)
             self.optionalBox.layout().addLayout(self.leditOptionalLayout.layout())
@@ -284,7 +282,8 @@ class OWBwBWidget(widget.OWWidget):
                self.bgui.disable(attr)
         
         #make a box for the console and console control - not abs necessary but it might help with future org and with the size hinting system
-        self.consoleBox = gui.widgetBox(self.controlArea)
+        self.consoleBox,consoleLayout=self.tabs.addBox('Console',minHeight=160)
+        #self.consoleBox = gui.widgetBox(self.controlArea)
         consoleControlLayout=BwbGridLayout()
         self.consoleBox.layout().addLayout(consoleControlLayout.layout())
         setattr(consoleControlLayout,'added',True)        
