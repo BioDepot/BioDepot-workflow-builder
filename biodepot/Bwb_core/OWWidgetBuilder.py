@@ -23,24 +23,42 @@ from AnyQt.QtWidgets import (
     QSizePolicy, QApplication, QCheckBox
 )
 class tabbedWindow(QTabWidget):
-   def __init__(self, parent = None):
-      super(tabbedWindow, self).__init__(parent)
-      self.general = QWidget()
-      self.inputs = QWidget()
-      self.outputs = QWidget()
-      self.volumes = QWidget()
-      self.parameters= QWidget()
-      self.command= QWidget()
-
-      self.addTab(self.general,"General")
-      self.addTab(self.inputs,"Inputs")
-      self.addTab(self.outputs,"Outputs")
-      self.addTab(self.volumes,"Volumes")
-      self.addTab(self.parameters,"Parameters")
-      self.addTab(self.command,"Command")
-
-      
-
+    def __init__(self, parent = None):
+        super(tabbedWindow, self).__init__(parent)
+        
+    def add(self,title):
+        tab=QWidget()
+        tab.setMinimumHeight(240)
+        self.addTab(tab,title)
+        box=gui.widgetBox(tab)
+        tab.setLayout(QVBoxLayout())
+        tab.layout().addWidget(self.getScrollArea(box))    
+        return self.getLeditLayout(box)
+        
+    def addBox(self,title):
+        tab=QWidget()
+        tab.setMinimumHeight(240)
+        self.addTab(tab,title)
+        box=gui.widgetBox(tab)
+        tab.setLayout(QVBoxLayout())
+        tab.layout().addWidget(self.getScrollArea(box))    
+        return box, self.getLeditLayout(box)
+               
+    def getScrollArea(self, box):
+        scroll_area = QScrollArea(
+            verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
+        )
+        scroll_area.setWidget(box)
+        scroll_area.setWidgetResizable(True)
+        return scroll_area
+    
+    def getLeditLayout(self,box):
+        layout=QtGui.QGridLayout()
+        layout.setSpacing(5)
+        setattr(layout,'nextRow',1)
+        box.layout().addLayout(layout)
+        return layout
+        
 class DragAndDropList(QtGui.QListWidget):
     #overloads the Drag and dropEvents to emit code
     itemMoved = pyqtSignal(int, int) # Old index, new index, item
@@ -462,16 +480,7 @@ class OWWidgetBuilder(widget.OWWidget):
                 self.allAttrs[attr]=None     
         self.tabs = tabbedWindow()
         self.controlArea.layout().addWidget(self.tabs)
-        self.tabs.general.setLayout(QVBoxLayout())
-        self.generalBox=gui.widgetBox(self.tabs.general)
-        #set up basic gui 
         self.setStyleSheet(":disabled { color: #282828}")
-        self.scroll_area = QScrollArea(
-            verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
-        )
-        self.scroll_area.setWidget(self.generalBox)
-        self.scroll_area.setWidgetResizable(True)
-        self.tabs.general.layout().addWidget(self.scroll_area)
         #self.clearLayout(self.controlArea.layout())
         #self.controlArea.layout().addWidget(self.scroll_area)
         
@@ -479,7 +488,7 @@ class OWWidgetBuilder(widget.OWWidget):
         #self.drawExec(box=controlBox)ne)
         #requiredBox = gui.widgetBox(self.generalBox, "Widget entries")
         #draw Ledits for the frequired elements
-        leditGeneralLayout=self.getLeditLayout(self.generalBox)
+        leditGeneralLayout=self.tabs.add('General')
         for pname in ['name','description','category','docker_image_name','docker_image_tag']:
             self.drawLedit(pname,layout=leditGeneralLayout)
         self.drawLedit('priority',layout=leditGeneralLayout)
@@ -490,52 +499,14 @@ class OWWidgetBuilder(widget.OWWidget):
         #define widgetItems for the different widgetLists
         #top level widgets are drawXXX - these can have multiple substituents
         #lower level widgets are makeXXX - these can also have multiple substituents
-        inputsBox=gui.widgetBox(self.tabs.inputs)
-        self.tabs.inputs.setLayout(QVBoxLayout())
-        self.tabs.inputs.layout().addWidget(self.getScrollArea(inputsBox))    
-        inputsLayout=self.getLeditLayout(inputsBox)
-        self.drawIListWidget('inputs',layout=inputsLayout)
         
-        outputsBox=gui.widgetBox(self.tabs.outputs)
-        self.tabs.outputs.setLayout(QVBoxLayout())
-        self.tabs.outputs.layout().addWidget(self.getScrollArea(outputsBox))    
-        outputsLayout=self.getLeditLayout(outputsBox)       
-        self.drawOListWidget('outputs',layout=outputsLayout)
-        
-        volumesBox=gui.widgetBox(self.tabs.volumes)
-        self.tabs.volumes.setLayout(QVBoxLayout())
-        self.tabs.volumes.layout().addWidget(self.getScrollArea(volumesBox))    
-        volumesLayout=self.getLeditLayout(volumesBox)       
-        self.drawVolumeListWidget('volumes',layout=volumesLayout)
-        
-        parametersBox=gui.widgetBox(self.tabs.parameters)
-        self.tabs.parameters.setLayout(QVBoxLayout())
-        self.tabs.parameters.layout().addWidget(self.getScrollArea(parametersBox))    
-        parametersLayout=self.getLeditLayout(parametersBox)
-        self.drawParamsListWidget('parameters',layout=parametersLayout)
-        
-        commandBox=gui.widgetBox(self.tabs.command)
-        self.tabs.command.setLayout(QVBoxLayout())
-        self.tabs.command.layout().addWidget(self.getScrollArea(commandBox))    
-        commandLayout=self.getLeditLayout(commandBox)
-        self.drawCommand('command',layout=commandLayout)
-        
+        self.drawIListWidget('inputs',layout=self.tabs.add('Inputs'))            
+        self.drawOListWidget('outputs',layout=self.tabs.add('Outputs'))
+        self.drawVolumeListWidget('volumes',layout=self.tabs.add('Volumes'))
+        self.drawParamsListWidget('parameters',layout=self.tabs.add('Parameters'))
+        self.drawCommand('command',layout=self.tabs.add('Command'))
         self.drawExec(self.controlArea.layout())
     
-    def getScrollArea(self, box):
-        scroll_area = QScrollArea(
-            verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
-        )
-        scroll_area.setWidget(box)
-        scroll_area.setWidgetResizable(True)
-        return scroll_area
-    
-    def getLeditLayout(self,box):
-        layout=QtGui.QGridLayout()
-        layout.setSpacing(5)
-        setattr(layout,'nextRow',1)
-        box.layout().addLayout(layout)
-        return layout
                           
     def updateCheckBox(self,checkBox,widget=None):
         if(checkBox.isEnabled()):
