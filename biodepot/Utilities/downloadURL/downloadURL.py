@@ -15,7 +15,7 @@ class OWdownloadURL(OWBwBWidget):
     name = "downloadURL"
     description = "Downloads files from URL"
     category = "Utilities"
-    priority = 10
+    priority = 1
     icon = "/biodepot/Utilities/downloadURL/download.png"
     want_main_area = False
     docker_image_name = "biodepot/downloadurl"
