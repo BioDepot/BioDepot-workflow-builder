@@ -6,7 +6,7 @@ import jsonpickle
 import pickle
 import csv
 from pathlib import Path
-from orangebiodepot.util.createWidget import createWidget, findDirectory, findIconFile
+from orangebiodepot.util.createWidget import mergeWidget, createWidget, findDirectory, findIconFile
 from copy import deepcopy
 from collections import OrderedDict
 from functools import partial
@@ -195,22 +195,32 @@ class OWWidgetBuilder(widget.OWWidget):
         # self.saveJsonBtn = gui.button(None, self, "Save json", callback=self.saveJson)
         # self.saveJsonBtn.setStyleSheet(css)
         # self.saveJsonBtn.setFixedSize(80,20)
-        self.saveWidgetBtn = gui.button(None, self, "Save Widget", callback=self.saveWidget)
+        self.saveWidgetBtn = gui.button(None, self, "Save", callback=self.saveWidget)
         self.saveWidgetBtn.setStyleSheet(css)
-        self.saveWidgetBtn.setFixedSize(120,20)
-        self.saveWidgetAsBtn = gui.button(None, self, "Save Widget As", callback=self.saveWidgetAs)
+        self.saveWidgetBtn.setFixedSize(50,20)
+        self.saveWidgetAsBtn = gui.button(None, self, "Save as", callback=self.saveWidgetAs)
         self.saveWidgetAsBtn.setStyleSheet(css)
-        self.saveWidgetAsBtn.setFixedSize(120,20)
-        self.loadWidgetBtn = gui.button(None, self, "Load Widget", callback=self.loadWidget)
+        self.saveWidgetAsBtn.setFixedSize(70,20)
+        self.loadWidgetBtn = gui.button(None, self, "Load", callback=self.loadWidget)
         self.loadWidgetBtn.setStyleSheet(css)
-        self.loadWidgetBtn.setFixedSize(150,20)
-        self.registerBtn = gui.button(None, self, "Register Widget", callback=self.registerWidget)
+        self.loadWidgetBtn.setFixedSize(70,20)
+        self.registerBtn = gui.button(None, self, "Register", callback=self.registerWidget)
         self.registerBtn.setStyleSheet(css)
-        self.registerBtn.setFixedSize(150,20)
-        self.rebuildBtn = gui.button(None, self, "Rebuild container", callback=self.rebuildWidget)
+        self.registerBtn.setFixedSize(100,20)
+        self.rebuildBtn = gui.button(None, self, "Rebuild", callback=self.rebuildWidget)
         self.rebuildBtn.setStyleSheet(css)
-        self.rebuildBtn.setFixedSize(150,20)
+        self.rebuildBtn.setFixedSize(100,20)
+        #choose save mode
+        self.saveMode=QtGui.QComboBox()
+        self.saveMode.addItem('Overwrite')
+        self.saveMode.addItem('Merge')
+        self.saveMode.addItem('Data')
+        saveLabel=QtGui.QLabel('Save mode:')
+        saveLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        
         box=QtGui.QHBoxLayout()
+        box.addWidget(saveLabel)
+        box.addWidget(self.saveMode)
         box.addWidget(self.saveWidgetBtn)
         box.addWidget(self.saveWidgetAsBtn)
         box.addWidget(self.loadWidgetBtn)
@@ -218,6 +228,7 @@ class OWWidgetBuilder(widget.OWWidget):
         box.addWidget(self.rebuildBtn)
         box.addStretch(1)
         layout.addLayout(box)
+
         
     def loadWidget(self,loadWidgetDir=None):
         if self.widgetDir:
@@ -390,7 +401,13 @@ class OWWidgetBuilder(widget.OWWidget):
         self.buildData()
         Path(self.widgetDir).mkdir(parents=True,exist_ok=True)
         outputWidget="{}/{}.py".format(self.widgetDir,self.widgetName)
-        createWidget(None,outputWidget,self.widgetName,inputData=self.data)
+        #check if data only
+        if self.saveMode.currentIndex() < 2:
+            if self.saveMode.currentIndex() == 1:
+                #merg
+                mergeWidget(None,outputWidget,self.widgetName,inputData=self.data)
+            else:
+                createWidget(None,outputWidget,self.widgetName,inputData=self.data)
         allStatesFile="{}/{}.states".format(self.widgetDir,self.widgetName)
         allAttrsFile="{}/{}.attrs".format(self.widgetDir,self.widgetName)
         self.pickleData(self.allStates,allStatesFile)

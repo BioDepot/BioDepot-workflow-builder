@@ -42,7 +42,6 @@ from PyQt5 import QtWidgets, QtGui
 def findDirectory(inputJson):
     with open(inputJson) as f:
         data=jsonpickle.decode(f.read())
-    f.close()
     return checkCategory(data['category'])
       
 def checkCategory(category):
@@ -62,14 +61,12 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
     if inputJson:
         with open(inputJson) as f:
             data=jsonpickle.decode(f.read())
-        f.close()
     elif inputData:
         data=inputData
         dataJ=jsonpickle.encode(data)
         inputJson=os.path.splitext(outputWidget)[0]+'.json'
         with open(inputJson,"w") as f:
             f.write(dataJ)
-        f.close()
     directory=checkCategory(data['category'])        
     #write preInit
     with open(outputWidget,'w') as f:
@@ -79,7 +76,10 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
         f.write('    name = "{}"\n'.format(data['name']))
         f.write('    description = "{}"\n'.format(data['description']))
         f.write('    category = "{}"\n'.format(data['category']))
-        f.write('    priority = 10\n')
+        priority=10
+        if 'priority' in data and (data['priority'] == 0 or data['priority']):
+            priority=data['priority']
+        f.write('    priority = {}\n'.format(priority))
         iconFile=data['icon']
         if not iconFile or not os.path.exists(iconFile):
             iconFile = defaultIconFile
@@ -166,4 +166,108 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
                 f.write('        self.send("{}", outputValue)\n'.format(attr))
         f.close()
 
-
+def fwrite(lines, match, replacement):
+    myPattern=re.compile(match)
+    for  i,line in enumerate(lines):
+        if myPattern.search(line):
+            lines[i]=replacement
+            return
+    lines.append(replacement)
+        
+def mergeWidget(inputJson,outputWidget,widgetName,inputData=None):
+    defaultIconFile='/biodepot/Bwb_core/icons/default.png'
+    widgetPath = os.path.dirname(os.path.realpath(outputWidget)) 
+    data={}
+    directory='User'
+    if inputJson:
+        with open(inputJson) as f:
+            data=jsonpickle.decode(f.read())
+    elif inputData:
+        data=inputData
+        dataJ=jsonpickle.encode(data)
+        inputJson=os.path.splitext(outputWidget)[0]+'.json'
+        with open(inputJson,"w") as f:
+            f.write(dataJ)
+    directory=checkCategory(data['category']) 
+    #updates the python file up to the first def command
+    #split the python file into 3
+    beforeClass=[]
+    afterClass=[]
+    afterDef=[]
+    
+    fpattern = re.compile("def .+:")
+    with open(outputWidget,'r') as f:
+        for line in f:
+            if beforeClass == [] and line.startswith('class OW'):
+                beforeClass=afterDef
+                afterDef=[]
+            elif afterClass == [] and fpattern.search(line):
+                afterClass=afterDef
+                afterDef=[]
+            afterDef.append(line)
+    
+    #don't replace the header - start with the afterClass
+    className='class OW{}(OWBwBWidget):\n'.format(data['name'].replace(' ',''))
+    afterClass[0]=className
+    fwrite(afterClass,"\s+name = ",'    name = "{}"\n'.format(data['name']))
+    fwrite(afterClass,"\s+description =",'    description = "{}"\n'.format(data['description']))
+    fwrite(afterClass,"\s+category =",'    category = "{}"\n'.format(data['category']))
+    priority=10
+    if 'priority' in data and (data['priority'] == 0 or data['priority']):
+        priority=data['priority']
+    fwrite(afterClass,"\s+priority =",'    priority = {}\n'.format(priority))
+    iconFile=data['icon']
+    if not iconFile or not os.path.exists(iconFile):
+        iconFile = defaultIconFile
+    copyfile(iconFile,widgetPath+'/'+ os.path.basename(iconFile))
+    finalIconFile = '/biodepot/'+directory + '/' + widgetName + '/' + os.path.basename(iconFile)
+    fwrite(afterClass,"\s+icon =",'    icon = "{}"\n'.format(finalIconFile))
+    fwrite(afterClass,"\s+want_main_area =",'    want_main_area = False\n')
+    fwrite(afterClass,"\s+docker_image_name =",'    docker_image_name = "{}"\n'.format(data['docker_image_name']))
+    fwrite(afterClass,"\s+docker_image_tag =",'    docker_image_tag = "{}"\n'.format(data['docker_image_tag']))
+    #inputs and outputs
+    if 'inputs' in data and data['inputs']:
+        inputStr='['
+        for attr, values  in data['inputs'].items():
+            if 'callback' in  values and values['callback']:
+                inputStr= inputStr+ '("{}",{},"{}"),'.format(attr,deClass(str(values['type'])),values['callback'])
+            else:
+                inputStr= inputStr+ '("{}",{},"handleInputs{}"),'.format(attr,deClass(str(values['type'])),attr)
+        inputStr=inputStr[:-1]+']'
+        fwrite(afterClass,"\s+inputs =", '    inputs = {}\n'.format(inputStr))
+        
+    if 'outputs' in data and data['outputs']:
+        outputStr='['
+        for attr, value  in data['outputs'].items():
+            outputStr= outputStr+ '("{}",{}),'.format(attr,deClass(str(value['type'])))
+        outputStr=outputStr[:-1]+']'
+        fwrite(afterClass,"\s+outputs =",'    outputs = {}\n'.format(outputStr))
+        #permanent settings are not rewritten - we assume that if you changed them you wanted it that way
+    if 'parameters' in data and data['parameters']:
+        for pname,pvalue in data['parameters'].items():
+            searchStr="\s+{}=pset".format(pname)
+            print (searchStr)
+            if 'default' in pvalue and pvalue['default'] is not None:
+                #if it is not a number or dict type then keep quotes
+                if pvalue['type'] == 'int' or  pvalue['type'] == 'float' or pvalue['type'] == 'double' or pvalue['type'] == 'bool' or pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict' or pvalue['type'][-4:] == 'list':
+                    fwrite(afterClass,searchStr,'    {}=pset({})\n'.format(pname,pvalue['default']))
+                else:
+                    fwrite(afterClass,searchStr,'    {}=pset("{}")\n'.format(pname,pvalue['default']))
+            else:               
+                if pvalue['type'] == type('str') :
+                    fwrite(afterClass,searchStr,'    {}=pset("")\n'.format(pname),None)
+                if pvalue['type'] == 'bool' :
+                    fwrite(afterClass,searchStr,'    {}=pset(False)\n'.format(pname))
+                elif pvalue['type'][-4:] == 'list' or pvalue['type'][-4:] == 'List':
+                    fwrite(afterClass,searchStr,'    {}=pset([])\n'.format(pname))
+                elif pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
+                    fwrite(afterClass,searchStr,'    {}=pset({{}})\n'.format(pname))
+                else:                   
+                    fwrite(afterClass,searchStr,'    {}=pset(None)\n'.format(pname))
+    with open(outputWidget,'w') as f:           
+        for line in beforeClass:
+            f.write(line)
+        for line in afterClass:
+            f.write(line)
+        for line in afterDef:
+            f.write(line)
