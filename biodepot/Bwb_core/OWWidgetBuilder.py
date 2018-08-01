@@ -244,8 +244,7 @@ class OWWidgetBuilder(widget.OWWidget):
             self.allAttrs=self.unPickleData(allAttrsFile)
             self.allStates=self.unPickleData(allStatesFile)
             self.widgetDir=loadWidgetDir
-        else:
-            self.startWidget()
+        self.startWidget()
             
             
     def rebuildWidget(self):
