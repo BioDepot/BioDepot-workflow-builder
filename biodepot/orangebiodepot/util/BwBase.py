@@ -241,8 +241,7 @@ class OWBwBWidget(widget.OWWidget):
         
         
         if not hasattr(self,'triggerReady'):
-            self.triggerReady={}
-        
+            self.triggerReady={}        
     def initVolumes(self):
         #initializes container volumes
         if 'volumeMappings' in self.data and self.data['volumeMappings']:
@@ -780,6 +779,10 @@ class OWBwBWidget(widget.OWWidget):
         #initialize the exec state
         self.execLayout=QtGui.QGridLayout()
         self.execLayout.setSpacing(5)
+        
+        self.graphicsMode=QtGui.QCheckBox('Export graphics',self)
+        self.graphicsMode.setChecked(self.exportGraphics)
+        self.graphicsMode.stateChanged.connect(self.graphicsModeChange)
         self.cboRunMode=QtGui.QComboBox()
         self.cboRunMode.addItem('Manual')
         self.cboRunMode.addItem('Automatic')
@@ -823,12 +826,14 @@ class OWBwBWidget(widget.OWWidget):
         self.btnStop.setEnabled(False)
         self.execLayout.addWidget(self.btnRun,1,0)
         self.execLayout.addWidget(self.btnStop,1,1)
-        self.execLayout.addWidget(myLabel,1,2)
-        self.execLayout.addWidget(self.cboRunMode,1,3)
+        self.execLayout.addWidget(self.graphicsMode,1,2)
+        self.execLayout.addWidget(myLabel,1,3)
+        self.execLayout.addWidget(self.cboRunMode,1,4)
         if self.candidateTriggers:
-            self.execLayout.addWidget(self.execBtn,1,4)
+            self.execLayout.addWidget(self.execBtn,1,5)
         box.layout().addLayout(self.execLayout)
-
+    def graphicsModeChange(self):
+        self.exportGraphics=self.graphicsMode.isChecked()
     def runModeChange(self):
         self.runMode=self.cboRunMode.currentIndex()
         if self.candidateTriggers:
@@ -1008,7 +1013,7 @@ class OWBwBWidget(widget.OWWidget):
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole)
+            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
@@ -1169,6 +1174,9 @@ class OWBwBWidget(widget.OWWidget):
         #unused args and flags are applied to the final command
         
         #multi executable commands need to use bash -c 'cmd1 && cmd2' type syntax - note this can cause problems when stopping container
+        #can also have no executable in which case we retun nothing
+        if not executables:
+            return ""
         cmdStr="bash -c '"
         if len(executables) == 1:
             cmdStr=""
@@ -1326,11 +1334,13 @@ class OWBwBWidget(widget.OWWidget):
         self.btnRun.setEnabled(False)
         self.btnStop.setEnabled(True)
         self.cboRunMode.setEnabled(False)
+        self.graphicsMode.setEnabled(False)
             
     def reenableExec(self):
         self.btnRun.setText('Start')
         self.btnRun.setEnabled(True)
         self.btnStop.setEnabled(False)
         self.cboRunMode.setEnabled(True)
+        self.graphicsMode.setEnabled(True)
         
 

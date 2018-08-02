@@ -109,6 +109,7 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
         #permanent settings
         f.write('    pset=functools.partial(settings.Setting,schema_only=True)\n')
         f.write('    runMode=pset(0)\n')
+        f.write('    exportGraphics=pset(False)\n')
         f.write('    runTriggers=pset([])\n')
         f.write('    triggerReady=pset({})\n')
         f.write('    inputConnectionsStore=pset({})\n')

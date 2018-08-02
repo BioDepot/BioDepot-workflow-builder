@@ -24,6 +24,7 @@ class OWDtoxSAlignment(OWBwBWidget):
     outputs = [("topDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
+    exportGraphics=pset(False)
     runTriggers=pset([])
     triggerReady=pset({})
     inputConnectionsStore=pset({})

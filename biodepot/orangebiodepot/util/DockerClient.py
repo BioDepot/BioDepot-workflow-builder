@@ -96,7 +96,7 @@ class DockerClient:
         ["pwd", "touch newfile.txt"]
     
     """
-    def create_container_cli(self, name, volumes=None, commands=None, environment=None, hostVolumes=None, consoleProc=None):
+    def create_container_cli(self, name, volumes=None, commands=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False):
         #skips DockerPy and creates the command line equivalent
         volumeMappings=''
         for container_dir, host_dir in hostVolumes.items():
@@ -111,7 +111,10 @@ class DockerClient:
             envs=envs+ "-e {}={} ".format(env,var)
         #create container
         consoleProc.cidFile='/tmp/'+ str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':', '.')
-        dockerCmd='docker run -i --rm --init --cidfile={} {} {} {} {}'.format(consoleProc.cidFile,volumeMappings,envs,name,commands)
+        dockerBaseCmd='docker run -i --rm '
+        if exportGraphics:
+            dockerBaseCmd+='-e DISPLAY=:0 -v /tmp/.X11-unix:/tmp/.X11-unix '
+        dockerCmd=dockerBaseCmd + ' --init --cidfile={} {} {} {} {}'.format(consoleProc.cidFile,volumeMappings,envs,name,commands)
         sys.stderr.write('Docker command is\n{}\n'.format(dockerCmd))
         consoleProc.state='running'
         consoleProc.process.start('/bin/bash',['-c',dockerCmd])

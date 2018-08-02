@@ -25,6 +25,7 @@ class OWfastqDump(OWBwBWidget):
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     runTriggers=pset([])
+    exportGraphics=pset(False)
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
