@@ -244,8 +244,10 @@ class OWWidgetBuilder(widget.OWWidget):
             self.allAttrs=self.unPickleData(allAttrsFile)
             self.allStates=self.unPickleData(allStatesFile)
             self.widgetDir=loadWidgetDir
-        self.startWidget()
-            
+            if self.isDrawn:
+                self.updateWidget()
+            else:
+                self.startWidget()
             
     def rebuildWidget(self):
         myDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Bwb directory", directory=self.defaultDir)
@@ -470,8 +472,10 @@ class OWWidgetBuilder(widget.OWWidget):
         self.widgetDir=None
         self.widgetName=None
         self.widgetDir=None
+        self.isDrawn=False
         sys.stderr.write('widgetID is {}\n'.format(widgetID))
         if widgetID:
+            #widgetID is given when this is called from menu and not the initial widget builder
             widgetSplit=widgetID.split('.')
             widgetSplit[-1]=widgetSplit[-1][2:]
             self.widgetName=widgetSplit[-1]
@@ -498,6 +502,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.tabs = tabbedWindow()
         self.controlArea.layout().addWidget(self.tabs)
         self.setStyleSheet(":disabled { color: #282828}")
+        self.isDrawn=True
         #self.clearLayout(self.controlArea.layout())
         #self.controlArea.layout().addWidget(self.scroll_area)
         
@@ -524,6 +529,10 @@ class OWWidgetBuilder(widget.OWWidget):
         self.drawCommand('command',layout=self.tabs.add('Command'))
         self.drawExec(self.controlArea.layout())
     
+    def updateWidget(self):
+        self.clearLayout(self.controlArea.layout())
+        self.startWidget()
+        
                           
     def updateCheckBox(self,checkBox,widget=None):
         if(checkBox.isEnabled()):
