@@ -48,7 +48,27 @@ class OWDESeq2(OWBwBWidget):
     def handleInputscountsFile(self, value, sourceId=None):
         self.handleInputs(value, "countsFile", sourceId=None)
     def handleOutputs(self):
-        outputValue=None
-        if hasattr(self,"topGenes"):
-            outputValue=getattr(self,"topGenes")
-        self.send("topGenes", outputValue)
+        topGenesFile="top{}Genes.tsv".format(self.ngenes)
+        sys.stderr.write("Top file is {}\n".format(topGenesFile))
+        if self.outputDir is not None:
+            topGenesFile=self.outputDir+"/"+topGenesFile
+        self.sendTable(topGenesFile)
+        
+    def sendTable(self,filename):
+        outname=filename+'.textExponents.tsv'
+        self.adjustExponents(filename,outname)
+        tsvReader = FileFormat.get_reader(outname)
+        dataTable= tsvReader.read()
+        self.send("topGenes", dataTable)
+    
+    def adjustExponents(self,inFile,outFile):
+        #need to add space to exponents so that reader doesn't recognize them as numbers and display 0.000000..0
+        with open (inFile,"r") as fin, open  (outFile,"w") as fout:
+            line=fin.readline()
+            fout.write(line)
+            for line in fin:
+                words=(line.rstrip()).split("\t")
+                for i, word in enumerate(words[1:],start=1):
+                    if "e" in word:
+                        words[i]=words[i].replace('e'," e")
+                fout.write("\t".join(words)+'\n')
