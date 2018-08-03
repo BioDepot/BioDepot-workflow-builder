@@ -701,7 +701,7 @@ class CanvasMainWindow(QMainWindow):
             self.window_menu.addAction(self.zoom_action)
             menu_bar.addMenu(self.window_menu)
 
-        menu_bar.addMenu(self.options_menu)
+#        menu_bar.addMenu(self.options_menu)
 
         # Help menu.
 #        self.help_menu = QMenu(self.tr("&Help"), self)

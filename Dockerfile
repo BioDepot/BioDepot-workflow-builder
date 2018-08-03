@@ -97,6 +97,7 @@ COPY user_config/ /root/
 
 #patch orange3
 COPY orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
+COPY orangePatches/canvasmain.py /orange3/Orange/canvas/application/canvasmain.py
 
 #Add tutorial
 COPY tutorials/ /root/tutorials/

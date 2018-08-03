@@ -160,6 +160,7 @@ class SchemeEditWidget(QWidget):
         self.__widgetMenu.addAction(self.__renameAction)
         self.__widgetMenu.addAction(self.__removeSelectedAction)
         self.__widgetMenu.addSeparator()
+#        self.__widgetMenu.addAction(self.__editToolBoxAction)
         self.__widgetMenu.addAction(self.__editWidgetAction)
         self.__widgetMenu.addSeparator()
         self.__widgetMenu.addAction(self.__helpAction)
@@ -287,6 +288,13 @@ class SchemeEditWidget(QWidget):
                     triggered=self.editWidget,
                     enabled=False)
                     
+        # self.__editToolBoxAction = \
+            # QAction(self.tr("Edit ToolBox"), self,
+                    # objectName="edit-toolbox",
+                    # toolTip=self.tr("Edit the ToolBox"),
+                    # triggered=self.editToolBox,
+                    # enabled=True)
+                                 
         self.__showSettingsAction = \
             QAction(self.tr("Show settings"), self,
                     objectName="show-settings",
@@ -1482,6 +1490,8 @@ class SchemeEditWidget(QWidget):
         selected = self.selectedNodes()
         if len(selected) == 1:
             self.editNodeTitle(selected[0])
+    def editToolBox (self):
+        pass
             
     def editWidget(self):
         """
