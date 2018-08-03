@@ -1,6 +1,5 @@
 Miscellaneous/OWDirectory.py
 Miscellaneous/OWFile.py
-Miscellaneous/OWtest.py
 Miscellaneous/__init__.py
 Miscellaneous/owtable.py
 Miscellaneous.egg-info/PKG-INFO

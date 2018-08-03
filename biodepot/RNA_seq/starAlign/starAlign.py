@@ -20,7 +20,7 @@ class OWStarAlign(OWBwBWidget):
     want_main_area = False
     docker_image_name = "biodepot/star"
     docker_image_tag = "2.6.0c__debian-8.11-slim__072918"
-    inputs = [("trigger",str,"handleInputstrigger"),("outputDir",str,"handleInputsoutputDir")]
+    inputs = [("trigger",str,"handleInputstrigger"),("outputDir",str,"handleInputsoutputDir"),("genomeDir",str,"handleInputsgenomeDir")]
     outputs = [("outputDir",str),("genomeDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
@@ -156,6 +156,8 @@ class OWStarAlign(OWBwBWidget):
         self.handleInputs(value, "trigger", sourceId=None)
     def handleInputsoutputDir(self, value, sourceId=None):
         self.handleInputs(value, "outputDir", sourceId=None)
+    def handleInputsgenomeDir(self, value, sourceId=None):
+        self.handleInputs(value, "genomeDir", sourceId=None)
     def handleOutputs(self):
         outputValue="/data"
         if hasattr(self,"outputDir"):

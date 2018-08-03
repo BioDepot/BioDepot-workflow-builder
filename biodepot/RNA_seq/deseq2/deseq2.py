@@ -19,8 +19,8 @@ class OWDESeq2(OWBwBWidget):
     icon = "/biodepot/RNA_seq/deseq2/icon/deseq2.png"
     want_main_area = False
     docker_image_name = "biodepot/deseq2"
-    docker_image_tag = "1.20-ubuntu-16.04-bioc-3.7-r-3.5.1"
-    inputs = [("Trigger",str,"handleInputsTrigger")]
+    docker_image_tag = "1.20__ubuntu-16.04__bioc-3.7__r-3.5.1__072918"
+    inputs = [("Trigger",str,"handleInputsTrigger"),("countsFile",str,"handleInputscountsFile")]
     outputs = [("topGenes",Orange.data.Table)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
@@ -45,31 +45,10 @@ class OWDESeq2(OWBwBWidget):
         self.drawGUI()
     def handleInputsTrigger(self, value, sourceId=None):
         self.handleInputs(value, "Trigger", sourceId=None)
+    def handleInputscountsFile(self, value, sourceId=None):
+        self.handleInputs(value, "countsFile", sourceId=None)
     def handleOutputs(self):
-        topGenesFile="top{}Genes.tsv".format(self.ngenes)
-        sys.stderr.write("Top file is {}\n".format(topGenesFile))
-        if self.outputDir is not None:
-            topGenesFile=self.outputDir+"/"+topGenesFile
-        self.sendTable(topGenesFile)
-
-        
-            
-    def sendTable(self,filename):
-        outname=filename+'.textExponents.tsv'
-        self.adjustExponents(filename,outname)
-        tsvReader = FileFormat.get_reader(outname)
-        dataTable= tsvReader.read()
-        self.send("topGenes", dataTable)
-    
-    def adjustExponents(self,inFile,outFile):
-        #need to add space to exponents so that reader doesn't recognize them as numbers and display 0.000000..0
-        with open (inFile,"r") as fin, open  (outFile,"w") as fout:
-            line=fin.readline()
-            fout.write(line)
-            for line in fin:
-                words=(line.rstrip()).split("\t")
-                for i, word in enumerate(words[1:],start=1):
-                    if "e" in word:
-                        words[i]=words[i].replace('e'," e")
-                fout.write("\t".join(words)+'\n')
-                
+        outputValue=None
+        if hasattr(self,"topGenes"):
+            outputValue=getattr(self,"topGenes")
+        self.send("topGenes", outputValue)
