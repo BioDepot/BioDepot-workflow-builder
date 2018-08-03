@@ -16,7 +16,7 @@ class OWStartoDESeq2(OWBwBWidget):
     description = "Convert Star quantMode counts file to DESeq2 style counts file"
     category = "RNA-seq"
     priority = 10
-    icon = "/biodepot/RNA_seq/startodeseq2/startodeseq2.png"
+    icon = "/biodepot/RNA_seq/startodeseq2/icon/startodeseq2.png"
     want_main_area = False
     docker_image_name = "biodepot/star2deseq"
     docker_image_tag = "1.0__alpine-3.7__07-29-18"

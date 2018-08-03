@@ -2,6 +2,8 @@
 from subprocess import call
 from shutil import copyfile
 import sys, re, os, getopt
+from os import listdir
+from os.path import isfile, join
 from collections import OrderedDict
 import jsonpickle
 import pprint
@@ -67,6 +69,7 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
         inputJson=os.path.splitext(outputWidget)[0]+'.json'
         with open(inputJson,"w") as f:
             f.write(dataJ)
+    inputPath=os.path.dirname(os.path.realpath(inputJson))
     directory=checkCategory(data['category'])        
     #write preInit
     with open(outputWidget,'w') as f:
@@ -82,9 +85,18 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
         f.write('    priority = {}\n'.format(priority))
         iconFile=data['icon']
         if not iconFile or not os.path.exists(iconFile):
-            iconFile = defaultIconFile
+            iconFile=None
+            #check if icon file exists in input Path or in the biodepot registry
+            for path in [inputPath +"/icon",'/biodepot/'+directory + '/' + widgetName + '/icon']:
+                if os.path.exists(path):
+                    iconFiles=[f for f in listdir(path) if isfile(join(oath, f))]
+                    if iconFiles:
+                        iconFile=iconFiles[0]
+                        break
+            if not iconFile:
+                iconFile=defaultFileIcon
         copyfile(iconFile,widgetPath+'/'+ os.path.basename(iconFile))
-        finalIconFile = '/biodepot/'+directory + '/' + widgetName + '/' + os.path.basename(iconFile)
+        finalIconFile = '/biodepot/'+directory + '/' + widgetName + '/icon/' + os.path.basename(iconFile)
         f.write('    icon = "{}"\n'.format(finalIconFile))
         f.write('    want_main_area = False\n')
         f.write('    docker_image_name = "{}"\n'.format(data['docker_image_name']))

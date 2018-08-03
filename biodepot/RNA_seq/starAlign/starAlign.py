@@ -16,7 +16,7 @@ class OWStarAlign(OWBwBWidget):
     description = "Star aligner alignment module"
     category = "RNA-seq"
     priority = 10
-    icon = "/biodepot/RNA_seq/starAlign/staralign.png"
+    icon = "/biodepot/RNA_seq/starAlign/icon/staralign.png"
     want_main_area = False
     docker_image_name = "biodepot/star"
     docker_image_tag = "2.6.0c__debian-8.11-slim__072918"

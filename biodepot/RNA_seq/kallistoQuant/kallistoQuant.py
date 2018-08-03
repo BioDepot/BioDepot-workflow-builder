@@ -16,7 +16,7 @@ class OWkallistoquant(OWBwBWidget):
     description = "Alignment and quantification of reads from fastq files"
     category = "RNA-seq"
     priority = 10
-    icon = "/biodepot/RNA_seq/kallistoQuant/kallistoquant.png"
+    icon = "/biodepot/RNA_seq/kallistoQuant/icon/kallistoquant.png"
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
     docker_image_tag = "0.44.0__ubuntu-16.04__072818"

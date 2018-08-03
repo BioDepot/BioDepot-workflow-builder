@@ -16,7 +16,7 @@ class OWDESeq2(OWBwBWidget):
     description = "Differential expression using DESeq2 package"
     category = "RNA-seq"
     priority = 10
-    icon = "/biodepot/RNA_seq/icons/deseq2.png"
+    icon = "/biodepot/RNA_seq/deseq2/icon/deseq2.png"
     want_main_area = False
     docker_image_name = "biodepot/deseq2"
     docker_image_tag = "1.20-ubuntu-16.04-bioc-3.7-r-3.5.1"

@@ -16,7 +16,7 @@ class OWDtoxSAlignment(OWBwBWidget):
     description = "Alignment part of DtoxS standard operating procedure (SOP)"
     category = "RNA-seq"
     priority = 10
-    icon = "/biodepot/RNA_seq/DtoxSAlignment/dtoxs-alignment2.svg"
+    icon = "/biodepot/RNA_seq/DtoxSAlignment/icon/dtoxs-alignment2.svg"
     want_main_area = False
     docker_image_name = "biodepot/dtoxs_alignment"
     docker_image_tag = "1.0__alpine-3.7__bwa-0.715-r1140__python-2.7.14__072818"
