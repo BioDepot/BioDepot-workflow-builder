@@ -1,1 +1,1 @@
-starAlign/starAlign.py
+../../widgets/starAlign/starAlign.py

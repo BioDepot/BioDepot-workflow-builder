@@ -1,1 +1,1 @@
-fastqDump/fastqDump.py
+../../widgets/fastqDump/fastqDump.py

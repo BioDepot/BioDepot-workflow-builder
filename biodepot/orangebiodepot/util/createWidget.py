@@ -86,8 +86,8 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
         iconFile=data['icon']
         if not iconFile or not os.path.exists(iconFile):
             iconFile=None
-            #check if icon file exists in input Path or in the biodepot registry
-            for path in [inputPath +"/icon",'/biodepot/'+directory + '/' + widgetName + '/icon']:
+            #check if icon file exists in input Path or in the widgets directory
+            for path in [inputPath +"/icon",'/widgets/' + widgetName + '/icon']:
                 if os.path.exists(path):
                     iconFiles=[f for f in listdir(path) if isfile(join(oath, f))]
                     if iconFiles:
@@ -96,7 +96,7 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
             if not iconFile:
                 iconFile=defaultFileIcon
         copyfile(iconFile,widgetPath+'/'+ os.path.basename(iconFile))
-        finalIconFile = '/biodepot/'+directory + '/' + widgetName + '/icon/' + os.path.basename(iconFile)
+        finalIconFile = '/widgets/' + widgetName + '/icon/' + os.path.basename(iconFile)
         f.write('    icon = "{}"\n'.format(finalIconFile))
         f.write('    want_main_area = False\n')
         f.write('    docker_image_name = "{}"\n'.format(data['docker_image_name']))
@@ -148,7 +148,7 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
         f.write('    def __init__(self):\n')        
         f.write('        super().__init__(self.docker_image_name, self.docker_image_tag)\n')
         joinedName=data['name'].replace(' ','')
-        f.write('        with open("/biodepot/{}/json/{}") as f:\n'.format(directory,os.path.basename(inputJson)))
+        f.write('        with open("/widgets/{}/{}") as f:\n'.format(widgetName,os.path.basename(inputJson)))
         f.write('            self.data=jsonpickle.decode(f.read())\n')
         f.write('            f.close()\n')
         #init

@@ -255,7 +255,7 @@ class CanvasMainWindow(QMainWindow):
         canvas_tool_dock.setSizePolicy(QSizePolicy.Fixed,
                                        QSizePolicy.MinimumExpanding)
 
-        # Bottom tool bar
+         #Bottom tool bar
         self.canvas_toolbar = canvas_tool_dock.toolbar
         self.canvas_toolbar.setIconSize(QSize(24, 24))
         self.canvas_toolbar.setMinimumHeight(28)
@@ -375,6 +375,33 @@ class CanvasMainWindow(QMainWindow):
     def setup_actions(self):
         """Initialize main window actions.
         """
+        self.addCategoryAction = \
+            QAction(self.tr("Add category"), self,
+                    objectName="addCategory-action",
+                    toolTip=self.tr("Add new category to toolBar"),
+                    triggered=self.addCategory,
+                    enabled=True)
+                    
+        self.addWidgetAction = \
+            QAction(self.tr("Add widget"), self,
+                    objectName="addWidget-action",
+                    toolTip=self.tr("Add new Widget to toolBar"),
+                    triggered=self.addWidget,
+                    enabled=True)
+                    
+        self.removeWidgetAction = \
+            QAction(self.tr("Remove widget"), self,
+                    objectName="removeWidget-action",
+                    toolTip=self.tr("remove widget from toolBar"),
+                    triggered=self.removeWidget,
+                    enabled=True)
+                    
+        self.removeCategoryAction = \
+            QAction(self.tr("Remove category"), self,
+                    objectName="removeCategory-action",
+                    toolTip=self.tr("Remove category from toolBar"),
+                    triggered=self.removeCategory,
+                    enabled=True)
 
         self.new_action = \
             QAction(self.tr("New"), self,
@@ -556,20 +583,6 @@ class CanvasMainWindow(QMainWindow):
                     triggered=self.zoom_reset,
                     shortcut=QKeySequence(Qt.ControlModifier | Qt.Key_0))
 
-        if sys.platform == "darwin":
-            # Actions for native Mac OSX look and feel.
-            self.minimize_action = \
-                QAction(self.tr("Minimize"), self,
-                        triggered=self.showMinimized,
-                        shortcut=QKeySequence(Qt.ControlModifier | Qt.Key_M)
-                        )
-
-            self.zoom_action = \
-                QAction(self.tr("Zoom"), self,
-                        objectName="application-zoom",
-                        triggered=self.toggleMaximized,
-                        )
-
         self.freeze_action = \
             QAction(self.tr("Freeze"), self,
                     objectName="signal-freeze-action",
@@ -621,7 +634,7 @@ class CanvasMainWindow(QMainWindow):
         # File -> Open Recent submenu
         self.recent_menu = QMenu(self.tr("Open Recent"), file_menu)
         file_menu.addMenu(self.recent_menu)
-        file_menu.addAction(self.open_report_action)
+#        file_menu.addAction(self.open_report_action)
         file_menu.addSeparator()
         file_menu.addAction(self.save_action)
         file_menu.addAction(self.save_as_action)
@@ -660,14 +673,8 @@ class CanvasMainWindow(QMainWindow):
 
         # View menu
         self.view_menu = QMenu(self.tr("&View"), self)
-        self.toolbox_menu = QMenu(self.tr("Widget Toolbox Style"),
-                                  self.view_menu)
-        self.toolbox_menu_group = \
-            QActionGroup(self, objectName="toolbox-menu-group")
-
-        self.view_menu.addAction(self.toggle_tool_dock_expand)
         self.view_menu.addAction(self.show_log_action)
-        self.view_menu.addAction(self.show_report_action)
+#        self.view_menu.addAction(self.show_report_action)
 
         self.view_menu.addSeparator()
         self.view_menu.addAction(self.zoom_in_action)
@@ -691,17 +698,25 @@ class CanvasMainWindow(QMainWindow):
 #        self.options_menu.addAction(self.reset_widget_settings_action)
 #        self.options_menu.addAction(self.canvas_addons_action)
 
-        # Widget menu
+        # Widget menu - handled in scheme edi
         menu_bar.addMenu(self.widget_menu)
+        self.setMenuBar(menu_bar)
+        
+        # ToolBar menu
+        self.toolDock_menu = QMenu(self.tr("&ToolDock"), self)
+        self.toolbox_menu = QMenu(self.tr("Widget Toolbox Style"),self.view_menu)
+        self.toolbox_menu_group = QActionGroup(self, objectName="toolbox-menu-group")
+        self.toolDock_menu.addAction(self.toggle_tool_dock_expand)  
+        self.toolDock_menu.addSeparator()
+        self.toolDock_menu.addAction(self.addCategoryAction)
+        self.toolDock_menu.addAction(self.addWidgetAction)
+        self.toolDock_menu.addSeparator()
+        self.toolDock_menu.addAction(self.removeCategoryAction)
+        self.toolDock_menu.addAction(self.removeWidgetAction)
+                
+        menu_bar.addMenu(self.toolDock_menu)
 
-        if sys.platform == "darwin":
-            # Mac OS X native look and feel.
-            self.window_menu = QMenu(self.tr("Window"), self)
-            self.window_menu.addAction(self.minimize_action)
-            self.window_menu.addAction(self.zoom_action)
-            menu_bar.addMenu(self.window_menu)
 
-#        menu_bar.addMenu(self.options_menu)
 
         # Help menu.
 #        self.help_menu = QMenu(self.tr("&Help"), self)
@@ -711,8 +726,16 @@ class CanvasMainWindow(QMainWindow):
 #        self.help_menu.addAction(self.examples_action)
 #        menu_bar.addMenu(self.help_menu)
 
-        self.setMenuBar(menu_bar)
-
+       
+        
+    def addCategory(self):
+        pass
+    def removeCategory(self):
+        pass
+    def addWidget(self):
+        pass
+    def removeWidget(self):
+        pass 
     def restore(self):
         """Restore the main window state from saved settings.
         """
@@ -1478,7 +1501,7 @@ class CanvasMainWindow(QMainWindow):
                     triggered=self.tutorials,
                     icon=canvas_icons("YouTube.svg")
                     )
-
+        
         bottom_row = [tutorials_action, examples_action,
                       self.get_started_action]
 

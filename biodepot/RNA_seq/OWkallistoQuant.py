@@ -1,1 +1,1 @@
-kallistoQuant/kallistoQuant.py
+../../widgets/kallistoQuant/kallistoQuant.py

@@ -99,12 +99,13 @@ COPY user_config/ /root/
 COPY orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
 COPY orangePatches/canvasmain.py /orange3/Orange/canvas/application/canvasmain.py
 
-#Add tutorial
-COPY tutorials/ /root/tutorials/
-
 #Add widget creator
 RUN ln -s /biodepot/orangebiodepot/util/createWidget /usr/bin/createWidget
 RUN ln -s /biodepot/Bwb_core/OWWidgetBuilder.py /orange3/Orange/canvas/document/OWWidgetBuilder.py
+
+#add widgets and workflows
+ADD widgets /widgets/
+ADD workflows /workflows/
 
 #start it up
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf

@@ -1,1 +1,1 @@
-downloadURL/downloadURL.py
+../../widgets/downloadURL/downloadURL.py

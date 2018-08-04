@@ -1,1 +1,1 @@
-deseq2/deseq2.py
+../../widgets/deseq2/deseq2.py

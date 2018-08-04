@@ -1,1 +1,1 @@
-starIndex/starIndex.py
+../../widgets/starIndex/starIndex.py

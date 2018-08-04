@@ -1,1 +1,1 @@
-DtoxSAlignment/DtoxSAlignment.py
+../../widgets/DtoxSAlignment/DtoxSAlignment.py

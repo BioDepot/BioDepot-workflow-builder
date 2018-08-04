@@ -1,1 +1,1 @@
-kallistoIndex/kallistoIndex.py
+../../widgets/kallistoIndex/kallistoIndex.py
