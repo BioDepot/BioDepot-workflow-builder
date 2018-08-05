@@ -95,7 +95,8 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
                         break
             if not iconFile:
                 iconFile=defaultFileIcon
-        copyfile(iconFile,widgetPath+'/'+ os.path.basename(iconFile))
+        os.system("mkdir -p {}/icon".format(widgetPath))
+        copyfile(iconFile,widgetPath+'/icon/'+ os.path.basename(iconFile))
         finalIconFile = '/widgets/' + widgetName + '/icon/' + os.path.basename(iconFile)
         f.write('    icon = "{}"\n'.format(finalIconFile))
         f.write('    want_main_area = False\n')

@@ -157,8 +157,7 @@ class OWWidgetBuilder(widget.OWWidget):
     def register(self,widgetPath,widgetName):
         jsonFile="{}/{}.json".format(widgetPath,widgetName)
         directory=findDirectory(jsonFile)
-        destParentPath='/biodepot/' + directory
-        destPath=destParentPath +'/' + widgetName;
+        destPath='/widgets/{}'.format(widgetName);
         
         if os.path.realpath(widgetPath) != os.path.realpath(destPath):
             #check if it exists
@@ -167,14 +166,10 @@ class OWWidgetBuilder(widget.OWWidget):
                 ret=qm.question(self,'', "{} exists - OverWrite ?".format(widgetName), qm.Yes | qm.No)
                 if ret == qm.No:
                     return
-                os.system("rm {} -rf ".format(destPath))
+                os.system("rm {} -rf ".format(destPath))    
             os.system("cp -r {} {}".format(widgetPath,destPath))
         #make linkages
-        os.system ("ln -sf ../{}/{}.json {}/json/{}.json ".format(widgetName,widgetName,destParentPath,widgetName) )
-        os.system ("ln -sf  {}/{}.py {}/OW{}.py".format(widgetName,widgetName,destParentPath,widgetName))
-        #get icon file from Python file
-        iconFile=findIconFile(widgetPath+'/'+widgetName+'.py')
-        os.system ("ln -sf ../{}/{} {}/icons/{}".format(widgetName,iconFile,destParentPath,iconFile))
+        os.system ("ln -sf  /widgets/{}/{}.py /biodepot/{}/OW{}.py".format(widgetName,widgetName,directory,widgetName))
         
     def drawExec(self, layout=None):
         css = '''
