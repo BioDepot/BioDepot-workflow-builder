@@ -776,8 +776,7 @@ class OWBwBWidget(widget.OWWidget):
         self.candidateTriggers=[]
         if self.data['inputs'] is not None:
             for pname in self.data['inputs']:
-                if not(pname in self.data['requiredParameters']):
-                    self.candidateTriggers.append(pname)
+                self.candidateTriggers.append(pname)
         #initialize the exec state
         self.execLayout=QtGui.QGridLayout()
         self.execLayout.setSpacing(5)
@@ -854,9 +853,9 @@ class OWBwBWidget(widget.OWWidget):
         if checked and attr not in self.runTriggers:
             self.runTriggers.append(attr)
             self.triggerReady[attr]=True
-        if not checked and attr in self.runTriggers:
-            self.runTriggers.pop(attr)
-            self.triggerReady.pop(attr)
+        elif not checked and attr in self.runTriggers:
+            (self.runTriggers).remove(attr)
+            self.triggerReady[attr]=False
     
     def checkTrigger(self,inputReceived=False):
         #this should be checked any time there is a change

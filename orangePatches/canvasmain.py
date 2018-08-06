@@ -375,6 +375,59 @@ class CanvasMainWindow(QMainWindow):
     def setup_actions(self):
         """Initialize main window actions.
         """
+        
+        self.loadNotebookAction = \
+            QAction(self.tr("Load notebook"), self,
+                    objectName="loadNotebook-action",
+                    toolTip=self.tr("Load notebook from list"),
+                    triggered=self.loadNotebook,
+                    enabled=True)
+                    
+        self.addNotebookAction = \
+            QAction(self.tr("Add notebook"), self,
+                    objectName="addNotebook-action",
+                    toolTip=self.tr("Add new notebook to list"),
+                    triggered=self.addNotebook,
+                    enabled=True)
+                    
+        self.removeNotebookAction = \
+            QAction(self.tr("Remove notebook"), self,
+                    objectName="removeNotebook-action",
+                    toolTip=self.tr("remove notebook from list"),
+                    triggered=self.removeNotebook,
+                    enabled=True)
+        
+        self.loadWorkflowAction = \
+            QAction(self.tr("Load workflow"), self,
+                    objectName="loadWorkflow-action",
+                    toolTip=self.tr("Load workflow from list"),
+                    triggered=self.loadWorkflow,
+                    enabled=True)
+                    
+        self.addWorkflowAction = \
+            QAction(self.tr("Add workflow"), self,
+                    objectName="addWorkflow-action",
+                    toolTip=self.tr("Add new workflow to list"),
+                    triggered=self.addWorkflow,
+                    enabled=True)
+                    
+        self.removeWorkflowAction = \
+            QAction(self.tr("Remove workflow"), self,
+                    objectName="removeWorkflow-action",
+                    toolTip=self.tr("remove workflow from list"),
+                    triggered=self.removeWorkflow,
+                    enabled=True)
+                    
+
+        self.new_action = \
+            QAction(self.tr("New"), self,
+                    objectName="action-new",
+                    toolTip=self.tr("Open a new workflow."),
+                    triggered=self.new_scheme,
+                    shortcut=QKeySequence.New,
+                    icon=canvas_icons("New.svg")
+                    )
+
         self.addCategoryAction = \
             QAction(self.tr("Add category"), self,
                     objectName="addCategory-action",
@@ -716,6 +769,21 @@ class CanvasMainWindow(QMainWindow):
                 
         menu_bar.addMenu(self.toolDock_menu)
 
+        self.workflow_menu = QMenu(self.tr("&Workflows"), self)
+        self.workflow_menu.addAction(self.loadWorkflowAction)
+        self.workflow_menu.addAction(self.addWorkflowAction)
+        self.workflow_menu.addSeparator()
+        self.workflow_menu.addAction(self.removeWorkflowAction)
+
+        menu_bar.addMenu(self.workflow_menu)
+
+        self.notebook_menu = QMenu(self.tr("&Notebooks"), self)
+        self.notebook_menu.addAction(self.loadNotebookAction)
+        self.notebook_menu.addAction(self.addNotebookAction)
+        self.notebook_menu.addSeparator()
+        self.notebook_menu.addAction(self.removeNotebookAction)
+
+        menu_bar.addMenu(self.notebook_menu)
 
 
         # Help menu.
@@ -726,7 +794,19 @@ class CanvasMainWindow(QMainWindow):
 #        self.help_menu.addAction(self.examples_action)
 #        menu_bar.addMenu(self.help_menu)
 
+    def loadNotebook(self):
+        pass
+    def addNotebook(self):
+        pass
+    def removeNotebook(self):
+        pass 
        
+    def loadWorkflow(self):
+        pass
+    def addWorkflow(self):
+        pass
+    def removeWorkflow(self):
+        pass 
         
     def addCategory(self):
         pass

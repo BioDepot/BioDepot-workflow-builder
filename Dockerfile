@@ -98,6 +98,8 @@ COPY user_config/ /root/
 #patch orange3
 COPY orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
 COPY orangePatches/canvasmain.py /orange3/Orange/canvas/application/canvasmain.py
+COPY orangePatches/widgetsscheme.py /orange3/Orange/canvas/scheme/widgetsscheme.py
+COPY orangePatches/signalmanager.py /orange3/Orange/canvas/scheme/signalmanager.py
 
 #Add widget creator
 RUN ln -s /biodepot/orangebiodepot/util/createWidget /usr/bin/createWidget

@@ -159,14 +159,11 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
         #input callbacks
         if 'inputs' in data and data['inputs']:
             for attr, values in data['inputs'].items():
-                if 'callback' in  values and values['callback']:
-                    f.write('    def {}(self,value, "{}", sourceId=None):\n'.format(values["callback"],attr))
-                    f.write('        #User code here\n')
-                    f.write('        self.handleInputs(value, "{}", sourceId=None)\n'.format(attr))
-                else:
-                    f.write('    def handleInputs{}(self, value, sourceId=None):\n'.format(attr))
-                    f.write('        self.handleInputs(value, "{}", sourceId=None)\n'.format(attr)) 
-            
+                f.write('    def handleInputs{}(self, value, *args):\n'.format(attr))
+                f.write('        if args and len(args) > 0: \n')
+                f.write('            self.handleInputs("{}", value, args[0][0])\n'.format(attr))
+                f.write('        else:\n')
+                f.write('            self.handleInputs("inputFile", value, None)\n'.format(attr))               
         if 'outputs' in data and data['outputs']:
             #generic omnibus output handler - change if you want to customize outputs
             f.write('    def handleOutputs(self):\n'.format(attr))
