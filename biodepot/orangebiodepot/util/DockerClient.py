@@ -113,7 +113,7 @@ class DockerClient:
         consoleProc.cidFile='/tmp/'+ str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':', '.')
         dockerBaseCmd='docker run -i --rm '
         if exportGraphics:
-            dockerBaseCmd+='-e DISPLAY=:0 -v /tmp/.X11-unix:/tmp/.X11-unix '
+            dockerBaseCmd+='-e DISPLAY=:1 -v /tmp/.X11-unix:/tmp/.X11-unix '
         dockerCmd=dockerBaseCmd + ' --init --cidfile={} {} {} {} {}'.format(consoleProc.cidFile,volumeMappings,envs,name,commands)
         sys.stderr.write('Docker command is\n{}\n'.format(dockerCmd))
         consoleProc.state='running'
