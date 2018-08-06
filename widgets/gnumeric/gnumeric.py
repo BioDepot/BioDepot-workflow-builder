@@ -11,17 +11,16 @@ from orangebiodepot.util.DockerClient import DockerClient
 from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWkallistoindex(OWBwBWidget):
-    name = "kallisto index"
-    description = "Generates index files for kallisto"
-    category = "RNA-seq"
-    priority = 10
-    icon = "/biodepot/RNA_seq/kallistoIndex/icon/kallistoindex.png"
+class OWgnumeric(OWBwBWidget):
+    name = "gnumeric"
+    description = "Open source spreadsheet"
+    category = "Utilities"
+    priority = 2
+    icon = "/widgets/gnumeric/icon/gnumeric.png"
     want_main_area = False
-    docker_image_name = "biodepot/kallisto"
-    docker_image_tag = "0.44.0__ubuntu-16.04__072818"
-    inputs = [("trigger",str,"handleInputstrigger")]
-    outputs = [("outputFilename",str)]
+    docker_image_name = "biodepot/gnumeric"
+    docker_image_tag = "1.12.18__debian-jessie-slim__080418"
+    inputs = [("inputFile",str,"handleInputsinputFile"),("Trigger",str,"handleInputsTrigger")]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     exportGraphics=pset(False)
@@ -29,22 +28,22 @@ class OWkallistoindex(OWBwBWidget):
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
-    fastaFiles=pset([])
-    outputFilename=pset(None)
-    kmerSize=pset(31)
-    makeUnique=pset(False)
+    inputFile=pset("")
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/biodepot/RNA_seq/json/kallistoIndex.json") as f:
+        with open("/widgets/gnumeric/gnumeric.json") as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputstrigger(self, value, sourceId=None):
-        self.handleInputs(value, "trigger", sourceId=None)
-    def handleOutputs(self):
-        outputValue=None
-        if hasattr(self,"outputFilename"):
-            outputValue=getattr(self,"outputFilename")
-        self.send("outputFilename", outputValue)
+    def handleInputsinputFile(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("inputFile", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
+    def handleInputsTrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("Trigger", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)

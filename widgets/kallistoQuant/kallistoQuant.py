@@ -15,7 +15,7 @@ class OWkallistoquant(OWBwBWidget):
     name = "kallisto quant"
     description = "Alignment and quantification of reads from fastq files"
     category = "RNA-seq"
-    priority = 10
+    priority = 4
     icon = "/widgets/kallistoQuant/icon/kallistoquant.png"
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
@@ -55,12 +55,21 @@ class OWkallistoquant(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputsindexFile(self, value, sourceId=None):
-        self.handleInputs(value, "indexFile", sourceId=None)
-    def handleInputsfastqFiles(self, value, sourceId=None):
-        self.handleInputs(value, "fastqFiles", sourceId=None)
-    def handleInputstrigger(self, value, sourceId=None):
-        self.handleInputs(value, "trigger", sourceId=None)
+    def handleInputsindexFile(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("indexFile", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
+    def handleInputsfastqFiles(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("fastqFiles", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
+    def handleInputstrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("trigger", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         outputValue=None
         if hasattr(self,"outputDir"):

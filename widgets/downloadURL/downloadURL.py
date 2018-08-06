@@ -41,10 +41,16 @@ class OWdownloadURL(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputsdirectory(self, value, sourceId=None):
-        self.handleInputs(value, "directory", sourceId=None)
-    def handleInputstrigger(self, value, sourceId=None):
-        self.handleInputs(value, "trigger", sourceId=None)
+    def handleInputsdirectory(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("directory", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
+    def handleInputstrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("trigger", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         outputValue="/data"
         if hasattr(self,"directory"):

@@ -54,8 +54,11 @@ class OWStarindex(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputsTrigger(self, value, sourceId=None):
-        self.handleInputs(value, "Trigger", sourceId=None)
+    def handleInputsTrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("Trigger", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         outputValue=None
         if hasattr(self,"genomeDir"):

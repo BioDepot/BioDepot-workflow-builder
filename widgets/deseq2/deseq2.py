@@ -21,7 +21,7 @@ class OWDESeq2(OWBwBWidget):
     docker_image_name = "biodepot/deseq2"
     docker_image_tag = "1.20__ubuntu-16.04__bioc-3.7__r-3.5.1__072918"
     inputs = [("Trigger",str,"handleInputsTrigger"),("countsFile",str,"handleInputscountsFile")]
-    outputs = [("topGenes",Orange.data.Table)]
+    outputs = [("topGenesFile",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     exportGraphics=pset(False)
@@ -43,32 +43,19 @@ class OWDESeq2(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputsTrigger(self, value, sourceId=None):
-        self.handleInputs(value, "Trigger", sourceId=None)
-    def handleInputscountsFile(self, value, sourceId=None):
-        self.handleInputs(value, "countsFile", sourceId=None)
+    def handleInputsTrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("Trigger", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
+    def handleInputscountsFile(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("countsFile", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         topGenesFile="top{}Genes.tsv".format(self.ngenes)
         sys.stderr.write("Top file is {}\n".format(topGenesFile))
         if self.outputDir is not None:
             topGenesFile=self.outputDir+"/"+topGenesFile
-        self.sendTable(topGenesFile)
-        
-    def sendTable(self,filename):
-        outname=filename+'.textExponents.tsv'
-        self.adjustExponents(filename,outname)
-        tsvReader = FileFormat.get_reader(outname)
-        dataTable= tsvReader.read()
-        self.send("topGenes", dataTable)
-    
-    def adjustExponents(self,inFile,outFile):
-        #need to add space to exponents so that reader doesn't recognize them as numbers and display 0.000000..0
-        with open (inFile,"r") as fin, open  (outFile,"w") as fout:
-            line=fin.readline()
-            fout.write(line)
-            for line in fin:
-                words=(line.rstrip()).split("\t")
-                for i, word in enumerate(words[1:],start=1):
-                    if "e" in word:
-                        words[i]=words[i].replace('e'," e")
-                fout.write("\t".join(words)+'\n')
+            self.send('topGenesFile',topGenesFile)

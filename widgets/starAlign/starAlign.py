@@ -152,12 +152,21 @@ class OWStarAlign(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputstrigger(self, value, sourceId=None):
-        self.handleInputs(value, "trigger", sourceId=None)
-    def handleInputsoutputDir(self, value, sourceId=None):
-        self.handleInputs(value, "outputDir", sourceId=None)
-    def handleInputsgenomeDir(self, value, sourceId=None):
-        self.handleInputs(value, "genomeDir", sourceId=None)
+    def handleInputstrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("trigger", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
+    def handleInputsoutputDir(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("outputDir", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
+    def handleInputsgenomeDir(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("genomeDir", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         outputValue="/data"
         if hasattr(self,"outputDir"):

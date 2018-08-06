@@ -15,7 +15,7 @@ class OWkallistoindex(OWBwBWidget):
     name = "kallisto index"
     description = "Generates index files for kallisto"
     category = "RNA-seq"
-    priority = 10
+    priority = 3
     icon = "/widgets/kallistoIndex/icon/kallistoindex.png"
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
@@ -35,14 +35,17 @@ class OWkallistoindex(OWBwBWidget):
     makeUnique=pset(False)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("widgets/kallistoIndex/kallistoIndex.json") as f:
+        with open("/widgets/kallistoIndex/kallistoIndex.json") as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputstrigger(self, value, sourceId=None):
-        self.handleInputs(value, "trigger", sourceId=None)
+    def handleInputstrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("trigger", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         outputValue=None
         if hasattr(self,"outputFilename"):

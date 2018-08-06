@@ -1,7 +1,6 @@
 Miscellaneous/OWDirectory.py
 Miscellaneous/OWFile.py
 Miscellaneous/__init__.py
-Miscellaneous/owtable.py
 Miscellaneous.egg-info/PKG-INFO
 Miscellaneous.egg-info/SOURCES.txt
 Miscellaneous.egg-info/dependency_links.txt

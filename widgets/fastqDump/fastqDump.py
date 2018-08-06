@@ -15,7 +15,7 @@ class OWfastqDump(OWBwBWidget):
     name = "fastqDump"
     description = "Download fastq files from GEO"
     category = "Utilities"
-    priority = 10
+    priority = 2
     icon = "/widgets/fastqDump/icon/pfqDump.png"
     want_main_area = False
     docker_image_name = "biodepot/sratoolkit"
@@ -24,8 +24,8 @@ class OWfastqDump(OWBwBWidget):
     outputs = [("OutputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
-    runTriggers=pset([])
     exportGraphics=pset(False)
+    runTriggers=pset([])
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
@@ -78,8 +78,11 @@ class OWfastqDump(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputsTrigger(self, value, sourceId=None):
-        self.handleInputs(value, "Trigger", sourceId=None)
+    def handleInputsTrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("Trigger", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         outputValue="/data"
         if hasattr(self,"OutputDir"):

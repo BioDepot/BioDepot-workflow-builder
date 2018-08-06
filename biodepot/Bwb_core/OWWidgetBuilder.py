@@ -261,6 +261,8 @@ class OWWidgetBuilder(widget.OWWidget):
                 self.console.show()
                 self.pConsole=ConsoleProcess(console=self.console,finishHandler=self.finishRebuild)
                 cmd='rsync -av /biodepot/ {}/biodepot/ --delete '.format(myDir) 
+                cmd+= '&& rsync -av /widgets/ {}/widgets/ --delete '.format(myDir)
+                cmd+= '&& rsync -av /workflows/ {}/workflows/ --delete '.format(myDir)
                 cmd+= '&& docker build -t {} {}'.format(imageName,myDir)
                 self.registerBtn.setEnabled(False)
                 self.rebuildBtn.setEnabled(False)

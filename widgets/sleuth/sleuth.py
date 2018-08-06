@@ -21,7 +21,7 @@ class OWsleuth(OWBwBWidget):
     docker_image_name = "biodepot/sleuth"
     docker_image_tag = "0.29.0__ubuntu-18.04__r-4.5.1__python-2.7.13__072818"
     inputs = [("trigger",str,"handleInputstrigger")]
-    outputs = [("output_file",str),("topGenes",Orange.data.Table)]
+    outputs = [("output_file",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     exportGraphics=pset(False)
@@ -53,27 +53,13 @@ class OWsleuth(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputstrigger(self, value, sourceId=None):
-        self.handleInputs(value, "trigger", sourceId=None)
+    def handleInputstrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("trigger", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         outputValue=None
         if hasattr(self,"output_file"):
             outputValue=getattr(self,"output_file")
         self.send("output_file", outputValue)
-        sys.stderr.write('output_file is {}\n'.format(outputValue))
-        if outputValue:
-            self.sendTable(outputValue)
-    def sendTable(self,filename):
-        outname=filename+'.tsv'
-        with open (filename, 'r') as fin, open (outname,'w') as fout:
-            line=fin.readline()
-            fout.write(line)
-            for line in fin:
-                fout.write(line.split("\t",1)[1])
-            fin.close()
-            fout.close()
-        tsvReader = FileFormat.get_reader(outname)
-        dataTable= tsvReader.read()
-        self.send("topGenes", dataTable)
-        os.unlink(outname)
-
