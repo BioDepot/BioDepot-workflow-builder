@@ -833,10 +833,10 @@ class WidgetsSignalManager(SignalManager):
 
             handler = getattr(widget, handler)
 
-            if link.sink_channel.single:
-                args = (value, )
-            else:
-                args = (value, signal.id)
+#            if link.sink_channel.single:
+#                args = (value)
+#            else:
+            args = (value, signal.id)
 
             log.debug("Process signals: calling %s.%s (from %s with id:%s)",
                       type(widget).__name__, handler.__name__, link, signal.id)

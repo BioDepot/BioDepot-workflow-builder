@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme description="" title="" version="2.0">
+	<nodes>
+		<node id="0" name="gnumeric" position="(644.0, 219.0)" project_name="Utilities" qualified_name="Utilities.OWgnumeric.OWgnumeric" title="gnumeric" version="" />
+		<node id="1" name="File" position="(463.0, 214.0)" project_name="Miscellaneous" qualified_name="Miscellaneous.OWFile.OWBamFile" title="File" version="" />
+	</nodes>
+	<links />
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties format="literal" node_id="0">{'controlAreaVisible': True, 'exportGraphics': True, 'inputConnectionsStore': {}, 'inputFile': '/data/LINCS/Results/FDR-0.1/TOP-40.tsv', 'optionsChecked': {'inputFile': True, 'saveLog': False}, 'runMode': 2, 'runTriggers': ['inputFile'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x019\x00\x00\x05\xb7\x00\x00\x03%\x00\x00\x02\xe7\x00\x00\x01Q\x00\x00\x05\xb7\x00\x00\x03"\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {'inputFile': False}, '__version__': 1}</properties>
+		<properties format="literal" node_id="1">{'checked': False, 'controlAreaVisible': True, 'filesList': ['/data/LINCS/Results/FDR-0.1/TOP-40.tsv'], 'inputConnections': None, 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00\xc3\x00\x00\x00\xa5\x00\x00\x02Z\x00\x00\x01\xc3\x00\x00\x00\xc3\x00\x00\x00\xbd\x00\x00\x02Z\x00\x00\x01\xc0\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', '__version__': 1}</properties>
+	</node_properties>
+</scheme>

@@ -171,13 +171,17 @@ class BwbGuiElements():
 
 class ConnectionDict:
     def __init__(self, inputDict):
+        self._dict={}
         self._dict=inputDict #we do want the name not a copy - i.e. the inputDict should change
 
     def add (self, slot, connectionId=None):
+        if connectionId is None:
+            return
         if slot in self._dict and connectionId not in self._dict[slot]:
             self._dict[slot].append(connectionId)
         else:
             self._dict[slot]=[connectionId]
+        sys.stderr.write('Adding {} to connection {}\n'.format(slot,self._dict[slot]))
 
     def remove (self, slot, connectionId=None):
         if slot in self._dict:
@@ -238,8 +242,6 @@ class OWBwBWidget(widget.OWWidget):
         self.bgui=BwbGuiElements()
         
         #For compatibility if triggers are not being kept
-        
-        
         if not hasattr(self,'triggerReady'):
             self.triggerReady={}        
     def initVolumes(self):
@@ -868,11 +870,21 @@ class OWBwBWidget(widget.OWWidget):
             if not inputReceived:
                 return            
             #check if the input triggers are set
+            sys.stderr.write('Checking triggers with runTriggers{}\n'.format(self.runTriggers))
             for trigger in self.runTriggers:
+                sys.stderr.write('Checking trigger {}\n'.format(trigger))
                 if trigger not in self.triggerReady:
+                    sys.stderr.write('trigger {} is not in triggerReady \n'.format(trigger))
                     return
-                if not self.triggerReady[trigger] or not self.inputConnections.isSet(trigger):
+                if not self.triggerReady[trigger]:
+                    sys.stderr.write('trigger {} not ready \n'.format(trigger))
+                    if (self.inputConnections.isSet(trigger)):
+                        sys.stderr.write('trigger {} is readied \n'.format(trigger))
+                        self.triggerReady[trigger]=True
                     return
+                else:
+                    if (not self.inputConnections.isSet(trigger)):
+                        return
             self.onRunClicked()
 
     def bwbFileEntry(self, widget, button, ledit, icon=browseIcon,layout=None, label=None,entryType='file', checkbox=None):
@@ -962,9 +974,10 @@ class OWBwBWidget(widget.OWWidget):
         self.optionsChecked[pname]=getattr(self,checkAttr)
         
 #Handle inputs
-    def handleInputs(self, value, attr, sourceId=None):
-        sys.stderr.write('checking inputs handler: attr {} value {}\n'.format(attr,value))
-        if value is None:
+    def handleInputs(self,attr,value,sourceId):
+        sys.stderr.write('value is {} sourceId is {}\n'.format(value,sourceId))
+        if value is '__purge':
+            #remove signal
             self.inputConnections.remove(attr,sourceId)
             sys.stderr.write('sig handler removing {} disabled {}\n'.format(attr,self.inputConnections.isConnected(attr)))
             setattr(self,attr,None) #this gives text None in ledit for some reason
@@ -972,7 +985,11 @@ class OWBwBWidget(widget.OWWidget):
                 self.triggerReady[attr]=False
         else:
             self.inputConnections.add(attr,sourceId)
-            sys.stderr.write('sig handler adding input: attr {} value {}\n'.format(attr,value,))
+            sys.stderr.write('sig handler adding input: attr {} sourceId {} value {}\n'.format(attr,sourceId,value))
+            sys.stderr.write('connection dict value for {} is {}\n'.format(attr,self.inputConnections._dict[attr]))
+            if attr in self.runTriggers:
+                sys.stderr.write("befor trigger value for attr {} is {}\n".format(attr,self.triggerReady[attr])) 
+            #addo check to see if this is optional
             setattr(self,attr,value)
             self.checkTrigger(inputReceived=True)
             if attr in self.runTriggers:
@@ -981,6 +998,7 @@ class OWBwBWidget(widget.OWWidget):
         self.updateGui(attr,value)
 
     def updateGui(self,attr,value,removeFlag=False):
+        #disables manual input when the value has been given by an input connection
         if self.inputConnections.isConnected(attr):
             sys.stderr.write('disabling {}\n'.format(attr))
             self.bgui.disable(attr,value)
@@ -1105,16 +1123,19 @@ class OWBwBWidget(widget.OWWidget):
         flags=[]
         args=[]
         if self.data['parameters'] is None:
+            sys.stderr.write('No parameters skipping parameter parsing\n')
             return self.generateCmdFromBash(self.data['command'],flags=flags,args=args)
         for pname, pvalue in self.data['parameters'].items():
+            sys.stderr.write('Parsing parameters: pname {} pvalue{}\n'.format(pname,pvalue))
             #possible to have an requirement or parameter that is not in the executable line
             #environment variables can have a Null value in the flags field
             #arguments are the only type that have no flag
             if 'argument' in pvalue:
                 fStr=self.flagString(pname)
-                args.append(fStr)
+                if fStr and fStr is not None:
+                    args.append(fStr)
                 continue
-            if 'flag' not in pvalue or pvalue['flag'] is None:
+            if 'flag' not in pvalue:
                 continue
             #if required or checked then it is added to the flags
             addParms=False
@@ -1131,9 +1152,10 @@ class OWBwBWidget(widget.OWWidget):
 
             if addParms:
                 fStr=self.flagString(pname)
-                if pvalue['flag']:
-                    if fStr:
-                        flags.append(fStr)
+                sys.stderr.write('fStr is {}\n'.format(fStr))
+                sys.stderr.write('pvalue flag is {}\n'.format(pvalue['flag']))
+                if fStr:
+                    flags.append(fStr)
                         
         return self.generateCmdFromBash(self.data['command'],flags=flags,args=args)
 
@@ -1294,7 +1316,8 @@ class OWBwBWidget(widget.OWWidget):
         #return shortest path
         for conVol, bwbVol in self.hostVolumes.items():
             hostVol=os.path.normpath(self.dockerClient.to_best_host_directory(bwbVol,returnNone=False))
-            sys.stderr.write('checking conVol {} bwbVol {} hostVol {}\ncommon {}\n'.format(conVol,bwbVol,hostVol,os.path.commonpath([hostVol,hostPath])))
+            sys.stderr.write('checking conVol {} bwbVol {} hostVol {} hostPath {}\n'.format(conVol,bwbVol,hostVol,hostPath))
+            sys.stderr.write('common {}\n'.format(os.path.commonpath([hostVol,hostPath])))
             prefix=None
             if hostVol == hostPath:
                 prefix=""

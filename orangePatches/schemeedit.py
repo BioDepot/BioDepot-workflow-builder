@@ -1278,7 +1278,7 @@ class SchemeEditWidget(QWidget):
         self.__renameAction.setEnabled(len(nodes) == 1)
         self.__duplicateSelectedAction.setEnabled(bool(nodes))
         self.__showSettingsAction.setEnabled(len(nodes) == 1)
-        if len(nodes) == 1 and self.__checkAttrsStatesFiles(nodes[0]):
+        if nodes and len(nodes) == 1 and self.__checkAttrsStatesFiles(nodes[0]):
             self.__editWidgetAction.setEnabled(len(nodes) == 1)
         else:
             self.__editWidgetAction.setEnabled(len(nodes) == 0)
@@ -1511,11 +1511,13 @@ class SchemeEditWidget(QWidget):
 
     def __checkAttrsStatesFiles(self,node):
         myWidget = self.scheme().widget_for_node(node)
-        desc = myWidget.get_widget_description()      
+        desc = myWidget.get_widget_description()
+        #id field is in form of <category>.OW<widgetId>
         widgetSplit=desc['id'].split('.')
-        widgetSplit[-1]=widgetSplit[-1][2:]
-        attrsFile='/biodepot/{}/{}.attrs'.format('/'.join(widgetSplit),widgetSplit[-1])
-        statesFile='/biodepot/{}/{}.states'.format('/'.join(widgetSplit),widgetSplit[-1])
+        widgetName=widgetSplit[-1][2:]
+        attrsFile='/widgets/{}/{}.attrs'.format(widgetName,widgetName)
+        statesFile='/widgets/{}/{}.states'.format(widgetName,widgetName)
+        
         if os.path.isfile(attrsFile) and os.path.isfile(statesFile):
             return True
         return False
