@@ -491,7 +491,7 @@ class OWWidgetBuilder(widget.OWWidget):
     
     def startWidget(self):
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
-                     'priority','icon','inputs','outputs','volumes','parameters','command','autoMap'):
+                     'priority','icon','inputs','outputs','volumes','parameters','command','autoMap','container'):
             if attr in self.allAttrs:
                 setattr(self,attr,self.allAttrs[attr])
             else:
@@ -525,6 +525,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.drawVolumeListWidget('volumes',layout=self.tabs.add('Volumes'))
         self.drawParamsListWidget('parameters',layout=self.tabs.add('Parameters'))
         self.drawCommand('command',layout=self.tabs.add('Command'))
+        self.drawContainer('container',layout=self.tabs.add('Container'))
         self.drawExec(self.controlArea.layout())
     
     def updateWidget(self):
@@ -618,7 +619,14 @@ class OWWidgetBuilder(widget.OWWidget):
         #layout.addWidget(labelTextBox.label,layout.nextRow,0)
         layout.addWidget(labelTextBox.textBox,layout.nextRow,1,1,4)
         layout.nextRow = layout.nextRow + 1
-    
+        
+    def drawContainer(self,pname,layout=None):
+        labelTextBox=self.makeTextBox(pname,label='Enter buildCommand:')
+        self.initAllStates(pname,labelTextBox)
+        labelTextBox.textBox.textChanged.connect(lambda: self.updateAllStates(pname,labelTextBox,labelTextBox.getState()))
+        layout.addWidget(labelTextBox.textBox,layout.nextRow,1,1,4)
+        layout.nextRow = layout.nextRow + 1
+        
     def makeTextBox(self,attr,label):
         box=QHBoxLayout()
         textLabel=None

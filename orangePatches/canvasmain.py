@@ -6,7 +6,7 @@ import os
 import sys
 sys.path.append('/biodepot/Bwb_core')
 import OWWidgetBuilder
-import workflowList
+#import workflowList
 import logging
 import operator
 from functools import partial
