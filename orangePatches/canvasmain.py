@@ -4,10 +4,15 @@ Orange Canvas Main Window
 """
 import os
 import sys
+sys.path.append('/biodepot/Bwb_core')
+import OWWidgetBuilder
+import workflowList
 import logging
 import operator
 from functools import partial
 from io import BytesIO, StringIO
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import *
 
 import pkg_resources
 
@@ -87,8 +92,7 @@ LINKS = \
      "youtube": "https://www.youtube.com/watch"
                 "?v=HXjnDIgGDuI&list=PLmNPvQr9Tf-ZSDLwOzxpvY-HrE0yv-8Fy&index=1"
      }
-
-
+#stackoverflow
 def style_icons(widget, standard_pixmap):
     """Return the Qt standard pixmap icon.
     """
@@ -802,7 +806,11 @@ class CanvasMainWindow(QMainWindow):
         pass 
        
     def loadWorkflow(self):
-        pass
+        widget=OWWidgetBuilder.OWWidgetBuilder()
+        widget.showNormal()
+        widget.raise_()
+        widget.activateWindow()
+
     def addWorkflow(self):
         pass
     def removeWorkflow(self):

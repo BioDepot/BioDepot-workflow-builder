@@ -229,9 +229,19 @@ def mergeWidget(inputJson,outputWidget,widgetName,inputData=None):
     fwrite(afterClass,"\s+priority =",'    priority = {}\n'.format(priority))
     iconFile=data['icon']
     if not iconFile or not os.path.exists(iconFile):
-        iconFile = defaultIconFile
-    copyfile(iconFile,widgetPath+'/'+ os.path.basename(iconFile))
-    finalIconFile = '/biodepot/'+directory + '/' + widgetName + '/' + os.path.basename(iconFile)
+        iconFile=None
+        #check if icon file exists in input Path or in the widgets directory
+        for path in [inputPath +"/icon",'/widgets/' + widgetName + '/icon']:
+            if os.path.exists(path):
+                iconFiles=[f for f in listdir(path) if isfile(join(oath, f))]
+                if iconFiles:
+                    iconFile=iconFiles[0]
+                    break
+        if not iconFile:
+            iconFile=defaultIconFile
+    os.system("mkdir -p {}/icon".format(widgetPath))
+    copyfile(iconFile,widgetPath+'/icon/'+ os.path.basename(iconFile))
+    finalIconFile = '/widgets/' + widgetName + '/icon/' + os.path.basename(iconFile)
     fwrite(afterClass,"\s+icon =",'    icon = "{}"\n'.format(finalIconFile))
     fwrite(afterClass,"\s+want_main_area =",'    want_main_area = False\n')
     fwrite(afterClass,"\s+docker_image_name =",'    docker_image_name = "{}"\n'.format(data['docker_image_name']))

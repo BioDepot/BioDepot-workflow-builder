@@ -476,6 +476,7 @@ class OWWidgetBuilder(widget.OWWidget):
             widgetSplit=widgetID.split('.')
             widgetSplit[-1]=widgetSplit[-1][2:]
             self.widgetName=widgetSplit[-1]
+            self.setWindowTitle(self.widgetName+':Definition')
             self.widgetDir='/widgets/{}'.format(self.widgetName)
             sys.stderr.write('widgetDir is {} widgetName is {}\n'.format(self.widgetDir,self.widgetName))
             self.loadWidget(loadWidgetDir=self.widgetDir)
