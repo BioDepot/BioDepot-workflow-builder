@@ -94,7 +94,7 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
                         iconFile=iconFiles[0]
                         break
             if not iconFile:
-                iconFile=defaultFileIcon
+                iconFile=defaultIconFile
         os.system("mkdir -p {}/icon".format(widgetPath))
         copyfile(iconFile,widgetPath+'/icon/'+ os.path.basename(iconFile))
         finalIconFile = '/widgets/' + widgetName + '/icon/' + os.path.basename(iconFile)
