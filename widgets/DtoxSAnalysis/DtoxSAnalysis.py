@@ -15,7 +15,7 @@ class OWDtoxSAnalysis(OWBwBWidget):
     name = "DtoxSAnalysis"
     description = "Step 2 of Dtoxs SOP. Uses edgeR for differential expression analysis"
     category = "RNA-seq"
-    priority = 21
+    priority = 2
     icon = "/widgets/DtoxSAnalysis/icon/dtoxs-analysis2.svg"
     want_main_area = False
     docker_image_name = "biodepot/dtoxs_analysis"

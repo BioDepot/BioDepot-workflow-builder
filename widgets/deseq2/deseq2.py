@@ -15,7 +15,7 @@ class OWDESeq2(OWBwBWidget):
     name = "DESeq2"
     description = "Differential expression using DESeq2 package"
     category = "RNA-seq"
-    priority = 10
+    priority = 14
     icon = "/widgets/deseq2/icon/deseq2.png"
     want_main_area = False
     docker_image_name = "biodepot/deseq2"

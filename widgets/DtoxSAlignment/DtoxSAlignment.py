@@ -15,7 +15,7 @@ class OWDtoxSAlignment(OWBwBWidget):
     name = "DtoxSAlignment"
     description = "Alignment part of DtoxS standard operating procedure (SOP)"
     category = "RNA-seq"
-    priority = 10
+    priority = 1
     icon = "/widgets/DtoxSAlignment/icon/dtoxs-alignment2.svg"
     want_main_area = False
     docker_image_name = "biodepot/dtoxs_alignment"
@@ -41,12 +41,21 @@ class OWDtoxSAlignment(OWBwBWidget):
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputsbarcodesFile(self, value, sourceId=None):
-        self.handleInputs(value, "barcodesFile", sourceId=None)
-    def handleInputstopDir(self, value, sourceId=None):
-        self.handleInputs(value, "topDir", sourceId=None)
-    def handleInputstrigger(self, value, sourceId=None):
-        self.handleInputs(value, "trigger", sourceId=None)
+    def handleInputsbarcodesFile(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("barcodesFile", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
+    def handleInputstopDir(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("topDir", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
+    def handleInputstrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("trigger", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         outputValue=None
         if hasattr(self,"topDir"):

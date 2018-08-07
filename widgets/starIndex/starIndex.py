@@ -15,7 +15,7 @@ class OWStarindex(OWBwBWidget):
     name = "Star index"
     description = "Construct indices for STAR aligner "
     category = "RNA-seq"
-    priority = 10
+    priority = 11
     icon = "/widgets/starIndex/icon/starIndex.png"
     want_main_area = False
     docker_image_name = "biodepot/star"

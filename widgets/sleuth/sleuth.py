@@ -15,7 +15,7 @@ class OWsleuth(OWBwBWidget):
     name = "sleuth"
     description = "Analysis of kallisto quantified RNA-seq files"
     category = "RNA-seq"
-    priority = 10
+    priority = 5
     icon = "/widgets/sleuth/icon/sleuth2.png"
     want_main_area = False
     docker_image_name = "biodepot/sleuth"

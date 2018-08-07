@@ -15,7 +15,7 @@ class OWStarAlign(OWBwBWidget):
     name = "Star Align"
     description = "Star aligner alignment module"
     category = "RNA-seq"
-    priority = 10
+    priority = 12
     icon = "/widgets/starAlign/icon/staralign.png"
     want_main_area = False
     docker_image_name = "biodepot/star"
