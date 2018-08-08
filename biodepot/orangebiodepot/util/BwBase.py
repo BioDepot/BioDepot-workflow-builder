@@ -627,7 +627,6 @@ class OWBwBWidget(widget.OWWidget):
         #is used for multiple entry of any type
         
         sys.stderr.write('adding text box for pname{} pvalue {} box {} layout {} addCheckbox {}\n'.format(pname,pvalue,box,layout,addCheckbox))
-        
         disabledFlag=False
         checkbox=None
         browseBtn=None
@@ -772,6 +771,8 @@ class OWBwBWidget(widget.OWWidget):
             removeBtn.setEnabled(False)
         
     def drawExec(self, box=None):
+        if not hasattr(self,'useDockerfile'):
+            setattr(self,'useDockerfile',False)
         #find out if there are triggers
         self.candidateTriggers=[]
         if self.data['inputs'] is not None:
@@ -784,6 +785,10 @@ class OWBwBWidget(widget.OWWidget):
         self.graphicsMode=QtGui.QCheckBox('Export graphics',self)
         self.graphicsMode.setChecked(self.exportGraphics)
         self.graphicsMode.stateChanged.connect(self.graphicsModeChange)
+        self.dockerMode=QtGui.QCheckBox('Build container',self)
+        self.dockerMode.setChecked(self.useDockerfile)
+        self.dockerMode.stateChanged.connect(self.dockerModeChange)
+        
         self.cboRunMode=QtGui.QComboBox()
         self.cboRunMode.addItem('Manual')
         self.cboRunMode.addItem('Automatic')
@@ -828,11 +833,14 @@ class OWBwBWidget(widget.OWWidget):
         self.execLayout.addWidget(self.btnRun,1,0)
         self.execLayout.addWidget(self.btnStop,1,1)
         self.execLayout.addWidget(self.graphicsMode,1,2)
-        self.execLayout.addWidget(myLabel,1,3)
-        self.execLayout.addWidget(self.cboRunMode,1,4)
+        self.execLayout.addWidget(self.dockerMode,1,3)
+        self.execLayout.addWidget(myLabel,1,4)
+        self.execLayout.addWidget(self.cboRunMode,1,5)
         if self.candidateTriggers:
-            self.execLayout.addWidget(self.execBtn,1,5)
+            self.execLayout.addWidget(self.execBtn,1,6)
         box.layout().addLayout(self.execLayout)
+    def dockerModeChange(self):
+        self.useDockerfile=self.dockerMode.isChecked()                       
     def graphicsModeChange(self):
         self.exportGraphics=self.graphicsMode.isChecked()
     def runModeChange(self):

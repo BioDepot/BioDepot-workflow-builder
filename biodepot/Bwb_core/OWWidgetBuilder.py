@@ -5,6 +5,7 @@ import json
 import jsonpickle
 import pickle
 import csv
+import OWImageBuilder
 from pathlib import Path
 from shutil import copyfile
 from orangebiodepot.util.createWidget import mergeWidget, createWidget, findDirectory, findIconFile
@@ -489,6 +490,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.widgetName=None
         self.widgetDir=None
         self.isDrawn=False
+        self.containerID=None
         #need save mode right at beginning
         self.saveMode=QtGui.QComboBox()
         self.saveMode.addItem('Overwrite')
@@ -659,15 +661,44 @@ class OWWidgetBuilder(widget.OWWidget):
         layout.nextRow = layout.nextRow + 1
         
     def drawDocker(self,pname,layout=None):
-        self.drawLedit('Add file to Dockerfiles',layout=layout,addBrowseButton=True, fileType=None)
-        self.drawLedit('Add directory to Dockerfiles',layout=layout,addBrowseButton=True, fileType='Directory')
-        labelTextBox=self.makeTextBox(pname,label='Enter Docker build command:')
-        self.initAllStates(pname,labelTextBox)
-        labelTextBox.textBox.textChanged.connect(lambda: self.updateAllStates(pname,labelTextBox,labelTextBox.getState()))
-        layout.addWidget(labelTextBox.label,layout.nextRow,0)
-        layout.addWidget(labelTextBox.textBox,layout.nextRow,1,1,4)
-        layout.nextRow = layout.nextRow + 1
+        css = '''
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
+        QPushButton:pressed { background-color: #158805; border-style: inset;}
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
+        QPushButton:hover {background-color: #1588f5; }
+        '''
+        #self.drawLedit('Add file to Dockerfiles',layout=layout,addBrowseButton=True, fileType=None)
+        #self.drawLedit('Add directory to Dockerfiles',layout=layout,addBrowseButton=True, fileType='Directory')
+        addDateCb=self.makeCheckBox ('addBuildDate','Add date to docker tag',default=True,persist=True,track=True)
+        containerIDLabel=QtGui.QLabel('Container ID: {}'.format(self.containerID))
+        imageBuilderLabel=QtGui.QLabel('Launch Image Builder')
+        imageBuilderBtn = gui.button(None, self, "Launch", callback=self.startImageBuilder)
+        imageBuilderBtn.setStyleSheet(css)
+        imageBuilderBtn.setFixedSize(80,20)
+        updateLabel=QtGui.QLabel('Import Dockerfiles directory')
+        updateBtn = gui.button(None, self, "Import", callback=self.updateDockerfiles)
+        updateBtn.setStyleSheet(css)
+        updateBtn.setFixedSize(80,20)        
+        buildCommandBox=self.makeTextBox(pname,label='Docker build command:')
+        self.initAllStates(pname,buildCommandBox)
+        buildCommandBox.textBox.textChanged.connect(lambda: self.updateAllStates(pname,buildCommandBox,buildCommandBox.getState()))
+        layout.addWidget(updateLabel,layout.nextRow,0)
+        layout.addWidget(updateBtn,layout.nextRow,1)
+        layout.addWidget(imageBuilderLabel,layout.nextRow+1,0)
+        layout.addWidget(imageBuilderBtn,layout.nextRow+1,1)
+        layout.addWidget(addDateCb,layout.nextRow+2,0)
+        layout.addWidget(containerIDLabel,layout.nextRow+3,0)
+        layout.addWidget(addDateCb,layout.nextRow+4,0)
+        layout.addWidget(buildCommandBox.label,layout.nextRow+5,0)
+        layout.addWidget(buildCommandBox.textBox,layout.nextRow+5,1,1,4)
+    def startImageBuilder(self):
+        widget=OWImageBuilder.OWImageBuilder()
+        widget.showNormal()
+        widget.raise_()
+        widget.activateWindow()
         
+    def updateDockerfiles(self):
+        pass
     def makeTextBox(self,attr,label):
         box=QHBoxLayout()
         textLabel=None
