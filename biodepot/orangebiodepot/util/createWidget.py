@@ -84,23 +84,25 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
             priority=data['priority']
         f.write('    priority = {}\n'.format(priority))
         iconFile=data['icon']
-        if not iconFile or not os.path.exists(iconFile):
-            iconFile=None
-            #check if icon file exists in input Path or in the widgets directory
-            for path in [inputPath +"/icon",'/widgets/' + widgetName + '/icon']:
-                if os.path.exists(path):
-                    iconFiles=[f for f in listdir(path) if isfile(join(oath, f))]
-                    if iconFiles:
-                        iconFile=iconFiles[0]
-                        break
-            if not iconFile:
-                iconFile=defaultIconFile
         os.system("mkdir -p {}/icon".format(widgetPath))
-        copyfile(iconFile,widgetPath+'/icon/'+ os.path.basename(iconFile))
+        if iconFile and os.path.exists(iconFile):
+            os.system("rm {}/icon/* ".format(widgetPath))
+            copyfile(iconFile,inputPath+'/icon/')
+        else:
+            icons=os.listdir(inputPath+'/icon')
+            iconFile=os.path.basename(defaultIconFile)
+            if not icons:
+                copyfile(defaultIconFile,inputPath+'/icon/')
+            else:
+                iconFile=icons[0]
         finalIconFile = '/widgets/' + widgetName + '/icon/' + os.path.basename(iconFile)
         f.write('    icon = "{}"\n'.format(finalIconFile))
         f.write('    want_main_area = False\n')
+        if not 'docker_image_name' in data:
+            data['docker_image_name']='biodepot/alpine-bash'
         f.write('    docker_image_name = "{}"\n'.format(data['docker_image_name']))
+        if not'docker_image_tag' in data:
+            data['docker_image_tag'] = 'latest'
         f.write('    docker_image_tag = "{}"\n'.format(data['docker_image_tag']))
         #inputs and outputs
         if 'inputs' in data and data['inputs']:
@@ -199,7 +201,8 @@ def mergeWidget(inputJson,outputWidget,widgetName,inputData=None):
         inputJson=os.path.splitext(outputWidget)[0]+'.json'
         with open(inputJson,"w") as f:
             f.write(dataJ)
-    directory=checkCategory(data['category']) 
+    directory=checkCategory(data['category'])
+    inputPath=os.path.dirname(os.path.realpath(inputJson))
     #updates the python file up to the first def command
     #split the python file into 3
     beforeClass=[]
@@ -228,22 +231,24 @@ def mergeWidget(inputJson,outputWidget,widgetName,inputData=None):
         priority=data['priority']
     fwrite(afterClass,"\s+priority =",'    priority = {}\n'.format(priority))
     iconFile=data['icon']
-    if not iconFile or not os.path.exists(iconFile):
-        iconFile=None
-        #check if icon file exists in input Path or in the widgets directory
-        for path in [inputPath +"/icon",'/widgets/' + widgetName + '/icon']:
-            if os.path.exists(path):
-                iconFiles=[f for f in listdir(path) if isfile(join(oath, f))]
-                if iconFiles:
-                    iconFile=iconFiles[0]
-                    break
-        if not iconFile:
-            iconFile=defaultIconFile
     os.system("mkdir -p {}/icon".format(widgetPath))
-    copyfile(iconFile,widgetPath+'/icon/'+ os.path.basename(iconFile))
+    if iconFile and os.path.exists(iconFile):
+        os.system("rm {}/icon/* ".format(widgetPath))
+        copyfile(iconFile,inputPath+'/icon/')
+    else:
+        icons=os.listdir(inputPath+'/icon')
+        iconFile=os.path.basename(defaultIconFile)
+        if not icons:
+            copyfile(defaultIconFile,inputPath+'/icon/')
+        else:
+            iconFile=icons[0]
     finalIconFile = '/widgets/' + widgetName + '/icon/' + os.path.basename(iconFile)
     fwrite(afterClass,"\s+icon =",'    icon = "{}"\n'.format(finalIconFile))
     fwrite(afterClass,"\s+want_main_area =",'    want_main_area = False\n')
+    if not 'docker_image_name' in data:
+        data['docker_image_name']='biodepot/alpine-bash'
+    if not'docker_image_tag' in data:
+        data['docker_image_tag'] = 'latest'
     fwrite(afterClass,"\s+docker_image_name =",'    docker_image_name = "{}"\n'.format(data['docker_image_name']))
     fwrite(afterClass,"\s+docker_image_tag =",'    docker_image_tag = "{}"\n'.format(data['docker_image_tag']))
     #inputs and outputs

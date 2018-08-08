@@ -6,6 +6,7 @@ import jsonpickle
 import pickle
 import csv
 from pathlib import Path
+from shutil import copyfile
 from orangebiodepot.util.createWidget import mergeWidget, createWidget, findDirectory, findIconFile
 from copy import deepcopy
 from collections import OrderedDict
@@ -22,6 +23,7 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
+defaultIconFile='/biodepot/Bwb_core/icons/default.png'
 class tabbedWindow(QTabWidget):
     def __init__(self, parent = None):
         super(tabbedWindow, self).__init__(parent)
@@ -190,6 +192,7 @@ class OWWidgetBuilder(widget.OWWidget):
         # self.saveJsonBtn = gui.button(None, self, "Save json", callback=self.saveJson)
         # self.saveJsonBtn.setStyleSheet(css)
         # self.saveJsonBtn.setFixedSize(80,20)
+
         self.saveWidgetBtn = gui.button(None, self, "Save", callback=self.saveWidget)
         self.saveWidgetBtn.setStyleSheet(css)
         self.saveWidgetBtn.setFixedSize(50,20)
@@ -206,13 +209,9 @@ class OWWidgetBuilder(widget.OWWidget):
         self.rebuildBtn.setStyleSheet(css)
         self.rebuildBtn.setFixedSize(100,20)
         #choose save mode
-        self.saveMode=QtGui.QComboBox()
-        self.saveMode.addItem('Overwrite')
-        self.saveMode.addItem('Merge')
-        self.saveMode.addItem('Data')
+
         saveLabel=QtGui.QLabel('Save mode:')
         saveLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        
         box=QtGui.QHBoxLayout()
         box.addWidget(saveLabel)
         box.addWidget(self.saveMode)
@@ -224,6 +223,9 @@ class OWWidgetBuilder(widget.OWWidget):
         box.addStretch(1)
         layout.addLayout(box)
 
+    def onSaveModeChange(self,widget):
+        self.saveModeIndex=widget.currentIndex()
+        self.allAttrs['saveModeIndex']=self.saveModeIndex
         
     def loadWidget(self,loadWidgetDir=None):
         if self.widgetDir:
@@ -238,7 +240,8 @@ class OWWidgetBuilder(widget.OWWidget):
             allStatesFile="{}/{}.states".format(loadWidgetDir,widgetName)
             self.allAttrs=self.unPickleData(allAttrsFile)
             self.allStates=self.unPickleData(allStatesFile)
-            self.widgetDir=loadWidgetDir
+            #we need to make default files in case the default files change from versions
+            self.makeDefaultFiles()
             if self.isDrawn:
                 self.updateWidget()
             else:
@@ -276,7 +279,8 @@ class OWWidgetBuilder(widget.OWWidget):
         self.saveWidgetBtn.setEnabled(True)
         self.saveWidgetAsBtn.setEnabled(True)
         self.loadWidgetBtn.setEnabled(True)        
-        #self.pcconsole.close()     
+        #self.pcconsole.close()
+        
     def buildData(self):
         self.data={}
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
@@ -284,12 +288,13 @@ class OWWidgetBuilder(widget.OWWidget):
             if hasattr(self,attr):
                 self.data[attr]=deepcopy(getattr(self,attr))
         
-        #separate multiple commands
+        #separate multiple commands and give default command
         if 'command' in self.data and self.data['command']: 
             if '\n' in self.data['command']:
                 self.data['command']=self.data['command'].split('\n')
             else:
                 self.data['command']=[self.data['command']]
+
         
         #add persistance -all for now - add option to for transient data later
         self.data['persistentSettings']='all'
@@ -382,20 +387,33 @@ class OWWidgetBuilder(widget.OWWidget):
         niceName=self.widgetName
         if not niceName:
             #get a generic name if necessary
-            if 'name' in self.allAttrs or not self.allAttrs['name']:
-                self.allAttrs['name']= "generic{}".format(os.getpid())
+            if not 'name' in self.allAttrs or not self.allAttrs['name']:
+                genericName="generic{}".format(os.getpid())
                 #Clean up name and replace all runs of whitespace with a single dash     
-                niceName=re.sub(r"[^\w\s]", '',self.allAttrs['name'])
+                niceName=re.sub(r"[^\w\s]", '',genericName)
                 niceName = re.sub(r"\s+", '_', niceName)
         nameDir, okPressed = QInputDialog.getText(self, "Widget directory ","Enter widget name:", QLineEdit.Normal, niceName)
-        #get json filename
+        if okPressed:
+            niceName=re.sub(r"[^\w\s]", '',nameDir)
+            niceName = re.sub(r"\s+", '_', nameDir)
+        else:
+            return
         self.outputDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose directory to save the widget in", directory=self.defaultDir)
-        if self.outputDir:
-            if (okPressed): 
-                self.widgetName=nameDir
-                self.widgetDir=self.outputDir+'/'+ self.widgetName
-                self.pickleWidget()
-    
+        if self.outputDir and okPressed: 
+            self.widgetName=niceName
+            self.widgetDir=self.outputDir+'/'+ self.widgetName
+            self.allAttrs['name']=self.widgetName
+            self.makeDefaultFiles()
+            self.pickleWidget()
+        return
+            
+    def makeDefaultFiles(self):
+        iconDir='{}/icon'.format(self.widgetDir)
+        os.system('mkdir -p {} '.format(iconDir))
+        if not os.listdir('{}/icon'.format(self.widgetDir)):
+            copyfile(defaultIconFile,iconDir+ '/'+os.path.basename(defaultIconFile))
+        os.system('mkdir -p {}/Dockerfiles'.format(self.widgetDir))
+        
     def pickleWidget(self):
         self.buildData()
         Path(self.widgetDir).mkdir(parents=True,exist_ok=True)
@@ -458,6 +476,7 @@ class OWWidgetBuilder(widget.OWWidget):
         QPushButton:pressed { background-color: #158805; border-style: inset;}       QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
         QPushButton:hover {background-color: #1588f5; }
         '''  
+        
         self.setStyleSheet(css)
         self.browseIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/bluefile.png')
         self.addIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/add.png')
@@ -470,6 +489,14 @@ class OWWidgetBuilder(widget.OWWidget):
         self.widgetName=None
         self.widgetDir=None
         self.isDrawn=False
+        #need save mode right at beginning
+        self.saveMode=QtGui.QComboBox()
+        self.saveMode.addItem('Overwrite')
+        self.saveMode.addItem('Merge')
+        self.saveMode.addItem('Data')
+        self.saveModeIndex=0
+        self.saveMode.setCurrentIndex=self.saveModeIndex 
+        self.saveMode.currentIndexChanged.connect(lambda: self.onSaveModeChange(self.saveMode))
         sys.stderr.write('widgetID is {}\n'.format(widgetID))
         if widgetID:
             #widgetID is given when this is called from menu and not the initial widget builder
@@ -480,9 +507,15 @@ class OWWidgetBuilder(widget.OWWidget):
             self.widgetDir='/widgets/{}'.format(self.widgetName)
             sys.stderr.write('widgetDir is {} widgetName is {}\n'.format(self.widgetDir,self.widgetName))
             self.loadWidget(loadWidgetDir=self.widgetDir)
+            if 'saveModeIndex' in self.allAttrs:
+                self.saveModeIndex=self.allAttrs['saveModeIndex']
+            self.saveMode.setCurrentIndex=self.saveModeIndex 
         else:
+            self.saveWidget()
+            if not self.widgetName or not self.widgetDir:
+                return
             self.startWidget()
-        
+    
     def clearLayout(self,layout):
         while layout.count():
             child = layout.takeAt(0)
@@ -490,17 +523,20 @@ class OWWidgetBuilder(widget.OWWidget):
                 child.widget().deleteLater()
     
     def startWidget(self):
+        self.isDrawn=True
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
-                     'priority','icon','inputs','outputs','volumes','parameters','command','autoMap','container'):
+                     'priority','icon','inputs','outputs','volumes','parameters','command','autoMap','buildCommand','saveModeIndex'):
             if attr in self.allAttrs:
                 setattr(self,attr,self.allAttrs[attr])
             else:
                 setattr(self,attr,None)
-                self.allAttrs[attr]=None     
+                self.allAttrs[attr]=None
         self.tabs = tabbedWindow()
         self.controlArea.layout().addWidget(self.tabs)
         self.setStyleSheet(":disabled { color: #282828}")
-        self.isDrawn=True
+        
+        
+        
         #self.clearLayout(self.controlArea.layout())
         #self.controlArea.layout().addWidget(self.scroll_area)
         
@@ -509,7 +545,9 @@ class OWWidgetBuilder(widget.OWWidget):
         #requiredBox = gui.widgetBox(self.generalBox, "Widget entries")
         #draw Ledits for the frequired elements
         leditGeneralLayout=self.tabs.add('General')
-        for pname in ['name','description','category','docker_image_name','docker_image_tag']:
+        nameLabel=QtGui.QLabel('Name: '+self.widgetName)
+        leditGeneralLayout.addWidget(nameLabel)
+        for pname in ['description','category','docker_image_name','docker_image_tag']:
             self.drawLedit(pname,layout=leditGeneralLayout)
         self.drawLedit('priority',layout=leditGeneralLayout)
         #file entry for icon
@@ -525,7 +563,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.drawVolumeListWidget('volumes',layout=self.tabs.add('Volumes'))
         self.drawParamsListWidget('parameters',layout=self.tabs.add('Parameters'))
         self.drawCommand('command',layout=self.tabs.add('Command'))
-        self.drawContainer('container',layout=self.tabs.add('Container'))
+        self.drawDocker('buildCommand',layout=self.tabs.add('Docker'))
         self.drawExec(self.controlArea.layout())
     
     def updateWidget(self):
@@ -620,10 +658,13 @@ class OWWidgetBuilder(widget.OWWidget):
         layout.addWidget(labelTextBox.textBox,layout.nextRow,1,1,4)
         layout.nextRow = layout.nextRow + 1
         
-    def drawContainer(self,pname,layout=None):
-        labelTextBox=self.makeTextBox(pname,label='Enter buildCommand:')
+    def drawDocker(self,pname,layout=None):
+        self.drawLedit('Add file to Dockerfiles',layout=layout,addBrowseButton=True, fileType=None)
+        self.drawLedit('Add directory to Dockerfiles',layout=layout,addBrowseButton=True, fileType='Directory')
+        labelTextBox=self.makeTextBox(pname,label='Enter Docker build command:')
         self.initAllStates(pname,labelTextBox)
         labelTextBox.textBox.textChanged.connect(lambda: self.updateAllStates(pname,labelTextBox,labelTextBox.getState()))
+        layout.addWidget(labelTextBox.label,layout.nextRow,0)
         layout.addWidget(labelTextBox.textBox,layout.nextRow,1,1,4)
         layout.nextRow = layout.nextRow + 1
         
@@ -985,7 +1026,7 @@ class OWWidgetBuilder(widget.OWWidget):
                    ]
         self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
 
-    def drawLedit(self,pname,layout=None,addBrowseButton=False,fileType=None):
+    def drawLedit(self,pname,layout=None,addBrowseButton=False,fileType=None, callback=None):
         #make labeledLedit combo layout
         labelLedit=self.makeLedit(pname,'Enter '+ pname, label=pname+':')
         self.initAllStates(pname,labelLedit)
@@ -993,7 +1034,9 @@ class OWWidgetBuilder(widget.OWWidget):
         layout.addWidget(labelLedit.label,layout.nextRow,0)
         if addBrowseButton:
             layout.addWidget(labelLedit.ledit,layout.nextRow,1,1,1)
-            button=gui.button(None, self, "", callback= lambda : self.browseFileDir(pname,ledit=labelLedit.ledit,fileType=fileType),autoDefault=True, width=19, height=19)
+            if callback is None:
+                callback=self.browseFileDir
+            button=gui.button(None, self, "", callback= lambda : callback(pname,ledit=labelLedit.ledit,fileType=fileType),autoDefault=True, width=19, height=19)
             button.setIcon(self.browseIcon)
             layout.addWidget(button,layout.nextRow,2)
         else:
