@@ -4,7 +4,7 @@ Orange Canvas Main Window
 """
 import os
 import sys
-sys.path.append('/biodepot/Bwb_core')
+sys.path.append('/coreutils')
 import OWWidgetBuilder
 #import workflowList
 import logging

@@ -231,11 +231,11 @@ class OWWidgetBuilder(widget.OWWidget):
         self.saveModeIndex=widget.currentIndex()
         self.allAttrs['saveModeIndex']=self.saveModeIndex
         
-    def loadWidget(self,loadWidgetDir=None):
+    def loadWidget(self,loadWidgetDir=None,loadNameCheck=True):
         if self.widgetDir:
             startDir=self.widgetDir
         else:
-            startDir=self.defaultDir
+            startDir='/templates/Generic'
         if not loadWidgetDir:
             loadWidgetDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose widget to load", directory=startDir)
         if loadWidgetDir:
@@ -247,7 +247,8 @@ class OWWidgetBuilder(widget.OWWidget):
             if os.path.exists(allStatesFile):
                 self.allStates=self.unPickleData(allStatesFile)
             #we need to make default files in case the default files change from versions
-            self.widgetName=self.getWidgetName()
+            if loadNameCheck or not self.widgetName:
+                self.widgetName=self.getWidgetName()
             self.makeDefaultFiles()
             if not self.widgetName:
                 return
@@ -423,6 +424,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.widgetName=self.getWidgetName()
         if not self.widgetName:
             return
+        oldWidgetName=self.widgetName
         self.widgetName=self.getWidgetName()
         self.outputDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose directory to save the widget in", directory=self.defaultDir)
         if self.outputDir: 
@@ -430,6 +432,7 @@ class OWWidgetBuilder(widget.OWWidget):
             self.allAttrs['name']=self.widgetName
             self.makeDefaultFiles()
             self.pickleWidget()
+            
             title='Save {}'.format(self.widgetName)
             message='Saved widget to {}'.format(self.widgetDir)
             QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
@@ -531,11 +534,8 @@ class OWWidgetBuilder(widget.OWWidget):
             #widgetID is given when this is called from menu and not the initial widget builder
             if widgetID == 'New':
                 tmp = tempfile.mkdtemp()
-                os.system('cp -r /templates/Generic {}'.format(tmp))
-                self.widgetName='Generic'
+                self.loadWidget()
                 self.setWindowTitle(self.widgetName+':Definition')
-                self.widgetDir='{}/{}'.format(tmp,self.widgetName)
-                self.loadWidget(loadWidgetDir=self.widgetDir)
             else:
                 widgetSplit=widgetID.split('.')
                 widgetSplit[-1]=widgetSplit[-1][2:]
@@ -543,7 +543,7 @@ class OWWidgetBuilder(widget.OWWidget):
                 self.setWindowTitle(self.widgetName+':Definition')
                 self.widgetDir='/widgets/{}'.format(self.widgetName)
                 sys.stderr.write('widgetDir is {} widgetName is {}\n'.format(self.widgetDir,self.widgetName))
-                self.loadWidget(loadWidgetDir=self.widgetDir)
+                self.loadWidget(loadWidgetDir=self.widgetDir,loadNameCheck=False)
                 if 'saveModeIndex' in self.allAttrs:
                     self.saveModeIndex=self.allAttrs['saveModeIndex']
                 self.saveMode.setCurrentIndex=self.saveModeIndex 
@@ -561,6 +561,12 @@ class OWWidgetBuilder(widget.OWWidget):
             if not self.isDrawn:
                 self.startWidget()
     
+    def syncNames(self,oldName):
+        for myType in ('attrs','states','json','py'):
+            oldFile='{}/{}.{}'.format(self.widgetDir,oldName,myType)
+            if os.path_exists(oldFile):
+                os.system('mv {} []/{}.{}'.format(oldFile,self.widgetName,myType))
+        
     def clearLayout(self,layout):
         while layout.count():
             child = layout.takeAt(0)
