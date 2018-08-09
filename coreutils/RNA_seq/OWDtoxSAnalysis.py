@@ -1,0 +1,1 @@
+../../widgets/DtoxSAnalysis/DtoxSAnalysis.py

@@ -13,6 +13,7 @@ import unicodedata
 import copy
 import os.path
 
+
 from operator import attrgetter
 from urllib.parse import urlencode
 
@@ -45,7 +46,7 @@ from ..canvas import items
 from . import interactions
 from . import commands
 from . import quickmenu
-from . import OWWidgetBuilder
+sys.path.append('/coreutils/OWWidgetBuilder')
 
 log = logging.getLogger(__name__)
 
@@ -286,7 +287,7 @@ class SchemeEditWidget(QWidget):
                     objectName="edit-widget",
                     toolTip=self.tr("Edit the widget"),
                     triggered=self.editWidget,
-                    enabled=False)
+                    enabled=True)
                     
         # self.__editToolBoxAction = \
             # QAction(self.tr("Edit ToolBox"), self,
@@ -1498,8 +1499,14 @@ class SchemeEditWidget(QWidget):
         Check that only one widget is selected - if so then edit it
         """
         selected = self.selectedNodes()
-        if len(selected) == 1:
+        if not selected or len(selected) == 0:
+            widget=OWWWidgetBuilder.OWWidgetBuilder(widgetID='New')
+            widget.showNormal()
+            widget.raise_()
+            widget.activateWindow()
+        elif len(selected) == 1:
             self.__editSelectedWidget(selected[0])
+
             
     def __editSelectedWidget(self, node):
         myWidget = self.scheme().widget_for_node(node)

@@ -1,0 +1,1 @@
+../../widgets/DtoxSAlignment/DtoxSAlignment.py

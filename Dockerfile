@@ -109,6 +109,7 @@ RUN ln -s /biodepot/Bwb_core/OWWidgetBuilder.py /orange3/Orange/canvas/document/
 ADD widgets /widgets/
 ADD workflows /workflows/
 ADD notebooks /notebooks/
+ADD templates /templates/
 
 #start it up
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf

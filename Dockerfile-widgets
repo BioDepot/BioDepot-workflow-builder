@@ -113,6 +113,7 @@ COPY orangePatches/signalmanager.py /orange3/Orange/canvas/scheme/signalmanager.
 ADD widgets /widgets/
 ADD workflows /workflows/
 ADD notebooks /notebooks/
+ADD templates /templates/
 
 #Add widget creator
 RUN ln -s /biodepot/orangebiodepot/util/createWidget /usr/bin/createWidget

@@ -1,0 +1,1 @@
+../../widgets/fastqDump/fastqDump.py
