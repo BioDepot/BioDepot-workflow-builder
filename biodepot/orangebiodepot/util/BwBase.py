@@ -1225,7 +1225,7 @@ class OWBwBWidget(widget.OWWidget):
             if lastExecutable:
                 for flag in flags:
                     if flag not in varSeen:
-                        cmdStr+=flag + ' '
+                        cmdStr+=str(flag) + ' '
                 for arg in args:
                     if arg not in varSeen:
                         cmdStr+= str(arg) + ' '
