@@ -1,1 +1,0 @@
-../../widgets/startodeseq2/startodeseq2.py

@@ -1,1 +1,0 @@
-../../widgets/sleuth/sleuth.py

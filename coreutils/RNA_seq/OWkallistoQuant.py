@@ -1,1 +1,0 @@
-../../widgets/kallistoQuant/kallistoQuant.py

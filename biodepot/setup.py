@@ -1,10 +1,4 @@
 from setuptools import setup
-setup(name="Bwb_core",
-      packages=["Bwb_core"],
-      package_data={"Bwb_core": ["icons/*.svg"]},
-      classifiers=["Example :: Invalid"],
-      entry_points={"orange.widgets": "Bwb-core = Bwb_core"},
-      )
 setup(name="RNA-seq",
       packages=["RNA_seq"],
       package_data={"RNA_seq": ["icons/*.svg"]},

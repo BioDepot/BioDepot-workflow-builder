@@ -1,3 +1,0 @@
-[orange.widgets]
-RNA-seq = RNA_seq
-

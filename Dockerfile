@@ -110,6 +110,7 @@ ADD widgets /widgets/
 ADD workflows /workflows/
 ADD notebooks /notebooks/
 ADD templates /templates/
+ADD coreutils /coreutils/
 
 #start it up
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf

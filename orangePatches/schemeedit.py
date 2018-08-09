@@ -46,7 +46,8 @@ from ..canvas import items
 from . import interactions
 from . import commands
 from . import quickmenu
-sys.path.append('/coreutils/OWWidgetBuilder')
+sys.path.append('/coreutils')
+import OWWidgetBuilder
 
 log = logging.getLogger(__name__)
 
@@ -1500,7 +1501,7 @@ class SchemeEditWidget(QWidget):
         """
         selected = self.selectedNodes()
         if not selected or len(selected) == 0:
-            widget=OWWWidgetBuilder.OWWidgetBuilder(widgetID='New')
+            widget=OWWidgetBuilder.OWWidgetBuilder(widgetID='New')
             widget.showNormal()
             widget.raise_()
             widget.activateWindow()

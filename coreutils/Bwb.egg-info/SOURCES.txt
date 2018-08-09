@@ -1,5 +1,0 @@
-Bwb.egg-info/PKG-INFO
-Bwb.egg-info/SOURCES.txt
-Bwb.egg-info/dependency_links.txt
-Bwb.egg-info/entry_points.txt
-Bwb.egg-info/top_level.txt

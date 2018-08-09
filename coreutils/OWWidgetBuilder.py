@@ -266,13 +266,13 @@ class OWWidgetBuilder(widget.OWWidget):
                 niceName="generic{}".format(os.getpid())
             niceName =re.sub(r"[^\w\s]", '',niceName)
             niceName = re.sub(r"\s+", '_', niceName)
-            nameDir, okPressed = QInputDialog.getText(self, "Widget Name ","Enter widget name:", QLineEdit.Normal,niceName)
-            if okPressed and nameDir:
-                niceName=re.sub(r"[^\w\s]", '',nameDir)
-                niceName = re.sub(r"\s+", '_', nameDir)
-            else:
+        nameDir, okPressed = QInputDialog.getText(self, "Widget Name ","Enter widget name:", QLineEdit.Normal,niceName)
+        if okPressed and nameDir:
+            niceName=re.sub(r"[^\w\s]", '',nameDir)
+            niceName = re.sub(r"\s+", '_', nameDir)
+        else:
                 #return what we started with
-                return self.widgetName
+            return self.widgetName
         return niceName
     
     def rebuildWidget(self):
@@ -423,6 +423,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.widgetName=self.getWidgetName()
         if not self.widgetName:
             return
+        self.widgetName=self.getWidgetName()
         self.outputDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose directory to save the widget in", directory=self.defaultDir)
         if self.outputDir: 
             self.widgetDir=self.outputDir+'/'+ self.widgetName

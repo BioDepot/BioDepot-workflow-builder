@@ -114,6 +114,7 @@ ADD widgets /widgets/
 ADD workflows /workflows/
 ADD notebooks /notebooks/
 ADD templates /templates/
+ADD coreutils /coreutils/
 
 #Add widget creator
 RUN ln -s /biodepot/orangebiodepot/util/createWidget /usr/bin/createWidget
