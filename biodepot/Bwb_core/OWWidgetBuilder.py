@@ -156,8 +156,10 @@ class OWWidgetBuilder(widget.OWWidget):
     want_control_area = True
     allStates=pset({})
     allAttrs=pset({})
+    data={}
     
     def register(self,widgetPath,widgetName):
+        sys.stderr.write('register with path {} name {}\n'.format(widgetPath,widgetName))
         jsonFile="{}/{}.json".format(widgetPath,widgetName)
         directory=findDirectory(jsonFile)
         destPath='/widgets/{}'.format(widgetName);
@@ -243,6 +245,21 @@ class OWWidgetBuilder(widget.OWWidget):
             self.allStates=self.unPickleData(allStatesFile)
             #we need to make default files in case the default files change from versions
             self.makeDefaultFiles()
+            if not self.widgetName:
+                nameDir, okPressed = QInputDialog.getText(self, "Widget directory ","Enter widget name:", QLineEdit.Normal, "")
+                if okPressed and nameDir:
+                    niceName=re.sub(r"[^\w\s]", '',nameDir)
+                    niceName = re.sub(r"\s+", '_', nameDir)
+                    self.widgetName=niceName
+                else:
+                    return
+            else:
+                if self.isDrawn:
+                    self.updateWidget()
+                else:
+                    self.startWidget()
+        else:
+            return
             if self.isDrawn:
                 self.updateWidget()
             else:
@@ -283,48 +300,52 @@ class OWWidgetBuilder(widget.OWWidget):
         #self.pcconsole.close()
         
     def buildData(self):
-        self.data={}
+        myData={}
+        self.data['name']=self.widgetName
+        if 'category' not in self.data:
+            self.data['category']='User'
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
             'priority','icon','inputs','outputs','volumes','parameters','command','autoMap'):
-            if hasattr(self,attr):
-                self.data[attr]=deepcopy(getattr(self,attr))
-        
-        #separate multiple commands and give default command
-        if 'command' in self.data and self.data['command']: 
-            if '\n' in self.data['command']:
-                self.data['command']=self.data['command'].split('\n')
+            if attr in self.data and self.data[attr]:
+                myData[attr]=deepcopy(self.data[attr])
             else:
-                self.data['command']=[self.data['command']]
+                myData[attr]=None
+        #separate multiple commands and give default command
+        if 'command' in myData and myData['command']: 
+            if '\n' in myData['command']:
+                myData['command']=myData['command'].split('\n')
+            else:
+                myData['command']=[myData['command']]
 
         
         #add persistance -all for now - add option to for transient data later
-        self.data['persistentSettings']='all'
+        myData['persistentSettings']='all'
         
         #add required elements
         reqList=[]
-        if 'parameters' in self.data and self.data['parameters']:
-            for pname,pvalue in self.data['parameters'].items():
+        if 'parameters' in myData and myData['parameters']:
+            for pname,pvalue in myData['parameters'].items():
                 if not pvalue['optional']:
                     reqList.append(pname)
-        self.data['requiredParameters']=reqList
+        myData['requiredParameters']=reqList
         #add volume mappings
-        if 'volumes' in self.data and self.data['volumes']:
+        if 'volumes' in myData and myData['volumes']:
             myMappings=[]
-            for attr, volume in self.data['volumes'].items():
+            for attr, volume in myData['volumes'].items():
                 myMappings.append({'conVolume':volume['containerVolume'], 'attr' : attr})
-            self.data['volumeMappings']=myMappings
-            self.data.pop('volumes',None)
+            myData['volumeMappings']=myMappings
+            myData.pop('volumes',None)
         #replace text str with type(str)
         for pname in ('inputs','outputs'):
-            if pname in self.data and self.data[pname]:
-                for key, myDict in self.data[pname].items():
+            if pname in myData and myData[pname]:
+                for key, myDict in myData[pname].items():
                     if myDict['type'] == 'str':
                         myDict['type'] = type('str')
 
         #for now just keep default, flags, 
         #also make all defaults false for booleans - will fix these kluges after cleaning up BwBase code
-        if 'parameters' in self.data and self.data['parameters']:
-            for key, myDict in self.data['parameters'].items():
+        if 'parameters' in myData and myData['parameters']:
+            for key, myDict in myData['parameters'].items():
                 newDict={}
                 
                 if  'default' in myDict and myDict['default'] is not None:
@@ -366,11 +387,12 @@ class OWWidgetBuilder(widget.OWWidget):
                     newDict['type']=myDict['type']
                 if 'env' in myDict and myDict['env']:
                     newDict['env']=myDict['env']
-                self.data['parameters'][key]=newDict 
+                myData['parameters'][key]=newDict
+        return myData
     def saveJson(self):
-        self.buildData()
+        myData=self.buildData()
         #get json filename
-        dataJ=jsonpickle.encode(self.data)
+        dataJ=jsonpickle.encode(myData)
         jSaveFile=QtWidgets.QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","All Files (*);;json Files (*.json)")[0]
         if jSaveFile:
             sys.stderr.write('save file is {}\n'.format(jSaveFile))
@@ -416,16 +438,16 @@ class OWWidgetBuilder(widget.OWWidget):
         os.system('mkdir -p {}/Dockerfiles'.format(self.widgetDir))
         
     def pickleWidget(self):
-        self.buildData()
+        myData=self.buildData()
         Path(self.widgetDir).mkdir(parents=True,exist_ok=True)
         outputWidget="{}/{}.py".format(self.widgetDir,self.widgetName)
         #check if data only
         if self.saveMode.currentIndex() < 2:
             if self.saveMode.currentIndex() == 1:
                 #merg
-                mergeWidget(None,outputWidget,self.widgetName,inputData=self.data)
+                mergeWidget(None,outputWidget,self.widgetName,inputData=myData)
             else:
-                createWidget(None,outputWidget,self.widgetName,inputData=self.data)
+                createWidget(None,outputWidget,self.widgetName,inputData=myData)
         allStatesFile="{}/{}.states".format(self.widgetDir,self.widgetName)
         allAttrsFile="{}/{}.attrs".format(self.widgetDir,self.widgetName)
         self.pickleData(self.allStates,allStatesFile)
@@ -513,10 +535,16 @@ class OWWidgetBuilder(widget.OWWidget):
                 self.saveModeIndex=self.allAttrs['saveModeIndex']
             self.saveMode.setCurrentIndex=self.saveModeIndex 
         else:
+            flags = QtGui.QMessageBox.Yes 
+            flags |= QtGui.QMessageBox.No
+            loadFlag= QtGui.QMessageBox.question(self, "Create new widget","Use existing file as template?",flags)
+            if loadFlag == QtGui.QMessageBox.Yes:
+                self.loadWidget()
             self.saveWidget()
             if not self.widgetName or not self.widgetDir:
                 return
-            self.startWidget()
+            if not self.isDrawn:
+                self.startWidget()
     
     def clearLayout(self,layout):
         while layout.count():
@@ -529,9 +557,9 @@ class OWWidgetBuilder(widget.OWWidget):
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
                      'priority','icon','inputs','outputs','volumes','parameters','command','autoMap','buildCommand','saveModeIndex'):
             if attr in self.allAttrs:
-                setattr(self,attr,self.allAttrs[attr])
+                self.data[attr]=self.allAttrs[attr]
             else:
-                setattr(self,attr,None)
+                self.data[attr]=None
                 self.allAttrs[attr]=None
         self.tabs = tabbedWindow()
         self.controlArea.layout().addWidget(self.tabs)
@@ -609,10 +637,10 @@ class OWWidgetBuilder(widget.OWWidget):
             sys.stderr.write('append state {} value {}\n'.format(state,qWidgetItem.getStateValue(state)))
         if serialState:
             self.allStates[pname]=serialState
-            setattr(self,pname,OrderedDict(widgetList))
+            self.data[pname]=OrderedDict(widgetList)
         else:
             self.allStates[pname]=None
-            setattr(self,pname,qWidgetItem.getStateValue(None))
+            self.data[pname]=qWidgetItem.getStateValue(None)
             
     def qwInitAllStates(self,pname,qWidgetList,qWidgetItem):
         widgetList=[]
@@ -626,9 +654,9 @@ class OWWidgetBuilder(widget.OWWidget):
                 qWidgetList.states.append(qWidgetItem.getState())
                 widgetList.append(qWidgetItem.getStateValue(serialState))
         if widgetList:
-            setattr(self,pname,OrderedDict(widgetList))
+            self.data[pname]=OrderedDict(widgetList)
         else:
-            setattr(self,pname,None)
+            self.data[pname]=None
         qWidgetItem.blankState()
     
     def onListWidgetSelect(self,qWidgetList,addBtn,removeBtn,qWidgetItem):
@@ -893,8 +921,8 @@ class OWWidgetBuilder(widget.OWWidget):
     def makeCheckBox (self, attr,label,default=False,persist=False,track=False):
         #checkbox for binary options
         #not used as part of other elements
-        if not hasattr(self,attr):
-            setattr(self,attr,default)
+        if attr not in self.data:
+            self.data[attr]=default
         checkBox=QtGui.QCheckBox(label,self)
         setattr(checkBox,'getValue',lambda : checkBox.isEnabled() and checkBox.isChecked())
         setattr(checkBox,'getStateValue',lambda state: self.getCheckBoxStateValue(checkBox,state,default))
@@ -938,8 +966,8 @@ class OWWidgetBuilder(widget.OWWidget):
     def makeListWidget(self,pname,boxEdit):
         #setup boxEdit
         #logic is handled by add remove buttons
-        if not hasattr(self,pname):
-            setattr(self,pname,None); 
+        if pname not in self.data:
+            self.data[pname]=None; 
         boxEdit=DragAndDropList(self)
         boxEdit.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
         boxEdit.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
@@ -1077,7 +1105,7 @@ class OWWidgetBuilder(widget.OWWidget):
     
     def updateAllStates(self,pname,widget,state):
         self.allStates[pname]=state
-        setattr(self,pname,widget.getStateValue(state))
+        self.data[pname]=widget.getStateValue(state)
         sys.stderr.write('updating all - pname {} state {}\n'.format(pname,state))
         
     def initAllStates(self, attr ,widget):
@@ -1086,7 +1114,7 @@ class OWWidgetBuilder(widget.OWWidget):
         else:
             widget.setState(None)
             self.allStates[attr]=widget.getState()
-        setattr(self,attr,widget.getStateValue(self.allStates[attr]))
+        self.data[attr]=widget.getStateValue(self.allStates[attr])
             
     def browseFileDir(self, attr,ledit=None,fileType=None):
         self.defaultDir = self.getDefaultDir()
@@ -1095,7 +1123,7 @@ class OWWidgetBuilder(widget.OWWidget):
         else:
             myFileDir=QtWidgets.QFileDialog.getOpenFileName(self, "Locate file", self.defaultDir)[0]
         if myFileDir:
-            setattr(self,attr,myFileDir)
+            self.data[pname]=myFileDir
             self.defaultDir=myFileDir
         if ledit:
             ledit.setText(myFileDir)

@@ -87,12 +87,12 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
         os.system("mkdir -p {}/icon".format(widgetPath))
         if iconFile and os.path.exists(iconFile):
             os.system("rm {}/icon/* ".format(widgetPath))
-            copyfile(iconFile,inputPath+'/icon/')
+            os.system("cp {} {}/icon/".format(iconFile,inputPath))
         else:
             icons=os.listdir(inputPath+'/icon')
             iconFile=os.path.basename(defaultIconFile)
             if not icons:
-                copyfile(defaultIconFile,inputPath+'/icon/')
+                os.system("cp {} {}/icon/".format(defaultIconFile,inputPath))
             else:
                 iconFile=icons[0]
         finalIconFile = '/widgets/' + widgetName + '/icon/' + os.path.basename(iconFile)
@@ -234,12 +234,12 @@ def mergeWidget(inputJson,outputWidget,widgetName,inputData=None):
     os.system("mkdir -p {}/icon".format(widgetPath))
     if iconFile and os.path.exists(iconFile):
         os.system("rm {}/icon/* ".format(widgetPath))
-        copyfile(iconFile,inputPath+'/icon/')
+        os.system("cp {} {}/icon/".format(iconFile,inputPath))
     else:
         icons=os.listdir(inputPath+'/icon')
         iconFile=os.path.basename(defaultIconFile)
         if not icons:
-            copyfile(defaultIconFile,inputPath+'/icon/')
+            os.system("cp {} {}/icon/".format(defaultIconFile,inputPath))
         else:
             iconFile=icons[0]
     finalIconFile = '/widgets/' + widgetName + '/icon/' + os.path.basename(iconFile)
