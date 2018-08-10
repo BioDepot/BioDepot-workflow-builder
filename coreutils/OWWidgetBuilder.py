@@ -179,10 +179,10 @@ class OWWidgetBuilder(widget.OWWidget):
         
     def drawExec(self, layout=None):
         css = '''
-        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
-        QPushButton:pressed { background-color: #158805; border-style: inset;}
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: #1555f5; }
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
-        QPushButton:hover {background-color: #1588f5; }
         '''
         #pname='github'
         #githubLedit=self.makeLedit(pname,'Enter directory', label='Bwb directory:')
@@ -503,12 +503,13 @@ class OWWidgetBuilder(widget.OWWidget):
     def __init__(self,widgetID=None):
         super().__init__()
         css = '''
-        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
-        QPushButton:pressed { background-color: #158805; border-style: inset;}       QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
-        QPushButton:hover {background-color: #1588f5; }
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: #1555f5; }
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
         '''  
         
-        self.setStyleSheet(css)
+        #self.setStyleSheet(css)
         self.browseIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/bluefile.png')
         self.addIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/add.png')
         self.removeIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/remove.png')
@@ -714,10 +715,10 @@ class OWWidgetBuilder(widget.OWWidget):
         
     def drawDocker(self,pname,layout=None):
         css = '''
-        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
-        QPushButton:pressed { background-color: #158805; border-style: inset;}
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: #1555f5; }
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
-        QPushButton:hover {background-color: #1588f5; }
         '''
         #self.drawLedit('Add file to Dockerfiles',layout=layout,addBrowseButton=True, fileType=None)
         #self.drawLedit('Add directory to Dockerfiles',layout=layout,addBrowseButton=True, fileType='Directory')

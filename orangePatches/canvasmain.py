@@ -5,7 +5,7 @@ Orange Canvas Main Window
 import os
 import sys
 sys.path.append('/coreutils')
-import OWWidgetBuilder
+import OWWidgetBuilder, toolDockEdit
 #import workflowList
 import logging
 import operator
@@ -821,7 +821,13 @@ class CanvasMainWindow(QMainWindow):
     def removeCategory(self):
         pass
     def addWidget(self):
-        pass
+        #widgetName=QFileDialog.getExistingDirectory(self, caption="Choose widget to add to ToolDock", directory='/widgets')
+        widget=toolDockEdit.ToolDockEdit()
+        widget.showNormal()
+        widget.raise_()
+        widget.activateWindow()
+        widget.addWidget()
+        
     def removeWidget(self):
         pass 
     def restore(self):

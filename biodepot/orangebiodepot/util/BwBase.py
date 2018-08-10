@@ -304,10 +304,10 @@ class OWBwBWidget(widget.OWWidget):
 
     def drawConsoleControl(self,box=None,layout=None):
         css = '''
-        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
-        QPushButton:pressed { background-color: #158805; border-style: inset;}
-        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
-        QPushButton:hover {background-color: #1588f5; }
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: #1555f5; }
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
         '''
         layout.addWidget(QtGui.QLabel('Console: '))
         pname='saveLog'
@@ -818,10 +818,10 @@ class OWBwBWidget(widget.OWWidget):
         myLabel=QtGui.QLabel('RunMode:')
         myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         css = '''
-        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid #1a8ac6; border-radius: 2px;}
-        QPushButton:pressed { background-color: #158805; border-style: inset;}
-        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
-        QPushButton:hover {background-color: #1588f5; }
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: #1555f5; }
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
         '''
         self.btnRun = gui.button(None, self, "Start", callback=self.onRunClicked)
         self.btnRun.setStyleSheet(css)
