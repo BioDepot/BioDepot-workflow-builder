@@ -531,42 +531,24 @@ class OWWidgetBuilder(widget.OWWidget):
         self.saveMode.setCurrentIndex=self.saveModeIndex 
         self.saveMode.currentIndexChanged.connect(lambda: self.onSaveModeChange(self.saveMode))
         sys.stderr.write('widgetID is {}\n'.format(widgetID))
-        if widgetID:
-            #widgetID is given when this is called from menu and not the initial widget builder
-            if widgetID == 'New':
-                tmp = tempfile.mkdtemp()
-                self.loadWidget()
+        if widgetID == 'New':
+            tmp = tempfile.mkdtemp()
+            self.loadWidget()
+            if self.widgetName:
                 self.setWindowTitle(self.widgetName+':Definition')
             else:
-                widgetSplit=widgetID.split('.')
-                widgetSplit[-1]=widgetSplit[-1][2:]
-                self.widgetName=widgetSplit[-1]
-                self.setWindowTitle(self.widgetName+':Definition')
-                self.widgetDir='/widgets/{}'.format(self.widgetName)
-                sys.stderr.write('widgetDir is {} widgetName is {}\n'.format(self.widgetDir,self.widgetName))
-                self.loadWidget(loadWidgetDir=self.widgetDir,loadNameCheck=False)
-                if 'saveModeIndex' in self.allAttrs:
-                    self.saveModeIndex=self.allAttrs['saveModeIndex']
-                self.saveMode.setCurrentIndex=self.saveModeIndex 
+                raise ValueError('no widget name given')
         else:
-            flags = QtGui.QMessageBox.Yes 
-            flags |= QtGui.QMessageBox.No
-            loadFlag= QtGui.QMessageBox.question(self, "Create new widget","Use existing file as template?",flags)
-            if loadFlag == QtGui.QMessageBox.Yes:
-                self.loadWidget()
-            self.saveWidget()
-            if not self.widgetName or not self.widgetDir:
-                self.widgetName="generic{}".format(os.getpid())
-                self.widgetDir='/tmp/{}'.format(self.widgetName)
+            widgetSplit=widgetID.split('.')
+            widgetSplit[-1]=widgetSplit[-1][2:]
+            self.widgetName=widgetSplit[-1]
             self.setWindowTitle(self.widgetName+':Definition')
-            if not self.isDrawn:
-                self.startWidget()
-    
-    def syncNames(self,oldName):
-        for myType in ('attrs','states','json','py'):
-            oldFile='{}/{}.{}'.format(self.widgetDir,oldName,myType)
-            if os.path_exists(oldFile):
-                os.system('mv {} []/{}.{}'.format(oldFile,self.widgetName,myType))
+            self.widgetDir='/widgets/{}'.format(self.widgetName)
+            sys.stderr.write('widgetDir is {} widgetName is {}\n'.format(self.widgetDir,self.widgetName))
+            self.loadWidget(loadWidgetDir=self.widgetDir,loadNameCheck=False)
+            if 'saveModeIndex' in self.allAttrs:
+                self.saveModeIndex=self.allAttrs['saveModeIndex']
+            self.saveMode.setCurrentIndex=self.saveModeIndex 
         
     def clearLayout(self,layout):
         while layout.count():

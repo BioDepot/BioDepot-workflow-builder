@@ -11,6 +11,8 @@ import logging
 import itertools
 import unicodedata
 import copy
+import os.path
+
 
 from operator import attrgetter
 from urllib.parse import urlencode
@@ -44,7 +46,8 @@ from ..canvas import items
 from . import interactions
 from . import commands
 from . import quickmenu
-
+sys.path.append('/coreutils')
+import OWWidgetBuilder
 
 log = logging.getLogger(__name__)
 
@@ -158,6 +161,9 @@ class SchemeEditWidget(QWidget):
         self.__widgetMenu.addSeparator()
         self.__widgetMenu.addAction(self.__renameAction)
         self.__widgetMenu.addAction(self.__removeSelectedAction)
+        self.__widgetMenu.addSeparator()
+#        self.__widgetMenu.addAction(self.__editToolBoxAction)
+        self.__widgetMenu.addAction(self.__editWidgetAction)
         self.__widgetMenu.addSeparator()
         self.__widgetMenu.addAction(self.__helpAction)
         if log.isEnabledFor(logging.DEBUG):
@@ -277,7 +283,20 @@ class SchemeEditWidget(QWidget):
                     triggered=self.removeSelected,
                     enabled=False
                     )
-
+        self.__editWidgetAction = \
+            QAction(self.tr("Edit widget"), self,
+                    objectName="edit-widget",
+                    toolTip=self.tr("Edit the widget"),
+                    triggered=self.editWidget,
+                    enabled=True)
+                    
+        # self.__editToolBoxAction = \
+            # QAction(self.tr("Edit ToolBox"), self,
+                    # objectName="edit-toolbox",
+                    # toolTip=self.tr("Edit the ToolBox"),
+                    # triggered=self.editToolBox,
+                    # enabled=True)
+                                 
         self.__showSettingsAction = \
             QAction(self.tr("Show settings"), self,
                     objectName="show-settings",
@@ -785,6 +804,7 @@ class SchemeEditWidget(QWidget):
         command = commands.RenameNodeCommand(self.__scheme, node, title)
         self.__undoStack.push(command)
 
+
     def addLink(self, link):
         """
         Add a `link` (:class:`.SchemeLink`) to the scheme.
@@ -837,6 +857,7 @@ class SchemeEditWidget(QWidget):
                     commands.RemoveAnnotationCommand(self.__scheme, annot)
                 )
         self.__undoStack.endMacro()
+        
 
     def showSettings(self):
         """
@@ -1259,7 +1280,11 @@ class SchemeEditWidget(QWidget):
         self.__renameAction.setEnabled(len(nodes) == 1)
         self.__duplicateSelectedAction.setEnabled(bool(nodes))
         self.__showSettingsAction.setEnabled(len(nodes) == 1)
-
+        if nodes and len(nodes) == 1 and self.__checkAttrsStatesFiles(nodes[0]):
+            self.__editWidgetAction.setEnabled(len(nodes) == 1)
+        else:
+            self.__editWidgetAction.setEnabled(len(nodes) == 0)
+        
         if len(nodes) > 1:
             self.__openSelectedAction.setText(self.tr("Open All"))
         else:
@@ -1277,7 +1302,10 @@ class SchemeEditWidget(QWidget):
         focus = self.focusNode()
         if focus is not None:
             desc = focus.description
-            tip = whats_this_helper(desc, include_more_link=True)
+            try:
+                tip = whats_this_helper(desc, include_more_link=True)
+            except:
+                tip =""
         else:
             tip = ""
 
@@ -1464,7 +1492,50 @@ class SchemeEditWidget(QWidget):
         selected = self.selectedNodes()
         if len(selected) == 1:
             self.editNodeTitle(selected[0])
+    def editToolBox (self):
+        pass
+            
+    def editWidget(self):
+        """
+        Check that only one widget is selected - if so then edit it
+        """
+        selected = self.selectedNodes()
+        if not selected or len(selected) == 0:
+            try:
+                widget=OWWidgetBuilder.OWWidgetBuilder(widgetID='New')
+            except ValueError:
+                return
+            widget.showNormal()
+            widget.raise_()
+            widget.activateWindow()
+        elif len(selected) == 1:
+            self.__editSelectedWidget(selected[0])
 
+            
+    def __editSelectedWidget(self, node):
+        myWidget = self.scheme().widget_for_node(node)
+        desc = myWidget.get_widget_description()
+        try:
+            widget=OWWidgetBuilder.OWWidgetBuilder(widgetID=desc['id'])
+        except ValueError:
+            return
+        widget.showNormal()
+        widget.raise_()
+        widget.activateWindow()
+
+    def __checkAttrsStatesFiles(self,node):
+        myWidget = self.scheme().widget_for_node(node)
+        desc = myWidget.get_widget_description()
+        #id field is in form of <category>.OW<widgetId>
+        widgetSplit=desc['id'].split('.')
+        widgetName=widgetSplit[-1][2:]
+        attrsFile='/widgets/{}/{}.attrs'.format(widgetName,widgetName)
+        statesFile='/widgets/{}/{}.states'.format(widgetName,widgetName)
+        
+        if os.path.isfile(attrsFile) and os.path.isfile(statesFile):
+            return True
+        return False
+              
     def __onHelpAction(self):
         """
         Help was requested for the selected widget.

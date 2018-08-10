@@ -1501,7 +1501,10 @@ class SchemeEditWidget(QWidget):
         """
         selected = self.selectedNodes()
         if not selected or len(selected) == 0:
-            widget=OWWidgetBuilder.OWWidgetBuilder(widgetID='New')
+            try:
+                widget=OWWidgetBuilder.OWWidgetBuilder(widgetID='New')
+            except ValueError:
+                return
             widget.showNormal()
             widget.raise_()
             widget.activateWindow()
@@ -1512,7 +1515,10 @@ class SchemeEditWidget(QWidget):
     def __editSelectedWidget(self, node):
         myWidget = self.scheme().widget_for_node(node)
         desc = myWidget.get_widget_description()
-        widget=OWWidgetBuilder.OWWidgetBuilder(widgetID=desc['id'])
+        try:
+            widget=OWWidgetBuilder.OWWidgetBuilder(widgetID=desc['id'])
+        except ValueError:
+            return
         widget.showNormal()
         widget.raise_()
         widget.activateWindow()
