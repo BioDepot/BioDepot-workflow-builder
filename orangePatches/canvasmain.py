@@ -820,16 +820,27 @@ class CanvasMainWindow(QMainWindow):
         pass
     def removeCategory(self):
         pass
+        
+
     def addWidget(self):
+        if not hasattr(self,'dockEdit'):
+            self.dockEdit=toolDockEdit.ToolDockEdit()
         #widgetName=QFileDialog.getExistingDirectory(self, caption="Choose widget to add to ToolDock", directory='/widgets')
-        widget=toolDockEdit.ToolDockEdit()
+        widget=self.dockEdit
         widget.showNormal()
         widget.raise_()
         widget.activateWindow()
         widget.addWidget()
-        
+
     def removeWidget(self):
-        pass 
+        if not hasattr(self,'dockEdit'):
+            self.dockEdit=toolDockEdit.ToolDockEdit()
+        widget=self.dockEdit
+        widget.showNormal()
+        widget.raise_()
+        widget.activateWindow()
+        widget.removeWidget()     
+
     def restore(self):
         """Restore the main window state from saved settings.
         """

@@ -558,10 +558,13 @@ class OWWidgetBuilder(widget.OWWidget):
             self.saveMode.setCurrentIndex=self.saveModeIndex 
         
     def clearLayout(self,layout):
-        while layout.count():
-            child = layout.takeAt(0)
-            if child.widget():
-                child.widget().deleteLater()
+        if layout != None:
+            while layout.count():
+                child = layout.takeAt(0)
+                if child.widget() is not None:
+                    child.widget().deleteLater()
+                elif child.layout() is not None:
+                    self.clearLayout(child.layout())
     
     def startWidget(self):
         self.isDrawn=True
