@@ -48,16 +48,16 @@ class ToolDockEdit(widget.OWWidget):
         css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
         QPushButton:hover {background-color: #1555f5; }
-        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset;} 
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
          
         '''  
         self.setStyleSheet(css)
-        self.browseIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/bluefile.png')
-        self.addIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/add.png')
-        self.removeIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/remove.png')
-        self.submitIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/submit.png')
-        self.reloadIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/reload.png')
+        self.browseIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/bluefile.png')
+        self.addIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/add.png')
+        self.removeIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/remove.png')
+        self.submitIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/submit.png')
+        self.reloadIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/reload.png')
         self.startWidget()
 
     
@@ -70,21 +70,38 @@ class ToolDockEdit(widget.OWWidget):
     def startWidget(self):
         self.setWindowTitle('Add Widget to Dock')
         #self.setStyleSheet(":disabled { color: #282828}")
-    def addWidget(self):
-        elements=('User','RNA_seq','Utilities','Miscellaneous')
-        cbox=self.makeComboBox('Choose category',elements)
-        ledit=self.makeLedit('Enter widget name','Choose widget')
-        addWidgetBtn = gui.button(None, self, "Add", callback=self.add)
-        addWidgetBtn.setFixedSize(30,20)
-
-        self.controlArea.layout().addLayout(ledit)
-        self.controlArea.layout().addLayout(cbox)
-        self.controlArea.layout().addWidget(addWidgetBtn)
         
-    def add(self):
-        pass
-  #workhorse widget
-    def makeLedit(self,text=None,label=None):
+    def addWidget(self):
+        categories=(str(os.popen('''grep -oP 'name="\K[^"]+' /biodepot/setup.py''').read())).split()
+        grid=QtGui.QGridLayout()
+        self.categoryValue=self.makeComboBox(grid,'Choose category:',categories)
+        self.widgetDir=self.makeLedit(grid,'Enter widget name','Choose widget:')        
+        self.controlArea.layout().addLayout(grid)
+
+    def widgetAdd(self):
+        inputDir=self.widgetDir()
+        category=self.categoryValue()
+        sys.stderr.write('input widget is {} category is {}\n'.format(inputDir,category))
+        inputName=os.path.basename(os.path.normpath(inputDir))
+        if not os.path.exists(inputDir):
+            if os.path.exists('/widgets/{}'.format(inputName)):
+            #ask if we want to overwrite
+                qm = QtGui.QMessageBox
+                ret=qm.question(self,'', "{} exists - OverWrite ?".format(inputName), qm.Yes | qm.No)
+                if ret == qm.No:
+                    return
+            #safer way of removing the widget
+                os.system("cd /widgets && rm -rf {}".format(inputName))    
+            os.system('cp -r {} /widgets/{}'.format(inputDir,inputName))
+        try:
+            os.system ("ln -sf  /widgets/{}/{}.py /biodepot/{}/OW{}.py".format(inputName,inputName,category,inputName))
+            title='Add {}'.format(inputName)
+            message='Added {} to {} in ToolDock'.format(inputName,category)
+            QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
+        except:
+            pass
+            
+    def makeLedit(self,layout,text=None,label=None):
         leditLabel=None
         if(label):
             leditLabel=QtGui.QLabel(label)
@@ -92,28 +109,35 @@ class ToolDockEdit(widget.OWWidget):
         ledit.setClearButtonEnabled(True)
         ledit.setPlaceholderText(text)
         ledit.setStyleSheet(":disabled { color: #282828}")           
-        box=QHBoxLayout()
-        if leditLabel:
-            box.addWidget(leditLabel)
-            box.addWidget(ledit)
-        setattr(box,'getValue',lambda : self.getLeditValue(ledit))
-        return box
+        button=gui.button(None, self, "",callback= lambda: self.browseWidget(ledit),autoDefault=True, width=19, height=19)
+        button.setIcon(self.browseIcon)
+        widgetAddBtn = gui.button(None, self, "Add", callback=self.widgetAdd)
+        widgetAddBtn.setFixedSize(30,20)
+        layout.addWidget(leditLabel,1,1)
+        layout.addWidget(ledit,1,2)
+        layout.addWidget(button,1,3)
+        layout.addWidget(widgetAddBtn,1,4)
+        return lambda : self.getLeditValue(ledit)
         
-
-    def makeComboBox (self,label, elements):
+    def browseWidget(self, ledit):
+        myFileDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate widget", directory='/widgets')
+        ledit.setText(myFileDir)
+            
+    def makeComboBox (self,layout,label, elements):
         comboBoxLabel=QtGui.QLabel(label)
         comboBox=QtGui.QComboBox()
         comboBox.addItems(elements)
         comboBox.currentIndex=0
-        box=QHBoxLayout()
-        box.addWidget(comboBoxLabel)
-        box.addWidget(comboBox)
-        setattr(box,'getValue',lambda : self.getComboValue(comboBox))
-        return box
+        layout.addWidget(comboBoxLabel,2,1)
+        layout.addWidget(comboBox,2,2)
+        return lambda : self.getComboValue(comboBox)
         
     def getComboValue(self,comboBox):
         if comboBox.isEnabled():
             return comboBox.currentText()  
         return None 
         
-    
+    def getLeditValue(self,ledit):
+        if ledit.isEnabled():
+            return ledit.text()
+        return None

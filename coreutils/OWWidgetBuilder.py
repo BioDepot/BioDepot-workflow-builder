@@ -164,7 +164,6 @@ class OWWidgetBuilder(widget.OWWidget):
         jsonFile="{}/{}.json".format(widgetPath,widgetName)
         directory=findDirectory(jsonFile)
         destPath='/widgets/{}'.format(widgetName);
-        
         if os.path.realpath(widgetPath) != os.path.realpath(destPath):
             #check if it exists
             if os.path.exists(destPath):
@@ -172,10 +171,18 @@ class OWWidgetBuilder(widget.OWWidget):
                 ret=qm.question(self,'', "{} exists - OverWrite ?".format(widgetName), qm.Yes | qm.No)
                 if ret == qm.No:
                     return
-                os.system("rm {} -rf ".format(destPath))    
+                os.system("cd /widgets && rm {} -rf ".format(widgetName))    
             os.system("cp -r {} {}".format(widgetPath,destPath))
+        else:
+            title='Register {}'.format(widgetName)
+            message='{} is already in {} in ToolDock'.format(widgetName,directory)
+            QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
+            return           
         #make linkages
         os.system ("ln -sf  /widgets/{}/{}.py /biodepot/{}/OW{}.py".format(widgetName,widgetName,directory,widgetName))
+        title='Register {}'.format(widgetName)
+        message='Added {} to {} in ToolDock'.format(widgetName,directory)
+        QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
         
     def drawExec(self, layout=None):
         css = '''
