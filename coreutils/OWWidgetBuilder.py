@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+sys.path.append('/coreutils')
 import json
 import jsonpickle
 import pickle
@@ -9,13 +10,13 @@ import tempfile
 import OWImageBuilder
 from pathlib import Path
 from shutil import copyfile
-from orangebiodepot.util.createWidget import mergeWidget, createWidget, findDirectory, findIconFile
+from coreutils.createWidget import mergeWidget, createWidget, findDirectory, findIconFile
 from copy import deepcopy
 from collections import OrderedDict
 from functools import partial
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
-from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
+from coreutils.DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QInputDialog, QLineEdit, QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget, QVBoxLayout, QMessageBox
 
@@ -185,7 +186,7 @@ class OWWidgetBuilder(widget.OWWidget):
         QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
         
     def drawExec(self, layout=None):
-        css = '''
+        self.css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
         QPushButton:hover {background-color: #1555f5; }
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
@@ -201,23 +202,23 @@ class OWWidgetBuilder(widget.OWWidget):
         #button.setIcon(self.browseIcon)
         #layout.addWidget(button,layout.nextRow,2)
         # self.saveJsonBtn = gui.button(None, self, "Save json", callback=self.saveJson)
-        # self.saveJsonBtn.setStyleSheet(css)
+        # self.saveJsonBtn.setStyleSheet(self.css)
         # self.saveJsonBtn.setFixedSize(80,20)
 
         self.saveWidgetBtn = gui.button(None, self, "Save", callback=self.saveWidget)
-        self.saveWidgetBtn.setStyleSheet(css)
+        self.saveWidgetBtn.setStyleSheet(self.css)
         self.saveWidgetBtn.setFixedSize(50,20)
         self.saveWidgetAsBtn = gui.button(None, self, "Save as", callback=self.saveWidgetAs)
-        self.saveWidgetAsBtn.setStyleSheet(css)
+        self.saveWidgetAsBtn.setStyleSheet(self.css)
         self.saveWidgetAsBtn.setFixedSize(70,20)
         self.loadWidgetBtn = gui.button(None, self, "Load", callback=self.loadWidget)
-        self.loadWidgetBtn.setStyleSheet(css)
+        self.loadWidgetBtn.setStyleSheet(self.css)
         self.loadWidgetBtn.setFixedSize(70,20)
         self.registerBtn = gui.button(None, self, "Register", callback=self.registerWidget)
-        self.registerBtn.setStyleSheet(css)
+        self.registerBtn.setStyleSheet(self.css)
         self.registerBtn.setFixedSize(100,20)
         self.rebuildBtn = gui.button(None, self, "Rebuild", callback=self.rebuildWidget)
-        self.rebuildBtn.setStyleSheet(css)
+        self.rebuildBtn.setStyleSheet(self.css)
         self.rebuildBtn.setFixedSize(100,20)
         #choose save mode
 
@@ -513,19 +514,19 @@ class OWWidgetBuilder(widget.OWWidget):
         self.controlArea.setMinimumWidth(600)
         self.controlArea.setMinimumHeight(400)
         
-        css = '''
+        self.css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
         QPushButton:hover {background-color: #1555f5; }
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
         '''  
         
-        #self.setStyleSheet(css)
-        self.browseIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/bluefile.png')
-        self.addIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/add.png')
-        self.removeIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/remove.png')
-        self.submitIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/submit.png')
-        self.reloadIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/reload.png')
+        #self.setStyleSheet(self.css)
+        self.browseIcon=QtGui.QIcon('/icons/bluefile.png')
+        self.addIcon=QtGui.QIcon('/icons/add.png')
+        self.removeIcon=QtGui.QIcon('/icons/remove.png')
+        self.submitIcon=QtGui.QIcon('/icons/submit.png')
+        self.reloadIcon=QtGui.QIcon('/icons/reload.png')
         self.outputWidget=""
         self.defaultDir=self.getDefaultDir()
         self.widgetDir=None
@@ -710,7 +711,7 @@ class OWWidgetBuilder(widget.OWWidget):
         layout.nextRow = layout.nextRow + 1
         
     def drawDocker(self,pname,layout=None):
-        css = '''
+        self.css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
         QPushButton:hover {background-color: #1555f5; }
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
@@ -722,11 +723,11 @@ class OWWidgetBuilder(widget.OWWidget):
         containerIDLabel=QtGui.QLabel('Container ID: {}'.format(self.containerID))
         imageBuilderLabel=QtGui.QLabel('Launch Image Builder')
         imageBuilderBtn = gui.button(None, self, "Launch", callback=self.startImageBuilder)
-        imageBuilderBtn.setStyleSheet(css)
+        imageBuilderBtn.setStyleSheet(self.css)
         imageBuilderBtn.setFixedSize(80,20)
         updateLabel=QtGui.QLabel('Import Dockerfiles directory')
         updateBtn = gui.button(None, self, "Import", callback=self.updateDockerfiles)
-        updateBtn.setStyleSheet(css)
+        updateBtn.setStyleSheet(self.css)
         updateBtn.setFixedSize(80,20)        
         buildCommandBox=self.makeTextBox(pname,label='Docker build command:')
         self.initAllStates(pname,buildCommandBox)
@@ -1013,7 +1014,9 @@ class OWWidgetBuilder(widget.OWWidget):
         boxEdit.itemSelectionChanged.connect(lambda: self.onListWidgetSelect(boxEdit,addBtn,removeBtn,lineItem))
         boxEdit.itemMoved.connect(lambda oldRow,newRow : self.onItemMoved(oldRow,newRow,boxEdit))
         addBtn.setIcon(self.addIcon)
+        addBtn.setStyleSheet(self.css)
         removeBtn.setIcon(self.removeIcon)
+        removeBtn.setStyleSheet(self.css)
         #set button styles
         buttonStyle='background: None; border: None ; border-radius: 0;'
         addBtn.setStyleSheet(buttonStyle)
@@ -1118,6 +1121,7 @@ class OWWidgetBuilder(widget.OWWidget):
                 callback=self.browseFileDir
             button=gui.button(None, self, "", callback= lambda : callback(pname,ledit=labelLedit.ledit,fileType=fileType),autoDefault=True, width=19, height=19)
             button.setIcon(self.browseIcon)
+            button.setStyleSheet(self.css)
             layout.addWidget(button,layout.nextRow,2)
         else:
             layout.addWidget(labelLedit.ledit,layout.nextRow,1,1,2)

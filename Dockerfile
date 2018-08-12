@@ -101,9 +101,6 @@ COPY orangePatches/canvasmain.py /orange3/Orange/canvas/application/canvasmain.p
 COPY orangePatches/widgetsscheme.py /orange3/Orange/canvas/scheme/widgetsscheme.py
 COPY orangePatches/signalmanager.py /orange3/Orange/canvas/scheme/signalmanager.py
 
-#Add widget creator
-RUN ln -s /biodepot/orangebiodepot/util/createWidget /usr/bin/createWidget
-RUN ln -s /biodepot/Bwb_core/OWWidgetBuilder.py /orange3/Orange/canvas/document/OWWidgetBuilder.py
 
 #add widgets and workflows
 ADD widgets /widgets/
@@ -111,6 +108,7 @@ ADD workflows /workflows/
 ADD notebooks /notebooks/
 ADD templates /templates/
 ADD coreutils /coreutils/
+ADD icons /icons/
 
 #start it up
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf

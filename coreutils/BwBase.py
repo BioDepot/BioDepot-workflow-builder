@@ -2,13 +2,12 @@ import os
 import re
 import sys
 import logging
-sys.path.append("/biodepot/Bwb_core")
 from OWWidgetBuilder import tabbedWindow
 from functools import partial
 from pathlib import Path
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
-from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
+from .DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 
 from AnyQt.QtWidgets import (
@@ -49,6 +48,12 @@ class getExistingDirectories(QtWidgets.QFileDialog):
 class BwbGridLayout():
     #adds methods to keep track of rows and columns
     def __init__(self, spacing=5, startCol=0,startRow=0):
+        self.css = '''
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: #1555f5; }
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
+        '''
         self._layout=QtGui.QGridLayout()
         self._layout.setSpacing(spacing)
         self.nextCol=startCol
@@ -214,12 +219,12 @@ class ConnectionDict:
 
 class OWBwBWidget(widget.OWWidget):
     dockerClient = DockerClient('unix:///var/run/docker.sock', 'local')
-    defaultFileIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/bluefile.png')
-    browseIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/bluefile.png')
-    addIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/add.png')
-    removeIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/remove.png')
-    submitIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/submit.png')
-    reloadIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/reload.png')
+    defaultFileIcon=QtGui.QIcon('/icons/bluefile.png')
+    browseIcon=QtGui.QIcon('/icons/bluefile.png')
+    addIcon=QtGui.QIcon('/icons/add.png')
+    removeIcon=QtGui.QIcon('/icons/remove.png')
+    submitIcon=QtGui.QIcon('/icons/submit.png')
+    reloadIcon=QtGui.QIcon('icons/reload.png')
     
     
 #Initialization
@@ -303,12 +308,7 @@ class OWBwBWidget(widget.OWWidget):
         self.checkTrigger()
 
     def drawConsoleControl(self,box=None,layout=None):
-        css = '''
-        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
-        QPushButton:hover {background-color: #1555f5; }
-        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
-        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
-        '''
+
         layout.addWidget(QtGui.QLabel('Console: '))
         pname='saveLog'
         pvalue={ 'type' : 'directory', 'label' : 'AutoLog'}
@@ -316,10 +316,10 @@ class OWBwBWidget(widget.OWWidget):
             setattr(self,pname,None)
 
         self.btnConsoleClear = gui.button(None, self, "Clear", callback=self.clearConsole)
-        self.btnConsoleClear.setStyleSheet(css)
+        self.btnConsoleClear.setStyleSheet(self.css)
         self.btnConsoleClear.setFixedSize(60,20)
         self.btnConsoleSave = gui.button(None, self, "Save", callback=self.saveConsole)
-        self.btnConsoleSave.setStyleSheet(css)
+        self.btnConsoleSave.setStyleSheet(self.css)
         self.btnConsoleSave.setFixedSize(60,20)
         layout.addWidget(self.btnConsoleClear)
         layout.addWidget(self.btnConsoleSave)
@@ -817,17 +817,12 @@ class OWBwBWidget(widget.OWWidget):
         self.cboRunMode.currentIndexChanged.connect(self.runModeChange)
         myLabel=QtGui.QLabel('RunMode:')
         myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        css = '''
-        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
-        QPushButton:hover {background-color: #1555f5; }
-        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
-        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
-        '''
+        myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self.btnRun = gui.button(None, self, "Start", callback=self.onRunClicked)
-        self.btnRun.setStyleSheet(css)
+        self.btnRun.setStyleSheet(self.css)
         self.btnRun.setFixedSize(60,20)
         self.btnStop = gui.button(None, self, "Stop", callback=self.onStopClicked)
-        self.btnStop.setStyleSheet(css)
+        self.btnStop.setStyleSheet(self.css)
         self.btnStop.setFixedSize(60,20)
         self.btnStop.setEnabled(False)
         self.execLayout.addWidget(self.btnRun,1,0)
