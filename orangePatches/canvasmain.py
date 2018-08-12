@@ -409,43 +409,13 @@ class CanvasMainWindow(QMainWindow):
                     shortcut=QKeySequence.New,
                     icon=canvas_icons("New.svg")
                     )
-
-        self.addCategoryAction = \
-            QAction(self.tr("Add category"), self,
-                    objectName="addCategory-action",
-                    toolTip=self.tr("Add new category to toolBar"),
-                    triggered=self.addCategory,
-                    enabled=True)
                     
-        self.addWidgetAction = \
-            QAction(self.tr("Add widget"), self,
-                    objectName="addWidget-action",
+        self.editDockAction = \
+            QAction(self.tr("Edit Tool Dock"), self,
+                    objectName="editToolDock-action",
                     toolTip=self.tr("Add new Widget to toolBar"),
-                    triggered=self.addWidget,
+                    triggered=self.editDock,
                     enabled=True)
-                    
-        self.removeWidgetAction = \
-            QAction(self.tr("Remove widget"), self,
-                    objectName="removeWidget-action",
-                    toolTip=self.tr("remove widget from toolBar"),
-                    triggered=self.removeWidget,
-                    enabled=True)
-                    
-        self.removeCategoryAction = \
-            QAction(self.tr("Remove category"), self,
-                    objectName="removeCategory-action",
-                    toolTip=self.tr("Remove category from toolBar"),
-                    triggered=self.removeCategory,
-                    enabled=True)
-
-        self.new_action = \
-            QAction(self.tr("New"), self,
-                    objectName="action-new",
-                    toolTip=self.tr("Open a new workflow."),
-                    triggered=self.new_scheme,
-                    shortcut=QKeySequence.New,
-                    icon=canvas_icons("New.svg")
-                    )
 
         self.open_action = \
             QAction(self.tr("Open"), self,
@@ -743,11 +713,7 @@ class CanvasMainWindow(QMainWindow):
         self.toolbox_menu_group = QActionGroup(self, objectName="toolbox-menu-group")
         self.toolDock_menu.addAction(self.toggle_tool_dock_expand)  
         self.toolDock_menu.addSeparator()
-        self.toolDock_menu.addAction(self.addCategoryAction)
-        self.toolDock_menu.addAction(self.addWidgetAction)
-        self.toolDock_menu.addSeparator()
-        self.toolDock_menu.addAction(self.removeCategoryAction)
-        self.toolDock_menu.addAction(self.removeWidgetAction)
+        self.toolDock_menu.addAction(self.editDockAction)
                 
         menu_bar.addMenu(self.toolDock_menu)
 
@@ -768,14 +734,15 @@ class CanvasMainWindow(QMainWindow):
 #        self.help_menu.addAction(self.examples_action)
 #        menu_bar.addMenu(self.help_menu)
 
+
     def loadNotebook(self):
         pass
     def addNotebook(self):
         pass
     def removeNotebook(self):
         pass 
-       
-    def addCategory(self):
+
+    def editDock(self):
         if not hasattr(self,'dockEdit'):
             self.dockEdit=toolDockEdit.ToolDockEdit()
         #widgetName=QFileDialog.getExistingDirectory(self, caption="Choose widget to add to ToolDock", directory='/widgets')
@@ -783,28 +750,6 @@ class CanvasMainWindow(QMainWindow):
         widget.showNormal()
         widget.raise_()
         widget.activateWindow()
-        widget.addCategory()
-    def removeCategory(self):
-        pass        
-
-    def addWidget(self):
-        if not hasattr(self,'dockEdit'):
-            self.dockEdit=toolDockEdit.ToolDockEdit()
-        #widgetName=QFileDialog.getExistingDirectory(self, caption="Choose widget to add to ToolDock", directory='/widgets')
-        widget=self.dockEdit
-        widget.showNormal()
-        widget.raise_()
-        widget.activateWindow()
-        widget.addWidget()
-
-    def removeWidget(self):
-        if not hasattr(self,'dockEdit'):
-            self.dockEdit=toolDockEdit.ToolDockEdit()
-        widget=self.dockEdit
-        widget.showNormal()
-        widget.raise_()
-        widget.activateWindow()
-        widget.removeWidget()     
 
     def restore(self):
         """Restore the main window state from saved settings.
