@@ -10,13 +10,13 @@ import tempfile
 import OWImageBuilder
 from pathlib import Path
 from shutil import copyfile
-from coreutils.createWidget import mergeWidget, createWidget, findDirectory, findIconFile
+from createWidget import mergeWidget, createWidget, findDirectory, findIconFile
 from copy import deepcopy
 from collections import OrderedDict
 from functools import partial
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
-from coreutils.DockerClient import DockerClient, PullImageThread, ConsoleProcess
+from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QInputDialog, QLineEdit, QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget, QVBoxLayout, QMessageBox
 
@@ -26,7 +26,7 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
-defaultIconFile='/biodepot/orangebiodepot/icons/default.png'
+defaultIconFile='/icons/default.png'
 class tabbedWindow(QTabWidget):
     def __init__(self, parent = None):
         super(tabbedWindow, self).__init__(parent)

@@ -1,12 +1,12 @@
 from Orange.widgets import widget, gui
 import sys, os, fnmatch, tempfile
-import re
+sys.path.append('/coreutils')
 import requests, json
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import pyqtSlot, Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QStandardItem, QTextDocument, QFont
-from orangebiodepot.util.DockerClient import DockerClient, DockerThread_BuildImage
-from orangebiodepot.util.UIDockerfileEditor import DockerSyntaxHighlighter
+from DockerClient import DockerClient, DockerThread_BuildImage
+from UIDockerfileEditor import DockerSyntaxHighlighter
 
 
 class OWImageBuilder(widget.OWWidget):

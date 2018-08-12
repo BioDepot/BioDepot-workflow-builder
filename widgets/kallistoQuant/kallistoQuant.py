@@ -7,8 +7,8 @@ from collections import OrderedDict
 from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
-from orangebiodepot.util.DockerClient import DockerClient
-from orangebiodepot.util.BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from DockerClient import DockerClient
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
 class OWkallistoquant(OWBwBWidget):

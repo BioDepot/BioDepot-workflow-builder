@@ -9,13 +9,13 @@ import tempfile
 import OWImageBuilder
 from pathlib import Path
 from shutil import copyfile
-from orangebiodepot.util.createWidget import mergeWidget, createWidget, findDirectory, findIconFile
+from createWidget import mergeWidget, createWidget, findDirectory, findIconFile
 from copy import deepcopy
 from collections import OrderedDict
 from functools import partial
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
-from orangebiodepot.util.DockerClient import DockerClient, PullImageThread, ConsoleProcess
+from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QInputDialog, QLineEdit, QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget, QVBoxLayout, QMessageBox
 
@@ -51,11 +51,11 @@ class ToolDockEdit(widget.OWWidget):
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
         '''
         self.setStyleSheet(self.css)
-        self.browseIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/bluefile.png')
-        self.addIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/add.png')
-        self.removeIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/remove.png')
-        self.submitIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/submit.png')
-        self.reloadIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/reload.png')
+        self.browseIcon=QtGui.QIcon('/icons/bluefile.png')
+        self.addIcon=QtGui.QIcon('/icons/add.png')
+        self.removeIcon=QtGui.QIcon('/icons/remove.png')
+        self.submitIcon=QtGui.QIcon('/icons/submit.png')
+        self.reloadIcon=QtGui.QIcon('/icons/reload.png')
         self.controlArea.setMinimumWidth(500)
         self.controlArea.setMinimumHeight(120)
         self.startWidget()
