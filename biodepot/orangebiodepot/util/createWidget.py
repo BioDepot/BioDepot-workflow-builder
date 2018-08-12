@@ -47,9 +47,10 @@ def findDirectory(inputJson):
     return checkCategory(data['category'])
       
 def checkCategory(category):
-    categories=['Bwb-core','RNA-seq','Utilities','Miscellaneous','User']
+    categories=(str(os.popen('''grep -oP 'name="\K[^"]+' /biodepot/setup.py''').read())).split()
     if category in categories:
-        directory=category.replace('-','_');
+        #has/setattr does not like -
+        directory=category.replace('-','_')
         return directory
     else:
         sys.stderr.write('*WARNING* {} not a recognized category - will place widget in User directory\n'.format(category))

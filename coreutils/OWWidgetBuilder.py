@@ -25,7 +25,7 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
-defaultIconFile='/biodepot/Bwb_core/icons/default.png'
+defaultIconFile='/biodepot/orangebiodepot/icons/default.png'
 class tabbedWindow(QTabWidget):
     def __init__(self, parent = None):
         super(tabbedWindow, self).__init__(parent)
@@ -509,6 +509,10 @@ class OWWidgetBuilder(widget.OWWidget):
 
     def __init__(self,widgetID=None):
         super().__init__()
+        #minimum sizes
+        self.controlArea.setMinimumWidth(600)
+        self.controlArea.setMinimumHeight(400)
+        
         css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
         QPushButton:hover {background-color: #1555f5; }
@@ -517,11 +521,11 @@ class OWWidgetBuilder(widget.OWWidget):
         '''  
         
         #self.setStyleSheet(css)
-        self.browseIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/bluefile.png')
-        self.addIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/add.png')
-        self.removeIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/remove.png')
-        self.submitIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/submit.png')
-        self.reloadIcon=QtGui.QIcon('/biodepot/Bwb_core/icons/reload.png')
+        self.browseIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/bluefile.png')
+        self.addIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/add.png')
+        self.removeIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/remove.png')
+        self.submitIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/submit.png')
+        self.reloadIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/reload.png')
         self.outputWidget=""
         self.defaultDir=self.getDefaultDir()
         self.widgetDir=None

@@ -56,6 +56,8 @@ class ToolDockEdit(widget.OWWidget):
         self.removeIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/remove.png')
         self.submitIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/submit.png')
         self.reloadIcon=QtGui.QIcon('/biodepot/orangebiodepot/icons/reload.png')
+        self.controlArea.setMinimumWidth(500)
+        self.controlArea.setMinimumHeight(60)
         self.startWidget()
 
     
@@ -83,12 +85,12 @@ class ToolDockEdit(widget.OWWidget):
         if not hasattr(self,'grid'):
             self.grid=QtGui.QGridLayout()
         self.clearLayout(self.grid)
-        cbox=self.makeComboBox(self.grid,'Choose category:',self.categories,2)
-        ledit=self.makeLedit(self.grid,'Enter widget name','Choose widget:',startRow=1)
+        ledit=self.makeLedit(self.grid,'Enter widget name','Choose widget ',startRow=1,startColumn=1,browse=True)
+        cbox=self.makeComboBox(self.grid,'from category:',self.categories,startRow=1,startColumn=4)
         widgetAddBtn = gui.button(None, self, "Add", callback= lambda: self.widgetAdd(ledit,cbox))
         widgetAddBtn.setFixedSize(30,20)
         widgetAddBtn.setStyleSheet(self.css)
-        self.grid.addWidget(widgetAddBtn,1,4)        
+        self.grid.addWidget(widgetAddBtn,1,6)        
         self.controlArea.layout().addLayout(self.grid)
 
     def widgetAdd(self,ledit,cbox):
@@ -130,7 +132,7 @@ class ToolDockEdit(widget.OWWidget):
         self.clearLayout(self.grid)
         self.wbox=self.makeComboBox(self.grid,'Remove widget ',widgetList,startRow=1,callback=self.__onWidgetChange)
         categoryList=self.getCategoryList(self.getComboValue(self.wbox))
-        self.cbox=self.makeComboBox(self.grid,' from Category ',categoryList,startRow=1,startColumn=4)
+        self.cbox=self.makeComboBox(self.grid,' from category ',categoryList,startRow=1,startColumn=4)
         widgetRemoveBtn = gui.button(None, self, "Remove", callback=self.widgetRemove)
         widgetRemoveBtn.setFixedSize(60,20)
         widgetRemoveBtn.setStyleSheet(self.css)
@@ -158,8 +160,22 @@ class ToolDockEdit(widget.OWWidget):
                 directory=self.categoryToDirectory[category]
                 os.system('cd /biodepot/{} && rm OW{}.py '.format(directory,widgetName))
                 qm.information(self,'Removed widget','Removed widget {} from {}'.format(widgetName,category),QtGui.QMessageBox.Ok)
+    
+    def addCategory(self):
+        if not hasattr(self,'grid'):
+            self.grid=QtGui.QGridLayout()
+        self.clearLayout(self.controlArea.layout())
+        self.clearLayout(self.grid)
+        nameLedit=self.makeLedit(self.grid,'Enter category name','Choose category:',startRow=1)
+        iconLedit=self.makeLedit(self.grid,'Enter icon file','Choose icon:',startRow=2,browse=True)
+        widgetAddBtn = gui.button(None, self, "Add", callback= lambda: self.categoryAdd(nameLedit,iconLedit))
+        widgetAddBtn.setFixedSize(30,20)
+        widgetAddBtn.setStyleSheet(self.css)
+        self.grid.addWidget(widgetAddBtn,2,4)        
+        self.controlArea.layout().addLayout(self.grid) 
         
-        
+    def categoryAdd(self,nameLedit,iconLedit):
+        pass
     def getCategoryList(self,widgetName):
         #categories may not be directories
         if not widgetName:
@@ -173,7 +189,7 @@ class ToolDockEdit(widget.OWWidget):
         returnList.insert(0,'_ALL_')
         return returnList
 
-    def makeLedit(self,layout,text=None,label=None,startRow=1,startColumn=1):
+    def makeLedit(self,layout,text=None,label=None,startRow=1,startColumn=1,browse=False):
         leditLabel=None
         if(label):
             leditLabel=QtGui.QLabel(label)
@@ -181,11 +197,12 @@ class ToolDockEdit(widget.OWWidget):
         ledit.setClearButtonEnabled(True)
         ledit.setPlaceholderText(text)
         ledit.setStyleSheet(":disabled { color: #282828}")           
-        button=gui.button(None, self, "",callback= lambda: self.browseWidget(ledit),autoDefault=True, width=19, height=19)
-        button.setIcon(self.browseIcon)
         layout.addWidget(leditLabel,startRow,startColumn)
         layout.addWidget(ledit,startRow,startColumn+1)
-        layout.addWidget(button,startRow,startColumn+2)
+        if browse:
+            button=gui.button(None, self, "",callback= lambda: self.browseWidget(ledit),autoDefault=True, width=19, height=19)
+            button.setIcon(self.browseIcon)
+            layout.addWidget(button,startRow,startColumn+2)
         return ledit
         
     def browseWidget(self, ledit):

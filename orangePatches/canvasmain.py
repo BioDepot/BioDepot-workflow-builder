@@ -400,28 +400,6 @@ class CanvasMainWindow(QMainWindow):
                     toolTip=self.tr("remove notebook from list"),
                     triggered=self.removeNotebook,
                     enabled=True)
-        
-        self.loadWorkflowAction = \
-            QAction(self.tr("Load workflow"), self,
-                    objectName="loadWorkflow-action",
-                    toolTip=self.tr("Load workflow from list"),
-                    triggered=self.loadWorkflow,
-                    enabled=True)
-                    
-        self.addWorkflowAction = \
-            QAction(self.tr("Add workflow"), self,
-                    objectName="addWorkflow-action",
-                    toolTip=self.tr("Add new workflow to list"),
-                    triggered=self.addWorkflow,
-                    enabled=True)
-                    
-        self.removeWorkflowAction = \
-            QAction(self.tr("Remove workflow"), self,
-                    objectName="removeWorkflow-action",
-                    toolTip=self.tr("remove workflow from list"),
-                    triggered=self.removeWorkflow,
-                    enabled=True)
-                    
 
         self.new_action = \
             QAction(self.tr("New"), self,
@@ -493,7 +471,7 @@ class CanvasMainWindow(QMainWindow):
                     )
 
         self.save_action = \
-            QAction(self.tr("Save"), self,
+            QAction(self.tr("Save workflow"), self,
                     objectName="action-save",
                     toolTip=self.tr("Save current workflow."),
                     triggered=self.save_scheme,
@@ -501,7 +479,7 @@ class CanvasMainWindow(QMainWindow):
                     )
 
         self.save_as_action = \
-            QAction(self.tr("Save As..."), self,
+            QAction(self.tr("Save workflow as..."), self,
                     objectName="action-save-as",
                     toolTip=self.tr("Save current workflow as."),
                     triggered=self.save_scheme_as,
@@ -773,14 +751,6 @@ class CanvasMainWindow(QMainWindow):
                 
         menu_bar.addMenu(self.toolDock_menu)
 
-        self.workflow_menu = QMenu(self.tr("&Workflows"), self)
-        self.workflow_menu.addAction(self.loadWorkflowAction)
-        self.workflow_menu.addAction(self.addWorkflowAction)
-        self.workflow_menu.addSeparator()
-        self.workflow_menu.addAction(self.removeWorkflowAction)
-
-        menu_bar.addMenu(self.workflow_menu)
-
         self.notebook_menu = QMenu(self.tr("&Notebooks"), self)
         self.notebook_menu.addAction(self.loadNotebookAction)
         self.notebook_menu.addAction(self.addNotebookAction)
@@ -805,22 +775,17 @@ class CanvasMainWindow(QMainWindow):
     def removeNotebook(self):
         pass 
        
-    def loadWorkflow(self):
-        widget=OWWidgetBuilder.OWWidgetBuilder()
+    def addCategory(self):
+        if not hasattr(self,'dockEdit'):
+            self.dockEdit=toolDockEdit.ToolDockEdit()
+        #widgetName=QFileDialog.getExistingDirectory(self, caption="Choose widget to add to ToolDock", directory='/widgets')
+        widget=self.dockEdit
         widget.showNormal()
         widget.raise_()
         widget.activateWindow()
-
-    def addWorkflow(self):
-        pass
-    def removeWorkflow(self):
-        pass 
-        
-    def addCategory(self):
-        pass
+        widget.addCategory()
     def removeCategory(self):
-        pass
-        
+        pass        
 
     def addWidget(self):
         if not hasattr(self,'dockEdit'):
