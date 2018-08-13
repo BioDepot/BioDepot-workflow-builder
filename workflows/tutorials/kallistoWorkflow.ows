@@ -5,9 +5,9 @@
 		<node id="1" name="downloadURL" position="(85.0, 228.0)" project_name="Utilities" qualified_name="Utilities.OWdownloadURL.OWdownloadURL" title="Download reference sequence" version="" />
 		<node id="2" name="downloadURL" position="(502.0, 83.0)" project_name="Utilities" qualified_name="Utilities.OWdownloadURL.OWdownloadURL" title="Download complete kallisto results" version="" />
 		<node id="3" name="sleuth" position="(694.0, 239.0)" project_name="RNA-seq" qualified_name="RNA_seq.OWsleuth.OWsleuth" title="sleuth" version="" />
-		<node id="4" name="kallisto index" position="(319.0, 226.0)" project_name="RNA-seq" qualified_name="RNA_seq.OWkallistoIndex.OWkallistoindex" title="kallisto index" version="" />
+		<node id="4" name="kallisto index" position="(319.0, 226.0)" project_name="RNA-seq" qualified_name="RNA_seq.OWkallistoIndex.OWkallistoIndex" title="kallisto Index" version="" />
 		<node id="5" name="fastqDump" position="(307.0, 402.0)" project_name="Utilities" qualified_name="Utilities.OWfastqDump.OWfastqDump" title="Download fastq files" version="" />
-		<node id="6" name="kallisto quant" position="(508.0, 236.0)" project_name="RNA-seq" qualified_name="RNA_seq.OWkallistoQuant.OWkallistoquant" title="kallisto quant" version="" />
+		<node id="6" name="kallisto quant" position="(508.0, 236.0)" project_name="RNA-seq" qualified_name="RNA_seq.OWkallistoQuant.OWkallistoQuant" title="kallisto quant" version="" />
 		<node id="7" name="gnumeric" position="(891.0, 240.0)" project_name="Utilities" qualified_name="Utilities.OWgnumeric.OWgnumeric" title="gnumeric" version="" />
 	</nodes>
 	<links>
