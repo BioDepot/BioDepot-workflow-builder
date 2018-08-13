@@ -11,8 +11,8 @@ from DockerClient import DockerClient
 from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWkallistoindex(OWBwBWidget):
-    name = "kallisto index"
+class OWkallistoIndex(OWBwBWidget):
+    name = "kallistoIndex"
     description = "Generates index files for kallisto"
     category = "RNA-seq"
     priority = 3

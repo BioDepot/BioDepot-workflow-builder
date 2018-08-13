@@ -11,8 +11,8 @@ from DockerClient import DockerClient
 from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWStartoDESeq2(OWBwBWidget):
-    name = "Star to DESeq2"
+class OWstartodeseq2(OWBwBWidget):
+    name = "startodeseq2"
     description = "Convert Star quantMode counts file to DESeq2 style counts file"
     category = "RNA-seq"
     priority = 13

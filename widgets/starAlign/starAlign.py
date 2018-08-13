@@ -11,8 +11,8 @@ from DockerClient import DockerClient
 from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWStarAlign(OWBwBWidget):
-    name = "Star Align"
+class OWstarAlign(OWBwBWidget):
+    name = "starAlign"
     description = "Star aligner alignment module"
     category = "RNA-seq"
     priority = 12

@@ -7,7 +7,7 @@ from functools import partial
 from pathlib import Path
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
-from .DockerClient import DockerClient, PullImageThread, ConsoleProcess
+from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 
 from AnyQt.QtWidgets import (
@@ -230,6 +230,25 @@ class OWBwBWidget(widget.OWWidget):
 #Initialization
     def __init__(self, image_name, image_tag):
         super().__init__()
+        self.css = '''
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: #1555f5; }
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
+        '''  
+        self.addRemoveCSS='''
+        QPushButton {background-color: lightBlue; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: blue; }
+        QPushButton:hover:pressed { background-color: lightBlue; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: white; border: 1px solid gray; } 
+        ''' 
+        self.browseCSS='''
+        QPushButton {background-color: rgba(30,30,200,128); color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: #1555f5; }
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
+        '''        
+        
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self._dockerImageName = image_name
         self._dockerImageTag = image_tag
@@ -592,12 +611,12 @@ class OWBwBWidget(widget.OWWidget):
         #last element is browseBtn if it exists
         if checkbox:
             checkbox.setEnabled(True)
-        ledit.clear()
-        boxEdit.clear()
-        if value:
-            boxEdit.addItems(value)
+
         if not checkbox or checkbox.isChecked():
-            for g in  [boxEdit,ledit,browseBtn,addBtn,removeBtn]:
+            ledit.clear()
+            boxEdit.setEnabled(True)
+            ledit.setEnabled(True)
+            for g in  [browseBtn,addBtn,removeBtn]:
                 if g:
                     g.setEnabled(True)          
         self.drawTextBoxBtnRules(boxEdit,ledit,addBtn,removeBtn)
@@ -628,12 +647,9 @@ class OWBwBWidget(widget.OWWidget):
         
         sys.stderr.write('adding text box for pname{} pvalue {} box {} layout {} addCheckbox {}\n'.format(pname,pvalue,box,layout,addCheckbox))
         disabledFlag=False
-        checkbox=None
-        browseBtn=None
-        
+        checkbox=None        
         if addCheckbox or self.inputConnections.isConnected(pname):
             disabledFlag=True
-        
         elements=[]
         #add checkbox if necessary
         if addCheckbox:
@@ -668,7 +684,7 @@ class OWBwBWidget(widget.OWWidget):
         #add boxEdit layout
         layoutAttr=pname+'Layout'
         setattr(self,layoutAttr,self.addBoxEdit(pname,pvalue,layout,ledit,checkbox,elements=elements,disabledFlag=disabledFlag))
-    
+        
         
     def addBoxEdit(self,pname,pvalue,layout,ledit,checkbox,elements=None,disabledFlag=False):
         #setup boxEdit - boxEdit element values other than the list itself are not tracked and not saved in settings 
@@ -700,10 +716,12 @@ class OWBwBWidget(widget.OWWidget):
         elif pvalue['type'] == 'directory list':
             browseBtn = gui.button(None, self, "", callback=partial(self.browseDirs, boxEdit=boxEdit,attr=pname), autoDefault=False,disabled=disabledFlag)
         #set styles
-        buttonStyle='background: None; border: None ; border-radius: 0;'
-        for btn in (addBtn,removeBtn,browseBtn):
+        if browseBtn:
+            browseBtn.setStyleSheet(self.browseCSS)
+            elements.append(browseBtn)
+        for btn in (addBtn,removeBtn):
             if btn:
-                btn.setStyleSheet(buttonStyle)
+                btn.setStyleSheet(self.addRemoveCSS)
                 elements.append(btn)      
         #set icons
         self.bgui.addList(pname,elements,enableCallback=lambda value, clearLedit: self.enableTextBox(value,clearLedit, checkbox,browseBtn,boxEdit,ledit,addBtn,removeBtn),updateCallback=lambda: self.updateTextBox(pname,ledit,boxEdit))
@@ -713,7 +731,6 @@ class OWBwBWidget(widget.OWWidget):
         removeBtn.setIcon(self.removeIcon)
         
         #check rules for buttons    
-        
         self.drawTextBoxBtnRules(boxEdit,ledit,addBtn,removeBtn)
         
         #connects from ledit and boxEdit to buttons
@@ -733,6 +750,7 @@ class OWBwBWidget(widget.OWWidget):
         label.setAlignment(Qt.AlignTop)
         if checkbox:
             layout.addWidget(checkbox)
+            
         layout.addWidget(label)
         layout.addWidget(myBox,width=2,linefeed=2)
         #line layout     
@@ -890,8 +908,8 @@ class OWBwBWidget(widget.OWWidget):
             self.onRunClicked()
 
     def bwbFileEntry(self, widget, button, ledit, icon=browseIcon,layout=None, label=None,entryType='file', checkbox=None):
-        button.setStyleSheet("border: 1px solid #1a8ac6; border-radius: 2px;")
         button.setIcon(icon)
+        button.setStyleSheet(self.browseCSS)
         ledit.setClearButtonEnabled(True)
         ledit.setPlaceholderText("Enter {}".format(entryType))
         if checkbox:

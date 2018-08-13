@@ -11,8 +11,8 @@ from DockerClient import DockerClient
 from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWStarindex(OWBwBWidget):
-    name = "Star index"
+class OWstarIndex(OWBwBWidget):
+    name = "starIndex"
     description = "Construct indices for STAR aligner "
     category = "RNA-seq"
     priority = 11

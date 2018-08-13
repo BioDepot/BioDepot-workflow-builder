@@ -11,8 +11,8 @@ from DockerClient import DockerClient
 from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWDESeq2(OWBwBWidget):
-    name = "DESeq2"
+class OWdeseq2(OWBwBWidget):
+    name = "deseq2"
     description = "Differential expression using DESeq2 package"
     category = "RNA-seq"
     priority = 14

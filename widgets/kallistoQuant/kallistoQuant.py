@@ -11,8 +11,8 @@ from DockerClient import DockerClient
 from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWkallistoquant(OWBwBWidget):
-    name = "kallisto quant"
+class OWkallistoQuant(OWBwBWidget):
+    name = "kallistoQuant"
     description = "Alignment and quantification of reads from fastq files"
     category = "RNA-seq"
     priority = 4

@@ -1,7 +1,6 @@
 import os
 import re
 import sys
-sys.path.append('/coreutils')
 import json
 import jsonpickle
 import pickle
@@ -186,25 +185,12 @@ class OWWidgetBuilder(widget.OWWidget):
         QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
         
     def drawExec(self, layout=None):
-        self.css = '''
-        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
-        QPushButton:hover {background-color: #1555f5; }
-        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
-        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
-        '''
-        #pname='github'
-        #githubLedit=self.makeLedit(pname,'Enter directory', label='Bwb directory:')
-        #self.initAllStates(pname,githubLedit)
-        #githubLedit.ledit.textChanged.connect(lambda: self.updateAllStates(pname,githubLedit,githubLedit.getState()))
-        #layout.addWidget(githubLedit.label,layout.nextRow,0)
-        #layout.addWidget(githubLedit.ledit,layout.nextRow,1,1,1)
-        #button=gui.button(None, self, "", callback= partial(self.browseFileDir, attr='gitHub',fileType='Directory'),autoDefault=True, width=19, height=19)
-        #button.setIcon(self.browseIcon)
-        #layout.addWidget(button,layout.nextRow,2)
-        # self.saveJsonBtn = gui.button(None, self, "Save json", callback=self.saveJson)
-        # self.saveJsonBtn.setStyleSheet(self.css)
-        # self.saveJsonBtn.setFixedSize(80,20)
-
+        self.saveMode=QtGui.QComboBox()
+        self.saveMode.addItem('Overwrite')
+        self.saveMode.addItem('Merge')
+        self.saveMode.addItem('Data')
+        self.saveMode.setCurrentIndex(self.saveModeIndex)
+        self.saveMode.currentIndexChanged.connect(lambda: self.onSaveModeChange(self.saveMode))
         self.saveWidgetBtn = gui.button(None, self, "Save", callback=self.saveWidget)
         self.saveWidgetBtn.setStyleSheet(self.css)
         self.saveWidgetBtn.setFixedSize(50,20)
@@ -224,6 +210,7 @@ class OWWidgetBuilder(widget.OWWidget):
 
         saveLabel=QtGui.QLabel('Save mode:')
         saveLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.saveMode.setCurrentIndex(self.saveModeIndex) 
         box=QtGui.QHBoxLayout()
         box.addWidget(saveLabel)
         box.addWidget(self.saveMode)
@@ -432,15 +419,23 @@ class OWWidgetBuilder(widget.OWWidget):
         self.widgetName=self.getWidgetName()
         if not self.widgetName:
             return
-        oldWidgetName=self.widgetName
-        self.widgetName=self.getWidgetName()
-        self.outputDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose directory to save the widget in", directory=self.defaultDir)
-        if self.outputDir: 
-            self.widgetDir=self.outputDir+'/'+ self.widgetName
+        outputDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose directory to save the widget in", directory=self.defaultDir)
+        if outputDir:
+            myWidgetDir='{}/{}'.format(outputDir,self.widgetName)
+            if os.path.exists(myWidgetDir) and not( self.widgetDir and os.path.samefile(myWidgetDir,self.widgetDir)) :
+                #same directory is occupied
+                #ask permission to nuke it
+                qm = QtGui.QMessageBox
+                ret=qm.question(self,'', "{}/{} exists - OverWrite ?".format(outputDir,self.widgetName), qm.Yes | qm.No)
+                if ret == qm.No:
+                    return
+                os.system("cd {} && rm {}/* -rf ".format(outputDir,self.widgetName))
+            self.widgetDir=outputDir+'/'+ self.widgetName
             self.allAttrs['name']=self.widgetName
             self.makeDefaultFiles()
             self.pickleWidget()
-            
+            self.nameLabel.setText(self.widgetName)
+            self.setWindowTitle(self.widgetName+':Definition')
             title='Save {}'.format(self.widgetName)
             message='Saved widget to {}'.format(self.widgetDir)
             QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
@@ -485,7 +480,7 @@ class OWWidgetBuilder(widget.OWWidget):
             widgetName=os.path.split(registerWidgetDir)[-1]
             self.register(registerWidgetDir,widgetName)
             
-    def pickleData(self,data,filename,jsonFlag=False):
+    def pickleData(self,data,filename,jsonFlag=True):
         if jsonFlag:
             myJdata=jsonpickle.encode(data)
             with open(filename,"w") as f:
@@ -497,11 +492,16 @@ class OWWidgetBuilder(widget.OWWidget):
             f.close()
 
         
-    def unPickleData(self,filename,jsonFlag=False):
+    def unPickleData(self,filename,jsonFlag=True):
         if jsonFlag:
-            with open(filename,'r') as f:
-                data=jsonpickle.decode(f)
-            f.close()
+            try:
+                with open(filename,'r') as f:
+                    data=jsonpickle.decode(f.read())
+                f.close()
+            except Exception as e:
+                with open(filename, 'rb') as f:
+                    data=pickle.load(f)
+                f.close()
         else:
             with open(filename, 'rb') as f:
                 data=pickle.load(f)
@@ -520,7 +520,18 @@ class OWWidgetBuilder(widget.OWWidget):
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
         '''  
-        
+        self.addRemoveCSS='''
+        QPushButton {background-color: lightBlue; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: blue; }
+        QPushButton:hover:pressed { background-color: lightBlue; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: white; border: 1px solid gray; } 
+        ''' 
+        self.browseCSS='''
+        QPushButton {background-color: rgba(30,30,200,128); color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: #1555f5; }
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
+        '''  
         #self.setStyleSheet(self.css)
         self.browseIcon=QtGui.QIcon('/icons/bluefile.png')
         self.addIcon=QtGui.QIcon('/icons/add.png')
@@ -534,15 +545,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.widgetDir=None
         self.isDrawn=False
         self.containerID=None
-        #need save mode right at beginning
-        self.saveMode=QtGui.QComboBox()
-        self.saveMode.addItem('Overwrite')
-        self.saveMode.addItem('Merge')
-        self.saveMode.addItem('Data')
         self.saveModeIndex=0
-        self.saveMode.setCurrentIndex=self.saveModeIndex 
-        self.saveMode.currentIndexChanged.connect(lambda: self.onSaveModeChange(self.saveMode))
-        sys.stderr.write('widgetID is {}\n'.format(widgetID))
         if widgetID == 'New':
             tmp = tempfile.mkdtemp()
             self.loadWidget()
@@ -557,10 +560,7 @@ class OWWidgetBuilder(widget.OWWidget):
             self.setWindowTitle(self.widgetName+':Definition')
             self.widgetDir='/widgets/{}'.format(self.widgetName)
             sys.stderr.write('widgetDir is {} widgetName is {}\n'.format(self.widgetDir,self.widgetName))
-            self.loadWidget(loadWidgetDir=self.widgetDir,loadNameCheck=False)
-            if 'saveModeIndex' in self.allAttrs:
-                self.saveModeIndex=self.allAttrs['saveModeIndex']
-            self.saveMode.setCurrentIndex=self.saveModeIndex 
+            self.loadWidget(loadWidgetDir=self.widgetDir,loadNameCheck=False) 
         
     def clearLayout(self,layout):
         if layout != None:
@@ -575,29 +575,29 @@ class OWWidgetBuilder(widget.OWWidget):
         self.isDrawn=True
         self.setWindowTitle(self.widgetName+':Definition')
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
-                     'priority','icon','inputs','outputs','volumes','parameters','command','autoMap','buildCommand','saveModeIndex'):
+                     'priority','icon','inputs','outputs','volumes','parameters','command','autoMap','buildCommand'):
             if attr in self.allAttrs:
                 self.data[attr]=self.allAttrs[attr]
             else:
                 self.data[attr]=None
                 self.allAttrs[attr]=None
+        if 'saveModeIndex' in self.allAttrs:
+            if self.allAttrs ['saveModeIndex'] is None:
+                self.allAttrs ['saveModeIndex']=0
+            self.saveModeIndex=self.allAttrs['saveModeIndex']
         self.tabs = tabbedWindow()
         self.controlArea.layout().addWidget(self.tabs)
         self.setStyleSheet(":disabled { color: #282828}")
-        
-        
-        
         #self.clearLayout(self.controlArea.layout())
         #self.controlArea.layout().addWidget(self.scroll_area)
-        
         
         #controlBox = gui.vBox(self.generalBox)
         #self.drawExec(box=controlBox)ne)
         #requiredBox = gui.widgetBox(self.generalBox, "Widget entries")
         #draw Ledits for the frequired elements
         leditGeneralLayout=self.tabs.add('General')
-        nameLabel=QtGui.QLabel('Name: '+self.widgetName)
-        leditGeneralLayout.addWidget(nameLabel,leditGeneralLayout.nextRow,0)
+        self.nameLabel=QtGui.QLabel('Name: '+self.widgetName)
+        leditGeneralLayout.addWidget(self.nameLabel,leditGeneralLayout.nextRow,0)
         leditGeneralLayout.nextRow=leditGeneralLayout.nextRow+1
         for pname in ['description','category','docker_image_name','docker_image_tag']:
             self.drawLedit(pname,layout=leditGeneralLayout)
@@ -622,7 +622,6 @@ class OWWidgetBuilder(widget.OWWidget):
         self.clearLayout(self.controlArea.layout())
         self.startWidget()
         
-                          
     def updateCheckBox(self,checkBox,widget=None):
         if(checkBox.isEnabled()):
             widget.setEnabled(checkBox.isChecked())
@@ -711,12 +710,6 @@ class OWWidgetBuilder(widget.OWWidget):
         layout.nextRow = layout.nextRow + 1
         
     def drawDocker(self,pname,layout=None):
-        self.css = '''
-        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
-        QPushButton:hover {background-color: #1555f5; }
-        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
-        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
-        '''
         #self.drawLedit('Add file to Dockerfiles',layout=layout,addBrowseButton=True, fileType=None)
         #self.drawLedit('Add directory to Dockerfiles',layout=layout,addBrowseButton=True, fileType='Directory')
         addDateCb=self.makeCheckBox ('addBuildDate','Add date to docker tag',default=True,persist=True,track=True)
@@ -1014,13 +1007,9 @@ class OWWidgetBuilder(widget.OWWidget):
         boxEdit.itemSelectionChanged.connect(lambda: self.onListWidgetSelect(boxEdit,addBtn,removeBtn,lineItem))
         boxEdit.itemMoved.connect(lambda oldRow,newRow : self.onItemMoved(oldRow,newRow,boxEdit))
         addBtn.setIcon(self.addIcon)
-        addBtn.setStyleSheet(self.css)
+        addBtn.setStyleSheet(self.addRemoveCSS)
         removeBtn.setIcon(self.removeIcon)
-        removeBtn.setStyleSheet(self.css)
-        #set button styles
-        buttonStyle='background: None; border: None ; border-radius: 0;'
-        addBtn.setStyleSheet(buttonStyle)
-        removeBtn.setStyleSheet(buttonStyle)
+        removeBtn.setStyleSheet(self.addRemoveCSS)
         
         #layout
         #basic layout is other widgets on top with filesBox below and the lineItem underneath
@@ -1121,7 +1110,7 @@ class OWWidgetBuilder(widget.OWWidget):
                 callback=self.browseFileDir
             button=gui.button(None, self, "", callback= lambda : callback(pname,ledit=labelLedit.ledit,fileType=fileType),autoDefault=True, width=19, height=19)
             button.setIcon(self.browseIcon)
-            button.setStyleSheet(self.css)
+            button.setStyleSheet(self.browseCSS)
             layout.addWidget(button,layout.nextRow,2)
         else:
             layout.addWidget(labelLedit.ledit,layout.nextRow,1,1,2)
