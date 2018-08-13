@@ -226,11 +226,23 @@ class OWWidgetBuilder(widget.OWWidget):
         self.saveModeIndex=widget.currentIndex()
         self.allAttrs['saveModeIndex']=self.saveModeIndex
         
-    def loadWidget(self,loadWidgetDir=None,loadNameCheck=True):
-        if self.widgetDir:
-            startDir=self.widgetDir
-        else:
-            startDir='/templates/Generic'
+    def loadWidget(self,loadWidgetDir=None,loadNameCheck=True,startDir=None):
+        if not startDir:
+            if self.widgetDir:
+                startDir=self.widgetDir
+            else:
+                startDir='/templates/Generic'
+        if startDir == '__New':
+            self.widgetName=self.getWidgetName()
+            if not self.widgetName:
+                return
+            allAttrsFile='/templates/Generic/Generic.attrs'
+            allStatesFile='/templates/Generic/Generic.states'
+            self.allAttrs=self.unPickleData(allAttrsFile)
+            self.allStates=self.unPickleData(allStatesFile)
+            self.makeDefaultFiles()
+            self.startWidget()
+            return
         if not loadWidgetDir:
             loadWidgetDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose widget to load", directory=startDir)
         if loadWidgetDir:
@@ -454,8 +466,7 @@ class OWWidgetBuilder(widget.OWWidget):
         outputWidget="{}/{}.py".format(self.widgetDir,self.widgetName)
         #check if data only
         if self.saveMode.currentIndex() < 2:
-            if self.saveMode.currentIndex() == 1:
-                #merg
+            if self.saveMode.currentIndex() == 1 and os.path.exists(self.outputWidget):
                 mergeWidget(None,outputWidget,self.widgetName,inputData=myData)
             else:
                 createWidget(None,outputWidget,self.widgetName,inputData=myData)
@@ -547,12 +558,21 @@ class OWWidgetBuilder(widget.OWWidget):
         self.containerID=None
         self.saveModeIndex=0
         if widgetID == 'New':
-            tmp = tempfile.mkdtemp()
-            self.loadWidget()
-            if self.widgetName:
-                self.setWindowTitle(self.widgetName+':Definition')
+            qm = QtGui.QMessageBox
+            ret=qm.question(self,'', "Create new widget?", qm.Yes | qm.No)
+            if ret == qm.No:
+                raise ValueError('User cancelled')
             else:
-                raise ValueError('no widget name given')
+                tmp = tempfile.mkdtemp()
+                ret=qm.question(self,'', "Use existing widget as template?", qm.Yes | qm.No)
+                if ret == qm.Yes:
+                    self.loadWidget(startDir='/widgets')
+                else:
+                    self.loadWidget(startDir='__New')
+                if self.widgetName:
+                    self.setWindowTitle(self.widgetName+':Definition')
+                else:
+                    raise ValueError('no widget name given')
         else:
             widgetSplit=widgetID.split('.')
             widgetSplit[-1]=widgetSplit[-1][2:]
