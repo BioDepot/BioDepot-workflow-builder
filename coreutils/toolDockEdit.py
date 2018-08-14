@@ -25,7 +25,34 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
-defaultIconFile='/biodepot/Bwb_core/icons/default.png'     
+defaultIconFile='/icons/default.png'
+
+def addWidgetToCategory (category,directory,inputDir,inputName,widgetsDir='/widgets'):
+    if not os.path.exists(inputDir):
+        if os.path.exists('{}/{}'.format(widgetsDir,inputName)):
+        #ask if we want to overwrite
+            qm = QtGui.QMessageBox
+            ret=qm.question(self,'', "{} exists - OverWrite ?".format(inputName), qm.Yes | qm.No)
+            if ret == qm.No:
+                return
+        #safer way of removing the widget
+            os.system("cd {} && rm -rf {}".format(widgetsDir,inputName))    
+        os.system('cp -r {} {}/{}'.format(inputDir,widgetsDir,inputName))
+    try:
+        os.system ("ln -sf  {}/{}/{}.py /biodepot/{}/OW{}.py".format(widgetsDir,inputName,inputName,directory,inputName))
+        title='Add {}'.format(inputName)
+        message='Added {} to {} in ToolDock'.format(inputName,category)
+        QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
+    except:
+        pass
+         
+def removeWidgetFromCategory(self,widgetName,category,directory,widgetsDir='/widgets',removeAll=False):
+    if removeAll:
+        os.system('cd {} && rm {} -rf'.format(widgetsDir,widgetName)) 
+        os.system('find -L /biodepot -type l -delete')
+    else:
+        os.system('cd /biodepot/{} && rm OW{}.py '.format(directory,widgetName))
+        
 class ToolDockEdit(widget.OWWidget):
     name = "ToolDockEditor"
     description = "Edits contents of tool dock"
@@ -100,30 +127,14 @@ class ToolDockEdit(widget.OWWidget):
         self.grid.addWidget(widgetAddBtn,1,7)        
         self.controlArea.layout().addLayout(self.grid)
 
-    def widgetAdd(self,ledit,cbox):
+    def widgetAdd(self,ledit,cbox,widgetsDir='/widgets'):
         category=self.getComboValue(cbox)
         inputDir=self.getLeditValue(ledit)
         if not inputDir:
             return
         inputName=os.path.basename(os.path.normpath(inputDir))
-        if not os.path.exists(inputDir):
-            if os.path.exists('/widgets/{}'.format(inputName)):
-            #ask if we want to overwrite
-                qm = QtGui.QMessageBox
-                ret=qm.question(self,'', "{} exists - OverWrite ?".format(inputName), qm.Yes | qm.No)
-                if ret == qm.No:
-                    return
-            #safer way of removing the widget
-                os.system("cd /widgets && rm -rf {}".format(inputName))    
-            os.system('cp -r {} /widgets/{}'.format(inputDir,inputName))
-        try:
-            directory=self.categoryToDirectory[category]
-            os.system ("ln -sf  /widgets/{}/{}.py /biodepot/{}/OW{}.py".format(inputName,inputName,directory,inputName))
-            title='Add {}'.format(inputName)
-            message='Added {} to {} in ToolDock'.format(inputName,category)
-            QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
-        except:
-            pass
+        directory=self.categoryToDirectory[category] 
+        addWidgetToCategory(category,directory, inputDir,inputName,widgetsDir=widgetsDir)
             
     def drawRemoveWidget(self):
         self.widgetList=(str(os.popen('cd /widgets && ls -d *').read())).split()
@@ -135,26 +146,24 @@ class ToolDockEdit(widget.OWWidget):
         widgetRemoveBtn.setStyleSheet(self.css)
         self.grid.addWidget(widgetRemoveBtn,2,7)
         
-    def widgetRemove(self):
+    def widgetRemove(self,widgetsDir='/widgets'):
         qm = QtGui.QMessageBox
         widgetName=self.getComboValue(self.wbox)
-        if not os.path.exists('/widgets/{}'.format(widgetName)):
+        if not os.path.exists('{}/{}'.format(widgetsDir,widgetName)):
             return
         category=self.getComboValue(self.cbox)
         ret=qm.No
         if category == '_ALL_':
             ret=qm.question(self,'', "Remove {} completely ?".format(widgetName), qm.Yes | qm.No)
             if ret == qm.Yes:
-                os.system('cd /widgets && rm {} -rf'.format(widgetName))
-                #cleanup links
-                os.system('find -L /biodepot -type l -delete')
+                removeWidgetFromCategory(widgetName,category,None,widgetsDir=widgetsDir,removeAll=True)
                 qm.information(self,'Removed widget','Completely removed widget {}'.format(widgetName),QtGui.QMessageBox.Ok)
             #remove from widgetList and set text to new top
         else:
             ret=qm.question(self,'', "Remove {} from category {} ?".format(widgetName,category), qm.Yes | qm.No)
             if ret == qm.Yes:
                 directory=self.categoryToDirectory[category]
-                os.system('cd /biodepot/{} && rm OW{}.py '.format(directory,widgetName))
+                removeWidgetFromCategory(widgetName,category,directory,widgetsDir=widgetsDir,removeAll=True)
                 qm.information(self,'Removed widget','Removed widget {} from {}'.format(widgetName,category),QtGui.QMessageBox.Ok)
     
     def drawAddCategory(self):
