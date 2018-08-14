@@ -1157,7 +1157,7 @@ class OWWidgetBuilder(widget.OWWidget):
         else:
             myFileDir=QtWidgets.QFileDialog.getOpenFileName(self, "Locate file", self.defaultDir)[0]
         if myFileDir:
-            self.data[pname]=myFileDir
+            self.data[attr]=myFileDir
             self.defaultDir=myFileDir
         if ledit:
             ledit.setText(myFileDir)
