@@ -19,8 +19,3 @@ setup(name="User",
       package_data={"User": ["icons/*.svg"]},
       entry_points={"orange.widgets": "User = User"},
       )
-setup(name="Test",
-      packages=["Test"],
-      package_data={"Test": ["icons/*.svg"]},
-      entry_points={"orange.widgets": "Test = Test"},
-      )

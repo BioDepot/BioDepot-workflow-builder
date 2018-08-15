@@ -25,6 +25,8 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
+from makeToolDockCategories import *
+
 defaultIconFile='/icons/default.png'
 
 def addWidgetToCategory (category,directory,inputDir,inputName,widgetsDir='/widgets'):
@@ -39,20 +41,30 @@ def addWidgetToCategory (category,directory,inputDir,inputName,widgetsDir='/widg
             os.system("cd {} && rm -rf {}".format(widgetsDir,inputName))    
         os.system('cp -r {} {}/{}'.format(inputDir,widgetsDir,inputName))
     try:
-        os.system ("ln -sf  {}/{}/{}.py /biodepot/{}/OW{}.py".format(widgetsDir,inputName,inputName,directory,inputName))
+        os.system ("ln -sf  {}/{}/{}.py {}/{}/OW{}.py".format(widgetsDir,inputName,inputName,self.basePath,directory,inputName))
         title='Add {}'.format(inputName)
         message='Added {} to {} in ToolDock'.format(inputName,category)
         QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
     except:
         pass
          
-def removeWidgetFromCategory(self,widgetName,category,directory,widgetsDir='/widgets',removeAll=False):
+def removeWidgetFromCategory(widgetName,category,directory,widgetsDir='/widgets',removeAll=False):
     if removeAll:
         os.system('cd {} && rm {} -rf'.format(widgetsDir,widgetName)) 
-        os.system('find -L /biodepot -type l -delete')
+        os.system('find -L {} -type l -delete'.format(self.basePath))
     else:
-        os.system('cd /biodepot/{} && rm OW{}.py '.format(directory,widgetName))
-        
+        os.system('cd {}/{} && rm OW{}.py '.format(self.basePath,directory,widgetName))
+
+def addCategoryToToolBox(basePath,category,iconFile=None):
+    directory=niceForm(category,allowDash=False)
+    makeNewDirectory(basePath,directory,iconFile)
+    with open('{}/setup.py'.format(basePath),'a+') as f:
+        f.write(entryString(category,directory))
+    return directory
+
+def registerDirectory(basepath):
+    os.system('cd {} && pip install -e .'.format(basepath))
+
 class ToolDockEdit(widget.OWWidget):
     name = "ToolDockEditor"
     description = "Edits contents of tool dock"
@@ -77,6 +89,7 @@ class ToolDockEdit(widget.OWWidget):
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
         '''
+        self.basePath='/biodepot'
         self.setStyleSheet(self.css)
         self.browseIcon=QtGui.QIcon('/icons/bluefile.png')
         self.addIcon=QtGui.QIcon('/icons/add.png')
@@ -86,6 +99,7 @@ class ToolDockEdit(widget.OWWidget):
         self.controlArea.setMinimumWidth(500)
         self.controlArea.setMinimumHeight(120)
         self.startWidget()
+       
 
     
     def clearLayout(self,layout):
@@ -108,14 +122,17 @@ class ToolDockEdit(widget.OWWidget):
         self.drawRemoveCategory()
         
         #self.setStyleSheet(":disabled { color: #282828}")
-        
-    def initCategories(self):
-        self.categories=(str(os.popen('''grep -oP 'name="\K[^"]+' /biodepot/setup.py''').read())).split()
+    
+    def updateCategories(self):
+        self.categories=(str(os.popen('''grep -oP 'name="\K[^"]+' {}/setup.py'''.format(self.basePath)).read())).split()
         #directories are not same as categories because Python/Linux unfriendly characters are changed
-        self.directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' /biodepot/setup.py''').read())).split()
+        self.directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' {}/setup.py'''.format(self.basePath)).read())).split()
         self.categoryToDirectory={}
         for index, category in enumerate(self.categories):
-            self.categoryToDirectory[category]=self.directoryList[index]
+            self.categoryToDirectory[category]=self.directoryList[index]            
+    
+    def initCategories(self):
+        self.updateCategories()
         self.clearLayout(self.controlArea.layout())
         
     def drawAddWidget(self):
@@ -168,7 +185,7 @@ class ToolDockEdit(widget.OWWidget):
     
     def drawAddCategory(self):
         nameLedit=self.makeLedit(self.grid,'Enter category name','Add category:',startRow=3)
-        iconLedit=self.makeLedit(self.grid,'Enter icon file','with icon',startRow=3,startColumn=4,browse=True)
+        iconLedit=self.makeLedit(self.grid,'Enter icon file','with icon',startRow=3,startColumn=4,browse=True,browseFileFlag=True)
         catAddBtn = gui.button(None, self, "Add", callback= lambda: self.categoryAdd(nameLedit,iconLedit))
         catAddBtn.setFixedSize(30,20)
         catAddBtn.setStyleSheet(self.css)
@@ -179,12 +196,38 @@ class ToolDockEdit(widget.OWWidget):
         catRemoveBtn = gui.button(None, self, "Remove", callback= lambda: self.categoryRemove(cbox))
         catRemoveBtn.setFixedSize(60,20)
         catRemoveBtn.setStyleSheet(self.css)
-        self.grid.addWidget(catRemoveBtn,4,3)
+        self.grid.addWidget(catRemoveBtn,4,7)
                      
     def categoryAdd(self,nameLedit,iconLedit):
-        pass
-    def categoryRemove(self,nameLedit):
-        pass
+        qm = QtGui.QMessageBox
+        category=self.getLeditValue(nameLedit)
+        if not category:
+            return
+        if category in self.categories:
+            qm.information(self,'Add category','category {} already in ToolDock'.format(category),QtGui.QMessageBox.Ok)
+            return
+        iconFile=self.getLeditValue(iconLedit)
+        directory=addCategoryToToolBox(self.basePath,category,iconFile=iconFile)
+        registerDirectory(self.basePath)
+        qm.information(self,'Add category','Added category {} to directory {} in ToolDock'.format(category,directory),QtGui.QMessageBox.Ok)
+        self.updateCategories()
+           
+    def categoryRemove(self,nameCombo):
+        qm = QtGui.QMessageBox
+        category=self.getComboValue(nameCombo)
+        if not category:
+            return
+        self.updateCategories()
+        if(category not in self.categories):
+            qm.information(self,'Remove category', 'Category {} not in ToolDock'.format(category),QtGui.QMessageBox.Ok)
+            return
+        ret=qm.question(self,'', "Remove {} from ToolDock ?".format(category), qm.Yes | qm.No)
+        if ret == qm.No:
+            return
+        removeCategoryFromToolDock(self.basePath,category,self.categoryToDirectory[category])
+        registerDirectory(self.basePath)
+        self.updateCategories()
+
         
     def getCategoryList(self,widgetName):
         #categories may not be directories
@@ -193,13 +236,12 @@ class ToolDockEdit(widget.OWWidget):
         returnList=[]
         for category in self.categories:
             directory=self.categoryToDirectory[category]
-            sys.stderr.write('/biodepot/{}/OW{}.py\n'.format(directory,widgetName))
-            if os.path.exists('/biodepot/{}/OW{}.py'.format(directory,widgetName)):
+            if os.path.exists('{}/{}/OW{}.py'.format(self.basePath,directory,widgetName)):
                 returnList.append(category)
         returnList.insert(0,'_ALL_')
         return returnList
 
-    def makeLedit(self,layout,text=None,label=None,startRow=1,startColumn=1,browse=False):
+    def makeLedit(self,layout,text=None,label=None,startRow=1,startColumn=1,browse=False,browseFileFlag=False):
         leditLabel=None
         if(label):
             leditLabel=QtGui.QLabel(label)
@@ -210,14 +252,17 @@ class ToolDockEdit(widget.OWWidget):
         layout.addWidget(leditLabel,startRow,startColumn)
         layout.addWidget(ledit,startRow,startColumn+1)
         if browse:
-            button=gui.button(None, self, "",callback= lambda: self.browseWidget(ledit),autoDefault=True, width=19, height=19)
+            button=gui.button(None, self, "",callback= lambda: self.browseWidget(ledit,browseFileFlag),autoDefault=True, width=19, height=19)
             button.setIcon(self.browseIcon)
             layout.addWidget(button,startRow,startColumn+2)
         return ledit
         
-    def browseWidget(self, ledit):
+    def browseWidget(self, ledit, browseFileFlag=False):
+        if browseFileFlag:
+            ledit.setText(str(QtWidgets.QFileDialog.getOpenFileName(self, "Locate file", '/widgets')[0]))
+            return
         myFileDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate widget", directory='/widgets')
-        ledit.setText(myFileDir)
+        ledit.setText(str(myFileDir))
             
     def makeComboBox (self,layout,label, elements,startRow=1,startColumn=1,callback=None):
         comboBoxLabel=QtGui.QLabel(label)

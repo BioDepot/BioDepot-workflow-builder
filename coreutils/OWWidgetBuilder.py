@@ -302,6 +302,7 @@ class OWWidgetBuilder(widget.OWWidget):
                 cmd='rsync -av /biodepot/ {}/biodepot/ --delete '.format(myDir) 
                 cmd+= '&& rsync -av /widgets/ {}/widgets/ --delete '.format(myDir)
                 cmd+= '&& rsync -av /workflows/ {}/workflows/ --delete '.format(myDir)
+                cmd+= '&& rsync -av /notebooks/ {}/notebooks/ --delete '.format(myDir)
                 cmd+= '&& docker build -t {} {}'.format(imageName,myDir)
                 self.registerBtn.setEnabled(False)
                 self.rebuildBtn.setEnabled(False)
@@ -557,7 +558,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.isDrawn=False
         self.containerID=None
         self.saveModeIndex=0
-        if widgetID == 'New':
+        if widgetID == '__New':
             qm = QtGui.QMessageBox
             ret=qm.question(self,'', "Create new widget?", qm.Yes | qm.No)
             if ret == qm.No:

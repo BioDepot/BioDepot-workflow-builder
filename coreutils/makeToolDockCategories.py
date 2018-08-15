@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-import sys, os, re
+import sys, os, re 
 
+
+defaultCategoryIcon='/icons/misc.png'
 def niceForm(badString,allowDash='True'):
     #dashes cause problems with hasattr
     #strip and sub spaces
@@ -15,37 +17,29 @@ def niceForm(badString,allowDash='True'):
 def entryString(category,directory):
     ret='setup(name="{}",\n'.format(category)
     ret+='      packages=["{}"],\n'.format(directory)
-    ret+='      package_data={"{}": ["icons/*.svg"]},\n'.format(directory)
-    ret+='      entry_points={"orange.widgets": "{} = {}"},)\n'.format(category)
+    ret+='      package_data={{"{}": ["icons/*.svg"]}},\n'.format(directory)
+    ret+='      entry_points={{"orange.widgets": "{} = {}"}},)\n'.format(category,directory)
     return ret
-    
-def initPyString(icon,background):
-    pass
-    
-def makeNewDirectory(basePath,directory,iconFile):
+
+
+def makeNewDirectory(basePath,directory,iconFile,background='light-purple'):
     if os.path.exists('{}/{}'.format(basePath,directory)):
         return
-    os.system('mkdir -p {}/{}'.format(basePath,directory))
     os.system('mkdir -p {}/{}/icon'.format(basePath,directory))
-    os.system('ln -s {}/{}/icons ../orangebiodepot/icons'.format(basePath,directory))
     os.system('touch {}/{}/__init__.py'.format(basePath,directory))
     with open('{}/{}/__init__.py'.format(basePath,directory),'w') as f:
-        fwrite('import sysconfig\n')
-        if iconFile and os.path.exists (iconFile):
-            os.system(cp {} {}/
-        else:
-        
-def writeSetup(categories,setupFile):
-    directories=[]
-    #make backup if it exists
-    if os.path.exists(setupFile):
-        os.system('cp {} {}.bak'.setupFile)
-    with open(setupFile,'w') as f:
-        for index,category in enumerate(categories):
-            category=niceForm(category)
-            directory=niceForm(category,allowDash=False)
-            f.write(entryString(category,directory))
-            directories.append(directory)
+        f.write('import sysconfig\n')
+        if not iconFile or not os.path.exists (iconFile):
+            iconFile = defaultCategoryIcon
+        iconName=os.path.basename(iconFile)
+        os.system('cp {} {}/{}/icon/.'.format(iconFile,basePath,directory))
+        f.write('ICON = "icon/{}"\n'.format(iconName))
+        f.write('BACKGROUND ="{}"\n'.format(background))
+
+def removeCategoryFromToolDock(basePath,category,directory):
+    setupFile='{}/setup.py'.format(basePath)
+    os.system(''' sed -i '/setup(name="{}"/,/)/d' {}'''.format(category,setupFile))
+    os.system('cd {} && rm -rf {} && rm -rf {}.egg'.format(basePath,directory,directory))
 
 
 

@@ -163,6 +163,7 @@ class SchemeEditWidget(QWidget):
         self.__widgetMenu.addAction(self.__removeSelectedAction)
         self.__widgetMenu.addSeparator()
 #        self.__widgetMenu.addAction(self.__editToolBoxAction)
+        self.__widgetMenu.addAction(self.__newWidgetAction)
         self.__widgetMenu.addAction(self.__editWidgetAction)
         self.__widgetMenu.addSeparator()
         self.__widgetMenu.addAction(self.__helpAction)
@@ -283,6 +284,13 @@ class SchemeEditWidget(QWidget):
                     triggered=self.removeSelected,
                     enabled=False
                     )
+        self.__newWidgetAction = \
+            QAction(self.tr("New widget"), self,
+                    objectName="new-widget",
+                    toolTip=self.tr("Make a new widget"),
+                    triggered=self.newWidget,
+                    enabled=True)
+                    
         self.__editWidgetAction = \
             QAction(self.tr("Edit widget"), self,
                     objectName="edit-widget",
@@ -1502,7 +1510,7 @@ class SchemeEditWidget(QWidget):
         selected = self.selectedNodes()
         if not selected or len(selected) == 0:
             try:
-                widget=OWWidgetBuilder.OWWidgetBuilder(widgetID='New')
+                widget=OWWidgetBuilder.OWWidgetBuilder(widgetID='__New')
             except ValueError:
                 return
             widget.showNormal()
@@ -1511,6 +1519,14 @@ class SchemeEditWidget(QWidget):
         elif len(selected) == 1:
             self.__editSelectedWidget(selected[0])
 
+    def newWidget(self):
+        try:
+            widget=OWWidgetBuilder.OWWidgetBuilder(widgetID='__New')
+        except ValueError:
+            return
+        widget.showNormal()
+        widget.raise_()
+        widget.activateWindow()
             
     def __editSelectedWidget(self, node):
         myWidget = self.scheme().widget_for_node(node)
