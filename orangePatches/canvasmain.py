@@ -527,7 +527,12 @@ class CanvasMainWindow(QMainWindow):
                     triggered=self.reload_last,
                     shortcut=QKeySequence(Qt.ControlModifier | Qt.Key_R)
                     )
-
+        self.reload_settings_action = \
+            QAction(self.tr("Reload settings"), self,
+                    objectName="reload-settings",
+                    toolTip=self.tr("Reload settings"),
+                    triggered=self.reload_settings,
+                    )
         self.clear_recent_action = \
             QAction(self.tr("Clear Menu"), self,
                     objectName="clear-recent-menu-action",
@@ -635,6 +640,7 @@ class CanvasMainWindow(QMainWindow):
         file_menu.addAction(self.open_action)
         file_menu.addAction(self.open_and_freeze_action)
         file_menu.addAction(self.reload_last_action)
+        file_menu.addAction(self.reload_settings_action)
 
         # File -> Open Recent submenu
         self.recent_menu = QMenu(self.tr("Open Recent"), file_menu)
@@ -750,7 +756,11 @@ class CanvasMainWindow(QMainWindow):
         widget.showNormal()
         widget.raise_()
         widget.activateWindow()
-
+        
+    def reload_settings(self):
+        os.system('rm /tmp/pid.{}'.format(os.getpid()))
+        self.close()
+        
     def restore(self):
         """Restore the main window state from saved settings.
         """

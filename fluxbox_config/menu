@@ -16,7 +16,7 @@
 #     session.menuFile: ~/.fluxbox/my-menu
 [begin] (Applications)
 [encoding] {UTF-8}
-  [exec] (Bwb) {orange-canvas} </root/.fluxbox/bwb256.png>
+  [exec] (Bwb) {/bin/runBwb.sh} </root/.fluxbox/bwb256.png>
   [exec] (Terminal) {/bin/bash -c 'export XENVIRONMENT=/root/.Xresources; xterm'}
   [exec] (QUIT Container) {pkill supervisord}
   [endencoding]

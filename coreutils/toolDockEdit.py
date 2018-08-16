@@ -29,7 +29,7 @@ from makeToolDockCategories import *
 
 defaultIconFile='/icons/default.png'
 
-def addWidgetToCategory (category,directory,inputDir,inputName,widgetsDir='/widgets'):
+def addWidgetToCategory (category,directory,inputDir,baseToolPath,inputName,widgetsDir='/widgets'):
     if not os.path.exists(inputDir):
         if os.path.exists('{}/{}'.format(widgetsDir,inputName)):
         #ask if we want to overwrite
@@ -41,19 +41,21 @@ def addWidgetToCategory (category,directory,inputDir,inputName,widgetsDir='/widg
             os.system("cd {} && rm -rf {}".format(widgetsDir,inputName))    
         os.system('cp -r {} {}/{}'.format(inputDir,widgetsDir,inputName))
     try:
-        os.system ("ln -sf  {}/{}/{}.py {}/{}/OW{}.py".format(widgetsDir,inputName,inputName,self.basePath,directory,inputName))
+        os.system ("ln -sf  {}/{}/{}.py {}/{}/OW{}.py".format(widgetsDir,inputName,inputName,baseToolPath,directory,inputName))
         title='Add {}'.format(inputName)
         message='Added {} to {} in ToolDock'.format(inputName,category)
-        QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
+        qm=QtGui.QMessageBox()
+        qm.information(self,title,message,QtGui.QMessageBox.Ok)
     except:
         pass
-         
-def removeWidgetFromCategory(widgetName,category,directory,widgetsDir='/widgets',removeAll=False):
+
+def removeWidgetFromCategory(widgetName,category,directory,baseToolPath,widgetsDir='/widgets',removeAll=False):
     if removeAll:
         os.system('cd {} && rm {} -rf'.format(widgetsDir,widgetName)) 
-        os.system('find -L {} -type l -delete'.format(self.basePath))
+        os.system('find -L {} -type l -delete'.format(baseToolPath))
     else:
-        os.system('cd {}/{} && rm OW{}.py '.format(self.basePath,directory,widgetName))
+        sys.stderr.write('cd {}/{} && rm OW{}.py '.format(baseToolPath,directory,widgetName))
+        os.system('cd {}/{} && rm OW{}.py '.format(baseToolPath,directory,widgetName))
 
 def addCategoryToToolBox(basePath,category,iconFile=None):
     directory=niceForm(category,allowDash=False)
@@ -89,7 +91,7 @@ class ToolDockEdit(widget.OWWidget):
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
         '''
-        self.basePath='/biodepot'
+        self.baseToolPath='/biodepot'
         self.setStyleSheet(self.css)
         self.browseIcon=QtGui.QIcon('/icons/bluefile.png')
         self.addIcon=QtGui.QIcon('/icons/add.png')
@@ -124,9 +126,9 @@ class ToolDockEdit(widget.OWWidget):
         #self.setStyleSheet(":disabled { color: #282828}")
     
     def updateCategories(self):
-        self.categories=(str(os.popen('''grep -oP 'name="\K[^"]+' {}/setup.py'''.format(self.basePath)).read())).split()
+        self.categories=(str(os.popen('''grep -oP 'name="\K[^"]+' {}/setup.py'''.format(self.baseToolPath)).read())).split()
         #directories are not same as categories because Python/Linux unfriendly characters are changed
-        self.directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' {}/setup.py'''.format(self.basePath)).read())).split()
+        self.directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' {}/setup.py'''.format(self.baseToolPath)).read())).split()
         self.categoryToDirectory={}
         for index, category in enumerate(self.categories):
             self.categoryToDirectory[category]=self.directoryList[index]            
@@ -151,7 +153,7 @@ class ToolDockEdit(widget.OWWidget):
             return
         inputName=os.path.basename(os.path.normpath(inputDir))
         directory=self.categoryToDirectory[category] 
-        addWidgetToCategory(category,directory, inputDir,inputName,widgetsDir=widgetsDir)
+        addWidgetToCategory(category,directory,inputDir,self.baseToolPath,inputName,widgetsDir=widgetsDir)
             
     def drawRemoveWidget(self):
         self.widgetList=(str(os.popen('cd /widgets && ls -d *').read())).split()
@@ -163,24 +165,28 @@ class ToolDockEdit(widget.OWWidget):
         widgetRemoveBtn.setStyleSheet(self.css)
         self.grid.addWidget(widgetRemoveBtn,2,7)
         
-    def widgetRemove(self,widgetsDir='/widgets'):
+    def widgetRemove(self):
+        widgetsDir="/widgets"
         qm = QtGui.QMessageBox
+        sys.stderr.write('widget dir is {}\n'.format(widgetsDir))
         widgetName=self.getComboValue(self.wbox)
+        sys.stderr.write('widget dir is {} widget Name is {}\n'.format(widgetsDir,widgetName))
         if not os.path.exists('{}/{}'.format(widgetsDir,widgetName)):
+            qm.information(self,'Non-existent','Widget {}/{} not found'.format(widgetsDir,widgetName),QtGui.QMessageBox.Ok)
             return
         category=self.getComboValue(self.cbox)
         ret=qm.No
         if category == '_ALL_':
             ret=qm.question(self,'', "Remove {} completely ?".format(widgetName), qm.Yes | qm.No)
             if ret == qm.Yes:
-                removeWidgetFromCategory(widgetName,category,None,widgetsDir=widgetsDir,removeAll=True)
+                removeWidgetFromCategory(widgetName,category,None,self.baseToolPath,widgetsDir=widgetsDir,removeAll=True)
                 qm.information(self,'Removed widget','Completely removed widget {}'.format(widgetName),QtGui.QMessageBox.Ok)
             #remove from widgetList and set text to new top
         else:
             ret=qm.question(self,'', "Remove {} from category {} ?".format(widgetName,category), qm.Yes | qm.No)
             if ret == qm.Yes:
                 directory=self.categoryToDirectory[category]
-                removeWidgetFromCategory(widgetName,category,directory,widgetsDir=widgetsDir,removeAll=True)
+                removeWidgetFromCategory(widgetName,category,directory,self.baseToolPath,widgetsDir=widgetsDir,removeAll=True)
                 qm.information(self,'Removed widget','Removed widget {} from {}'.format(widgetName,category),QtGui.QMessageBox.Ok)
     
     def drawAddCategory(self):
@@ -207,7 +213,7 @@ class ToolDockEdit(widget.OWWidget):
             qm.information(self,'Add category','category {} already in ToolDock'.format(category),QtGui.QMessageBox.Ok)
             return
         iconFile=self.getLeditValue(iconLedit)
-        directory=addCategoryToToolBox(self.basePath,category,iconFile=iconFile)
+        directory=addCategoryToToolBox(self.baseToolPath,category,iconFile=iconFile)
         registerDirectory(self.basePath)
         qm.information(self,'Add category','Added category {} to directory {} in ToolDock'.format(category,directory),QtGui.QMessageBox.Ok)
         self.updateCategories()
@@ -224,8 +230,8 @@ class ToolDockEdit(widget.OWWidget):
         ret=qm.question(self,'', "Remove {} from ToolDock ?".format(category), qm.Yes | qm.No)
         if ret == qm.No:
             return
-        removeCategoryFromToolDock(self.basePath,category,self.categoryToDirectory[category])
-        registerDirectory(self.basePath)
+        removeCategoryFromToolDock(self.baseToolPath,category,self.categoryToDirectory[category])
+        registerDirectory(self.baseToolPath)
         self.updateCategories()
 
         
@@ -236,7 +242,7 @@ class ToolDockEdit(widget.OWWidget):
         returnList=[]
         for category in self.categories:
             directory=self.categoryToDirectory[category]
-            if os.path.exists('{}/{}/OW{}.py'.format(self.basePath,directory,widgetName)):
+            if os.path.exists('{}/{}/OW{}.py'.format(self.baseToolPath,directory,widgetName)):
                 returnList.append(category)
         returnList.insert(0,'_ALL_')
         return returnList

@@ -101,6 +101,8 @@ COPY orangePatches/canvasmain.py /orange3/Orange/canvas/application/canvasmain.p
 COPY orangePatches/widgetsscheme.py /orange3/Orange/canvas/scheme/widgetsscheme.py
 COPY orangePatches/signalmanager.py /orange3/Orange/canvas/scheme/signalmanager.py
 
+#add bwb start scripts
+COPY scripts/startBwb.sh /bin/startBwb.sh
 
 #add widgets and workflows
 ADD widgets /widgets/
