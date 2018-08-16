@@ -29,25 +29,33 @@ from makeToolDockCategories import *
 
 defaultIconFile='/icons/default.png'
 
-def addWidgetToCategory (category,directory,inputDir,baseToolPath,inputName,widgetsDir='/widgets'):
-    if not os.path.exists(inputDir):
-        if os.path.exists('{}/{}'.format(widgetsDir,inputName)):
+def addWidgetToCategory (category,directory,widgetPath,baseToolPath,widgetName,sourceWidgetsDir='/widgets',confirmation=True):
+    if not os.path.exists(widgetPath):
+        if os.path.exists('{}/{}'.format(sourceWidgetsDir,widgetName)):
         #ask if we want to overwrite
             qm = QtGui.QMessageBox
-            ret=qm.question(self,'', "{} exists - OverWrite ?".format(inputName), qm.Yes | qm.No)
+            ret=qm.question(self,'', "{} exists - OverWrite ?".format(widgetName), qm.Yes | qm.No)
             if ret == qm.No:
                 return
         #safer way of removing the widget
-            os.system("cd {} && rm -rf {}".format(widgetsDir,inputName))    
-        os.system('cp -r {} {}/{}'.format(inputDir,widgetsDir,inputName))
+            os.system("cd {} && rm -rf {}".format(sourceWidgetsDir,widgetName))    
+        os.system('cp -r {} {}/{}'.format(widgetPath,sourceWidgetsDir,widgetName))
     try:
-        os.system ("ln -sf  {}/{}/{}.py {}/{}/OW{}.py".format(widgetsDir,inputName,inputName,baseToolPath,directory,inputName))
-        title='Add {}'.format(inputName)
-        message='Added {} to {} in ToolDock'.format(inputName,category)
-        qm=QtGui.QMessageBox()
-        qm.information(self,title,message,QtGui.QMessageBox.Ok)
+        os.system ("ln -sf  {}/{}/{}.py {}/{}/OW{}.py".format(sourceWidgetsDir,widgetName,widgetName,baseToolPath,directory,widgetName))
+        if confirmation:
+            title='Add {}'.format(widgetName)
+            message='Added {} to {} in ToolDock'.format(widgetName,category)
+            qm=QtGui.QMessageBox()
+            qm.information(self,title,message,QtGui.QMessageBox.Ok)
     except:
         pass
+def addWidgetsFromWorkflow(baseToolPath,workflowPath,destDirectory):
+    workflowName=os.basename(workflowPath)
+    widgetsDir='{}/widgets'.format(workflowPath)
+    widgetNames=os.listdir(widgetsDir)
+    for widgetName in widgetNames:
+        os.system ("ln -sf  {}/{}/{}.py {}/{}/OW{}.py".format(widgetsDir,widgetName,widgetName,baseToolPath,destDirectory,widgetName))
+    
 
 def removeWidgetFromCategory(widgetName,category,directory,baseToolPath,widgetsDir='/widgets',removeAll=False):
     if removeAll:
@@ -57,15 +65,15 @@ def removeWidgetFromCategory(widgetName,category,directory,baseToolPath,widgetsD
         sys.stderr.write('cd {}/{} && rm OW{}.py '.format(baseToolPath,directory,widgetName))
         os.system('cd {}/{} && rm OW{}.py '.format(baseToolPath,directory,widgetName))
 
-def addCategoryToToolBox(basePath,category,iconFile=None):
+def addCategoryToToolBox(baseToolPath,category,iconFile=None,background='light-purple'):
     directory=niceForm(category,allowDash=False)
-    makeNewDirectory(basePath,directory,iconFile)
-    with open('{}/setup.py'.format(basePath),'a+') as f:
+    makeNewDirectory(baseToolPath,directory,iconficonFile,background)
+    with open('{}/setup.py'.format(baseToolPath),'a+') as f:
         f.write(entryString(category,directory))
     return directory
 
-def registerDirectory(basepath):
-    os.system('cd {} && pip install -e .'.format(basepath))
+def registerDirectory(baseToolPath):
+    os.system('cd {} && pip install -e .'.format(baseToolPath))
 
 class ToolDockEdit(widget.OWWidget):
     name = "ToolDockEditor"
