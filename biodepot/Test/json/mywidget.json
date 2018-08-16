@@ -1,1 +1,0 @@
-{"autoMap": true, "category": "User", "command": ["echo \"Hello World\""], "description": "", "docker_image_name": "biodepot/alpine-bash", "docker_image_tag": "latest", "icon": "/data/download.png", "inputs": null, "name": "mywidget", "outputs": null, "parameters": null, "persistentSettings": "all", "priority": "10", "requiredParameters": [], "volumes": null}

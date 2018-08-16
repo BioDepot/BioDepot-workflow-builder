@@ -1,0 +1,13 @@
+STARDemo/OWdeseq2.py
+STARDemo/OWdownloadURL.py
+STARDemo/OWfastqDump.py
+STARDemo/OWgnumeric.py
+STARDemo/OWstarAlign.py
+STARDemo/OWstarIndex.py
+STARDemo/OWstartodeseq2.py
+STARDemo/__init__.py
+STARDemo.egg-info/PKG-INFO
+STARDemo.egg-info/SOURCES.txt
+STARDemo.egg-info/dependency_links.txt
+STARDemo.egg-info/entry_points.txt
+STARDemo.egg-info/top_level.txt

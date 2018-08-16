@@ -1,0 +1,3 @@
+[orange.widgets]
+kallistoDemo = kallistoDemo
+

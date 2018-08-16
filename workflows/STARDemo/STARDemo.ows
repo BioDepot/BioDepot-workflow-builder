@@ -1,14 +1,14 @@
 <?xml version='1.0' encoding='utf-8'?>
 <scheme description="" title="" version="2.0">
 	<nodes>
-		<node id="0" name="downloadURL" position="(318.0, 136.0)" project_name="STARDemoUtilities" qualified_name="STARDemoUtilities.OWdownloadURL.OWdownloadURL" title="Download release-91 GRCh38 files" version="" />
-		<node id="1" name="starIndex" position="(531.0, 134.0)" project_name="STARDemoRNA-seq" qualified_name="STARDemoRNA_seq.OWstarIndex.OWstarIndex" title="Star index" version="" />
-		<node id="2" name="fastqDump" position="(534.0, 368.0)" project_name="STARDemoUtilities" qualified_name="STARDemoUtilities.OWfastqDump.OWfastqDump" title="fastqDump" version="" />
-		<node id="3" name="starAlign" position="(753.0, 140.0)" project_name="STARDemoRNA-seq" qualified_name="STARDemoRNA_seq.OWstarAlign.OWstarAlign" title="Star Align" version="" />
-		<node id="4" name="downloadURL" position="(91.0, 143.0)" project_name="STARDemoUtilities" qualified_name="STARDemoUtilities.OWdownloadURL.OWdownloadURL" title="Download STAR tutorial setup files" version="" />
-		<node id="5" name="deseq2" position="(1115.0, 140.0)" project_name="STARDemoRNA-seq" qualified_name="STARDemoRNA_seq.OWdeseq2.OWdeseq2" title="DESeq2" version="" />
-		<node id="6" name="startodeseq2" position="(919.0, 139.0)" project_name="STARDemoRNA-seq" qualified_name="STARDemoRNA_seq.OWstartodeseq2.OWstartodeseq2" title="Star to DESeq2" version="" />
-		<node id="7" name="gnumeric" position="(1307.0, 142.0)" project_name="STARDemoUtilities" qualified_name="STARDemoUtilities.OWgnumeric.OWgnumeric" title="gnumeric" version="" />
+		<node id="0" name="downloadURL" position="(318.0, 136.0)" project_name="STARDemo" qualified_name="STARDemo.OWdownloadURL.OWdownloadURL" title="Download release-91 GRCh38 files" version="" />
+		<node id="1" name="starIndex" position="(531.0, 134.0)" project_name="STARDemo" qualified_name="STARDemo.OWstarIndex.OWstarIndex" title="Star index" version="" />
+		<node id="2" name="fastqDump" position="(534.0, 368.0)" project_name="STARDemo" qualified_name="STARDemo.OWfastqDump.OWfastqDump" title="fastqDump" version="" />
+		<node id="3" name="starAlign" position="(753.0, 140.0)" project_name="STARDemo" qualified_name="STARDemo.OWstarAlign.OWstarAlign" title="Star Align" version="" />
+		<node id="4" name="downloadURL" position="(91.0, 143.0)" project_name="STARDemo" qualified_name="STARDemo.OWdownloadURL.OWdownloadURL" title="Download STAR tutorial setup files" version="" />
+		<node id="5" name="deseq2" position="(1115.0, 140.0)" project_name="STARDemo" qualified_name="STARDemo.OWdeseq2.OWdeseq2" title="DESeq2" version="" />
+		<node id="6" name="startodeseq2" position="(919.0, 139.0)" project_name="STARDemo" qualified_name="STARDemo.OWstartodeseq2.OWstartodeseq2" title="Star to DESeq2" version="" />
+		<node id="7" name="gnumeric" position="(1307.0, 142.0)" project_name="STARDemo" qualified_name="STARDemo.OWgnumeric.OWgnumeric" title="gnumeric" version="" />
 	</nodes>
 	<links>
 		<link enabled="true" id="0" sink_channel="Trigger" sink_node_id="1" source_channel="directory" source_node_id="0" />

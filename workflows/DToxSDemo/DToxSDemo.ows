@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <scheme description="" title="" version="2.0">
 	<nodes>
-		<node id="0" name="downloadURL" position="(130.0, 426.0)" project_name="dToxSDemoUtilities" qualified_name="dToxSDemoUtilities.OWdownloadURL.OWdownloadURL" title="Download dtoxS files" version="" />
-		<node id="1" name="downloadURL" position="(468.0, 426.0)" project_name="dToxSDemoUtilities" qualified_name="dToxSDemoUtilities.OWdownloadURL.OWdownloadURL" title="Download complete counts" version="" />
-		<node id="2" name="DtoxSAlignment" position="(307.0, 425.0)" project_name="dToxSDemoRNA-seq" qualified_name="dToxSDemoRNA_seq.OWDtoxSAlignment.OWDtoxSAlignment" title="DtoxS alignment" version="" />
-		<node id="3" name="DtoxSAnalysis" position="(624.0, 428.0)" project_name="dToxSDemoRNA-seq" qualified_name="dToxSDemoRNA_seq.OWDtoxSAnalysis.OWDtoxSAnalysis" title="DtoxS analysis" version="" />
-		<node id="4" name="gnumeric" position="(800.0, 427.0)" project_name="dToxSDemoUtilities" qualified_name="dToxSDemoUtilities.OWgnumeric.OWgnumeric" title="gnumeric" version="" />
+		<node id="0" name="downloadURL" position="(130.0, 426.0)" project_name="DToxSDemo" qualified_name="DToxSDemo.OWdownloadURL.OWdownloadURL" title="Download dtoxS files" version="" />
+		<node id="1" name="downloadURL" position="(468.0, 426.0)" project_name="DToxSDemo" qualified_name="DToxSDemo.OWdownloadURL.OWdownloadURL" title="Download complete counts" version="" />
+		<node id="2" name="DtoxSAlignment" position="(307.0, 425.0)" project_name="DToxSDemo" qualified_name="DToxSDemo.OWDtoxSAlignment.OWDtoxSAlignment" title="DtoxS alignment" version="" />
+		<node id="3" name="DtoxSAnalysis" position="(624.0, 428.0)" project_name="DToxSDemo" qualified_name="DToxSDemo.OWDtoxSAnalysis.OWDtoxSAnalysis" title="DtoxS analysis" version="" />
+		<node id="4" name="gnumeric" position="(800.0, 427.0)" project_name="DToxSDemo" qualified_name="DToxSDemo.OWgnumeric.OWgnumeric" title="gnumeric" version="" />
 	</nodes>
 	<links>
 		<link enabled="true" id="0" sink_channel="trigger" sink_node_id="2" source_channel="directory" source_node_id="0" />
