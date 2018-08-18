@@ -192,7 +192,7 @@ class CanvasMainWindow(QMainWindow):
         self.setup_actions()
         self.setup_ui()
         self.setup_menu()
-
+        #os.system('mkdir -p /tmp/pid.{}'.format(os.getpid()))
         self.restore()
 
     def setup_ui(self):
@@ -758,7 +758,7 @@ class CanvasMainWindow(QMainWindow):
         widget.activateWindow()
         
     def reload_settings(self):
-        os.system('rm /tmp/pid.{}'.format(os.getpid()))
+        os.system('rm /tmp/pid.{} -rf'.format(os.getpid()))
         self.close()
         
     def restore(self):

@@ -167,8 +167,7 @@ class BwbGuiElements():
     def disableAll(self):
         for attr in self._dict.keys():
             self.disable(attr)
-
-            
+       
     def reenableAll(self,OWself):
         for attr in self._dict.keys():
             if not OWself.inputConnections.isConnected(attr) :
@@ -275,7 +274,7 @@ class OWBwBWidget(widget.OWWidget):
                 bwbVolAttr=mapping['attr']
                 if not hasattr(self, bwbVolAttr) :
                     setattr(self,bwbVolAttr,None)
-
+                    
 
 #Drawing the GUI
     def drawGUI(self):
@@ -1046,18 +1045,21 @@ class OWBwBWidget(widget.OWWidget):
         cmd=self.generateCmdFromData()
         self.envVars={}
         self.getEnvironmentVariables()
+       
         try:
             imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics)
+            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings())
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
             self.pConsole.writeMessage("unable to start Docker command "+ str(e))
             self.setStatusMessage('Error')
-
+    
+    def portMappings(self):
+        return None 
     def checkRequiredParms(self):
         for parm in self.data['requiredParameters']:
             if hasattr(self,parm):

@@ -215,7 +215,6 @@ def check_for_updates():
 
 
 def main(argv=None):
-    sys.stderr.write('pid inside is {}\n'.format(os.getpid()))
     if argv is None:
         argv = sys.argv
 

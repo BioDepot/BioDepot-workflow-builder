@@ -324,7 +324,7 @@ class OWWidgetBuilder(widget.OWWidget):
         if 'category' not in self.data:
             self.data['category']='User'
         for attr in ('name','description','category','docker_image_name','docker_image_tag',
-            'priority','icon','inputs','outputs','volumes','parameters','command','autoMap'):
+            'priority','icon','inputs','outputs','volumes','ports','parameters','command','autoMap'):
             if attr in self.data and self.data[attr]:
                 myData[attr]=deepcopy(self.data[attr])
             else:
@@ -354,6 +354,12 @@ class OWWidgetBuilder(widget.OWWidget):
                 myMappings.append({'conVolume':volume['containerVolume'], 'attr' : attr})
             myData['volumeMappings']=myMappings
             myData.pop('volumes',None)
+        if 'ports' in myData and myData['ports']:
+            myPortMappings=[]
+            for attr, pvalue in myData['ports'].items():
+                myPortMappings.append({'containerPorts':pvalue['containerPort'], 'attr' : attr})
+            myData['portMappings']=myPortMappings
+            myData.pop('ports',None) 
         #replace text str with type(str)
         for pname in ('inputs','outputs'):
             if pname in myData and myData[pname]:
@@ -634,6 +640,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.drawIListWidget('inputs',layout=self.tabs.add('Inputs'))            
         self.drawOListWidget('outputs',layout=self.tabs.add('Outputs'))
         self.drawVolumeListWidget('volumes',layout=self.tabs.add('Volumes'))
+        self.drawPortsListWidget('ports',layout=self.tabs.add('Ports'))
         self.drawParamsListWidget('parameters',layout=self.tabs.add('Parameters'))
         self.drawCommand('command',layout=self.tabs.add('Command'))
         self.drawDocker('buildCommand',layout=self.tabs.add('Docker'))
@@ -1086,7 +1093,6 @@ class OWWidgetBuilder(widget.OWWidget):
         widgetList=[('name',nameBox),('default',defaultBox),('type',comboBox)]
         self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
 
-
     def drawVolumeListWidget (self,pname,layout=None):
         nameBox=self.makeLedit(pname+'Name','Enter name','Name')
         volumeBox=self.makeLedit(pname+'volumeLedit','Enter volume','Additional volume')
@@ -1094,6 +1100,12 @@ class OWWidgetBuilder(widget.OWWidget):
         autoMapCb=self.makeCheckBox ('autoMap','Pass current Bwb volumes to container',default=True,persist=True,track=True)
         self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList,otherWidgets=[autoMapCb])
         
+    def drawPortsListWidget (self,pname,layout=None):
+        nameBox=self.makeLedit(pname+'Name','Enter variable name','Host port variable')
+        containerPortBox=self.makeLedit(pname+'containerPort','Enter container port','container port')
+        widgetList=[('name',nameBox),('containerPort',containerPortBox)]
+        self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
+                
     def drawParamsListWidget (self, pname, layout=None):
         nameBox=self.makeLedit(pname+'nameLedit','Enter name','Name')
         flagBox=self.makeLedit(pname+'flagLedit','Enter flag', 'flag',addCheckBox=True)
