@@ -1,3 +1,0 @@
-[orange.widgets]
-STARDemo = STARDemo
-

@@ -1,3 +1,0 @@
-[orange.widgets]
-Test = Test
-

@@ -1,4 +1,3 @@
-User/OWFile.py
 User/__init__.py
 User.egg-info/PKG-INFO
 User.egg-info/SOURCES.txt

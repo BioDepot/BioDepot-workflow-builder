@@ -1,0 +1,12 @@
+Demo_STAR/OWdeseq2.py
+Demo_STAR/OWdownloadURL.py
+Demo_STAR/OWfastqDump.py
+Demo_STAR/OWgnumeric.py
+Demo_STAR/OWstarAlign.py
+Demo_STAR/OWstarIndex.py
+Demo_STAR/OWstartodeseq2.py
+Demo_STAR.egg-info/PKG-INFO
+Demo_STAR.egg-info/SOURCES.txt
+Demo_STAR.egg-info/dependency_links.txt
+Demo_STAR.egg-info/entry_points.txt
+Demo_STAR.egg-info/top_level.txt

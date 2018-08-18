@@ -19,11 +19,17 @@ setup(name="User",
       package_data={"User": ["icons/*.svg"]},
       entry_points={"orange.widgets": "User = User"},
       )
-setup(name="DToxSDemo",
-      packages=["DToxSDemo"],
-      package_data={"DToxSDemo": ["icons/*.svg"]},
-      entry_points={"orange.widgets": "DToxSDemo = DToxSDemo"},)
-setup(name="kallistoDemo",
-      packages=["kallistoDemo"],
-      package_data={"kallistoDemo": ["icons/*.svg"]},
-      entry_points={"orange.widgets": "kallistoDemo = kallistoDemo"},)
+setup(name="Demo_DToxS",
+      packages=["Demo_DToxS"],
+      package_data={"Demo_DToxS": ["icons/*.svg"]},
+      entry_points={"orange.widgets": "Demo_DToxS = Demo_DToxS"},)
+      
+setup(name="Demo_kallisto",
+      packages=["Demo_kallisto"],
+      package_data={"Demo_kallisto": ["icons/*.svg"]},
+      entry_points={"orange.widgets": "Demo_kallisto = Demo_kallisto"},)
+      
+setup(name="Demo_STAR",
+      packages=["Demo_STAR"],
+      package_data={"Demo_STAR": ["icons/*.svg"]},
+      entry_points={"orange.widgets": "Demo_STAR = Demo_STAR"},)

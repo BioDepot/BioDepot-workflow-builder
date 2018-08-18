@@ -1,0 +1,25 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme description="" title="" version="2.0">
+	<nodes>
+		<node id="0" name="downloadURL" position="(130.0, 426.0)" project_name="Demo_DtoxS" qualified_name="Demo_DtoxS.OWdownloadURL.OWdownloadURL" title="Download dtoxS files" version="" />
+		<node id="1" name="downloadURL" position="(468.0, 426.0)" project_name="Demo_DtoxS" qualified_name="Demo_DtoxS.OWdownloadURL.OWdownloadURL" title="Download complete counts" version="" />
+		<node id="2" name="DtoxSAlignment" position="(307.0, 425.0)" project_name="Demo_DtoxS" qualified_name="Demo_DtoxS.OWDtoxSAlignment.OWDtoxSAlignment" title="DtoxS alignment" version="" />
+		<node id="3" name="DtoxSAnalysis" position="(624.0, 428.0)" project_name="Demo_DtoxS" qualified_name="Demo_DtoxS.OWDtoxSAnalysis.OWDtoxSAnalysis" title="DtoxS analysis" version="" />
+		<node id="4" name="gnumeric" position="(800.0, 427.0)" project_name="Demo_DtoxS" qualified_name="Demo_DtoxS.OWgnumeric.OWgnumeric" title="gnumeric" version="" />
+	</nodes>
+	<links>
+		<link enabled="true" id="0" sink_channel="trigger" sink_node_id="2" source_channel="directory" source_node_id="0" />
+		<link enabled="true" id="1" sink_channel="trigger" sink_node_id="1" source_channel="topDir" source_node_id="2" />
+		<link enabled="true" id="2" sink_channel="Trigger" sink_node_id="3" source_channel="directory" source_node_id="1" />
+		<link enabled="true" id="3" sink_channel="inputFile" sink_node_id="4" source_channel="topGenesFile" source_node_id="3" />
+	</links>
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties format="literal" node_id="0">{'URL': ['https://drive.google.com/open?id=16QHgiI_9QYuCukjZQmw03u7w374R3kt1'], 'concatenateFile': '', 'controlAreaVisible': True, 'decompress': True, 'directory': '/data', 'exportGraphics': False, 'inputConnectionsStore': {}, 'optionsChecked': {'decompress': False, 'concatenateFile': False, 'saveLog': False}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x04\x7f\x00\x00\x001\x00\x00\x06p\x00\x00\x02\x15\x00\x00\x04\x7f\x00\x00\x001\x00\x00\x06p\x00\x00\x02\x15\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {}, '__version__': 1}</properties>
+		<properties format="literal" node_id="1">{'URL': ['https://drive.google.com/open?id=1gtR-udbh5Cj99mQaN8zZw2aWWEtF_rTN'], 'concatenateFile': '', 'controlAreaVisible': True, 'decompress': True, 'directory': '/data/LINCS', 'exportGraphics': False, 'inputConnectionsStore': {'trigger': [None]}, 'optionsChecked': {'decompress': False, 'concatenateFile': False, 'saveLog': False}, 'runMode': 2, 'runTriggers': ['trigger'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x05\x83\x00\x00\x03\n\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x05\x83\x00\x00\x03\n\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {'trigger': True}, '__version__': 1}</properties>
+		<properties format="literal" node_id="2">{'barcodesFile': 'barcodes_trugrade_96_set4.dat', 'controlAreaVisible': True, 'exportGraphics': False, 'inputConnectionsStore': {'trigger': [None]}, 'lanes': 6, 'optionsChecked': {'saveLog': False}, 'runMode': 2, 'runTriggers': ['trigger'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x05"\x00\x00\x02\xe3\x00\x00\x02\xe7\x00\x00\x01S\x00\x00\x05"\x00\x00\x02\xe3\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'seriesName': '20150409', 'topDir': '/data/LINCS', 'triggerReady': {'trigger': True}, '__version__': 1}</properties>
+		<properties format="literal" node_id="3">{'ConfigurationFile': '/data/LINCS/Configs/Configs.LINCS.Dataset.Gene.LINCS.20150409.tsv', 'RepositoryDirectory': '/data/LINCS', 'controlAreaVisible': True, 'exportGraphics': False, 'inputConnectionsStore': {}, 'optionsChecked': {'saveLog': False, 'topGenesFile': True}, 'runMode': 2, 'runTriggers': ['Trigger'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x00\xc9\x00\x00\x00f\x00\x00\x03\x0c\x00\x00\x02\x0e\x00\x00\x00\xc9\x00\x00\x00f\x00\x00\x03\x0c\x00\x00\x02\x0e\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'topGenesFile': '/data/LINCS/Results/FDR-0.1/TOP-40.tsv', 'triggerReady': {'Trigger': True}, '__version__': 1}</properties>
+		<properties format="literal" node_id="4">{'controlAreaVisible': True, 'exportGraphics': True, 'inputConnectionsStore': {'inputFile': [None, 7]}, 'inputFile': '/data/LINCS/Results/FDR-0.1/TOP-40.tsv', 'optionsChecked': {'inputFile': True, 'saveLog': False}, 'runMode': 2, 'runTriggers': ['inputFile'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x02\xe7\x00\x00\x01Q\x00\x00\x05\x1c\x00\x00\x02S\x00\x00\x02\xe7\x00\x00\x01Q\x00\x00\x05\x1c\x00\x00\x02S\x00\x00\x00\x00\x00\x00\x00\x00\x06\xab', 'triggerReady': {'inputFile': True}, '__version__': 1}</properties>
+	</node_properties>
+</scheme>

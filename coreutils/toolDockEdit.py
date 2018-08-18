@@ -67,7 +67,7 @@ def removeWidgetFromCategory(widgetName,category,directory,baseToolPath,widgetsD
 
 def addCategoryToToolBox(baseToolPath,category,iconFile=None,background='light-purple'):
     directory=niceForm(category,allowDash=False)
-    makeNewDirectory(baseToolPath,directory,iconficonFile,background)
+    makeNewDirectory(baseToolPath,directory,iconFile,background='light-red')
     with open('{}/setup.py'.format(baseToolPath),'a+') as f:
         f.write(entryString(category,directory))
     return directory
@@ -222,7 +222,7 @@ class ToolDockEdit(widget.OWWidget):
             return
         iconFile=self.getLeditValue(iconLedit)
         directory=addCategoryToToolBox(self.baseToolPath,category,iconFile=iconFile)
-        registerDirectory(self.basePath)
+        registerDirectory(self.baseToolPath)
         qm.information(self,'Add category','Added category {} to directory {} in ToolDock'.format(category,directory),QtGui.QMessageBox.Ok)
         self.updateCategories()
            
