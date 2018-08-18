@@ -354,12 +354,14 @@ class OWWidgetBuilder(widget.OWWidget):
                 myMappings.append({'conVolume':volume['containerVolume'], 'attr' : attr})
             myData['volumeMappings']=myMappings
             myData.pop('volumes',None)
+        #add port mappings    
         if 'ports' in myData and myData['ports']:
             myPortMappings=[]
             for attr, pvalue in myData['ports'].items():
-                myPortMappings.append({'containerPorts':pvalue['containerPort'], 'attr' : attr})
+                myPortMappings.append({'containerPort':pvalue['containerPort'], 'attr' : attr})
             myData['portMappings']=myPortMappings
             myData.pop('ports',None) 
+            
         #replace text str with type(str)
         for pname in ('inputs','outputs'):
             if pname in myData and myData[pname]:

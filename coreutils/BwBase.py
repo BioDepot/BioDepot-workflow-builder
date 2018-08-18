@@ -267,6 +267,7 @@ class OWBwBWidget(widget.OWWidget):
         #For compatibility if triggers are not being kept
         if not hasattr(self,'triggerReady'):
             self.triggerReady={}        
+        
     def initVolumes(self):
         #initializes container volumes
         if 'volumeMappings' in self.data and self.data['volumeMappings']:
@@ -274,7 +275,6 @@ class OWBwBWidget(widget.OWWidget):
                 bwbVolAttr=mapping['attr']
                 if not hasattr(self, bwbVolAttr) :
                     setattr(self,bwbVolAttr,None)
-                    
 
 #Drawing the GUI
     def drawGUI(self):
@@ -1057,9 +1057,21 @@ class OWBwBWidget(widget.OWWidget):
             self.reenableExec()
             self.pConsole.writeMessage("unable to start Docker command "+ str(e))
             self.setStatusMessage('Error')
+            
     
     def portMappings(self):
-        return None 
+        if 'portMappings' in self.data:
+            mappings=[]
+            for mapping in self.data['portMappings']:
+                sys.stderr.write('mapping is {}\n'.format(mapping))
+                if mapping['attr'] and hasattr(self,mapping['attr']) :
+                    hostPort=getattr(self,mapping['attr'])
+                    sys.stderr.write('{} hostPort value\n'.format(hostPort))
+                    mappings.append('{}:{}'.format(hostPort,mapping['containerPort']))
+            if mappings:
+                return mappings            
+        return None
+         
     def checkRequiredParms(self):
         for parm in self.data['requiredParameters']:
             if hasattr(self,parm):
@@ -1140,14 +1152,24 @@ class OWBwBWidget(widget.OWWidget):
                     return self.joinFlagValue(flagName,flagValue)
             
         return None
-            
+                                
     def generateCmdFromData (self):
         flags=[]
         args=[]
+        #map port variables if necessary
+        if not hasattr(self,'portVars'):
+            sys.stderr.write('Initializing portVars\n')
+            self.portVars=[]
+            if 'portMappings' in self.data:
+                for mapping in self.data['portMappings']:
+                    sys.stderr.write('adding {} to portVars\n'.format(mapping['attr']))
+                    self.portVars.append(mapping['attr'])   
         if self.data['parameters'] is None:
             sys.stderr.write('No parameters skipping parameter parsing\n')
             return self.generateCmdFromBash(self.data['command'],flags=flags,args=args)
         for pname, pvalue in self.data['parameters'].items():
+            if pname in self.portVars:
+                continue
             sys.stderr.write('Parsing parameters: pname {} pvalue{}\n'.format(pname,pvalue))
             #possible to have an requirement or parameter that is not in the executable line
             #environment variables can have a Null value in the flags field
