@@ -12,10 +12,10 @@ pid="$!"
 mkdir -p "/tmp/pid.$pid"
 wait $pid
 if [ -d "/tmp/pid.$pid" ]; then
-    if [ -f "/tmp/pid.$pid/cmd" ] then
+    if [ -f "/tmp/pid.$pid/cmd" ]; then
         cmd= `cat /tmp/pid.$pid/cmd`
     else
-        rm -r "/tmp/pid.$pid"
+        rm -rf "/tmp/pid.$pid"
         break
     fi
 fi
