@@ -1,7 +1,3 @@
-Demo_DtoxS/OWDtoxSAlignment.py
-Demo_DtoxS/OWDtoxSAnalysis.py
-Demo_DtoxS/OWdownloadURL.py
-Demo_DtoxS/OWgnumeric.py
 Demo_DtoxS/__init__.py
 Demo_DtoxS.egg-info/PKG-INFO
 Demo_DtoxS.egg-info/SOURCES.txt

@@ -1,0 +1,1 @@
+/widgets/jupyter_bioc_firefox/jupyter_bioc_firefox.py
