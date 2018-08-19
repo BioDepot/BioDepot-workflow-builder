@@ -1,0 +1,6 @@
+Scripting/__init__.py
+Scripting.egg-info/PKG-INFO
+Scripting.egg-info/SOURCES.txt
+Scripting.egg-info/dependency_links.txt
+Scripting.egg-info/entry_points.txt
+Scripting.egg-info/top_level.txt

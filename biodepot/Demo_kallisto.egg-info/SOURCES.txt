@@ -1,3 +1,9 @@
+Demo_kallisto/OWdownloadURL.py
+Demo_kallisto/OWfastqDump.py
+Demo_kallisto/OWgnumeric.py
+Demo_kallisto/OWkallistoIndex.py
+Demo_kallisto/OWkallistoQuant.py
+Demo_kallisto/OWsleuth.py
 Demo_kallisto/__init__.py
 Demo_kallisto.egg-info/PKG-INFO
 Demo_kallisto.egg-info/SOURCES.txt

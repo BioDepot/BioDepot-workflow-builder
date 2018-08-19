@@ -37,3 +37,7 @@ setup(name="Jupyter",
       packages=["Jupyter"],
       package_data={"Jupyter": ["icons/*.svg"]},
       entry_points={"orange.widgets": "Jupyter = Jupyter"},)
+setup(name="Scripting",
+      packages=["Scripting"],
+      package_data={"Scripting": ["icons/*.svg"]},
+      entry_points={"orange.widgets": "Scripting = Scripting"},)
