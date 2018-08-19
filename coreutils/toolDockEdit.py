@@ -67,7 +67,7 @@ def removeWidgetFromCategory(widgetName,category,directory,baseToolPath,widgetsD
 
 def addCategoryToToolBox(baseToolPath,category,iconFile=None,background='light-purple'):
     directory=niceForm(category,allowDash=False)
-    makeNewDirectory(baseToolPath,directory,iconFile,background='light-red')
+    makeNewDirectory(baseToolPath,directory,iconFile,background)
     with open('{}/setup.py'.format(baseToolPath),'a+') as f:
         f.write(entryString(category,directory))
     return directory

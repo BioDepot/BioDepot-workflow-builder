@@ -19,10 +19,10 @@ setup(name="User",
       package_data={"User": ["icons/*.svg"]},
       entry_points={"orange.widgets": "User = User"},
       )
-setup(name="Demo_DToxS",
-      packages=["Demo_DToxS"],
-      package_data={"Demo_DToxS": ["icons/*.svg"]},
-      entry_points={"orange.widgets": "Demo_DToxS = Demo_DToxS"},)
+setup(name="Demo_DtoxS",
+      packages=["Demo_DtoxS"],
+      package_data={"Demo_DtoxS": ["icons/*.svg"]},
+      entry_points={"orange.widgets": "Demo_DtoxS = Demo_DtoxS"},)
       
 setup(name="Demo_kallisto",
       packages=["Demo_kallisto"],
@@ -33,3 +33,7 @@ setup(name="Demo_STAR",
       packages=["Demo_STAR"],
       package_data={"Demo_STAR": ["icons/*.svg"]},
       entry_points={"orange.widgets": "Demo_STAR = Demo_STAR"},)
+setup(name="Jupyter",
+      packages=["Jupyter"],
+      package_data={"Jupyter": ["icons/*.svg"]},
+      entry_points={"orange.widgets": "Jupyter = Jupyter"},)

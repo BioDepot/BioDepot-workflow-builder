@@ -1,0 +1,1 @@
+/widgets/jupyter_firefox/jupyter_firefox.py

@@ -1,3 +1,5 @@
+Miscellaneous/OWDirectory.py
+Miscellaneous/OWFile.py
 Miscellaneous/__init__.py
 Miscellaneous.egg-info/PKG-INFO
 Miscellaneous.egg-info/SOURCES.txt

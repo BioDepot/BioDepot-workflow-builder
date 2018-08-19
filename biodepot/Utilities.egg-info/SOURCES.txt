@@ -1,5 +1,6 @@
 Utilities/OWdownloadURL.py
 Utilities/OWfastqDump.py
+Utilities/OWgnumeric.py
 Utilities/__init__.py
 Utilities.egg-info/PKG-INFO
 Utilities.egg-info/SOURCES.txt

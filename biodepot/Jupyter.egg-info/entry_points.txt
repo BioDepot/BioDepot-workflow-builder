@@ -1,0 +1,3 @@
+[orange.widgets]
+Jupyter = Jupyter
+

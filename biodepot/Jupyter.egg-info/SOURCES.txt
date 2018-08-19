@@ -1,0 +1,6 @@
+Jupyter/__init__.py
+Jupyter.egg-info/PKG-INFO
+Jupyter.egg-info/SOURCES.txt
+Jupyter.egg-info/dependency_links.txt
+Jupyter.egg-info/entry_points.txt
+Jupyter.egg-info/top_level.txt

@@ -1,3 +1,0 @@
-[orange.widgets]
-Demo_DToxS = Demo_DToxS
-
