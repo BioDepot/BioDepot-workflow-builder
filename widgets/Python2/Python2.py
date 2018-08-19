@@ -15,7 +15,7 @@ class OWPython2(OWBwBWidget):
     name = "Python2"
     description = "Minimum Python2 container with pip"
     category = "Scripting"
-    priority = 3
+    priority = 11
     icon = "/widgets/Python2/icon/python2.png"
     want_main_area = False
     docker_image_name = "biodepot/python2"

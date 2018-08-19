@@ -15,7 +15,7 @@ class OWPython3(OWBwBWidget):
     name = "Python3"
     description = "Minimum Python3 container with pip"
     category = "Scripting"
-    priority = 2
+    priority = 10
     icon = "/widgets/Python3/icon/python3.png"
     want_main_area = False
     docker_image_name = "biodepot/python3"

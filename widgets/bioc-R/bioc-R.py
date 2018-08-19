@@ -11,15 +11,15 @@ from DockerClient import DockerClient
 from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWPerl(OWBwBWidget):
-    name = "Perl"
-    description = "Minimum perl container"
+class OWbioc-R(OWBwBWidget):
+    name = "bioc-R"
+    description = "Bioconductor 3.7 R 3.5.1"
     category = "Scripting"
-    priority = 20
-    icon = "/widgets/Perl/icon/perl.png"
+    priority = 1
+    icon = "/widgets/bioc-R/icon/bioc-r.png"
     want_main_area = False
     docker_image_name = "biodepot/perl"
-    docker_image_tag = "5.26.2-r1__alpine-3.7__081418"
+    docker_image_tag = "3.7__ubuntu-18.04__R-3.5.1__081318"
     inputs = [("inputFile",str,"handleInputsinputFile"),("Trigger",str,"handleInputsTrigger")]
     outputs = [("OutputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -32,7 +32,7 @@ class OWPerl(OWBwBWidget):
     InputFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/Perl/Perl.json") as f:
+        with open("/widgets/bioc-R/bioc-R.json") as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

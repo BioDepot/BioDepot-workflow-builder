@@ -15,7 +15,7 @@ class OWJava8(OWBwBWidget):
     name = "Java8"
     description = "Minimum java 8 container"
     category = "Scripting"
-    priority = 5
+    priority = 15
     icon = "/widgets/Java8/icon/java.png"
     want_main_area = False
     docker_image_name = "library/openjdk"
