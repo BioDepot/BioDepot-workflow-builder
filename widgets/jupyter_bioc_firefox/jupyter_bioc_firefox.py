@@ -19,7 +19,7 @@ class OWjupyter_bioc_firefox(OWBwBWidget):
     icon = "/widgets/jupyter_bioc_firefox/icon/jupyter-bioc-firefox.png"
     want_main_area = False
     docker_image_name = "biodepot/jupyter"
-    docker_image_tag = "5.6.0__ubuntu-18.04__bioc_3.7__R-3.5.1__firefox-61.0.1__081318"
+    docker_image_tag = "5.6.0__ubuntu-18.04__bioc-3.6__R-3.4.3__firefox-61.0.1__082018"
     inputs = [("InputDir",str,"handleInputsInputDir"),("Trigger",str,"handleInputsTrigger")]
     outputs = [("OutputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -44,6 +44,7 @@ class OWjupyter_bioc_firefox(OWBwBWidget):
     clientca=pset(None)
     nomathjax=pset(False)
     browser=pset(None)
+    InputFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open("/widgets/jupyter_bioc_firefox/jupyter_bioc_firefox.json") as f:

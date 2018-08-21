@@ -1,9 +1,3 @@
-Jupyter/OWjupyter_R.py
-Jupyter/OWjupyter_R_firefox.py
-Jupyter/OWjupyter_base.py
-Jupyter/OWjupyter_bioc.py
-Jupyter/OWjupyter_bioc_firefox.py
-Jupyter/OWjupyter_firefox.py
 Jupyter/__init__.py
 Jupyter.egg-info/PKG-INFO
 Jupyter.egg-info/SOURCES.txt
