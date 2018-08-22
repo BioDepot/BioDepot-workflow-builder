@@ -1179,7 +1179,9 @@ class OWBwBWidget(widget.OWWidget):
                 if fStr and fStr is not None:
                     args.append(fStr)
                 continue
-            if 'flag' not in pvalue:
+            #do not add to arguments if it is an environment variable and there is no flag
+            #if you really want it added put a space in the flag field 
+            if pvalue['flag'] is None or pvalue['flag'] == "" and 'env' in pvalue:
                 continue
             #if required or checked then it is added to the flags
             addParms=False
