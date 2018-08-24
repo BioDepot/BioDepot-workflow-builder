@@ -996,7 +996,7 @@ class OWBwBWidget(widget.OWWidget):
     def handleInputs(self,attr,value,sourceId):
         sys.stderr.write('value is {} sourceId is {}\n'.format(value,sourceId))
         if value is '__purge':
-            #remove signal
+            #remove signal - this used to be None which was also passed when the value actually was None
             self.inputConnections.remove(attr,sourceId)
             sys.stderr.write('sig handler removing {} disabled {}\n'.format(attr,self.inputConnections.isConnected(attr)))
             setattr(self,attr,None) #this gives text None in ledit for some reason
@@ -1118,6 +1118,9 @@ class OWBwBWidget(widget.OWWidget):
                         return flagName
                     return None
                 elif pvalue['type'] == 'file':
+                    sys.stderr.write('flagValue is {}\n'.format(flagValue))
+                    if not flagValue:
+                        return None
                     filename=str(flagValue)
                     if filename:
                         hostFilename=self.bwbPathToContainerPath(filename, isFile=True,returnNone=False)
@@ -1221,7 +1224,7 @@ class OWBwBWidget(widget.OWWidget):
             matchStr='_bwb{' + sub +'}'
             psub=sub.strip()
             sys.stderr.write('looking for {} in {}\n'.format(psub,pnames))
-            if psub in pnames:
+            if psub in pnames and getattr(self,psub):
                 fStr=self.flagString(psub)
                 sys.stderr.write('psub {} is  in {}\n'.format(psub,pnames))
                 sys.stderr.write('fstr {}\n'.format(fStr))

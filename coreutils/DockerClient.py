@@ -33,9 +33,13 @@ class ConsoleProcess():
         
     def stop(self,message=None):
         self.state='stopped'
-        #we need to write our own code to 
-        with open (self.cidFile,'r') as f:
-            cid=f.read()
+        #we need to write our own code to
+        try: 
+            with open (self.cidFile,'r') as f:
+                cid=f.read()
+        except Exception as e:
+            sys.stderr.write("unable to read cidFile {}\n".format(cid))
+            return
         stopCmd='docker stop {} '.format(cid)
         sys.stderr.write('Stop command: {}'.format(stopCmd))
         os.system(stopCmd)

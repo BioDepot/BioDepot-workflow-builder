@@ -28,6 +28,11 @@ setup(name="Demo_kallisto",
       packages=["Demo_kallisto"],
       package_data={"Demo_kallisto": ["icons/*.svg"]},
       entry_points={"orange.widgets": "Demo_kallisto = Demo_kallisto"},)
+
+setup(name="Demo_kallisto_jupyter",
+      packages=["Demo_kallisto_jupyter"],
+      package_data={"Demo_kallisto_jupyter": ["icons/*.svg"]},
+      entry_points={"orange.widgets": "Demo_kallisto_jupyter = Demo_kallisto_jupyter"},)
       
 setup(name="Demo_STAR",
       packages=["Demo_STAR"],

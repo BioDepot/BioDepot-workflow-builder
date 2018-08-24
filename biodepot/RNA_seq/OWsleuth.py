@@ -1,1 +1,1 @@
-../../widgets/sleuth/sleuth.py
+/widgets/sleuth/sleuth.py
