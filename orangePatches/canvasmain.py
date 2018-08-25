@@ -723,13 +723,13 @@ class CanvasMainWindow(QMainWindow):
                 
         menu_bar.addMenu(self.toolDock_menu)
 
-        self.notebook_menu = QMenu(self.tr("&Notebooks"), self)
-        self.notebook_menu.addAction(self.loadNotebookAction)
-        self.notebook_menu.addAction(self.addNotebookAction)
-        self.notebook_menu.addSeparator()
-        self.notebook_menu.addAction(self.removeNotebookAction)
+        # self.notebook_menu = QMenu(self.tr("&Notebooks"), self)
+        # self.notebook_menu.addAction(self.loadNotebookAction)
+        # self.notebook_menu.addAction(self.addNotebookAction)
+        # self.notebook_menu.addSeparator()
+        # self.notebook_menu.addAction(self.removeNotebookAction)
 
-        menu_bar.addMenu(self.notebook_menu)
+        # menu_bar.addMenu(self.notebook_menu)
 
 
         # Help menu.

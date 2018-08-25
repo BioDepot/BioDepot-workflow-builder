@@ -15,13 +15,13 @@ class OWjupyter_base(OWBwBWidget):
     name = "jupyter_base"
     description = "Base installation of Jupyter"
     category = "Jupyter"
-    priority = 100
+    priority = 103
     icon = "/widgets/jupyter_base/icon/jupyter_image.png"
     want_main_area = False
     docker_image_name = "biodepot/jupyter"
-    docker_image_tag = "5.6.0__ubuntu-18.04__081318"
-    inputs = [("InputDir",str,"handleInputsInputDir"),("Trigger",str,"handleInputsTrigger")]
-    outputs = [("OutputDir",str)]
+    docker_image_tag = "5.6.0__ubuntu-18.04__firefox-61.0.1__081318"
+    inputs = [("InputDir",str,"handleInputsInputDir"),("Trigger",str,"handleInputsTrigger"),("startingNotebook",str,"handleInputsstartingNotebook")]
+    outputs = [("OutputDir",str),("outputNotebook",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     exportGraphics=pset(False)
@@ -30,6 +30,9 @@ class OWjupyter_base(OWBwBWidget):
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
     subcommand=pset("notebook")
+    startingNotebook=pset(None)
+    type=pset("notebook")
+    outputNotebook=pset(None)
     debug=pset(False)
     generateConfig=pset(False)
     autoyes=pset(True)
@@ -62,8 +65,17 @@ class OWjupyter_base(OWBwBWidget):
             self.handleInputs("Trigger", value, args[0][0])
         else:
             self.handleInputs("inputFile", value, None)
+    def handleInputsstartingNotebook(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("startingNotebook", value, args[0][0])
+        else:
+            self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         outputValue=None
         if hasattr(self,"OutputDir"):
             outputValue=getattr(self,"OutputDir")
         self.send("OutputDir", outputValue)
+        outputValue=None
+        if hasattr(self,"outputNotebook"):
+            outputValue=getattr(self,"outputNotebook")
+        self.send("outputNotebook", outputValue)
