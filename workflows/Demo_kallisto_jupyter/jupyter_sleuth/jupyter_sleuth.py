@@ -18,8 +18,8 @@ class OWjupyter_sleuth(OWBwBWidget):
     priority = 103
     icon = "/widgets/jupyter_sleuth/icon/jupyter-sleuth.png"
     want_main_area = False
-    docker_image_name = "biodepot/sleuth"
-    docker_image_tag = "0.30.0__ubuntu-16.04__r-3.4.4__jupyter-5.6.0__firefox-61.0.1__082318"
+    docker_image_name = "biodepot/jupyter"
+    docker_image_tag = "5.6.0__sleuth-0.30.0__ubuntu-18.04__r-3.5.1__firefox-61.0.1__082318"
     inputs = [("InputDir",str,"handleInputsInputDir"),("Trigger",str,"handleInputsTrigger"),("startingNotebook",str,"handleInputsstartingNotebook")]
     outputs = [("OutputDir",str),("outputNotebook",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
@@ -30,7 +30,6 @@ class OWjupyter_sleuth(OWBwBWidget):
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
     subcommand=pset("notebook")
-    execute=pset(False)
     startingNotebook=pset(None)
     type=pset("notebook")
     outputNotebook=pset(None)
