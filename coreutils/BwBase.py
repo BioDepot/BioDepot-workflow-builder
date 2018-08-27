@@ -104,7 +104,6 @@ class BwbGuiElements():
                    
     def __init__(self,required=None,active=None):
         self._enableCallbacks={}
-        self._updateCallbacks={}
         self._dict={}
         self.required=required
         self.active={}
@@ -115,8 +114,6 @@ class BwbGuiElements():
         self._dict[attr].append(guiElement)
         if enableCallback is not None:
             self._enableCallbacks[attr]=enableCallback
-        if updateCallback is not None:
-            self._updateCallbacks[attr]=updateCallback
             
     def addList(self,attr,guiElements,enableCallback=None,updateCallback=None):
         if attr not in self._dict:
@@ -125,12 +122,8 @@ class BwbGuiElements():
             self._dict[attr].extend(guiElements)
         if enableCallback is not None:
             self._enableCallbacks[attr]=enableCallback
-        if updateCallback is not None:
-            self._updateCallbacks[attr]=updateCallback
                 
     def disable(self,attr,ignoreCheckbox=False): #gray out to disable
-        if attr in self._updateCallbacks:
-            self._updateCallbacks[attr]()
         if attr in self._dict:
             if ignoreCheckbox:
                 for g in self._dict[attr]:
@@ -143,15 +136,34 @@ class BwbGuiElements():
                     self.disableElement(g)
             return True
         return False
-
+        
+    def clear(self,attr,activate=False):
+        #will activate cb when activate is True
+        #otherwise  
+        if attr in self._dict:
+            for g in self._dict[attr]:
+                if isinstance(g, QtWidgets.QCheckBox):
+                    g.setCheckState(activate)
+                elif isinstance(g,tuple):
+                    for element in g:
+                        if isinstance(element, QtWidgets.QCheckBox):
+                            element.setCheckState(activate)
+                        else:
+                            try:
+                                element.clear()
+                            except AttributeError:
+                                pass
+                else:
+                    try:
+                        g.clear()
+                    except AttributeError:
+                        pass
+        
     def enable(self,attr,value):
         sys.stderr.write('checking attr {}\n'.format(attr))
         clearLedit=False
         if value is None or value is "":
-            clearLedit=True
-        if attr in self._updateCallbacks:
-            sys.stderr.write('applying update for attr {}\n'.format(attr))
-            self._updateCallbacks[attr]() 
+            clearLedit=True 
         if attr in self._dict:
             sys.stderr.write('found attr in dict {}\n'.format(attr))
             if attr in self._enableCallbacks:
@@ -209,12 +221,13 @@ class ConnectionDict:
         if self._dict is None:
             return False
         if slot in self._dict:
-            sys.stderr.write('slot found in connection check with contents {}\n'.format(self._dict[slot]))
+            sys.stderr.write('slot found in connection check with contents {} and ID {}\n'.format(self._dict[slot], connectionId))
             if connectionId:
                 if connectionId in self._dict[slot]:
                     return True
-            elif self.__dict[slot] is []:
+            elif not self._dict[slot]:
                 del self._dict[slot]
+                sys.stderr.write('deleted slot\n')
                 return False
             else:
                 return True
@@ -258,7 +271,7 @@ class OWBwBWidget(widget.OWWidget):
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
         '''        
-        
+        self.jobRunning=False
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self._dockerImageName = image_name
         self._dockerImageTag = image_tag
@@ -902,19 +915,8 @@ class OWBwBWidget(widget.OWWidget):
             #check if the input triggers are set
             sys.stderr.write('Checking triggers with runTriggers{}\n'.format(self.runTriggers))
             for trigger in self.runTriggers:
-                sys.stderr.write('Checking trigger {}\n'.format(trigger))
-                if trigger not in self.triggerReady:
-                    sys.stderr.write('trigger {} is not in triggerReady \n'.format(trigger))
+                if (not self.inputConnections.isSet(trigger)):
                     return
-                if not self.triggerReady[trigger]:
-                    sys.stderr.write('trigger {} not ready \n'.format(trigger))
-                    if (self.inputConnections.isSet(trigger)):
-                        sys.stderr.write('trigger {} is readied \n'.format(trigger))
-                        self.triggerReady[trigger]=True
-                    return
-                else:
-                    if (not self.inputConnections.isSet(trigger)):
-                        return
             self.onRunClicked()
 
     def bwbFileEntry(self, widget, button, ledit, icon=browseIcon,layout=None, label=None,entryType='file', checkbox=None):
@@ -1011,28 +1013,24 @@ class OWBwBWidget(widget.OWWidget):
             self.inputConnections.remove(attr,sourceId)
             sys.stderr.write('sig handler removing {} disabled {}\n'.format(attr,self.inputConnections.isConnected(attr)))
             #just setting to None in ledit for some reason
-            if attr in self.data and self.data[attr]['type'] is 'str':
-                setattr(self,attr,"")
-            else:
+            self.bgui.clear(attr)
+            if hasattr(self,attr) and getattr(self,attr):
                 setattr(self,attr,None)
             if attr in self.runTriggers:
                 self.triggerReady[attr]=False
         elif value is '__add':
-            if attr in self.data and self.data[attr]['type'] is 'str':
-                setattr(self,attr,"")
-            else:
+            self.bgui.clear(attr,activate=True)
+            if hasattr(self,attr) and getattr(self,attr):
                 setattr(self,attr,None)
+            self.bgui.disable(attr)
             self.inputConnections.add(attr,sourceId)
             sys.stderr.write('sig handler adding node with no signal: attr {} sourceId {} value {}\n'.format(attr,sourceId,value))
-            sys.stderr.write('connection dict value for {} is {}\n'.format(attr,self.inputConnections._dict[attr]))            
-
+            sys.stderr.write('connection dict value for {} is {}\n'.format(attr,self.inputConnections._dict[attr]))
+            self.checkTrigger(inputReceived=False)
         else:
             self.inputConnections.add(attr,sourceId)
             sys.stderr.write('sig handler adding input: attr {} sourceId {} value {}\n'.format(attr,sourceId,value))
             sys.stderr.write('connection dict value for {} is {}\n'.format(attr,self.inputConnections._dict[attr]))
-            if attr in self.runTriggers:
-                sys.stderr.write("befor trigger value for attr {} is {}\n".format(attr,self.triggerReady[attr])) 
-            #addo check to see if this is optional
             setattr(self,attr,value)
             self.checkTrigger(inputReceived=True)
             if attr in self.runTriggers:
@@ -1044,7 +1042,7 @@ class OWBwBWidget(widget.OWWidget):
         #disables manual input when the value has been given by an input connection
         if self.inputConnections.isConnected(attr):
             sys.stderr.write('disabling {}\n'.format(attr))
-            self.bgui.disable(attr,value)
+            self.bgui.disable(attr)
         else:
             sys.stderr.write('enabling {} with {}\n'.format(attr,value))
             self.bgui.enable(attr,value)
@@ -1052,6 +1050,8 @@ class OWBwBWidget(widget.OWWidget):
 #Generate commands and run job
 
     def startJob(self):
+        if self.jobRunning:
+            return
         self.hostVolumes = {}
         #check for missing parameters and volumes
         missingParms=self.checkRequiredParms()
@@ -1066,6 +1066,7 @@ class OWBwBWidget(widget.OWWidget):
         attrList=self.__dict__.keys()
         self.bgui.disableAll()
         self.disableExec()
+        self.jobRunning=True
         cmd=self.generateCmdFromData()
         self.envVars={}
         self.getEnvironmentVariables()
@@ -1079,6 +1080,7 @@ class OWBwBWidget(widget.OWWidget):
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
+            self.jobRunning=False
             self.pConsole.writeMessage("unable to start Docker command "+ str(e))
             self.setStatusMessage('Error')
             
@@ -1340,10 +1342,13 @@ class OWBwBWidget(widget.OWWidget):
         self.pConsole.stop('Stopped by user')
         self.setStatusMessage('Stopped')
         self.status='stopped'
-        self.bgui.reenableAll(self)
-        self.reenableExec()
+        if self.jobRunning:
+            self.bgui.reenableAll(self)
+            self.reenableExec()
+            self.jobRunning=False
         
     def onRunFinished(self,code=None,status=None):
+        self.jobRunning=False
         self.pConsole.writeMessage("Finished")
         if code is not None:
            self.pConsole.writeMessage("Exit code is {}".format(code))
@@ -1364,6 +1369,7 @@ class OWBwBWidget(widget.OWWidget):
     def onRunError(self,error):
         self.bgui.reenableAll(self)
         self.reenableExec()
+        self.jobRunning=False
         self.console.writeMessage("Error occurred {}\n".format(error),color=Qt.red)
         
     def onRunMessage(self, message):

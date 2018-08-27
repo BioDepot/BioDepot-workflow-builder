@@ -38,7 +38,7 @@ class ConsoleProcess():
             with open (self.cidFile,'r') as f:
                 cid=f.read()
         except Exception as e:
-            sys.stderr.write("unable to read cidFile {}\n".format(cidFile))
+            sys.stderr.write("unable to read cidFile\n"))
             return
         stopCmd='docker stop {} '.format(cid)
         sys.stderr.write('Stop command: {}'.format(stopCmd))

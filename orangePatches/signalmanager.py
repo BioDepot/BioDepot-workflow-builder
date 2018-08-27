@@ -191,15 +191,16 @@ class SignalManager(QObject):
     def link_added(self, link):
         # push all current source values to the sink
         link.set_runtime_state(SchemeLink.Empty)
-        if link.enabled:
-            log.info("Link added (%s). Scheduling signal data update.", link)
-            self._schedule(self.signals_on_link(link))
-            self._update()
-        else:
+        #change so that only a signal when connected gets passed 
+        #if link.enabled:
+        #    log.info("Link added (%s). Scheduling signal data update.", link)
+        #    self._schedule(self.signals_on_link(link))
+         #   self._update()
+
             #we send a signal so that the widget can update its internal dictionayr
-            sourceWidget=self.scheme().widget_for_node(link.source_node)
-            sourceID=sourceWidget.widget_id
-            self.send_to_node(link.sink_node,[_Signal(link, '__add', [sourceID])])
+        sourceWidget=self.scheme().widget_for_node(link.source_node)
+        sourceID=sourceWidget.widget_id
+        self.send_to_node(link.sink_node,[_Signal(link, '__add', [sourceID])])
         link.enabled_changed.connect(self.link_enabled_changed)
 
     def link_removed(self, link):
