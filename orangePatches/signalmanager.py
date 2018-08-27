@@ -168,7 +168,7 @@ class SignalManager(QObject):
     def runtime_state(self):
         """
         Return the runtime state. This can be `SignalManager.Waiting`
-        or `SignalManager.Processing`.
+        or `SignalManager.Processing`
 
         """
         return self.__runtime_state
@@ -195,7 +195,11 @@ class SignalManager(QObject):
             log.info("Link added (%s). Scheduling signal data update.", link)
             self._schedule(self.signals_on_link(link))
             self._update()
-
+        else:
+            #we send a signal so that the widget can update its internal dictionayr
+            sourceWidget=self.scheme().widget_for_node(link.source_node)
+            sourceID=sourceWidget.widget_id
+            self.send_to_node(link.sink_node,[_Signal(link, '__add', [sourceID])])
         link.enabled_changed.connect(self.link_enabled_changed)
 
     def link_removed(self, link):
@@ -261,20 +265,28 @@ class SignalManager(QObject):
 
     def purge_link(self, link):
         """
-        Purge the link (send None for all ids currently present)
+        Purge the link (send "__purge" for all ids currently present)
         """
         contents = self.link_contents(link)
         ids = list(contents.keys())
-        signals = [_Signal(link, '__purge', id) for id in ids]
-        sys.stderr.write('sending signals to purge ids {} signals {}\n'.format(ids,signals))
-        self._schedule(signals)
+        #check if there are no ids - this occurs when the link is not enabled or live
+        #we still want to send a signal to the source to remove the link from its internal data structures
+        if not ids:
+            sourceWidget=self.scheme().widget_for_node(link.source_node)
+            sourceID=sourceWidget.widget_id
+            self.send_to_node(link.sink_node,[_Signal(link, '__purge', [sourceID])])
+        else:
+            signals = [_Signal(link, '__purge' , id) for id in ids]
+            self._schedule(signals)
+        
 
     def _schedule(self, signals):
         """
         Schedule a list of :class:`_Signal` for delivery.
         """
+        sys.stderr.write('receive for schedulin signals {}\n'.format(signals))
         self._input_queue.extend(signals)
-
+        sys.stderr.write('scheduling signals {}\n'.format(signals))
         for link in {sig.link for sig in signals}:
             # update the SchemeLink's runtime state flags
             contents = self.link_contents(link)
@@ -285,6 +297,7 @@ class SignalManager(QObject):
             link.set_runtime_state(state | SchemeLink.Pending)
 
         if signals:
+            sys.stderr.write('pending emit signals {}\n'.format(signals))
             self.updatesPending.emit()
 
         self._update()

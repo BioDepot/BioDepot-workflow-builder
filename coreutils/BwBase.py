@@ -147,7 +147,7 @@ class BwbGuiElements():
     def enable(self,attr,value):
         sys.stderr.write('checking attr {}\n'.format(attr))
         clearLedit=False
-        if value is None:
+        if value is None or value is "":
             clearLedit=True
         if attr in self._updateCallbacks:
             sys.stderr.write('applying update for attr {}\n'.format(attr))
@@ -188,6 +188,7 @@ class ConnectionDict:
         sys.stderr.write('Adding {} to connection {}\n'.format(slot,self._dict[slot]))
 
     def remove (self, slot, connectionId=None):
+        sys.stderr.write('removing {} to connection {}\n'.format(slot,connectionId))
         if slot in self._dict:
             if connectionId is None:
                 del self._dict[slot]
@@ -195,16 +196,26 @@ class ConnectionDict:
                 try:
                     self._dict[slot].remove(connectionId)
                 except ValueError:
-                    pass
-            #need to update the volumes
+                    #this is probably due to an addition of a link that did not register 
+                    #so on error - delete the slot
+                    sys.stderr.write("exception raise on remove {} - delete slot instead".format(connectionId))
+                    del self._dict[slot]
+          
+           #need to update the volumes
+        else:
+            sys.stderr.write('no matching slot for connection {}\n'.format(connectionId))
 
     def isConnected (self, slot, connectionId=None):
         if self._dict is None:
             return False
         if slot in self._dict:
+            sys.stderr.write('slot found in connection check with contents {}\n'.format(self._dict[slot]))
             if connectionId:
                 if connectionId in self._dict[slot]:
                     return True
+            elif self.__dict[slot] is []:
+                del self._dict[slot]
+                return False
             else:
                 return True
         return False
@@ -537,7 +548,7 @@ class OWBwBWidget(widget.OWWidget):
             self.bgui.add(pname,checkbox)
         self.bwbLedit(box,checkbox,ledit,layout=layout, label=pvalue['label'])
         #check if the value is none - then we clear it
-        if getattr(self,pname) is None:
+        if getattr(self,pname) is None or getattr(self,pname) is "":
             ledit.clear()
         self.bgui.add(pname,ledit,enableCallback=lambda value,clearLedit: self.enableLedit(value,clearLedit,checkbox,ledit))
         if addCheckbox:
@@ -994,14 +1005,27 @@ class OWBwBWidget(widget.OWWidget):
         
 #Handle inputs
     def handleInputs(self,attr,value,sourceId):
-        sys.stderr.write('value is {} sourceId is {}\n'.format(value,sourceId))
+        sys.stderr.write('INPUT RECEIVED value is {} sourceId is {}\n'.format(value,sourceId))
         if value is '__purge':
             #remove signal - this used to be None which was also passed when the value actually was None
             self.inputConnections.remove(attr,sourceId)
             sys.stderr.write('sig handler removing {} disabled {}\n'.format(attr,self.inputConnections.isConnected(attr)))
-            setattr(self,attr,None) #this gives text None in ledit for some reason
+            #just setting to None in ledit for some reason
+            if attr in self.data and self.data[attr]['type'] is 'str':
+                setattr(self,attr,"")
+            else:
+                setattr(self,attr,None)
             if attr in self.runTriggers:
                 self.triggerReady[attr]=False
+        elif value is '__add':
+            if attr in self.data and self.data[attr]['type'] is 'str':
+                setattr(self,attr,"")
+            else:
+                setattr(self,attr,None)
+            self.inputConnections.add(attr,sourceId)
+            sys.stderr.write('sig handler adding node with no signal: attr {} sourceId {} value {}\n'.format(attr,sourceId,value))
+            sys.stderr.write('connection dict value for {} is {}\n'.format(attr,self.inputConnections._dict[attr]))            
+
         else:
             self.inputConnections.add(attr,sourceId)
             sys.stderr.write('sig handler adding input: attr {} sourceId {} value {}\n'.format(attr,sourceId,value))
