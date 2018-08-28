@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWjupyter_bioc(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWjupyter_bioc(OWBwBWidget):
     description = "Base installation of Jupyter"
     category = "Jupyter"
     priority = 103
-    icon = "/widgets/jupyter_bioc/icon/jupyter-bioc.png"
+    icon = getIconName(__file__,"jupyter-bioc.png")
     want_main_area = False
     docker_image_name = "biodepot/jupyter"
     docker_image_tag = "5.6.0__ubuntu-18.04__bioc-3.7__R-3.5.1__firefox-61.0.1__081318"
@@ -49,7 +49,7 @@ class OWjupyter_bioc(OWBwBWidget):
     browser=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/jupyter_bioc/jupyter_bioc.json") as f:
+        with open(getJsonName(__file__,"jupyter_bioc")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

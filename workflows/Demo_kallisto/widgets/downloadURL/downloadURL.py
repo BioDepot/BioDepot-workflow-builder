@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWdownloadURL(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWdownloadURL(OWBwBWidget):
     description = "Downloads files from URL"
     category = "Utilities"
     priority = 1
-    icon = "/widgets/downloadURL/icon/download.png"
+    icon = getIconName(__file__,"download.png")
     want_main_area = False
     docker_image_name = "biodepot/downloadurl"
     docker_image_tag = "alpine-3.7__072818"
@@ -35,7 +35,7 @@ class OWdownloadURL(OWBwBWidget):
     concatenateFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/downloadURL/downloadURL.json") as f:
+        with open(getJsonName(__file__,"downloadURL")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWPerl(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWPerl(OWBwBWidget):
     description = "Minimum perl container"
     category = "Scripting"
     priority = 20
-    icon = "/widgets/Perl/icon/perl.png"
+    icon = getIconName(__file__,"perl.png")
     want_main_area = False
     docker_image_name = "biodepot/perl"
     docker_image_tag = "5.26.2-r1__alpine-3.7__081418"
@@ -32,7 +32,7 @@ class OWPerl(OWBwBWidget):
     InputFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/Perl/Perl.json") as f:
+        with open(getJsonName(__file__,"Perl")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

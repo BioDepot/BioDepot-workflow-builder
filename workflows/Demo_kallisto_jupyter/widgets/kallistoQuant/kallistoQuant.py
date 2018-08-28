@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWkallistoQuant(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWkallistoQuant(OWBwBWidget):
     description = "Alignment and quantification of reads from fastq files"
     category = "RNA-seq"
     priority = 4
-    icon = "/widgets/kallistoQuant/icon/kallistoquant.png"
+    icon = getIconName(__file__,"kallistoquant.png")
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
     docker_image_tag = "0.44.0__ubuntu-16.04__072818"
@@ -49,7 +49,7 @@ class OWkallistoQuant(OWBwBWidget):
     multiSample=pset(1)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/kallistoQuant/kallistoQuant.json") as f:
+        with open(getJsonName(__file__,"kallistoQuant")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

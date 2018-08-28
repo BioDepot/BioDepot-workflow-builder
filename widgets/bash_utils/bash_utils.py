@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWbash_utils(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWbash_utils(OWBwBWidget):
     description = "alpine bash with wget curl gzip bzip2"
     category = "Scripting"
     priority = 1
-    icon = "/widgets/bash_utils/icon/bash.png"
+    icon = getIconName(__file__,"bash.png")
     want_main_area = False
     docker_image_name = "biodepot/bash-utils"
     docker_image_tag = "alpine-3.7__081418"
@@ -32,7 +32,7 @@ class OWbash_utils(OWBwBWidget):
     InputFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/bash_utils/bash_utils.json") as f:
+        with open(getJsonName(__file__,"bash_utils")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

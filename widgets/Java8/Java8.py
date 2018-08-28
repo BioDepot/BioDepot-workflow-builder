@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWJava8(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWJava8(OWBwBWidget):
     description = "Minimum java 8 container"
     category = "Scripting"
     priority = 15
-    icon = "/widgets/Java8/icon/java.png"
+    icon = getIconName(__file__,"java.png")
     want_main_area = False
     docker_image_name = "library/openjdk"
     docker_image_tag = "8-jre-alpine3.8"
@@ -32,7 +32,7 @@ class OWJava8(OWBwBWidget):
     InputFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/Java8/Java8.json") as f:
+        with open(getJsonName(__file__,"Java8")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

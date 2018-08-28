@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWstarAlign(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWstarAlign(OWBwBWidget):
     description = "Star aligner alignment module"
     category = "RNA-seq"
     priority = 12
-    icon = "/widgets/starAlign/icon/staralign.png"
+    icon = getIconName(__file__,"staralign.png")
     want_main_area = False
     docker_image_name = "biodepot/star"
     docker_image_tag = "2.6.0c__debian-8.11-slim__072918"
@@ -146,7 +146,7 @@ class OWstarAlign(OWBwBWidget):
     multipleSample=pset(False)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/starAlign/starAlign.json") as f:
+        with open(getJsonName(__file__,"starAlign")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWDirectory(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWDirectory(OWBwBWidget):
     description = "Directory"
     category = "Miscellaneous"
     priority = 10
-    icon = "/widgets/Directory/icon/directory.svg"
+    icon = getIconName(__file__,"directory.svg")
     want_main_area = False
     docker_image_name = "biodepot/alpine-bash"
     docker_image_tag = "3.7"
@@ -32,7 +32,7 @@ class OWDirectory(OWBwBWidget):
     directory=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/Directory/Directory.json") as f:
+        with open(getJsonName(__file__,"Directory")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

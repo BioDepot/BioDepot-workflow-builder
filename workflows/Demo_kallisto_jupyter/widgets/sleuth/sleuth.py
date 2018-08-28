@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWsleuth(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWsleuth(OWBwBWidget):
     description = "Analysis of kallisto quantified RNA-seq files"
     category = "RNA-seq"
     priority = 5
-    icon = "/widgets/sleuth/icon/sleuth2.png"
+    icon = getIconName(__file__,"sleuth2.png")
     want_main_area = False
     docker_image_name = "biodepot/sleuth"
     docker_image_tag = "0.30.0__ubuntu-18.04__r-3.5.1__demo__082318"
@@ -47,7 +47,7 @@ class OWsleuth(OWBwBWidget):
     geneNamesFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/sleuth/sleuth.json") as f:
+        with open(getJsonName(__file__,"sleuth")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

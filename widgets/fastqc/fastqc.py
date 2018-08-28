@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWfastqc(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWfastqc(OWBwBWidget):
     description = "fastqc"
     category = "Utilities"
     priority = 5
-    icon = "/widgets/fastqc/icon/fastqc_icon_100.png"
+    icon = getIconName(__file__,"fastqc_icon_100.png")
     want_main_area = False
     docker_image_name = "biodepot/fastqc"
     docker_image_tag = "latest"
@@ -34,7 +34,7 @@ class OWfastqc(OWBwBWidget):
     inputDir=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/fastqc/fastqc.json") as f:
+        with open(getJsonName(__file__,"fastqc")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

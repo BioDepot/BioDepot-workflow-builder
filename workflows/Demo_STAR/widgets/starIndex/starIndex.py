@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWstarIndex(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWstarIndex(OWBwBWidget):
     description = "Construct indices for STAR aligner "
     category = "RNA-seq"
     priority = 11
-    icon = "/widgets/starIndex/icon/starIndex.png"
+    icon = getIconName(__file__,"starIndex.png")
     want_main_area = False
     docker_image_name = "biodepot/star"
     docker_image_tag = "2.6.0c__debian-8.11-slim__072918"
@@ -48,7 +48,7 @@ class OWstarIndex(OWBwBWidget):
     sjdbInsertSave =pset("Basic")
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/starIndex/starIndex.json") as f:
+        with open(getJsonName(__file__,"starIndex")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWPython3(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWPython3(OWBwBWidget):
     description = "Minimum Python3 container with pip"
     category = "Scripting"
     priority = 10
-    icon = "/widgets/Python3/icon/python3.png"
+    icon = getIconName(__file__,"python3.png")
     want_main_area = False
     docker_image_name = "biodepot/python3"
     docker_image_tag = "3.6.3-r9__alpine-3.7__min__081418"
@@ -32,7 +32,7 @@ class OWPython3(OWBwBWidget):
     InputFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/Python3/Python3.json") as f:
+        with open(getJsonName(__file__,"Python3")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

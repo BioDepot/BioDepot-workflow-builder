@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWstartodeseq2(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWstartodeseq2(OWBwBWidget):
     description = "Convert Star quantMode counts file to DESeq2 style counts file"
     category = "RNA-seq"
     priority = 13
-    icon = "/widgets/startodeseq2/icon/startodeseq2.png"
+    icon = getIconName(__file__,"startodeseq2.png")
     want_main_area = False
     docker_image_name = "biodepot/star2deseq"
     docker_image_tag = "1.0__alpine-3.7__07-29-18"
@@ -35,7 +35,7 @@ class OWstartodeseq2(OWBwBWidget):
     inputDirs=pset([])
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/startodeseq2/startodeseq2.json") as f:
+        with open(getJsonName(__file__,"startodeseq2")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWkallistoIndex(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWkallistoIndex(OWBwBWidget):
     description = "Generates index files for kallisto"
     category = "RNA-seq"
     priority = 3
-    icon = "/widgets/kallistoIndex/icon/kallistoindex.png"
+    icon = getIconName(__file__,"kallistoindex.png")
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
     docker_image_tag = "0.44.0__ubuntu-16.04__072818"
@@ -35,7 +35,7 @@ class OWkallistoIndex(OWBwBWidget):
     makeUnique=pset(False)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/kallistoIndex/kallistoIndex.json") as f:
+        with open(getJsonName(__file__,"kallistoIndex")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

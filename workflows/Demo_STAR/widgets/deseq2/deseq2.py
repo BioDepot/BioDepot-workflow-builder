@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWdeseq2(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWdeseq2(OWBwBWidget):
     description = "Differential expression using DESeq2 package"
     category = "RNA-seq"
     priority = 14
-    icon = "/widgets/deseq2/icon/deseq2.png"
+    icon = getIconName(__file__,"deseq2.png")
     want_main_area = False
     docker_image_name = "biodepot/deseq2"
     docker_image_tag = "1.20__ubuntu-16.04__bioc-3.7__r-3.5.1__072918"
@@ -37,7 +37,7 @@ class OWdeseq2(OWBwBWidget):
     ngenes=pset(50)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/deseq2/deseq2.json") as f:
+        with open(getJsonName(__file__,"deseq2")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
@@ -54,8 +54,7 @@ class OWdeseq2(OWBwBWidget):
         else:
             self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
-        topGenesFile="top{}Genes.tsv".format(self.ngenes)
-        sys.stderr.write("Top file is {}\n".format(topGenesFile))
-        if self.outputDir is not None:
-            topGenesFile=self.outputDir+"/"+topGenesFile
-            self.send('topGenesFile',topGenesFile)
+        outputValue=None
+        if hasattr(self,"topGenesFile"):
+            outputValue=getattr(self,"topGenesFile")
+        self.send("topGenesFile", outputValue)

@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWfastqDump(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWfastqDump(OWBwBWidget):
     description = "Download fastq files from GEO"
     category = "Utilities"
     priority = 2
-    icon = "/widgets/fastqDump/icon/pfqDump.png"
+    icon = getIconName(__file__,"pfqDump.png")
     want_main_area = False
     docker_image_name = "biodepot/sratoolkit"
     docker_image_tag = "2.8.2-1__minideb-jessie__072818"
@@ -72,7 +72,7 @@ class OWfastqDump(OWBwBWidget):
     legacyError=pset(False)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/fastqDump/fastqDump.json") as f:
+        with open(getJsonName(__file__,"fastqDump")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

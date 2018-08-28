@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWDtoxSAlignment(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWDtoxSAlignment(OWBwBWidget):
     description = "Alignment part of DtoxS standard operating procedure (SOP)"
     category = "RNA-seq"
     priority = 1
-    icon = "/widgets/DtoxSAlignment/icon/dtoxs-alignment2.svg"
+    icon = getIconName(__file__,"dtoxs-alignment2.svg")
     want_main_area = False
     docker_image_name = "biodepot/dtoxs_alignment"
     docker_image_tag = "1.0__alpine-3.7__bwa-0.715-r1140__python-2.7.14__072818"
@@ -35,7 +35,7 @@ class OWDtoxSAlignment(OWBwBWidget):
     seriesName=pset("20150409")
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/DtoxSAlignment/DtoxSAlignment.json") as f:
+        with open(getJsonName(__file__,"DtoxSAlignment")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

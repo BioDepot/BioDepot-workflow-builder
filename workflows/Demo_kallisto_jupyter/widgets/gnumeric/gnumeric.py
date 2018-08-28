@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWgnumeric(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWgnumeric(OWBwBWidget):
     description = "Open source spreadsheet"
     category = "Utilities"
     priority = 2
-    icon = "/widgets/gnumeric/icon/gnumeric.png"
+    icon = getIconName(__file__,"gnumeric.png")
     want_main_area = False
     docker_image_name = "biodepot/gnumeric"
     docker_image_tag = "1.12.18__debian-jessie-slim__080418"
@@ -31,7 +31,7 @@ class OWgnumeric(OWBwBWidget):
     inputFile=pset("")
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/gnumeric/gnumeric.json") as f:
+        with open(getJsonName(__file__,"gnumeric")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWjupyter_sleuth(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWjupyter_sleuth(OWBwBWidget):
     description = "Base installation of Jupyter"
     category = "Jupyter"
     priority = 103
-    icon = "/widgets/jupyter_sleuth/icon/jupyter-sleuth.png"
+    icon = getIconName(__file__,"jupyter-sleuth.png")
     want_main_area = False
     docker_image_name = "biodepot/sleuth"
     docker_image_tag = "0.30.0__ubuntu-16.04__r-3.4.4__jupyter-5.6.0__firefox-61.0.1__082318"
@@ -50,7 +50,7 @@ class OWjupyter_sleuth(OWBwBWidget):
     browser=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/jupyter_sleuth/jupyter_sleuth.json") as f:
+        with open(getJsonName(__file__,"jupyter_sleuth")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()

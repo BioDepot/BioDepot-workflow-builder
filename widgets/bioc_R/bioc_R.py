@@ -8,7 +8,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 class OWbioc_R(OWBwBWidget):
@@ -16,7 +16,7 @@ class OWbioc_R(OWBwBWidget):
     description = "Bioconductor 3.7 R 3.5.1"
     category = "Scripting"
     priority = 1
-    icon = "/widgets/bioc_R/icon/bioc-r.png"
+    icon = getIconName(__file__,"bioc-r.png")
     want_main_area = False
     docker_image_name = "biodepot/bioconductor"
     docker_image_tag = "3.7__ubuntu-18.04__R-3.5.1__081318"
@@ -32,7 +32,7 @@ class OWbioc_R(OWBwBWidget):
     InputFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open("/widgets/bioc_R/bioc_R.json") as f:
+        with open(getJsonName(__file__,"bioc_R")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
