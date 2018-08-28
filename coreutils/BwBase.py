@@ -16,6 +16,16 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
+def getJsonName(filename,widgetName):
+    widgetPy=os.path.realpath(filename)
+    widgetDir=os.path.dirname(widgetPy)
+    return '{}/{}.json'.format(widgetDir,widgetName)
+
+def getIconName(filename,iconFile):
+    widgetPy=os.path.realpath(filename)
+    widgetDir=os.path.dirname(widgetPy)
+    return '{}/icon/{}'.format(widgetDir,iconFile)
+
 class DragAndDropList(QtGui.QListWidget):
      #overloads the Drag and dropEvents to emit code
      itemMoved = pyqtSignal(int, int) # Old index, new index, item

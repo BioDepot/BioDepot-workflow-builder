@@ -36,7 +36,7 @@ from Orange.widgets import widget, gui, settings
 import Orange.data
 from Orange.data.io import FileFormat
 from DockerClient import DockerClient
-from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
+from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
 '''
@@ -96,8 +96,7 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
                 os.system("cp {} {}/icon/".format(defaultIconFile,inputPath))
             else:
                 iconFile=icons[0]
-        finalIconFile = '/widgets/' + widgetName + '/icon/' + os.path.basename(iconFile)
-        f.write('    icon = "{}"\n'.format(finalIconFile))
+        f.write('    icon = getIconName(__file__,"{}")\n'.format(os.path.basename(iconFile)))
         f.write('    want_main_area = False\n')
         if not 'docker_image_name' in data:
             data['docker_image_name']='biodepot/alpine-bash'
@@ -152,7 +151,7 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
         f.write('    def __init__(self):\n')        
         f.write('        super().__init__(self.docker_image_name, self.docker_image_tag)\n')
         joinedName=data['name'].replace(' ','')
-        f.write('        with open("/widgets/{}/{}") as f:\n'.format(widgetName,os.path.basename(inputJson)))
+        f.write('        with open(getJsonName(__file__,"{}")) as f:\n'.format(widgetName,))
         f.write('            self.data=jsonpickle.decode(f.read())\n')
         f.write('            f.close()\n')
         #init
@@ -243,8 +242,7 @@ def mergeWidget(inputJson,outputWidget,widgetName,inputData=None):
             os.system("cp {} {}/icon/".format(defaultIconFile,inputPath))
         else:
             iconFile=icons[0]
-    finalIconFile = '/widgets/' + widgetName + '/icon/' + os.path.basename(iconFile)
-    fwrite(afterClass,"\s+icon =",'    icon = "{}"\n'.format(finalIconFile))
+    fwrite(afterClass,"\s+icon =",'    icon = getIconName(__file__,"{}")\n'.format(os.path.basename(iconFile)))
     fwrite(afterClass,"\s+want_main_area =",'    want_main_area = False\n')
     if not 'docker_image_name' in data:
         data['docker_image_name']='biodepot/alpine-bash'

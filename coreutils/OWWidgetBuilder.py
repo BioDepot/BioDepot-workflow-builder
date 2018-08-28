@@ -584,11 +584,11 @@ class OWWidgetBuilder(widget.OWWidget):
                     raise ValueError('no widget name given')
         else:
             widgetSplit=widgetID.split('.')
-            widgetSplit[-1]=widgetSplit[-1][2:]
-            self.widgetName=widgetSplit[-1]
+            self.widgetName=widgetSplit[-1][2:]
+            widgetPy=os.path.realpath('/biodepot/{}.py'.format('/'.join(widgetSplit)))
+            self.widgetDir=os.path.dirname(widgetPy)
             self.setWindowTitle(self.widgetName+':Definition')
-            self.widgetDir='/widgets/{}'.format(self.widgetName)
-            sys.stderr.write('widgetDir is {} widgetName is {}\n'.format(self.widgetDir,self.widgetName))
+            sys.stderr.write('widgetPy is {} widgetDir is {} widgetName is {}\n'.format(widgetPy, self.widgetDir,self.widgetName))
             self.loadWidget(loadWidgetDir=self.widgetDir,loadNameCheck=False) 
         
     def clearLayout(self,layout):

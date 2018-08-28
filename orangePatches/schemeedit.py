@@ -1545,9 +1545,12 @@ class SchemeEditWidget(QWidget):
         #id field is in form of <category>.OW<widgetId>
         widgetSplit=desc['id'].split('.')
         widgetName=widgetSplit[-1][2:]
-        attrsFile='/widgets/{}/{}.attrs'.format(widgetName,widgetName)
-        statesFile='/widgets/{}/{}.states'.format(widgetName,widgetName)
-        
+        #follow link from
+        widgetPy=os.path.realpath('/biodepot/{}.py'.format('/'.join(widgetSplit)))
+        widgetDir=os.path.dirname(widgetPy)
+        attrsFile='{}/{}.attrs'.format(widgetDir,widgetName)
+        statesFile='{}/{}.states'.format(widgetDir,widgetName)
+        sys.stderr.write('desc {} attrsFile is {} and statesFile is {}\n'.format(desc['id'],attrsFile,statesFile))
         if os.path.isfile(attrsFile) and os.path.isfile(statesFile):
             return True
         return False
