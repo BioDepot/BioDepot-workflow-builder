@@ -31,6 +31,7 @@ class OWDtoxSAnalysis(OWBwBWidget):
     optionsChecked=pset({})
     RepositoryDirectory=pset(None)
     ConfigurationFile=pset(None)
+    topGenesFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open(getJsonName(__file__,"DtoxSAnalysis")) as f:
