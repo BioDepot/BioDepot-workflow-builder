@@ -35,6 +35,7 @@ class OWdeseq2(OWBwBWidget):
     treatment=pset(None)
     outputDir=pset(None)
     ngenes=pset(50)
+    topGenesFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
         with open(getJsonName(__file__,"deseq2")) as f:
