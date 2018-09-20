@@ -1,7 +1,7 @@
 FROM ubuntu:18.04
 MAINTAINER lhhung<lhhung@uw.edu>
 #Dockerfile for widget development container
-
+#comment to force rebuild
 ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /root
 #base files/utils to be used inside container
