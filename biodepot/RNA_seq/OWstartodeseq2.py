@@ -1,1 +1,1 @@
-../../widgets/startodeseq2/startodeseq2.py
+../../widgets/RNA_seq/startodeseq2/startodeseq2.py

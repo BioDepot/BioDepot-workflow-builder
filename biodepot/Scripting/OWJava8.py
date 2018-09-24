@@ -1,1 +1,1 @@
-/widgets/Java8/Java8.py
+../../widgets/Scripting/Java8/Java8.py

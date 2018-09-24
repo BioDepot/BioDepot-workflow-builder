@@ -1,1 +1,1 @@
-/widgets/Python3/Python3.py
+../../widgets/Scripting/Python3/Python3.py

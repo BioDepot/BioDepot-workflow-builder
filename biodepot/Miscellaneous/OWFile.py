@@ -1,1 +1,1 @@
-/widgets/File/File.py
+../../widgets/Miscellaneous/File/File.py

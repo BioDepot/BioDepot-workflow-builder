@@ -1,1 +1,1 @@
-../../widgets/deseq2/deseq2.py
+../../widgets/RNA_seq/deseq2/deseq2.py

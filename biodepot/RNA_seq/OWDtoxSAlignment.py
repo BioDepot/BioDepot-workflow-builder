@@ -1,1 +1,1 @@
-../../widgets/DtoxSAlignment/DtoxSAlignment.py
+../../widgets/RNA_seq/DtoxSAlignment/DtoxSAlignment.py

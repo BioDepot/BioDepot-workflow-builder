@@ -1,3 +1,0 @@
-[orange.widgets]
-Demo_DtoxS = Demo_DtoxS
-

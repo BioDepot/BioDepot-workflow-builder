@@ -1,1 +1,1 @@
-/widgets/jupyter_bioc/jupyter_bioc.py
+../../widgets/Jupyter/jupyter_bioc/jupyter_bioc.py

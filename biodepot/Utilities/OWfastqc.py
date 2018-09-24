@@ -1,1 +1,1 @@
-/widgets/fastqc/fastqc.py
+../../widgets/Utilities/fastqc/fastqc.py

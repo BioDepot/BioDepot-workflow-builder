@@ -1,1 +1,1 @@
-/widgets/R-Bioconductor/R-Bioconductor.py
+../../widgets/Scripting/R-Bioconductor/R-Bioconductor.py
