@@ -1,1 +1,0 @@
-../../widgets/Scripting/bioc-R/bioc-R.py

@@ -7,13 +7,14 @@ fi
 
 while true
 do
-$cmd &
+$cmd $workflow &
+workflow="" 
 pid="$!"
 mkdir -p "/tmp/pid.$pid"
 wait $pid
 if [ -d "/tmp/pid.$pid" ]; then
-    if [ -f "/tmp/pid.$pid/cmd" ]; then
-        cmd= `cat /tmp/pid.$pid/cmd`
+    if [ -f "/tmp/pid.$pid/workflow" ]; then
+        workflow=`cat /tmp/pid.$pid/workflow`
         rm -rf "/tmp/pid.$pid"
     else
         rm -rf "/tmp/pid.$pid"

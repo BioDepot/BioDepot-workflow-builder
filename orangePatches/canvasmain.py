@@ -766,7 +766,7 @@ class CanvasMainWindow(QMainWindow):
         
     def reload_settings(self,startingWorkflow=None):
         if startingWorkflow:
-            os.system('echo orange-canvas {} > /tmp/pid.{}/cmd'.format(startingWorkflow,os.getpid())) 
+            os.system('echo {} > /tmp/pid.{}/workflow'.format(startingWorkflow,os.getpid())) 
         else:
             os.system('rm /tmp/pid.{} -rf'.format(os.getpid()))
         self.close()

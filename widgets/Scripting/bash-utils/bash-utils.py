@@ -11,7 +11,7 @@ from DockerClient import DockerClient
 from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements
 from PyQt5 import QtWidgets, QtGui
 
-class OWbash-utils(OWBwBWidget):
+class OWbash_utils(OWBwBWidget):
     name = "bash-utils"
     description = "alpine bash with wget curl gzip bzip2"
     category = "Scripting"
