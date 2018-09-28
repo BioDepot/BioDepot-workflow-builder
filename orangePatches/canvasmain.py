@@ -2,7 +2,7 @@
 Orange Canvas Main Window
 
 """
-import os
+import os,re
 import sys
 sys.path.append('/coreutils')
 import OWWidgetBuilder, toolDockEdit
@@ -13,6 +13,7 @@ from functools import partial
 from io import BytesIO, StringIO
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
+from workflowTools import exportWorkflow, importWorkflow
 
 import pkg_resources
 
@@ -416,13 +417,19 @@ class CanvasMainWindow(QMainWindow):
                     toolTip=self.tr("Add new Widget to toolBar"),
                     triggered=self.editDock,
                     enabled=True)
-
+        self.load_action = \
+            QAction(self.tr("Load workflow"), self,
+                    objectName="action-load",
+                    toolTip=self.tr("Load workflow"),
+                    triggered=self.load_workflow,
+                    shortcut=QKeySequence.Open,
+                    icon=canvas_icons("Open.svg")
+                    )
         self.open_action = \
             QAction(self.tr("Open"), self,
                     objectName="action-open",
                     toolTip=self.tr("Open a workflow."),
                     triggered=self.open_scheme,
-                    shortcut=QKeySequence.Open,
                     icon=canvas_icons("Open.svg")
                     )
 
@@ -637,6 +644,7 @@ class CanvasMainWindow(QMainWindow):
         # File menu
         file_menu = QMenu(self.tr("&File"), menu_bar)
         file_menu.addAction(self.new_action)
+        file_menu.addAction(self.load_action)
         file_menu.addAction(self.open_action)
         file_menu.addAction(self.open_and_freeze_action)
         file_menu.addAction(self.reload_last_action)
@@ -956,6 +964,33 @@ class CanvasMainWindow(QMainWindow):
 
         return QDialog.Accepted
 
+    def load_workflow(self):
+        """Open a new workflow. Return QDialog.Rejected if the user canceled
+        the operation and QDialog.Accepted otherwise.
+
+        """
+        if not self.pre_close_save():
+            return QDialog.Rejected
+
+        if self.last_scheme_dir is None:
+            # Get user 'Documents' folder
+            start_dir = user_documents_path()
+        else:
+            start_dir = self.last_scheme_dir
+        
+        openDir = str(QFileDialog.getExistingDirectory(
+            self, self.tr("Save Workflow to Directory"),
+            start_dir))
+        if not openDir:
+            return QFileDialog.Rejected
+        #copy widgets
+        print(openDir)
+        owsFile=os.popen('ls {}/*.ows'.format(openDir)).read().split()[0]
+        print (owsFile)
+        importWorkflow(owsFile)
+        self.load_scheme(owsFile)
+        return QDialog.Accepted
+        
     def open_scheme(self):
         """Open a new scheme. Return QDialog.Rejected if the user canceled
         the operation and QDialog.Accepted otherwise.
@@ -1139,7 +1174,7 @@ class CanvasMainWindow(QMainWindow):
         msgbox.addButton("Clear", QMessageBox.DestructiveRole)
         keep = msgbox.addButton("Keep", QMessageBox.AcceptRole)
         cancel = msgbox.addButton("Cancel", QMessageBox.RejectRole)
-        msgbox.exec()
+#        msgbox.exec()
         button = msgbox.clickedButton()
         if button is cancel or \
                 button is save and report.save_report() == QDialog.Rejected:
@@ -1275,13 +1310,15 @@ class CanvasMainWindow(QMainWindow):
             else:
                 start_dir = user_documents_path()
 
-            start_dir = os.path.join(str(start_dir), title + ".ows")
-
-        filename, _ = QFileDialog.getSaveFileName(
-            self, self.tr("Save Orange Workflow File"),
-            start_dir, self.tr("Orange Workflow (*.ows)")
-        )
-
+        saveDir = str(QFileDialog.getExistingDirectory(
+            self, self.tr("Save Workflow to Directory"),
+            start_dir))
+        if not saveDir:
+            return QFileDialog.Rejected
+        owsName=os.path.basename(saveDir)+'.ows'
+        owsName=re.sub(r"\s+", '_',owsName)
+        owsName.replace('-','_')
+        filename=saveDir+'/'+owsName
         if filename:
             if not self.check_can_save(document, filename):
                 return QDialog.Rejected
@@ -1289,10 +1326,11 @@ class CanvasMainWindow(QMainWindow):
             self.last_scheme_dir = os.path.dirname(filename)
 
             if self.save_scheme_to(curr_scheme, filename):
+                exportWorkflow (filename,saveDir)
                 document.setPath(filename)
                 document.setModified(False)
                 self.add_recent_scheme(curr_scheme.title, document.path())
-
+                
                 return QFileDialog.Accepted
 
         return QFileDialog.Rejected

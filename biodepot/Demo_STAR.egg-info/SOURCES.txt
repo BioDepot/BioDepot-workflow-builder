@@ -1,6 +1,0 @@
-Demo_STAR/__init__.py
-Demo_STAR.egg-info/PKG-INFO
-Demo_STAR.egg-info/SOURCES.txt
-Demo_STAR.egg-info/dependency_links.txt
-Demo_STAR.egg-info/entry_points.txt
-Demo_STAR.egg-info/top_level.txt

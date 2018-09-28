@@ -1,6 +1,0 @@
-Demo_kallisto/__init__.py
-Demo_kallisto.egg-info/PKG-INFO
-Demo_kallisto.egg-info/SOURCES.txt
-Demo_kallisto.egg-info/dependency_links.txt
-Demo_kallisto.egg-info/entry_points.txt
-Demo_kallisto.egg-info/top_level.txt

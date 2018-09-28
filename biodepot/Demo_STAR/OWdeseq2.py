@@ -1,1 +1,0 @@
-/workflows/Demo_STAR/widgets/deseq2/deseq2.py

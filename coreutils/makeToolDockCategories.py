@@ -40,13 +40,4 @@ def removeCategoryFromToolDock(basePath,category,directory):
     setupFile='{}/setup.py'.format(basePath)
     os.system(''' sed -i '/setup(name="{}"/,/)/d' {}'''.format(category,setupFile))
     os.system('cd {} && rm -rf {} && rm -rf {}.egg'.format(basePath,directory,directory))
-
-
-
-
     
-    
-
-
-
-

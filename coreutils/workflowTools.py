@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import sys, os, re 
 from makeToolDockCategories import *
 from xml.dom import minidom
@@ -48,7 +47,7 @@ def copyWorkflow(inputWorkflow,outputWorkflow):
         
 def findWidgetPathFromLink(qualifiedName,groupName,basePath=''):
     parts=qualifiedName.split('.')
-    link=basePath+'/biodepot'+'/'+'/'.join(parts[0:-1])+'.py'
+    link=basePath+'/biodepot/'+'/'.join(parts[0:-1])+'.py'
     widgetPath=os.path.dirname((os.readlink(link)))
    #check if absolute path
     if widgetPath[0]=='/':
@@ -59,6 +58,9 @@ def findWidgetPathFromLink(qualifiedName,groupName,basePath=''):
 
         
 def exportWorkflow (bwbOWS,outputWorkflow,basePath=""):
+    #don't let it nuke the root directories 
+    if not outputWorkflow.strip('/'):
+        return
     os.system('rm -rf {}/widgets'.format(outputWorkflow))
     os.system('mkdir -p {}/widgets'.format(outputWorkflow))
     os.system('rm -rf {}/icon'.format(outputWorkflow))
@@ -69,41 +71,64 @@ def exportWorkflow (bwbOWS,outputWorkflow,basePath=""):
     #find base workflowName
     if not nodes:
         return
+    projectPaths=[]
+    #copy widgets
+    for node in nodes:
+        projectPath=niceForm(node.getAttribute('project_name'),allowDash=False)
+        widgetName=niceForm(node.getAttribute('name'),allowDash=False)
+        projectPaths.append(projectPath)
+        qname=node.getAttribute('qualified_name')
+        widgetPath=findWidgetPathFromLink(qname,projectPath,basePath)
+        #the link has
+        os.system('mkdir -p {}/widgets/{}'.format(outputWorkflow,projectPath))
+        os.system('cp -r {} {}/widgets/{}'.format(widgetPath,outputWorkflow,projectPath))
+   
+    #copy icons and info in setup.py for each projectPath
+    for projectPath in list(set(projectPaths)):
+        os.system('cp {}/biodepot/{}/__init__.py {}/widgets/{}/'.format(basePath,projectPath,outputWorkflow,projectPath))
+        os.system('cp -r {}/biodepot/{}/icon {}/widgets/{}/'.format(basePath,projectPath,outputWorkflow,projectPath))
+
+def importWorkflow(owsFile):
+    changedSetup=False
+    workflowDir=os.path.dirname(owsFile)
+    doc = minidom.parse(owsFile)
+    nodes = doc.getElementsByTagName("node")
+    with open('/biodepot/setup.py','r') as f:
+        setupData=f.read()
+    projectList=re.findall(r'setup\(name="([^"]+)"',setupData)
+    #find base workflowName
+    if not nodes:
+        return
     projectNames=[]
     #copy widgets
     for node in nodes:
-        projectName=node.getAttribute('project_name')
-        widgetName=node.getAttribute('widgetName')
+        #differs from export in that we want to preserve the dashes in the names for changing setup.py later
+        projectName=niceForm(node.getAttribute('project_name'),allowDash=True)
+        widgetName=niceForm(node.getAttribute('name'),allowDash=False)
         projectNames.append(projectName)
+        projectPath=niceForm(projectName,allowDash=False)
         qname=node.getAttribute('qualified_name')
-        print(qname)
-        widgetPath=findWidgetPathFromLink(qname,projectName,basePath)
-        print (widgetPath)
-        os.system('mkdir -p {}/widgets/{}'.format(outputWorkflow,projectName))
-        os.system('cp -r {} {}/widgets/{}'.format(widgetPath,outputWorkflow,projectName))
-   
-    #copy icons and info in setup.py
+        parts=qname.split('.')
+        destLink='/biodepot/'+'/'.join(parts[0:-1])+'.py'
+        pythonFile='{}/widgets/{}/{}/{}.py'.format(workflowDir,projectPath,widgetName,widgetName)
+        print ('mkdir -p /biodepot/{}'.format(projectPath))
+        print ('ln -sf {} {}'.format(pythonFile,destLink))
+        os.system('mkdir -p /biodepot/{}'.format(projectPath))
+        os.system('ln -sf {} {}'.format(pythonFile,destLink))
+    #update the entryname in the setup.py directory
+
+    for projectName in list(set(projectNames)):
+        projectPath=niceForm(projectName,allowDash=False)
+        os.system('rm -rf /biodepot/{}/icon'.format(projectPath))
+        os.system('cp -r {}/widgets/{}/icon  /biodepot/{} '.format(workflowDir,projectPath,projectPath))
+        os.system('cp  {}/widgets/{}/__init__.py  /biodepot/{}/.'.format(workflowDir,projectPath,projectPath))
+        if projectName not in  projectList:
+            setupData+=entryString(projectName,projectPath)
+            changedSetup=True
     
-    projectMode=findMode(projectNames)[0]
-    #use most common project found to determine the icon and init.py
-    
-    #convert any - to _  dashes are not allowed in Python names so we leave them out of paths but we keep them for the sake of terms like RNA-seq
-    projectMode=projectMode.replace('-','_')
-    print ('cp -r {}/biodepot/{}/icon {}'.format(basePath,projectMode,outputWorkflow))
-    os.system('cp -r {}/biodepot/{}/icon {}'.format(basePath,projectMode,outputWorkflow))
-    os.system('cp {}/biodepot/{}/__init__.py {}'.format(basePath,projectMode,outputWorkflow))
-    
-    print(projectMode)
+    if changedSetup:
+        with open('/biodepot/setup.py','w') as f:
+            f.write(setupData)
+        os.system('cd /biodepot && pip install -e .')
 
 
-def makeWorkflow(workflowName,directory,owsFile,basePath='',copyOWS=False,reformat=False):
-    workflowPath= '{}/{}'.format(directory,workflowName)
- 
-    #os.system('mkdir -p {}'.format(workflowPath))
-    #os.system('mkdir -p {}/widgets'.format(workflowPath))
-    #widgets=findWidgetsInOWS(owsFile)
-    #copyWidgets(widgets,workflowPath,basePath=basePath)
-    reformatOWS(workflowName,owsFile,'./testfile.ows')
-    #os.system('cp {} {}/{}.ows'.format(owsFile,workflowPath,workflowName))
-
-exportWorkflow('./test.ows','./newWorkflow','/media/data/home/lhhung/bwb/BioDepot-workflow-builder/')
