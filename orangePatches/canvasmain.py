@@ -193,7 +193,6 @@ class CanvasMainWindow(QMainWindow):
         self.setup_actions()
         self.setup_ui()
         self.setup_menu()
-        #os.system('mkdir -p /tmp/pid.{}'.format(os.getpid()))
         self.restore()
 
     def setup_ui(self):
@@ -765,8 +764,11 @@ class CanvasMainWindow(QMainWindow):
         widget.raise_()
         widget.activateWindow()
         
-    def reload_settings(self):
-        os.system('rm /tmp/pid.{} -rf'.format(os.getpid()))
+    def reload_settings(self,startingWorkflow=None):
+        if startingWorkflow:
+            os.system('echo orange-canvas {} > /tmp/pid.{}/cmd'.format(startingWorkflow,os.getpid())) 
+        else:
+            os.system('rm /tmp/pid.{} -rf'.format(os.getpid()))
         self.close()
         
     def restore(self):
@@ -988,7 +990,7 @@ class CanvasMainWindow(QMainWindow):
         owsFile=os.popen('ls {}/*.ows'.format(openDir)).read().split()[0]
         print (owsFile)
         importWorkflow(owsFile)
-        self.load_scheme(owsFile)
+        self.reload_settings(owsFile)
         return QDialog.Accepted
         
     def open_scheme(self):
