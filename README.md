@@ -90,9 +90,14 @@ For more information please refer to -
 
 ![](./docs/images/image13.png)     
 
-You will be asked to authorize Docker.app with your system password after you launch it. Privileged access is needed to install networking components and links to the Docker apps.The whale in the top status bar indicates that Docker is running, and accessible from a terminal.
+You will be asked to authorize Docker.app with your system password after you 
+launch it. Privileged access is needed to install networking components and links to the Docker apps.The whale in the top status bar indicates that Docker is running, and accessible from a terminal.
 
 ![](./docs/images/image16.png) 
+
+3\. By default, Docker for Windows limit the memory usage to 2 GB. Given that most Bioinformatics workflows are computationally intensive, some of the tasks may require a higher memory usage. To change the memory allocation, go to `Docker Preferences (Right Click on the docker Icon) -> Preferences -> Advanced`, and adjust the memory allocation as needed. We recommend allowing Docker engine to use at least 10 Gb of memory or more. 
+
+![](./docs/images/image25.png)
 
 
 ### Windows
@@ -120,6 +125,10 @@ For other versions of Windows, the older toolbox version that uses VirtualBox wi
 * if the whale is hidden in the Notifications area, click the up arrow on the taskbar to show it. To learn more, see [Docker Settings](https://docs.docker.com/docker-for-windows/#docker-settings).
 * If you just installed the app, you also get a popup success message with suggested next steps, and a link to this documentation. 
 ![](./docs/images/image15.png) 
+
+3\. By default, Docker for Windows limit the memory usage to 2 GB. Given that most Bioinformatics workflows are computationally intensive, some of the tasks may require a higher memory usage. To change the memory allocation, go to `Docker Preferences (Right Click on the docker Icon) -> Preferences -> Advanced`, and adjust the memory allocation as needed. We recommend allowing Docker engine to use at least 10 Gb of memory or more. 
+
+![](./docs/images/image26.png)
 
 
 ### On The Cloud
