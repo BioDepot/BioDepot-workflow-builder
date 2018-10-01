@@ -10,8 +10,6 @@ def findMode(lst):
     modes = [i for i in lst if lst.count(i) == maxFreq]
     return modes
     
-
-    
 def reformatOWS(workflowName,inputFile,outputFile):
     doc = minidom.parse(inputFile)
     nodes = doc.getElementsByTagName("node")

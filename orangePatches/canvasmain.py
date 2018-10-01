@@ -14,7 +14,7 @@ from io import BytesIO, StringIO
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from workflowTools import exportWorkflow, importWorkflow
-
+from OWWidgetBuilder import SaveWorkflowForm
 import pkg_resources
 
 from AnyQt.QtWidgets import (
@@ -112,7 +112,6 @@ def canvas_icons(name):
                       os.path.join("icons", name))
                      )
 
-
 class FakeToolBar(QToolBar):
     """A Toolbar with no contents (used to reserve top and bottom margins
     on the main window).
@@ -171,7 +170,7 @@ class CanvasMainWindow(QMainWindow):
 
     def __init__(self, *args):
         QMainWindow.__init__(self, *args)
-
+        self.saveWorkflowSettings={}
         self.__scheme_margins_enabled = True
         self.__document_title = "untitled"
         self.__first_show = True
@@ -1301,9 +1300,11 @@ class CanvasMainWindow(QMainWindow):
         document = self.current_document()
         curr_scheme = document.scheme()
         title = curr_scheme.title or "untitled"
+        
+        
         for illegal in r'<>:"\/|?*\0':
             title = title.replace(illegal, '_')
-
+            
         if document.path():
             start_dir = document.path()
         else:
@@ -1311,30 +1312,29 @@ class CanvasMainWindow(QMainWindow):
                 start_dir = self.last_scheme_dir
             else:
                 start_dir = user_documents_path()
-
-        saveDir = str(QFileDialog.getExistingDirectory(
-            self, self.tr("Save Workflow to Directory"),
-            start_dir))
-        if not saveDir:
-            return QFileDialog.Rejected
-        owsName=os.path.basename(saveDir)+'.ows'
-        owsName=re.sub(r"\s+", '_',owsName)
-        owsName.replace('-','_')
+        self.saveWorkflowSettings['name']=title
+        self.saveWorkflowSettings['start_dir']=start_dir
+        form=SaveWorkflowForm(self.saveWorkflowSettings)
+        form.exec_()
+        print(self.saveWorkflowSettings)
+        if not self.saveWorkflowSettings['success']:
+            return QDialog.Rejected
+        saveDir = self.saveWorkflowSettings['dir']+'/'+self.saveWorkflowSettings['name']
+        owsName=self.saveWorkflowSettings['name']+'.ows'
+        owsName=owsName.replace('-','_')
         filename=saveDir+'/'+owsName
+        os.system("mkdir -p {}".format(saveDir))
         if filename:
             if not self.check_can_save(document, filename):
+                print (filename)
                 return QDialog.Rejected
-
             self.last_scheme_dir = os.path.dirname(filename)
-
             if self.save_scheme_to(curr_scheme, filename):
                 exportWorkflow (filename,saveDir)
                 document.setPath(filename)
                 document.setModified(False)
                 self.add_recent_scheme(curr_scheme.title, document.path())
-                
                 return QFileDialog.Accepted
-
         return QFileDialog.Rejected
 
     def save_scheme_to(self, scheme, filename):
