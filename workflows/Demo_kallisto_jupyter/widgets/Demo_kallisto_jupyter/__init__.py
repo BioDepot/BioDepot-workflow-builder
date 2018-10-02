@@ -1,3 +1,3 @@
 import sysconfig
 ICON = "icon/jupyter-kallisto-sleuth.png"
-BACKGROUND ="light-green"
+BACKGROUND = "light-green"

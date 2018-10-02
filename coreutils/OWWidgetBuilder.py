@@ -52,7 +52,7 @@ class SaveWorkflowForm(QDialog):
         self.browseIcon=QtGui.QIcon('/icons/bluefile.png')
         self.colorIcon=QtGui.QIcon('/icons/colorWheel.png')
         self.ledits={}
-        self.required=['name','dir','color']
+        self.required=['name','dir']
         super(SaveWorkflowForm, self).__init__(parent)
         self.setWindowTitle("Save workflow")
         name_ledit = QLineEdit()
@@ -94,7 +94,7 @@ class SaveWorkflowForm(QDialog):
         else:
             icon_ledit.setText(self.defaultIconFile)
         icon_ledit.setStyleSheet(":disabled { color: #282828}")
-        icon_label=QtGui.QLabel('Workflow icon:')    
+        icon_label=QtGui.QLabel('Change workflow icon:')    
         icon_button=gui.button(None, self, "", callback= lambda : self.browseFileDir('iconFile',ledit=icon_ledit),autoDefault=True, width=19, height=19)
         icon_button.setIcon(self.browseIcon)
         icon_button.setStyleSheet(self.browseCSS)
@@ -111,7 +111,7 @@ class SaveWorkflowForm(QDialog):
         if 'color' in self.initialData and self.initialData['color']:
             color_ledit.setText(self.initialData['color'])
         color_ledit.setStyleSheet(":disabled { color: #282828}")
-        color_label=QtGui.QLabel('Workflow color:')    
+        color_label=QtGui.QLabel('Change workflow color:')    
         color_button=gui.button(None, self, "", callback= lambda : self.browseColor('color',ledit=color_ledit),autoDefault=True, width=19, height=19)
         color_button.setIcon(self.colorIcon)
         color_button.setStyleSheet(self.colorCSS)
@@ -149,7 +149,7 @@ class SaveWorkflowForm(QDialog):
         self.close()
         
     def checkFields(self):
-        #make sure that the ledits are populated with something (icon is OK to be none)
+        #make sure that the ledits are populated with something if required
         for attr in ('name','dir','color','icon'):
             ledit = self.ledits[attr]
             if not ledit.text():

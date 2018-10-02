@@ -641,10 +641,10 @@ class CanvasMainWindow(QMainWindow):
 
         # File menu
         file_menu = QMenu(self.tr("&File"), menu_bar)
-        file_menu.addAction(self.new_action)
+#        file_menu.addAction(self.new_action)
         file_menu.addAction(self.load_action)
-        file_menu.addAction(self.open_action)
-        file_menu.addAction(self.open_and_freeze_action)
+#        file_menu.addAction(self.open_action)
+#        file_menu.addAction(self.open_and_freeze_action)
         file_menu.addAction(self.reload_last_action)
         file_menu.addAction(self.reload_settings_action)
 
@@ -1327,8 +1327,8 @@ class CanvasMainWindow(QMainWindow):
         if os.path.isfile('/biodepot/{}/__init__.py'.format(self.saveWorkflowSettings['name'])):
             cmd='cat /biodepot/{}/__init__.py'.format(self.saveWorkflowSettings['name']) + ''' | grep -o -P '(?<=BACKGROUND = ").*(?=")' '''
             self.saveWorkflowSettings['color']=str(os.popen(cmd).read())
-            cmd='cat /biodepot/{}/__init__.py'.format(self.saveWorkflowSettings['name']) + ''' | grep -o -P '(?<=ICON = ").*(?=")' '''
-            self.saveWorkflowSettings['icon']=str(os.popen(cmd).read())
+            currentIconFile=os.popen('ls /biodepot/{}/icon/*'.format(self.saveWorkflowSettings['name'])).read().split()[0]
+            self.saveWorkflowSettings['icon']=os.path.realpath(currentIconFile)
         print (self.saveWorkflowSettings)
         form=SaveWorkflowForm(self.saveWorkflowSettings)
         form.exec_()
