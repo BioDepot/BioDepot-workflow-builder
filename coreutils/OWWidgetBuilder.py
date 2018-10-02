@@ -121,12 +121,12 @@ class SaveWorkflowForm(QDialog):
         color_box.addWidget(color_button)
 
         #checkboxes
-        merge_checkBox=QtGui.QCheckBox('Merge all widget types',self)        
-        merge_checkBox.stateChanged.connect(lambda: self.getCheckBoxState(merge_checkBox,'merge'))
+        self.merge_checkBox=QtGui.QCheckBox('Merge all widget types',self)        
+        self.merge_checkBox.stateChanged.connect(lambda: self.getCheckBoxState(self.merge_checkBox,'merge'))
         if 'merge' in self.initialData and self.initialData['merge'] is not None:
-            merge_checkBox.setCheckState(self.initialData['merge'])
+            self.merge_checkBox.setCheckState(self.initialData['merge'])
         else:
-            merge_checkBox.setCheckState(False)
+            self.merge_checkBox.setCheckState(False)
 
         #OK cancel buttons
         buttonbox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -138,7 +138,7 @@ class SaveWorkflowForm(QDialog):
         layout.addLayout(dir_box,2,1,1,2)
         layout.addLayout(color_box,3,1,1,2)
         layout.addLayout(icon_box,4,1,1,2)
-        layout.addWidget(merge_checkBox,5,1,1,1)
+        layout.addWidget(self.merge_checkBox,5,1,1,1)
         layout.addWidget(buttonbox,6,1,1,1)
         self.setLayout(layout)
     
@@ -162,8 +162,8 @@ class SaveWorkflowForm(QDialog):
                     return
             else:
                 self.returnData[attr]=ledit.text()
+        self.returnData['merge']=self.merge_checkBox.isChecked()
         #make sure that the name is nice Form (can keep dashes until it is converted to a ows file
-        
         self.returnData['name']=niceForm(self.returnData['name'])
         self.returnData['success']=True
         self.close()

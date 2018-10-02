@@ -1330,7 +1330,8 @@ class CanvasMainWindow(QMainWindow):
                 return QDialog.Rejected
             self.last_scheme_dir = os.path.dirname(filename)
             if self.save_scheme_to(curr_scheme, filename):
-                exportWorkflow (filename,saveDir)
+                #projectName allows dashes
+                exportWorkflow (filename,saveDir,self.saveWorkflowSettings['name'],color=self.saveWorkflowSettings['color'],merge=self.saveWorkflowSettings['merge'],iconFile=self.saveWorkflowSettings['icon'])
                 document.setPath(filename)
                 document.setModified(False)
                 self.add_recent_scheme(curr_scheme.title, document.path())
