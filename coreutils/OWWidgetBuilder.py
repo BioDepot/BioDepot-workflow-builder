@@ -391,8 +391,8 @@ class OWWidgetBuilder(widget.OWWidget):
         box.addWidget(self.saveWidgetBtn)
         box.addWidget(self.saveWidgetAsBtn)
         box.addWidget(self.loadWidgetBtn)
-        box.addWidget(self.registerBtn)
-        box.addWidget(self.rebuildBtn)
+#        box.addWidget(self.registerBtn)
+#        box.addWidget(self.rebuildBtn)
         box.addStretch(1)
         layout.addLayout(box)
 

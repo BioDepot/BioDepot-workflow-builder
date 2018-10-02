@@ -3,7 +3,6 @@ from makeToolDockCategories import *
 from xml.dom import minidom
 from collections import Counter, OrderedDict
 from itertools import groupby
-
         
 def findMode(lst):
     maxFreq =  max(map(lst.count, lst))
@@ -146,20 +145,25 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
                 os.system('cp -r {} {}/widgets/{}'.format(widgetPath,outputWorkflow,projectPath))
     #now check projectTitle directory which could be empty
     #check if icon and __init__.py exist already - otherwise copy the User info
+
+    os.system('mkdir -p {}/widgets/{}/icon'.format(outputWorkflow,projectTitlePath))
     
     if os.path.isdir('{}/biodepot/{}/icon'.format(basePath,projectTitlePath)):
-        os.system('cp -r {}/biodepot/{}/icon {}/widgets/{}/'.format(basePath,projectTitlePath,outputWorkflow,projectTitlePath))
-        os.system('cp {}/biodepot/{}/__init__.py {}/widgets/{}/'.format(basePath,projectTitlePath,outputWorkflow,projectTitlePath)) 
+        #the copy functions are not atomic it seems
+        os.system('cp {}/biodepot/{}/icon/* {}/widgets/{}/icon/.'.format(basePath,projectTitlePath,outputWorkflow,projectTitlePath))
+        os.system('cp {}/biodepot/{}/__init__.py {}/widgets/{}/.'.format(basePath,projectTitlePath,outputWorkflow,projectTitlePath)) 
     else:
-        os.system('cp -r {}/biodepot/User/icon {}/widgets/{}/'.format(basePath,outputWorkflow,projectTitlePath))
-        os.system('cp {}/biodepot/User/__init__.py {}/widgets/{}/'.format(basePath,outputWorkflow,projectTitlePath))
+        os.system('cp {}/biodepot/User/icon/* {}/widgets/{}/icon/.'.format(basePath,outputWorkflow,projectTitlePath))
+        os.system('cp {}/biodepot/User/__init__.py {}/widgets/{}/.'.format(basePath,outputWorkflow,projectTitlePath))
+        
     if iconFile:
         os.system('rm {}/widgets/{}/icon/*'.format(outputWorkflow,projectTitlePath))
         os.system('cp {} {}/widgets/{}/icon/.'.format(iconFile,outputWorkflow,projectTitlePath))
         
         #substitute the icon name
-        iconString='ICON = "icon/{}"'.format(os.path.basename(iconFile))
+        iconString='ICON = "icon\\/{}"'.format(os.path.basename(iconFile))
         cmd="sed -i 's/ICON = .*/{}/g' {}/widgets/{}/__init__.py".format(iconString,outputWorkflow,projectTitlePath)
+        print (cmd)
         os.system(cmd)
     if color:
         colorString='BACKGROUND = "{}"'.format(color)
@@ -169,6 +173,7 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
 def importWorkflow(owsFile):
     changedSetup=False
     workflowDir=os.path.dirname(owsFile)
+    projectTitle=os.path.basename(workflowDir)
     doc = minidom.parse(owsFile)
     nodes = doc.getElementsByTagName("node")
     with open('/biodepot/setup.py','r') as f:
@@ -194,8 +199,8 @@ def importWorkflow(owsFile):
         os.system('mkdir -p /biodepot/{}'.format(projectPath))
         os.system('ln -sf {} {}'.format(pythonFile,destLink))
     #update the entryname in the setup.py directory
-
-    for projectName in list(set(projectNames)):
+    uniqueList=list(set(projectNames))
+    for projectName in uniqueList:
         projectPath=niceForm(projectName,allowDash=False)
         os.system('rm -rf /biodepot/{}/icon'.format(projectPath))
         os.system('cp -r {}/widgets/{}/icon  /biodepot/{} '.format(workflowDir,projectPath,projectPath))
@@ -203,7 +208,16 @@ def importWorkflow(owsFile):
         if projectName not in  projectList:
             setupData+=entryString(projectName,projectPath)
             changedSetup=True
-    
+    if projectTitle not in uniqueList:
+        projectPath=niceForm(projectTitle,allowDash=False)
+        os.system('mkdir -p /biodepot/{}'.format(projectPath))
+        os.system('rm -rf /biodepot/{}/icon'.format(projectPath))
+        os.system('cp -r {}/widgets/{}/icon  /biodepot/{} '.format(workflowDir,projectPath,projectPath))
+        os.system('cp  {}/widgets/{}/__init__.py  /biodepot/{}/.'.format(workflowDir,projectPath,projectPath))
+        if projectTitle not in  projectList:
+            setupData+=entryString(projectTitle,projectPath)
+            changedSetup=True
+            
     if changedSetup:
         with open('/biodepot/setup.py','w') as f:
             f.write(setupData)
