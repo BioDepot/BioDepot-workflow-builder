@@ -1312,11 +1312,26 @@ class CanvasMainWindow(QMainWindow):
                 start_dir = self.last_scheme_dir
             else:
                 start_dir = user_documents_path()
-        self.saveWorkflowSettings['name']=title
+        if curr_scheme.title:
+            self.saveWorkflowSettings['name']=title
+        elif document.path():
+            self.saveWorkflowSettings['name']=os.path.basename(os.path.dirname(document.path()))
+        else:
+            self.saveWorkflowSettings['name']="untitled"
+            
         self.saveWorkflowSettings['start_dir']=start_dir
+        if document.path():
+            self.saveWorkflowSettings['dir']=os.path.dirname(os.path.dirname(document.path()))
+        else:
+            self.saveWorkflowSettings['dir']="/data"
+        if os.path.isfile('/biodepot/{}/__init__.py'.format(self.saveWorkflowSettings['name'])):
+            cmd='cat /biodepot/{}/__init__.py'.format(self.saveWorkflowSettings['name']) + ''' | grep -o -P '(?<=BACKGROUND = ").*(?=")' '''
+            self.saveWorkflowSettings['color']=str(os.popen(cmd).read())
+            cmd='cat /biodepot/{}/__init__.py'.format(self.saveWorkflowSettings['name']) + ''' | grep -o -P '(?<=ICON = ").*(?=")' '''
+            self.saveWorkflowSettings['icon']=str(os.popen(cmd).read())
+        print (self.saveWorkflowSettings)
         form=SaveWorkflowForm(self.saveWorkflowSettings)
         form.exec_()
-        print(self.saveWorkflowSettings)
         if not self.saveWorkflowSettings['success']:
             return QDialog.Rejected
         saveDir = self.saveWorkflowSettings['dir']+'/'+self.saveWorkflowSettings['name']
