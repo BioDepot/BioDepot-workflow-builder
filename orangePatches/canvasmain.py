@@ -650,7 +650,7 @@ class CanvasMainWindow(QMainWindow):
 
         # File -> Open Recent submenu
         self.recent_menu = QMenu(self.tr("Open Recent"), file_menu)
-        file_menu.addMenu(self.recent_menu)
+#        file_menu.addMenu(self.recent_menu)
 #        file_menu.addAction(self.open_report_action)
         file_menu.addSeparator()
         file_menu.addAction(self.save_action)
@@ -980,7 +980,7 @@ class CanvasMainWindow(QMainWindow):
             start_dir = self.last_scheme_dir
         
         openDir = str(QFileDialog.getExistingDirectory(
-            self, self.tr("Save Workflow to Directory"),
+            self, self.tr("Load Workflow from Directory"),
             start_dir))
         if not openDir:
             return QFileDialog.Rejected
@@ -1300,7 +1300,10 @@ class CanvasMainWindow(QMainWindow):
         document = self.current_document()
         curr_scheme = document.scheme()
         title = curr_scheme.title or "untitled"
-        
+        self.saveWorkflowSettings['icon']=""
+        self.saveWorkflowSettings['name']=""
+        self.saveWorkflowSettings['color']=""
+        self.saveWorkflowSettings['merge']=False
         
         for illegal in r'<>:"\/|?*\0':
             title = title.replace(illegal, '_')
@@ -1327,9 +1330,7 @@ class CanvasMainWindow(QMainWindow):
         if os.path.isfile('/biodepot/{}/__init__.py'.format(self.saveWorkflowSettings['name'])):
             cmd='cat /biodepot/{}/__init__.py'.format(self.saveWorkflowSettings['name']) + ''' | grep -o -P '(?<=BACKGROUND = ").*(?=")' '''
             self.saveWorkflowSettings['color']=str(os.popen(cmd).read())
-            currentIconFile=os.popen('ls /biodepot/{}/icon/*'.format(self.saveWorkflowSettings['name'])).read().split()[0]
-            self.saveWorkflowSettings['icon']=os.path.realpath(currentIconFile)
-        print (self.saveWorkflowSettings)
+
         form=SaveWorkflowForm(self.saveWorkflowSettings)
         form.exec_()
         if not self.saveWorkflowSettings['success']:
