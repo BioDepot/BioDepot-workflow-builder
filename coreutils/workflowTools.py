@@ -10,7 +10,7 @@ def findMode(lst):
     modes = [i for i in lst if lst.count(i) == maxFreq]
     return modes
     
-def reformatOWS2(workflowTitle,inputFile,outputFile,uniqueNames=None):
+def reformatOWS(workflowTitle,inputFile,outputFile,uniqueNames):
     workflowPath=niceForm(workflowTitle,allowDash=False)
     doc = minidom.parse(inputFile)
     scheme = doc.getElementsByTagName("scheme")[0]
@@ -22,26 +22,16 @@ def reformatOWS2(workflowTitle,inputFile,outputFile,uniqueNames=None):
         widgetName=niceForm(node.getAttribute('name'),allowDash=False)
         if uniqueNames and projectName in uniqueNames and widgetName in uniqueNames[projectName]:
             uniqueName=uniqueNames[projectName][widgetName]
-            node.attributes['name'].value=uniqueName
-            widgetName=uniqueName
+            
+            #link will be at biodepot/workflowPath/OWuniqueName -> uniqueName/widgetName.py
+            #class is still OWwidgetName
+        else:
+            uniqueName=widgetName
+        node.attributes['name'].value=uniqueName
+        node.attributes['qualified_name']=workflowPath+'.OW'+uniqueName+'.OW'+widgetName
         node.attributes['project_name'].value=workflowTitle
-        qname=node.getAttribute('qualified_name').split('.')[-1]
-        node.attributes['qualified_name'].value=workflowPath+'.'+qname+'.'+qname
     with open(outputFile,'w') as f:
         f.write(doc.toxml())    
-def reformatOWS(workflowTitle,inputFile,outputFile):
-    workflowPath=niceForm(workflowTitle,allowDash=False)
-    doc = minidom.parse(inputFile)
-    scheme = doc.getElementsByTagName("scheme")[0]
-    scheme.attributes['title'].value=workflowTitle
-    nodes = doc.getElementsByTagName("node")
-    for node in nodes:
-        node.attributes['project_name'].value=workflowTitle
-        qname=node.getAttribute('qualified_name').split('.')[-1]
-        node.attributes['qualified_name'].value=workflowPath+'.'+qname+'.'+qname
-    with open(outputFile,'w') as f:
-        f.write(doc.toxml())
-
 def changeNameInOWS(oldName,newName,filename):
     doc = minidom.parse(filename)
     nodes = doc.getElementsByTagName("node")
@@ -136,8 +126,8 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
                 widgetPaths[projectName].append(widgetPath)
         
         #keep track of projectNames - do not unique - want to count their occurrence and sort    
-            if projectTitle != projectName:
-                projectNames.append(projectName)
+#            if projectTitle != projectName:
+            projectNames.append(projectName)
             
         if projectNames:
             #sort by frequency of occurence
@@ -145,22 +135,27 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
             #unique the list
             projectNames=list(OrderedDict.fromkeys(projectNames))
     
-        if projectName in widgetPaths:
-            projectNames=[projectName]+projectNames
+#        if projectName in widgetPaths:
+#            projectNames=[projectName]+projectNames
             
         #copy the widgets and make a map for renamed widgets
         nameSeen=set()
-        #for now just copy the most common widgets - do name change to unique name later
+        uniqueNames={}
         for projectName in projectNames:
             for widgetPath in widgetPaths[projectName]:
-                # uniqueName=os.path.basename(widgetPath)
-                # while uniqueName in nameSeen:
-                    # uniqueName=modifyWidgetName(uniqueName,projectName,projectNames)
-                # nameSeen.add(uniqueName)
-                if widgetPath not in nameSeen:
-                    nameSeen.add(widgetPath)
-                    os.system('cp -r {} {}/widgets/{}/.'.format(widgetPath,tempDir,projectTitlePath))                
-        reformatOWS(projectTitle,bwbOWS,tempOWS)
+                widgetName=os.path.basename(widgetPath)
+                uniqueName=os.path.basename(widgetPath)
+                nameChanged=False
+                while uniqueName in nameSeen:
+                    uniqueName=modifyWidgetName(uniqueName,projectName,projectNames)
+                    nameChanged=True
+                if nameChanged:
+                    if projectName not in uniqueNames:
+                        uniqueNames[projectName]={}
+                    uniqueNames[projectName][widgetName]=uniqueName
+                nameSeen.add(uniqueName)
+                os.system('cp -r {} {}/widgets/{}/{}'.format(widgetPath,tempDir,projectTitlePath,uniqueName))                
+        reformatOWS(projectTitle,bwbOWS,tempOWS,uniqueNames)
     else:
         widgetPaths=set()
         for node in nodes:
@@ -261,7 +256,7 @@ def importWorkflow(owsFile):
             qname=node.getAttribute('qualified_name')
             parts=qname.split('.')
             destLink='/biodepot/'+'/'.join(parts[0:-1])+'.py'
-            pythonFile='{}/widgets/{}/{}/{}.py'.format(workflowDir,projectPath,widgetName,widgetName)
+            pythonFile='{}/widgets/{}/{}/{}.py'.format(workflowDir,projectPath,widgetName,parts[-1][2:])
             print ('ln -sf {} {}'.format(pythonFile,destLink))
             os.system('ln -sf {} {}'.format(pythonFile,destLink))
     #make link to icons and __init__.py
