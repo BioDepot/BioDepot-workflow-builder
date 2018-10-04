@@ -19,21 +19,24 @@ Source code	: [https://github.com/BioDepot/BioDepot-workflow-builder](https://gi
 ### Overview: Running Bwb
 <div class="lower_alpha"></div>1\. Install Docker
 2\. Start the container with Bwb by executing the following Docker command by typing into a window (Linux) or on the Docker command line (Windows/macOs)
+
 ```bash 
     docker run --rm   -p 6080:6080 \
     -v  ~/Desktop/:/data  \
     -v  /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    --privileged --group-add root \
     biodepot/bwb
 ```
-3\. Open a browser and connect to the Bwb container by typing the following url in the address bar of your browser. In Linux the url is:
+
+3\. Open a browser and connect to the Bwb container by typing the following url in the address bar of your browser:
 
    [http://localhost:6080](http://localhost:6080)    
 
 For cloud instances and remote servers use the ip of the instance or remote server instead of localhost.
 
-For Windows and Macs the url is [http://192.168.99.100:6080](http://192.168.99.100:6080) 
 
-For Windows and Macs the IP may vary depending on your setup - instructions are [here](#findip) to find it)
+For Windows and Macs the IP may vary depending on your setup - instructions are [https://docs.docker.com/network/](#Docker Network) for more information)
 
 4\. To quit the container, right click inside the browser and choose the QUIT container option. Alternatively, you can also stop it by finding the container id and stopping the container. Quitting the browser just closes the viewport to the container - it does not stop the container.
 
@@ -186,7 +189,7 @@ docker pull biodepot/bwb:latest
 2\.  Start the Bwb container 
 
 ```bash
-docker run --rm -p 6080:6080 -v ${PWD}:/data -v /var/run/docker.sock:/var/run/docker.sock biodepot/bwb
+docker run --rm -p 6080:6080 -v $PWD:/data -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/.X11-unix:/tmp/.X11-unix  --privileged --group-add root biodepot/bwb
 ```
 
 This command will launch a mini-webserver and start a windowing environment inside the container. The Bwb application is automatically launched upon running the container and appears as a maximized window on the Desktop inside the container. In the above command we have set the port to be 6080 and the current directory is mapped to the /data directory inside the container. However, all this is hidden from view until the user connects to the container using a browser. 
