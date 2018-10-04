@@ -1,1 +1,1 @@
-/widgets/bioc_R/bioc_R.py
+../../widgets/Scripting/bioc_R/bioc_R.py

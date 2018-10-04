@@ -253,6 +253,7 @@ def main(argv=None):
 
     (options, args) = parser.parse_args(argv[1:])
 
+
     levels = [logging.CRITICAL,
               logging.ERROR,
               logging.WARN,

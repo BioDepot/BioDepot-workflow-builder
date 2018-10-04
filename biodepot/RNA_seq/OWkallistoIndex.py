@@ -1,1 +1,1 @@
-../../widgets/kallistoIndex/kallistoIndex.py
+../../widgets/RNA_seq/kallistoIndex/kallistoIndex.py

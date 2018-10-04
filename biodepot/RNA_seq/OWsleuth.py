@@ -1,1 +1,1 @@
-/widgets/sleuth/sleuth.py
+../../widgets/RNA_seq/sleuth/sleuth.py

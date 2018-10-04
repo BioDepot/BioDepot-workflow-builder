@@ -1,1 +1,1 @@
-/widgets/Python2/Python2.py
+../../widgets/Scripting/Python2/Python2.py

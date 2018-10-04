@@ -1,1 +1,1 @@
-/widgets/jupyter_base/jupyter_base.py
+../../widgets/Jupyter/jupyter_base/jupyter_base.py

@@ -1,1 +1,1 @@
-../../widgets/DtoxSAnalysis/DtoxSAnalysis.py
+../../widgets/RNA_seq/DtoxSAnalysis/DtoxSAnalysis.py

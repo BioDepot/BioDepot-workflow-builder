@@ -1,6 +1,0 @@
-Demo_kallisto_jupyter/__init__.py
-Demo_kallisto_jupyter.egg-info/PKG-INFO
-Demo_kallisto_jupyter.egg-info/SOURCES.txt
-Demo_kallisto_jupyter.egg-info/dependency_links.txt
-Demo_kallisto_jupyter.egg-info/entry_points.txt
-Demo_kallisto_jupyter.egg-info/top_level.txt

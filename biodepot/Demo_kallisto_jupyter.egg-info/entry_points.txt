@@ -1,3 +1,0 @@
-[orange.widgets]
-Demo_kallisto_jupyter = Demo_kallisto_jupyter
-

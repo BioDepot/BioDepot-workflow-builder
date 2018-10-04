@@ -1,1 +1,1 @@
-/widgets/Perl/Perl.py
+../../widgets/Scripting/Perl/Perl.py

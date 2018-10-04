@@ -1,1 +1,1 @@
-/widgets/jupyter_sleuth/jupyter_sleuth.py
+../../widgets/Jupyter/jupyter_sleuth/jupyter_sleuth.py

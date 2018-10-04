@@ -1,1 +1,1 @@
-/widgets/bash_utils/bash_utils.py
+../../widgets/Scripting/bash-utils/bash-utils.py

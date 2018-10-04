@@ -1,1 +1,1 @@
-../../widgets/starIndex/starIndex.py
+../../widgets/RNA_seq/starIndex/starIndex.py

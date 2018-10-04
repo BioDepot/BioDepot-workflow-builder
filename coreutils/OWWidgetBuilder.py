@@ -17,7 +17,8 @@ from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import QInputDialog, QLineEdit, QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget, QVBoxLayout, QMessageBox
+from PyQt5.QtWidgets import *
+from makeToolDockCategories import niceForm
 
 from AnyQt.QtWidgets import (
     QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
@@ -26,6 +27,179 @@ from AnyQt.QtWidgets import (
     QSizePolicy, QApplication, QCheckBox
 )
 defaultIconFile='/icons/default.png'
+
+class SaveWorkflowForm(QDialog):
+    def __init__(self, returnData, parent=None):
+        self.browseCSS='''
+        QPushButton {background-color: rgba(30,30,200,128); color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: #1555f5; }
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
+        ''' 
+        self.colorCSS='''
+        QPushButton {background-color: white; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: gray; }
+        QPushButton:hover:pressed { background-color: black; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
+        ''' 
+        self.defaultDir='/'
+        self.returnData=returnData
+        self.returnData['success']=False
+        self.initialData=returnData.copy()
+        self.defaultIconFile='/icons/user.png'
+        if 'start_dir' in self.initialData and self.initialData['start_dir']:
+            self.defaultDir=self.initialData['start_dir']
+        self.browseIcon=QtGui.QIcon('/icons/bluefile.png')
+        self.colorIcon=QtGui.QIcon('/icons/colorWheel.png')
+        self.ledits={}
+        self.required=['name','dir']
+        super(SaveWorkflowForm, self).__init__(parent)
+        self.setWindowTitle("Save workflow")
+        name_ledit = QLineEdit()
+        self.ledits['name']=name_ledit
+        name_ledit.setClearButtonEnabled(True)
+        name_ledit.setPlaceholderText('Enter workflow name')
+        if 'name' in self.initialData and self.initialData['name']:
+            name_ledit.setText(self.initialData['name'])
+        name_ledit.setStyleSheet(":disabled { color: #282828}")
+        name_label=QtGui.QLabel('Workflow name:')
+        name_box=QHBoxLayout()
+        name_box.addWidget(name_label)
+        name_box.addWidget(name_ledit)
+        
+        #ledit for directory
+        dir_ledit = QLineEdit()
+        self.ledits['dir']=dir_ledit
+        dir_ledit.setClearButtonEnabled(True)
+        dir_ledit.setPlaceholderText('Enter workflow directory')
+        if 'dir' in self.initialData and self.initialData['dir']:
+            dir_ledit.setText(self.initialData['dir'])
+        dir_ledit.setStyleSheet(":disabled { color: #282828}")
+        dir_label=QtGui.QLabel('Workflow directory:')       
+        dir_button=gui.button(None, self, "", callback= lambda : self.browseFileDir('dirname',ledit=dir_ledit,fileType='Directory'),autoDefault=True, width=19, height=19)
+        dir_button.setIcon(self.browseIcon)
+        dir_button.setStyleSheet(self.browseCSS)
+        dir_box=QHBoxLayout()
+        dir_box.addWidget(dir_label)
+        dir_box.addWidget(dir_ledit)
+        dir_box.addWidget(dir_button)
+
+        #ledit for iconFile
+        icon_ledit = QLineEdit()
+        self.ledits['icon']=icon_ledit
+        icon_ledit.setClearButtonEnabled(True)
+        icon_ledit.setPlaceholderText('Enter iconFile')
+        if 'icon' in self.initialData and self.initialData['icon']:
+            icon_ledit.setText(self.initialData['icon'])
+        else:
+            icon_ledit.setText(self.defaultIconFile)
+        icon_ledit.setStyleSheet(":disabled { color: #282828}")
+        icon_label=QtGui.QLabel('Change workflow icon:')    
+        icon_button=gui.button(None, self, "", callback= lambda : self.browseFileDir('iconFile',ledit=icon_ledit),autoDefault=True, width=19, height=19)
+        icon_button.setIcon(self.browseIcon)
+        icon_button.setStyleSheet(self.browseCSS)
+        icon_box=QHBoxLayout()
+        icon_box.addWidget(icon_label)
+        icon_box.addWidget(icon_ledit)    
+        icon_box.addWidget(icon_button)
+
+        #ledit for color
+        color_ledit = QLineEdit()
+        self.ledits['color']=color_ledit
+        color_ledit.setClearButtonEnabled(True)
+        color_ledit.setPlaceholderText('Enter color')
+        if 'color' in self.initialData and self.initialData['color']:
+            color_ledit.setText(self.initialData['color'])
+        color_ledit.setStyleSheet(":disabled { color: #282828}")
+        color_label=QtGui.QLabel('Change workflow color:')    
+        color_button=gui.button(None, self, "", callback= lambda : self.browseColor('color',ledit=color_ledit),autoDefault=True, width=19, height=19)
+        color_button.setIcon(self.colorIcon)
+        color_button.setStyleSheet(self.colorCSS)
+        color_box=QHBoxLayout()
+        color_box.addWidget(color_label)
+        color_box.addWidget(color_ledit)    
+        color_box.addWidget(color_button)
+
+        #checkboxes
+        self.merge_checkBox=QtGui.QCheckBox('Merge all widget types',self)        
+        self.merge_checkBox.stateChanged.connect(lambda: self.getCheckBoxState(self.merge_checkBox,'merge'))
+        if 'merge' in self.initialData and self.initialData['merge'] is not None:
+            self.merge_checkBox.setCheckState(self.initialData['merge'])
+        else:
+            self.merge_checkBox.setCheckState(False)
+
+        #OK cancel buttons
+        buttonbox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttonbox.accepted.connect(self.checkFields)
+        buttonbox.rejected.connect(self.cancel) 
+        
+        layout=QtGui.QGridLayout()
+        layout.addLayout(name_box,1,1,1,2)
+        layout.addLayout(dir_box,2,1,1,2)
+        layout.addLayout(color_box,3,1,1,2)
+        layout.addLayout(icon_box,4,1,1,2)
+        layout.addWidget(self.merge_checkBox,5,1,1,1)
+        layout.addWidget(buttonbox,6,1,1,1)
+        self.setLayout(layout)
+    
+        #save/cancel buttons
+    def cancel(self):
+        self.returnData=self.initialData
+        self.returnData['success']=False
+        self.close()
+        
+    def checkFields(self):
+        #make sure that the ledits are populated with something if required
+        for attr in ('name','dir','color','icon'):
+            ledit = self.ledits[attr]
+            if not ledit.text():
+                if attr in self.required:
+                    warning=QMessageBox()
+                    warning.setText("Must enter a value for {}".format(attr))
+                    warning.setWindowTitle("Missing required entry")
+                    warning.setStandardButtons(QMessageBox.Ok)
+                    warning.exec_()
+                    return
+            else:
+                self.returnData[attr]=ledit.text()
+        self.returnData['merge']=self.merge_checkBox.isChecked()
+        #make sure that the name is nice Form (can keep dashes until it is converted to a ows file
+        self.returnData['name']=niceForm(self.returnData['name'])
+        self.returnData['success']=True
+        self.close()
+        
+    
+    def getCheckBoxState(self,checkbox,attr):
+        self.returnData[attr]=checkbox.isChecked()
+        return
+        
+    def browseColor(self,attr,ledit=None):
+        color = QColorDialog.getColor()
+        if color.isValid():
+            if ledit:
+                ledit.setText(color.name())
+            return color.name()
+        return None
+        
+        
+    def browseFileDir(self, attr,ledit=None,fileType=None):
+        self.defaultDir = self.getDefaultDir()
+        if fileType == 'Directory':
+            myFileDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate directory", directory=self.defaultDir)
+        else:
+            myFileDir=QtWidgets.QFileDialog.getOpenFileName(self, "Locate file", self.defaultDir)[0]
+        if myFileDir:
+            self.returnData[attr]=myFileDir
+        if ledit:
+            ledit.setText(myFileDir)
+            
+    def getDefaultDir(self):
+        defaultDir = '/root'
+        if os.path.exists('/data'):
+            defaultDir = '/data' 
+        return defaultDir
+        
+
 class tabbedWindow(QTabWidget):
     def __init__(self, parent = None):
         super(tabbedWindow, self).__init__(parent)
@@ -217,8 +391,8 @@ class OWWidgetBuilder(widget.OWWidget):
         box.addWidget(self.saveWidgetBtn)
         box.addWidget(self.saveWidgetAsBtn)
         box.addWidget(self.loadWidgetBtn)
-        box.addWidget(self.registerBtn)
-        box.addWidget(self.rebuildBtn)
+#        box.addWidget(self.registerBtn)
+#        box.addWidget(self.rebuildBtn)
         box.addStretch(1)
         layout.addLayout(box)
 
