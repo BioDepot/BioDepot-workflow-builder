@@ -5,8 +5,9 @@ import json
 import jsonpickle
 import pickle
 import csv
-import tempfile
+import tempfile,shutil
 import OWImageBuilder
+from glob import glob
 from pathlib import Path
 from shutil import copyfile
 from createWidget import mergeWidget, createWidget, findDirectory, findIconFile
@@ -19,6 +20,7 @@ from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import QInputDialog, QLineEdit, QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget, QVBoxLayout, QMessageBox
 
+
 from AnyQt.QtWidgets import (
     QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
     QDoubleSpinBox, QComboBox, QSpinBox, QListView, QLabel,
@@ -29,33 +31,20 @@ from makeToolDockCategories import *
 
 defaultIconFile='/icons/default.png'
 
-def addWidgetToCategory (category,directory,widgetPath,baseToolPath,widgetName,sourceWidgetsDir='/widgets',confirmation=True):
-    if not os.path.exists(widgetPath):
-        if os.path.exists('{}/{}'.format(sourceWidgetsDir,widgetName)):
-        #ask if we want to overwrite
-            qm = QtGui.QMessageBox
-            ret=qm.question(self,'', "{} exists - OverWrite ?".format(widgetName), qm.Yes | qm.No)
-            if ret == qm.No:
-                return
-        #safer way of removing the widget
-            os.system("cd {} && rm -rf {}".format(sourceWidgetsDir,widgetName))    
-        os.system('cp -r {} {}/{}'.format(widgetPath,sourceWidgetsDir,widgetName))
-    try:
-        os.system ("ln -sf  {}/{}/{}.py {}/{}/OW{}.py".format(sourceWidgetsDir,widgetName,widgetName,baseToolPath,directory,widgetName))
-        if confirmation:
-            title='Add {}'.format(widgetName)
-            message='Added {} to {} in ToolDock'.format(widgetName,category)
-            qm=QtGui.QMessageBox()
-            qm.information(self,title,message,QtGui.QMessageBox.Ok)
-    except:
-        pass
-def addWidgetsFromWorkflow(baseToolPath,workflowPath,destDirectory):
-    workflowName=os.basename(workflowPath)
-    widgetsDir='{}/widgets'.format(workflowPath)
-    widgetNames=os.listdir(widgetsDir)
-    for widgetName in widgetNames:
-        os.system ("ln -sf  {}/{}/{}.py {}/{}/OW{}.py".format(widgetsDir,widgetName,widgetName,baseToolPath,destDirectory,widgetName))
+def categoryWidgetPath(categoryDir):
+    pyFiles=glob('/biodepot/{}/OW*.py'.format(categoryDir))
+    if not pyFiles:
+        return None
+    widgetPath=os.path.dirname((os.readlink(pyFiles[0])))
+   #check if absolute path
+    if widgetPath[0]=='/':
+        absWidgetPath=widgetPath
+    else:
+        absWidgetPath=os.path.abspath('/biodepot/{}/{}'.format(categoryDir,widgetPath))
+    return os.path.dirname(absWidgetPath)
     
+    
+
 
 def removeWidgetFromCategory(widgetName,category,directory,baseToolPath,widgetsDir='/widgets',removeAll=False):
     if removeAll:
@@ -65,12 +54,6 @@ def removeWidgetFromCategory(widgetName,category,directory,baseToolPath,widgetsD
         sys.stderr.write('cd {}/{} && rm OW{}.py '.format(baseToolPath,directory,widgetName))
         os.system('cd {}/{} && rm OW{}.py '.format(baseToolPath,directory,widgetName))
 
-def addCategoryToToolBox(baseToolPath,category,iconFile=None,background='light-purple'):
-    directory=niceForm(category,allowDash=False)
-    makeNewDirectory(baseToolPath,directory,iconFile,background)
-    with open('{}/setup.py'.format(baseToolPath),'a+') as f:
-        f.write(entryString(category,directory))
-    return directory
 
 def registerDirectory(baseToolPath):
     os.system('cd {} && pip install -e .'.format(baseToolPath))
@@ -120,6 +103,31 @@ class ToolDockEdit(widget.OWWidget):
                     child.widget().deleteLater()
                 elif child.layout() is not None:
                     self.clearLayout(child.layout())
+    def addWidgetToCategory (self,category,directory,widgetPath,confirmation=True):
+        qm = QtGui.QMessageBox
+        widgetName=os.path.basename(widgetPath)
+        destLink='/biodepot/{}/OW{}.py'.format(directory,widgetName)
+        pythonFile=glob('{}/*.py'.format(widgetPath))[0]
+        destDir=categoryWidgetPath(directory)
+        if not destDir:
+            return
+        destPath=destDir+'/'+ widgetName
+        if os.path.exists(destPath) or os.path.exists(destLink):
+            ret=qm.question(self,'', "symlink {} or destination widget {} exists - OverWrite ?".format(destLink,destPath), qm.Yes | qm.No)
+            if ret == qm.No:
+                return
+            if os.path.exists(destPath):
+                shutil.rmtree(destPath)
+        #try:
+        shutil.copytree(widgetPath,destPath)
+        os.system('ln -sf {} {}'.format(pythonFile,destLink))
+        if confirmation:
+            widgetName=os.path.basename(widgetPath)
+            title='Add {}'.format(widgetName)
+            message='Added {} to {} in ToolDock'.format(widgetName,category)
+            qm.information(self,title,message,QtGui.QMessageBox.Ok)
+        #except:
+            #pass
     
     def startWidget(self):
         self.setWindowTitle('WidgetToolDock Editor')
@@ -128,7 +136,6 @@ class ToolDockEdit(widget.OWWidget):
         self.initCategories()
         self.drawAddWidget()
         self.drawRemoveWidget()
-        self.drawAddCategory()
         self.drawRemoveCategory()
         
         #self.setStyleSheet(":disabled { color: #282828}")
@@ -139,8 +146,15 @@ class ToolDockEdit(widget.OWWidget):
         self.directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' {}/setup.py'''.format(self.baseToolPath)).read())).split()
         self.categoryToDirectory={}
         for index, category in enumerate(self.categories):
-            self.categoryToDirectory[category]=self.directoryList[index]            
-    
+            self.categoryToDirectory[category]=self.directoryList[index]
+                        
+    def updateWidgetList(self):
+        self.updateCategories()
+        self.widgetList={}
+        for category in self.categories:
+            directory = self.categoryToDirectory[category]
+            self.widgetList[category]=[os.path.basename(x)[2:-3] for x in glob('/biodepot/{}/OW*.py'.format(directory))]
+        
     def initCategories(self):
         self.updateCategories()
         self.clearLayout(self.controlArea.layout())
@@ -159,15 +173,13 @@ class ToolDockEdit(widget.OWWidget):
         inputDir=self.getLeditValue(ledit)
         if not inputDir:
             return
-        inputName=os.path.basename(os.path.normpath(inputDir))
         directory=self.categoryToDirectory[category] 
-        addWidgetToCategory(category,directory,inputDir,self.baseToolPath,inputName,widgetsDir=widgetsDir)
+        self.addWidgetToCategory(category,directory,inputDir)
             
     def drawRemoveWidget(self):
-        self.widgetList=(str(os.popen('cd /widgets && ls -d *').read())).split()
-        self.wbox=self.makeComboBox(self.grid,'Remove widget ',self.widgetList,startRow=2,callback=self.__onWidgetChange)
-        categoryList=self.getCategoryList(self.getComboValue(self.wbox))
-        self.cbox=self.makeComboBox(self.grid,' from category ',categoryList,startRow=2,startColumn=4)
+        self.updateWidgetList()        
+        self.RWwbox=self.makeComboBox(self.grid,'Remove widget ',self.widgetList[self.categories[0]],startRow=2)
+        self.RWcbox=self.makeComboBox(self.grid,' from category ',self.categories,startRow=2,startColumn=4,callback=lambda: self.__onRWCategoryChoice(self.RWcbox,self.RWwbox))
         widgetRemoveBtn = gui.button(None, self, "Remove", callback=self.widgetRemove)
         widgetRemoveBtn.setFixedSize(60,20)
         widgetRemoveBtn.setStyleSheet(self.css)
@@ -196,14 +208,6 @@ class ToolDockEdit(widget.OWWidget):
                 directory=self.categoryToDirectory[category]
                 removeWidgetFromCategory(widgetName,category,directory,self.baseToolPath,widgetsDir=widgetsDir,removeAll=True)
                 qm.information(self,'Removed widget','Removed widget {} from {}'.format(widgetName,category),QtGui.QMessageBox.Ok)
-    
-    def drawAddCategory(self):
-        nameLedit=self.makeLedit(self.grid,'Enter category name','Add category:',startRow=3)
-        iconLedit=self.makeLedit(self.grid,'Enter icon file','with icon',startRow=3,startColumn=4,browse=True,browseFileFlag=True)
-        catAddBtn = gui.button(None, self, "Add", callback= lambda: self.categoryAdd(nameLedit,iconLedit))
-        catAddBtn.setFixedSize(30,20)
-        catAddBtn.setStyleSheet(self.css)
-        self.grid.addWidget(catAddBtn,3,7)     
            
     def drawRemoveCategory(self):
         cbox=self.makeComboBox(self.grid,'Remove category:',self.categories,startRow=4,startColumn=1)
@@ -285,15 +289,14 @@ class ToolDockEdit(widget.OWWidget):
             comboBox.addItems(elements)
         comboBox.currentIndex=0
         if callback:
-            comboBox.currentIndexChanged.connect(lambda: callback(comboBox)) 
+            comboBox.currentIndexChanged.connect(callback) 
         layout.addWidget(comboBoxLabel,startRow,startColumn)
         layout.addWidget(comboBox,startRow,startColumn+1)
         return comboBox
     
-    def __onWidgetChange(self,box):
-        self.cbox.clear()
-        self.cbox.addItems(self.getCategoryList(box.currentText()))
-        
+    def __onRWCategoryChoice(self,cbox,wbox):
+        wbox.clear()
+        wbox.addItems(self.widgetList[cbox.currentText()])
         
     def getComboValue(self,comboBox):
         if comboBox.isEnabled():
