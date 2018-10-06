@@ -129,7 +129,12 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
     nodes = doc.getElementsByTagName("node")
     if not nodes:
         shutil.rmtree(tempDir)
-        return False 
+        return False
+    #find the old title
+    myScheme = doc.getElementsByTagName("scheme")[0]
+    oldProjectTitle = myScheme.getAttribute('title')
+    oldProjectTitlePath = niceForm(oldProjectTitle,allowDash=False)
+    
     #get rid of anything like \n in the color string    
     if color:
         color=color.strip()
@@ -194,24 +199,23 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
                     widgetPaths.add(widgetPath)
                     os.system('cp -r {} {}/widgets/{}/{}'.format(widgetPath,tempDir,projectTitlePath,widgetName)) 
           
-    #check if the original exists for icon and __init__.py - otherwise take them from the User drawer 
+    #check if the original exists for icon and __init__.py - otherwise take them from the title otherwise take it from the 
     if os.path.exists('{}/widgets/{}/icon'.format(outputWorkflow,projectTitlePath)) and os.path.exists('{}/widgets/{}/__init__.py'.format(outputWorkflow,projectTitlePath)):
-        src='{}/widgets/{}/icon'.format(outputWorkflow,projectTitlePath)
-        dst='{}/widgets/{}/icon'.format(tempDir,projectTitlePath)
-        shutil.copytree(src, dst, symlinks=True)
-        srcFile='{}/widgets/{}/__init__.py'.format(outputWorkflow,projectTitlePath)
-        dstFile='{}/widgets/{}/__init__.py'.format(tempDir,projectTitlePath)
-        shutil.copyfile(srcFile, dstFile)
+        iconPath='{}/widgets/{}/icon'.format(outputWorkflow,projectTitlePath)
+        initPath='{}/widgets/{}/__init__.py'.format(outputWorkflow,projectTitlePath)
+    elif os.path.exists('/biodepot/{}/icon'.format(oldProjectTitlePath)):
+        iconPath='/biodepot/{}/icon'.format(oldProjectTitlePath)
+        initPath='/biodepot/{}/__init__.py'.format(oldProjectTitlePath)
+    elif os.path.exists('/biodepot/{}/icon'.format(projectTitlePath)):
+        iconPath='/biodepot/{}/icon'.format(projectTitlePath)
+        initPath='/biodepot/{}/__init__.py'.format(projectTitlePath)
     else:
-        src='/biodepot/User/icon'
-        dst='{}/widgets/{}/icon'.format(tempDir,projectTitlePath)
-        shutil.copytree(src, dst,symlinks=True)
-        srcFile='/biodepot/User/__init__.py'
-        dstFile='{}/widgets/{}/__init__.py'.format(tempDir,projectTitlePath)
-        shutil.copyfile(srcFile, dstFile)
+        iconPath='/biodepot/User/icon'
+        initPath='/biodepot/User/__init__.py'
         if not color:
             color='light-blue'
-    
+    shutil.copytree(iconPath,'{}/widgets/{}/icon'.format(tempDir,projectTitlePath))
+    shutil.copyfile(initPath, '{}/widgets/{}/__init__.py'.format(tempDir,projectTitlePath))
     changedIcon=False
     
     #check that iconFile exists and resolve if symlink

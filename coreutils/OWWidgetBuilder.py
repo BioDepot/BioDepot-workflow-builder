@@ -92,7 +92,7 @@ class SaveWorkflowForm(QDialog):
         if 'icon' in self.initialData and self.initialData['icon']:
             icon_ledit.setText(self.initialData['icon'])
         else:
-            icon_ledit.setText(self.defaultIconFile)
+            icon_ledit.setText("")
         icon_ledit.setStyleSheet(":disabled { color: #282828}")
         icon_label=QtGui.QLabel('Change workflow icon:')    
         icon_button=gui.button(None, self, "", callback= lambda : self.browseFileDir('iconFile',ledit=icon_ledit),autoDefault=True, width=19, height=19)
