@@ -31,7 +31,8 @@ def reformatOWS(workflowTitle,inputFile,outputFile,uniqueNames):
         node.attributes['qualified_name']=workflowPath+'.OW'+uniqueName+'.OW'+widgetName
         node.attributes['project_name'].value=workflowTitle
     with open(outputFile,'w') as f:
-        f.write(doc.toxml())    
+        f.write(doc.toxml())
+            
 def changeNameInOWS(oldName,newName,filename):
     doc = minidom.parse(filename)
     nodes = doc.getElementsByTagName("node")
@@ -92,7 +93,31 @@ def modifyWidgetName(widgetName,projectName, projectNames):
     else:
         return niceForm(projectName,allowDash=False)+'_'+widgetName
 
+def removeWidgetfromWorkflow(inputOWS,outputOWS,projectName,widgetName):
+    #remove nodes that match projectName and widgetName and record them
+    removedNodes=set()
+    doc = minidom.parse(inputOWS)
+    nodeParent=doc.getElementsByTagName("nodes")[0]
+    nodes = doc.getElementsByTagName("node")
+    for node in nodes:
+        if node.getAttribute('project_name')==projectName and node.getAttribute('name') == widgetName:
+            removedNodes.add(node.getAttribute('id'))
+            nodeParent.removeChild(node)
+    linkParent=doc.getElementsByTagName("links")[0]
+    links=doc.getElementsByTagName("link")
+    for link in links:
+        if link.getAttribute('source_node_id') in removedNodes or link.getAttribute('sink_node_id') in removedNodes:
+            linkParent.removeChild(link)
+    propertiesParent=doc.getElementsByTagName("node_properties")[0]
+    properties=doc.getElementsByTagName("properties")
+    for nodeProperty in properties:
+        if nodeProperty.getAttribute('node_id') in removedNodes:
+            propertiesParent.removeChild(nodeProperty)
+#get rid of empty with one space lines that result from removal and write    
+    with open(outputOWS,'w') as f:
+        f.write("".join([s for s in doc.toxml().splitlines(True) if s.strip()]))
 
+    
 def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,iconFile=None,basePath=""):
     tempDir = tempfile.mkdtemp()
     os.mkdir(tempDir+'/widgets')
@@ -269,5 +294,4 @@ def importWorkflow(owsFile):
         with open('/biodepot/setup.py','w') as f:
             f.write(setupData)
         os.system('cd /biodepot && pip install -e .')
-
 

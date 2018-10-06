@@ -7,6 +7,8 @@ import pickle
 import csv
 import tempfile,shutil
 import OWImageBuilder
+import workflowTools
+from xml.dom import minidom
 from glob import glob
 from pathlib import Path
 from shutil import copyfile
@@ -43,17 +45,6 @@ def categoryWidgetPath(categoryDir):
         absWidgetPath=os.path.abspath('/biodepot/{}/{}'.format(categoryDir,widgetPath))
     return os.path.dirname(absWidgetPath)
     
-    
-
-
-def removeWidgetFromCategory(widgetName,category,directory,baseToolPath,widgetsDir='/widgets',removeAll=False):
-    if removeAll:
-        os.system('cd {} && rm {} -rf'.format(widgetsDir,widgetName)) 
-        os.system('find -L {} -type l -delete'.format(baseToolPath))
-    else:
-        sys.stderr.write('cd {}/{} && rm OW{}.py '.format(baseToolPath,directory,widgetName))
-        os.system('cd {}/{} && rm OW{}.py '.format(baseToolPath,directory,widgetName))
-
 
 def registerDirectory(baseToolPath):
     os.system('cd {} && pip install -e .'.format(baseToolPath))
@@ -145,9 +136,21 @@ class ToolDockEdit(widget.OWWidget):
         #directories are not same as categories because Python/Linux unfriendly characters are changed
         self.directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' {}/setup.py'''.format(self.baseToolPath)).read())).split()
         self.categoryToDirectory={}
+        self.categoryToPath={}
+        #check for icon link for categories where there are no widgets
         for index, category in enumerate(self.categories):
             self.categoryToDirectory[category]=self.directoryList[index]
-                        
+            iconLink='/biodepot/{}/icon'.format(self.categoryToDirectory[category])
+            if os.path.islink(iconLink):
+                iconPath=os.readlink(iconLink)
+                self.categoryToPath[category]=os.path.dirname(os.path.dirname(os.path.dirname(iconPath)))    
+            else:
+                #this is one of biodepots native categories if the icon directory is not a link
+                self.categoryToPath[category]='/widgets/{}'.format(self.categoryToDirectory[category])
+
+            
+            
+        print(self.categoryToPath)
     def updateWidgetList(self):
         self.updateCategories()
         self.widgetList={}
@@ -186,29 +189,52 @@ class ToolDockEdit(widget.OWWidget):
         self.grid.addWidget(widgetRemoveBtn,2,7)
         
     def widgetRemove(self):
-        widgetsDir="/widgets"
         qm = QtGui.QMessageBox
-        sys.stderr.write('widget dir is {}\n'.format(widgetsDir))
-        widgetName=self.getComboValue(self.wbox)
-        sys.stderr.write('widget dir is {} widget Name is {}\n'.format(widgetsDir,widgetName))
-        if not os.path.exists('{}/{}'.format(widgetsDir,widgetName)):
-            qm.information(self,'Non-existent','Widget {}/{} not found'.format(widgetsDir,widgetName),QtGui.QMessageBox.Ok)
+        widgetName=self.getComboValue(self.RWwbox)
+        category=self.getComboValue(self.RWcbox)
+        categoryDir=self.categoryToDirectory[category]
+        symlink='/biodepot/{}/OW{}.py'.format(categoryDir,widgetName)
+        if not os.path.exists(symlink):
+            qm.information(self,'Non-existent symlink','Symlink {} not found'.format(symlink),QtGui.QMessageBox.Ok)
             return
-        category=self.getComboValue(self.cbox)
-        ret=qm.No
-        if category == '_ALL_':
-            ret=qm.question(self,'', "Remove {} completely ?".format(widgetName), qm.Yes | qm.No)
-            if ret == qm.Yes:
-                removeWidgetFromCategory(widgetName,category,None,self.baseToolPath,widgetsDir=widgetsDir,removeAll=True)
-                qm.information(self,'Removed widget','Completely removed widget {}'.format(widgetName),QtGui.QMessageBox.Ok)
-            #remove from widgetList and set text to new top
-        else:
-            ret=qm.question(self,'', "Remove {} from category {} ?".format(widgetName,category), qm.Yes | qm.No)
-            if ret == qm.Yes:
-                directory=self.categoryToDirectory[category]
-                removeWidgetFromCategory(widgetName,category,directory,self.baseToolPath,widgetsDir=widgetsDir,removeAll=True)
-                qm.information(self,'Removed widget','Removed widget {} from {}'.format(widgetName,category),QtGui.QMessageBox.Ok)
-           
+        widgetPath=os.path.dirname(os.readlink(symlink))
+        #check if relative path and convert to absolute path if necessary
+        if widgetPath[0] != '/':
+            widgetPath=os.path.abspath('/biodepot/{}/{}'.format(categoryDir,widgetPath))
+        if not os.path.exists(widgetPath):
+            qm.information(self,'Non-existent widget','Widget {} not found'.format(widgetPath),QtGui.QMessageBox.Ok)
+            return
+        #check if any ows file that is in toolbox uses the widget and issue a warning if so
+        workflowPaths=self.findWorkflowsWithWidget(widgetName,category)
+        print('workflow paths are')
+        print(workflowPaths)
+        if workflowPaths:
+            workflowStr=','.join(workflowPaths)
+            ret=qm.question(self,'', "Workflows {} use this widget - Do you still want to remove it?".format(workflowStr), qm.Yes | qm.No)
+            if ret == qm.No:
+                return
+            for workflowPath in workflowPaths:
+                workflowTools.removeWidgetfromWorkflow(workflowPath,workflowPath,category,widgetName)
+        #finally remove the widget and symlink
+        shutil.rmtree(widgetPath)
+        os.unlink(symlink)
+        qm.information(self,'Successfully removed','removed widget {} from {}'.format(widgetPath,category),QtGui.QMessageBox.Ok)
+        
+    def findWorkflowsWithWidget(self,widgetName,category):
+        workflowPaths=[]
+        for category in self.categories:
+            print(category + ' ' +self.categoryToPath[category])
+            owsFiles=glob('{}/*.ows'.format(self.categoryToPath[category]))
+            for owsFile in owsFiles:
+                print ('checking ' + owsFile + ' for '+ category +' '+widgetName) 
+                doc = minidom.parse(owsFile)
+                nodes = doc.getElementsByTagName("node")
+                for node in nodes:
+                    if node.getAttribute('project_name') == category and node.getAttribute('name') == widgetName:
+                        workflowPaths.append(owsFile)
+                        continue
+        return workflowPaths
+    
     def drawRemoveCategory(self):
         cbox=self.makeComboBox(self.grid,'Remove category:',self.categories,startRow=4,startColumn=1)
         catRemoveBtn = gui.button(None, self, "Remove", callback= lambda: self.categoryRemove(cbox))
@@ -256,7 +282,6 @@ class ToolDockEdit(widget.OWWidget):
             directory=self.categoryToDirectory[category]
             if os.path.exists('{}/{}/OW{}.py'.format(self.baseToolPath,directory,widgetName)):
                 returnList.append(category)
-        returnList.insert(0,'_ALL_')
         return returnList
 
     def makeLedit(self,layout,text=None,label=None,startRow=1,startColumn=1,browse=False,browseFileFlag=False):
