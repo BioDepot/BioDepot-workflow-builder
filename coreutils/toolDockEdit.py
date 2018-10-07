@@ -164,7 +164,7 @@ class ToolDockEdit(widget.OWWidget):
         
     def drawAddWidget(self):
         ledit=self.makeLedit(self.grid,'Enter widget name','Add widget ',startRow=1,startColumn=1,browse=True)
-        cbox=self.makeComboBox(self.grid,' to category:',self.categories,startRow=1,startColumn=4)
+        cbox=self.makeComboBox(self.grid,' to drawer:',self.categories,startRow=1,startColumn=4)
         widgetAddBtn = gui.button(None, self, "Add", callback= lambda: self.widgetAdd(ledit,cbox))
         widgetAddBtn.setFixedSize(30,20)
         widgetAddBtn.setStyleSheet(self.css)
@@ -182,7 +182,7 @@ class ToolDockEdit(widget.OWWidget):
     def drawRemoveWidget(self):
         self.updateWidgetList()        
         self.RWwbox=self.makeComboBox(self.grid,'Remove widget ',self.widgetList[self.categories[0]],startRow=2)
-        self.RWcbox=self.makeComboBox(self.grid,' from category ',self.categories,startRow=2,startColumn=4,callback=lambda: self.__onRWCategoryChoice(self.RWcbox,self.RWwbox))
+        self.RWcbox=self.makeComboBox(self.grid,' from drawer ',self.categories,startRow=2,startColumn=4,callback=lambda: self.__onRWCategoryChoice(self.RWcbox,self.RWwbox))
         widgetRemoveBtn = gui.button(None, self, "Remove", callback=self.widgetRemove)
         widgetRemoveBtn.setFixedSize(60,20)
         widgetRemoveBtn.setStyleSheet(self.css)
@@ -236,7 +236,7 @@ class ToolDockEdit(widget.OWWidget):
         return workflowPaths
     
     def drawRemoveCategory(self):
-        cbox=self.makeComboBox(self.grid,'Remove category:',self.categories,startRow=4,startColumn=1)
+        cbox=self.makeComboBox(self.grid,'Remove drawer:',self.categories,startRow=4,startColumn=1)
         catRemoveBtn = gui.button(None, self, "Remove", callback= lambda: self.categoryRemove(cbox))
         catRemoveBtn.setFixedSize(60,20)
         catRemoveBtn.setStyleSheet(self.css)
@@ -248,12 +248,12 @@ class ToolDockEdit(widget.OWWidget):
         if not category:
             return
         if category in self.categories:
-            qm.information(self,'Add category','category {} already in ToolDock'.format(category),QtGui.QMessageBox.Ok)
+            qm.information(self,'Add drawer','Drawer {} already in ToolDock'.format(category),QtGui.QMessageBox.Ok)
             return
         iconFile=self.getLeditValue(iconLedit)
         directory=addCategoryToToolBox(self.baseToolPath,category,iconFile=iconFile)
         registerDirectory(self.baseToolPath)
-        qm.information(self,'Add category','Added category {} to directory {} in ToolDock'.format(category,directory),QtGui.QMessageBox.Ok)
+        qm.information(self,'Add drawer','Added drawer {} to directory {} in ToolDock'.format(category,directory),QtGui.QMessageBox.Ok)
         self.updateCategories()
            
     def categoryRemove(self,nameCombo):
@@ -263,7 +263,7 @@ class ToolDockEdit(widget.OWWidget):
             return
         self.updateCategories()
         if(category not in self.categories):
-            qm.information(self,'Remove category', 'Category {} not in ToolDock'.format(category),QtGui.QMessageBox.Ok)
+            qm.information(self,'Remove drawer', 'Drawer {} not in ToolDock'.format(category),QtGui.QMessageBox.Ok)
             return
         ret=qm.question(self,'', "Remove {} from ToolDock ?".format(category), qm.Yes | qm.No)
         if ret == qm.No:
