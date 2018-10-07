@@ -1,5 +1,5 @@
 from Orange.widgets import widget, gui
-import sys, os, fnmatch, tempfile, re
+import sys, os, fnmatch, tempfile
 sys.path.append('/coreutils')
 import requests, json
 from PyQt5 import QtCore, QtGui, QtWidgets
