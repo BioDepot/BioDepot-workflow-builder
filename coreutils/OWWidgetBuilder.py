@@ -199,7 +199,6 @@ class SaveWorkflowForm(QDialog):
             defaultDir = '/data' 
         return defaultDir
         
-
 class tabbedWindow(QTabWidget):
     def __init__(self, parent = None):
         super(tabbedWindow, self).__init__(parent)
@@ -763,7 +762,8 @@ class OWWidgetBuilder(widget.OWWidget):
             self.widgetDir=os.path.dirname(widgetPy)
             self.setWindowTitle(self.widgetName+':Definition')
             sys.stderr.write('widgetPy is {} widgetDir is {} widgetName is {}\n'.format(widgetPy, self.widgetDir,self.widgetName))
-            self.loadWidget(loadWidgetDir=self.widgetDir,loadNameCheck=False) 
+            self.loadWidget(loadWidgetDir=self.widgetDir,loadNameCheck=False)
+            self.defaultDir=os.path.dirname(self.widgetDir) 
         
     def clearLayout(self,layout):
         if layout != None:
