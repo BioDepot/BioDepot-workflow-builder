@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWjupyter_base(OWBwBWidget):
     name = "jupyter_base"
     description = "Base installation of Jupyter"
-    category = "Jupyter"
     priority = 103
     icon = getIconName(__file__,"jupyter_image.png")
     want_main_area = False

@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWjupyter_sleuth(OWBwBWidget):
     name = "jupyter_sleuth"
     description = "Base installation of Jupyter"
-    category = "Jupyter"
     priority = 103
     icon = getIconName(__file__,"jupyter-sleuth.png")
     want_main_area = False

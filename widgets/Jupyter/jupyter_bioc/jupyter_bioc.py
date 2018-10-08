@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWjupyter_bioc(OWBwBWidget):
     name = "jupyter_bioc"
     description = "Base installation of Jupyter"
-    category = "Jupyter"
     priority = 103
     icon = getIconName(__file__,"jupyter-bioc.png")
     want_main_area = False

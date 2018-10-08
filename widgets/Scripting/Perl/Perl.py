@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWPerl(OWBwBWidget):
     name = "Perl"
     description = "Minimum perl container"
-    category = "Scripting"
     priority = 20
     icon = getIconName(__file__,"perl.png")
     want_main_area = False

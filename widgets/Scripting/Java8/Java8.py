@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWJava8(OWBwBWidget):
     name = "Java8"
     description = "Minimum java 8 container"
-    category = "Scripting"
     priority = 15
     icon = getIconName(__file__,"java.png")
     want_main_area = False

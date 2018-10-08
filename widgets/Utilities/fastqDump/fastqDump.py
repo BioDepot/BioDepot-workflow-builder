@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWfastqDump(OWBwBWidget):
     name = "fastqDump"
     description = "Download fastq files from GEO"
-    category = "Utilities"
     priority = 2
     icon = getIconName(__file__,"pfqDump.png")
     want_main_area = False

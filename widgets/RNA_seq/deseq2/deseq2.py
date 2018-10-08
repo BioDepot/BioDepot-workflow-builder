@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWdeseq2(OWBwBWidget):
     name = "deseq2"
     description = "Differential expression using DESeq2 package"
-    category = "RNA-seq"
     priority = 14
     icon = getIconName(__file__,"deseq2.png")
     want_main_area = False

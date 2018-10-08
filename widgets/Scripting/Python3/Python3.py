@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWPython3(OWBwBWidget):
     name = "Python3"
     description = "Minimum Python3 container with pip"
-    category = "Scripting"
     priority = 10
     icon = getIconName(__file__,"python3.png")
     want_main_area = False

@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWgnumeric(OWBwBWidget):
     name = "gnumeric"
     description = "Open source spreadsheet"
-    category = "Utilities"
     priority = 2
     icon = getIconName(__file__,"gnumeric.png")
     want_main_area = False

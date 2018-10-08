@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWDtoxSAnalysis(OWBwBWidget):
     name = "DtoxSAnalysis"
     description = "Step 2 of Dtoxs SOP. Uses edgeR for differential expression analysis"
-    category = "RNA-seq"
     priority = 2
     icon = getIconName(__file__,"dtoxs-analysis2.svg")
     want_main_area = False

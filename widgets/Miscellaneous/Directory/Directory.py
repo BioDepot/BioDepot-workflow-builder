@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWDirectory(OWBwBWidget):
     name = "Directory"
     description = "Directory"
-    category = "Miscellaneous"
     priority = 10
     icon = getIconName(__file__,"directory.svg")
     want_main_area = False

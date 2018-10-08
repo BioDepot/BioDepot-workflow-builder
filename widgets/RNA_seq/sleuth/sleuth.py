@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWsleuth(OWBwBWidget):
     name = "sleuth"
     description = "Analysis of kallisto quantified RNA-seq files"
-    category = "RNA-seq"
     priority = 5
     icon = getIconName(__file__,"sleuth2.png")
     want_main_area = False

@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWbash_utils(OWBwBWidget):
     name = "bash_utils"
     description = "alpine bash with wget curl gzip bzip2"
-    category = "Scripting"
     priority = 1
     icon = getIconName(__file__,"bash.png")
     want_main_area = False

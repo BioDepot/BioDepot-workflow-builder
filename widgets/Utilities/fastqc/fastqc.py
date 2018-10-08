@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWfastqc(OWBwBWidget):
     name = "fastqc"
     description = "fastqc"
-    category = "Utilities"
     priority = 5
     icon = getIconName(__file__,"fastqc_icon_100.png")
     want_main_area = False

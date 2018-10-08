@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWbioc_R(OWBwBWidget):
     name = "bioc_R"
     description = "Bioconductor 3.7 R 3.5.1"
-    category = "Scripting"
     priority = 1
     icon = getIconName(__file__,"bioc-r.png")
     want_main_area = False

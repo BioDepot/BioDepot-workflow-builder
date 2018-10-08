@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWFile(OWBwBWidget):
     name = "File"
     description = "Enter and output a file"
-    category = "Miscellaneous"
     priority = 10
     icon = getIconName(__file__,"file.png")
     want_main_area = False

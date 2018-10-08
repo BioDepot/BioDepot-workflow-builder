@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWDtoxSAlignment(OWBwBWidget):
     name = "DtoxSAlignment"
     description = "Alignment part of DtoxS standard operating procedure (SOP)"
-    category = "RNA-seq"
     priority = 1
     icon = getIconName(__file__,"dtoxs-alignment2.svg")
     want_main_area = False
