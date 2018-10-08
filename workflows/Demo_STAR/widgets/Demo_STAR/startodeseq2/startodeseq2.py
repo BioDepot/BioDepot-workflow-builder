@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWstartodeseq2(OWBwBWidget):
     name = "startodeseq2"
     description = "Convert Star quantMode counts file to DESeq2 style counts file"
-    category = "RNA-seq"
     priority = 13
     icon = getIconName(__file__,"startodeseq2.png")
     want_main_area = False

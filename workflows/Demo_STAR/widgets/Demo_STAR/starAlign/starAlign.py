@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWstarAlign(OWBwBWidget):
     name = "starAlign"
     description = "Star aligner alignment module"
-    category = "RNA-seq"
     priority = 12
     icon = getIconName(__file__,"staralign.png")
     want_main_area = False

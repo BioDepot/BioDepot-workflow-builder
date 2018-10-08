@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWdownloadURL(OWBwBWidget):
     name = "downloadURL"
     description = "Downloads files from URL"
-    category = "Utilities"
     priority = 1
     icon = getIconName(__file__,"download.png")
     want_main_area = False

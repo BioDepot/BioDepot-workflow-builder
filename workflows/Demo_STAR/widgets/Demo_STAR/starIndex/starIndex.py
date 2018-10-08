@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWstarIndex(OWBwBWidget):
     name = "starIndex"
     description = "Construct indices for STAR aligner "
-    category = "RNA-seq"
     priority = 11
     icon = getIconName(__file__,"starIndex.png")
     want_main_area = False

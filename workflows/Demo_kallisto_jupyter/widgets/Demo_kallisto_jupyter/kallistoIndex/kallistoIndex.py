@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWkallistoIndex(OWBwBWidget):
     name = "kallistoIndex"
     description = "Generates index files for kallisto"
-    category = "RNA-seq"
     priority = 3
     icon = getIconName(__file__,"kallistoindex.png")
     want_main_area = False

@@ -14,7 +14,6 @@ from PyQt5 import QtWidgets, QtGui
 class OWkallistoQuant(OWBwBWidget):
     name = "kallistoQuant"
     description = "Alignment and quantification of reads from fastq files"
-    category = "RNA-seq"
     priority = 4
     icon = getIconName(__file__,"kallistoquant.png")
     want_main_area = False
