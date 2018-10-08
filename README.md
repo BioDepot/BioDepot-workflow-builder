@@ -260,22 +260,25 @@ The Tool Dock can be minimized using the button on the top right hand side.
 A miniature version of the tooldock is accessible by right clicking in the canvas section to the right of the toolBox 
 
 
-### Editing the Tooldock
+### Editing the Tool dock
 
-Widgets and drawers can be added and deleted from the Toolbox using 
-
-### Dragging and dropping widgets
+Widgets and drawers can be added and deleted from the Tool Dock by choosing the edit tool dock item from the menu. Before any of the changes are reflected, the user must also choose to refresh the settings.
 
 ### Interacting with widgets
 
-Bwb widgets consist of 4 basic sections. The topmost section contains entries that are required before the widget can execute (eg. fastq files for alignent). The section below contains optional parameters (eg. number of threads to be used). The third section is a console that displays a terminal with messages from the widget. The bottom section contains the execution controls. When a widget is executed, it starts a command inside a Docker container. Docker will search locally for the container and if it does not find it, will look to download it from the Dockerhub repositories. All the containers provided with Bwb are arvailable through the BioDepot dockerhub [repo](https://hub.docker.com/r/biodepot)
+To interact with widget, the are first dragged from the Tool Dock onto the canvas. Clicking on a widget brings up the widget UI window with tabs for parameter entry, an output console and a tool bar with options to control the execution of the widget. Right-clicking on the widget brings up a the widget definition window. The definition window contains a set of forms that define the parameters to be queried by the UI window, the Docker container to be used, and the commands to be run upon execution. Finally dragging the mouse from the edge of one widget to another creates a link between the output of one widget to the input of the second widget. These three sets of actions are described in the next sections
+
+#### Widget user interaction window 
+
+The Bwb interaction window is popped up by double clicking on the widget. There are 3 main tabs in each window: Required entries, optional entries and console. Required entries are parameters that must be entered before the widget can execute. An example would be fastq files for an alignment widget. Optional entries are optional flags and parameters that are not required for program execution. The console tab provides a window with the text output from the widget. This can be saved in log files. 
+
 
 Containers, as a rule, are meant to carry dependencies and smaller supporting files needed by the executable. This is why they are so portable and require no installation to run. Larger input files that may depend on the user (eg data fastq files), are handled by mapping the user volume to a container path that is accessible. The software and scripts inside the container always see the same paths regardless of where the user data actually resides.
 
 
 ### Customizing widgets
 
-### Saving and widgets
+### Saving widgets
 
 ### Connecting widgets to form workflows
 

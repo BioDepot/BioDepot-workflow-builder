@@ -375,7 +375,7 @@ class OWBwBWidget(widget.OWWidget):
         self.btnConsoleSave.setFixedSize(60,20)
         layout.addWidget(self.btnConsoleClear)
         layout.addWidget(self.btnConsoleSave)
-        self.drawFileDirElements(pname, pvalue, box=box,layout=layout, addCheckbox=True)        
+        #self.drawFileDirElements(pname, pvalue, box=box,layout=layout, addCheckbox=True)        
         #keep track of buttons separately because the drawFileDir routine has its own callback for enabling the elements
         #should fix this at some point to check which elements have been dealt with using a dict or work out a recursive scheme with elements 
         btnPname=pname+'Btns'
@@ -391,10 +391,14 @@ class OWBwBWidget(widget.OWWidget):
         defaultDir = '/root'
         if os.path.exists('/data'):
             defaultDir = '/data'
-        fileName = QtWidgets.QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","Text files (*.txt);;All Files (*)")[0]
-        with open(fileName, 'w') as myFile:
-            myFile.write(str(self.console.toPlainText()))
-            myFile.close()
+        try:
+            fileName = QtWidgets.QFileDialog.getSaveFileName(self,"QFileDialog.getSaveFileName()","","Text files (*.txt);;All Files (*)")[0]
+            if fileName:
+                with open(fileName, 'w') as myFile:
+                    myFile.write(str(self.console.toPlainText()))
+                    myFile.close()
+        except Exception as e:
+            return
 
 
         #consoleControlLayout.addWidget(outputLabel,0,0) 
@@ -836,9 +840,9 @@ class OWBwBWidget(widget.OWWidget):
         self.graphicsMode=QtGui.QCheckBox('Export graphics',self)
         self.graphicsMode.setChecked(self.exportGraphics)
         self.graphicsMode.stateChanged.connect(self.graphicsModeChange)
-        self.dockerMode=QtGui.QCheckBox('Build container',self)
-        self.dockerMode.setChecked(self.useDockerfile)
-        self.dockerMode.stateChanged.connect(self.dockerModeChange)
+        #self.dockerMode=QtGui.QCheckBox('Build container',self)
+        #self.dockerMode.setChecked(self.useDockerfile)
+        #self.dockerMode.stateChanged.connect(self.dockerModeChange)
         
         self.cboRunMode=QtGui.QComboBox()
         self.cboRunMode.addItem('Manual')
@@ -879,7 +883,7 @@ class OWBwBWidget(widget.OWWidget):
         self.execLayout.addWidget(self.btnRun,1,0)
         self.execLayout.addWidget(self.btnStop,1,1)
         self.execLayout.addWidget(self.graphicsMode,1,2)
-        self.execLayout.addWidget(self.dockerMode,1,3)
+        #self.execLayout.addWidget(self.dockerMode,1,3)
         self.execLayout.addWidget(myLabel,1,4)
         self.execLayout.addWidget(self.cboRunMode,1,5)
         if self.candidateTriggers:
