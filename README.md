@@ -217,26 +217,26 @@ More information about finding Docker IP is available here: [https://docs.docker
 
 ### Graphics support for containerized apps
 
-The Bwb no-vnc container launches a mini-webserver that is accessed using your browser. The server uses fluxbox [http://fluxbox.org/], a compact windows manager to provide a graphical user interface similar to Windows or the MacOS. Fluxbox provides full graphical support using X11 to render the graphics internally on the servers, Bwb uses the GUIdock-X11 system to allow containerized apps (i.e Jupyter, gnumeric)  to export graphic output to the server's internal screen.  The noVNC protocol is used to transfer the internally rendered screen to your browser and HTML5 commands draw the graphics on your browser.
+The Bwb no-vnc container launches a mini-webserver that is accessed using your browser. The server uses fluxbox [http://fluxbox.org/], a compact windows manager to provide a graphical user interface similar to Windows or the MacOS. Fluxbox provides full graphical support using X11 to render the graphics internally on the server.  Bwb uses the GUIdock-X11 system to allow containerized apps (i.e Jupyter, gnumeric)  to export graphic output to the server's internal screen.  The noVNC protocol is then used to transfer the internally rendered screen to your browser and HTML5 commands draw the graphics on your browser.
 
 
 ### Basic window manpulations
 
- The Bwb application is started automatically upon starting the docker container. The window can be minimized, maximized/restore and closed using the buttons on the left hand corner. These are the same buttons available in standard Windows, MacOS and Linux windowing systems. The window can also be resized by clcking on the middle button to unmaximize and then dragging the lower right hand corner.
+ The Bwb application is started automatically upon starting the docker container. The window can be minimized, maximized/restore and closed using the buttons in the left hand corner. These are the same buttons available in standard Windows, MacOS and Linux windowing systems. The window can also be resized by clcking on the middle button to unmaximize and then dragging the lower right hand corner.
 
-Clicking on the left minimize button of th window hides the window and reveals the background. The window can be restored by clicking on the panels in the lower toolbar. Clicking on the right close button closes the application. It however does not quit the container.
+Clicking on the left minimize button of th window hides the window and reveals the background. The window can be restored by clicking on the panels in the lower toolbar. Clicking on the right close button closes the application. It, however, does not quit the container.
 
 ### Application menu
 
-If we minimize or close the window we will see the background screen. Right clicking on the background brings up an application menu. For the basic Bwb container, there are 3 menu options, the Bwb app, a terminal to enter system commands, and the quit option. The quit option actually quits the container.
+If we minimize or close the window we will see the background screen. Right clicking on the background brings up an application menu. For the basic Bwb container, there are 3 menu options, the Bwb app, a terminal to enter system commands, and the quit container option.
 
 ### Multiple Bwb instances and workspaces
 
-You can also launch multiple instances of Bwb and there are 4 separate workspaces that are available. Clicking on the panel at the left of the bottom toolbar switches between the workspaces. Cut and paste is supported between different windows within the browser window (i.e originating from the container).
+You can launch multiple instances of Bwb which will appear in separate windows.  There are 4 separate workspaces that are available which act as independent screens. Clicking on the panel at the left of the bottom toolbar switches between the workspaces. Cut and paste is supported between different windows within the browser window (i.e originating from the container).
 
 ### Interaction with host windowing system
 
-Note that the fluxbox windowing system is inside the browser window. You still have access to whatever windowing system you are using on your host machine. If your browser closes or go to another url, nothing happens to Bwb - the browser merely provides a viewport to the Bwb container. Refreshing or reconnecting the browser to the container IP allows you to interact with Bwb again. Only by using the quit option from the fluxbox application menu or by using Docker to terminate the container can you actually quit.  Cut and paste is not yet available from windows in the user's host machine to windows in the browser, though this feature will be added soon. 
+Note that the fluxbox windowing system is inside the browser window. You still have access to whatever windowing system you are using on your host machine. If your browser closes or go to another url, nothing happens to Bwb - the browser merely provides a viewport to the server in Bwb container . Refreshing or reconnecting the browser to the container IP allows you to interact with Bwb again. Only by using the quit option from the fluxbox application menu or by using Docker to terminate the container can you actually quit.  Cut and paste is not yet available from windows in the user's host machine to windows in the browser, though this feature will be added soon. 
 
 
 ## Bwb application
@@ -249,7 +249,7 @@ In Bwb, we use Bwb workflows and widgets to represent and execute analytical pip
 
 ### Tool Dock
 
-When Bwb is started, on the left hand side of the application window is tool box (tool dock) with multiple tabs  (drawers) which contain different collections of widgets. Clicking on the tab expands the toolbox drawer to reveal the contents. Drawers are organized by function. Bwb comes with a set of ready-to-use widgets. These are all linked to containers available on our BioDepot repositiory on Docker hub. Any workflows constructed with these widgets will automatically download the necessary containers the first time that they are run and require no installation. 
+When Bwb is started, the Bwb application window pops up. On the left hand side of the application window is tool box (tool dock) with multiple tabs  (drawers) which contain different collections of widgets. Clicking on the tab expands the toolbox drawer to reveal the contents. Drawers are organized by function. Bwb comes with a set of ready-to-use widgets. These are all linked to containers available on our BioDepot repositiory on Docker hub. Any workflows constructed with these widgets will automatically download the necessary containers the first time that they are run and require no installation. 
 
 Users can also create their own drawers. A new drawer is created whenever a workflow is loaded. Also widgets can be added (and removed) using the ToolDock editor available fromt the menu bar. (See the section on editing the tool dock
 
@@ -259,24 +259,39 @@ The Tool Dock can be minimized using the button on the top right hand side.
 
 A miniature version of the tooldock is accessible by right clicking in the canvas section to the right of the toolBox 
 
-
 ### Editing the Tool dock
 
 Widgets and drawers can be added and deleted from the Tool Dock by choosing the edit tool dock item from the menu. Before any of the changes are reflected, the user must also choose to refresh the settings.
 
 ### Interacting with widgets
 
-To interact with widget, the are first dragged from the Tool Dock onto the canvas. Clicking on a widget brings up the widget UI window with tabs for parameter entry, an output console and a tool bar with options to control the execution of the widget. Right-clicking on the widget brings up a the widget definition window. The definition window contains a set of forms that define the parameters to be queried by the UI window, the Docker container to be used, and the commands to be run upon execution. Finally dragging the mouse from the edge of one widget to another creates a link between the output of one widget to the input of the second widget. These three sets of actions are described in the next sections
+To interact with a widget, it is first dragged from the Tool Dock onto the canvas. Clicking on a widget brings up the widget UI window with tabs for parameter entry, an output console and a tool bar with options to control the execution of the widget. Right-clicking on the widget and choosing the edit widget item brings up the widget definition window. The definition window contains a set of forms that define the parameters to be queried by the UI window, the Docker container to be used, and the commands to be run upon execution. Finally dragging the mouse from the edge of one widget to another creates a link between the output of one widget to the input of the second widget. These three sets of actions are described in the next sections
 
 #### Widget user interaction window 
 
-The Bwb interaction window is popped up by double clicking on the widget. There are 3 main tabs in each window: Required entries, optional entries and console. Required entries are parameters that must be entered before the widget can execute. An example would be fastq files for an alignment widget. Optional entries are optional flags and parameters that are not required for program execution. The console tab provides a window with the text output from the widget. This can be saved in log files.
+The Bwb interaction window pops up when when a widget is double clicked. There are up to 3 tabs in each window: Required entries, optional entries and console. Required entries are parameters that must be entered before the widget can execute. An example would be fastq files for an alignment widget. Additional optional entries are optional flags and parameters that are not required for program execution. When these are present, they are displayed by clicking on the optional entires tab. Finally, clicking on the console tab brings up a window with the text output from the widget.
 
-At then bottom of the UI window are a series of controls that affect the execution of the widget. The start button starts the execution. The stop button then becomes active and pressing it will terminate execution. The export graphics option, if checked allows the widget to output graphics to the Bwb screen. The last option controls how the widget will be executed. Manual, the default option means that tghe widget can only be run by the user pressing the start button. Automatic means that the widget will run once all the required options are entered. The last run mode is the triggered run mode. The widget will start execution after one or more inputs are received *AND* all the required parameters are set. If the triggered mode is chosen, the user can then specify which inputs will trigger execution. If more than one input is chosen, the widget will wait until all inputs are received before executing. Manual start mode is typically used for widgets at the beginning of pipelines or in optional sections of the pipeline. Triggered mode is typcially used in downstream widgets to allow widgets to sequentially process the data as it flows through the analytical pipeline.
+At the bottom of the UI window are a series of controls that affect the execution of the widget. The start button starts the execution. The stop button then becomes active and pressing it will terminate execution. The export graphics option, if checked allows the widget to output graphics to the Bwb screen. The last option controls how the widget will be executed. Manual, the default option means that tghe widget can only be run by the user pressing the start button. Automatic means that the widget will run once all the required options are entered. The last run mode is the triggered run mode. The widget will start execution after one or more inputs are received *AND* all the required parameters are set. If the triggered mode is chosen, the user can then specify which inputs will trigger execution. If more than one input is chosen, the widget will wait until all inputs are received before executing. Manual start mode is typically used for widgets at the beginning of pipelines or in optional sections of the pipeline. Triggered mode is typcially used in downstream widgets to allow widgets to sequentially process the data as it flows through the analytical pipeline.
 
 #### Widget definition window
 
-Right clicking on the 
+Right clicking on the widget brings up the option to edit its definition parameters. Choosing the edit option edits the present widget. Choosing the new option edits a new widget. The same options are also available from the main menu. Upon entering the edit widget mode, a window pops up with multiple tabs described next:
+
+##### General 
+
+The general tab allows the user to enter general information about the widget. The entries are:
+###### description
+A description of the widgets function
+###### docker_image_name
+
+##### Inputs
+
+##### Outputs
+##### Volumes
+##### Ports
+##### Parameters
+##### Command
+##### Docker
 
 
 ### Connecting widgets to form workflows
