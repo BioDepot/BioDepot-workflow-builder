@@ -5,7 +5,7 @@ import json
 import jsonpickle
 import pickle
 import csv
-import tempfile
+import tempfile, shutil
 import OWImageBuilder
 from pathlib import Path
 from shutil import copyfile
@@ -914,16 +914,44 @@ class OWWidgetBuilder(widget.OWWidget):
         layout.nextRow = layout.nextRow + 1
         
     def drawDocker(self,pname,layout=None):
+        dockerFileLedit=self.makeLedit('dockerFileToAdd','Enter file to add', label='Add Dockerfile:')
+        layout.addWidget(dockerFileLedit.label,layout.nextRow,0)
+        layout.addWidget(dockerFileLedit.ledit,layout.nextRow,1,1,1)
+        callback=self.browseFileDir
+        browseFileBtn=gui.button(None, self, "", callback= lambda : callback('dockerFileToAdd',ledit=dockerFileLedit.ledit,fileType=None),autoDefault=True, width=20, height=20)
+        browseFileBtn.setIcon(self.browseIcon)
+        browseFileBtn.setStyleSheet(self.browseCSS)
+        layout.addWidget(browseFileBtn,layout.nextRow,2)
+        addFileBtn=gui.button(None, self, "", callback=lambda: self.addDockerFile(dockerFileLedit.ledit), autoDefault=False)
+        addFileBtn.setIcon(self.addIcon)
+        addFileBtn.setStyleSheet(self.addRemoveCSS)
+        layout.addWidget(addFileBtn,layout.nextRow,3)
+        layout.nextRow+=1
+        
+        dockerDirLedit=self.makeLedit('dockerDirToAdd','Enter directory to add', label='Add directory:')
+        layout.addWidget(dockerDirLedit.label,layout.nextRow,0)
+        layout.addWidget(dockerDirLedit.ledit,layout.nextRow,1,1,1)
+        callback=self.browseFileDir
+        browseDirBtn=gui.button(None, self, "", callback= lambda : callback('dockerDirToAdd',ledit=dockerDirLedit.ledit,fileType='Directory'),autoDefault=True, width=20, height=20)
+        browseDirBtn.setIcon(self.browseIcon)
+        browseDirBtn.setStyleSheet(self.browseCSS)
+        layout.addWidget(browseDirBtn,layout.nextRow,2)
+        addDirBtn=gui.button(None, self, "", callback=lambda: self.addDockerDir(dockerDirLedit.ledit), autoDefault=False)
+        addDirBtn.setIcon(self.addIcon)
+        addDirBtn.setStyleSheet(self.addRemoveCSS)
+        layout.addWidget(addDirBtn,layout.nextRow,3)
+        layout.nextRow+=1
         #self.drawLedit('Add file to Dockerfiles',layout=layout,addBrowseButton=True, fileType=None)
         #self.drawLedit('Add directory to Dockerfiles',layout=layout,addBrowseButton=True, fileType='Directory')
-        addDateCb=self.makeCheckBox ('addBuildDate','Add date to docker tag',default=True,persist=True,track=True)
-        containerIDLabel=QtGui.QLabel('Container ID: {}'.format(self.containerID))
+        
+        #addDateCb=self.makeCheckBox ('addBuildDate','Add date to docker tag',default=True,persist=True,track=True)
+        #containerIDLabel=QtGui.QLabel('Container ID: {}'.format(self.containerID))
         imageBuilderLabel=QtGui.QLabel('Launch Image Builder')
         imageBuilderBtn = gui.button(None, self, "Launch", callback=self.startImageBuilder)
         imageBuilderBtn.setStyleSheet(self.css)
         imageBuilderBtn.setFixedSize(80,20)
-        updateLabel=QtGui.QLabel('Import Dockerfiles directory')
-        updateBtn = gui.button(None, self, "Import", callback=self.updateDockerfiles)
+        updateLabel=QtGui.QLabel('Clear Dockerfiles')
+        updateBtn = gui.button(None, self, "Clear", callback=self.clearDockerfiles)
         updateBtn.setStyleSheet(self.css)
         updateBtn.setFixedSize(80,20)        
         buildCommandBox=self.makeTextBox(pname,label='Docker build command:')
@@ -933,19 +961,62 @@ class OWWidgetBuilder(widget.OWWidget):
         layout.addWidget(updateBtn,layout.nextRow,1)
         layout.addWidget(imageBuilderLabel,layout.nextRow+1,0)
         layout.addWidget(imageBuilderBtn,layout.nextRow+1,1)
-        layout.addWidget(addDateCb,layout.nextRow+2,0)
-        layout.addWidget(containerIDLabel,layout.nextRow+3,0)
-        layout.addWidget(addDateCb,layout.nextRow+4,0)
-        layout.addWidget(buildCommandBox.label,layout.nextRow+5,0)
-        layout.addWidget(buildCommandBox.textBox,layout.nextRow+5,1,1,4)
+        #layout.addWidget(addDateCb,layout.nextRow+2,0)
+        #layout.addWidget(containerIDLabel,layout.nextRow+3,0)
+        #layout.addWidget(addDateCb,layout.nextRow+4,0)
+        layout.addWidget(buildCommandBox.label,layout.nextRow+2,0)
+        layout.addWidget(buildCommandBox.textBox,layout.nextRow+2,1,1,4)
+    
+    def addDockerFile(self,ledit):
+        if not hasattr(ledit,'text'):
+            return
+        src=ledit.text().strip()
+        if src and os.path.isfile(src):
+            dest=self.widgetDir+'/'+'Dockerfiles/'+os.path.basename(src)
+            copyfile(src,dest)
+            qm = QtGui.QMessageBox
+            title='Added Dockerfile'
+            message='Added {}'.format(src)
+            qm.information(self,title,message,QtGui.QMessageBox.Ok)
+            
+    def addDockerDir(self,ledit):
+        if not hasattr(ledit,'text'):
+            return
+        src=ledit.text().strip()
+        if src and os.path.isdir(src):
+            dest=self.widgetDir+'/'+'Dockerfiles/'+os.path.basename(src)
+            if os.path.isdir(dest):
+                qm = QtGui.QMessageBox
+                ret=qm.question(self,'Confirm delete', "The directory {} exits Delete?".format(os.path.basename(dest)), qm.Yes | qm.No)
+                if ret == qm.No:
+                    return
+                shutil.rmtree(dest)
+            shutil.copytree(src,dest)
+            qm = QtGui.QMessageBox
+            title='Added Directory'
+            message='Added {}'.format(src)
+            qm.information(self,title,message,QtGui.QMessageBox.Ok)
+            
+            
     def startImageBuilder(self):
         widget=OWImageBuilder.OWImageBuilder()
         widget.showNormal()
         widget.raise_()
         widget.activateWindow()
         
-    def updateDockerfiles(self):
-        pass
+    def clearDockerfiles(self):
+        dockerDir=self.widgetDir+'/'+'Dockerfiles'
+        if not os.listdir(dockerDir):
+            return
+        qm = QtGui.QMessageBox
+        ret=qm.question(self,'Confirm delete', "Are you sure you want to remove all files in {} ?".format(dockerDir), qm.Yes | qm.No)
+        if ret == qm.No:
+            return
+        os.system("cd {} && rm -rf * ".format(dockerDir))
+        title='Cleared docker files'
+        message='Cleared docker files'
+        qm.information(self,title,message,QtGui.QMessageBox.Ok)
+                
     def makeTextBox(self,attr,label):
         box=QHBoxLayout()
         textLabel=None

@@ -270,15 +270,14 @@ To interact with widget, the are first dragged from the Tool Dock onto the canva
 
 #### Widget user interaction window 
 
-The Bwb interaction window is popped up by double clicking on the widget. There are 3 main tabs in each window: Required entries, optional entries and console. Required entries are parameters that must be entered before the widget can execute. An example would be fastq files for an alignment widget. Optional entries are optional flags and parameters that are not required for program execution. The console tab provides a window with the text output from the widget. This can be saved in log files. 
+The Bwb interaction window is popped up by double clicking on the widget. There are 3 main tabs in each window: Required entries, optional entries and console. Required entries are parameters that must be entered before the widget can execute. An example would be fastq files for an alignment widget. Optional entries are optional flags and parameters that are not required for program execution. The console tab provides a window with the text output from the widget. This can be saved in log files.
 
+At then bottom of the UI window are a series of controls that affect the execution of the widget. The start button starts the execution. The stop button then becomes active and pressing it will terminate execution. The export graphics option, if checked allows the widget to output graphics to the Bwb screen. The last option controls how the widget will be executed. Manual, the default option means that tghe widget can only be run by the user pressing the start button. Automatic means that the widget will run once all the required options are entered. The last run mode is the triggered run mode. The widget will start execution after one or more inputs are received *AND* all the required parameters are set. If the triggered mode is chosen, the user can then specify which inputs will trigger execution. If more than one input is chosen, the widget will wait until all inputs are received before executing. Manual start mode is typically used for widgets at the beginning of pipelines or in optional sections of the pipeline. Triggered mode is typcially used in downstream widgets to allow widgets to sequentially process the data as it flows through the analytical pipeline.
 
-Containers, as a rule, are meant to carry dependencies and smaller supporting files needed by the executable. This is why they are so portable and require no installation to run. Larger input files that may depend on the user (eg data fastq files), are handled by mapping the user volume to a container path that is accessible. The software and scripts inside the container always see the same paths regardless of where the user data actually resides.
+#### Widget definition window
 
+Right clicking on the 
 
-### Customizing widgets
-
-### Saving widgets
 
 ### Connecting widgets to form workflows
 
@@ -384,13 +383,6 @@ There are 17 primary fields to the object
        } 
 ```
 
-### Creating widget
-
-Open a terminal in Bwb by minimizing the Bwb window and right clicking.
-Type in the following
-```bash
-	createWidget -i <jsonfile> -o <widgetFile.py> --register
-```
 Open a new instance of Bwb and you should see the new widget in the toolbox.
 A sample json file is in the /biodepot/orangebiodepot/json directory
 
