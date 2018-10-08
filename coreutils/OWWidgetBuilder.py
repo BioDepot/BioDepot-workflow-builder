@@ -9,7 +9,7 @@ import tempfile, shutil
 import OWImageBuilder
 from pathlib import Path
 from shutil import copyfile
-from createWidget import mergeWidget, createWidget, findDirectory, findIconFile
+from createWidget import mergeWidget, createWidget, findIconFile
 from copy import deepcopy
 from collections import OrderedDict
 from functools import partial
@@ -318,7 +318,6 @@ class WidgetItem():
 class OWWidgetBuilder(widget.OWWidget):
     name = "Widget Builder"
     description = "Build a new widget from a set of bash commands and a Docker container"
-    category = "Bwb-core"
     icon = "icons/build.png"
     priority = 2
 
@@ -331,32 +330,7 @@ class OWWidgetBuilder(widget.OWWidget):
     allStates=pset({})
     allAttrs=pset({})
     data={}
-    
-    def register(self,widgetPath,widgetName):
-        sys.stderr.write('register with path {} name {}\n'.format(widgetPath,widgetName))
-        jsonFile="{}/{}.json".format(widgetPath,widgetName)
-        directory=findDirectory(jsonFile)
-        destPath='/widgets/{}'.format(widgetName);
-        if os.path.realpath(widgetPath) != os.path.realpath(destPath):
-            #check if it exists
-            if os.path.exists(destPath):
-                qm = QtGui.QMessageBox
-                ret=qm.question(self,'', "{} exists - OverWrite ?".format(widgetName), qm.Yes | qm.No)
-                if ret == qm.No:
-                    return
-                os.system("cd /widgets && rm {} -rf ".format(widgetName))    
-            os.system("cp -r {} {}".format(widgetPath,destPath))
-        else:
-            title='Register {}'.format(widgetName)
-            message='{} is already in {} in ToolDock'.format(widgetName,directory)
-            QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
-            return           
-        #make linkages
-        os.system ("ln -sf  /widgets/{}/{}.py /biodepot/{}/OW{}.py".format(widgetName,widgetName,directory,widgetName))
-        title='Register {}'.format(widgetName)
-        message='Added {} to {} in ToolDock'.format(widgetName,directory)
-        QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
-        
+         
     def drawExec(self, layout=None):
         self.saveMode=QtGui.QComboBox()
         self.saveMode.addItem('Overwrite')
@@ -373,9 +347,6 @@ class OWWidgetBuilder(widget.OWWidget):
         self.loadWidgetBtn = gui.button(None, self, "Load", callback=self.loadWidget)
         self.loadWidgetBtn.setStyleSheet(self.css)
         self.loadWidgetBtn.setFixedSize(70,20)
-        self.registerBtn = gui.button(None, self, "Register", callback=self.registerWidget)
-        self.registerBtn.setStyleSheet(self.css)
-        self.registerBtn.setFixedSize(100,20)
         self.rebuildBtn = gui.button(None, self, "Rebuild", callback=self.rebuildWidget)
         self.rebuildBtn.setStyleSheet(self.css)
         self.rebuildBtn.setFixedSize(100,20)
@@ -390,8 +361,6 @@ class OWWidgetBuilder(widget.OWWidget):
         box.addWidget(self.saveWidgetBtn)
         box.addWidget(self.saveWidgetAsBtn)
         box.addWidget(self.loadWidgetBtn)
-#        box.addWidget(self.registerBtn)
-#        box.addWidget(self.rebuildBtn)
         box.addStretch(1)
         layout.addLayout(box)
 
@@ -477,14 +446,12 @@ class OWWidgetBuilder(widget.OWWidget):
                 cmd+= '&& rsync -av /workflows/ {}/workflows/ --delete '.format(myDir)
                 cmd+= '&& rsync -av /notebooks/ {}/notebooks/ --delete '.format(myDir)
                 cmd+= '&& docker build -t {} {}'.format(imageName,myDir)
-                self.registerBtn.setEnabled(False)
                 self.rebuildBtn.setEnabled(False)
                 self.saveWidgetBtn.setEnabled(False)
                 self.saveWidgetAsBtn.setEnabled(False)
                 self.loadWidgetBtn.setEnabled(False)
                 self.pConsole.process.start('/bin/bash',['-c',cmd])
     def finishRebuild(self,stopped=None):
-        self.registerBtn.setEnabled(True)
         self.rebuildBtn.setEnabled(True)
         self.saveWidgetBtn.setEnabled(True)
         self.saveWidgetAsBtn.setEnabled(True)
@@ -494,9 +461,7 @@ class OWWidgetBuilder(widget.OWWidget):
     def buildData(self):
         myData={}
         self.data['name']=self.widgetName
-        if 'category' not in self.data:
-            self.data['category']='User'
-        for attr in ('name','description','category','docker_image_name','docker_image_tag',
+        for attr in ('name','description','docker_image_name','docker_image_tag',
             'priority','icon','inputs','outputs','volumes','ports','parameters','command','autoMap'):
             if attr in self.data and self.data[attr]:
                 myData[attr]=deepcopy(self.data[attr])
@@ -662,16 +627,6 @@ class OWWidgetBuilder(widget.OWWidget):
         if os.path.exists('/data'):
             defaultDir = '/data' 
         return defaultDir
-        
-    def registerWidget(self):
-        if self.widgetDir:
-            startDir=self.widgetDir
-        else:
-            startDir=self.defaultDir
-        registerWidgetDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose widget to register", directory=startDir)
-        if registerWidgetDir:
-            widgetName=os.path.split(registerWidgetDir)[-1]
-            self.register(registerWidgetDir,widgetName)
             
     def pickleData(self,data,filename,jsonFlag=True):
         if jsonFlag:
@@ -777,7 +732,7 @@ class OWWidgetBuilder(widget.OWWidget):
     def startWidget(self):
         self.isDrawn=True
         self.setWindowTitle(self.widgetName+':Definition')
-        for attr in ('name','description','category','docker_image_name','docker_image_tag',
+        for attr in ('name','description','docker_image_name','docker_image_tag',
                      'priority','icon','inputs','outputs','volumes','parameters','command','autoMap','buildCommand'):
             if attr in self.allAttrs:
                 self.data[attr]=self.allAttrs[attr]
@@ -802,7 +757,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.nameLabel=QtGui.QLabel('Name: '+self.widgetName)
         leditGeneralLayout.addWidget(self.nameLabel,leditGeneralLayout.nextRow,0)
         leditGeneralLayout.nextRow=leditGeneralLayout.nextRow+1
-        for pname in ['description','category','docker_image_name','docker_image_tag']:
+        for pname in ['description','docker_image_name','docker_image_tag']:
             self.drawLedit(pname,layout=leditGeneralLayout)
         self.drawLedit('priority',layout=leditGeneralLayout)
         #file entry for icon

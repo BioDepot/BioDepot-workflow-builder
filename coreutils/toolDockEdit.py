@@ -12,7 +12,7 @@ from xml.dom import minidom
 from glob import glob
 from pathlib import Path
 from shutil import copyfile
-from createWidget import mergeWidget, createWidget, findDirectory, findIconFile
+from createWidget import mergeWidget, createWidget,findIconFile
 from copy import deepcopy
 from collections import OrderedDict
 from functools import partial
