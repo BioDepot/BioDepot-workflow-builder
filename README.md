@@ -391,13 +391,14 @@ Widgets are connected by dragging from the right side of the source widget to th
 When an input is connected to an output - the output value will become the input value and will override any user input and the form for that imput will be grayed out and inaccessible.
 
 ##### Connections to triggers are used to control the execution of widgets
-One of the major uses of connections is to control the execution of widgets. A widget that has one or more inputs that are connected can use these as execution triggers using the run mode at the bottom of the destination widget. The widget will not execute until all required parameters are entered and all the inputs that are triggers receive input. This allows for a widget to wait until another widget has finished processing. For example, the kallisto quant widget in the kallisto-sleuth demo workflow is triggered by the indexFile produced by the kallisto index widget and the output of the fastq download widget. It will wait unti the index file is ready and the fastq files are downloaded before proceeding
+One of the major uses of connections is to control the execution of widgets in workflows. A widget that has one or more inputs that are connected can use these as execution triggers using the run mode at the bottom of the destination widget. The widget will not execute until all required parameters are entered and all the inputs that are triggers receive input. This allows for a widget to wait until another widget has finished processing. For example, the kallisto quant widget in the kallisto-sleuth demo workflow is triggered by the indexFile produced by the kallisto index widget and the output of the fastq download widget. It will wait unti the index file is ready and the fastq files are downloaded before proceeding
 
 #### Saving workflows
-The 'Save workflow as' option under the File menu will bring up a dialog box. The dialog box will ask for the workflow name which will also be the name of the directory where the widgets and other workflow files are stored. The 
-
+The 'Save workflow as' option under the File menu will bring up a dialog box. The dialog box will ask for the workflow name which will also be the name of the directory where the widgets and other workflow files are stored. The parent directory where the workflow directory will reside also needs to be inputted. Optionally, a color and icon can provided. Otherwise, the current icon and color of the workflow are used, or in the case of new workflows, default icons and color will be used. Finally, there is a check box to merge all widgets. If this is left unchecked, the workflow will not maintain a separate copy of the widgets in its directory. The workflow will function but will use off-the-shelf widgets provided by Bwb or another loaded workflow. Checking the box clones all the widgets into the workflow directory. Note that different drawers can carry its own version of a widget. These will be assigned different names if there is a conflict before being copied into the workflow.
 
 #### Loading and executing a workflow
+
+
 
 
 ## Demo workflows
@@ -411,7 +412,7 @@ The 'Save workflow as' option under the File menu will bring up a dialog box. Th
 ###STAR demo
 
 
-### Tutorial - Adding a Python script to a Bwb workflow
+## Tutorial - Adding a Python script to a Bwb workflow
 
 
 
