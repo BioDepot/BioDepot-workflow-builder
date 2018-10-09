@@ -1,4 +1,5 @@
-import sys, os, re, shutil, glob, tempfile 
+import sys, os, re, shutil, glob, tempfile, json
+from glob import glob 
 from makeToolDockCategories import *
 from xml.dom import minidom
 from collections import Counter, OrderedDict
@@ -55,6 +56,31 @@ def copyWorkflow(inputWorkflow,outputWorkflow):
         newOWS=outputWorkflow+'/'+newName+'.ows'
         os.system('mv oldOWS newOWS')
         changeNameInOWS(oldName,newName,newOWS)
+
+def replaceNameInJson(oldName,newName):
+    
+    pass
+def replaceNameInPy (oldName,newName):
+    pass
+def replaceNameInStates (oldName,newName
+def renameWidget(srcWidget,oldName,newName):
+    #first rename parent if possible
+    if os.path.basename(os.path.dirname(srcWidget)) != newName:
+        newPath=os.path.dirname(os.path.dirname(srcWidget)) + '/' + newName
+        if os.path.exists(newPath):
+            qm = QtGui.QMessageBox
+            title='Rename widget failed'.format(widgetName)
+            message='{} already exists - can not reanem'.format(newPath)
+            qm.information(self,title,message,QtGui.QMessageBox.Ok)
+            return
+        oldPath=os.path.dirname(srcWidget)
+        os.rename(oldPath,newPath)
+    #now we need to rename each of the files
+    oldFiles=glob('{}/{}.*'.format(newPath,oldName))
+    for oldFile in oldFiles:
+        newFile=newPath+'/'+newName+os.path.splitext(odlFile)[1]
+        os.rename(oldFile,newFile)
+        
         
 def findWidgetPathFromLink(qualifiedName,groupName,basePath=''):
     parts=qualifiedName.split('.')
@@ -184,8 +210,10 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
                         uniqueNames[projectName]={}
                     uniqueNames[projectName][widgetName]=uniqueName
                 nameSeen.add(uniqueName)
-                os.system('cp -r {} {}/widgets/{}/{}'.format(widgetPath,tempDir,projectTitlePath,uniqueName))                
+                os.system('cp -r {} {}/widgets/{}/{}'.format(widgetPath,tempDir,projectTitlePath,uniqueName))
+        
         reformatOWS(projectTitle,bwbOWS,tempOWS,uniqueNames)
+        
     else:
         widgetPaths=set()
         for node in nodes:

@@ -283,6 +283,8 @@ The general tab allows the user to enter general information about the widget. T
 ###### description
 A description of the widgets function
 ###### docker_image_name
+###### docker image tag
+###### 
 
 ##### Inputs
 
