@@ -385,8 +385,17 @@ We recommend that for most cases that you merge all widgets that are to be used 
 N.B. changes to widgets and workflows may not be reflected immediately as Bwb must reload in order to incorporate new or changed routines. This is done as much as possible automatically but if it does not, using the reset settings option from the File menu or the Load workflow option to reload the workflow **
 
 #### Connecting widgets
+Widgets are connected by dragging from the right side of the source widget to the left side of the destination widget. This transfers the output of the source widget to the destination widget. When there are more than one possible connection, Bwb will choose one. Double clicking on the link will allow the user to edit this choice and select which inputs are to be connected to which output. An output can be connected to multiple inputs but inputs in Bwb by default currently accept one output. This may be changed in the future - especially for triggers
+
+##### Input from connections override user input
+When an input is connected to an output - the output value will become the input value and will override any user input and the form for that imput will be grayed out and inaccessible.
+
+##### Connections to triggers are used to control the execution of widgets
+One of the major uses of connections is to control the execution of widgets. A widget that has one or more inputs that are connected can use these as execution triggers using the run mode at the bottom of the destination widget. The widget will not execute until all required parameters are entered and all the inputs that are triggers receive input. This allows for a widget to wait until another widget has finished processing. For example, the kallisto quant widget in the kallisto-sleuth demo workflow is triggered by the indexFile produced by the kallisto index widget and the output of the fastq download widget. It will wait unti the index file is ready and the fastq files are downloaded before proceeding
 
 #### Saving workflows
+The 'Save workflow as' option under the File menu will bring up a dialog box. The dialog box will ask for the workflow name which will also be the name of the directory where the widgets and other workflow files are stored. The 
+
 
 #### Loading and executing a workflow
 

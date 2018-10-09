@@ -75,7 +75,7 @@ class SaveWorkflowForm(QDialog):
         if 'dir' in self.initialData and self.initialData['dir']:
             dir_ledit.setText(self.initialData['dir'])
         dir_ledit.setStyleSheet(":disabled { color: #282828}")
-        dir_label=QtGui.QLabel('Workflow directory:')       
+        dir_label=QtGui.QLabel('Workflow parent directory:')       
         dir_button=gui.button(None, self, "", callback= lambda : self.browseFileDir('dirname',ledit=dir_ledit,fileType='Directory'),autoDefault=True, width=19, height=19)
         dir_button.setIcon(self.browseIcon)
         dir_button.setStyleSheet(self.browseCSS)
