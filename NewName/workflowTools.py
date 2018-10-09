@@ -74,22 +74,24 @@ def replaceNamePy(pyFile,oldName,newName):
             #look for
             #class OWFile(OWBwBWidget):
             if line[0:8] == 'class OW':
-                line='class OW{}(OWBwBWidget):\n'.format(newName)
+                line='class OW{}(OWBwBWidget)\n'.format(newName)
             elif line.strip() == 'name = "{}"'.format(oldName):
                 line='    name = "{}"\n'.format(newName)
-            elif line.strip() == 'with open(getJsonName(__file__,"{}")) as f:'.format(oldName):
-                line='        with open(getJsonName(__file__,"{}")) as f:\n'.format(newName)
             f.write(line)
     
 
 def renameWidget(srcWidget,oldName,newName):
     #first rename parent if possible
-    oldPath=os.path.basename(srcWidget)
-    if oldPath != newName:
-        newPath=os.path.dirname(srcWidget)+'/'+newName
-        os.rename(srcWidget,newPath)
-    else:
-        newPath=srcWidget
+    if os.path.basename(os.path.dirname(srcWidget)) != newName:
+        newPath=os.path.dirname(os.path.dirname(srcWidget)) + '/' + newName
+        if os.path.exists(newPath):
+            qm = QtGui.QMessageBox
+            title='Rename widget failed'.format(widgetName)
+            message='{} already exists - can not reanem'.format(newPath)
+            qm.information(self,title,message,QtGui.QMessageBox.Ok)
+            return
+        oldPath=os.path.dirname(srcWidget)
+        os.rename(oldPath,newPath)
     #now we need to rename each of the files
     #and after renaming replace the instances of oldName in the data structures and python script with newName
     oldFiles=glob('{}/{}.*'.format(newPath,oldName))
@@ -231,10 +233,9 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
                         uniqueNames[projectName]={}
                     uniqueNames[projectName][widgetName]=uniqueName
                 nameSeen.add(uniqueName)
-                uniquePath='{}/widgets/{}/{}'.format(tempDir,projectTitlePath,uniqueName)
+                uniquePath='{}/widgets/{}/{}'.format(widgetPath,tempDir,projectTitlePath,uniqueName)
                 shutil.copytree(widgetPath,uniquePath)
-                if nameChanged:
-                    renameWidget(uniquePath,widgetName,uniqueName)
+                renameWidget(uniquePath,widgetName,uniqueName)
         
         reformatOWS(projectTitle,bwbOWS,tempOWS,uniqueNames)
         
@@ -350,4 +351,4 @@ def importWorkflow(owsFile):
         with open('/biodepot/setup.py','w') as f:
             f.write(setupData)
         os.system('cd /biodepot && pip install -e .')
-
+renameWidget('/media/data/home/lhhung/bwb/BioDepot-workflow-builder/coreutils/File','File','NewName')
