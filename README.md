@@ -283,17 +283,57 @@ The general tab allows the user to enter general information about the widget. T
 ###### description
 A description of the widgets function
 ###### docker_image_name
+The name of the Docker container that is used. 
 ###### docker image tag
-###### 
+The image tag for the Docker container. The default tag for any conainer is latest which is not necessarily the most recent in spite of the name. Bwb has he version of software and the major dependencies and the date separated by underscores to proivde a detailed yet human readable versioning tag
+###### priority
+Determines the order of appearance in the Tool Dock drawer
+###### icon
+The icon used for the widget
 
 ##### Inputs
 
+The input section allows the user to specify the name of the inputs accepted by the widget. These are variable names that can also be assigned to parameters and outputs. Currently the callback option is not used. When an input name is also a parameter name, the value of the parameter will be determined by the input if it is connected to the output of another widget
+
 ##### Outputs
+
+The output section allows the user to specify the names of outputs that will be sent when the widget is finished execution.
+
 ##### Volumes
+
+Volumes allow the user to map a user volume to a container volume. This allows the workflows to operate on data that is on the host system. The Bwb container already has one mapped volume and by default this is passed to the workflow containers. For example, the default mapping is that the current host directory where Bwb is launched is accessed through the /data mountpoint in the Bwb container. By default, all workflow containers will also be able to access the host directory through the /data mountpoint.
+
+The volumes tab allows the user to enter a variable name and an internal container volume or mount point. The user is then queried (using the parameters section) for the local directory that is to be mapped to the internal container volume.
+
 ##### Ports
+
+Similar to the volumes tab except the widget can query a host port to map to an internal port. 
+
 ##### Parameters
+
+Different flags and environment variables to be queried an be entered in this section. The name box is the internal variable name. This can also  be an output, input, volume, or port variable defined in previous section that the widget wants the user to input. The type of the variable determines the manner of entry. For example, a file type will bring up a line for manual entry and a button to browse for files. A boolean type will bring up a check box in the UI window. There is an optional flag field. This can be a single -, -- or any string that appears before the value that is entered. The variable can be an argument with no flag. Arguments and flags are passed in the command line. The value can also be passed to the container as an environment variable as well. The entry of a value for the variable can be optional.
+
+Individual parameters are entered using the + button. This will add the parameter to the box where they can be dragged to change the order, deleted using the x button, or edited.
+
 ##### Command
+
+The command is the command that is executed upon in the docker container. A command will be followed by the flags and arguments specified in the parameters section in order from top to bottom. Arguments always appear at the end of the command. It is also possible to specify a specific order using the _bwb{<variable>} notation. Multiple lines are possible - these are joined by the && operator to form a single command (in bash...)
+
+For example the command
+```
+rm -f Counts/*
+Rscript Programs/analyze.R _bwb{ConfigurationFile}
+
+```
+will generate the following command
+```
+	rm -f Counts/* && Rscript Programs/analyze.R <ConfigurationFile> <flags> <arguments>
+```
+
 ##### Docker
+
+The Docker tab contains information about the Dockerfiles and build commands used to construct the container. This currently is mainly for documenting the provenance of the container. However, we will be adding the option of generating the containers from this section rather than downloading the container from a repo.
+
 
 
 ### Connecting widgets to form workflows
