@@ -362,12 +362,53 @@ Finally in addition to the save and save as button there is an additional load b
 ###### Load button
 Will load the attrs and state from another widget - this allows the user to use a pre-existing widget as a template or starting point
 
-### Connecting widgets to form workflows
+### Building workflows from widgets
 
-### Saving and loading workflows
+#### TLDR
+
+A quick summary of the steps to construct a workflow:
+
+1\. Drag desired widgets from Tool Dock onto the canvas
+2\. Save the workflow and check of merge all widgets box
+3\. Load the saved workflow and a drawer of workflow widgets will appear in the Tool dock
+4\. Edit the widget definitions to define which parameters will be queried, what command and which container will be run
+5\. Connect the widgets by dragging from the right side of the widget (output) to the left side of the next widget to form the pipeline
+6\. Enter all the values for the different parameters
+7\. Save the workflow
+
+#### Workflow structure
+
+The workflow is stored in a single directory. This directory contains widgets specific to the workflow, the icon, and a stub \__init__.py  python script used to load the workflow into Bwb. A .ows file saves the connections between the widgets and all the parameter values or settings in xml format. This is different information than the json files for each of the widgets which store information defining which parameters are queried and what and how the widgets execute based on these parameters but not the values of the parameters themselves. Workflows can also use widgets that are not stored locally in the directory. This can be useful for building and prototyping new workflows or when the workflow is meant to be a dependent version to be automatically updated as widgets get changed in other workflows. Upon saving, there is the option of merging all widgets. This will make copies of all widgets outside the workflow, resolve any names that are identical and update the ows and other files. All widgets will then appear in a separate Tool Dock drawer when the workflow is loaded.
+
+We recommend that for most cases that you merge all widgets that are to be used before modifying them in a workflow for maximum encapsulation and reproducibility
+**
+N.B. changes to widgets and workflows may not be reflected immediately as Bwb must reload in order to incorporate new or changed routines. This is done as much as possible automatically but if it does not, using the reset settings option from the File menu or the Load workflow option to reload the workflow **
+
+#### Connecting widgets
+
+#### Saving workflows
+
+#### Loading and executing a workflow
 
 
-## Workflow and widget development guide
+## Demo workflows
+
+###DToxS demo
+
+###kallisto-sleuth demo
+
+###kallisto-sleuth with Jupyter demo
+
+###STAR demo
+
+
+### Tutorial - Adding a Python script to a Bwb workflow
+
+
+
+
+## Appendices
+
 
 ### 1. Development environment
 
@@ -384,10 +425,7 @@ docker build -f ./Dockerfile-widgets -t biodepot/bwb-widget-dev .
 ```
 As the development widget is not yet linked to the github, it is better to build the widget locally
 
-## Demo workflows
 
-
-## Appendices
 
 ### How Bwb executes workflows
 
