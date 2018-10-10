@@ -1,0 +1,5 @@
+source('http://bioconductor.org/biocLite.R')
+biocLite("withr")
+biocLite("rstudioapi")
+biocLite("devtools")
+biocLite("pachterlab/sleuth")

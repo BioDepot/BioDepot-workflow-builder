@@ -1,0 +1,1 @@
+{"hotfix-http-throttling-v2-bug-1462906":{"name":"hotfix-http-throttling-v2-bug-1462906","branch":"hotfix","expired":false,"lastSeen":"2018-08-18T18:07:14.326Z","preferenceName":"network.http.throttle.version","preferenceValue":1,"preferenceType":"integer","previousPreferenceValue":2,"preferenceBranchType":"user","experimentType":"exp"}}
