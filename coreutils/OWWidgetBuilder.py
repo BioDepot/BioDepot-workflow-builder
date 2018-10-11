@@ -954,7 +954,8 @@ class OWWidgetBuilder(widget.OWWidget):
             
             
     def startImageBuilder(self):
-        widget=OWImageBuilder.OWImageBuilder()
+        dockerDir=self.widgetDir+'/'+'Dockerfiles'
+        widget=OWImageBuilder.OWImageBuilder(dockerDir)
         widget.showNormal()
         widget.raise_()
         widget.activateWindow()

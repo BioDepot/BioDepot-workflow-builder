@@ -12,9 +12,7 @@ from UIDockerfileEditor import DockerSyntaxHighlighter
 class OWImageBuilder(widget.OWWidget):
     name = "Image Builder"
     description = "Build Custom Image"
-    category = "Bwb-core"
     icon = "icons/imagebuilder.png"
-
     priority = 2
 
     inputs = []
@@ -23,9 +21,10 @@ class OWImageBuilder(widget.OWWidget):
     want_main_area = True
     want_control_area = False
 
-    def __init__(self):
+    def __init__(self,dockerDir):
         super().__init__()
-
+        self.dockerDir=dockerDir
+        print(self.dockerDir)
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
         self.FLAG_binder_string = '<BinderCompatible>'
         self.FLAG_binder_compatible = False
@@ -370,7 +369,10 @@ class OWImageBuilder(widget.OWWidget):
 
     @pyqtSlot()
     def OnChooseScriptFile(self):
-        start_file = os.path.expanduser("~/")
+        if self.dockerDir:
+            start_file=self.dockerDir
+        else:
+            start_file = os.path.expanduser("~/")
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Open R Script File', start_file)
         if not filename:
@@ -518,7 +520,7 @@ class OWImageBuilder(widget.OWWidget):
     def OnLoadDockerfile(self):
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Open Dockerfile',
-            os.path.expanduser("~/"),
+            self.dockerDir,
             'Docker files (*)'
         )
         if filename:

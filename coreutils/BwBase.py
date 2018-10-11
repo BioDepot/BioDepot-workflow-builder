@@ -1141,9 +1141,13 @@ class OWBwBWidget(widget.OWWidget):
     
     def joinFlagValue(self,flag,value):
         if flag:
-            if flag.strip()[-1] == '=':
-                return flag.strip()+value.strip()
-            return flag.strip()+ ' ' + str(value).strip()
+            if flag.strip():
+                if flag.strip()[-1] == '=':
+                    return flag.strip()+value.strip()
+                else:
+                    return flag.strip()+ ' ' + str(value).strip()
+            else:
+                return flag + str(value).strip()
         return value
     
     def flagString(self, pname):
