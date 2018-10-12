@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<scheme description="" title="" version="2.0">
+<scheme description="" title="Demo-DtoxS" version="2.0">
 	<nodes>
 		<node id="0" name="downloadURL" position="(130.0, 426.0)" project_name="Demo-DtoxS" qualified_name="Demo_DtoxS.OWdownloadURL.OWdownloadURL" title="Download DtoxS files" version="" />
 		<node id="1" name="downloadURL" position="(468.0, 426.0)" project_name="Demo-DtoxS" qualified_name="Demo_DtoxS.OWdownloadURL.OWdownloadURL" title="Download complete counts" version="" />

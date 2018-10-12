@@ -650,7 +650,7 @@ class CanvasMainWindow(QMainWindow):
 
         # File -> Open Recent submenu
         self.recent_menu = QMenu(self.tr("Open Recent"), file_menu)
-#        file_menu.addMenu(self.recent_menu)
+        file_menu.addMenu(self.recent_menu)
 #        file_menu.addAction(self.open_report_action)
         file_menu.addSeparator()
         file_menu.addAction(self.save_action)
@@ -965,11 +965,16 @@ class CanvasMainWindow(QMainWindow):
 
         return QDialog.Accepted
 
-    def load_workflow(self):
+    def load_workflow(self,ows=None):
         """Open a new workflow. Return QDialog.Rejected if the user canceled
         the operation and QDialog.Accepted otherwise.
 
         """
+        if ows:
+            importWorkflow(ows)
+            self.reload_settings(ows)
+            return QDialog.Accepted
+        
         if not self.pre_close_save():
             return QDialog.Rejected
 
@@ -1129,7 +1134,8 @@ class CanvasMainWindow(QMainWindow):
         # TODO: Search for a temp backup scheme with per process
         # locking.
         if self.recent_schemes:
-            self.load_scheme(self.recent_schemes[0][1])
+            print (self.recent_schemes[0][1])
+            self.load_workflow(ows=self.recent_schemes[0][1])
 
         return QDialog.Accepted
 
@@ -1276,19 +1282,7 @@ class CanvasMainWindow(QMainWindow):
         QDialog.Rejected if the user canceled the file selection.
 
         """
-        document = self.current_document()
-        curr_scheme = document.scheme()
-        path = document.path()
-
-        if path and self.check_can_save(document, path):
-            if self.save_scheme_to(curr_scheme, path):
-                document.setModified(False)
-                self.add_recent_scheme(curr_scheme.title, document.path())
-                return QDialog.Accepted
-            else:
-                return QDialog.Rejected
-        else:
-            return self.save_scheme_as()
+        return self.save_scheme_as()
 
     def save_scheme_as(self):
         """
@@ -1351,6 +1345,8 @@ class CanvasMainWindow(QMainWindow):
                 document.setPath(filename)
                 document.setModified(False)
                 self.add_recent_scheme(curr_scheme.title, document.path())
+                if self.saveWorkflowSettings['merge']:
+                    self.reload_last()
                 return QFileDialog.Accepted
         return QFileDialog.Rejected
 
