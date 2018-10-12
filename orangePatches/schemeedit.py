@@ -114,9 +114,9 @@ class SchemeEditWidget(QWidget):
      SpaceKey,
      AnyKey) = [0, 1, 2, 4, 8]
 
-    def __init__(self, parent=None, ):
+    def __init__(self, parent=None, canvasMainWindow=None ):
         QWidget.__init__(self, parent)
-
+        self.canvas=canvasMainWindow
         self.__modified = False
         self.__registry = None
         self.__scheme = None
@@ -1510,7 +1510,7 @@ class SchemeEditWidget(QWidget):
         selected = self.selectedNodes()
         if not selected or len(selected) == 0:
             try:
-                widget=OWWidgetBuilder.OWWidgetBuilder(widgetID='__New')
+                widget=OWWidgetBuilder.OWWidgetBuilder(widgetID='__New',canvasMainWindow=self.canvas)
             except ValueError:
                 return
             widget.showNormal()
@@ -1521,7 +1521,7 @@ class SchemeEditWidget(QWidget):
 
     def newWidget(self):
         try:
-            widget=OWWidgetBuilder.OWWidgetBuilder(widgetID='__New')
+            widget=OWWidgetBuilder.OWWidgetBuilder(widgetID='__New',canvasMainWindow=self.canvas)
         except ValueError:
             return
         widget.showNormal()
@@ -1532,7 +1532,7 @@ class SchemeEditWidget(QWidget):
         myWidget = self.scheme().widget_for_node(node)
         desc = myWidget.get_widget_description()
         try:
-            widget=OWWidgetBuilder.OWWidgetBuilder(widgetID=desc['id'])
+            widget=OWWidgetBuilder.OWWidgetBuilder(widgetID=desc['id'],canvasMainWindow=self.canvas)
         except ValueError:
             return
         widget.showNormal()

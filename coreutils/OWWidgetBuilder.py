@@ -570,9 +570,16 @@ class OWWidgetBuilder(widget.OWWidget):
             self.saveWidgetAs()
             return
         self.pickleWidget()
+        qm= QtGui.QMessageBox
         title='Save {}'.format(self.widgetName)
         message='Saved widget to {}'.format(self.widgetDir)
-        QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
+        ret=qm.question(self,title, "Saved widget to {} - Reload?".format(self.widgetDir), qm.Yes | qm.No)
+        if ret == qm.No:
+            return
+        if self.canvas:
+            self.canvas.reload_last()
+        return
+       
                     
     def saveWidgetAs(self):
         self.widgetName=self.getWidgetName()
@@ -597,7 +604,11 @@ class OWWidgetBuilder(widget.OWWidget):
             self.setWindowTitle(self.widgetName+':Definition')
             title='Save {}'.format(self.widgetName)
             message='Saved widget to {}'.format(self.widgetDir)
-            QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
+            ret=qm.question(self,title, "Saved widget to {} - Reload?".format(self.widgetDir), qm.Yes | qm.No)
+            if ret == qm.No:
+                return
+            if self.canvas:
+                self.canvas.reload_last()
         return
             
     def makeDefaultFiles(self):
@@ -656,9 +667,10 @@ class OWWidgetBuilder(widget.OWWidget):
             f.close()
         return data
 
-    def __init__(self,widgetID=None):
+    def __init__(self,widgetID=None,canvasMainWindow=None):
         super().__init__()
         #minimum sizes
+        self.canvas=canvasMainWindow
         self.controlArea.setMinimumWidth(600)
         self.controlArea.setMinimumHeight(400)
         

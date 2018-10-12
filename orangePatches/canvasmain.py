@@ -222,7 +222,7 @@ class CanvasMainWindow(QMainWindow):
         w.setLayout(QVBoxLayout())
         w.layout().setContentsMargins(20, 0, 10, 0)
 
-        self.scheme_widget = SchemeEditWidget()
+        self.scheme_widget = SchemeEditWidget(canvasMainWindow=self)
         self.scheme_widget.setScheme(widgetsscheme.WidgetsScheme(parent=self))
 
         w.layout().addWidget(self.scheme_widget)
@@ -1129,15 +1129,18 @@ class CanvasMainWindow(QMainWindow):
         user canceled the operation and QDialog.Accepted otherwise.
 
         """
-        if not self.pre_close_save():
-            return QDialog.Rejected
         # TODO: Search for a temp backup scheme with per process
         # locking.
         if self.recent_schemes:
-            print (self.recent_schemes[0][1])
             self.load_workflow(ows=self.recent_schemes[0][1])
+            return QDialog.Accepted
+        else:
+            self.save_scheme_as()
+            if self.recent_schemes:
+                self.load_workflow(ows=self.recent_schemes[0][1])
+                return QDialog.Accepted
 
-        return QDialog.Accepted
+        return QDialog.Rejected
 
     def set_new_scheme(self, new_scheme):
         """
