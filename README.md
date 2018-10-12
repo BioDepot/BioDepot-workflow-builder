@@ -397,25 +397,177 @@ One of the major uses of connections is to control the execution of widgets in w
 The 'Save workflow as' option under the File menu will bring up a dialog box. The dialog box will ask for the workflow name which will also be the name of the directory where the widgets and other workflow files are stored. The parent directory where the workflow directory will reside also needs to be inputted. Optionally, a color and icon can provided. Otherwise, the current icon and color of the workflow are used, or in the case of new workflows, default icons and color will be used. Finally, there is a check box to merge all widgets. If this is left unchecked, the workflow will not maintain a separate copy of the widgets in its directory. The workflow will function but will use off-the-shelf widgets provided by Bwb or another loaded workflow. Checking the box clones all the widgets into the workflow directory. Note that different drawers can carry its own version of a widget. These will be assigned different names if there is a conflict before being copied into the workflow.
 
 #### Loading and executing a workflow
+To load a workflow go to the File menu at the top left corner of the Bwb window and choose the 'Load workflow' option. A file dialog will pop up allowing you to chooe the workflow to load. The workflow is a directory.
 
+Demo workflows that come with Bwb are in the /workflows directory.
 
+To execute a workflow, double click on a widget and manual start from that widget by hitting the blue start button. When that widget is finished execution it will send output to connected widgets. If these widgets are triggered by the output, they will then execute (as long as all the required parameters and other other trigger signals have been received. Workflows also can be started from any widget if the required files and parameters are present. For example,  an alignment pipeline can skip the indexing steps if the index has already been generated or downloaded.
 
 
 ## Demo workflows
 
-###DToxS demo
+### DToxS demo
 
-###kallisto-sleuth demo
+### kallisto-sleuth demo
 
-###kallisto-sleuth with Jupyter demo
+### kallisto-sleuth with Jupyter demo
 
-###STAR demo
+### STAR demo
 
 
 ## Tutorial - Adding a Python script to a Bwb workflow
 
+The aims of this workflow are to demonstrate how to build a widget for a custom Python script and modify and customize an existing workflow. In this tutorial we will write a script to call cutadapt ( a Python app for removing adapters from reads) and insert it into the kallisto-jupyter demo workflow to trim the reads before alignment.
 
 
+###Overview
+
+The basic steps will be to
+
+1\. Add the Python2 widget to the kallisto-jupyter workflow
+2\. Customize the Python2 widget to query the additional parameters needed by the cutadapt script
+3\. Create Docker image
+4\. Write a short custom script locally to manage multiple files
+5\. Connect widget into the workflow
+
+
+### Add Python2 widget to the kallisto-sleuth-jupyter workflow
+
+1\. From the File menu choose 'Load workflow'. Navigate to the /workflow directory Click on the Demo_kallisto_jupyter directory and hit the Choose buttone in the bottom right corner of the dialog. After a second or two, a new drawer should appear in the Tool dock and the workflow should appear on the main canvas.
+
+2\. Click on the Scripting tab in the Tool dock on the left hand side of the window. A set of programming widgets will appear. 
+
+3\. Drag the Python2 widget on to the main Canvas. A purple Python2 icon should appear on the canvas next to the original light green workflow
+
+4\. Choose 'Save workflow as' from the File menu. A 'Save Workflow' file dialog should pop up.
+
+- Change the workflow name to Demo_kallisto_jupyter_cutadapt. 
+- Then click on the blue folder button next to Workflow parent directory. This will bring up a "Locate directory" navigation window. This should start up in your local files. Use the new folder button (third from the right in the top right corner of the navigation window) to make a new folder and label it tutorial. Click Choose in the lower right hand corner. 
+- Change the color of the new Workflow to something else by clicking on the color wheel button next to the Chanbe workflow color. 
+-  Check the 'Merge all widget types' box. This will clone the Python2 widget and the kallisto widgets and put them into a new workflow.
+- Click OK on the Save workflow. This saves the new workflow to 
+/data/tutorials/Demo_kallisto_Jupyter_cutadapt. However the old workflow is still loaded.
+
+5 . Load the new workflow by going to the File menu and clicking on the 'Load workflow' option. It should pop up a load workflow window that is automatically starts at the last saved workflow, so no navigation is necessary. Just hit the Choose button.  The new workflow widgets should appear in the Tool dock and the new workflow should appear. This will be apparent by the color change.
+
+### Customize the Python2 widget
+
+1\. Right click on the Python2 widget. A menu should pop up. Choose the 'Edit Widget' option to bring up the Widget defintion window.
+
+2\. The Python2 definition window should have 8 tabs. If the window is too narrow, not all the tabs will be visible. Either resize the window by dragging on the lower right corner or use the arrows in the top right  to scrool the content. The 'Genera'l tab should be the active one by default. Make the following changes:
+
+****NB (do not enter quotes)**
+-  description:  'Cutadapt trimming'
+-  docker_image_name: 'biodepot/cutadapt-demo'
+-  docker_image_tag: 1.0
+
+The description will appear in the lower left hand help window undoer the Tool dock when we hover over the widget to let other users know what the widget does. The docker image and tag fields tell the widget which container to user. We will build that container later.
+
+3\. Click on the Inputs Tab. Under the big white texgt box there is a set of data entry boxes followed by an add button (file icon with plus sign) and a delete button (file icon with x sign) which should be inactive. Enter 'OutputDir' in the 'Name' box and then click on the add button. The new entry should by visible in the text box. To edit an entry if there is a mistake, click on the entry in the text box. The boxes at the bottom wil be filled with the values from the entry and can be edited and saved by clicking the add button. The delete button should become active and allow you to delete the entry.
+
+What we have done is defined 'outputDir' as an input. This is because the fastq download widget outputs the output directory upon finishing and we want to be able to receive that signal. However we also want to be able to use that information by passing it to our script. This we do in the next step. 
+
+4\. Click on the Parameters tab . Do the following:
+
+- Create entry for outputDir by putting 'outputDir' (no qutoes) in the name box, choosing file from the Type box, checking the flag box, entering '-d ' (without the quotes) as the value, enter, 'fastq directory:' (no quotes) in the label box. Then press the add button to enter
+
+- Create entry for qualtty by putting 'qualitn' (no qutoes) in the name box,  choosing integer from the Type box, checking the flag box, entering '-dq' (without the quotes) as the value, enter, 'minimum quality' (no quotes) in the label box, 10 for a default in the default box. Then press the add button to enter
+
+- Modify the the inputFile entry by clicking on the inputFile entry. Then at the bottom uncheck the Argument box. Check the flag box and enter a single space for the value of the flag. Click on the save button (file icon with plus sign.)
+
+What we have done is to create two new entry forms. One for outputDir which is where the fastq file reside and one for the minimum quality of the reads. We also changed the inputFile (which is the python script) to have a blank flag instead of being an argument. Bwb will place all parameters after the command in the order which they appear in the list. Arguments will be placed after all flags. The bare command is visible in the Command tab and is simply 'python'. 
+
+So with our changes the widget will execute.:
+
+```
+python <blank flag><scriptName> -d <outputDir> -q <quality>
+```
+
+In reality we would also have parameters for the file with adapter sequences and possiblly other flags instead of this relatively simple example
+
+### Creating the Docker image
+
+
+The Dockerfile used is:
+
+```
+#from https://github.com/frol/docker-alpine-python2/blob/master/Dockerfile - the Dockerfile used for Python2 widget
+FROM alpine:3.7
+RUN apk add --no-cache python && \
+    python -m ensurepip && \
+    rm -r /usr/lib/python*/ensurepip && \
+    pip install --upgrade pip setuptools && \
+    rm -r /root/.cache
+    
+#added these lines for cutadapt
+RUN apk add --no-cache gcc gzip && \
+    pip install cutadapt && \
+    apk del gcc python-dev libc-dev && \
+    rm -r /root/.cache
+
+```
+
+The widget is built starting from the Dockerfile used for the python2 widget. This widget was built using the compact alpine Linux distro which uses apk as a package manager (analogous to apt-get, yum, and dnf in other distros). We add one extra line which installs devtools gcc and libraries python-dev libc-dev needed by pip to install cutadapt. The gzip library is installed as well to support decompression of gzpped fastq files. pip is then called to install cutadapt and the devtools removed as they are not necessary to run cutadapt. The entire procedure is done in one command to avoid Docker spawning intermediate containers that are take up space in the final image.
+
+To add this Dockerfile and build this Dockerfile:
+
+1\. Click on the Docker tab of the Python2 definition window. This is the rightmost tab and may require scrolling to see it
+. 
+2\. Click on the blue folder button on  'Add Dockerfile' line and navigating to /tutorialFiles/Dockerfile. Then press the add button (rightmost button) to add the Dockerfile. A message should appear confirming that the fie has been added.
+
+3\. Click on the blue launch button to launch the image builder. Resize it by dragging th right corner and scroll to the bottom to see the open button. 
+
+4\.Click on the the open button. It should start in the Python2 widgets Dockerfiles directory. The Dockerfile should be there. Open the file. 
+
+5\.Enter biodepot/cutadapt-demo:1.0 into the Image Name box and press the build button
+
+### Save widget and load the workflow again
+
+1\. Hit the bottom save button to save all the changes to the widget.
+2\. Go to the menu and choose Load workflow so that the changes loaded into Bwb
+
+### Creating the wrapper Python script
+
+The wrapper script is needed to call cutadapt on different sets of paired end files. It is provided in /tutorialFiles/cutadapt_multi.py or you can paste the code into a local editor to be saved on your local file system. The script should be stored locally because files stored in the Bwb container files system (those not accessed via /data or other mountpoint) are lost when the container terminates.
+
+```python
+import os
+from glob import glob
+from optparse import OptionParser
+
+def runCutAdapt(file1,file2,flags):
+    print ("cutadapt {} -o tmp/{} -p tmp/{} {} {}".format(flags,file1,file2,file1,file2))
+    os.system("cutadapt {} -o tmp/{} -p tmp/{} {} {}".format(flags,file1,file2,file1,file2))
+
+#get options - we are interested in -d for directory -q for quality
+parser = OptionParser()
+parser.add_option("-d")
+parser.add_option("-q")
+(options, args) = parser.parse_args()
+
+flags ="-q {} ".format(options.q)
+#change directory to output directory
+os.chdir(options.d)
+
+#we use the fact that for our naming convention the paired end files will be nicely grouped in pairs
+files=sorted(glob('SRR*.gz'))
+
+#make a the temporary directory
+if not os.path.exists('tmp'):
+    os.makedirs('tmp')
+    
+#run cutadapt on pairs
+for i in range(0,len(files)/2):
+    runCutAdapt(files[2*i],files[2*i+1],flags)
+
+#copy the filtered files and remove the temp directory
+os.system("cp -r tmp/* . && rm -r tmp")
+
+```
+
+
+### Connecting the widget to the workflow
+ 
 
 ## Appendices
 
@@ -578,5 +730,4 @@ Once the widget has decided to launch the executable, it calls the startJob meth
 Directory paths are a bit complicated as there are 3 different file systems. There is the container filesytem that is being launched, the host system (i.e the laptop or cloud instance) and also the filesytem used by the Bwb container. The file browsers used by the bwb GUI use the bwb directory paths. These are converted to host paths for the volume mappings. There can be multiple possible mappings - the shortest mapping is used.
 
 Support will be added for an additional automap mode that will automatically map the file system the user has provided to bwb to the same paths in the container launched by the widget.
-
 
