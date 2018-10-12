@@ -756,7 +756,7 @@ class CanvasMainWindow(QMainWindow):
 
     def editDock(self):
         if not hasattr(self,'dockEdit'):
-            self.dockEdit=toolDockEdit.ToolDockEdit()
+            self.dockEdit=toolDockEdit.ToolDockEdit(canvasMainWindow=self)
         #widgetName=QFileDialog.getExistingDirectory(self, caption="Choose widget to add to ToolDock", directory='/widgets')
         widget=self.dockEdit
         widget.showNormal()
@@ -1123,7 +1123,16 @@ class CanvasMainWindow(QMainWindow):
                 details="\n".join(map(repr, errors))
             )
         return new_scheme
-
+        
+    def reload_current(self):
+        #reloads the last workflow if the current title is the same as the last title
+        document = self.current_document()
+        title = document.scheme().title
+        if not title:
+            self.reload_settings()
+        else:
+            self.reload_last()
+            
     def reload_last(self):
         """Reload last opened scheme. Return QDialog.Rejected if the
         user canceled the operation and QDialog.Accepted otherwise.

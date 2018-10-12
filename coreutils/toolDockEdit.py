@@ -65,8 +65,9 @@ class ToolDockEdit(widget.OWWidget):
     allAttrs=pset({})
     data={}
     
-    def __init__(self,widgetID=None):
+    def __init__(self,widgetID=None,canvasMainWindow=None):
         super().__init__()
+        self.canvas=canvasMainWindow
         self.css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
         QPushButton:hover {background-color: #1555f5; }
@@ -117,6 +118,7 @@ class ToolDockEdit(widget.OWWidget):
             title='Add {}'.format(widgetName)
             message='Added {} to {} in ToolDock'.format(widgetName,category)
             qm.information(self,title,message,QtGui.QMessageBox.Ok)
+            self.canvas.reload_current()
         #except:
             #pass
     
@@ -219,6 +221,7 @@ class ToolDockEdit(widget.OWWidget):
         shutil.rmtree(widgetPath)
         os.unlink(symlink)
         qm.information(self,'Successfully removed','removed widget {} from {}'.format(widgetPath,category),QtGui.QMessageBox.Ok)
+        self.canvas.reload_current()
         
     def findWorkflowsWithWidget(self,widgetName,category):
         workflowPaths=[]
@@ -255,6 +258,7 @@ class ToolDockEdit(widget.OWWidget):
         registerDirectory(self.baseToolPath)
         qm.information(self,'Add drawer','Added drawer {} to directory {} in ToolDock'.format(category,directory),QtGui.QMessageBox.Ok)
         self.updateCategories()
+        self.canvas.reload_current()
            
     def categoryRemove(self,nameCombo):
         qm = QtGui.QMessageBox
@@ -268,9 +272,15 @@ class ToolDockEdit(widget.OWWidget):
         ret=qm.question(self,'', "Remove {} from ToolDock ?".format(category), qm.Yes | qm.No)
         if ret == qm.No:
             return
+        directory=self.categoryToDirectory[category]
         removeCategoryFromToolDock(self.baseToolPath,category,self.categoryToDirectory[category])
         registerDirectory(self.baseToolPath)
         self.updateCategories()
+        if self.canvas.recent_schemes:
+            currentDirectory=os.path.basename(os.path.dirname(self.canvas.recent_schemes[0][1]))
+            if currentDirectory != directory:
+                self.canvas.reload_current()
+        self.canvas.reload_settings()
 
         
     def getCategoryList(self,widgetName):

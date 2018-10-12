@@ -577,7 +577,7 @@ class OWWidgetBuilder(widget.OWWidget):
         if ret == qm.No:
             return
         if self.canvas:
-            self.canvas.reload_last()
+            self.canvas.reload_current()
         return
        
                     
@@ -608,7 +608,7 @@ class OWWidgetBuilder(widget.OWWidget):
             if ret == qm.No:
                 return
             if self.canvas:
-                self.canvas.reload_last()
+                self.canvas.reload_current()
         return
             
     def makeDefaultFiles(self):
