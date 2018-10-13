@@ -310,7 +310,6 @@ def importWorkflow(owsFile):
     workflowDir=os.path.dirname(owsFile)
     projectTitlePath=os.path.basename(workflowDir)
     os.system('mkdir -p /biodepot/{}'.format(projectTitlePath))
-
     with open('/biodepot/setup.py','r') as f:
         setupData=f.read()
     projectList=re.findall(r'setup\(name="([^"]+)"',setupData)
@@ -322,24 +321,11 @@ def importWorkflow(owsFile):
             break
     if changedSetup:
         setupData+=entryString(projectTitlePath,projectTitlePath)
-        
-    doc = minidom.parse(owsFile)
-    nodes = doc.getElementsByTagName("node")        
-    if not nodes:
-        return
-    #make links to widgets
-    for node in nodes:
-        #differs from export in that we want to preserve the dashes in the names for changing setup.py later
-        projectPath=niceForm(node.getAttribute('project_name'),allowDash=False)
-        #only care about the ones specific to this workflow
-        if projectPath == projectTitlePath:
-            widgetName=niceForm(node.getAttribute('name'),allowDash=False)
-            qname=node.getAttribute('qualified_name')
-            parts=qname.split('.')
-            destLink='/biodepot/'+'/'.join(parts[0:-1])+'.py'
-            pythonFile='{}/widgets/{}/{}/{}.py'.format(workflowDir,projectPath,widgetName,parts[-1][2:])
-            print ('ln -sf {} {}'.format(pythonFile,destLink))
-            os.system('ln -sf {} {}'.format(pythonFile,destLink))
+    pythonFiles=glob('{}/widgets/*/*/*.py'.format(workflowDir))
+    for pythonFile in pythonFiles:
+        basePythonFile=os.path.basename(pythonFile)
+        destLink='/biodepot/{}/OW{}'.format(projectTitlePath,basePythonFile)
+        os.system('ln -sf {} {}'.format(pythonFile,destLink))
     #make link to icons and __init__.py
     print ('ln -sf {}/widgets/{}/icon /biodepot/{}/icon'.format(workflowDir,projectTitlePath,projectTitlePath))
     if os.path.exists('/biodepot/{}/icon'.format(projectTitlePath)):

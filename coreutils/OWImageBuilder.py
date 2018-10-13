@@ -18,8 +18,8 @@ class OWImageBuilder(widget.OWWidget):
     inputs = []
     outputs = []#[("ImageTag", str)]
 
-    want_main_area = True
-    want_control_area = False
+    want_main_area = False
+    want_control_area = True
 
     def __init__(self,dockerDir):
         super().__init__()
@@ -281,15 +281,17 @@ class OWImageBuilder(widget.OWWidget):
         self.hlayout_mainArea.addWidget(self.splitter_main)
 
         self.vlayoutBase.addWidget(self.mainContent)
-
-        self.mainArea.layout().addLayout(self.vlayoutBase)
-        self.mainArea.layout().setContentsMargins(0, 0, 0, 0)
+        
+        self.controlArea.setMinimumWidth(600)
+        self.controlArea.setMinimumHeight(400)        
+        self.controlArea.layout().addLayout(self.vlayoutBase)
+        self.controlArea.layout().setContentsMargins(0, 0, 0, 0)
 
         #LHH commented out to add scrollbars 
         # set window size
         #width = 900
         #height = 700
-        #self.mainArea.setMinimumSize(width, height)
+        #self.mainArea.setMinimumWidth(width, height)
 
         # initialize UI components
         self.retranslateUi(self)
@@ -315,7 +317,8 @@ class OWImageBuilder(widget.OWWidget):
         )
         self.scroll_area.setWidget(self.mainContent)
         self.scroll_area.setWidgetResizable(True)
-        self.mainArea.layout().addWidget(self.scroll_area)
+        self.controlArea.layout().addWidget(self.scroll_area)
+        
         self.InitializeUI()
         #self.show()
 

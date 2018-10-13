@@ -7,6 +7,7 @@ import pickle
 import csv
 import tempfile, shutil
 import OWImageBuilder
+from glob import glob
 from pathlib import Path
 from shutil import copyfile
 from createWidget import mergeWidget, createWidget, findIconFile
@@ -183,7 +184,6 @@ class SaveWorkflowForm(QDialog):
         
         
     def browseFileDir(self, attr,ledit=None,fileType=None):
-        self.defaultDir = self.getDefaultDir()
         if fileType == 'Directory':
             myFileDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate directory", directory=self.defaultDir)
         else:
@@ -192,12 +192,7 @@ class SaveWorkflowForm(QDialog):
             self.returnData[attr]=myFileDir
         if ledit:
             ledit.setText(myFileDir)
-            
-    def getDefaultDir(self):
-        defaultDir = '/root'
-        if os.path.exists('/data'):
-            defaultDir = '/data' 
-        return defaultDir
+
         
 class tabbedWindow(QTabWidget):
     def __init__(self, parent = None):
@@ -603,6 +598,19 @@ class OWWidgetBuilder(widget.OWWidget):
             self.pickleWidget()
             self.nameLabel.setText(self.widgetName)
             self.setWindowTitle(self.widgetName+':Definition')
+            
+            drawerName=os.path.basename(outputDir)
+            if drawerName in self.directoryList:
+                initPy='/biodepot/{}/__init__.py'.format(drawerName)
+                workflowPath=""
+                if os.path.islink(initPy):
+                    workflowPath=os.path.dirname(os.path.realpath(initPy))
+                if not workflowPath or workflowPath == outputDir:
+                    destLink='/biodepot/{}/OW{}.py'.format(drawerName,self.widgetName)
+                    pythonFile=glob('{}/*.py'.format(self.widgetDir))[0]
+                    os.system('ln -sf {} {}'.format(pythonFile,destLink))
+                    
+                #make a symlink to the 
             title='Save {}'.format(self.widgetName)
             message='Saved widget to {}'.format(self.widgetDir)
             ret=qm.question(self,title, "Saved widget to {} - Reload?".format(self.widgetDir), qm.Yes | qm.No)
@@ -670,6 +678,8 @@ class OWWidgetBuilder(widget.OWWidget):
 
     def __init__(self,widgetID=None,canvasMainWindow=None):
         super().__init__()
+        #Directories it toolDock
+        self.directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' /biodepot/setup.py''').read())).split()
         #minimum sizes
         self.canvas=canvasMainWindow
         self.controlArea.setMinimumWidth(600)
