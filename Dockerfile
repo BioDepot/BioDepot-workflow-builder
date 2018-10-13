@@ -111,6 +111,7 @@ ADD notebooks /notebooks/
 ADD templates /templates/
 ADD coreutils /coreutils/
 ADD icons /icons/
+ADD tutorialFiles /tutorialFiles
 
 #start it up
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf

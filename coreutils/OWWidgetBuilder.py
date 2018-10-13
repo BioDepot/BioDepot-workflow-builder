@@ -582,6 +582,7 @@ class OWWidgetBuilder(widget.OWWidget):
        
                     
     def saveWidgetAs(self):
+        qm = QtGui.QMessageBox
         self.widgetName=self.getWidgetName()
         if not self.widgetName:
             return
@@ -591,7 +592,7 @@ class OWWidgetBuilder(widget.OWWidget):
             if os.path.exists(myWidgetDir) and not( self.widgetDir and os.path.samefile(myWidgetDir,self.widgetDir)) :
                 #same directory is occupied
                 #ask permission to nuke it
-                qm = QtGui.QMessageBox
+                
                 ret=qm.question(self,'', "{}/{} exists - OverWrite ?".format(outputDir,self.widgetName), qm.Yes | qm.No)
                 if ret == qm.No:
                     return

@@ -433,22 +433,21 @@ The basic steps will be to
 
 ### Add Python2 widget to the kallisto-sleuth-jupyter workflow
 
-1\. From the File menu choose 'Load workflow'. Navigate to the /workflow directory Click on the Demo_kallisto_jupyter directory and hit the Choose buttone in the bottom right corner of the dialog. After a second or two, a new drawer should appear in the Tool dock and the workflow should appear on the main canvas.
+1\. From the *File *menu choose  *Load workflow*. Navigate to the* /workflows *directory Click on the Demo_kallisto_jupyter directory and hit the *Choose* button in the bottom right corner of the dialog. After a second or two, a new drawer should appear in the Tool dock and the workflow should appear on the main canvas.
 
-2\. Click on the Scripting tab in the Tool dock on the left hand side of the window. A set of programming widgets will appear. 
+2\. Click on the *Scripting* tab in the Tool dock on the left hand side of the window. A set of programming widgets will appear. 
 
-3\. Drag the Python2 widget on to the main Canvas. A purple Python2 icon should appear on the canvas next to the original light green workflow
+3\. Drag the *Python2* widget on to the main Canvas. A purple *Python2* icon should appear on the canvas next to the original light green workflow
 
-4\. Choose 'Save workflow as' from the File menu. A 'Save Workflow' file dialog should pop up.
+4\. Choose *Save workflow as* from the *File* menu. A *Save Workflow* file dialog should pop up.
 
 - Change the workflow name to Demo_kallisto_jupyter_cutadapt. 
-- Then click on the blue folder button next to Workflow parent directory. This will bring up a "Locate directory" navigation window. This should start up in your local files. Use the new folder button (third from the right in the top right corner of the navigation window) to make a new folder and label it tutorial. Click Choose in the lower right hand corner. 
+- Then click on the blue folder button next to *Workflow parent directory*. This will bring up a *Locate directory* navigation window. This should start up in your local files. Use the new folder button (third from the right in the top right corner of the navigation window) to make a new folder and label it *tutorial*. Click *Choose* in the lower right hand corner. 
 - Change the color of the new Workflow to something else by clicking on the color wheel button next to the Chanbe workflow color. 
--  Check the 'Merge all widget types' box. This will clone the Python2 widget and the kallisto widgets and put them into a new workflow.
-- Click OK on the Save workflow. This saves the new workflow to 
-/data/tutorials/Demo_kallisto_Jupyter_cutadapt. However the old workflow is still loaded.
+- Check the *Merge all widget types' checkbox. This will clone the *Python2* widget and the original *kallisto *widgets and put them into a new workflow.
+- Click OK on the Save workflow. This saves the new workflow to /data/tutorial/Demo_kallisto_Jupyter_cutadapt and loads the new workflow. 
 
-5 . Load the new workflow by going to the File menu and clicking on the 'Load workflow' option. It should pop up a load workflow window that is automatically starts at the last saved workflow, so no navigation is necessary. Just hit the Choose button.  The new workflow widgets should appear in the Tool dock and the new workflow should appear. This will be apparent by the color change.
+ The new workflow widgets should appear in the Tool dock and the new cloned workflow should appear on the canvas. This will be apparent by the color change.
 
 ### Customize the Python2 widget
 
@@ -463,15 +462,15 @@ The basic steps will be to
 
 The description will appear in the lower left hand help window undoer the Tool dock when we hover over the widget to let other users know what the widget does. The docker image and tag fields tell the widget which container to user. We will build that container later.
 
-3\. Click on the Inputs Tab. Under the big white texgt box there is a set of data entry boxes followed by an add button (file icon with plus sign) and a delete button (file icon with x sign) which should be inactive. Enter 'OutputDir' in the 'Name' box and then click on the add button. The new entry should by visible in the text box. To edit an entry if there is a mistake, click on the entry in the text box. The boxes at the bottom wil be filled with the values from the entry and can be edited and saved by clicking the add button. The delete button should become active and allow you to delete the entry.
+3\. Click on the Inputs Tab. Under the big white text box there is a set of data entry boxes followed by an add button (file icon with plus sign) and a delete button (file icon with x sign) which should be inactive. Enter 'OutputDir' in the 'Name' box and then click on the add button. The new entry should by visible in the text box. To edit an entry if there is a mistake, click on the entry in the text box. The boxes at the bottom wil be filled with the values from the entry and can be edited and saved by clicking the add button. The delete button should become active and allow you to delete the entry.
 
 What we have done is defined 'outputDir' as an input. This is because the fastq download widget outputs the output directory upon finishing and we want to be able to receive that signal. However we also want to be able to use that information by passing it to our script. This we do in the next step. 
 
 4\. Click on the Parameters tab . Do the following:
 
-- Create entry for outputDir by putting 'outputDir' (no qutoes) in the name box, choosing file from the Type box, checking the flag box, entering '-d ' (without the quotes) as the value, enter, 'fastq directory:' (no quotes) in the label box. Then press the add button to enter
+- Create entry for *OutputDir* by putting *OutputDir* in the *name* text box, choosing file from the *Type* text box, checking the *flag* box, entering *-d * followed by a space, as the value, enter, Check the *label* checkbox, and enter  *fastq directory:* into the label text box. Then press the *add* button.
 
-- Create entry for qualtty by putting 'qualitn' (no qutoes) in the name box,  choosing integer from the Type box, checking the flag box, entering '-dq' (without the quotes) as the value, enter, 'minimum quality' (no quotes) in the label box, 10 for a default in the default box. Then press the add button to enter
+- Create entry for *quality* by putting *quality* in the *name* tex box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-q * followed by a space, as the value for the flag. Enter, *Mininum quality* in the label box. Enter *10* in the *default *box. Then press the *add *button
 
 - Modify the the inputFile entry by clicking on the inputFile entry. Then at the bottom uncheck the Argument box. Check the flag box and enter a single space for the value of the flag. Click on the save button (file icon with plus sign.)
 

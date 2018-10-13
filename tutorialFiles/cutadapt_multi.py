@@ -6,13 +6,14 @@ def runCutAdapt(file1,file2,flags):
     print ("cutadapt {} -o tmp/{} -p tmp/{} {} {}".format(flags,file1,file2,file1,file2))
     os.system("cutadapt {} -o tmp/{} -p tmp/{} {} {}".format(flags,file1,file2,file1,file2))
 
-#get options - we are interested in -d for directory -q for quality
+#get options - we are interested in -d for directory -q for quality -m for minimum length
 parser = OptionParser()
 parser.add_option("-d")
 parser.add_option("-q")
+parser.add_option("-m")
 (options, args) = parser.parse_args()
 
-flags ="-q {} ".format(options.q)
+flags ="-q {} -m {}".format(options.q,options.m)
 #change directory to output directory
 os.chdir(options.d)
 

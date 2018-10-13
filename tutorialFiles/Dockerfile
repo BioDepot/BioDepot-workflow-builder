@@ -7,7 +7,7 @@ RUN apk add --no-cache python && \
     rm -r /root/.cache
     
 #added these lines for cutadapt
-RUN apk add --no-cache gcc gzip && \
+RUN apk add --no-cache gcc gzip python-dev libc-dev && \
     pip install cutadapt && \
     apk del gcc python-dev libc-dev && \
     rm -r /root/.cache
