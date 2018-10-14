@@ -1,5 +1,6 @@
 import sys, os, re, shutil, glob, tempfile, jsonpickle
 from glob import glob 
+from makeToolDockCategories import *
 from xml.dom import minidom
 from collections import Counter, OrderedDict
 from itertools import groupby
@@ -26,7 +27,7 @@ def reformatOWS(workflowTitle,inputFile,outputFile,uniqueNames):
         else:
             uniqueName=widgetName
         node.attributes['name'].value=uniqueName
-        node.attributes['qualified_name']=workflowName+'.OW'+uniqueName+'.OW'+uniqueName
+        node.attributes['qualified_name']=projectName+'.OW'+uniqueName+'.OW'+uniqueName
         node.attributes['project_name'].value=workflowTitle
     with open(outputFile,'w') as f:
         f.write(doc.toxml())
@@ -213,7 +214,7 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
             projectName=node.getAttribute('project_name')
             widgetName=node.getAttribute('name')
             qname=node.getAttribute('qualified_name')
-            widgetPath=findWidgetPathFromLink(qname,projectPath,basePath)
+            widgetPath=findWidgetPathFromLink(qname,projectName,basePath)
         #keep unique list of widgetPaths for each project
             if projectName not in widgetPaths:
                 widgetPaths[projectName]=[]
@@ -263,7 +264,7 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
             if projectName==projectTitle:
                 widgetName=node.getAttribute('name')
                 qname=node.getAttribute('qualified_name')
-                widgetPath=findWidgetPathFromLink(qname,projectPath,basePath)
+                widgetPath=findWidgetPathFromLink(qname,projectName,basePath)
                 if widgetPath not in widgetPaths:
                     widgetPaths.add(widgetPath)
                     os.system('cp -r {} {}/widgets/{}/{}'.format(widgetPath,tempDir,projectTitle,widgetName)) 

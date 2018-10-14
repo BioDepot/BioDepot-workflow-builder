@@ -165,7 +165,7 @@ class SaveWorkflowForm(QDialog):
                 self.returnData[attr]=ledit.text()
         self.returnData['merge']=self.merge_checkBox.isChecked()
         #make sure that the name is nice Form (can keep dashes until it is converted to a ows file
-        self.returnData['name']=niceForm(self.returnData['name'])
+        self.returnData['name']=niceForm(self.returnData['name'],useDash=True)
         self.returnData['success']=True
         self.close()
         

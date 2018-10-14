@@ -1,12 +1,12 @@
-<?xml version="1.0" ?><scheme description="" title="Demo_kallisto" version="2.0">
+<?xml version="1.0" ?><scheme description="" title="Demo-kallisto" version="2.0">
 	<nodes>
-		<node id="0" name="downloadURL" position="(-92.0, -1.0)" project_name="Demo_kallisto" qualified_name="Demo_kallisto.OWdownloadURL.OWdownloadURL" title="Download sleuth directory" version=""/>
-		<node id="1" name="downloadURL" position="(155.0, -2.0)" project_name="Demo_kallisto" qualified_name="Demo_kallisto.OWdownloadURL.OWdownloadURL" title="Download reference sequence" version=""/>
-		<node id="2" name="kallistoIndex" position="(356.0, 0.0)" project_name="Demo_kallisto" qualified_name="Demo_kallisto.OWkallistoIndex.OWkallistoIndex" title="kallistoIndex" version=""/>
-		<node id="3" name="sleuth" position="(706.0, 12.0)" project_name="Demo_kallisto" qualified_name="Demo_kallisto.OWsleuth.OWsleuth" title="sleuth" version=""/>
-		<node id="4" name="gnumeric" position="(862.0, 14.0)" project_name="Demo_kallisto" qualified_name="Demo_kallisto.OWgnumeric.OWgnumeric" title="gnumeric" version=""/>
-		<node id="5" name="fastqDump" position="(251.0, 222.0)" project_name="Demo_kallisto" qualified_name="Demo_kallisto.OWfastqDump.OWfastqDump" title="Download fastq files" version=""/>
-		<node id="6" name="kallistoQuant" position="(552.0, 11.0)" project_name="Demo_kallisto" qualified_name="Demo_kallisto.OWkallistoQuant.OWkallistoQuant" title="kallistoQuant" version=""/>
+		<node id="0" name="downloadURL" position="(-92.0, -1.0)" project_name="Demo-kallisto" qualified_name="Demo-kallisto.OWdownloadURL.OWdownloadURL" title="Download sleuth directory" version=""/>
+		<node id="1" name="downloadURL" position="(155.0, -2.0)" project_name="Demo-kallisto" qualified_name="Demo-kallisto.OWdownloadURL.OWdownloadURL" title="Download reference sequence" version=""/>
+		<node id="2" name="kallistoIndex" position="(356.0, 0.0)" project_name="Demo-kallisto" qualified_name="Demo-kallisto.OWkallistoIndex.OWkallistoIndex" title="kallistoIndex" version=""/>
+		<node id="3" name="sleuth" position="(706.0, 12.0)" project_name="Demo-kallisto" qualified_name="Demo-kallisto.OWsleuth.OWsleuth" title="sleuth" version=""/>
+		<node id="4" name="gnumeric" position="(862.0, 14.0)" project_name="Demo-kallisto" qualified_name="Demo-kallisto.OWgnumeric.OWgnumeric" title="gnumeric" version=""/>
+		<node id="5" name="fastqDump" position="(251.0, 222.0)" project_name="Demo-kallisto" qualified_name="Demo-kallisto.OWfastqDump.OWfastqDump" title="Download fastq files" version=""/>
+		<node id="6" name="kallistoQuant" position="(552.0, 11.0)" project_name="Demo-kallisto" qualified_name="Demo-kallisto.OWkallistoQuant.OWkallistoQuant" title="kallistoQuant" version=""/>
 	</nodes>
 	<links>
 		<link enabled="true" id="0" sink_channel="inputFile" sink_node_id="4" source_channel="output_file" source_node_id="3"/>

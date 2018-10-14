@@ -1,8 +1,8 @@
 from setuptools import setup
-setup(name="RNA_seq",
+setup(name="RNA-seq",
       packages=["RNA_seq"],
       package_data={"RNA_seq": ["icons/*.svg"]},
-      entry_points={"orange.widgets": "RNA_seq = RNA_seq"},
+      entry_points={"orange.widgets": "RNA-seq = RNA_seq"},
       )
 setup(name="Utilities",
       packages=["Utilities"],

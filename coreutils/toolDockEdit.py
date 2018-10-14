@@ -95,6 +95,7 @@ class ToolDockEdit(widget.OWWidget):
                     child.widget().deleteLater()
                 elif child.layout() is not None:
                     self.clearLayout(child.layout())
+                    
     def addWidgetToCategory (self,category,directory,widgetPath,confirmation=True):
         qm = QtGui.QMessageBox
         widgetName=os.path.basename(widgetPath)
@@ -266,7 +267,6 @@ class ToolDockEdit(widget.OWWidget):
             ret=qm.question(self,'', "Workflows {} use this widget - Do you still want to rename it?".format(workflowStr), qm.Yes | qm.No)
             if ret == qm.No:
                 return
-        return
         for workflowPath in workflowPaths:
             workflowTools.renameWidgetInWorkflow(workflowPath,workflowPath,category,widgetName,newName)
         workflowTools.renameWidget(widgetPath,widgetName,newName)

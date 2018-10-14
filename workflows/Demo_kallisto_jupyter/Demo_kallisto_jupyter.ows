@@ -1,13 +1,13 @@
-<?xml version="1.0" ?><scheme description="" title="Demo_kallisto_jupyter" version="2.0">
+<?xml version="1.0" ?><scheme description="" title="Demo-kallisto_jupyter" version="2.0">
 	<nodes>
-		<node id="0" name="downloadURL" position="(-60.0, 43.0)" project_name="Demo_kallisto_jupyter" qualified_name="Demo_kallisto_jupyter.OWdownloadURL.OWdownloadURL" title="Download sleuth directory" version=""/>
-		<node id="1" name="downloadURL" position="(193.0, 40.0)" project_name="Demo_kallisto_jupyter" qualified_name="Demo_kallisto_jupyter.OWdownloadURL.OWdownloadURL" title="Download reference sequence" version=""/>
-		<node id="2" name="fastqDump" position="(347.0, 251.0)" project_name="Demo_kallisto_jupyter" qualified_name="Demo_kallisto_jupyter.OWfastqDump.OWfastqDump" title="Download fastq files" version=""/>
-		<node id="3" name="jupyter_sleuth" position="(905.0, 48.0)" project_name="Demo_kallisto_jupyter" qualified_name="Demo_kallisto_jupyter.OWjupyter_sleuth.OWjupyter_sleuth" title="Execute notebook" version=""/>
-		<node id="4" name="kallistoIndex" position="(361.0, 43.0)" project_name="Demo_kallisto_jupyter" qualified_name="Demo_kallisto_jupyter.OWkallistoIndex.OWkallistoIndex" title="kallistoIndex" version=""/>
-		<node id="5" name="kallistoQuant" position="(554.0, 49.0)" project_name="Demo_kallisto_jupyter" qualified_name="Demo_kallisto_jupyter.OWkallistoQuant.OWkallistoQuant" title="kallistoQuant" version=""/>
-		<node id="6" name="jupyter_sleuth" position="(1100.0, 48.0)" project_name="Demo_kallisto_jupyter" qualified_name="Demo_kallisto_jupyter.OWjupyter_sleuth.OWjupyter_sleuth" title="Display notebook" version=""/>
-		<node id="7" name="downloadURL" position="(729.0, 48.0)" project_name="Demo_kallisto_jupyter" qualified_name="Demo_kallisto_jupyter.OWdownloadURL.OWdownloadURL" title="Download notebook" version=""/>
+		<node id="0" name="downloadURL" position="(-60.0, 43.0)" project_name="Demo-kallisto_jupyter" qualified_name="Demo-kallisto_jupyter.OWdownloadURL.OWdownloadURL" title="Download sleuth directory" version=""/>
+		<node id="1" name="downloadURL" position="(193.0, 40.0)" project_name="Demo-kallisto_jupyter" qualified_name="Demo-kallisto_jupyter.OWdownloadURL.OWdownloadURL" title="Download reference sequence" version=""/>
+		<node id="2" name="fastqDump" position="(347.0, 251.0)" project_name="Demo-kallisto_jupyter" qualified_name="Demo-kallisto_jupyter.OWfastqDump.OWfastqDump" title="Download fastq files" version=""/>
+		<node id="3" name="jupyter_sleuth" position="(905.0, 48.0)" project_name="Demo-kallisto_jupyter" qualified_name="Demo-kallisto_jupyter.OWjupyter_sleuth.OWjupyter_sleuth" title="Execute notebook" version=""/>
+		<node id="4" name="kallistoIndex" position="(361.0, 43.0)" project_name="Demo-kallisto_jupyter" qualified_name="Demo-kallisto_jupyter.OWkallistoIndex.OWkallistoIndex" title="kallistoIndex" version=""/>
+		<node id="5" name="kallistoQuant" position="(554.0, 49.0)" project_name="Demo-kallisto_jupyter" qualified_name="Demo-kallisto_jupyter.OWkallistoQuant.OWkallistoQuant" title="kallistoQuant" version=""/>
+		<node id="6" name="jupyter_sleuth" position="(1100.0, 48.0)" project_name="Demo-kallisto_jupyter" qualified_name="Demo-kallisto_jupyter.OWjupyter_sleuth.OWjupyter_sleuth" title="Display notebook" version=""/>
+		<node id="7" name="downloadURL" position="(729.0, 48.0)" project_name="Demo-kallisto_jupyter" qualified_name="Demo-kallisto_jupyter.OWdownloadURL.OWdownloadURL" title="Download notebook" version=""/>
 	</nodes>
 	<links>
 		<link enabled="true" id="0" sink_channel="trigger" sink_node_id="1" source_channel="directory" source_node_id="0"/>
