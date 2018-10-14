@@ -266,7 +266,7 @@ class ToolDockEdit(widget.OWWidget):
             ret=qm.question(self,'', "Workflows {} use this widget - Do you still want to rename it?".format(workflowStr), qm.Yes | qm.No)
             if ret == qm.No:
                 return
-
+        return
         for workflowPath in workflowPaths:
             workflowTools.renameWidgetInWorkflow(workflowPath,workflowPath,category,widgetName,newName)
         workflowTools.renameWidget(widgetPath,widgetName,newName)
@@ -284,7 +284,8 @@ class ToolDockEdit(widget.OWWidget):
                 doc = minidom.parse(owsFile)
                 nodes = doc.getElementsByTagName("node")
                 for node in nodes:
-                    if niceForm(node.getAttribute('project_name'),allowDash=False) == niceForm(category,allowDash=False) and node.getAttribute('name') == widgetName:
+                    print('node pn {} node name {} category {} wname {}'.format(node.getAttribute('project_name'),node.getAttribute('name'),category,widgetName))
+                    if node.getAttribute('project_name') == category and node.getAttribute('name') == widgetName:
                         workflowPaths.append(owsFile)
                         continue
         return workflowPaths

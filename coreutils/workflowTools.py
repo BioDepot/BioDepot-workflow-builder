@@ -1,6 +1,5 @@
 import sys, os, re, shutil, glob, tempfile, jsonpickle
 from glob import glob 
-from makeToolDockCategories import *
 from xml.dom import minidom
 from collections import Counter, OrderedDict
 from itertools import groupby
@@ -12,15 +11,13 @@ def findMode(lst):
     return modes
     
 def reformatOWS(workflowTitle,inputFile,outputFile,uniqueNames):
-    workflowPath=niceForm(workflowTitle,allowDash=False)
     doc = minidom.parse(inputFile)
     scheme = doc.getElementsByTagName("scheme")[0]
     scheme.attributes['title'].value=workflowTitle
     nodes = doc.getElementsByTagName("node")
     for node in nodes:
         projectName=node.getAttribute('project_name')
-        projectPath=niceForm(projectName,allowDash=False)
-        widgetName=niceForm(node.getAttribute('name'),allowDash=False)
+        widgetName=node.getAttribute('name')
         if uniqueNames and projectName in uniqueNames and widgetName in uniqueNames[projectName]:
             uniqueName=uniqueNames[projectName][widgetName]
             
@@ -29,7 +26,7 @@ def reformatOWS(workflowTitle,inputFile,outputFile,uniqueNames):
         else:
             uniqueName=widgetName
         node.attributes['name'].value=uniqueName
-        node.attributes['qualified_name']=workflowPath+'.OW'+uniqueName+'.OW'+uniqueName
+        node.attributes['qualified_name']=workflowName+'.OW'+uniqueName+'.OW'+uniqueName
         node.attributes['project_name'].value=workflowTitle
     with open(outputFile,'w') as f:
         f.write(doc.toxml())
@@ -140,10 +137,7 @@ def modifyWidgetName(widgetName,projectName, projectNames):
     #tries to get a unique name when there
     #first try to add prefix if there is no prefix
     #we check against all project names to keep multiple chaining of names to a minimum
-    projectPaths=[]
-    for projectName in projectNames:
-        projectPaths.append(niceForm(projectName,allowDash=False))
-    if widgetNameSeen(widgetName,projectPaths):
+    if widgetNameSeen(widgetName,projectNames):
         parts=widgetName.split('_')
         if parts and parts[-1].isdigit():
             number=int(parts[-1])+1
@@ -151,7 +145,7 @@ def modifyWidgetName(widgetName,projectName, projectNames):
             number=1
         return '{}_{}'.format(widgetName,number)
     else:
-        return niceForm(projectName,allowDash=False)+'_'+widgetName
+        return projectName +'_'+widgetName
 
 def removeWidgetfromWorkflow(inputOWS,outputOWS,projectName,widgetName):
     #remove nodes that match projectName and widgetName and record them
@@ -160,7 +154,7 @@ def removeWidgetfromWorkflow(inputOWS,outputOWS,projectName,widgetName):
     nodeParent=doc.getElementsByTagName("nodes")[0]
     nodes = doc.getElementsByTagName("node")
     for node in nodes:
-        if niceForm(node.getAttribute('project_name'),allowDash=False) == niceForm(projectName,allowDash=False) and node.getAttribute('name') == widgetName:
+        if node.getAttribute('project_name')==projectName and node.getAttribute('name') == widgetName:
             removedNodes.add(node.getAttribute('id'))
             nodeParent.removeChild(node)
     linkParent=doc.getElementsByTagName("links")[0]
@@ -185,9 +179,9 @@ def renameWidgetInWorkflow(inputOWS,outputOWS,projectName,widgetName,newName):
     for node in nodes:
         print (node.getAttribute('project_name'))
         print (node.getAttribute('name'))
-        if niceForm(node.getAttribute('project_name'),allowDash=False) == niceForm(projectName,allowDash=False) and node.getAttribute('name') == widgetName:
+        if node.getAttribute('project_name')==projectName and node.getAttribute('name') == widgetName:
             node.attributes['name']=newName
-            node.attributes['qualified_name'].value='{}.OW{}.OW{}'.format(niceForm(projectName,allowDash=False),newName,newName)
+            node.attributes['qualified_name'].value='{}.OW{}.OW{}'.format(projectName,newName,newName)
 #get rid of empty with one space lines that result from removal and write    
     with open(outputOWS,'w') as f:
         f.write("".join([s for s in doc.toxml().splitlines(True) if s.strip()]))
@@ -195,8 +189,7 @@ def renameWidgetInWorkflow(inputOWS,outputOWS,projectName,widgetName,newName):
 def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,iconFile=None,basePath=""):
     tempDir = tempfile.mkdtemp()
     os.mkdir(tempDir+'/widgets')
-    projectTitlePath=niceForm(projectTitle,allowDash=False)
-    os.mkdir(tempDir+'/widgets/{}'.format(projectTitlePath))
+    os.mkdir(tempDir+'/widgets/{}'.format(projectTitle))
     tempOWS='{}/{}'.format(tempDir,os.path.basename(bwbOWS))
     shutil.copyfile(bwbOWS,tempOWS)
     doc = minidom.parse(bwbOWS)
@@ -207,7 +200,6 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
     #find the old title
     myScheme = doc.getElementsByTagName("scheme")[0]
     oldProjectTitle = myScheme.getAttribute('title')
-    oldProjectTitlePath = niceForm(oldProjectTitle,allowDash=False)
     
     #get rid of anything like \n in the color string    
     if color:
@@ -219,8 +211,7 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
         #this is the order to copy/convert the names
         for node in nodes:
             projectName=node.getAttribute('project_name')
-            projectPath=niceForm(projectName,allowDash=False)
-            widgetName=niceForm(node.getAttribute('name'),allowDash=False)
+            widgetName=node.getAttribute('name')
             qname=node.getAttribute('qualified_name')
             widgetPath=findWidgetPathFromLink(qname,projectPath,basePath)
         #keep unique list of widgetPaths for each project
@@ -258,7 +249,7 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
                         uniqueNames[projectName]={}
                     uniqueNames[projectName][widgetName]=uniqueName
                 nameSeen.add(uniqueName)
-                uniquePath='{}/widgets/{}/{}'.format(tempDir,projectTitlePath,uniqueName)
+                uniquePath='{}/widgets/{}/{}'.format(tempDir,projectTitle,uniqueName)
                 shutil.copytree(widgetPath,uniquePath)
                 if nameChanged:
                     renameWidget(uniquePath,widgetName,uniqueName)
@@ -269,32 +260,31 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
         widgetPaths=set()
         for node in nodes:
             projectName=node.getAttribute('project_name')
-            projectPath=niceForm(projectName,allowDash=False)
-            if projectPath==projectTitlePath:
-                widgetName=niceForm(node.getAttribute('name'),allowDash=False)
+            if projectName==projectTitle:
+                widgetName=node.getAttribute('name')
                 qname=node.getAttribute('qualified_name')
                 widgetPath=findWidgetPathFromLink(qname,projectPath,basePath)
                 if widgetPath not in widgetPaths:
                     widgetPaths.add(widgetPath)
-                    os.system('cp -r {} {}/widgets/{}/{}'.format(widgetPath,tempDir,projectTitlePath,widgetName)) 
+                    os.system('cp -r {} {}/widgets/{}/{}'.format(widgetPath,tempDir,projectTitle,widgetName)) 
           
     #check if the original exists for icon and __init__.py - otherwise take them from the title otherwise take it from the 
-    if os.path.exists('{}/widgets/{}/icon'.format(outputWorkflow,projectTitlePath)) and os.path.exists('{}/widgets/{}/__init__.py'.format(outputWorkflow,projectTitlePath)):
-        iconPath='{}/widgets/{}/icon'.format(outputWorkflow,projectTitlePath)
-        initPath='{}/widgets/{}/__init__.py'.format(outputWorkflow,projectTitlePath)
-    elif os.path.exists('/biodepot/{}/icon'.format(oldProjectTitlePath)):
-        iconPath='/biodepot/{}/icon'.format(oldProjectTitlePath)
-        initPath='/biodepot/{}/__init__.py'.format(oldProjectTitlePath)
-    elif os.path.exists('/biodepot/{}/icon'.format(projectTitlePath)):
-        iconPath='/biodepot/{}/icon'.format(projectTitlePath)
-        initPath='/biodepot/{}/__init__.py'.format(projectTitlePath)
+    if os.path.exists('{}/widgets/{}/icon'.format(outputWorkflow,projectTitle)) and os.path.exists('{}/widgets/{}/__init__.py'.format(outputWorkflow,projectTitle)):
+        iconPath='{}/widgets/{}/icon'.format(outputWorkflow,projectTitle)
+        initPath='{}/widgets/{}/__init__.py'.format(outputWorkflow,projectTitle)
+    elif os.path.exists('/biodepot/{}/icon'.format(oldProjectTitle)):
+        iconPath='/biodepot/{}/icon'.format(oldProjectTitle)
+        initPath='/biodepot/{}/__init__.py'.format(oldProjectTitle)
+    elif os.path.exists('/biodepot/{}/icon'.format(projectTitle)):
+        iconPath='/biodepot/{}/icon'.format(projectTitle)
+        initPath='/biodepot/{}/__init__.py'.format(projectTitle)
     else:
         iconPath='/biodepot/User/icon'
         initPath='/biodepot/User/__init__.py'
         if not color:
             color='light-blue'
-    shutil.copytree(iconPath,'{}/widgets/{}/icon'.format(tempDir,projectTitlePath))
-    shutil.copyfile(initPath, '{}/widgets/{}/__init__.py'.format(tempDir,projectTitlePath))
+    shutil.copytree(iconPath,'{}/widgets/{}/icon'.format(tempDir,projectTitle))
+    shutil.copyfile(initPath, '{}/widgets/{}/__init__.py'.format(tempDir,projectTitle))
     changedIcon=False
     
     #check that iconFile exists and resolve if symlink
@@ -308,12 +298,12 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
                 
     #if there is an icon
     if iconFile:
-        iconDir="{}/widgets/{}/icon".format(tempDir,projectTitlePath)
+        iconDir="{}/widgets/{}/icon".format(tempDir,projectTitle)
         os.system('rm -f {}/* && cp {} {}/. '.format(iconDir,iconFile,iconDir))
         changedIcon=True
 
     if changedIcon or color:
-        initFile='{}/widgets/{}/__init__.py'.format(tempDir,projectTitlePath)
+        initFile='{}/widgets/{}/__init__.py'.format(tempDir,projectTitle)
         with open(initFile,'r') as f:
             lines = f.readlines()
         with open(initFile,'w') as f:
@@ -335,30 +325,29 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
 def importWorkflow(owsFile):
     changedSetup=False
     workflowDir=os.path.dirname(owsFile)
-    projectTitlePath=os.path.basename(workflowDir)
-    os.system('mkdir -p /biodepot/{}'.format(projectTitlePath))
+    projectTitle=os.path.basename(workflowDir)
+    os.system('mkdir -p /biodepot/{}'.format(projectTitle))
     with open('/biodepot/setup.py','r') as f:
         setupData=f.read()
     projectList=re.findall(r'setup\(name="([^"]+)"',setupData)
     changedSetup=True
     for projectName in projectList:
-        projectPath=niceForm(projectName,allowDash=False)
-        if projectPath == projectTitlePath:
+        if projectName == projectTitle:
             changedSetup=False
             break
     if changedSetup:
-        setupData+=entryString(projectTitlePath,projectTitlePath)
+        setupData+=entryString(projectTitle,projectTitle)
     pythonFiles=glob('{}/widgets/*/*/*.py'.format(workflowDir))
     for pythonFile in pythonFiles:
         basePythonFile=os.path.basename(pythonFile)
-        destLink='/biodepot/{}/OW{}'.format(projectTitlePath,basePythonFile)
+        destLink='/biodepot/{}/OW{}'.format(projectTitle,basePythonFile)
         os.system('ln -sf {} {}'.format(pythonFile,destLink))
     #make link to icons and __init__.py
-    print ('ln -sf {}/widgets/{}/icon /biodepot/{}/icon'.format(workflowDir,projectTitlePath,projectTitlePath))
-    if os.path.exists('/biodepot/{}/icon'.format(projectTitlePath)):
-        os.unlink('/biodepot/{}/icon'.format(projectTitlePath))
-    os.system('ln -sf {}/widgets/{}/icon /biodepot/{}/icon'.format(workflowDir,projectTitlePath,projectTitlePath))
-    os.system('ln -sf {}/widgets/{}/__init__.py /biodepot/{}/__init__.py'.format(workflowDir,projectTitlePath,projectTitlePath))
+    print ('ln -sf {}/widgets/{}/icon /biodepot/{}/icon'.format(workflowDir,projectTitle,projectTitle))
+    if os.path.exists('/biodepot/{}/icon'.format(projectTitle)):
+        os.unlink('/biodepot/{}/icon'.format(projectTitle))
+    os.system('ln -sf {}/widgets/{}/icon /biodepot/{}/icon'.format(workflowDir,projectTitle,projectTitle))
+    os.system('ln -sf {}/widgets/{}/__init__.py /biodepot/{}/__init__.py'.format(workflowDir,projectTitle,projectTitle))
     if changedSetup:
         with open('/biodepot/setup.py','w') as f:
             f.write(setupData)

@@ -3,7 +3,7 @@ import sys, os, re
 
 
 defaultCategoryIcon='/icons/misc.png'
-def niceForm(badString,allowDash='True'):
+def niceForm(badString,allowDash='False'):
     #dashes cause problems with hasattr
     #strip and sub spaces
     ret=re.sub("\s+","_",badString.strip())
