@@ -83,13 +83,15 @@ def replaceNamePy(pyFile,oldName,newName):
     
 def renameWidgetInToolDock(oldPyPath,newPyPath):
     directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' /biodepot/setup.py''').read())).split()
-    widgetName=os.path.dirname(newPyPath)
+    widgetPy=os.path.basename(newPyPath)
     for directory in directoryList:
         pyLinks=glob('/biodepot/{}/OW*.py'.format(directory))
         for pyLink in pyLinks:
             if os.path.realpath(pyLink) == os.path.realpath(oldPyPath):        
                 os.unlink(pyLink)
-                os.system('ln -s {} /biodepot/{}/OW{}.py'.format(newPyPath,directory,widgetName)) 
+                sys.stderr.write('ln -s {} /biodepot/{}/OW{}'.format(newPyPath,directory,widgetPy)) 
+                os.system('ln -s {} /biodepot/{}/OW{}'.format(newPyPath,directory,widgetPy)) 
+                
 def renameWidget(srcWidget,oldName,newName):
     if oldName == newName:
         return
@@ -158,7 +160,7 @@ def removeWidgetfromWorkflow(inputOWS,outputOWS,projectName,widgetName):
     nodeParent=doc.getElementsByTagName("nodes")[0]
     nodes = doc.getElementsByTagName("node")
     for node in nodes:
-        if node.getAttribute('project_name')==projectName and node.getAttribute('name') == widgetName:
+        if niceForm(node.getAttribute('project_name'),allowDash=False) == niceForm(projectName,allowDash=False) and node.getAttribute('name') == widgetName:
             removedNodes.add(node.getAttribute('id'))
             nodeParent.removeChild(node)
     linkParent=doc.getElementsByTagName("links")[0]
@@ -177,14 +179,15 @@ def removeWidgetfromWorkflow(inputOWS,outputOWS,projectName,widgetName):
 
 def renameWidgetInWorkflow(inputOWS,outputOWS,projectName,widgetName,newName):
     #remove nodes that match projectName and widgetName and record them
-    removedNodes=set()
     doc = minidom.parse(inputOWS)
     nodeParent=doc.getElementsByTagName("nodes")[0]
     nodes = doc.getElementsByTagName("node")
     for node in nodes:
-        if node.getAttribute('project_name')==projectName and node.getAttribute('name') == widgetName:
+        print (node.getAttribute('project_name'))
+        print (node.getAttribute('name'))
+        if niceForm(node.getAttribute('project_name'),allowDash=False) == niceForm(projectName,allowDash=False) and node.getAttribute('name') == widgetName:
             node.attributes['name']=newName
-            node.attributes['qualified_name'].value='{}.OW{}.OW{}'.format(niceForm(projectName,allow_dashes=False),newName,newName)
+            node.attributes['qualified_name'].value='{}.OW{}.OW{}'.format(niceForm(projectName,allowDash=False),newName,newName)
 #get rid of empty with one space lines that result from removal and write    
     with open(outputOWS,'w') as f:
         f.write("".join([s for s in doc.toxml().splitlines(True) if s.strip()]))

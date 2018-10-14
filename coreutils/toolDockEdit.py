@@ -150,10 +150,7 @@ class ToolDockEdit(widget.OWWidget):
             else:
                 #this is one of biodepots native categories if the icon directory is not a link
                 self.categoryToPath[category]='/widgets/{}'.format(self.categoryToDirectory[category])
-
-            
-            
-        print(self.categoryToPath)
+                
     def updateWidgetList(self):
         self.updateCategories()
         self.widgetList={}
@@ -243,26 +240,36 @@ class ToolDockEdit(widget.OWWidget):
         newName=self.getLeditValue(self.RNWledit)
         if not newName or newName == widgetName:
             return
+        #check if name already exists
         if not os.path.exists(symlink):
-            qm.information(self,'Non-existent symlink','Symlink {} not found'.format(symlink),QtGui.QMessageBox.Ok)
+            qm.information(self,'','Non-existent symlink','Symlink {} not found'.format(symlink),QtGui.QMessageBox.Ok)
             return
-        widgetPath=os.path.dirname(os.readlink(symlink))
-        #check if relative path and convert to absolute path if necessary
-        if widgetPath[0] != '/':
-            widgetPath=os.path.abspath('/biodepot/{}/{}'.format(categoryDir,widgetPath))
+        widgetPath=os.path.dirname(os.path.realpath(symlink))
+        newWidgetPath=os.path.dirname(widgetPath)+'/'+newName
+        if os.path.exists(newWidgetPath):
+            qm.information(self,'','widget {} already exists'.format(newWidgetPath),QtGui.QMessageBox.Ok)
+            return 
         if not os.path.exists(widgetPath):
             qm.information(self,'Non-existent widget','Widget {} not found'.format(widgetPath),QtGui.QMessageBox.Ok)
             return
         #check if any ows file that is in toolbox uses the widget and issue a warning if so
+        print ('widgetName is '+ widgetName)
+        print ('category  is' + category)
         workflowPaths=self.findWorkflowsWithWidget(widgetName,category)
+        print ('workflowPaths are ')
+        print (workflowPaths)
         if workflowPaths:
-            workflowStr=','.join(workflowPaths)
+            myWorkflowNames=[]
+            for path in workflowPaths:
+                myWorkflowNames.append(os.path.basename(os.path.dirname(path)))
+            workflowStr=','.join(myWorkflowNames)
             ret=qm.question(self,'', "Workflows {} use this widget - Do you still want to rename it?".format(workflowStr), qm.Yes | qm.No)
             if ret == qm.No:
                 return
-        workflowTools.renameWidget(widgetPath,widgetName,newName)
+
         for workflowPath in workflowPaths:
-            workflowTools.renameWidgetInWorkflow(workflowPath,workflowPath,category,widgetName)
+            workflowTools.renameWidgetInWorkflow(workflowPath,workflowPath,category,widgetName,newName)
+        workflowTools.renameWidget(widgetPath,widgetName,newName)
         #finally remove the widget and symlink
         qm.information(self,'Successfully renamed','renamed widget {} to {}'.format(widgetName,newName),QtGui.QMessageBox.Ok)
         self.canvas.reload_current()
@@ -277,7 +284,7 @@ class ToolDockEdit(widget.OWWidget):
                 doc = minidom.parse(owsFile)
                 nodes = doc.getElementsByTagName("node")
                 for node in nodes:
-                    if node.getAttribute('project_name') == category and node.getAttribute('name') == widgetName:
+                    if niceForm(node.getAttribute('project_name'),allowDash=False) == niceForm(category,allowDash=False) and node.getAttribute('name') == widgetName:
                         workflowPaths.append(owsFile)
                         continue
         return workflowPaths

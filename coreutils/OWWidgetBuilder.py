@@ -662,6 +662,7 @@ class OWWidgetBuilder(widget.OWWidget):
         
     def unPickleData(self,filename,jsonFlag=True):
         if jsonFlag:
+            sys.stderr.write('opening file {}\n'.format(filename))
             try:
                 with open(filename,'r') as f:
                     data=jsonpickle.decode(f.read())
