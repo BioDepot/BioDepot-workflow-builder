@@ -81,15 +81,22 @@ def replaceNamePy(pyFile,oldName,newName):
                 line='        with open(getJsonName(__file__,"{}")) as f:\n'.format(newName)
             f.write(line)
     
-
+def renameWidgetInToolDock(oldPyPath,newPyPath):
+    directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' /biodepot/setup.py''').read())).split()
+    widgetName=os.path.dirname(newPyPath)
+    for directory in directoryList:
+        pyLinks=glob('/biodepot/{}/OW*.py'.format(directory))
+        for pyLink in pyLinks:
+            if os.path.realpath(pyLink) == os.path.realpath(oldPyPath):        
+                os.unlink(pyLink)
+                os.system('ln -s {} /biodepot/{}/OW{}.py'.format(newPyPath,directory,widgetName)) 
 def renameWidget(srcWidget,oldName,newName):
+    if oldName == newName:
+        return
     #first rename parent if possible
-    oldPath=os.path.basename(srcWidget)
-    if oldPath != newName:
-        newPath=os.path.dirname(srcWidget)+'/'+newName
-        os.rename(srcWidget,newPath)
-    else:
-        newPath=srcWidget
+    newPath=os.path.dirname(srcWidget)+'/'+newName
+    os.system('mv {} {}'.format(srcWidget,newPath))
+
     #now we need to rename each of the files
     #and after renaming replace the instances of oldName in the data structures and python script with newName
     oldFiles=glob('{}/{}.*'.format(newPath,oldName))
@@ -100,7 +107,11 @@ def renameWidget(srcWidget,oldName,newName):
         if extension == '.py':
             replaceNamePy(newFile,oldName,newName)
         else:
-           replaceName(newFile,'name',newName) 
+            replaceName(newFile,'name',newName)
+    oldPyPath='{}/{}.py'.format(srcWidget,oldName)
+    newPyPath='{}/{}.py'.format(newPath,newName)
+    renameWidgetInToolDock(oldPyPath,newPyPath)
+    
 
         
 def findWidgetPathFromLink(qualifiedName,groupName,basePath=''):
@@ -164,6 +175,19 @@ def removeWidgetfromWorkflow(inputOWS,outputOWS,projectName,widgetName):
     with open(outputOWS,'w') as f:
         f.write("".join([s for s in doc.toxml().splitlines(True) if s.strip()]))
 
+def renameWidgetInWorkflow(inputOWS,outputOWS,projectName,widgetName,newName):
+    #remove nodes that match projectName and widgetName and record them
+    removedNodes=set()
+    doc = minidom.parse(inputOWS)
+    nodeParent=doc.getElementsByTagName("nodes")[0]
+    nodes = doc.getElementsByTagName("node")
+    for node in nodes:
+        if node.getAttribute('project_name')==projectName and node.getAttribute('name') == widgetName:
+            node.attributes['name']=newName
+            node.attributes['qualified_name'].value='{}.OW{}.OW{}'.format(niceForm(projectName,allow_dashes=False),newName,newName)
+#get rid of empty with one space lines that result from removal and write    
+    with open(outputOWS,'w') as f:
+        f.write("".join([s for s in doc.toxml().splitlines(True) if s.strip()]))
     
 def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,iconFile=None,basePath=""):
     tempDir = tempfile.mkdtemp()

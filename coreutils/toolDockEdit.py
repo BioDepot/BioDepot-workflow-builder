@@ -129,6 +129,7 @@ class ToolDockEdit(widget.OWWidget):
         self.initCategories()
         self.drawAddWidget()
         self.drawRemoveWidget()
+        self.drawRenameWidget()
         self.drawRemoveCategory()
         
         #self.setStyleSheet(":disabled { color: #282828}")
@@ -170,7 +171,7 @@ class ToolDockEdit(widget.OWWidget):
         widgetAddBtn = gui.button(None, self, "Add", callback= lambda: self.widgetAdd(ledit,cbox))
         widgetAddBtn.setFixedSize(30,20)
         widgetAddBtn.setStyleSheet(self.css)
-        self.grid.addWidget(widgetAddBtn,1,7)        
+        self.grid.addWidget(widgetAddBtn,1,6)        
         self.controlArea.layout().addLayout(self.grid)
 
     def widgetAdd(self,ledit,cbox,widgetsDir='/widgets'):
@@ -180,6 +181,16 @@ class ToolDockEdit(widget.OWWidget):
             return
         directory=self.categoryToDirectory[category] 
         self.addWidgetToCategory(category,directory,inputDir)
+    
+    def drawRenameWidget(self):
+        self.updateWidgetList()        
+        self.RNWwbox=self.makeComboBox(self.grid,'Rename widget ',self.widgetList[self.categories[0]],startRow=3)
+        self.RNWcbox=self.makeComboBox(self.grid,' in drawer ',self.categories,startRow=3,startColumn=4,callback=lambda: self.__onRWCategoryChoice(self.RNWcbox,self.RNWwbox))
+        self.RNWledit=self.makeLedit(self.grid,'New name','to new name',startRow=3,startColumn=6,browse=False)
+        widgetRenameBtn = gui.button(None, self, "Rename", callback=self.widgetRename)
+        widgetRenameBtn.setFixedSize(60,20)
+        widgetRenameBtn.setStyleSheet(self.css)
+        self.grid.addWidget(widgetRenameBtn,3,8)
             
     def drawRemoveWidget(self):
         self.updateWidgetList()        
@@ -188,7 +199,7 @@ class ToolDockEdit(widget.OWWidget):
         widgetRemoveBtn = gui.button(None, self, "Remove", callback=self.widgetRemove)
         widgetRemoveBtn.setFixedSize(60,20)
         widgetRemoveBtn.setStyleSheet(self.css)
-        self.grid.addWidget(widgetRemoveBtn,2,7)
+        self.grid.addWidget(widgetRemoveBtn,2,6)
         
     def widgetRemove(self):
         qm = QtGui.QMessageBox
@@ -222,7 +233,40 @@ class ToolDockEdit(widget.OWWidget):
         os.unlink(symlink)
         qm.information(self,'Successfully removed','removed widget {} from {}'.format(widgetPath,category),QtGui.QMessageBox.Ok)
         self.canvas.reload_current()
-        
+    
+    def widgetRename(self):
+        qm = QtGui.QMessageBox
+        widgetName=self.getComboValue(self.RNWwbox)
+        category=self.getComboValue(self.RNWcbox)
+        categoryDir=self.categoryToDirectory[category]
+        symlink='/biodepot/{}/OW{}.py'.format(categoryDir,widgetName)
+        newName=self.getLeditValue(self.RNWledit)
+        if not newName or newName == widgetName:
+            return
+        if not os.path.exists(symlink):
+            qm.information(self,'Non-existent symlink','Symlink {} not found'.format(symlink),QtGui.QMessageBox.Ok)
+            return
+        widgetPath=os.path.dirname(os.readlink(symlink))
+        #check if relative path and convert to absolute path if necessary
+        if widgetPath[0] != '/':
+            widgetPath=os.path.abspath('/biodepot/{}/{}'.format(categoryDir,widgetPath))
+        if not os.path.exists(widgetPath):
+            qm.information(self,'Non-existent widget','Widget {} not found'.format(widgetPath),QtGui.QMessageBox.Ok)
+            return
+        #check if any ows file that is in toolbox uses the widget and issue a warning if so
+        workflowPaths=self.findWorkflowsWithWidget(widgetName,category)
+        if workflowPaths:
+            workflowStr=','.join(workflowPaths)
+            ret=qm.question(self,'', "Workflows {} use this widget - Do you still want to rename it?".format(workflowStr), qm.Yes | qm.No)
+            if ret == qm.No:
+                return
+        workflowTools.renameWidget(widgetPath,widgetName,newName)
+        for workflowPath in workflowPaths:
+            workflowTools.renameWidgetInWorkflow(workflowPath,workflowPath,category,widgetName)
+        #finally remove the widget and symlink
+        qm.information(self,'Successfully renamed','renamed widget {} to {}'.format(widgetName,newName),QtGui.QMessageBox.Ok)
+        self.canvas.reload_current()
+                
     def findWorkflowsWithWidget(self,widgetName,category):
         workflowPaths=[]
         for category in self.categories:
@@ -243,7 +287,7 @@ class ToolDockEdit(widget.OWWidget):
         catRemoveBtn = gui.button(None, self, "Remove", callback= lambda: self.categoryRemove(cbox))
         catRemoveBtn.setFixedSize(60,20)
         catRemoveBtn.setStyleSheet(self.css)
-        self.grid.addWidget(catRemoveBtn,4,7)
+        self.grid.addWidget(catRemoveBtn,4,3)
                      
     def categoryAdd(self,nameLedit,iconLedit):
         qm = QtGui.QMessageBox
