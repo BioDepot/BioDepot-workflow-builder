@@ -65,9 +65,14 @@ class ToolDockEdit(widget.OWWidget):
     allAttrs=pset({})
     data={}
     
-    def __init__(self,widgetID=None,canvasMainWindow=None):
+    def __init__(self,renameData=None,canvasMainWindow=None):
         super().__init__()
         self.canvas=canvasMainWindow
+        if renameData:
+            #run the rename routine and then finish
+            self.updateCategories()
+            self.widgetRename(widgetName=renameData['widgetName'],category=renameData['category'],newName=renameData['newName'])
+            return  
         self.css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
         QPushButton:hover {background-color: #1555f5; }
@@ -136,9 +141,9 @@ class ToolDockEdit(widget.OWWidget):
         #self.setStyleSheet(":disabled { color: #282828}")
     
     def updateCategories(self):
-        self.categories=(str(os.popen('''grep -oP 'name="\K[^"]+' {}/setup.py'''.format(self.baseToolPath)).read())).split()
+        self.categories=(str(os.popen('''grep -oP 'name="\K[^"]+' /biodepot/setup.py''').read())).split()
         #directories are not same as categories because Python/Linux unfriendly characters are changed
-        self.directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' {}/setup.py'''.format(self.baseToolPath)).read())).split()
+        self.directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' /biodepot/setup.py''').read())).split()
         self.categoryToDirectory={}
         self.categoryToPath={}
         #check for icon link for categories where there are no widgets
@@ -232,13 +237,16 @@ class ToolDockEdit(widget.OWWidget):
         qm.information(self,'Successfully removed','removed widget {} from {}'.format(widgetPath,category),QtGui.QMessageBox.Ok)
         self.canvas.reload_current()
     
-    def widgetRename(self):
+    def widgetRename(self,widgetName=None,category=None,newName=None):
         qm = QtGui.QMessageBox
-        widgetName=self.getComboValue(self.RNWwbox)
-        category=self.getComboValue(self.RNWcbox)
+        if not widgetName:
+            widgetName=self.getComboValue(self.RNWwbox)
+        if not category:
+            category=self.getComboValue(self.RNWcbox)
         categoryDir=self.categoryToDirectory[category]
         symlink='/biodepot/{}/OW{}.py'.format(categoryDir,widgetName)
-        newName=self.getLeditValue(self.RNWledit)
+        if not newName:
+            newName=self.getLeditValue(self.RNWledit)
         if not newName or newName == widgetName:
             return
         #check if name already exists

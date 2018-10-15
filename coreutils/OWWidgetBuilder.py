@@ -6,7 +6,7 @@ import jsonpickle
 import pickle
 import csv
 import tempfile, shutil
-import OWImageBuilder
+import OWImageBuilder,toolDockEdit
 from glob import glob
 from pathlib import Path
 from shutil import copyfile
@@ -342,9 +342,9 @@ class OWWidgetBuilder(widget.OWWidget):
         self.loadWidgetBtn = gui.button(None, self, "Load", callback=self.loadWidget)
         self.loadWidgetBtn.setStyleSheet(self.css)
         self.loadWidgetBtn.setFixedSize(70,20)
-        self.rebuildBtn = gui.button(None, self, "Rebuild", callback=self.rebuildWidget)
-        self.rebuildBtn.setStyleSheet(self.css)
-        self.rebuildBtn.setFixedSize(100,20)
+        self.renameBtn = gui.button(None, self, "Rename", callback=self.renameWidget)
+        self.renameBtn.setStyleSheet(self.css)
+        self.renameBtn.setFixedSize(100,20)
         #choose save mode
 
         saveLabel=QtGui.QLabel('Save mode:')
@@ -356,6 +356,8 @@ class OWWidgetBuilder(widget.OWWidget):
         box.addWidget(self.saveWidgetBtn)
         box.addWidget(self.saveWidgetAsBtn)
         box.addWidget(self.loadWidgetBtn)
+        if not self.newFlag:
+            box.addWidget(self.renameBtn)
         box.addStretch(1)
         layout.addLayout(box)
 
@@ -420,38 +422,20 @@ class OWWidgetBuilder(widget.OWWidget):
             return self.widgetName
         return niceName
     
-    def rebuildWidget(self):
-        myDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Bwb directory", directory=self.defaultDir)
-        (imageName,accept)=QtGui.QInputDialog.getText(self,"New image name", "Enter image name",QtGui.QLineEdit.Normal,"biodepot/bwb")
-        if imageName:
-            qm = QtGui.QMessageBox
-            ret=qm.question(self,'', "Are you sure you want to rebuild {} from directory {} ?".format(imageName,myDir), qm.Yes | qm.No)
-            if ret == qm.Yes:
-                self.console=QtGui.QTextEdit()
-                self.console.setReadOnly(True)
-                pal=QtGui.QPalette()
-                pal.setColor(QtGui.QPalette.Base,Qt.black)
-                pal.setColor(QtGui.QPalette.Text,Qt.green)
-                self.console.setPalette(pal)
-                self.console.setAutoFillBackground(True)
-                self.console.show()
-                self.pConsole=ConsoleProcess(console=self.console,finishHandler=self.finishRebuild)
-                cmd='rsync -av /biodepot/ {}/biodepot/ --delete '.format(myDir) 
-                cmd+= '&& rsync -av /widgets/ {}/widgets/ --delete '.format(myDir)
-                cmd+= '&& rsync -av /workflows/ {}/workflows/ --delete '.format(myDir)
-                cmd+= '&& rsync -av /notebooks/ {}/notebooks/ --delete '.format(myDir)
-                cmd+= '&& docker build -t {} {}'.format(imageName,myDir)
-                self.rebuildBtn.setEnabled(False)
-                self.saveWidgetBtn.setEnabled(False)
-                self.saveWidgetAsBtn.setEnabled(False)
-                self.loadWidgetBtn.setEnabled(False)
-                self.pConsole.process.start('/bin/bash',['-c',cmd])
-    def finishRebuild(self,stopped=None):
-        self.rebuildBtn.setEnabled(True)
-        self.saveWidgetBtn.setEnabled(True)
-        self.saveWidgetAsBtn.setEnabled(True)
-        self.loadWidgetBtn.setEnabled(True)        
-        #self.pcconsole.close()
+    def renameWidget(self):
+        renameData={}
+        newName, okPressed = QInputDialog.getText(self, "Rename widget ","Enter new name:", QLineEdit.Normal,"")
+        if okPressed and newName:
+            niceName=niceForm(newName,useDash=False)
+            renameData['newName']=niceName
+            renameData['widgetName']=self.widgetName
+            renameData['category']=niceForm(os.path.basename(os.path.dirname(self.widgetDir)),useDash=True)
+            td=toolDockEdit.ToolDockEdit(renameData,canvasMainWindow=self.canvas)
+            del td
+        else:
+            return
+    #renames the widget definition, not the instance
+        pass
         
     def buildData(self):
         myData={}
@@ -714,16 +698,17 @@ class OWWidgetBuilder(widget.OWWidget):
         self.defaultDir=self.getDefaultDir()
         self.widgetDir=None
         self.widgetName=None
-        self.widgetDir=None
         self.isDrawn=False
         self.containerID=None
         self.saveModeIndex=0
+        self.newFlag=False
         if widgetID == '__New':
             qm = QtGui.QMessageBox
             ret=qm.question(self,'', "Create new widget?", qm.Yes | qm.No)
             if ret == qm.No:
                 raise ValueError('User cancelled')
             else:
+                self.newFlag=True
                 tmp = tempfile.mkdtemp()
                 ret=qm.question(self,'', "Use existing widget as template?", qm.Yes | qm.No)
                 if ret == qm.Yes:
