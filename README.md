@@ -476,7 +476,7 @@ What we have done is defined 'outputDir' as an input. This is because the fastq 
 
 - Modify the the inputFile entry by clicking on the inputFile entry. Then at the bottom uncheck the Argument box. Check the flag box and enter a single space for the value of the flag. Click on the save button (file icon with plus sign.)
 
-What we have done is to create two new entry forms. One for outputDir which is where the fastq file reside and one for the minimum quality of the reads. We also changed the inputFile (which is the python script) to have a blank flag instead of being an argument. Bwb will place all parameters after the command in the order which they appear in the list. Arguments will be placed after all flags. The bare command is visible in the Command tab and is simply 'python'. 
+What we have done is to create three new entry forms. One for *outputDir *which is where the fastq file reside, one for the minimum quality of the reads, and one for the minimum read length. We also changed the *inputFile* entry (which is the python script) to have a blank flag instead of being an argument. Bwb will place all parameters after the command in the order which they appear in the list. However, arguments will be placed after all flags. The bare command is visible in the Command tab and is simply 'python'. 
 
 So with our changes the widget will execute.:
 
@@ -508,7 +508,7 @@ RUN apk add --no-cache gcc gzip && \
 
 ```
 
-The widget is built starting from the Dockerfile used for the python2 widget. This widget was built using the compact alpine Linux distro which uses apk as a package manager (analogous to apt-get, yum, and dnf in other distros). We add one extra line which installs devtools gcc and libraries python-dev libc-dev needed by pip to install cutadapt. The gzip library is installed as well to support decompression of gzpped fastq files. pip is then called to install cutadapt and the devtools removed as they are not necessary to run cutadapt. The entire procedure is done in one command to avoid Docker spawning intermediate containers that are take up space in the final image.
+The widget is built starting from the Dockerfile used for the python2 widget. This widget was built using the compact alpine Linux distro which uses apk as a package manager (analogous to apt-get, yum, and dnf in other distros). We add one extra line (the slashes concatenate lines) which installs the gcc compiler suite and dev libraries python-dev libc-dev needed by pip to install cutadapt. The gzip library is installed as well to support decompression of gzpped fastq files. *pip* is then called to install *cutadapt* and the dev tools removed as they are not necessary to run cutadapt. The entire procedure is done in one command to avoid Docker spawning intermediate containers that are take up space in the final image.
 
 To add this Dockerfile and build this Dockerfile:
 
