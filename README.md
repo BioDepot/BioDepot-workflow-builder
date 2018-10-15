@@ -449,9 +449,9 @@ The basic steps will be to
 
  The new workflow widgets should appear in the Tool dock and the new cloned workflow should appear on the canvas. This will be apparent by the color change.
 
-### Customize the Python2 widget
+### Rename and customize the Python2 widget
 
-1\. Right click on the Python2 widget. A menu should pop up. Choose the 'Edit Widget' option to bring up the Widget defintion window.
+1\. Right click on the Python2 widget. A menu should pop up. Choose the 'Edit Widget' option to bring up the Widget defintion window. Hit the rename button and change the name to cutadapt_demo. This will rename the widget definition, i.e. the base name of the widget in the drawer in the ToolDock
 
 2\. The Python2 definition window should have 8 tabs. If the window is too narrow, not all the tabs will be visible. Either resize the window by dragging on the lower right corner or use the arrows in the top right  to scrool the content. The 'Genera'l tab should be the active one by default. Make the following changes:
 
@@ -524,8 +524,7 @@ To add this Dockerfile and build this Dockerfile:
 
 ### Save widget and load the workflow again
 
-1\. Hit the bottom save button to save all the changes to the widget.
-2\. Go to the menu and choose Load workflow so that the changes loaded into Bwb
+1\. Hit the bottom save button to save all the changes to the widget. The workflow should automatically reload to update the changes.
 
 ### Creating or copying the wrapper Python script
 
