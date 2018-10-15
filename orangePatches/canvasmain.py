@@ -1341,14 +1341,15 @@ class CanvasMainWindow(QMainWindow):
         form.exec_()
         if not self.saveWorkflowSettings['success']:
             return QDialog.Rejected
-        saveDir = self.saveWorkflowSettings['dir']+'/'+self.saveWorkflowSettings['name']
-        owsName=self.saveWorkflowSettings['name']+'.ows'
-        owsName=owsName.replace('-','_')
+        namePath=self.saveWorkflowSettings['name'].replace('-','_')
+        saveDir = self.saveWorkflowSettings['dir']+'/'+namePath
+        owsName=namePath+'.ows'
         filename=saveDir+'/'+owsName
-        os.system("mkdir -p {}".format(saveDir))
+        if not os.path.exists(saveDir):
+            os.makedirs(saveDir)
         if filename:
             if not self.check_can_save(document, filename):
-                print (filename)
+                print ('File to be saved is {}'.format(filename))
                 return QDialog.Rejected
             self.last_scheme_dir = os.path.dirname(filename)
             if self.save_scheme_to(curr_scheme, filename):

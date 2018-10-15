@@ -470,7 +470,9 @@ What we have done is defined 'outputDir' as an input. This is because the fastq 
 
 - Create entry for *OutputDir* by putting *OutputDir* in the *name* text box, choosing file from the *Type* text box, checking the *flag* box, entering *-d * followed by a space, as the value, enter, Check the *label* checkbox, and enter  *fastq directory:* into the label text box. Then press the *add* button.
 
-- Create entry for *quality* by putting *quality* in the *name* tex box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-q * followed by a space, as the value for the flag. Enter, *Mininum quality* in the label box. Enter *10* in the *default *box. Then press the *add *button
+- Create entry for *quality* by putting *quality* in the *name* text box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-q * followed by a space, as the value for the flag. Enter, *Mininum quality* in the label box. Enter *10* in the *default *box. Then press the *add *button
+
+- Create entry for *minLength* by putting *minLength* in the *name* text box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-m * followed by a space, as the value for the flag. Enter, *Mininum read length* in the label box. Enter *50* in the *default *box. Then press the *add *button
 
 - Modify the the inputFile entry by clicking on the inputFile entry. Then at the bottom uncheck the Argument box. Check the flag box and enter a single space for the value of the flag. Click on the save button (file icon with plus sign.)
 
@@ -479,7 +481,7 @@ What we have done is to create two new entry forms. One for outputDir which is w
 So with our changes the widget will execute.:
 
 ```
-python <blank flag><scriptName> -d <outputDir> -q <quality>
+python <blank flag><scriptName> -d <outputDir> -q <quality> -m <minLength>
 ```
 
 In reality we would also have parameters for the file with adapter sequences and possiblly other flags instead of this relatively simple example
@@ -525,10 +527,12 @@ To add this Dockerfile and build this Dockerfile:
 1\. Hit the bottom save button to save all the changes to the widget.
 2\. Go to the menu and choose Load workflow so that the changes loaded into Bwb
 
-### Creating the wrapper Python script
+### Creating or copying the wrapper Python script
 
-The wrapper script is needed to call cutadapt on different sets of paired end files. It is provided in /tutorialFiles/cutadapt_multi.py or you can paste the code into a local editor to be saved on your local file system. The script should be stored locally because files stored in the Bwb container files system (those not accessed via /data or other mountpoint) are lost when the container terminates.
+The wrapper script is needed to call cutadapt on different sets of paired end files. It is provided in /tutorialFiles/cutadapt_multi.py or you can paste the code into a local editor to be saved on your local file system. The code is also available from the github repository. 
 
+
+The script is:
 ```python
 import os
 from glob import glob
@@ -538,13 +542,14 @@ def runCutAdapt(file1,file2,flags):
     print ("cutadapt {} -o tmp/{} -p tmp/{} {} {}".format(flags,file1,file2,file1,file2))
     os.system("cutadapt {} -o tmp/{} -p tmp/{} {} {}".format(flags,file1,file2,file1,file2))
 
-#get options - we are interested in -d for directory -q for quality
+#get options - we are interested in -d for directory -q for quality -m for minimum length
 parser = OptionParser()
 parser.add_option("-d")
 parser.add_option("-q")
+parser.add_option("-m")
 (options, args) = parser.parse_args()
 
-flags ="-q {} ".format(options.q)
+flags ="-q {} -m {}".format(options.q,options.m)
 #change directory to output directory
 os.chdir(options.d)
 
@@ -562,11 +567,29 @@ for i in range(0,len(files)/2):
 #copy the filtered files and remove the temp directory
 os.system("cp -r tmp/* . && rm -r tmp")
 
+
 ```
+The script should be stored locally because files stored in the Bwb container files system (those not accessed via /data or other mountpoint) are lost when the container terminates. In addition, although the script is in the bwb container, the widget will not be able to see it unless we add a volume mapping or simply move the file to our local system.
 
+To do this:
 
+1\. Click on the orange righ arrow at the bottom of the browser window to change the workspace to workspace 2. There should be a screen with no windows. 
+2\. Right click and choose the 'Terminal' option.
+3\. Enter the following command (assuming that you used the default /data mountpoint)
+```bash
+cp /tutorialFiles/cutadapt_multi.py /data/tutorial/.
+```
 ### Connecting the widget to the workflow
- 
+ 1\. Right-click on the link between the Download fastq files and kalistoQuant widgets and chose the Remove option
+ 2\. Click on the right side of the Download fastq file widget and drag the ouse to the left hand side of the cutadapt widget 
+ 3\. When the link dialog pops up, click on the Clear all button in the lower left hand corner. Click on the OutputDir Box on the left and drag the mouse to the OutputDir Box on the right. Click OK
+ 4\. Click on the right side of the cutadapt widget and drag to the left sid of the kallisto Quant widget. When the Dialog box appears, hit the clear all button and connect the OutputDir of cutadapt to the trigger of kallistoQuant
+ 5\. Double click on the Cutadapt widget. Enter the following
+ 	Script: /data/tutorial/cutadapt_multi.py
+ 	RunMode: Triggered
+ 	Click on Select Triggers and choose OutputDir
+
+The workflow is read to be run by double click on the Download sleuth directory and pressing start. Alternatively, if you have already generated the index, disconnected the kallisto index widget from the kallistioQuant widget. Clikc on the kallistoQuant widget and enter the index file. Click on select triggers and uncheck the indexFile option. This will let you avoid having to wait for the index to be regenerated.
 
 ## Appendices
 

@@ -27,7 +27,7 @@ def reformatOWS(workflowTitle,inputFile,outputFile,uniqueNames):
         else:
             uniqueName=widgetName
         node.attributes['name'].value=uniqueName
-        node.attributes['qualified_name']=niceForm(projectName,useDash=False)+'.OW'+uniqueName+'.OW'+uniqueName
+        node.attributes['qualified_name']=niceForm(workflowTitle,useDash=False)+'.OW'+uniqueName+'.OW'+uniqueName
         node.attributes['project_name'].value=workflowTitle
     with open(outputFile,'w') as f:
         f.write(doc.toxml())
@@ -226,9 +226,6 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
             #unique the list
             projectNames=list(OrderedDict.fromkeys(projectNames))
     
-#        if projectName in widgetPaths:
-#            projectNames=[projectName]+projectNames
-            
         #copy the widgets and make a map for renamed widgets
         nameSeen=set()
         uniqueNames={}
@@ -255,7 +252,7 @@ def exportWorkflow (bwbOWS,outputWorkflow,projectTitle,merge=False,color=None,ic
             projectName=node.getAttribute('project_name')
             if projectName==projectTitle:
                 widgetName=node.getAttribute('name')
-                widgetPath=findWidgetPathFromLink(widgetPath,projectName)
+                widgetPath=findWidgetPathFromLink(widgetName,projectName)
                 if widgetPath not in widgetPaths:
                     widgetPaths.add(widgetPath)
                     os.system('cp -r {} {}/widgets/{}/{}'.format(widgetPath,tempDir,projectTitlePath,widgetName)) 
