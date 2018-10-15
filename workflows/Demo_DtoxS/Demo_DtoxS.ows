@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <scheme description="" title="Demo-DtoxS" version="2.0">
 	<nodes>
-		<node id="0" name="downloadURL" position="(130.0, 426.0)" project_name="Demo-DtoxS" qualified_name="Demo-DtoxS.OWdownloadURL.OWdownloadURL" title="Download DtoxS files" version="" />
-		<node id="1" name="downloadURL" position="(468.0, 426.0)" project_name="Demo-DtoxS" qualified_name="Demo-DtoxS.OWdownloadURL.OWdownloadURL" title="Download complete counts" version="" />
-		<node id="2" name="DtoxSAlignment" position="(307.0, 426.0)" project_name="Demo-DtoxS" qualified_name="Demo-DtoxS.OWDtoxSAlignment.OWDtoxSAlignment" title="DtoxS alignment" version="" />
-		<node id="3" name="DtoxSAnalysis" position="(625.0, 424.0)" project_name="Demo-DtoxS" qualified_name="Demo-DtoxS.OWDtoxSAnalysis.OWDtoxSAnalysis" title="DtoxS analysis" version="" />
-		<node id="4" name="gnumeric" position="(815.0, 423.0)" project_name="Demo-DtoxS" qualified_name="Demo-DtoxS.OWgnumeric.OWgnumeric" title="gnumeric" version="" />
+		<node id="0" name="downloadURL" position="(130.0, 426.0)" project_name="Demo-DtoxS" qualified_name="Demo_DtoxS.OWdownloadURL.OWdownloadURL" title="Download DtoxS files" version="" />
+		<node id="1" name="downloadURL" position="(468.0, 426.0)" project_name="Demo-DtoxS" qualified_name="Demo_DtoxS.OWdownloadURL.OWdownloadURL" title="Download complete counts" version="" />
+		<node id="2" name="DtoxSAlignment" position="(307.0, 426.0)" project_name="Demo-DtoxS" qualified_name="Demo_DtoxS.OWDtoxSAlignment.OWDtoxSAlignment" title="DtoxS alignment" version="" />
+		<node id="3" name="DtoxSAnalysis" position="(625.0, 424.0)" project_name="Demo-DtoxS" qualified_name="Demo_DtoxS.OWDtoxSAnalysis.OWDtoxSAnalysis" title="DtoxS analysis" version="" />
+		<node id="4" name="gnumeric" position="(815.0, 423.0)" project_name="Demo-DtoxS" qualified_name="Demo_DtoxS.OWgnumeric.OWgnumeric" title="gnumeric" version="" />
 	</nodes>
 	<links>
 		<link enabled="true" id="0" sink_channel="trigger" sink_node_id="2" source_channel="directory" source_node_id="0" />
