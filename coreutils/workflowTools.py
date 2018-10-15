@@ -177,8 +177,8 @@ def renameWidgetInWorkflow(inputOWS,outputOWS,projectName,widgetName,newName):
         print (node.getAttribute('name'))
         if node.getAttribute('project_name')==projectName and node.getAttribute('name') == widgetName:
             node.attributes['name']=newName
-            node.attributes['qualified_name'].value='{}.OW{}.OW{}'.format(projectName,newName,newName)
-#get rid of empty with one space lines that result from removal and write    
+            node.attributes['qualified_name'].value='{}.OW{}.OW{}'.format(niceForm(projectName,useDash=False),newName,newName)
+    #get rid of empty with one space lines that result from removal and write    
     with open(outputOWS,'w') as f:
         f.write("".join([s for s in doc.toxml().splitlines(True) if s.strip()]))
     

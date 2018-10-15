@@ -274,18 +274,18 @@ class ToolDockEdit(widget.OWWidget):
         qm.information(self,'Successfully renamed','renamed widget {} to {}'.format(widgetName,newName),QtGui.QMessageBox.Ok)
         self.canvas.reload_current()
                 
-    def findWorkflowsWithWidget(self,widgetName,category):
+    def findWorkflowsWithWidget(self,widgetName,widgetCategory):
         workflowPaths=[]
         for category in self.categories:
             print(category + ' ' +self.categoryToPath[category])
             owsFiles=glob('{}/*.ows'.format(self.categoryToPath[category]))
             for owsFile in owsFiles:
-                print ('checking ' + owsFile + ' for '+ category +' '+widgetName) 
+                print ('checking ' + owsFile + ' for '+ widgetCategory +' '+widgetName) 
                 doc = minidom.parse(owsFile)
                 nodes = doc.getElementsByTagName("node")
                 for node in nodes:
                     print('node pn {} node name {} category {} wname {}'.format(node.getAttribute('project_name'),node.getAttribute('name'),category,widgetName))
-                    if node.getAttribute('project_name') == category and node.getAttribute('name') == widgetName:
+                    if node.getAttribute('project_name') == widgetCategory and node.getAttribute('name') == widgetName:
                         workflowPaths.append(owsFile)
                         continue
         return workflowPaths
