@@ -280,7 +280,8 @@ class OWBwBWidget(widget.OWWidget):
         QPushButton:hover {background-color: #1555f5; }
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
-        '''        
+        '''
+        self.useTestMode=False        
         self.jobRunning=False
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self._dockerImageName = image_name
@@ -840,6 +841,10 @@ class OWBwBWidget(widget.OWWidget):
         self.graphicsMode=QtGui.QCheckBox('Export graphics',self)
         self.graphicsMode.setChecked(self.exportGraphics)
         self.graphicsMode.stateChanged.connect(self.graphicsModeChange)
+        
+        self.testMode=QtGui.QCheckBox('Test mode',self)
+        self.testMode.setChecked(self.useTestMode)
+        self.testMode.stateChanged.connect(self.testModeChange)
         #self.dockerMode=QtGui.QCheckBox('Build container',self)
         #self.dockerMode.setChecked(self.useDockerfile)
         #self.dockerMode.stateChanged.connect(self.dockerModeChange)
@@ -883,12 +888,15 @@ class OWBwBWidget(widget.OWWidget):
         self.execLayout.addWidget(self.btnRun,1,0)
         self.execLayout.addWidget(self.btnStop,1,1)
         self.execLayout.addWidget(self.graphicsMode,1,2)
+        self.execLayout.addWidget(self.testMode,1,3)
         #self.execLayout.addWidget(self.dockerMode,1,3)
         self.execLayout.addWidget(myLabel,1,4)
         self.execLayout.addWidget(self.cboRunMode,1,5)
         if self.candidateTriggers:
             self.execLayout.addWidget(self.execBtn,1,6)
-        box.layout().addLayout(self.execLayout)
+        box.layout().addLayout(self.execLayout)    
+    def testModeChange(self):
+        self.useTestMode=self.testMode.isChecked() 
     def dockerModeChange(self):
         self.useDockerfile=self.dockerMode.isChecked()                       
     def graphicsModeChange(self):
@@ -1084,13 +1092,12 @@ class OWBwBWidget(widget.OWWidget):
         cmd=self.generateCmdFromData()
         self.envVars={}
         self.getEnvironmentVariables()
-       
         try:
             imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings())
+            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()

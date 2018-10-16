@@ -220,9 +220,9 @@ More information about finding Docker IP is available here: [https://docs.docker
 The Bwb no-vnc container launches a mini-webserver that is accessed using your browser. The server uses fluxbox [http://fluxbox.org/], a compact windows manager to provide a graphical user interface similar to Windows or the MacOS. Fluxbox provides full graphical support using X11 to render the graphics internally on the server.  Bwb uses the GUIdock-X11 system to allow containerized apps (i.e Jupyter, gnumeric)  to export graphic output to the server's internal screen.  The noVNC protocol is then used to transfer the internally rendered screen to your browser and HTML5 commands draw the graphics on your browser.
 
 
-### Basic window manpulations
+### Basic window manipulations
 
- The Bwb application is started automatically upon starting the docker container. The window can be minimized, maximized/restore and closed using the buttons in the left hand corner. These are the same buttons available in standard Windows, MacOS and Linux windowing systems. The window can also be resized by clcking on the middle button to unmaximize and then dragging the lower right hand corner.
+ The Bwb application is started automatically upon starting the Docker container. The window can be minimized, maximized/restore and closed using the buttons in the left hand corner. These are the same buttons available in standard Windows, MacOS and Linux windowing systems. The window can also be resized by clcking on the middle button to unmaximize and then dragging the lower right hand corner.
 
 Clicking on the left minimize button of th window hides the window and reveals the background. The window can be restored by clicking on the panels in the lower toolbar. Clicking on the right close button closes the application. It, however, does not quit the container.
 
@@ -406,9 +406,13 @@ To execute a workflow, double click on a widget and manual start from that widge
 
 ## Demo workflows
 
+Four demo workflows are included with the Bwb container. They are found in the */workflows* directory
+
 ### DToxS demo
+This is an workflow used for processing UMI (Unique Molecular Identifier) barcoded RNA-seq data. 
 
 ### kallisto-sleuth demo
+This workflow is the kallisto 
 
 ### kallisto-sleuth with Jupyter demo
 
@@ -455,12 +459,12 @@ The basic steps will be to
 
 2\. The Python2 definition window should have 8 tabs. If the window is too narrow, not all the tabs will be visible. Either resize the window by dragging on the lower right corner or use the arrows in the top right  to scrool the content. The 'Genera'l tab should be the active one by default. Make the following changes:
 
-****NB (do not enter quotes)**
+**NB (do not enter quotes)**
 -  description:  'Cutadapt trimming'
 -  docker_image_name: 'biodepot/cutadapt-demo'
 -  docker_image_tag: 1.0
 
-The description will appear in the lower left hand help window undoer the Tool dock when we hover over the widget to let other users know what the widget does. The docker image and tag fields tell the widget which container to user. We will build that container later.
+The description will appear in the lower left hand help window under the Tool dock when we hover over the widget to let other users know what the widget does. The Docker image and tag fields tell the widget which container to user. We will build that container later.
 
 3\. Click on the Inputs Tab. Under the big white text box there is a set of data entry boxes followed by an add button (file icon with plus sign) and a delete button (file icon with x sign) which should be inactive. Enter 'OutputDir' in the 'Name' box and then click on the add button. The new entry should by visible in the text box. To edit an entry if there is a mistake, click on the entry in the text box. The boxes at the bottom wil be filled with the values from the entry and can be edited and saved by clicking the add button. The delete button should become active and allow you to delete the entry.
 
@@ -508,7 +512,7 @@ RUN apk add --no-cache gcc gzip && \
 
 ```
 
-The widget is built starting from the Dockerfile used for the python2 widget. This widget was built using the compact alpine Linux distro which uses apk as a package manager (analogous to apt-get, yum, and dnf in other distros). We add one extra line (the slashes concatenate lines) which installs the gcc compiler suite and dev libraries python-dev libc-dev needed by pip to install cutadapt. The gzip library is installed as well to support decompression of gzpped fastq files. *pip* is then called to install *cutadapt* and the dev tools removed as they are not necessary to run cutadapt. The entire procedure is done in one command to avoid Docker spawning intermediate containers that are take up space in the final image.
+The widget is built starting from the Dockerfile used for the python2 widget. This widget was built using the compact alpine Linux distro which uses apk as a package manager (analogous to apt-get, yum, and dnf in other distros). We add one extra command line (the slashes concatenate the lines into a single command) which installs the gcc compiler suite and dev libraries python-dev libc-dev needed by pip to install cutadapt. The gzip library is installed as well to support decompression of gzpped fastq files. *pip* is then called to install *cutadapt* and the dev tools removed as they are not necessary to run cutadapt. The entire procedure is done in one command to avoid Docker spawning intermediate containers that are take up space in the final image.
 
 To add this Dockerfile and build this Dockerfile:
 
