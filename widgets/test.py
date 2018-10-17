@@ -11,16 +11,16 @@ from DockerClient import DockerClient
 from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
-class OWfastqc(OWBwBWidget):
-    name = "fastqc"
-    description = "fastqc"
-    priority = 5
-    icon = getIconName(__file__,"fastqc_icon_100.png")
+class OWPerl(OWBwBWidget):
+    name = "Perl"
+    description = "Minimum perl container"
+    priority = 20
+    icon = getIconName(__file__,"perl.png")
     want_main_area = False
-    docker_image_name = "biodepot/fastqc"
-    docker_image_tag = "latest"
-    inputs = [("inputDir",str,"handleInputsinputDir")]
-    outputs = [("outputDir",str)]
+    docker_image_name = "biodepot/perl"
+    docker_image_tag = "5.26.2-r1__alpine-3.7__081418"
+    inputs = [("inputFile",str,"handleInputsinputFile"),("Trigger",str,"handleInputsTrigger")]
+    outputs = [("OutputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     exportGraphics=pset(False)
@@ -28,24 +28,27 @@ class OWfastqc(OWBwBWidget):
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
-    inputFiles=pset([])
-    outputDir=pset(None)
-    inputDir=pset(None)
+    InputFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open(getJsonName(__file__,"fastqc")) as f:
+        with open(getJsonName(__file__,"Perl")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputsinputDir(self, value, *args):
+    def handleInputsinputFile(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("inputDir", value, args[0][0], test=args[0][3])
+            self.handleInputs("inputFile", value, args[0][0], args[0][3])
+        else:
+            self.handleInputs("inputFile", value, None)
+    def handleInputsTrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("Trigger", value, args[0][0], args[0][3])
         else:
             self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         outputValue=None
-        if hasattr(self,"outputDir"):
-            outputValue=getattr(self,"outputDir")
-        self.send("outputDir", outputValue)
+        if hasattr(self,"OutputDir"):
+            outputValue=getattr(self,"OutputDir")
+        self.send("OutputDir", outputValue)
