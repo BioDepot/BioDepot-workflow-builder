@@ -57,17 +57,17 @@ class OWjupyter_sleuth(OWBwBWidget):
         self.drawGUI()
     def handleInputsInputDir(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("InputDir", value, args[0][0])
+            self.handleInputs("InputDir", value, args[0][0]), test=args[0][3]))
         else:
             self.handleInputs("inputFile", value, None)
     def handleInputsTrigger(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("Trigger", value, args[0][0])
+            self.handleInputs("Trigger", value, args[0][0]), test=args[0][3]))
         else:
             self.handleInputs("inputFile", value, None)
     def handleInputsstartingNotebook(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("startingNotebook", value, args[0][0])
+            self.handleInputs("startingNotebook", value, args[0][0]), test=args[0][3]))
         else:
             self.handleInputs("inputFile", value, None)
     def handleOutputs(self):

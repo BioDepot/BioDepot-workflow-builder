@@ -39,7 +39,7 @@ class OWDirectory(OWBwBWidget):
         self.drawGUI()
     def handleInputsDirectory(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("Directory", value, args[0][0])
+            self.handleInputs("Directory", value, args[0][0]), test=args[0][3]))
         else:
             self.handleInputs("inputFile", value, None)
     def handleOutputs(self):

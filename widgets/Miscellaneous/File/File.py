@@ -39,9 +39,9 @@ class OWFile(OWBwBWidget):
         self.drawGUI()
     def handleInputsFile(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("File", value, args[0][0], args[0][3])
+            self.handleInputs("File", value, args[0][0]), test=args[0][3]))
         else:
-            self.handleInputs("inputFile", value, None, False)
+            self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
         outputValue=None
         if hasattr(self,"File"):
