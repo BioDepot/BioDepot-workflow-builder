@@ -752,7 +752,7 @@ class WidgetsSignalManager(SignalManager):
         scheme.link_added.connect(self.link_added)
         scheme.link_removed.connect(self.link_removed)
 
-    def send(self, widget, channelname, value, signal_id):
+    def send(self, widget, channelname, value, signal_id, test=False):
         """
         send method compatible with OWBaseWidget.
         """
@@ -776,7 +776,7 @@ class WidgetsSignalManager(SignalManager):
         # Expand the signal_id with the unique widget id and the
         # channel name. This is needed for OWBaseWidget's input
         # handlers (Multiple flag).
-        signal_id = (widget.widget_id, channelname, signal_id)
+        signal_id = (widget.widget_id, channelname, signal_id, test)
 
         SignalManager.send(self, node, channel, value, signal_id)
 

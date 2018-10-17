@@ -9,6 +9,7 @@ from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
+from time import sleep
 
 from AnyQt.QtWidgets import (
     QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
@@ -311,6 +312,13 @@ class OWBwBWidget(widget.OWWidget):
                 if not hasattr(self, bwbVolAttr) :
                     setattr(self,bwbVolAttr,None)
 
+#Override the send function to handle the test flag
+    def send(self,attr,*args,**kwargs):
+        if self.useTestMode:
+            super().send(attr,*args,test=self.useTestMode,**kwargs)
+        else:
+            super().send(attr,*args,**kwargs)
+
 #Drawing the GUI
     def drawGUI(self):
         self.tabs = tabbedWindow()
@@ -474,8 +482,6 @@ class OWBwBWidget(widget.OWWidget):
             else:
                 sys.stderr.write('{} has prevous value {} of type {}\n'.format(pname,getattr(self,pname),type(getattr(self,pname))))
         self.drawElements(self.data['requiredParameters'])
-
-
     
     def findOptionalElements(self):
        #checks that there are optional elements
@@ -500,7 +506,6 @@ class OWBwBWidget(widget.OWWidget):
                 optionalList.append(pname)    
         self.drawElements(optionalList,isOptional=True)
             
-
     def drawCheckbox(self,pname,pvalue, box=None):
         #for booleans - their value is the same as the checkbox state
         sys.stderr.write('drawCB pname {} pvalue {} label {}\n'.format(pname, pvalue,pvalue['label']))
@@ -722,7 +727,6 @@ class OWBwBWidget(widget.OWWidget):
         #add boxEdit layout
         layoutAttr=pname+'Layout'
         setattr(self,layoutAttr,self.addBoxEdit(pname,pvalue,layout,ledit,checkbox,elements=elements,disabledFlag=disabledFlag))
-        
         
     def addBoxEdit(self,pname,pvalue,layout,ledit,checkbox,elements=None,disabledFlag=False):
         #setup boxEdit - boxEdit element values other than the list itself are not tracked and not saved in settings 
@@ -1028,8 +1032,9 @@ class OWBwBWidget(widget.OWWidget):
         self.optionsChecked[pname]=getattr(self,checkAttr)
         
 #Handle inputs
-    def handleInputs(self,attr,value,sourceId):
+    def handleInputs(self,attr,value,sourceId,test=False):
         sys.stderr.write('INPUT RECEIVED value is {} sourceId is {}\n'.format(value,sourceId))
+        #check for test mode pre-signal
         if value is '__purge':
             #remove signal - this used to be None which was also passed when the value actually was None
             self.inputConnections.remove(attr,sourceId)
@@ -1050,6 +1055,7 @@ class OWBwBWidget(widget.OWWidget):
             sys.stderr.write('connection dict value for {} is {}\n'.format(attr,self.inputConnections._dict[attr]))
             self.checkTrigger(inputReceived=False)
         else:
+            self.testMode.setChecked(test)
             self.inputConnections.add(attr,sourceId)
             sys.stderr.write('sig handler adding input: attr {} sourceId {} value {}\n'.format(attr,sourceId,value))
             sys.stderr.write('connection dict value for {} is {}\n'.format(attr,self.inputConnections._dict[attr]))
@@ -1097,7 +1103,7 @@ class OWBwBWidget(widget.OWWidget):
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode)
+            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile='/data/output.sh')
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()

@@ -147,9 +147,9 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
             for attr, values in data['inputs'].items():
                 f.write('    def handleInputs{}(self, value, *args):\n'.format(attr))
                 f.write('        if args and len(args) > 0: \n')
-                f.write('            self.handleInputs("{}", value, args[0][0])\n'.format(attr))
+                f.write('            self.handleInputs("{}", value, args[0][0], args[0][3])\n'.format(attr))
                 f.write('        else:\n')
-                f.write('            self.handleInputs("inputFile", value, None)\n'.format(attr))               
+                f.write('            self.handleInputs("inputFile", value, None, False)\n'.format(attr))               
         if 'outputs' in data and data['outputs']:
             #generic omnibus output handler - change if you want to customize outputs
             f.write('    def handleOutputs(self):\n'.format(attr))
