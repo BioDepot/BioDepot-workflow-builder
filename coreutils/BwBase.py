@@ -284,6 +284,7 @@ class OWBwBWidget(widget.OWWidget):
         '''
         self.useTestMode=False        
         self.jobRunning=False
+        self.saveBashFile=None
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self._dockerImageName = image_name
         self._dockerImageTag = image_tag
@@ -882,7 +883,7 @@ class OWBwBWidget(widget.OWWidget):
         myLabel=QtGui.QLabel('RunMode:')
         myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        self.btnRun = gui.button(None, self, "Start", callback=self.onRunClicked)
+        self.btnRun = gui.button(None, self, "Start", callback=lambda: self.onRunClicked(button=self.btnRun))
         self.btnRun.setStyleSheet(self.css)
         self.btnRun.setFixedSize(60,20)
         self.btnStop = gui.button(None, self, "Stop", callback=self.onStopClicked)
@@ -1055,6 +1056,8 @@ class OWBwBWidget(widget.OWWidget):
             sys.stderr.write('connection dict value for {} is {}\n'.format(attr,self.inputConnections._dict[attr]))
             self.checkTrigger(inputReceived=False)
         else:
+            if test:
+                self.saveBashFile=None
             self.testMode.setChecked(test)
             self.inputConnections.add(attr,sourceId)
             sys.stderr.write('sig handler adding input: attr {} sourceId {} value {}\n'.format(attr,sourceId,value))
@@ -1103,7 +1106,7 @@ class OWBwBWidget(widget.OWWidget):
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile='/data/output.sh')
+            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
@@ -1363,11 +1366,21 @@ class OWBwBWidget(widget.OWWidget):
                     self.envVars[e]=self.data['env'][e]
 
 #Event handlers
-    def onRunClicked(self):
-        if hasattr (self,'userStartJob'):
-            self.userStartJob()
-        else:
-            self.startJob()
+    def onRunClicked(self,button=None):
+        if button and self.useTestMode:
+            qm = QtGui.QMessageBox
+            ret=qm.question(self,'Export?', "Export Docker commands?", qm.Yes | qm.No)
+            if ret == qm.No:
+                self.saveBashFile=""
+                self.startJob()
+            else:
+                self.saveBashFile=""
+                retValue= QtWidgets.QFileDialog.getSaveFileName(self,"Export Docker commands","myscript.sh","Text files (*.sh);;All Files (*)")[0]
+                if retValue:
+                    self.saveBashFile=retValue
+                    with open(self.saveBashFile,'w') as f:
+                        f.write('#!/bin/bash\n')
+        self.startJob()
             
     def onStopClicked(self):
         self.pConsole.stop('Stopped by user')

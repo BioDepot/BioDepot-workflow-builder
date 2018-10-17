@@ -60,6 +60,7 @@ class DockerClient:
         self.bwb_instance_id = socket.gethostname()
         self.bwbMounts={}
         self.findVolumeMappings()
+        self.logFile=None
 
     def getClient(self):
         return self.cli
@@ -101,6 +102,10 @@ class DockerClient:
     
     """
     def create_container_cli(self, name, volumes=None, commands=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None):
+        #reset logFile when it is not None - can be "" though - this allows an active reset
+        if logFile is not None:
+            self.logFile = logFile
+            
         #skips DockerPy and creates the command line equivalent
         volumeMappings=''
         for container_dir, host_dir in hostVolumes.items():
@@ -125,6 +130,11 @@ class DockerClient:
         sys.stderr.write('Docker command is\n{}\n'.format(dockerCmd))
         consoleProc.state='running'
         if testMode:
+            dockerCmd=dockerBaseCmd + ' --init {} {} {} {}'.format(volumeMappings,envs,name,commands)
+            #Do not test for logFile - this may be None if it is not the first widget in testMode
+            if self.logFile:
+                with open (self.logFile,'a') as f:
+                    f.write('    {}\n'.format(dockerCmd))
             consoleProc.process.start('echo',[dockerCmd])
         else:   
             consoleProc.process.start('/bin/bash',['-c',dockerCmd])
