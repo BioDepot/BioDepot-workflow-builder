@@ -217,12 +217,12 @@ More information about finding Docker IP is available here: [https://docs.docker
 
 ### Graphics support for containerized apps
 
-The Bwb no-vnc container launches a mini-webserver that is accessed using your browser. The server uses fluxbox [http://fluxbox.org/], a compact windows manager to provide a graphical user interface similar to Windows or the MacOS. Fluxbox provides full graphical support using X11 to render the graphics internally on the server.  Bwb uses the GUIdock-X11 system to allow containerized apps (i.e Jupyter, gnumeric)  to export graphic output to the server's internal screen.  The noVNC protocol is then used to transfer the internally rendered screen to your browser and HTML5 commands draw the graphics on your browser.
+The Bwb noVNC container launches a mini-webserver that is accessed using your browser. The server uses fluxbox [http://fluxbox.org/], a compact windows manager to provide a graphical user interface similar to Windows or the MacOS. Fluxbox provides full graphical support using X11 to render the graphics internally on the server.  Bwb uses the GUIdock-X11 system to allow containerized apps (i.e Jupyter, gnumeric)  to export graphic output to the server's internal screen.  The noVNC protocol is then used to transfer the internally rendered screen to your browser and HTML5 commands draw the graphics on your browser.
 
 
 ### Basic window manipulations
 
- The Bwb application is started automatically upon starting the Docker container. The window can be minimized, maximized/restore and closed using the buttons in the left hand corner. These are the same buttons available in standard Windows, MacOS and Linux windowing systems. The window can also be resized by clcking on the middle button to unmaximize and then dragging the lower right hand corner.
+ The Bwb application is started automatically upon starting the Docker container. The window can be minimized, maximized/restored and closed using the buttons in the left hand corner. These are the same buttons available in standard Windows, MacOS and Linux windowing systems. The window can also be resized by clcking on the middle button to unmaximize and then dragging the lower right hand corner.
 
 Clicking on the left minimize button of th window hides the window and reveals the background. The window can be restored by clicking on the panels in the lower toolbar. Clicking on the right close button closes the application. It, however, does not quit the container.
 
@@ -236,7 +236,7 @@ You can launch multiple instances of Bwb which will appear in separate windows. 
 
 ### Interaction with host windowing system
 
-Note that the fluxbox windowing system is inside the browser window. You still have access to whatever windowing system you are using on your host machine. If your browser closes or go to another url, nothing happens to Bwb - the browser merely provides a viewport to the server in Bwb container . Refreshing or reconnecting the browser to the container IP allows you to interact with Bwb again. Only by using the quit option from the fluxbox application menu or by using Docker to terminate the container can you actually quit.  Cut and paste is not yet available from windows in the user's host machine to windows in the browser, though this feature will be added soon. 
+Note that the fluxbox windowing system is inside the browser window. You still have access to whatever windowing system you are using on your host machine. If your browser closes or go to another url, nothing happens to Bwb - the browser merely provides a viewport to the server running in the Bwb container. Refreshing or reconnecting the browser to the container IP allows you to interact with Bwb again. Only by using the quit option from the fluxbox application menu or by using Docker to terminate the container can you actually quit.  Cut and paste is not yet available from windows in the user's host machine to windows in the browser, though this feature will be added soon. 
 
 
 ## Bwb application
@@ -245,23 +245,29 @@ Note that the fluxbox windowing system is inside the browser window. You still h
 
 Bioinformatics analytical pipelines are comprised of multiple modules. The output from one module becomes the input processed by the next module in the pipeline. Scripting languages such as Python, R, Perl, and bash are used to connect workflows and to generate the final output, often in the form of tables and graphcs.
 
-In Bwb, we use Bwb workflows and widgets to represent and execute analytical pipelines. Each execution module in a pipeline is represented by a graphical icon which we call a widget.  Output from one widget can be connected to the input of the next to form a graphical flowchart representing the analytical pipeline which can be saved or executed. A Bwb workflow representing a pipeline, thus consists of a set of widgets (individual execution modules) and a file that defines how their inputs and outputs are connected. Construction of Bwb workflows is accomplished by constructing, and connecting widgets using the Bwb interface described in the next sections
+In Bwb, we use Bwb workflows and widgets to represent and execute analytical pipelines. Each execution module in a pipeline is represented by a graphical icon which we call a widget.  Output from one widget can be connected to the input of the next to form a graphical flowchart representing the analytical pipeline which can be saved or executed. A Bwb workflow,  representing a pipeline, thus consists of a set of widgets (individual execution modules) and a definition of how the widget inputs and outputs are connected. Construction of Bwb workflows is accomplished by constructing, and connecting widgets using the Bwb interface described in the next sections
 
 ### Tool Dock
 
-When Bwb is started, the Bwb application window pops up. On the left hand side of the application window is tool box (tool dock) with multiple tabs  (drawers) which contain different collections of widgets. Clicking on the tab expands the toolbox drawer to reveal the contents. Drawers are organized by function. Bwb comes with a set of ready-to-use widgets. These are all linked to containers available on our BioDepot repositiory on Docker hub. Any workflows constructed with these widgets will automatically download the necessary containers the first time that they are run and require no installation. 
+When Bwb is started, the Bwb application window pops up. On the left hand side of the application window is tool box (tool dock) with multiple tabs  (drawers) which contain different collections of widgets. Clicking on the tab expands the toolbox drawer to reveal the contents. Drawers are organized by function. Bwb comes with a set of ready-to-use widgets. These are all linked to containers available on our BioDepot repositiory on Docker hub. Any workflows constructed with these widgets will automatically download the necessary containers the first time that they are run and require no installation. Automatic downloading is not restricted to BioDepto widgets but will occur for any widget that uses a container available on a public repository such as DockerHub. 
 
 Users can also create their own drawers. A new drawer is created whenever a workflow is loaded. Also widgets can be added (and removed) using the ToolDock editor available fromt the menu bar. (See the section on editing the tool dock
 
-Note that different drawers in the Tool dock can have widgets with the same name. For the included stock widgets, these are identical. However, they can represent different versions due to the ease which widgets an be customized. For user workflows we use different color to visually distinguish these customized widgets from stock widgets.
+### Widget names and definitions
+
+Widgets in the Tool Dock represent different widget definitions, i.e. which command is executed, which is container used and what parameters are queried. These widgets can be dragged onto the canvas to form workflows. The same widget definition can appear multiple times in a workflow, possibly with the different parameters to perform functions. For example, the downloadURL widget might appear several times in a workflow to download different files. In other words, a workflow may have many **instances** of the same widget. However, the software will ensure that each widget instance in a workflow will have the same name. 
+
+Different workflows can have the same set of names, both for the definition and the instances. This means that different drawers can have widgets with the same name and these are defined by separate sets of files. This may sound confusing but is necessary if we expect that individual workflows will have their own set of customized modules. We use different colors to visually distinguish the source of the widget
+
+### Minimization and miniature version of Tool Dock
 
 The Tool Dock can be minimized using the button on the top right hand side.
 
-A miniature version of the tooldock is accessible by right clicking in the canvas section to the right of the toolBox 
+A miniature version of the tooldock is also accessible by right clicking in the canvas section to the right of the toolBox 
 
 ### Editing the Tool dock
 
-Widgets and drawers can be added and deleted from the Tool Dock by choosing the edit tool dock item from the menu. Before any of the changes are reflected, the user must also choose to refresh the settings.
+Widgets and drawers can be added and deleted from the Tool Dock by choosing the edit tool dock item from the menu. The changes occur after refreshing settings or reloading the current workflow. For the most part this occurs automatically, but if the changes do not occur, try refreshing settings or reloading the current workflow using the File menu.
 
 ### Interacting with widgets
 
@@ -364,16 +370,22 @@ Will load the attrs and state from another widget - this allows the user to use 
 
 ### Building workflows from widgets
 
-#### TLDR
+#### TLDR;
 
 A quick summary of the steps to construct a workflow:
 
 1\. Drag desired widgets from Tool Dock onto the canvas
+
 2\. Save the workflow and check of merge all widgets box
+
 3\. Load the saved workflow and a drawer of workflow widgets will appear in the Tool dock
+
 4\. Edit the widget definitions to define which parameters will be queried, what command and which container will be run
+
 5\. Connect the widgets by dragging from the right side of the widget (output) to the left side of the next widget to form the pipeline
+
 6\. Enter all the values for the different parameters
+
 7\. Save the workflow
 
 #### Workflow structure
@@ -403,6 +415,12 @@ Demo workflows that come with Bwb are in the /workflows directory.
 
 To execute a workflow, double click on a widget and manual start from that widget by hitting the blue start button. When that widget is finished execution it will send output to connected widgets. If these widgets are triggered by the output, they will then execute (as long as all the required parameters and other other trigger signals have been received. Workflows also can be started from any widget if the required files and parameters are present. For example,  an alignment pipeline can skip the indexing steps if the index has already been generated or downloaded.
 
+#### Test execution
+Workflows can take a long time to execute and errors in connecting widgets can take a long time to detect if all the preceding code has to be executed first. In the bottom execution area of the widget UI window, there is a checkbox that only generates the Docker command and sends the outputs without actually executing the Docker command. Instead, the Docker command will pop up in the console. Once a widget is run in test mode, all downstream widgets will also run in test mode. This allows for rapid testing of the connections. Running a widget in normal mode, will reset downstream widgets so that they run in normal mode as well. 
+
+#### Exporting workflows as a bash script
+
+When a widget is started in test mode, an option will appear to save the Docker commands in a bash script. This script can be run from the host machine without Bwb with some caveats. The file paths will be those specified from the host machine and be in Linux format (forward slashes). Currently, any graphics will be directed to the Bwb screen - and will pop up on the Bwb browser if Bwb is active.
 
 ## Demo workflows
 
@@ -424,14 +442,18 @@ This workflow is the kallisto
 The aims of this workflow are to demonstrate how to build a widget for a custom Python script and modify and customize an existing workflow. In this tutorial we will write a script to call cutadapt ( a Python app for removing adapters from reads) and insert it into the kallisto-jupyter demo workflow to trim the reads before alignment.
 
 
-###Overview
+### Overview
 
 The basic steps will be to
 
 1\. Add the Python2 widget to the kallisto-jupyter workflow
+
 2\. Customize the Python2 widget to query the additional parameters needed by the cutadapt script
+
 3\. Create Docker image
+
 4\. Write a short custom script locally to manage multiple files
+
 5\. Connect widget into the workflow
 
 
