@@ -285,6 +285,8 @@ class OWBwBWidget(widget.OWWidget):
         self.useTestMode=False        
         self.jobRunning=False
         self.saveBashFile=None
+        self.iterableAttrs=[]
+        self.iteratedAttrs=[]
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self._dockerImageName = image_name
         self._dockerImageTag = image_tag
@@ -830,6 +832,15 @@ class OWBwBWidget(widget.OWWidget):
             self.updateBoxEditValue(attr,boxEdit)
         if not boxEdit.count():
             removeBtn.setEnabled(False)
+            
+    def findIterables(self):
+        retList=[]
+        if self.data['parameters'] is None:
+            return retList
+        for pname, pvalue in self.data['parameters'].items():
+            if 'list' in pvalue['type']:
+                retList.append(pname) 
+        return retList
         
     def drawExec(self, box=None):
         if not hasattr(self,'useDockerfile'):
@@ -850,6 +861,22 @@ class OWBwBWidget(widget.OWWidget):
         self.testMode=QtGui.QCheckBox('Test mode',self)
         self.testMode.setChecked(self.useTestMode)
         self.testMode.stateChanged.connect(self.testModeChange)
+        
+        self.iterableAttrs=self.findIterables()
+
+        self.iterateBtn=QtGui.QToolButton(self)
+        self.iterateBtn.setText('Iterate')
+        self.iterablesMenuItems={}
+        if self.iterableAttrs:
+            self.iterablesMenu=QtGui.QMenu(self)
+            for attr in self.iterableAttrs:
+                action=self.iterablesMenu.addAction(attr)
+                action.setCheckable(True)
+                action.setChecked( bool(attr in self.iteratedAttrs))
+                action.changed.connect(self.chooseIterable)
+                self.iterablesMenuItems[action]=attr
+            self.iterateBtn.setMenu(self.iterablesMenu)
+            self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)    
         #self.dockerMode=QtGui.QCheckBox('Build container',self)
         #self.dockerMode.setChecked(self.useDockerfile)
         #self.dockerMode.stateChanged.connect(self.dockerModeChange)
@@ -892,13 +919,14 @@ class OWBwBWidget(widget.OWWidget):
         self.btnStop.setEnabled(False)
         self.execLayout.addWidget(self.btnRun,1,0)
         self.execLayout.addWidget(self.btnStop,1,1)
-        self.execLayout.addWidget(self.graphicsMode,1,2)
-        self.execLayout.addWidget(self.testMode,1,3)
+        self.execLayout.addWidget(self.iterateBtn,1,2)
+        self.execLayout.addWidget(self.graphicsMode,1,3)
+        self.execLayout.addWidget(self.testMode,1,4)
         #self.execLayout.addWidget(self.dockerMode,1,3)
-        self.execLayout.addWidget(myLabel,1,4)
-        self.execLayout.addWidget(self.cboRunMode,1,5)
+        self.execLayout.addWidget(myLabel,1,5)
+        self.execLayout.addWidget(self.cboRunMode,1,6)
         if self.candidateTriggers:
-            self.execLayout.addWidget(self.execBtn,1,6)
+            self.execLayout.addWidget(self.execBtn,1,7)
         box.layout().addLayout(self.execLayout)    
     def testModeChange(self):
         self.useTestMode=self.testMode.isChecked() 
@@ -927,7 +955,16 @@ class OWBwBWidget(widget.OWWidget):
         elif not checked and attr in self.runTriggers:
             (self.runTriggers).remove(attr)
             self.triggerReady[attr]=False
-    
+            
+    def chooseIterable (self):
+        action=self.iterablesMenu.sender()
+        attr=self.iterablesMenuItems[action]
+        checked=action.isChecked()
+        if attr is None or checked is None:
+            return
+        if checked and attr not in self.iteratedAttrs:
+            self.iteratedAttrs.append(attr)
+
     def checkTrigger(self,inputReceived=False):
         #this should be checked any time there is a change
         #but only triggers when an input is received
@@ -1188,7 +1225,7 @@ class OWBwBWidget(widget.OWWidget):
                         return self.joinFlagValue(flagName,hostFilename)
                     return None
                 elif pvalue['type'] == 'file list':
-                    #files=str.splitlines(flagValue)
+                    #check whether it is iterated
                     files=flagValue
                     sys.stderr.write('flagnName {} files are {}\n'.format(flagName,files))
                     if files:
@@ -1196,6 +1233,11 @@ class OWBwBWidget(widget.OWWidget):
                         for f in files:
                             hostFiles.append(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
                             sys.stderr.write('flagnName {} adding file {} hostFiles {}\n'.format(flagName,f,hostFiles))
+                        if pname in self.iteratedAttrs:
+                            if flagName: 
+                                return "__iterateflag=[{}] __iterateValues=[{}] ".format(flagName,'\t'.join(hostFiles))
+                            else:
+                                return "__iterateflag=[] __iterateValues=[{}] ".format('\t'.join(hostFiles))
                         if flagName:
                             return " ".join([flagName] + hostFiles)
                         else:
@@ -1215,7 +1257,7 @@ class OWBwBWidget(widget.OWWidget):
                     return self.joinFlagValue(flagName,flagValue)
             
         return None
-                                
+                           
     def generateCmdFromData (self):
         flags=[]
         args=[]

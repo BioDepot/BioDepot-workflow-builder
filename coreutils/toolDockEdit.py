@@ -89,8 +89,6 @@ class ToolDockEdit(widget.OWWidget):
         self.controlArea.setMinimumWidth(500)
         self.controlArea.setMinimumHeight(120)
         self.startWidget()
-       
-
     
     def clearLayout(self,layout):
         if layout != None:
@@ -341,8 +339,7 @@ class ToolDockEdit(widget.OWWidget):
             if currentDirectory != directory:
                 self.canvas.reload_current()
         self.canvas.reload_settings()
-
-        
+      
     def getCategoryList(self,widgetName):
         #categories may not be directories
         if not widgetName:
