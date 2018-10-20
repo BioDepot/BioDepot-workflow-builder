@@ -5,12 +5,11 @@ import json
 import jsonpickle
 import pickle
 import csv
-import tempfile, shutil
-import OWImageBuilder,toolDockEdit
-from glob import glob
+import tempfile
+import OWImageBuilder
 from pathlib import Path
 from shutil import copyfile
-from createWidget import mergeWidget, createWidget, findIconFile
+from createWidget import mergeWidget, createWidget, findDirectory, findIconFile
 from copy import deepcopy
 from collections import OrderedDict
 from functools import partial
@@ -18,8 +17,7 @@ from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui
-from PyQt5.QtWidgets import *
-from makeToolDockCategories import niceForm
+from PyQt5.QtWidgets import QInputDialog, QLineEdit, QMainWindow, QApplication, QPushButton, QWidget, QAction, QTabWidget, QVBoxLayout, QMessageBox
 
 from AnyQt.QtWidgets import (
     QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
@@ -28,172 +26,6 @@ from AnyQt.QtWidgets import (
     QSizePolicy, QApplication, QCheckBox
 )
 defaultIconFile='/icons/default.png'
-
-class SaveWorkflowForm(QDialog):
-    def __init__(self, returnData, parent=None):
-        self.browseCSS='''
-        QPushButton {background-color: rgba(30,30,200,128); color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
-        QPushButton:hover {background-color: #1555f5; }
-        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
-        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
-        ''' 
-        self.colorCSS='''
-        QPushButton {background-color: white; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
-        QPushButton:hover {background-color: gray; }
-        QPushButton:hover:pressed { background-color: black; color: black; border-style: inset; border: 1px solid white} 
-        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; }
-        ''' 
-        self.defaultDir='/'
-        self.returnData=returnData
-        self.returnData['success']=False
-        self.initialData=returnData.copy()
-        self.defaultIconFile='/icons/user.png'
-        if 'start_dir' in self.initialData and self.initialData['start_dir']:
-            self.defaultDir=self.initialData['start_dir']
-        self.browseIcon=QtGui.QIcon('/icons/bluefile.png')
-        self.colorIcon=QtGui.QIcon('/icons/colorWheel.png')
-        self.ledits={}
-        self.required=['name','dir']
-        super(SaveWorkflowForm, self).__init__(parent)
-        self.setWindowTitle("Save workflow")
-        name_ledit = QLineEdit()
-        self.ledits['name']=name_ledit
-        name_ledit.setClearButtonEnabled(True)
-        name_ledit.setPlaceholderText('Enter workflow name')
-        if 'name' in self.initialData and self.initialData['name']:
-            name_ledit.setText(self.initialData['name'])
-        name_ledit.setStyleSheet(":disabled { color: #282828}")
-        name_label=QtGui.QLabel('Workflow name:')
-        name_box=QHBoxLayout()
-        name_box.addWidget(name_label)
-        name_box.addWidget(name_ledit)
-        
-        #ledit for directory
-        dir_ledit = QLineEdit()
-        self.ledits['dir']=dir_ledit
-        dir_ledit.setClearButtonEnabled(True)
-        dir_ledit.setPlaceholderText('Enter workflow directory')
-        if 'dir' in self.initialData and self.initialData['dir']:
-            dir_ledit.setText(self.initialData['dir'])
-        dir_ledit.setStyleSheet(":disabled { color: #282828}")
-        dir_label=QtGui.QLabel('Workflow parent directory:')       
-        dir_button=gui.button(None, self, "", callback= lambda : self.browseFileDir('dirname',ledit=dir_ledit,fileType='Directory'),autoDefault=True, width=19, height=19)
-        dir_button.setIcon(self.browseIcon)
-        dir_button.setStyleSheet(self.browseCSS)
-        dir_box=QHBoxLayout()
-        dir_box.addWidget(dir_label)
-        dir_box.addWidget(dir_ledit)
-        dir_box.addWidget(dir_button)
-
-        #ledit for iconFile
-        icon_ledit = QLineEdit()
-        self.ledits['icon']=icon_ledit
-        icon_ledit.setClearButtonEnabled(True)
-        icon_ledit.setPlaceholderText('Enter iconFile')
-        if 'icon' in self.initialData and self.initialData['icon']:
-            icon_ledit.setText(self.initialData['icon'])
-        else:
-            icon_ledit.setText("")
-        icon_ledit.setStyleSheet(":disabled { color: #282828}")
-        icon_label=QtGui.QLabel('Change workflow icon:')    
-        icon_button=gui.button(None, self, "", callback= lambda : self.browseFileDir('iconFile',ledit=icon_ledit),autoDefault=True, width=19, height=19)
-        icon_button.setIcon(self.browseIcon)
-        icon_button.setStyleSheet(self.browseCSS)
-        icon_box=QHBoxLayout()
-        icon_box.addWidget(icon_label)
-        icon_box.addWidget(icon_ledit)    
-        icon_box.addWidget(icon_button)
-
-        #ledit for color
-        color_ledit = QLineEdit()
-        self.ledits['color']=color_ledit
-        color_ledit.setClearButtonEnabled(True)
-        color_ledit.setPlaceholderText('Enter color')
-        if 'color' in self.initialData and self.initialData['color']:
-            color_ledit.setText(self.initialData['color'])
-        color_ledit.setStyleSheet(":disabled { color: #282828}")
-        color_label=QtGui.QLabel('Change workflow color:')    
-        color_button=gui.button(None, self, "", callback= lambda : self.browseColor('color',ledit=color_ledit),autoDefault=True, width=19, height=19)
-        color_button.setIcon(self.colorIcon)
-        color_button.setStyleSheet(self.colorCSS)
-        color_box=QHBoxLayout()
-        color_box.addWidget(color_label)
-        color_box.addWidget(color_ledit)    
-        color_box.addWidget(color_button)
-
-        #checkboxes
-        self.merge_checkBox=QtGui.QCheckBox('Merge all widget types',self)        
-        self.merge_checkBox.stateChanged.connect(lambda: self.getCheckBoxState(self.merge_checkBox,'merge'))
-        if 'merge' in self.initialData and self.initialData['merge'] is not None:
-            self.merge_checkBox.setCheckState(self.initialData['merge'])
-        else:
-            self.merge_checkBox.setCheckState(False)
-
-        #OK cancel buttons
-        buttonbox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        buttonbox.accepted.connect(self.checkFields)
-        buttonbox.rejected.connect(self.cancel) 
-        
-        layout=QtGui.QGridLayout()
-        layout.addLayout(name_box,1,1,1,2)
-        layout.addLayout(dir_box,2,1,1,2)
-        layout.addLayout(color_box,3,1,1,2)
-        layout.addLayout(icon_box,4,1,1,2)
-        layout.addWidget(self.merge_checkBox,5,1,1,1)
-        layout.addWidget(buttonbox,6,1,1,1)
-        self.setLayout(layout)
-    
-        #save/cancel buttons
-    def cancel(self):
-        self.returnData=self.initialData
-        self.returnData['success']=False
-        self.close()
-        
-    def checkFields(self):
-        #make sure that the ledits are populated with something if required
-        for attr in ('name','dir','color','icon'):
-            ledit = self.ledits[attr]
-            if not ledit.text():
-                if attr in self.required:
-                    warning=QMessageBox()
-                    warning.setText("Must enter a value for {}".format(attr))
-                    warning.setWindowTitle("Missing required entry")
-                    warning.setStandardButtons(QMessageBox.Ok)
-                    warning.exec_()
-                    return
-            else:
-                self.returnData[attr]=ledit.text()
-        self.returnData['merge']=self.merge_checkBox.isChecked()
-        #make sure that the name is nice Form (can keep dashes until it is converted to a ows file
-        self.returnData['name']=niceForm(self.returnData['name'],useDash=True)
-        self.returnData['success']=True
-        self.close()
-        
-    
-    def getCheckBoxState(self,checkbox,attr):
-        self.returnData[attr]=checkbox.isChecked()
-        return
-        
-    def browseColor(self,attr,ledit=None):
-        color = QColorDialog.getColor()
-        if color.isValid():
-            if ledit:
-                ledit.setText(color.name())
-            return color.name()
-        return None
-        
-        
-    def browseFileDir(self, attr,ledit=None,fileType=None):
-        if fileType == 'Directory':
-            myFileDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate directory", directory=self.defaultDir)
-        else:
-            myFileDir=QtWidgets.QFileDialog.getOpenFileName(self, "Locate file", self.defaultDir)[0]
-        if myFileDir:
-            self.returnData[attr]=myFileDir
-        if ledit:
-            ledit.setText(myFileDir)
-
-        
 class tabbedWindow(QTabWidget):
     def __init__(self, parent = None):
         super(tabbedWindow, self).__init__(parent)
@@ -313,6 +145,7 @@ class WidgetItem():
 class OWWidgetBuilder(widget.OWWidget):
     name = "Widget Builder"
     description = "Build a new widget from a set of bash commands and a Docker container"
+    category = "Bwb-core"
     icon = "icons/build.png"
     priority = 2
 
@@ -325,7 +158,32 @@ class OWWidgetBuilder(widget.OWWidget):
     allStates=pset({})
     allAttrs=pset({})
     data={}
-         
+    
+    def register(self,widgetPath,widgetName):
+        sys.stderr.write('register with path {} name {}\n'.format(widgetPath,widgetName))
+        jsonFile="{}/{}.json".format(widgetPath,widgetName)
+        directory=findDirectory(jsonFile)
+        destPath='/widgets/{}'.format(widgetName);
+        if os.path.realpath(widgetPath) != os.path.realpath(destPath):
+            #check if it exists
+            if os.path.exists(destPath):
+                qm = QtGui.QMessageBox
+                ret=qm.question(self,'', "{} exists - OverWrite ?".format(widgetName), qm.Yes | qm.No)
+                if ret == qm.No:
+                    return
+                os.system("cd /widgets && rm {} -rf ".format(widgetName))    
+            os.system("cp -r {} {}".format(widgetPath,destPath))
+        else:
+            title='Register {}'.format(widgetName)
+            message='{} is already in {} in ToolDock'.format(widgetName,directory)
+            QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
+            return           
+        #make linkages
+        os.system ("ln -sf  /widgets/{}/{}.py /biodepot/{}/OW{}.py".format(widgetName,widgetName,directory,widgetName))
+        title='Register {}'.format(widgetName)
+        message='Added {} to {} in ToolDock'.format(widgetName,directory)
+        QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
+        
     def drawExec(self, layout=None):
         self.saveMode=QtGui.QComboBox()
         self.saveMode.addItem('Overwrite')
@@ -342,9 +200,12 @@ class OWWidgetBuilder(widget.OWWidget):
         self.loadWidgetBtn = gui.button(None, self, "Load", callback=self.loadWidget)
         self.loadWidgetBtn.setStyleSheet(self.css)
         self.loadWidgetBtn.setFixedSize(70,20)
-        self.renameBtn = gui.button(None, self, "Rename", callback=self.renameWidget)
-        self.renameBtn.setStyleSheet(self.css)
-        self.renameBtn.setFixedSize(100,20)
+        self.registerBtn = gui.button(None, self, "Register", callback=self.registerWidget)
+        self.registerBtn.setStyleSheet(self.css)
+        self.registerBtn.setFixedSize(100,20)
+        self.rebuildBtn = gui.button(None, self, "Rebuild", callback=self.rebuildWidget)
+        self.rebuildBtn.setStyleSheet(self.css)
+        self.rebuildBtn.setFixedSize(100,20)
         #choose save mode
 
         saveLabel=QtGui.QLabel('Save mode:')
@@ -356,8 +217,8 @@ class OWWidgetBuilder(widget.OWWidget):
         box.addWidget(self.saveWidgetBtn)
         box.addWidget(self.saveWidgetAsBtn)
         box.addWidget(self.loadWidgetBtn)
-        if not self.newFlag:
-            box.addWidget(self.renameBtn)
+        box.addWidget(self.registerBtn)
+        box.addWidget(self.rebuildBtn)
         box.addStretch(1)
         layout.addLayout(box)
 
@@ -422,25 +283,47 @@ class OWWidgetBuilder(widget.OWWidget):
             return self.widgetName
         return niceName
     
-    def renameWidget(self):
-        renameData={}
-        newName, okPressed = QInputDialog.getText(self, "Rename widget ","Enter new name:", QLineEdit.Normal,"")
-        if okPressed and newName:
-            niceName=niceForm(newName,useDash=False)
-            renameData['newName']=niceName
-            renameData['widgetName']=self.widgetName
-            renameData['category']=niceForm(os.path.basename(os.path.dirname(self.widgetDir)),useDash=True)
-            td=toolDockEdit.ToolDockEdit(renameData,canvasMainWindow=self.canvas)
-            del td
-        else:
-            return
-    #renames the widget definition, not the instance
-        pass
+    def rebuildWidget(self):
+        myDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Locate Bwb directory", directory=self.defaultDir)
+        (imageName,accept)=QtGui.QInputDialog.getText(self,"New image name", "Enter image name",QtGui.QLineEdit.Normal,"biodepot/bwb")
+        if imageName:
+            qm = QtGui.QMessageBox
+            ret=qm.question(self,'', "Are you sure you want to rebuild {} from directory {} ?".format(imageName,myDir), qm.Yes | qm.No)
+            if ret == qm.Yes:
+                self.console=QtGui.QTextEdit()
+                self.console.setReadOnly(True)
+                pal=QtGui.QPalette()
+                pal.setColor(QtGui.QPalette.Base,Qt.black)
+                pal.setColor(QtGui.QPalette.Text,Qt.green)
+                self.console.setPalette(pal)
+                self.console.setAutoFillBackground(True)
+                self.console.show()
+                self.pConsole=ConsoleProcess(console=self.console,finishHandler=self.finishRebuild)
+                cmd='rsync -av /biodepot/ {}/biodepot/ --delete '.format(myDir) 
+                cmd+= '&& rsync -av /widgets/ {}/widgets/ --delete '.format(myDir)
+                cmd+= '&& rsync -av /workflows/ {}/workflows/ --delete '.format(myDir)
+                cmd+= '&& rsync -av /notebooks/ {}/notebooks/ --delete '.format(myDir)
+                cmd+= '&& docker build -t {} {}'.format(imageName,myDir)
+                self.registerBtn.setEnabled(False)
+                self.rebuildBtn.setEnabled(False)
+                self.saveWidgetBtn.setEnabled(False)
+                self.saveWidgetAsBtn.setEnabled(False)
+                self.loadWidgetBtn.setEnabled(False)
+                self.pConsole.process.start('/bin/bash',['-c',cmd])
+    def finishRebuild(self,stopped=None):
+        self.registerBtn.setEnabled(True)
+        self.rebuildBtn.setEnabled(True)
+        self.saveWidgetBtn.setEnabled(True)
+        self.saveWidgetAsBtn.setEnabled(True)
+        self.loadWidgetBtn.setEnabled(True)        
+        #self.pcconsole.close()
         
     def buildData(self):
         myData={}
         self.data['name']=self.widgetName
-        for attr in ('name','description','docker_image_name','docker_image_tag',
+        if 'category' not in self.data:
+            self.data['category']='User'
+        for attr in ('name','description','category','docker_image_name','docker_image_tag',
             'priority','icon','inputs','outputs','volumes','ports','parameters','command','autoMap'):
             if attr in self.data and self.data[attr]:
                 myData[attr]=deepcopy(self.data[attr])
@@ -549,19 +432,11 @@ class OWWidgetBuilder(widget.OWWidget):
             self.saveWidgetAs()
             return
         self.pickleWidget()
-        qm= QtGui.QMessageBox
         title='Save {}'.format(self.widgetName)
         message='Saved widget to {}'.format(self.widgetDir)
-        ret=qm.question(self,title, "Saved widget to {} - Reload?".format(self.widgetDir), qm.Yes | qm.No)
-        if ret == qm.No:
-            return
-        if self.canvas:
-            self.canvas.reload_current()
-        return
-       
+        QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
                     
     def saveWidgetAs(self):
-        qm = QtGui.QMessageBox
         self.widgetName=self.getWidgetName()
         if not self.widgetName:
             return
@@ -571,7 +446,7 @@ class OWWidgetBuilder(widget.OWWidget):
             if os.path.exists(myWidgetDir) and not( self.widgetDir and os.path.samefile(myWidgetDir,self.widgetDir)) :
                 #same directory is occupied
                 #ask permission to nuke it
-                
+                qm = QtGui.QMessageBox
                 ret=qm.question(self,'', "{}/{} exists - OverWrite ?".format(outputDir,self.widgetName), qm.Yes | qm.No)
                 if ret == qm.No:
                     return
@@ -582,26 +457,9 @@ class OWWidgetBuilder(widget.OWWidget):
             self.pickleWidget()
             self.nameLabel.setText(self.widgetName)
             self.setWindowTitle(self.widgetName+':Definition')
-            
-            drawerName=os.path.basename(outputDir)
-            if drawerName in self.directoryList:
-                initPy='/biodepot/{}/__init__.py'.format(drawerName)
-                workflowPath=""
-                if os.path.islink(initPy):
-                    workflowPath=os.path.dirname(os.path.realpath(initPy))
-                if not workflowPath or workflowPath == outputDir:
-                    destLink='/biodepot/{}/OW{}.py'.format(drawerName,self.widgetName)
-                    pythonFile=glob('{}/*.py'.format(self.widgetDir))[0]
-                    os.system('ln -sf {} {}'.format(pythonFile,destLink))
-                    
-                #make a symlink to the 
             title='Save {}'.format(self.widgetName)
             message='Saved widget to {}'.format(self.widgetDir)
-            ret=qm.question(self,title, "Saved widget to {} - Reload?".format(self.widgetDir), qm.Yes | qm.No)
-            if ret == qm.No:
-                return
-            if self.canvas:
-                self.canvas.reload_current()
+            QtGui.QMessageBox.information(self, title,message,QtGui.QMessageBox.Ok)
         return
             
     def makeDefaultFiles(self):
@@ -631,6 +489,16 @@ class OWWidgetBuilder(widget.OWWidget):
         if os.path.exists('/data'):
             defaultDir = '/data' 
         return defaultDir
+        
+    def registerWidget(self):
+        if self.widgetDir:
+            startDir=self.widgetDir
+        else:
+            startDir=self.defaultDir
+        registerWidgetDir=QtWidgets.QFileDialog.getExistingDirectory(self, caption="Choose widget to register", directory=startDir)
+        if registerWidgetDir:
+            widgetName=os.path.split(registerWidgetDir)[-1]
+            self.register(registerWidgetDir,widgetName)
             
     def pickleData(self,data,filename,jsonFlag=True):
         if jsonFlag:
@@ -646,7 +514,6 @@ class OWWidgetBuilder(widget.OWWidget):
         
     def unPickleData(self,filename,jsonFlag=True):
         if jsonFlag:
-            sys.stderr.write('opening file {}\n'.format(filename))
             try:
                 with open(filename,'r') as f:
                     data=jsonpickle.decode(f.read())
@@ -661,12 +528,9 @@ class OWWidgetBuilder(widget.OWWidget):
             f.close()
         return data
 
-    def __init__(self,widgetID=None,canvasMainWindow=None):
+    def __init__(self,widgetID=None):
         super().__init__()
-        #Directories it toolDock
-        self.directoryList=(str(os.popen('''grep -oP 'packages=\["\K[^"]+' /biodepot/setup.py''').read())).split()
         #minimum sizes
-        self.canvas=canvasMainWindow
         self.controlArea.setMinimumWidth(600)
         self.controlArea.setMinimumHeight(400)
         
@@ -698,17 +562,16 @@ class OWWidgetBuilder(widget.OWWidget):
         self.defaultDir=self.getDefaultDir()
         self.widgetDir=None
         self.widgetName=None
+        self.widgetDir=None
         self.isDrawn=False
         self.containerID=None
         self.saveModeIndex=0
-        self.newFlag=False
         if widgetID == '__New':
             qm = QtGui.QMessageBox
             ret=qm.question(self,'', "Create new widget?", qm.Yes | qm.No)
             if ret == qm.No:
                 raise ValueError('User cancelled')
             else:
-                self.newFlag=True
                 tmp = tempfile.mkdtemp()
                 ret=qm.question(self,'', "Use existing widget as template?", qm.Yes | qm.No)
                 if ret == qm.Yes:
@@ -726,8 +589,7 @@ class OWWidgetBuilder(widget.OWWidget):
             self.widgetDir=os.path.dirname(widgetPy)
             self.setWindowTitle(self.widgetName+':Definition')
             sys.stderr.write('widgetPy is {} widgetDir is {} widgetName is {}\n'.format(widgetPy, self.widgetDir,self.widgetName))
-            self.loadWidget(loadWidgetDir=self.widgetDir,loadNameCheck=False)
-            self.defaultDir=os.path.dirname(self.widgetDir) 
+            self.loadWidget(loadWidgetDir=self.widgetDir,loadNameCheck=False) 
         
     def clearLayout(self,layout):
         if layout != None:
@@ -741,7 +603,7 @@ class OWWidgetBuilder(widget.OWWidget):
     def startWidget(self):
         self.isDrawn=True
         self.setWindowTitle(self.widgetName+':Definition')
-        for attr in ('name','description','docker_image_name','docker_image_tag',
+        for attr in ('name','description','category','docker_image_name','docker_image_tag',
                      'priority','icon','inputs','outputs','volumes','parameters','command','autoMap','buildCommand'):
             if attr in self.allAttrs:
                 self.data[attr]=self.allAttrs[attr]
@@ -766,7 +628,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.nameLabel=QtGui.QLabel('Name: '+self.widgetName)
         leditGeneralLayout.addWidget(self.nameLabel,leditGeneralLayout.nextRow,0)
         leditGeneralLayout.nextRow=leditGeneralLayout.nextRow+1
-        for pname in ['description','docker_image_name','docker_image_tag']:
+        for pname in ['description','category','docker_image_name','docker_image_tag']:
             self.drawLedit(pname,layout=leditGeneralLayout)
         self.drawLedit('priority',layout=leditGeneralLayout)
         #file entry for icon
@@ -878,44 +740,16 @@ class OWWidgetBuilder(widget.OWWidget):
         layout.nextRow = layout.nextRow + 1
         
     def drawDocker(self,pname,layout=None):
-        dockerFileLedit=self.makeLedit('dockerFileToAdd','Enter file to add', label='Add Dockerfile:')
-        layout.addWidget(dockerFileLedit.label,layout.nextRow,0)
-        layout.addWidget(dockerFileLedit.ledit,layout.nextRow,1,1,1)
-        callback=self.browseFileDir
-        browseFileBtn=gui.button(None, self, "", callback= lambda : callback('dockerFileToAdd',ledit=dockerFileLedit.ledit,fileType=None),autoDefault=True, width=20, height=20)
-        browseFileBtn.setIcon(self.browseIcon)
-        browseFileBtn.setStyleSheet(self.browseCSS)
-        layout.addWidget(browseFileBtn,layout.nextRow,2)
-        addFileBtn=gui.button(None, self, "", callback=lambda: self.addDockerFile(dockerFileLedit.ledit), autoDefault=False)
-        addFileBtn.setIcon(self.addIcon)
-        addFileBtn.setStyleSheet(self.addRemoveCSS)
-        layout.addWidget(addFileBtn,layout.nextRow,3)
-        layout.nextRow+=1
-        
-        dockerDirLedit=self.makeLedit('dockerDirToAdd','Enter directory to add', label='Add directory:')
-        layout.addWidget(dockerDirLedit.label,layout.nextRow,0)
-        layout.addWidget(dockerDirLedit.ledit,layout.nextRow,1,1,1)
-        callback=self.browseFileDir
-        browseDirBtn=gui.button(None, self, "", callback= lambda : callback('dockerDirToAdd',ledit=dockerDirLedit.ledit,fileType='Directory'),autoDefault=True, width=20, height=20)
-        browseDirBtn.setIcon(self.browseIcon)
-        browseDirBtn.setStyleSheet(self.browseCSS)
-        layout.addWidget(browseDirBtn,layout.nextRow,2)
-        addDirBtn=gui.button(None, self, "", callback=lambda: self.addDockerDir(dockerDirLedit.ledit), autoDefault=False)
-        addDirBtn.setIcon(self.addIcon)
-        addDirBtn.setStyleSheet(self.addRemoveCSS)
-        layout.addWidget(addDirBtn,layout.nextRow,3)
-        layout.nextRow+=1
         #self.drawLedit('Add file to Dockerfiles',layout=layout,addBrowseButton=True, fileType=None)
         #self.drawLedit('Add directory to Dockerfiles',layout=layout,addBrowseButton=True, fileType='Directory')
-        
-        #addDateCb=self.makeCheckBox ('addBuildDate','Add date to docker tag',default=True,persist=True,track=True)
-        #containerIDLabel=QtGui.QLabel('Container ID: {}'.format(self.containerID))
+        addDateCb=self.makeCheckBox ('addBuildDate','Add date to docker tag',default=True,persist=True,track=True)
+        containerIDLabel=QtGui.QLabel('Container ID: {}'.format(self.containerID))
         imageBuilderLabel=QtGui.QLabel('Launch Image Builder')
         imageBuilderBtn = gui.button(None, self, "Launch", callback=self.startImageBuilder)
         imageBuilderBtn.setStyleSheet(self.css)
         imageBuilderBtn.setFixedSize(80,20)
-        updateLabel=QtGui.QLabel('Clear Dockerfiles')
-        updateBtn = gui.button(None, self, "Clear", callback=self.clearDockerfiles)
+        updateLabel=QtGui.QLabel('Import Dockerfiles directory')
+        updateBtn = gui.button(None, self, "Import", callback=self.updateDockerfiles)
         updateBtn.setStyleSheet(self.css)
         updateBtn.setFixedSize(80,20)        
         buildCommandBox=self.makeTextBox(pname,label='Docker build command:')
@@ -925,63 +759,19 @@ class OWWidgetBuilder(widget.OWWidget):
         layout.addWidget(updateBtn,layout.nextRow,1)
         layout.addWidget(imageBuilderLabel,layout.nextRow+1,0)
         layout.addWidget(imageBuilderBtn,layout.nextRow+1,1)
-        #layout.addWidget(addDateCb,layout.nextRow+2,0)
-        #layout.addWidget(containerIDLabel,layout.nextRow+3,0)
-        #layout.addWidget(addDateCb,layout.nextRow+4,0)
-        layout.addWidget(buildCommandBox.label,layout.nextRow+2,0)
-        layout.addWidget(buildCommandBox.textBox,layout.nextRow+2,1,1,4)
-    
-    def addDockerFile(self,ledit):
-        if not hasattr(ledit,'text'):
-            return
-        src=ledit.text().strip()
-        if src and os.path.isfile(src):
-            dest=self.widgetDir+'/'+'Dockerfiles/'+os.path.basename(src)
-            copyfile(src,dest)
-            qm = QtGui.QMessageBox
-            title='Added Dockerfile'
-            message='Added {}'.format(src)
-            qm.information(self,title,message,QtGui.QMessageBox.Ok)
-            
-    def addDockerDir(self,ledit):
-        if not hasattr(ledit,'text'):
-            return
-        src=ledit.text().strip()
-        if src and os.path.isdir(src):
-            dest=self.widgetDir+'/'+'Dockerfiles/'+os.path.basename(src)
-            if os.path.isdir(dest):
-                qm = QtGui.QMessageBox
-                ret=qm.question(self,'Confirm delete', "The directory {} exits Delete?".format(os.path.basename(dest)), qm.Yes | qm.No)
-                if ret == qm.No:
-                    return
-                shutil.rmtree(dest)
-            shutil.copytree(src,dest)
-            qm = QtGui.QMessageBox
-            title='Added Directory'
-            message='Added {}'.format(src)
-            qm.information(self,title,message,QtGui.QMessageBox.Ok)
-            
-            
+        layout.addWidget(addDateCb,layout.nextRow+2,0)
+        layout.addWidget(containerIDLabel,layout.nextRow+3,0)
+        layout.addWidget(addDateCb,layout.nextRow+4,0)
+        layout.addWidget(buildCommandBox.label,layout.nextRow+5,0)
+        layout.addWidget(buildCommandBox.textBox,layout.nextRow+5,1,1,4)
     def startImageBuilder(self):
-        dockerDir=self.widgetDir+'/'+'Dockerfiles'
-        widget=OWImageBuilder.OWImageBuilder(dockerDir)
+        widget=OWImageBuilder.OWImageBuilder()
         widget.showNormal()
         widget.raise_()
         widget.activateWindow()
         
-    def clearDockerfiles(self):
-        dockerDir=self.widgetDir+'/'+'Dockerfiles'
-        if not os.listdir(dockerDir):
-            return
-        qm = QtGui.QMessageBox
-        ret=qm.question(self,'Confirm delete', "Are you sure you want to remove all files in {} ?".format(dockerDir), qm.Yes | qm.No)
-        if ret == qm.No:
-            return
-        os.system("cd {} && rm -rf * ".format(dockerDir))
-        title='Cleared docker files'
-        message='Cleared docker files'
-        qm.information(self,title,message,QtGui.QMessageBox.Ok)
-                
+    def updateDockerfiles(self):
+        pass
     def makeTextBox(self,attr,label):
         box=QHBoxLayout()
         textLabel=None

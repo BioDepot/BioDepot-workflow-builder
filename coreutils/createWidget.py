@@ -41,11 +41,26 @@ from PyQt5 import QtWidgets, QtGui
 
 '''
 
+def findDirectory(inputJson):
+    with open(inputJson) as f:
+        data=jsonpickle.decode(f.read())
+    return checkCategory(data['category'])
+      
+def checkCategory(category):
+    categories=(str(os.popen('''grep -oP 'name="\K[^"]+' /biodepot/setup.py''').read())).split()
+    if category in categories:
+        #has/setattr does not like -
+        directory=category.replace('-','_')
+        return directory
+    else:
+        sys.stderr.write('*WARNING* {} not a recognized category - will place widget in User directory\n'.format(category))
+        return 'User'
         
 def createWidget(inputJson,outputWidget,widgetName,inputData=None):
     defaultIconFile='/biodepot/Bwb_core/icons/default.png'
     widgetPath = os.path.dirname(os.path.realpath(outputWidget)) 
     data={}
+    directory='User'
     if inputJson:
         with open(inputJson) as f:
             data=jsonpickle.decode(f.read())
@@ -56,7 +71,7 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
         with open(inputJson,"w") as f:
             f.write(dataJ)
     inputPath=os.path.dirname(os.path.realpath(inputJson))
-   
+    directory=checkCategory(data['category'])        
     #write preInit
     with open(outputWidget,'w') as f:
         f.write(WIDGET_HEADING)
@@ -64,6 +79,7 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
         f.write(className)
         f.write('    name = "{}"\n'.format(data['name']))
         f.write('    description = "{}"\n'.format(data['description']))
+        f.write('    category = "{}"\n'.format(data['category']))
         priority=10
         if 'priority' in data and (data['priority'] == 0 or data['priority']):
             priority=data['priority']
@@ -147,9 +163,9 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
             for attr, values in data['inputs'].items():
                 f.write('    def handleInputs{}(self, value, *args):\n'.format(attr))
                 f.write('        if args and len(args) > 0: \n')
-                f.write('            self.handleInputs("{}", value, args[0][0], args[0][3])\n'.format(attr))
+                f.write('            self.handleInputs("{}", value, args[0][0])\n'.format(attr))
                 f.write('        else:\n')
-                f.write('            self.handleInputs("inputFile", value, None, False)\n'.format(attr))               
+                f.write('            self.handleInputs("inputFile", value, None)\n'.format(attr))               
         if 'outputs' in data and data['outputs']:
             #generic omnibus output handler - change if you want to customize outputs
             f.write('    def handleOutputs(self):\n'.format(attr))
@@ -175,6 +191,7 @@ def mergeWidget(inputJson,outputWidget,widgetName,inputData=None):
     defaultIconFile='/biodepot/Bwb_core/icons/default.png'
     widgetPath = os.path.dirname(os.path.realpath(outputWidget)) 
     data={}
+    directory='User'
     if inputJson:
         with open(inputJson) as f:
             data=jsonpickle.decode(f.read())
@@ -184,6 +201,7 @@ def mergeWidget(inputJson,outputWidget,widgetName,inputData=None):
         inputJson=os.path.splitext(outputWidget)[0]+'.json'
         with open(inputJson,"w") as f:
             f.write(dataJ)
+    directory=checkCategory(data['category'])
     inputPath=os.path.dirname(os.path.realpath(inputJson))
     #updates the python file up to the first def command
     #split the python file into 3
@@ -207,6 +225,7 @@ def mergeWidget(inputJson,outputWidget,widgetName,inputData=None):
     afterClass[0]=className
     fwrite(afterClass,"\s+name = ",'    name = "{}"\n'.format(data['name']))
     fwrite(afterClass,"\s+description =",'    description = "{}"\n'.format(data['description']))
+    fwrite(afterClass,"\s+category =",'    category = "{}"\n'.format(data['category']))
     priority=10
     if 'priority' in data and (data['priority'] == 0 or data['priority']):
         priority=data['priority']
