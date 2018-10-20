@@ -403,6 +403,13 @@ Demo workflows that come with Bwb are in the /workflows directory.
 
 To execute a workflow, double click on a widget and manual start from that widget by hitting the blue start button. When that widget is finished execution it will send output to connected widgets. If these widgets are triggered by the output, they will then execute (as long as all the required parameters and other other trigger signals have been received. Workflows also can be started from any widget if the required files and parameters are present. For example,  an alignment pipeline can skip the indexing steps if the index has already been generated or downloaded.
 
+#### Testing and exporting workflows as a bash script 
+A test mode is also provided for testing. Checking the test mode box before hitting the start button causes the widget and downstream connected widgets to output the docker commands to the console rather than executing them. This allows the user to check whether the triggers are set and the necessary parameters are entered without needing to run a lengthy workflow. In addition, the user will be prompted for a file to save the docker commands as a bash script. The script is a record of the actual docker commands that are run when the workflow is executed. 
+
+The bash script is portalbe and can be run without Bwb with 3 caveats. 
+1\. It may be necessary to give the save file run permissions. 
+2\. The file paths are those of the host system - if the script is run elsewhere these will need to be altered
+3\. The graphics are set to screen1 which is used by Bwb. Bwb must be active for graphics support, in which case the graphics will appear inside Bwb even if the script is run on the host. Alternatively, the user can change the command to use screen0 and follow the recipes given in our GuiDock-X11 paper.
 
 ## Demo workflows
 
@@ -434,6 +441,7 @@ The basic steps will be to
 3\. Create Docker image
 4\. Write a short custom script locally to manage multiple files
 5\. Connect widget into the workflow
+6\. Test and run the new workflow
 
 
 ### Add Python2 widget to the kallisto-sleuth-jupyter workflow
@@ -593,7 +601,10 @@ cp /tutorialFiles/cutadapt_multi.py /data/tutorial/.
  	RunMode: Triggered
  	Click on Select Triggers and choose OutputDir
 
-The workflow is read to be run by double click on the Download sleuth directory and pressing start. Alternatively, if you have already generated the index, disconnected the kallisto index widget from the kallistioQuant widget. Clikc on the kallistoQuant widget and enter the index file. Click on select triggers and uncheck the indexFile option. This will let you avoid having to wait for the index to be regenerated.
+### Running and testing the workflow
+The workflow is ready to be run by double click on the Download sleuth directory and pressing start. If you wish to make sure that all the connections and parameters are correct, then check the test mode box before pressing start. This will cause the Docker commands to be generated but not run, but output to the console. In addition, a prompt will appear to allow the option of saving the commands as a bash script representation of the workflow. This scriptan be executed outside of Bwb
+.
+
 
 ## Appendices
 
