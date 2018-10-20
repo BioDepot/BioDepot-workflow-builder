@@ -864,19 +864,19 @@ class OWBwBWidget(widget.OWWidget):
         
         self.iterableAttrs=self.findIterables()
 
-        self.iterateBtn=QtGui.QToolButton(self)
-        self.iterateBtn.setText('Iterate')
-        self.iterablesMenuItems={}
-        if self.iterableAttrs:
-            self.iterablesMenu=QtGui.QMenu(self)
-            for attr in self.iterableAttrs:
-                action=self.iterablesMenu.addAction(attr)
-                action.setCheckable(True)
-                action.setChecked( bool(attr in self.iteratedAttrs))
-                action.changed.connect(self.chooseIterable)
-                self.iterablesMenuItems[action]=attr
-            self.iterateBtn.setMenu(self.iterablesMenu)
-            self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)    
+        # self.iterateBtn=QtGui.QToolButton(self)
+        # self.iterateBtn.setText('Iterate')
+        # self.iterablesMenuItems={}
+        # if self.iterableAttrs:
+            # self.iterablesMenu=QtGui.QMenu(self)
+            # for attr in self.iterableAttrs:
+                # action=self.iterablesMenu.addAction(attr)
+                # action.setCheckable(True)
+                # action.setChecked( bool(attr in self.iteratedAttrs))
+                # action.changed.connect(self.chooseIterable)
+                # self.iterablesMenuItems[action]=attr
+            # self.iterateBtn.setMenu(self.iterablesMenu)
+            # self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)    
         #self.dockerMode=QtGui.QCheckBox('Build container',self)
         #self.dockerMode.setChecked(self.useDockerfile)
         #self.dockerMode.stateChanged.connect(self.dockerModeChange)
@@ -919,7 +919,7 @@ class OWBwBWidget(widget.OWWidget):
         self.btnStop.setEnabled(False)
         self.execLayout.addWidget(self.btnRun,1,0)
         self.execLayout.addWidget(self.btnStop,1,1)
-        self.execLayout.addWidget(self.iterateBtn,1,2)
+#        self.execLayout.addWidget(self.iterateBtn,1,2)
         self.execLayout.addWidget(self.graphicsMode,1,3)
         self.execLayout.addWidget(self.testMode,1,4)
         #self.execLayout.addWidget(self.dockerMode,1,3)
@@ -1412,12 +1412,12 @@ class OWBwBWidget(widget.OWWidget):
         iteratedFlags=[]
         if not executables:
             return ""
-        for iteratedIndex, executable in executables.items():
-            if '_iter{' in executables: 
-                iteratedFlagNames=self.findIteratedFlagNames(executables)
-                iteratedFlags[iteratedIndex]={}
-                for nameIndex,pname in iteratedFlagNames.items():
-                    iteratedFlags[iteratedIndex][nameIndex]=[]
+        # for iteratedIndex, executable in executables.items():
+            # if '_iter{' in executables: 
+                # iteratedFlagNames=self.findIteratedFlagNames(executables)
+                # iteratedFlags[iteratedIndex]={}
+                # for nameIndex,pname in iteratedFlagNames.items():
+                    # iteratedFlags[iteratedIndex][nameIndex]=[]
                         
             
         cmdStr="bash -c '"
