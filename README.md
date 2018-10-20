@@ -364,7 +364,7 @@ Will load the attrs and state from another widget - this allows the user to use 
 
 ### Building workflows from widgets
 
-#### TLDR
+#### TLDR;
 
 A quick summary of the steps to construct a workflow:
 
@@ -403,21 +403,29 @@ Demo workflows that come with Bwb are in the /workflows directory.
 
 To execute a workflow, double click on a widget and manual start from that widget by hitting the blue start button. When that widget is finished execution it will send output to connected widgets. If these widgets are triggered by the output, they will then execute (as long as all the required parameters and other other trigger signals have been received. Workflows also can be started from any widget if the required files and parameters are present. For example,  an alignment pipeline can skip the indexing steps if the index has already been generated or downloaded.
 
+#### Testing and exporting workflows as a bash script 
+A test mode is also provided for testing. Checking the test mode box before hitting the start button causes the widget and downstream connected widgets to output the docker commands to the console rather than executing them. This allows the user to check whether the triggers are set and the necessary parameters are entered without needing to run a lengthy workflow. In addition, the user will be prompted for a file to save the docker commands as a bash script. The script is a record of the actual docker commands that are run when the workflow is executed. 
+
+The bash script is portalbe and can be run without Bwb with 3 caveats. 
+1\. It may be necessary to give the save file run permissions. 
+2\. The file paths are those of the host system - if the script is run elsewhere these will need to be altered
+3\. The graphics are set to screen1 which is used by Bwb. Bwb must be active for graphics support, in which case the graphics will appear inside Bwb even if the script is run on the host. Alternatively, the user can change the command to use screen0 and follow the recipes given in our GuiDock-X11 paper.
 
 ## Demo workflows
 
 Four demo workflows are included with the Bwb container. They are found in the */workflows* directory
 
 ### DToxS demo
-This is an workflow used for processing UMI (Unique Molecular Identifier) barcoded RNA-seq data. 
+This is an workflow used for processing UMI (Unique Molecular Identifier) barcoded RNA-seq data. This is one of the first workflows that we converted for Bwb. The first downloadURL widget downloads the fastq files, directories and support files needed for the workflow. Upon completion it signals the DetoxS alignment widget. This widget calls bwa using a bash script and two python scripts. These are the original scripts used by DToxS. The alignment on full files would take overnight to run so our sample files are shortened versions of the true reads. However, the short files are too short to give any detectable differential expression in the subsequent steps. Therefore, in this demo, we have a second downloadURL widget which downloads the SAM files produced by bwa on the complete files. These are fed to the DtoX analyses which consists of a series of R scripts that use the edgeR package to identify differentially expressed genes. The top40 most confidently predicted differentially expressed genes are then displayed by gnumeric, an open-source spreadsheet program. 
 
 ### kallisto-sleuth demo
-This workflow is a popular RNA-seq workflow using kallisto to pseudo-align the reads and sleuth to determine which transcripts are differentially expressed. The workflow starts with a downloadURL widget that downloads the necessary directory structure and files that are used by sleuth to translate the transcript names to gene names and a file that describes which data are in the control group and which data are from the treatment group. Upon completion, the widget then signals a second downloadURL widget to download the human genomic sequence that will be used by the kallisto index to create the indices need for alignment. The first widget also signals the fastqDump widget to download 6 paired-end reads in 12 fastq files. These are the data obtained from 6 samples that will be analysed. The kallisto align widget is triggered when both kallisto index and fastqDump are finished, i.e. it will start running after the index is made and the files are downloaded. kallisto-widget is a bash wrapper around the kallisto pseudo-alignment program. The bash wrapper sends multiple pairs of paired-end reads to the kallisto pseudo-alignment executable. kallisto then produces a series of directories that contain estimates of the abundance of the reads at each transcript. Sleuth is a R script that uses a model based on the observed abundances to determine whether a gene is differentially expressed and obtains a p-value. The sleuth widget itself is a bash script which generates an R script that calls sleuth with the parameters given by the user. The resulting p-values are then output to a file which is read by gnumeric, an open-source spreadsheet, that is displays the results to the screen.
+This workflow is a popular RNA-seq workflow using kallisto to pseudo-align the reads and sleuth to determine which transcripts are differentially expressed. The workflow starts with a downloadURL widget that downloads the necessary directory structure and files that are used by sleuth to translate the transcript names to gene names and a file that describes which data are in the control group and which data are from the treatment group. Upon completion, the widget then signals a second downloadURL widget to download the human genomic sequence that will be used by the kallisto index to create the indices need for alignment. The first widget also signals the fastqDump widget to download 6 paired-end reads in 12 fastq files. These are the data obtained from 6 samples that will be analysed. The widget is set to only download the first 10000 spots to allow the demo to complete in a few minutes. The kallisto align widget is triggered when both kallisto index and fastqDump are finished, i.e. it will start running after the index is made and the files are downloaded. kallisto-widget is a bash wrapper around the kallisto pseudo-alignment program. The bash wrapper sends multiple pairs of paired-end reads to the kallisto pseudo-alignment executable. kallisto then produces a series of directories that contain estimates of the abundance of the reads at each transcript. Sleuth is a R script that uses a model based on the observed abundances to determine whether a gene is differentially expressed and obtains a p-value. The sleuth widget itself is a bash script which generates an R script that calls sleuth with the parameters given by the user. The resulting p-values are then output to a file which is read by gnumeric, an open-source spreadsheet, that is displays the results to the screen.
 
 ### kallisto-sleuth with Jupyter demo
 The kallisto-sleuth workflow with Jupyter demo is identical to the kallisto-sleuth workflow except that instead of wrapping sleuth in a bash script and outputting the results using gnumeric - a Jupyter notebook is used to run and display the results. The first notebook widget runs nbconvert which runs the code in the notebook and generates a filled notebook with the results, including a graph of the expression of the top differentially expressed gene. This widget triggers a second jupyter widget which opens the filled notebook. The second widget is run in a container with firefox which automatically opens the notebook at the end of the workflow. The user is free to interact with the code to change the analyses or conduct further analyses using the filled notebook as it is a fully functional dynamic instance of Jupyter.
 
 ### STAR demo
+STAR aligner is another popular RNA-seq aligner. Here we have paired it with DESEQ2 to perform the differential analyses. The pipeline is very similar in structure to the kallisto-sleuth pipeline. A downloadURL widget downloads the directory structure which then signals the download of the human genome and the calculation of indices. The fastqDump widget downloads the fastq files. STAR align waits for the downloads to complete and the index to be formed. Like Kallisto, this is wrapped in a bash script to allow STAR to run on multiple pairs of pair-end reads. A small widget runs a bash script then rearranges the output columns into a form that DESEQ2 can read. DESEQ2 is R based and like the sleuth widget uses a bash script to pre-process the parameters and construct a R script. Gnumeric displays the final output as in the kallisto-sleuth demo.
 
 ## Tutorial - Adding a Python script to a Bwb workflow
 
@@ -433,6 +441,7 @@ The basic steps will be to
 3\. Create Docker image
 4\. Write a short custom script locally to manage multiple files
 5\. Connect widget into the workflow
+6\. Test and run the new workflow
 
 
 ### Add Python2 widget to the kallisto-sleuth-jupyter workflow
@@ -592,7 +601,10 @@ cp /tutorialFiles/cutadapt_multi.py /data/tutorial/.
  	RunMode: Triggered
  	Click on Select Triggers and choose OutputDir
 
-The workflow is read to be run by double click on the Download sleuth directory and pressing start. Alternatively, if you have already generated the index, disconnected the kallisto index widget from the kallistioQuant widget. Clikc on the kallistoQuant widget and enter the index file. Click on select triggers and uncheck the indexFile option. This will let you avoid having to wait for the index to be regenerated.
+### Running and testing the workflow
+The workflow is ready to be run by double click on the Download sleuth directory and pressing start. If you wish to make sure that all the connections and parameters are correct, then check the test mode box before pressing start. This will cause the Docker commands to be generated but not run, but output to the console. In addition, a prompt will appear to allow the option of saving the commands as a bash script representation of the workflow. This scriptan be executed outside of Bwb
+.
+
 
 ## Appendices
 
