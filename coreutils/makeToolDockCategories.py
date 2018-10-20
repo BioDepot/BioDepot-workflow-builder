@@ -1,17 +1,23 @@
 #!/usr/bin/env python3
 import sys, os, re 
-
+#pip insists on changing underscores to dashes
+#however import will not work with python package names with dashes - this includes the paths
+#so until we get rid of pip for dynamic installation we have to support two forms of the name - a dash form for package names and an underscore form for widget names and their paths which is derived from the package name
 
 defaultCategoryIcon='/icons/misc.png'
-def niceForm(badString,allowDash='True'):
+
+
+def niceForm(badString,useDash='False'):
     #dashes cause problems with hasattr
     #strip and sub spaces
     ret=re.sub("\s+","_",badString.strip())
     #strip other bad characters
     ret=re.sub('[^a-zA-Z0-9\_\-\.]', '', ret)
     #strip 
-    if not allowDash:
-        ret=re.sub('-', '_', ret)
+    if useDash:
+        ret=re.sub('_', '-', ret)
+    else:
+        ret=re.sub('-','_',ret)
     return ret
         
 def entryString(category,directory):
@@ -40,13 +46,4 @@ def removeCategoryFromToolDock(basePath,category,directory):
     setupFile='{}/setup.py'.format(basePath)
     os.system(''' sed -i '/setup(name="{}"/,/)/d' {}'''.format(category,setupFile))
     os.system('cd {} && rm -rf {} && rm -rf {}.egg'.format(basePath,directory,directory))
-
-
-
-
     
-    
-
-
-
-

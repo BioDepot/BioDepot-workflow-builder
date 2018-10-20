@@ -1,5 +1,5 @@
 from Orange.widgets import widget, gui
-import sys, os, fnmatch, tempfile
+import sys, os, fnmatch, tempfile, re
 sys.path.append('/coreutils')
 import requests, json
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -12,20 +12,19 @@ from UIDockerfileEditor import DockerSyntaxHighlighter
 class OWImageBuilder(widget.OWWidget):
     name = "Image Builder"
     description = "Build Custom Image"
-    category = "Bwb-core"
     icon = "icons/imagebuilder.png"
-
     priority = 2
 
     inputs = []
     outputs = []#[("ImageTag", str)]
 
-    want_main_area = True
-    want_control_area = False
+    want_main_area = False
+    want_control_area = True
 
-    def __init__(self):
+    def __init__(self,dockerDir):
         super().__init__()
-
+        self.dockerDir=dockerDir
+        print(self.dockerDir)
         self.base_dir = os.path.dirname(os.path.abspath(__file__))
         self.FLAG_binder_string = '<BinderCompatible>'
         self.FLAG_binder_compatible = False
@@ -282,15 +281,17 @@ class OWImageBuilder(widget.OWWidget):
         self.hlayout_mainArea.addWidget(self.splitter_main)
 
         self.vlayoutBase.addWidget(self.mainContent)
-
-        self.mainArea.layout().addLayout(self.vlayoutBase)
-        self.mainArea.layout().setContentsMargins(0, 0, 0, 0)
+        
+        self.controlArea.setMinimumWidth(600)
+        self.controlArea.setMinimumHeight(400)        
+        self.controlArea.layout().addLayout(self.vlayoutBase)
+        self.controlArea.layout().setContentsMargins(0, 0, 0, 0)
 
         #LHH commented out to add scrollbars 
         # set window size
         #width = 900
         #height = 700
-        #self.mainArea.setMinimumSize(width, height)
+        #self.mainArea.setMinimumWidth(width, height)
 
         # initialize UI components
         self.retranslateUi(self)
@@ -316,7 +317,8 @@ class OWImageBuilder(widget.OWWidget):
         )
         self.scroll_area.setWidget(self.mainContent)
         self.scroll_area.setWidgetResizable(True)
-        self.mainArea.layout().addWidget(self.scroll_area)
+        self.controlArea.layout().addWidget(self.scroll_area)
+        
         self.InitializeUI()
         #self.show()
 
@@ -370,7 +372,10 @@ class OWImageBuilder(widget.OWWidget):
 
     @pyqtSlot()
     def OnChooseScriptFile(self):
-        start_file = os.path.expanduser("~/")
+        if self.dockerDir:
+            start_file=self.dockerDir
+        else:
+            start_file = os.path.expanduser("~/")
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Open R Script File', start_file)
         if not filename:
@@ -518,7 +523,7 @@ class OWImageBuilder(widget.OWWidget):
     def OnLoadDockerfile(self):
         filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self, 'Open Dockerfile',
-            os.path.expanduser("~/"),
+            self.dockerDir,
             'Docker files (*)'
         )
         if filename:

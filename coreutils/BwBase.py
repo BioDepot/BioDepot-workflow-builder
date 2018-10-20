@@ -284,6 +284,9 @@ class OWBwBWidget(widget.OWWidget):
         '''
         self.useTestMode=False        
         self.jobRunning=False
+        self.saveBashFile=None
+        self.iterableAttrs=[]
+        self.iteratedAttrs=[]
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self._dockerImageName = image_name
         self._dockerImageTag = image_tag
@@ -408,6 +411,7 @@ class OWBwBWidget(widget.OWWidget):
                     myFile.close()
         except Exception as e:
             return
+
 
         #consoleControlLayout.addWidget(outputLabel,0,0) 
     def drawElements(self, elementList,isOptional=False):
@@ -828,6 +832,15 @@ class OWBwBWidget(widget.OWWidget):
             self.updateBoxEditValue(attr,boxEdit)
         if not boxEdit.count():
             removeBtn.setEnabled(False)
+            
+    def findIterables(self):
+        retList=[]
+        if self.data['parameters'] is None:
+            return retList
+        for pname, pvalue in self.data['parameters'].items():
+            if 'list' in pvalue['type']:
+                retList.append(pname) 
+        return retList
         
     def drawExec(self, box=None):
         if not hasattr(self,'useDockerfile'):
@@ -848,6 +861,22 @@ class OWBwBWidget(widget.OWWidget):
         self.testMode=QtGui.QCheckBox('Test mode',self)
         self.testMode.setChecked(self.useTestMode)
         self.testMode.stateChanged.connect(self.testModeChange)
+        
+        self.iterableAttrs=self.findIterables()
+
+        self.iterateBtn=QtGui.QToolButton(self)
+        self.iterateBtn.setText('Iterate')
+        self.iterablesMenuItems={}
+        if self.iterableAttrs:
+            self.iterablesMenu=QtGui.QMenu(self)
+            for attr in self.iterableAttrs:
+                action=self.iterablesMenu.addAction(attr)
+                action.setCheckable(True)
+                action.setChecked( bool(attr in self.iteratedAttrs))
+                action.changed.connect(self.chooseIterable)
+                self.iterablesMenuItems[action]=attr
+            self.iterateBtn.setMenu(self.iterablesMenu)
+            self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)    
         #self.dockerMode=QtGui.QCheckBox('Build container',self)
         #self.dockerMode.setChecked(self.useDockerfile)
         #self.dockerMode.stateChanged.connect(self.dockerModeChange)
@@ -881,7 +910,7 @@ class OWBwBWidget(widget.OWWidget):
         myLabel=QtGui.QLabel('RunMode:')
         myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
-        self.btnRun = gui.button(None, self, "Start", callback=self.onRunClicked)
+        self.btnRun = gui.button(None, self, "Start", callback=lambda: self.onRunClicked(button=self.btnRun))
         self.btnRun.setStyleSheet(self.css)
         self.btnRun.setFixedSize(60,20)
         self.btnStop = gui.button(None, self, "Stop", callback=self.onStopClicked)
@@ -890,6 +919,7 @@ class OWBwBWidget(widget.OWWidget):
         self.btnStop.setEnabled(False)
         self.execLayout.addWidget(self.btnRun,1,0)
         self.execLayout.addWidget(self.btnStop,1,1)
+        #self.execLayout.addWidget(self.iterateBtn,1,2)
         self.execLayout.addWidget(self.graphicsMode,1,2)
         self.execLayout.addWidget(self.testMode,1,3)
         #self.execLayout.addWidget(self.dockerMode,1,3)
@@ -925,7 +955,16 @@ class OWBwBWidget(widget.OWWidget):
         elif not checked and attr in self.runTriggers:
             (self.runTriggers).remove(attr)
             self.triggerReady[attr]=False
-    
+            
+    def chooseIterable (self):
+        action=self.iterablesMenu.sender()
+        attr=self.iterablesMenuItems[action]
+        checked=action.isChecked()
+        if attr is None or checked is None:
+            return
+        if checked and attr not in self.iteratedAttrs:
+            self.iteratedAttrs.append(attr)
+
     def checkTrigger(self,inputReceived=False):
         #this should be checked any time there is a change
         #but only triggers when an input is received
@@ -1054,6 +1093,8 @@ class OWBwBWidget(widget.OWWidget):
             sys.stderr.write('connection dict value for {} is {}\n'.format(attr,self.inputConnections._dict[attr]))
             self.checkTrigger(inputReceived=False)
         else:
+            if test:
+                self.saveBashFile=None
             self.testMode.setChecked(test)
             self.inputConnections.add(attr,sourceId)
             sys.stderr.write('sig handler adding input: attr {} sourceId {} value {}\n'.format(attr,sourceId,value))
@@ -1102,7 +1143,7 @@ class OWBwBWidget(widget.OWWidget):
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile='/data/output.sh')
+            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
@@ -1184,7 +1225,7 @@ class OWBwBWidget(widget.OWWidget):
                         return self.joinFlagValue(flagName,hostFilename)
                     return None
                 elif pvalue['type'] == 'file list':
-                    #files=str.splitlines(flagValue)
+                    #check whether it is iterated
                     files=flagValue
                     sys.stderr.write('flagnName {} files are {}\n'.format(flagName,files))
                     if files:
@@ -1211,7 +1252,7 @@ class OWBwBWidget(widget.OWWidget):
                     return self.joinFlagValue(flagName,flagValue)
             
         return None
-                                
+                           
     def generateCmdFromData (self):
         flags=[]
         args=[]
@@ -1234,7 +1275,10 @@ class OWBwBWidget(widget.OWWidget):
             #environment variables can have a Null value in the flags field
             #arguments are the only type that have no flag
             if 'argument' in pvalue:
-                fStr=self.flagString(pname)
+                if pname in self.iteratedAttrs:
+                    fStr="_iter\{{{}}}".format(pname)
+                else:
+                    fStr=self.flagString(pname)
                 if fStr and fStr is not None:
                     args.append(fStr)
                 continue
@@ -1256,14 +1300,73 @@ class OWBwBWidget(widget.OWWidget):
                 addParms=True
 
             if addParms:
-                fStr=self.flagString(pname)
+                if pname in self.iteratedAttrs:
+                    fStr="_iter\{{{}}}".format(pname)
+                else:
+                    fStr=self.flagString(pname)
                 sys.stderr.write('fStr is {}\n'.format(fStr))
                 sys.stderr.write('pvalue flag is {}\n'.format(pvalue['flag']))
                 if fStr:
                     flags.append(fStr)
                         
         return self.generateCmdFromBash(self.data['command'],flags=flags,args=args)
-
+    
+    def iteratedfString(self,pname, valuesList):
+        # flagstrings and findIteratedflags put the iterated names in the correct order place
+        #this routine creates a list of values either flagstrings or other values to substitute into the command strings
+        
+        if 'parameters' in self.data and pname in self.data['parameters']:
+            pvalue= self.data['parameters'][pname]
+            if 'flag' in pvalue  and hasattr(self,pname):
+                flagName=pvalue['flag']
+                flagValues=getattr(self,pname)
+                if pvalue['type'] == 'file list':
+                    files=flagValues
+                    if files:
+                        flags=[]
+                        baseFlag=""
+                        if flagName:
+                            #this is done to avoid the string None appearing as a flag name
+                            baseFlag=flagName
+                        for f in files:
+                            hostFile=(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
+                            flags.append(baseFlag+hostFile)
+                            return flags
+                elif pvalue['type'][-4:] =='list':
+                    flags=[]
+                    baseFlag=""
+                    if flagValues:
+                        if flagName:
+                            baseFlag=flagName
+                            for value in flagValues:
+                                flags.append(baseFlag+value)
+                    return flags
+        return None
+            
+    def findIteratedFlags(self,cmd):
+        cmd=self.replaceIteratedVars(cmd)
+        pattern = r'\_iter\{([^\}]+)\}'
+        regex = re.compile(pattern)
+        subs=[]
+        sys.stderr.write('command is {}\n'.format(cmd))
+        for match in regex.finditer(cmd):
+            sys.stderr.write('matched {}\n'.format(match.group(1)))
+            sub=match.group(1)
+            if sub not in subs:
+                subs.append(sub)        
+        return subs
+        
+    def replaceIteratedVars(self,cmd):
+        #replace any _bwb with _iter if iterated
+        pattern = r'\_bwb\{([^\}]+)\}'
+        regex = re.compile(pattern)
+        subs=[]
+        sys.stderr.write('command is {}\n'.format(cmd))
+        for match in regex.finditer(cmd):
+            pname=match.group(1)
+            if pname and self.iteratedAttrs and pname in self.iteratedAttrs:
+                cmd=cmd.replace('_bwb{{{}}}'.format(pname),'_iter{{{}}}'.format(pname))
+                
     def replaceVars(self,cmd,pnames,varSeen):
         pattern = r'\_bwb\{([^\}]+)\}'
         regex = re.compile(pattern)
@@ -1302,6 +1405,11 @@ class OWBwBWidget(widget.OWWidget):
         
         #multi executable commands need to use bash -c 'cmd1 && cmd2' type syntax - note this can cause problems when stopping container
         #can also have no executable in which case we retun nothing
+        
+        #will return a list of commands if there are iterables in the command string - it is possible to have iterated variables outside the command string
+        
+        #iterable flags is a dict of lists of flags
+        iteratedFlags=[]
         if not executables:
             return ""
         cmdStr="bash -c '"
@@ -1362,11 +1470,21 @@ class OWBwBWidget(widget.OWWidget):
                     self.envVars[e]=self.data['env'][e]
 
 #Event handlers
-    def onRunClicked(self):
-        if hasattr (self,'userStartJob'):
-            self.userStartJob()
-        else:
-            self.startJob()
+    def onRunClicked(self,button=None):
+        if button and self.useTestMode:
+            qm = QtGui.QMessageBox
+            ret=qm.question(self,'Export?', "Export Docker commands?", qm.Yes | qm.No)
+            if ret == qm.No:
+                self.saveBashFile=""
+                self.startJob()
+            else:
+                self.saveBashFile=""
+                retValue= QtWidgets.QFileDialog.getSaveFileName(self,"Export Docker commands","myscript.sh","Text files (*.sh);;All Files (*)")[0]
+                if retValue:
+                    self.saveBashFile=retValue
+                    with open(self.saveBashFile,'w') as f:
+                        f.write('#!/bin/bash\n')
+        self.startJob()
             
     def onStopClicked(self):
         self.pConsole.stop('Stopped by user')
