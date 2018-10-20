@@ -101,7 +101,7 @@ class WidgetsScheme(Scheme):
         inst.show()
         inst.raise_()
 
-    def dump_settings(self, node: SchemeNode):
+    def dump_settings(self, node):
         from Orange.widgets.settings import SettingsPrinter
         widget = self.widget_for_node(node)
 
@@ -817,6 +817,7 @@ class WidgetsSignalManager(SignalManager):
         app = QCoreApplication.instance()
 
         for signal in signals:
+            
             link = signal.link
             value = signal.value
 
@@ -836,6 +837,9 @@ class WidgetsSignalManager(SignalManager):
 #            if link.sink_channel.single:
 #                args = (value)
 #            else:
+            #check if signal has enough fields
+            while len(signal.id) < 4:
+                signal.id.append(False)
             args = (value, signal.id)
 
             log.debug("Process signals: calling %s.%s (from %s with id:%s)",
