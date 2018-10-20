@@ -409,7 +409,6 @@ class OWBwBWidget(widget.OWWidget):
         except Exception as e:
             return
 
-
         #consoleControlLayout.addWidget(outputLabel,0,0) 
     def drawElements(self, elementList,isOptional=False):
         for pname in elementList:
