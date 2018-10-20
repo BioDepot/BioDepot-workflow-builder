@@ -412,20 +412,19 @@ Four demo workflows are included with the Bwb container. They are found in the *
 This is an workflow used for processing UMI (Unique Molecular Identifier) barcoded RNA-seq data. 
 
 ### kallisto-sleuth demo
-This workflow is a popular RNA-seq workflow using kallisto to pseudo-align the reads and sleuth to determine which transcripts are differentially expressed. The workflow starts with a downloadURL widget that downloads the necessary directory structure and files that are used by sleuth to translate the transcript names to gene names and a file that describes which data are in the control group and which data are from the treatment group. Upon completion, the widget then signals the download of the genomic sequence that will be used by the kallisto index to create the indices need for alignment. The first widget also signals the fastqDump widget to download 6 paired-end reads in 12 fastq files. These are the data obtained from 6 samples that will be analysed. The kallisto align widget is triggered when both kallisto index and fastqDump are finished, i.e. it will start running after the index is made and the files are downloaded. kallisto-widget is a bash wrapper around the kallisto pseudo-alignment program. The bash wrapper sends multiple pairs of paired-end reads to the kallisto pseudo-alignment executable. kallisto then produces a series of directories that contain estimates of the abundance of the reads at each transcript. Sleuth is a R script that uses a model based on the observed abundances to determine whether a gene is differentially expressed and obtains a p-value. The sleuth widget itself is a bash script which generates an R script that calls sleuth with the parameters given by the user. The resulting p-values are then output to a file which is read by gnumeric, an open-source spreadsheet, that is displays the results to the screen.
+This workflow is a popular RNA-seq workflow using kallisto to pseudo-align the reads and sleuth to determine which transcripts are differentially expressed. The workflow starts with a downloadURL widget that downloads the necessary directory structure and files that are used by sleuth to translate the transcript names to gene names and a file that describes which data are in the control group and which data are from the treatment group. Upon completion, the widget then signals a second downloadURL widget to download the human genomic sequence that will be used by the kallisto index to create the indices need for alignment. The first widget also signals the fastqDump widget to download 6 paired-end reads in 12 fastq files. These are the data obtained from 6 samples that will be analysed. The kallisto align widget is triggered when both kallisto index and fastqDump are finished, i.e. it will start running after the index is made and the files are downloaded. kallisto-widget is a bash wrapper around the kallisto pseudo-alignment program. The bash wrapper sends multiple pairs of paired-end reads to the kallisto pseudo-alignment executable. kallisto then produces a series of directories that contain estimates of the abundance of the reads at each transcript. Sleuth is a R script that uses a model based on the observed abundances to determine whether a gene is differentially expressed and obtains a p-value. The sleuth widget itself is a bash script which generates an R script that calls sleuth with the parameters given by the user. The resulting p-values are then output to a file which is read by gnumeric, an open-source spreadsheet, that is displays the results to the screen.
 
 ### kallisto-sleuth with Jupyter demo
-The kallisto-sleuth workflow with Jupyter demo is identical to the kallisto-sleuth workflow except that instead of wrapping sleuth in a bash script and outputting the results using gnumeric - a jupyter notebook is used to run and display the results. The first notebook widget runs nbconvert which runs the code in the notebook and generates a filled notebook with the results, including a graph of the expression of the top differentially expressed gene. This widget triggers a second jupyter widget which opens the filled notebook. The second widget is run in a container with firefox which automatically opens the notebook at the end of the workflow. The user is free to interact with the code to change the analyses or conduct further analyses using the filled notebook as it is a fully functional dynamic instance of Jupyter.
+The kallisto-sleuth workflow with Jupyter demo is identical to the kallisto-sleuth workflow except that instead of wrapping sleuth in a bash script and outputting the results using gnumeric - a Jupyter notebook is used to run and display the results. The first notebook widget runs nbconvert which runs the code in the notebook and generates a filled notebook with the results, including a graph of the expression of the top differentially expressed gene. This widget triggers a second jupyter widget which opens the filled notebook. The second widget is run in a container with firefox which automatically opens the notebook at the end of the workflow. The user is free to interact with the code to change the analyses or conduct further analyses using the filled notebook as it is a fully functional dynamic instance of Jupyter.
 
 ### STAR demo
-
 
 ## Tutorial - Adding a Python script to a Bwb workflow
 
 The aims of this workflow are to demonstrate how to build a widget for a custom Python script and modify and customize an existing workflow. In this tutorial we will write a script to call cutadapt ( a Python app for removing adapters from reads) and insert it into the kallisto-jupyter demo workflow to trim the reads before alignment.
 
 
-###Overview
+### Overview
 
 The basic steps will be to
 
@@ -596,7 +595,6 @@ cp /tutorialFiles/cutadapt_multi.py /data/tutorial/.
 The workflow is read to be run by double click on the Download sleuth directory and pressing start. Alternatively, if you have already generated the index, disconnected the kallisto index widget from the kallistioQuant widget. Clikc on the kallistoQuant widget and enter the index file. Click on select triggers and uncheck the indexFile option. This will let you avoid having to wait for the index to be regenerated.
 
 ## Appendices
-
 
 ### 1. Development environment
 
