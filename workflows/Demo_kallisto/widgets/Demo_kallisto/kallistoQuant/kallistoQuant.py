@@ -56,17 +56,17 @@ class OWkallistoQuant(OWBwBWidget):
         self.drawGUI()
     def handleInputsindexFile(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("indexFile", value, args[0][0]), test=args[0][3]))
+            self.handleInputs("indexFile", value, args[0][0], test=args[0][3])
         else:
             self.handleInputs("inputFile", value, None)
     def handleInputsfastqFiles(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("fastqFiles", value, args[0][0]), test=args[0][3]))
+            self.handleInputs("fastqFiles", value, args[0][0], test=args[0][3])
         else:
             self.handleInputs("inputFile", value, None)
     def handleInputstrigger(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("trigger", value, args[0][0]), test=args[0][3]))
+            self.handleInputs("trigger", value, args[0][0], test=args[0][3])
         else:
             self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
