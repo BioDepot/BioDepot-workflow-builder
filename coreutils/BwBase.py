@@ -1233,11 +1233,6 @@ class OWBwBWidget(widget.OWWidget):
                         for f in files:
                             hostFiles.append(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
                             sys.stderr.write('flagnName {} adding file {} hostFiles {}\n'.format(flagName,f,hostFiles))
-                        if pname in self.iteratedAttrs:
-                            if flagName: 
-                                return "__iterateflag=[{}] __iterateValues=[{}] ".format(flagName,'\t'.join(hostFiles))
-                            else:
-                                return "__iterateflag=[] __iterateValues=[{}] ".format('\t'.join(hostFiles))
                         if flagName:
                             return " ".join([flagName] + hostFiles)
                         else:
@@ -1280,7 +1275,10 @@ class OWBwBWidget(widget.OWWidget):
             #environment variables can have a Null value in the flags field
             #arguments are the only type that have no flag
             if 'argument' in pvalue:
-                fStr=self.flagString(pname)
+                if pname in self.iteratedAttrs:
+                    fStr="_iter\{{{}}}".format(pname)
+                else:
+                    fStr=self.flagString(pname)
                 if fStr and fStr is not None:
                     args.append(fStr)
                 continue
@@ -1302,14 +1300,73 @@ class OWBwBWidget(widget.OWWidget):
                 addParms=True
 
             if addParms:
-                fStr=self.flagString(pname)
+                if pname in self.iteratedAttrs:
+                    fStr="_iter\{{{}}}".format(pname)
+                else:
+                    fStr=self.flagString(pname)
                 sys.stderr.write('fStr is {}\n'.format(fStr))
                 sys.stderr.write('pvalue flag is {}\n'.format(pvalue['flag']))
                 if fStr:
                     flags.append(fStr)
                         
         return self.generateCmdFromBash(self.data['command'],flags=flags,args=args)
-
+    
+    def iteratedfString(self,pname, valuesList):
+        # flagstrings and findIteratedflags put the iterated names in the correct order place
+        #this routine creates a list of values either flagstrings or other values to substitute into the command strings
+        
+        if 'parameters' in self.data and pname in self.data['parameters']:
+            pvalue= self.data['parameters'][pname]
+            if 'flag' in pvalue  and hasattr(self,pname):
+                flagName=pvalue['flag']
+                flagValues=getattr(self,pname)
+                if pvalue['type'] == 'file list':
+                    files=flagValues
+                    if files:
+                        flags=[]
+                        baseFlag=""
+                        if flagName:
+                            #this is done to avoid the string None appearing as a flag name
+                            baseFlag=flagName
+                        for f in files:
+                            hostFile=(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
+                            flags.append(baseFlag+hostFile)
+                            return flags
+                elif pvalue['type'][-4:] =='list':
+                    flags=[]
+                    baseFlag=""
+                    if flagValues:
+                        if flagName:
+                            baseFlag=flagName
+                            for value in flagValues:
+                                flags.append(baseFlag+value)
+                    return flags
+        return None
+            
+    def findIteratedFlags(self,cmd):
+        cmd=self.replaceIteratedVars(cmd)
+        pattern = r'\_iter\{([^\}]+)\}'
+        regex = re.compile(pattern)
+        subs=[]
+        sys.stderr.write('command is {}\n'.format(cmd))
+        for match in regex.finditer(cmd):
+            sys.stderr.write('matched {}\n'.format(match.group(1)))
+            sub=match.group(1)
+            if sub not in subs:
+                subs.append(sub)        
+        return subs
+        
+    def replaceIteratedVars(self,cmd):
+        #replace any _bwb with _iter if iterated
+        pattern = r'\_bwb\{([^\}]+)\}'
+        regex = re.compile(pattern)
+        subs=[]
+        sys.stderr.write('command is {}\n'.format(cmd))
+        for match in regex.finditer(cmd):
+            pname=match.group(1)
+            if pname and self.iteratedAttrs and pname in self.iteratedAttrs:
+                cmd=cmd.replace('_bwb{{{}}}'.format(pname),'_iter{{{}}}'.format(pname))
+                
     def replaceVars(self,cmd,pnames,varSeen):
         pattern = r'\_bwb\{([^\}]+)\}'
         regex = re.compile(pattern)
@@ -1348,8 +1405,21 @@ class OWBwBWidget(widget.OWWidget):
         
         #multi executable commands need to use bash -c 'cmd1 && cmd2' type syntax - note this can cause problems when stopping container
         #can also have no executable in which case we retun nothing
+        
+        #will return a list of commands if there are iterables in the command string - it is possible to have iterated variables outside the command string
+        
+        #iterable flags is a dict of lists of flags
+        iteratedFlags=[]
         if not executables:
             return ""
+        for iteratedIndex, executable in executables.items():
+            if '_iter{' in executables: 
+                iteratedFlagNames=self.findIteratedFlagNames(executables)
+                iteratedFlags[iteratedIndex]={}
+                for nameIndex,pname in iteratedFlagNames.items():
+                    iteratedFlags[iteratedIndex][nameIndex]=[]
+                        
+            
         cmdStr="bash -c '"
         if len(executables) == 1:
             cmdStr=""
