@@ -153,17 +153,17 @@ class OWstarAlign(OWBwBWidget):
         self.drawGUI()
     def handleInputstrigger(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("trigger", value, args[0][0], test=args[0][3])
+            self.handleInputs("trigger", value, args[0][0]), test=args[0][3]))
         else:
             self.handleInputs("inputFile", value, None)
     def handleInputsoutputDir(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("outputDir", value, args[0][0], test=args[0][3])
+            self.handleInputs("outputDir", value, args[0][0]), test=args[0][3]))
         else:
             self.handleInputs("inputFile", value, None)
     def handleInputsgenomeDir(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("genomeDir", value, args[0][0], test=args[0][3])
+            self.handleInputs("genomeDir", value, args[0][0]), test=args[0][3]))
         else:
             self.handleInputs("inputFile", value, None)
     def handleOutputs(self):

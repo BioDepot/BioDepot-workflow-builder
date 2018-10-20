@@ -55,7 +55,7 @@ class OWstarIndex(OWBwBWidget):
         self.drawGUI()
     def handleInputsTrigger(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("Trigger", value, args[0][0], test=args[0][3])
+            self.handleInputs("Trigger", value, args[0][0]), test=args[0][3]))
         else:
             self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
