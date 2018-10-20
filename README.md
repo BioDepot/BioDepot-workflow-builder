@@ -406,9 +406,12 @@ To execute a workflow, double click on a widget and manual start from that widge
 #### Testing and exporting workflows as a bash script 
 A test mode is also provided for testing. Checking the test mode box before hitting the start button causes the widget and downstream connected widgets to output the docker commands to the console rather than executing them. This allows the user to check whether the triggers are set and the necessary parameters are entered without needing to run a lengthy workflow. In addition, the user will be prompted for a file to save the docker commands as a bash script. The script is a record of the actual docker commands that are run when the workflow is executed. 
 
-The bash script is portalbe and can be run without Bwb with 3 caveats. 
+The bash script is portalbe and can be run without Bwb with 3 caveats:
+
 1\. It may be necessary to give the save file run permissions. 
+
 2\. The file paths are those of the host system - if the script is run elsewhere these will need to be altered
+
 3\. The graphics are set to screen1 which is used by Bwb. Bwb must be active for graphics support, in which case the graphics will appear inside Bwb even if the script is run on the host. Alternatively, the user can change the command to use screen0 and follow the recipes given in our GuiDock-X11 paper.
 
 ## Demo workflows
@@ -437,10 +440,15 @@ The aims of this workflow are to demonstrate how to build a widget for a custom 
 The basic steps will be to
 
 1\. Add the Python2 widget to the kallisto-jupyter workflow
+
 2\. Customize the Python2 widget to query the additional parameters needed by the cutadapt script
+
 3\. Create Docker image
+
 4\. Write a short custom script locally to manage multiple files
+
 5\. Connect widget into the workflow
+
 6\. Test and run the new workflow
 
 
@@ -585,24 +593,30 @@ The script should be stored locally because files stored in the Bwb container fi
 
 To do this:
 
-1\. Click on the orange righ arrow at the bottom of the browser window to change the workspace to workspace 2. There should be a screen with no windows. 
+1\. Click on the orange right arrow at the bottom of the browser window to change the workspace to workspace 2. There should be a screen with no windows. 
+
 2\. Right click and choose the 'Terminal' option.
+
 3\. Enter the following command (assuming that you used the default /data mountpoint)
 ```bash
 cp /tutorialFiles/cutadapt_multi.py /data/tutorial/.
 ```
 ### Connecting the widget to the workflow
  1\. Right-click on the link between the Download fastq files and kalistoQuant widgets and chose the Remove option
+ 
  2\. Click on the right side of the Download fastq file widget and drag the ouse to the left hand side of the cutadapt widget 
+ 
  3\. When the link dialog pops up, click on the Clear all button in the lower left hand corner. Click on the OutputDir Box on the left and drag the mouse to the OutputDir Box on the right. Click OK
+ 
  4\. Click on the right side of the cutadapt widget and drag to the left sid of the kallisto Quant widget. When the Dialog box appears, hit the clear all button and connect the OutputDir of cutadapt to the trigger of kallistoQuant
+ 
  5\. Double click on the Cutadapt widget. Enter the following
  	Script: /data/tutorial/cutadapt_multi.py
  	RunMode: Triggered
  	Click on Select Triggers and choose OutputDir
 
 ### Running and testing the workflow
-The workflow is ready to be run by double click on the Download sleuth directory and pressing start. If you wish to make sure that all the connections and parameters are correct, then check the test mode box before pressing start. This will cause the Docker commands to be generated but not run, but output to the console. In addition, a prompt will appear to allow the option of saving the commands as a bash script representation of the workflow. This scriptan be executed outside of Bwb
+The workflow is ready to be run by double clicking on the 'Download sleuth directory' widget and pressing start. If you wish to make sure that all the connections and parameters are correct, then check the test mode box before pressing start. This will cause the Docker commands to be generated but not run. Instead the commands will be output to the console. In addition, a prompt will appear to allow the option of saving the commands as a bash script representation of the workflow. This script can be executed outside of Bwb and will give the same results as running the workflow using the normal Bwb interface.
 .
 
 
