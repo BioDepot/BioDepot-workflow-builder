@@ -862,21 +862,21 @@ class OWBwBWidget(widget.OWWidget):
         self.testMode.setChecked(self.useTestMode)
         self.testMode.stateChanged.connect(self.testModeChange)
         
-        self.iterableAttrs=self.findIterables()
+        # self.iterableAttrs=self.findIterables()
 
-        self.iterateBtn=QtGui.QToolButton(self)
-        self.iterateBtn.setText('Iterate')
-        self.iterablesMenuItems={}
-        if self.iterableAttrs:
-            self.iterablesMenu=QtGui.QMenu(self)
-            for attr in self.iterableAttrs:
-                action=self.iterablesMenu.addAction(attr)
-                action.setCheckable(True)
-                action.setChecked( bool(attr in self.iteratedAttrs))
-                action.changed.connect(self.chooseIterable)
-                self.iterablesMenuItems[action]=attr
-            self.iterateBtn.setMenu(self.iterablesMenu)
-            self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)    
+        # self.iterateBtn=QtGui.QToolButton(self)
+        # self.iterateBtn.setText('Iterate')
+        # self.iterablesMenuItems={}
+        # if self.iterableAttrs:
+            # self.iterablesMenu=QtGui.QMenu(self)
+            # for attr in self.iterableAttrs:
+                # action=self.iterablesMenu.addAction(attr)
+                # action.setCheckable(True)
+                # action.setChecked( bool(attr in self.iteratedAttrs))
+                # action.changed.connect(self.chooseIterable)
+                # self.iterablesMenuItems[action]=attr
+            # self.iterateBtn.setMenu(self.iterablesMenu)
+            # self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)    
         #self.dockerMode=QtGui.QCheckBox('Build container',self)
         #self.dockerMode.setChecked(self.useDockerfile)
         #self.dockerMode.stateChanged.connect(self.dockerModeChange)
