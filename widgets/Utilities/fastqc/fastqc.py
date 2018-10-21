@@ -41,7 +41,7 @@ class OWfastqc(OWBwBWidget):
         self.drawGUI()
     def handleInputsinputDir(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("inputDir", value, args[0][0]), test=args[0][3]))
+            self.handleInputs("inputDir", value, args[0][0], test=args[0][3])
         else:
             self.handleInputs("inputFile", value, None)
     def handleOutputs(self):
