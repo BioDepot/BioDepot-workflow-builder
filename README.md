@@ -644,7 +644,8 @@ As the development version of Bwb is not yet linked to the github, it is better 
 
 
 ### How Bwb executes workflows
-#### TLDR; ####
+#### TLDR;
+
 Bwb takes values from the widget forms, generates and executes a Docker command for the widget, and passes signals and data to downstream widgets to trigger their execution.
 
 Bwb takes the values from the forms and generates a Docker command (or set of commands when there are multiple commands) for each widget. Pressing the start button in the widget UI window, executes the command as a Quicktime QProcess which is interruptable and can signals when it is finished. If the process finishes without error, output signals are emitted and passed to linked widgets using the OrangeML signal manager. Upon receiving a signal, the widget checks that all necessary parameters are set and if execution is also triggered (or is automatic once parameters are set), its execution starts. 
@@ -654,10 +655,15 @@ Bwb takes the values from the forms and generates a Docker command (or set of co
 The Bwb container copies directories from the repository to the / directory of the container and installs the Python packages using pip. These directories are
 
 1\. orange3 - contains major routines of orange-ml
+
 2\. coreutils - contains major routines of Bwb
+
 3\. biodepot - mostly symbolic links required that Bwb widgets will appear in orange's Tool dock implementation 
+
 4\. widgets - where the included widget definitions for Bwb reside
+
 5\. workflows - copies of the demo workflows are found here
+
 6\. tutorialFiles - some files for the tutorial are found here
 
 A description of the 
@@ -696,27 +702,66 @@ Workflows are also stored as a directory. There is an XML .ows file which stores
 
 ### List and description of included widgets
 
-#### Jupyter widgets
+#### Scripting widgets
+Scripting widgets take as a required parameter the script to be run. Only basic libraries come pre-installed with the container.
+##### bash_utils  
+Very light container with alpine linux and a few utilities (curl, wget, gzip, xterm) for bash scripts. 5 MB in size compared to 112 MB for a base ubuntu container
+##### bioc_R  
+Bioconductor and R are installed. Ubuntu is the operating system as it is the base test system used by Bioconductor.
+##### Java8  
+The java 8 engine is installed and uses alpine 
+##### Perl
+Alpine linux with perl
+##### Python2
+Alpine and Python 2.7
+##### Python3
+Alpine and Python 3.6
 
-#### jupyter_base  
-#### jupyter_bioc  
-#### jupyter_sleuth
-
-Miscellaneous:
-Directory  File
-
-RNA_seq:
-deseq2          DtoxSAnalysis  kallistoQuant  starAlign  startodeseq2
-DtoxSAlignment  kallistoIndex  sleuth         starIndex
-
-Scripting:
-bash_utils  bioc_R  Java8  Perl  Python2  Python3
-
-User:
-File
-
-Utilities:
-downloadURL  fastqc  fastqDump  gnumeric
+#### Jupyter widgets:
+All jupyter widgets take as a required parameter an ipynb notebook file which is executed. The export graphics checkbox must be checked if the notebook is to be used interactively. Base operating system is ubuntu. Firefox is used to interact with Jupyter.
+##### jupyter_base 
+The basic vanilla jupyter widget with Python kernel. It takes a Jupyter notebook .ipynb file as an input. Most external libraries will have to be installed by the notebook.
+##### jupyter_bioc  
+Bioconductor and the R kernel have been installed. It can be further customized so that packages are pre-installed in the container using the  BiocImagebuilder utility
+##### jupyter_sleuth
+Sleuth and the R kernel has been installed.
+#### RNA_seq:
+Widgets used for RNA-seq are here
+##### deseq2
+deseq2 wrapped in a shell script in order to pass the parameter values
+##### DtoxSAnalysis
+Runs the shell script used by DToxS for their UMI RNA-seq analysis. The shell script organizes data and calls EdgeR to perform the differential expression analyses.
+##### DtoxSAlignment
+Runs the shell script used by DToxS for their UMI RNA-seq alignment. Calls two Python scripts that use bwa for alignment
+##### kallistoIndex 
+Generates the indices needed for kallisto. It calls kallisto with the index command. A shell script is used to pass multiple files and paired end reads to kallisto
+##### kallistoQuant
+Performs pseudoalignment quantitation using kallisto. It calls kallisto quant.
+##### starIndex
+Calls STAR aligner with index runmode to generate indices for STAR aligner
+##### starAlign
+Calls STAR aligner to perform alignment and quantitation. A shell script is used to pass multiple files and paired-end reads to STAR.
+##### startodeseq2
+A simple script to arrange the column output of STAR for input to deseq2
+##### sleuth
+A wrapper shell script that passes the parameters to sleuth.
+#### Miscellaneous:
+Some utility widgets are kept here that are useful for testing inputs and outputs.
+##### Directory  
+Prompts user to choose a directory. Sends it using a second button.
+##### File
+Prompts user to choose a directory. Sends it using a second button
+#### User:
+User defined widgets go here. 
+#### Utilities:
+##### downloadURL  
+Downloads a file given a URL. A shell script uses curl/wget and gzip/bzip to fetch and decompress the files. Additional logic is used to download files from google drives.
+##### fastqc  
+Invokes fastqc. The interactive graphics mode is also supported
+##### fastqDump 
+Used to download fastq files from GEO. Contains the SRA toolkit. A shell script passes parameters to the fastqDump utility of SRA tools. 
+##### gnumeric
+Calls the gnumeric open-source spreadsheet. The use graphics option should be checked to use the UI.
 
 
 ### Description of json descriptors for widgets (Note that some of this may be outdated) 
