@@ -369,11 +369,17 @@ Will load the attrs and state from another widget - this allows the user to use 
 A quick summary of the steps to construct a workflow:
 
 1\. Drag desired widgets from Tool Dock onto the canvas
+
 2\. Save the workflow and check of merge all widgets box
+
 3\. Load the saved workflow and a drawer of workflow widgets will appear in the Tool dock
+
 4\. Edit the widget definitions to define which parameters will be queried, what command and which container will be run
+
 5\. Connect the widgets by dragging from the right side of the widget (output) to the left side of the next widget to form the pipeline
+
 6\. Enter all the values for the different parameters
+
 7\. Save the workflow
 
 #### Workflow structure
@@ -489,11 +495,11 @@ What we have done is defined 'outputDir' as an input. This is because the fastq 
 
 4\. Click on the Parameters tab . Do the following:
 
-- Create entry for *OutputDir* by putting *OutputDir* in the *name* text box, choosing file from the *Type* text box, checking the *flag* box, entering *-d * followed by a space, as the value, enter, Check the *label* checkbox, and enter  *fastq directory:* into the label text box. Then press the *add* button.
+- Create entry for *OutputDir* by putting *OutputDir* in the *name* text box, choosing file from the *Type* text box, checking the *flag* box, entering *-d* followed by a space, as the value, enter, Check the *label* checkbox, and enter  *fastq directory:* into the label text box. Then press the *add* button.
 
-- Create entry for *quality* by putting *quality* in the *name* text box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-q * followed by a space, as the value for the flag. Enter, *Mininum quality* in the label box. Enter *10* in the *default *box. Then press the *add *button
+- Create entry for *quality* by putting *quality* in the *name* text box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-q* followed by a space, as the value for the flag. Enter, *Mininum quality* in the label box. Enter *10* in the *default *box. Then press the *add *button
 
-- Create entry for *minLength* by putting *minLength* in the *name* text box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-m * followed by a space, as the value for the flag. Enter, *Mininum read length* in the label box. Enter *50* in the *default *box. Then press the *add *button
+- Create entry for *minLength* by putting *minLength* in the *name* text box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-m* followed by a space, as the value for the flag. Enter, *Mininum read length* in the label box. Enter *50* in the *default *box. Then press the *add *button
 
 - Modify the the inputFile entry by clicking on the inputFile entry. Then at the bottom uncheck the Argument box. Check the flag box and enter a single space for the value of the flag. Click on the save button (file icon with plus sign.)
 
