@@ -9,6 +9,7 @@ from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5.QtGui import *
 from time import sleep
 
 from AnyQt.QtWidgets import (
@@ -17,6 +18,10 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
+def breakpoint(title=None,message=None):
+    return
+    QMessageBox.warning(title,'',message)
+    
 def getJsonName(filename,widgetName):
     widgetPy=os.path.realpath(filename)
     widgetDir=os.path.dirname(widgetPy)
@@ -372,7 +377,6 @@ class OWBwBWidget(widget.OWWidget):
         self.checkTrigger()
 
     def drawConsoleControl(self,box=None,layout=None):
-
         layout.addWidget(QtGui.QLabel('Console: '))
         pname='saveLog'
         pvalue={ 'type' : 'directory', 'label' : 'AutoLog'}
@@ -862,9 +866,8 @@ class OWBwBWidget(widget.OWWidget):
         self.testMode.setChecked(self.useTestMode)
         self.testMode.stateChanged.connect(self.testModeChange)
         
-        self.iterableAttrs=self.findIterables()
+        # self.iterableAttrs=self.findIterables()
 
-<<<<<<< HEAD
         self.iterateBtn=QtGui.QToolButton(self)
         self.iterateBtn.setText('Iterate')
         self.iterablesMenuItems={}
@@ -878,21 +881,6 @@ class OWBwBWidget(widget.OWWidget):
                 self.iterablesMenuItems[action]=attr
             self.iterateBtn.setMenu(self.iterablesMenu)
             self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)    
-=======
-        # self.iterateBtn=QtGui.QToolButton(self)
-        # self.iterateBtn.setText('Iterate')
-        # self.iterablesMenuItems={}
-        # if self.iterableAttrs:
-            # self.iterablesMenu=QtGui.QMenu(self)
-            # for attr in self.iterableAttrs:
-                # action=self.iterablesMenu.addAction(attr)
-                # action.setCheckable(True)
-                # action.setChecked( bool(attr in self.iteratedAttrs))
-                # action.changed.connect(self.chooseIterable)
-                # self.iterablesMenuItems[action]=attr
-            # self.iterateBtn.setMenu(self.iterablesMenu)
-            # self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)    
->>>>>>> iterate
         #self.dockerMode=QtGui.QCheckBox('Build container',self)
         #self.dockerMode.setChecked(self.useDockerfile)
         #self.dockerMode.stateChanged.connect(self.dockerModeChange)
@@ -936,19 +924,19 @@ class OWBwBWidget(widget.OWWidget):
         self.execLayout.addWidget(self.btnRun,1,0)
         self.execLayout.addWidget(self.btnStop,1,1)
 <<<<<<< HEAD
+        self.execLayout.addWidget(self.iterateBtn,1,2)
+        self.execLayout.addWidget(self.graphicsMode,1,3)
+        self.execLayout.addWidget(self.testMode,1,4)
+=======
         #self.execLayout.addWidget(self.iterateBtn,1,2)
         self.execLayout.addWidget(self.graphicsMode,1,2)
         self.execLayout.addWidget(self.testMode,1,3)
-=======
-#        self.execLayout.addWidget(self.iterateBtn,1,2)
-        self.execLayout.addWidget(self.graphicsMode,1,3)
-        self.execLayout.addWidget(self.testMode,1,4)
->>>>>>> iterate
+>>>>>>> cb5cbcec1a6bc0b0ac8745103667c25a8c40b443
         #self.execLayout.addWidget(self.dockerMode,1,3)
-        self.execLayout.addWidget(myLabel,1,5)
-        self.execLayout.addWidget(self.cboRunMode,1,6)
+        self.execLayout.addWidget(myLabel,1,4)
+        self.execLayout.addWidget(self.cboRunMode,1,5)
         if self.candidateTriggers:
-            self.execLayout.addWidget(self.execBtn,1,7)
+            self.execLayout.addWidget(self.execBtn,1,6)
         box.layout().addLayout(self.execLayout)    
     def testModeChange(self):
         self.useTestMode=self.testMode.isChecked() 
@@ -978,7 +966,7 @@ class OWBwBWidget(widget.OWWidget):
             (self.runTriggers).remove(attr)
             self.triggerReady[attr]=False
             
-    def chooseIterable (self):
+    def chooseIterable(self):
         action=self.iterablesMenu.sender()
         attr=self.iterablesMenuItems[action]
         checked=action.isChecked()
@@ -986,7 +974,9 @@ class OWBwBWidget(widget.OWWidget):
             return
         if checked and attr not in self.iteratedAttrs:
             self.iteratedAttrs.append(attr)
-
+        elif not checked and attr in self.iteratedAttrs:
+            (self.iteratedAttrs).remove(attr)
+            
     def checkTrigger(self,inputReceived=False):
         #this should be checked any time there is a change
         #but only triggers when an input is received
@@ -1157,15 +1147,16 @@ class OWBwBWidget(widget.OWWidget):
         self.bgui.disableAll()
         self.disableExec()
         self.jobRunning=True
-        cmd=self.generateCmdFromData()
+        cmds=self.generateCmdFromData()
         self.envVars={}
         self.getEnvironmentVariables()
         try:
             imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
-            self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
+            self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmds , self.envVars))
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile)
+            for cmd in cmds:
+                self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
@@ -1276,6 +1267,7 @@ class OWBwBWidget(widget.OWWidget):
         return None
                            
     def generateCmdFromData (self):
+        self.iterateFlag=False
         flags=[]
         args=[]
         #map port variables if necessary
@@ -1298,7 +1290,8 @@ class OWBwBWidget(widget.OWWidget):
             #arguments are the only type that have no flag
             if 'argument' in pvalue:
                 if pname in self.iteratedAttrs:
-                    fStr="_iter\{{{}}}".format(pname)
+                    fStr="_iterate{{{}}}".format(pname)
+                    self.iterateFlag=True
                 else:
                     fStr=self.flagString(pname)
                 if fStr and fStr is not None:
@@ -1323,17 +1316,16 @@ class OWBwBWidget(widget.OWWidget):
 
             if addParms:
                 if pname in self.iteratedAttrs:
-                    fStr="_iter\{{{}}}".format(pname)
+                    fStr="_iterate{{{}}}".format(pname)
                 else:
                     fStr=self.flagString(pname)
                 sys.stderr.write('fStr is {}\n'.format(fStr))
                 sys.stderr.write('pvalue flag is {}\n'.format(pvalue['flag']))
                 if fStr:
                     flags.append(fStr)
-                        
         return self.generateCmdFromBash(self.data['command'],flags=flags,args=args)
     
-    def iteratedfString(self,pname, valuesList):
+    def iteratedfString(self,pname):
         # flagstrings and findIteratedflags put the iterated names in the correct order place
         #this routine creates a list of values either flagstrings or other values to substitute into the command strings
         
@@ -1353,7 +1345,7 @@ class OWBwBWidget(widget.OWWidget):
                         for f in files:
                             hostFile=(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
                             flags.append(baseFlag+hostFile)
-                            return flags
+                        return flags
                 elif pvalue['type'][-4:] =='list':
                     flags=[]
                     baseFlag=""
@@ -1365,31 +1357,63 @@ class OWBwBWidget(widget.OWWidget):
                     return flags
         return None
             
-    def findIteratedFlags(self,cmd):
-        cmd=self.replaceIteratedVars(cmd)
-        pattern = r'\_iter\{([^\}]+)\}'
+    def findIteratedVariables(self,executables, flags, args):
+        pattern = r'\_iterate{([^\}]+)\}'
         regex = re.compile(pattern)
         subs=[]
-        sys.stderr.write('command is {}\n'.format(cmd))
-        for match in regex.finditer(cmd):
-            sys.stderr.write('matched {}\n'.format(match.group(1)))
-            sub=match.group(1)
-            if sub not in subs:
-                subs.append(sub)        
+        for i,executable in enumerate(executables):
+            executables[i]=self.replaceIteratedVars(executable)
+        for executable in executables:
+            if executable:
+                for match in regex.finditer(executable):
+                    sub=match.group(1)
+                    if sub not in subs:
+                        subs.append(sub)
+        for flag in flags:
+            if flag: 
+                for match in regex.finditer(flag):
+                    sub=match.group(1)
+                    if sub not in subs:
+                        subs.append(sub)
+        for arg in args:
+            if arg:
+                for match in regex.finditer(arg):
+                    sub=match.group(1)
+                    if sub not in subs:
+                        subs.append(sub)          
         return subs
+    
+    def subIteratedVars(self,cmd,subs):
+        if not subs:
+            return [cmd]
+        #replace all iterates in the cmd string with values 
+        cmds=[]
+        #find maxlen
+        maxLen=0
+        for key, values in subs.items():
+            if len(values)> maxLen:
+                maxLen = len(values)
+        for i in range (maxLen):
+            for key, values in subs.items():
+                index=i%len(values)
+                value=values[index]
+                cmds.append(cmd.replace('_iterate{{{}}}'.format(key),value))
+        return cmds
         
     def replaceIteratedVars(self,cmd):
         #replace any _bwb with _iter if iterated
         pattern = r'\_bwb\{([^\}]+)\}'
         regex = re.compile(pattern)
-        subs=[]
         sys.stderr.write('command is {}\n'.format(cmd))
         for match in regex.finditer(cmd):
             pname=match.group(1)
             if pname and self.iteratedAttrs and pname in self.iteratedAttrs:
-                cmd=cmd.replace('_bwb{{{}}}'.format(pname),'_iter{{{}}}'.format(pname))
-                
+                cmd=cmd.replace('_bwb{{{}}}'.format(pname),'_iterate{{{}}}'.format(pname))
+        return cmd
+        
     def replaceVars(self,cmd,pnames,varSeen):
+        if not cmd:
+            return
         pattern = r'\_bwb\{([^\}]+)\}'
         regex = re.compile(pattern)
         subs=[]
@@ -1429,25 +1453,25 @@ class OWBwBWidget(widget.OWWidget):
         #can also have no executable in which case we retun nothing
         
         #will return a list of commands if there are iterables in the command string - it is possible to have iterated variables outside the command string
-        
-        #iterable flags is a dict of lists of flags
-        iteratedFlags=[]
+        varSeen={}
         if not executables:
             return ""
-        # for iteratedIndex, executable in executables.items():
-            # if '_iter{' in executables: 
-                # iteratedFlagNames=self.findIteratedFlagNames(executables)
-                # iteratedFlags[iteratedIndex]={}
-                # for nameIndex,pname in iteratedFlagNames.items():
-                    # iteratedFlags[iteratedIndex][nameIndex]=[]
-                        
-            
+<<<<<<< HEAD
+        #find the iterated variables and make a nice unique list
+        #this will be used to substitute later
+        iteratedVariables=self.findIteratedVariables(executables,flags,args)
+
+        iteratedSubs={}
+        for pname in iteratedVariables:
+            iteratedSubs[pname]=self.iteratedfString(pname)
+=======
+>>>>>>> cb5cbcec1a6bc0b0ac8745103667c25a8c40b443
         cmdStr="bash -c '"
         if len(executables) == 1:
             cmdStr=""
-        varSeen={}
         sys.stderr.write('execs {}\n'.format(executables))
         sys.stderr.write('executables {}\n'.format(executables))
+        breakpoint(message='executables are {}'.format(executables))
         for executable in executables:
             lastExecutable= (executable == executables[-1])
             sys.stderr.write('Orig executable {} flags {} args {}\n'.format(executable,flags,args))
@@ -1469,7 +1493,10 @@ class OWBwBWidget(widget.OWWidget):
                     cmdStr+="'"
             else:
                 cmdStr+=" && "
-        return cmdStr
+        breakpoint(message='commandStr is {}'.format(cmdStr))
+        cmds=self.subIteratedVars(cmdStr,iteratedSubs)
+        breakpoint(message='cmds are {}'.format(cmds))
+        return cmds
 
     def getEnvironmentVariables(self):
         #dynamic environment variables

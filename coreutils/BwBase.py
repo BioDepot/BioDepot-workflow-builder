@@ -1484,6 +1484,8 @@ class OWBwBWidget(widget.OWWidget):
                     self.saveBashFile=retValue
                     with open(self.saveBashFile,'w') as f:
                         f.write('#!/bin/bash\n')
+                    #change this to something nicer when we start having user permissions for written files
+                    os.system('chmod +777 {}'.format(self.saveBashFile))
         self.startJob()
             
     def onStopClicked(self):
