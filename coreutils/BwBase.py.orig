@@ -799,7 +799,11 @@ class OWBwBWidget(widget.OWWidget):
         if 'label' in pvalue and pvalue['label']:
             label=QtGui.QLabel(pvalue['label']+':')
         else:
+<<<<<<< HEAD
+            label=QtGui.QLabel("")
+=======
             label=QtGui.QLabel(' ')
+>>>>>>> b76c60ba9013797bb563fe0a7da7c1ccd270b954
         label.setAlignment(Qt.AlignTop)
         if checkbox:
             layout.addWidget(checkbox)
@@ -870,21 +874,21 @@ class OWBwBWidget(widget.OWWidget):
         self.testMode.setChecked(self.useTestMode)
         self.testMode.stateChanged.connect(self.testModeChange)
         
-        self.iterableAttrs=self.findIterables()
+        # self.iterableAttrs=self.findIterables()
 
-        self.iterateBtn=QtGui.QToolButton(self)
-        self.iterateBtn.setText('Iterate')
-        self.iterablesMenuItems={}
-        if self.iterableAttrs:
-            self.iterablesMenu=QtGui.QMenu(self)
-            for attr in self.iterableAttrs:
-                action=self.iterablesMenu.addAction(attr)
-                action.setCheckable(True)
-                action.setChecked( bool(attr in self.iteratedAttrs))
-                action.changed.connect(self.chooseIterable)
-                self.iterablesMenuItems[action]=attr
-            self.iterateBtn.setMenu(self.iterablesMenu)
-            self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)    
+        # self.iterateBtn=QtGui.QToolButton(self)
+        # self.iterateBtn.setText('Iterate')
+        # self.iterablesMenuItems={}
+        # if self.iterableAttrs:
+            # self.iterablesMenu=QtGui.QMenu(self)
+            # for attr in self.iterableAttrs:
+                # action=self.iterablesMenu.addAction(attr)
+                # action.setCheckable(True)
+                # action.setChecked( bool(attr in self.iteratedAttrs))
+                # action.changed.connect(self.chooseIterable)
+                # self.iterablesMenuItems[action]=attr
+            # self.iterateBtn.setMenu(self.iterablesMenu)
+            # self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)    
         #self.dockerMode=QtGui.QCheckBox('Build container',self)
         #self.dockerMode.setChecked(self.useDockerfile)
         #self.dockerMode.stateChanged.connect(self.dockerModeChange)
@@ -927,14 +931,14 @@ class OWBwBWidget(widget.OWWidget):
         self.btnStop.setEnabled(False)
         self.execLayout.addWidget(self.btnRun,1,0)
         self.execLayout.addWidget(self.btnStop,1,1)
-        self.execLayout.addWidget(self.iterateBtn,1,2)
-        self.execLayout.addWidget(self.graphicsMode,1,3)
-        self.execLayout.addWidget(self.testMode,1,4)
+        #self.execLayout.addWidget(self.iterateBtn,1,2)
+        self.execLayout.addWidget(self.graphicsMode,1,2)
+        self.execLayout.addWidget(self.testMode,1,3)
         #self.execLayout.addWidget(self.dockerMode,1,3)
-        self.execLayout.addWidget(myLabel,1,5)
-        self.execLayout.addWidget(self.cboRunMode,1,6)
+        self.execLayout.addWidget(myLabel,1,4)
+        self.execLayout.addWidget(self.cboRunMode,1,5)
         if self.candidateTriggers:
-            self.execLayout.addWidget(self.execBtn,1,7)
+            self.execLayout.addWidget(self.execBtn,1,6)
         box.layout().addLayout(self.execLayout)    
     def testModeChange(self):
         self.useTestMode=self.testMode.isChecked() 
@@ -1149,9 +1153,6 @@ class OWBwBWidget(widget.OWWidget):
         try:
             imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
-            cmds=[]
-            breakpoint(message='cmd is {}'.format(cmd))
-            #generate cmds here
             self.status='running'
             self.setStatusMessage('Running...')
             self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=[cmd], environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile)
@@ -1287,7 +1288,7 @@ class OWBwBWidget(widget.OWWidget):
             #arguments are the only type that have no flag
             if 'argument' in pvalue:
                 if pname in self.iteratedAttrs:
-                    fStr="_iterate{{{}}}".format(pname)
+                    fStr="_iter\{{{}}}".format(pname)
                 else:
                     fStr=self.flagString(pname)
                 if fStr and fStr is not None:
@@ -1312,7 +1313,7 @@ class OWBwBWidget(widget.OWWidget):
 
             if addParms:
                 if pname in self.iteratedAttrs:
-                    fStr="_iterate{{{}}}".format(pname)
+                    fStr="_iter\{{{}}}".format(pname)
                 else:
                     fStr=self.flagString(pname)
                 sys.stderr.write('fStr is {}\n'.format(fStr))
@@ -1356,7 +1357,7 @@ class OWBwBWidget(widget.OWWidget):
             
     def findIteratedFlags(self,cmd):
         cmd=self.replaceIteratedVars(cmd)
-        pattern = r'\_iterate{([^\}]+)\}'
+        pattern = r'\_iter\{([^\}]+)\}'
         regex = re.compile(pattern)
         subs=[]
         sys.stderr.write('command is {}\n'.format(cmd))
@@ -1376,7 +1377,7 @@ class OWBwBWidget(widget.OWWidget):
         for match in regex.finditer(cmd):
             pname=match.group(1)
             if pname and self.iteratedAttrs and pname in self.iteratedAttrs:
-                cmd=cmd.replace('_bwb{{{}}}'.format(pname),'_iterate{{{}}}'.format(pname))
+                cmd=cmd.replace('_bwb{{{}}}'.format(pname),'_iter{{{}}}'.format(pname))
                 
     def replaceVars(self,cmd,pnames,varSeen):
         pattern = r'\_bwb\{([^\}]+)\}'
