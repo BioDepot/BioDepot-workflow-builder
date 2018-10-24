@@ -369,11 +369,17 @@ Will load the attrs and state from another widget - this allows the user to use 
 A quick summary of the steps to construct a workflow:
 
 1\. Drag desired widgets from Tool Dock onto the canvas
+
 2\. Save the workflow and check of merge all widgets box
+
 3\. Load the saved workflow and a drawer of workflow widgets will appear in the Tool dock
+
 4\. Edit the widget definitions to define which parameters will be queried, what command and which container will be run
+
 5\. Connect the widgets by dragging from the right side of the widget (output) to the left side of the next widget to form the pipeline
+
 6\. Enter all the values for the different parameters
+
 7\. Save the workflow
 
 #### Workflow structure
@@ -489,11 +495,11 @@ What we have done is defined 'outputDir' as an input. This is because the fastq 
 
 4\. Click on the Parameters tab . Do the following:
 
-- Create entry for *OutputDir* by putting *OutputDir* in the *name* text box, choosing file from the *Type* text box, checking the *flag* box, entering *-d * followed by a space, as the value, enter, Check the *label* checkbox, and enter  *fastq directory:* into the label text box. Then press the *add* button.
+- Create entry for *OutputDir* by putting *OutputDir* in the *name* text box, choosing file from the *Type* text box, checking the *flag* box, entering *-d* followed by a space, as the value, enter, Check the *label* checkbox, and enter  *fastq directory:* into the label text box. Then press the *add* button.
 
-- Create entry for *quality* by putting *quality* in the *name* text box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-q * followed by a space, as the value for the flag. Enter, *Mininum quality* in the label box. Enter *10* in the *default *box. Then press the *add *button
+- Create entry for *quality* by putting *quality* in the *name* text box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-q* followed by a space, as the value for the flag. Enter, *Mininum quality* in the label box. Enter *10* in the *default *box. Then press the *add *button
 
-- Create entry for *minLength* by putting *minLength* in the *name* text box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-m * followed by a space, as the value for the flag. Enter, *Mininum read length* in the label box. Enter *50* in the *default *box. Then press the *add *button
+- Create entry for *minLength* by putting *minLength* in the *name* text box, choosing *int* from the *Type* box, checking the *flag* checkbox, entering *-m* followed by a space, as the value for the flag. Enter, *Mininum read length* in the label box. Enter *50* in the *default *box. Then press the *add *button
 
 - Modify the the inputFile entry by clicking on the inputFile entry. Then at the bottom uncheck the Argument box. Check the flag box and enter a single space for the value of the flag. Click on the save button (file icon with plus sign.)
 
@@ -608,7 +614,7 @@ cp /tutorialFiles/cutadapt_multi.py /data/tutorial/.
  
  3\. When the link dialog pops up, click on the Clear all button in the lower left hand corner. Click on the OutputDir Box on the left and drag the mouse to the OutputDir Box on the right. Click OK
  
- 4\. Click on the right side of the cutadapt widget and drag to the left sid of the kallisto Quant widget. When the Dialog box appears, hit the clear all button and connect the OutputDir of cutadapt to the trigger of kallistoQuant
+ 4\. Click on the right side of the cutadapt widget and drag to the left side of the kallisto Quant widget. When the Dialog box appears, hit the clear all button and connect the OutputDir of cutadapt to the trigger of kallistoQuant
  
  5\. Double click on the Cutadapt widget. Enter the following
  	Script: /data/tutorial/cutadapt_multi.py
@@ -616,15 +622,14 @@ cp /tutorialFiles/cutadapt_multi.py /data/tutorial/.
  	Click on Select Triggers and choose OutputDir
 
 ### Running and testing the workflow
-The workflow is ready to be run by double clicking on the 'Download sleuth directory' widget and pressing start. If you wish to make sure that all the connections and parameters are correct, then check the test mode box before pressing start. This will cause the Docker commands to be generated but not run. Instead the commands will be output to the console. In addition, a prompt will appear to allow the option of saving the commands as a bash script representation of the workflow. This script can be executed outside of Bwb and will give the same results as running the workflow using the normal Bwb interface.
+The workflow is ready to be run by double clicking on the 'Download sleuth directory' widget and pressing start. If you wish to make sure that all the connections and parameters are correct, then check the test mode box before pressing start. This will cause the Docker commands to be generated but not run. Instead the commands will be output to the console. In addition, a prompt will appear to allow the option of saving the commands as a bash script representation of the workflow. This script can be executed outside of Bwb and will give the same results (and errors) as running the workflow using the normal Bwb interface.
 .
-
 
 ## Appendices
 
 ### 1. Development environment
 
-We provide additional tools in a the biodepot/bwb-widget-dev for development of widgets. This includes a full-fledged editor, geany, some graphics tools for making icons and firefox for cutting pasting from stack overflow and other resources and for editing json files inside the container. This can be pulled from Dockerhub
+We provide additional tools in a the biodepot/bwb-widget-dev for development of widgets. This includes a full-fledged editor, geany, some graphics tools for making icons, firefox for cutting pasting from stack overflow and other resources and for editing json files inside the container. This can be pulled from Dockerhub
 
 ```bash
 docker pull biodepot/bwb-widget-dev
@@ -635,17 +640,129 @@ Alternatively the image can be built from source using the Dockerfile
 cd <github repo>
 docker build -f ./Dockerfile-widgets -t biodepot/bwb-widget-dev .
 ```
-As the development widget is not yet linked to the github, it is better to build the widget locally
-
+As the development version of Bwb is not yet linked to the github, it is better to build the container locally
 
 
 ### How Bwb executes workflows
+#### TLDR;
+
+Bwb takes values from the widget forms, generates and executes a Docker command for the widget, and passes signals and data to downstream widgets to trigger their execution.
+
+Bwb takes the values from the forms and generates a Docker command (or set of commands when there are multiple commands) for each widget. Pressing the start button in the widget UI window, executes the command as a Quicktime QProcess which is interruptable and can signals when it is finished. If the process finishes without error, output signals are emitted and passed to linked widgets using the OrangeML signal manager. Upon receiving a signal, the widget checks that all necessary parameters are set and if execution is also triggered (or is automatic once parameters are set), its execution starts. 
 
 ### Organization of code
 
-### Organization of widgets
+The Bwb container copies directories from the repository to the / directory of the container and installs the Python packages using pip. These directories are
+
+1\. orange3 - contains major routines of orange-ml
+
+2\. coreutils - contains major routines of Bwb
+
+3\. biodepot - mostly symbolic links required that Bwb widgets will appear in orange's Tool dock implementation 
+
+4\. widgets - where the included widget definitions for Bwb reside
+
+5\. workflows - copies of the demo workflows are found here
+
+6\. tutorialFiles - some files for the tutorial are found here
+
+A description of the 
+#### coreutils
+The core code for Bwb is stored in coreutils directory of the Bwb repository and is loaded into the coreuitls
+
+##### BwBase
+Each widget is an instantiation of the BwBase widget class which is a subclass extension of the original OWWidget class from Orange. The base class manages the forms and draws the UI for the widget. It also generates the basic command.
+
+##### DockerClient 
+To run the Docker command, a DockerClient class is used. This DockerClient object is created when Bwb is started and used to have methods based on DockerPy. Now it has two main functions, one is to convert the widget commands to Docker cli commands and the other is to execute it. Execution is done using a subclass of QProcess which attaches output of the Docker command to the console display, manages STOP interrupts from the user and signals when the process has completed or aborted. The DockerClient is also responsible for running the workflow in test mode and generating a bash script.
+
+##### OWWidgetBuilder
+This class is reponsible for the editing and saving the widget definitions. Originally this was a separate widget - hence it is also a subclass of the OWWidget class of Orange. 
+
+##### createWidget
+This is reponsible for auto creation of the python script for the widget
+
+#### OWBiocImageBuilder
+This subclass also started out as a widget and is now optionally called by widget builder to provide a UI to facilitate building Docker images
+
+#### ToolDockEdit
+Code for editing the ToolDock
+
+#### makeToolDockCategories
+Basic code for manipulation of ToolDock
+
+#### workflowTools
+Code for loading and saving workflows. 
+
+### Organization of widget definition directory
+Widgets are stored as a directory. Each widget consists of the 3 json files and one python file as described before. In addition there is a icon directory which contains the icon file (png, svg, jpg) and a Dockerfiles directory which (optionally) contains the Dockerfiles and scripts necessary to build the widget.
+
+### Organization of workflow directory
+Workflows are also stored as a directory. There is an XML .ows file which stores the graph of widgets, and the parameter values for each widget. This is the original format from OrangeML. There is an icon directory and a widgets directory that store the icon and widgets used by OrangeML. 
 
 ### List and description of included widgets
+
+#### Scripting widgets
+Scripting widgets take as a required parameter the script to be run. Only basic libraries come pre-installed with the container.
+##### bash_utils  
+Very light container with alpine linux and a few utilities (curl, wget, gzip, xterm) for bash scripts. 5 MB in size compared to 112 MB for a base ubuntu container
+##### bioc_R  
+Bioconductor and R are installed. Ubuntu is the operating system as it is the base test system used by Bioconductor.
+##### Java8  
+The java 8 engine is installed and uses alpine 
+##### Perl
+Alpine linux with perl
+##### Python2
+Alpine and Python 2.7
+##### Python3
+Alpine and Python 3.6
+
+#### Jupyter widgets:
+All jupyter widgets take as a required parameter an ipynb notebook file which is executed. The export graphics checkbox must be checked if the notebook is to be used interactively. Base operating system is ubuntu. Firefox is used to interact with Jupyter.
+##### jupyter_base 
+The basic vanilla jupyter widget with Python kernel. It takes a Jupyter notebook .ipynb file as an input. Most external libraries will have to be installed by the notebook.
+##### jupyter_bioc  
+Bioconductor and the R kernel have been installed. It can be further customized so that packages are pre-installed in the container using the  BiocImagebuilder utility
+##### jupyter_sleuth
+Sleuth and the R kernel has been installed.
+#### RNA_seq:
+Widgets used for RNA-seq are here
+##### deseq2
+deseq2 wrapped in a shell script in order to pass the parameter values
+##### DtoxSAnalysis
+Runs the shell script used by DToxS for their UMI RNA-seq analysis. The shell script organizes data and calls EdgeR to perform the differential expression analyses.
+##### DtoxSAlignment
+Runs the shell script used by DToxS for their UMI RNA-seq alignment. Calls two Python scripts that use bwa for alignment
+##### kallistoIndex 
+Generates the indices needed for kallisto. It calls kallisto with the index command. A shell script is used to pass multiple files and paired end reads to kallisto
+##### kallistoQuant
+Performs pseudoalignment quantitation using kallisto. It calls kallisto quant.
+##### starIndex
+Calls STAR aligner with index runmode to generate indices for STAR aligner
+##### starAlign
+Calls STAR aligner to perform alignment and quantitation. A shell script is used to pass multiple files and paired-end reads to STAR.
+##### startodeseq2
+A simple script to arrange the column output of STAR for input to deseq2
+##### sleuth
+A wrapper shell script that passes the parameters to sleuth.
+#### Miscellaneous:
+Some utility widgets are kept here that are useful for testing inputs and outputs.
+##### Directory  
+Prompts user to choose a directory. Sends it using a second button.
+##### File
+Prompts user to choose a directory. Sends it using a second button
+#### User:
+User defined widgets go here. 
+#### Utilities:
+##### downloadURL  
+Downloads a file given a URL. A shell script uses curl/wget and gzip/bzip to fetch and decompress the files. Additional logic is used to download files from google drives.
+##### fastqc  
+Invokes fastqc. The interactive graphics mode is also supported
+##### fastqDump 
+Used to download fastq files from GEO. Contains the SRA toolkit. A shell script passes parameters to the fastqDump utility of SRA tools. 
+##### gnumeric
+Calls the gnumeric open-source spreadsheet. The use graphics option should be checked to use the UI.
+
 
 ### Description of json descriptors for widgets (Note that some of this may be outdated) 
 

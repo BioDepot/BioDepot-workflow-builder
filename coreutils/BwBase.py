@@ -17,6 +17,11 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
+
+def breakpoint(title=None,message=None):
+    return
+    QMessageBox.warning(title,'',message)
+    
 def getJsonName(filename,widgetName):
     widgetPy=os.path.realpath(filename)
     widgetDir=os.path.dirname(widgetPy)
@@ -794,7 +799,7 @@ class OWBwBWidget(widget.OWWidget):
         if 'label' in pvalue and pvalue['label']:
             label=QtGui.QLabel(pvalue['label']+':')
         else:
-            label=QtGui.QLabel("")
+            label=QtGui.QLabel(' ')
         label.setAlignment(Qt.AlignTop)
         if checkbox:
             layout.addWidget(checkbox)
@@ -1222,7 +1227,7 @@ class OWBwBWidget(widget.OWWidget):
                     if not flagValue:
                         return None
                     filename=str(flagValue)
-                    if filename:
+                    if filename.strip():
                         hostFilename=self.bwbPathToContainerPath(filename, isFile=True,returnNone=False)
                         sys.stderr.write('orig file {} convert to container {}\n'.format(filename,hostFilename))
                         return self.joinFlagValue(flagName,hostFilename)

@@ -104,6 +104,7 @@ COPY orangePatches/signals.py /orange3/Orange/widgets/utils/signals.py
 
 #add bwb start scripts
 COPY scripts/startBwb.sh /bin/startBwb.sh
+COPY scripts/runDockerJob.sh /bin/runDockerJob.sh
 
 #add widgets and workflows
 ADD widgets /widgets/

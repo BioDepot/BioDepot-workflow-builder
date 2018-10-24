@@ -41,7 +41,7 @@ class OWFile(OWBwBWidget):
         if args and len(args) > 0: 
             self.handleInputs("File", value, args[0][0], test=args[0][3])
         else:
-            self.handleInputs("inputFile", value, None)
+            self.handleInputs("inputFile", value, None, False)
     def handleOutputs(self):
         outputValue=None
         if hasattr(self,"File"):

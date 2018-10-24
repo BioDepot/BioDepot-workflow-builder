@@ -32,10 +32,11 @@ class ConsoleProcess():
     def stop(self,message=None):
         self.state='stopped'
         #the runDockerJob.sh cleans itself up when interrupted
-        self.process.kill()
+        self.process.terminate()
         if message:
             self.writeMessage(message)
 
+        
 class DockerClient:
     def __init__(self, url, name):
         self.url = url
@@ -112,7 +113,7 @@ class DockerClient:
             for mapping in portMappings:
                 dockerBaseFlags+='-p {} '.format(mapping)
         for cmd in cmds:
-            dockerCmds.append(dockerBaseFlags + ' {} {} {} {}'.format(volumeMappings,envs,name,commands))
+            dockerCmds.append(dockerBaseFlags + ' {} {} {} {}'.format(volumeMappings,envs,name,cmd))
         consoleProc.state='running'
         if testMode:
             echoStr=''
@@ -124,47 +125,9 @@ class DockerClient:
                         echoStr+= '    docker  run -i --rm --init {}\n'.format(dockerCmd)
             consoleProc.process.start('echo',[echoStr])
         else:
-            dockerCmds.insert(_nThreads)   
+            dockerCmds=[str(_nThreads)] + dockerCmds   
             consoleProc.process.start('runDockerJob.sh',dockerCmds)
             
-            
-    def create_container_cli(self, name, volumes=None, commands=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None):
-        #reset logFile when it is not None - can be "" though - this allows an active reset
-        if logFile is not None:
-            self.logFile = logFile
-            
-        #skips DockerPy and creates the command line equivalent
-        volumeMappings=''
-        for container_dir, host_dir in hostVolumes.items():
-            volumeMappings=volumeMappings+"-v {}:{} ".format(self.to_best_host_directory(host_dir),container_dir)
-        envs=''
-        for env, var in environment.items():
-            #strip whitespace
-            env.strip()
-            #strip quotes if present
-            if env[0] == env[-1] and env.startswith(("'",'"')):
-                env=env[1:-1]
-            envs=envs+ "-e {}={} ".format(env,var)
-        #create container
-        consoleProc.cidFile='/tmp/'+ str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':', '.')
-        dockerBaseCmd='docker run -i --rm '
-        if exportGraphics:
-            dockerBaseCmd+='-e DISPLAY=:1 -v /tmp/.X11-unix:/tmp/.X11-unix '
-        if portMappings:
-            for mapping in portMappings:
-                dockerBaseCmd+='-p {} '.format(mapping)
-        dockerCmd=dockerBaseCmd + ' --init --cidfile={} {} {} {} {}'.format(consoleProc.cidFile,volumeMappings,envs,name,commands)
-        sys.stderr.write('Docker command is\n{}\n'.format(dockerCmd))
-        consoleProc.state='running'
-        if testMode:
-            dockerCmd=dockerBaseCmd + ' --init {} {} {} {}'.format(volumeMappings,envs,name,commands)
-            #Do not test for logFile - this may be None if it is not the first widget in testMode
-            if self.logFile:
-                with open (self.logFile,'a') as f:
-                    f.write('    {}\n'.format(dockerCmd))
-            consoleProc.process.start('echo',[dockerCmd])
-        else:   
-            consoleProc.process.start('/bin/bash',['-c',dockerCmd])
 
         
     def create_container(self, name, volumes=None, commands=None, environment=None, hostVolumes=None):
