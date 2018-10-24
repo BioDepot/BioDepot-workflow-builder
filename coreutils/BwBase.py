@@ -17,6 +17,11 @@ from AnyQt.QtWidgets import (
     QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
     QSizePolicy, QApplication, QCheckBox
 )
+
+def breakpoint(title=None,message=None):
+    return
+    QMessageBox.warning(title,'',message)
+    
 def getJsonName(filename,widgetName):
     widgetPy=os.path.realpath(filename)
     widgetDir=os.path.dirname(widgetPy)
@@ -791,7 +796,10 @@ class OWBwBWidget(widget.OWWidget):
         myBox=gui.vBox(None)
         myBox.layout().addLayout(filesBoxLeditLayout)
         startCol=0
-        label=QtGui.QLabel(pvalue['label']+':')
+        if 'label' in pvalue and pvalue['label']:
+            label=QtGui.QLabel(pvalue['label']+':')
+        else:
+            label=QtGui.QLabel(' ')
         label.setAlignment(Qt.AlignTop)
         if checkbox:
             layout.addWidget(checkbox)
@@ -1143,7 +1151,7 @@ class OWBwBWidget(widget.OWWidget):
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_cli(imageName, hostVolumes=self.hostVolumes, commands=cmd, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile)
+            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=[cmd], environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
@@ -1219,7 +1227,7 @@ class OWBwBWidget(widget.OWWidget):
                     if not flagValue:
                         return None
                     filename=str(flagValue)
-                    if filename:
+                    if filename.strip():
                         hostFilename=self.bwbPathToContainerPath(filename, isFile=True,returnNone=False)
                         sys.stderr.write('orig file {} convert to container {}\n'.format(filename,hostFilename))
                         return self.joinFlagValue(flagName,hostFilename)
