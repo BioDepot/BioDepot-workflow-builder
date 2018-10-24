@@ -20,7 +20,7 @@ from AnyQt.QtWidgets import (
 
 def breakpoint(title=None,message=None):
     return
-    QMessageBox.warning(title,'',message)
+    QtGui.QMessageBox.warning(title,'',message)
     
 def getJsonName(filename,widgetName):
     widgetPy=os.path.realpath(filename)
@@ -1149,12 +1149,13 @@ class OWBwBWidget(widget.OWWidget):
         try:
             imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
-            cmds=[]
             breakpoint(message='cmd is {}'.format(cmd))
+            cmds=self.findIteratedFlags(cmd)
+            breakpoint(message='cmds are {}'.format(cmds))
             #generate cmds here
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=[cmd], environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile)
+            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
@@ -1322,7 +1323,7 @@ class OWBwBWidget(widget.OWWidget):
                         
         return self.generateCmdFromBash(self.data['command'],flags=flags,args=args)
     
-    def iteratedfString(self,pname, valuesList):
+    def iteratedfString(self,pname):
         # flagstrings and findIteratedflags put the iterated names in the correct order place
         #this routine creates a list of values either flagstrings or other values to substitute into the command strings
         
@@ -1342,7 +1343,7 @@ class OWBwBWidget(widget.OWWidget):
                         for f in files:
                             hostFile=(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
                             flags.append(baseFlag+hostFile)
-                            return flags
+                        return flags
                 elif pvalue['type'][-4:] =='list':
                     flags=[]
                     baseFlag=""
@@ -1355,28 +1356,47 @@ class OWBwBWidget(widget.OWWidget):
         return None
             
     def findIteratedFlags(self,cmd):
+        #replace positional values
         cmd=self.replaceIteratedVars(cmd)
-        pattern = r'\_iterate{([^\}]+)\}'
+        pattern = r'\_iterate\{([^\}]+)\}'
         regex = re.compile(pattern)
         subs=[]
+        subFlags={}
+        cmds=[]
         sys.stderr.write('command is {}\n'.format(cmd))
+        maxLen=0
+        #find matches
         for match in regex.finditer(cmd):
             sys.stderr.write('matched {}\n'.format(match.group(1)))
             sub=match.group(1)
             if sub not in subs:
-                subs.append(sub)        
-        return subs
+                subs.append(sub)
+                subFlags[sub]=self.iteratedfString(sub) 
+                breakpoint(message='sub is {} flags are{}'.format(sub,subFlags[sub]))   
+                if len(subFlags[sub]) > maxLen:
+                    maxLen=len(subFlags[sub])
+        for i in range(maxLen):
+            cmds.append(cmd)
+            for sub in subs:
+                index=i%len(subFlags[sub])
+                sys.stderr.write('sub {} i = {}\n'.format(sub,i))
+                replaceStr=subFlags[sub][index]
+                cmds[i]=cmds[i].replace('_iterate{{{}}}'.format(sub),replaceStr)
+        
+        breakpoint(message='end of findIterated cmds are {}'.format(cmds))    
+        return cmds
         
     def replaceIteratedVars(self,cmd):
         #replace any _bwb with _iter if iterated
         pattern = r'\_bwb\{([^\}]+)\}'
         regex = re.compile(pattern)
         subs=[]
-        sys.stderr.write('command is {}\n'.format(cmd))
+        sys.stderr.write('replaceIteratedVarsL command is {}\n'.format(cmd))
         for match in regex.finditer(cmd):
             pname=match.group(1)
             if pname and self.iteratedAttrs and pname in self.iteratedAttrs:
                 cmd=cmd.replace('_bwb{{{}}}'.format(pname),'_iterate{{{}}}'.format(pname))
+        return cmd 
                 
     def replaceVars(self,cmd,pnames,varSeen):
         pattern = r'\_bwb\{([^\}]+)\}'
