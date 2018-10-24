@@ -300,9 +300,11 @@ class OWBwBWidget(widget.OWWidget):
         self.filesBoxLayout=QtGui.QVBoxLayout()
         self.fileDirRequiredLayout=BwbGridLayout()
         self.fileDirOptionalLayout=BwbGridLayout()
-
+        self.fileDirScheduleLayout=QtGui.QGridLayout()
+        self.fileDirScheduleLayout.setSpacing(5)
         #lineEdits
         self.leditRequiredLayout=BwbGridLayout()
+        self.leditOptionalLayout=BwbGridLayout()
         self.leditOptionalLayout=BwbGridLayout()
         
         #keep track of gui elements associated with each attribute
@@ -350,6 +352,10 @@ class OWBwBWidget(widget.OWWidget):
             setattr(self.leditOptionalLayout.layout(),'added',True)              
             self.drawOptionalElements()
             
+        self.scheduleBox,scheduleLayout=self.tabs.addBox('Scheduler',minHeight=160)
+        self.scheduleBox.layout().addLayout(self.fileDirScheduleLayout.layout())          
+        self.drawScheduleElements()
+             
         #disable connected elements
         for i in self.inputs:
             attr=i.name
@@ -513,7 +519,62 @@ class OWBwBWidget(widget.OWWidget):
                     self.optionsChecked[pname]=False
                 optionalList.append(pname)    
         self.drawElements(optionalList,isOptional=True)
-            
+        
+    def drawScheduleElements(self):
+        self.widgetThreads=1
+        self.widgetThreadsChecked=True
+        self.IPs=['localhost']
+        self.schedulers=['Default']
+        self.iterableAttrs=self.findIterables()
+        self.iterateBtn=QtGui.QToolButton(self)
+        self.iterateBtn.setText('Iterated parameters')
+        self.iterablesMenuItems={}
+        self.IPMenuItems={}
+        self.schedulerMenuItems={}
+        if self.iterableAttrs:
+            self.iterablesMenu=QtGui.QMenu(self)
+            for attr in self.iterableAttrs:
+                action=self.iterablesMenu.addAction(attr)
+                action.setCheckable(True)
+                action.setChecked( bool(attr in self.iteratedAttrs))
+                action.changed.connect(self.chooseIterable)
+                self.iterablesMenuItems[action]=attr
+            self.iterateBtn.setMenu(self.iterablesMenu)
+            self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
+        
+        self.IPMenu=QtGui.QMenu(self)
+        self.IPBtn=QtGui.QToolButton(self)
+        self.IPBtn.setText('IPs to Use')        
+        for attr in self.IPs:
+            action=self.IPMenu.addAction(attr)
+            action.setCheckable(True)
+            action.setChecked( bool(attr in self.IPs))
+            action.changed.connect(self.chooseIP)
+            self.IPMenuItems[action]=attr
+        self.IPBtn.setMenu(self.IPMenu)
+        self.IPBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
+        
+        self.schedulerMenu=QtGui.QMenu(self)
+        self.schedulerBtn=QtGui.QToolButton(self)
+        self.schedulerBtn.setText('Scheduler to Use')        
+        for attr in self.schedulers:
+            action=self.schedulerMenu.addAction(attr)
+            action.setCheckable(True)
+            action.setChecked( bool(attr in self.schedulers))
+            action.changed.connect(self.chooseScheduler)
+            self.schedulerMenuItems[action]=attr
+        self.schedulerBtn.setMenu(self.schedulerMenu)
+        self.schedulerBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
+                
+        threadCheck,threadSpin=gui.spin(self.scheduleBox, self,'widgetThreads' , minv=1, maxv=128, label='Number of threads', checked='widgetThreadsChecked', checkCallback=lambda : self.updateSpinCheckbox('widgetThreads'))
+
+        
+        self.fileDirScheduleLayout.addWidget(self.iterateBtn,1,0)
+        self.fileDirScheduleLayout.addWidget(self.IPBtn,2,0)
+        self.fileDirScheduleLayout.addWidget(self.schedulerBtn,3,0)
+        self.fileDirScheduleLayout.addWidget(threadCheck,4,0)
+        self.fileDirScheduleLayout.addWidget(threadSpin,4,1)
+
     def drawCheckbox(self,pname,pvalue, box=None):
         #for booleans - their value is the same as the checkbox state
         sys.stderr.write('drawCB pname {} pvalue {} label {}\n'.format(pname, pvalue,pvalue['label']))
@@ -870,21 +931,7 @@ class OWBwBWidget(widget.OWWidget):
         self.testMode.setChecked(self.useTestMode)
         self.testMode.stateChanged.connect(self.testModeChange)
         
-        self.iterableAttrs=self.findIterables()
-
-        self.iterateBtn=QtGui.QToolButton(self)
-        self.iterateBtn.setText('Iterate')
-        self.iterablesMenuItems={}
-        if self.iterableAttrs:
-            self.iterablesMenu=QtGui.QMenu(self)
-            for attr in self.iterableAttrs:
-                action=self.iterablesMenu.addAction(attr)
-                action.setCheckable(True)
-                action.setChecked( bool(attr in self.iteratedAttrs))
-                action.changed.connect(self.chooseIterable)
-                self.iterablesMenuItems[action]=attr
-            self.iterateBtn.setMenu(self.iterablesMenu)
-            self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)    
+    
         #self.dockerMode=QtGui.QCheckBox('Build container',self)
         #self.dockerMode.setChecked(self.useDockerfile)
         #self.dockerMode.stateChanged.connect(self.dockerModeChange)
@@ -927,14 +974,14 @@ class OWBwBWidget(widget.OWWidget):
         self.btnStop.setEnabled(False)
         self.execLayout.addWidget(self.btnRun,1,0)
         self.execLayout.addWidget(self.btnStop,1,1)
-        self.execLayout.addWidget(self.iterateBtn,1,2)
-        self.execLayout.addWidget(self.graphicsMode,1,3)
-        self.execLayout.addWidget(self.testMode,1,4)
+        #self.execLayout.addWidget(self.iterateBtn,1,2)
+        self.execLayout.addWidget(self.graphicsMode,1,2)
+        self.execLayout.addWidget(self.testMode,1,3)
         #self.execLayout.addWidget(self.dockerMode,1,3)
-        self.execLayout.addWidget(myLabel,1,5)
-        self.execLayout.addWidget(self.cboRunMode,1,6)
+        self.execLayout.addWidget(myLabel,1,4)
+        self.execLayout.addWidget(self.cboRunMode,1,5)
         if self.candidateTriggers:
-            self.execLayout.addWidget(self.execBtn,1,7)
+            self.execLayout.addWidget(self.execBtn,1,6)
         box.layout().addLayout(self.execLayout)    
     def testModeChange(self):
         self.useTestMode=self.testMode.isChecked() 
@@ -969,10 +1016,24 @@ class OWBwBWidget(widget.OWWidget):
         attr=self.iterablesMenuItems[action]
         checked=action.isChecked()
         if attr is None or checked is None:
-            return
+            self.iteratedAttrs.append(attr)
         if checked and attr not in self.iteratedAttrs:
             self.iteratedAttrs.append(attr)
-
+        if not checked and attr in self.iteratedAttrs:
+            del(self.iteratedAttrs[attr])
+            
+    def chooseIP (self):
+        action=self.IPMenu.sender()
+        attr=self.IPMenuItems[action]
+        checked=action.isChecked()
+        if attr is None or checked is None:
+            return
+    def chooseScheduler (self):
+        action=self.schedulerMenu.sender()
+        attr=self.schedulerMenuItems[action]
+        checked=action.isChecked()
+        if attr is None or checked is None:
+            return           
     def checkTrigger(self,inputReceived=False):
         #this should be checked any time there is a change
         #but only triggers when an input is received
@@ -1155,7 +1216,7 @@ class OWBwBWidget(widget.OWWidget):
             #generate cmds here
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile)
+            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,_nThreads=self.widgetThreads)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
@@ -1375,6 +1436,8 @@ class OWBwBWidget(widget.OWWidget):
                 breakpoint(message='sub is {} flags are{}'.format(sub,subFlags[sub]))   
                 if len(subFlags[sub]) > maxLen:
                     maxLen=len(subFlags[sub])
+        if not maxLen:
+            return [cmd]
         for i in range(maxLen):
             cmds.append(cmd)
             for sub in subs:

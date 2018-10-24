@@ -6,16 +6,20 @@
 
 #if interrupted - still cleanup
 myjobs=( "$@" )
-
+echo "$@"
 nThreads=$1
 lockDir=/tmp/locks.$$
+echo "mkdir -p $lockDir"
 mkdir -p $lockDir
 echo nThreads $nThreads
 #wait until all the variables i.e. lockDir have been defined
+for ((i=1; i<${#myjobs[@]}; ++i)); do
+    cmd="${myjobs[i]}"
+    echo "job $i is docker run -i --rm  --init --cidfile=$lockDir/lock$i/pid.$BASHPID $cmd"
+done
 trap "cleanup ${lockDir} " SIGINT INT TERM
 cleanup(){
     echo "cleaning up $1"
-    echo " find $1 -type f -name 'pid.* "
     find $1 -type f -name 'pid.*' 2> /dev/null | while read file; do
         echo ${file}
         cid=$(cat $file)
@@ -42,7 +46,8 @@ runJob(){
 }
 
 for i in $(seq 1 $nThreads); do
-      runJob $i &
+    echo "starting job with thread $i"
+    runJob $i &
 done
 #catch sigint and term and cleanup anyway
 

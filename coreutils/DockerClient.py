@@ -116,13 +116,17 @@ class DockerClient:
             dockerCmds.append(dockerBaseFlags + ' {} {} {} {}'.format(volumeMappings,envs,name,cmd))
         consoleProc.state='running'
         if testMode:
+            baseCmd='docker  run -i --rm --init '
             echoStr=''
+            for dockerCmd in dockerCmds:
+                fullCmd=baseCmd+dockerCmd
+                echoStr=echoStr+fullCmd+'\n'
+            print (echoStr)
             #Do not test for logFile - this may be None if it is not the first widget in testMode
             if self.logFile:
                 with open (self.logFile,'a') as f:
-                    for dockerCmd in dockerCmds:
-                        f.write('    docker  run -i --rm --init {}\n'.format(dockerCmd))
-                        echoStr+= '    docker  run -i --rm --init {}\n'.format(dockerCmd)
+                    f.write(echoStr)
+                        
             consoleProc.process.start('echo',[echoStr])
         else:
             dockerCmds=[str(_nThreads)] + dockerCmds   
