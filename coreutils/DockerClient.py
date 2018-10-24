@@ -13,7 +13,6 @@ class ConsoleProcess():
     def __init__(self, console=None, errorHandler=None, finishHandler=None):
         self.process=QProcess()
         self.console=console
-        self.cidFile=""
         self.state='stopped'
         if console:
             self.process.readyReadStandardOutput.connect(lambda: self.writeConsole(self.process, console,self.process.readAllStandardOutput,Qt.white))
@@ -24,7 +23,6 @@ class ConsoleProcess():
     def writeConsole(self,process,console,read,color):
         console.setTextColor(color)
         console.append(read().data().decode('utf-8',errors="ignore"))
-        #console.append('</span>')
     
     def writeMessage(self,message,color=Qt.green):
         #for bwb messages
@@ -33,25 +31,11 @@ class ConsoleProcess():
         
     def stop(self,message=None):
         self.state='stopped'
-        #we need to write our own code to
-        try: 
-            with open (self.cidFile,'r') as f:
-                cid=f.read()
-        except Exception as e:
-            sys.stderr.write("unable to read cidFile\n")
-            return
-        stopCmd='docker stop {} '.format(cid)
-        sys.stderr.write('Stop command: {}'.format(stopCmd))
-        os.system(stopCmd)
+        #the runDockerJob.sh cleans itself up when interrupted
         self.process.kill()
-        self.cleanup()
         if message:
             self.writeMessage(message)
-            
-    def cleanup(self):
-        os.unlink(self.cidFile)
 
-        
 class DockerClient:
     def __init__(self, url, name):
         self.url = url
@@ -101,12 +85,11 @@ class DockerClient:
         ["pwd", "touch newfile.txt"]
     
     """
-    def create_container_iter(self, name, volumes=None, commands=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None):
+    def create_container_iter(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None,_nThreads=1):
         #reset logFile when it is not None - can be "" though - this allows an active reset
         if logFile is not None:
             self.logFile = logFile
-            
-        #skips DockerPy and creates the command line equivalent
+         
         volumeMappings=''
         for container_dir, host_dir in hostVolumes.items():
             volumeMappings=volumeMappings+"-v {}:{} ".format(self.to_best_host_directory(host_dir),container_dir)
@@ -118,26 +101,32 @@ class DockerClient:
             if env[0] == env[-1] and env.startswith(("'",'"')):
                 env=env[1:-1]
             envs=envs+ "-e {}={} ".format(env,var)
-        #create container
-        consoleProc.cidFile='/tmp/'+ str(datetime.datetime.now().date()) + '_' + str(datetime.datetime.now().time()).replace(':', '.')
-        dockerBaseCmd='docker run -i --rm '
+        #create container cmds
+        #the runDockerJob.sh script takes care of the first part of the docker command and cidfile
+        #docker  run -i --rm --init --cidfile=<lockfile>'
+        dockerBaseFlags=""
+        dockerCmds=[]
         if exportGraphics:
-            dockerBaseCmd+='-e DISPLAY=:1 -v /tmp/.X11-unix:/tmp/.X11-unix '
+            dockerBaseFlags+='-e DISPLAY=:1 -v /tmp/.X11-unix:/tmp/.X11-unix '
         if portMappings:
             for mapping in portMappings:
-                dockerBaseCmd+='-p {} '.format(mapping)
-        dockerCmd=dockerBaseCmd + ' --init --cidfile={} {} {} {} {}'.format(consoleProc.cidFile,volumeMappings,envs,name,commands)
-        sys.stderr.write('Docker command is\n{}\n'.format(dockerCmd))
+                dockerBaseFlags+='-p {} '.format(mapping)
+        for cmd in cmds:
+            dockerCmds.append(dockerBaseFlags + ' {} {} {} {}'.format(volumeMappings,envs,name,commands))
         consoleProc.state='running'
         if testMode:
-            dockerCmd=dockerBaseCmd + ' --init {} {} {} {}'.format(volumeMappings,envs,name,commands)
+            echoStr=''
             #Do not test for logFile - this may be None if it is not the first widget in testMode
             if self.logFile:
                 with open (self.logFile,'a') as f:
-                    f.write('    {}\n'.format(dockerCmd))
-            consoleProc.process.start('echo',[dockerCmd])
-        else:   
-            consoleProc.process.start('/bin/bash',['-c',dockerCmd])
+                    for dockerCmd in dockerCmds:
+                        f.write('    docker  run -i --rm --init {}\n'.format(dockerCmd))
+                        echoStr+= '    docker  run -i --rm --init {}\n'.format(dockerCmd)
+            consoleProc.process.start('echo',[echoStr])
+        else:
+            dockerCmds.insert(_nThreads)   
+            consoleProc.process.start('runDockerJob.sh',dockerCmds)
+            
             
     def create_container_cli(self, name, volumes=None, commands=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None):
         #reset logFile when it is not None - can be "" though - this allows an active reset
