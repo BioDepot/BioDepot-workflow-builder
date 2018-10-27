@@ -5,7 +5,7 @@ Orange Canvas Main Window
 import os,re
 import sys
 sys.path.append('/coreutils')
-import OWWidgetBuilder, toolDockEdit
+import OWWidgetBuilder, toolDockEdit, ServerUtils
 #import workflowList
 import logging
 import operator
@@ -171,6 +171,7 @@ class CanvasMainWindow(QMainWindow):
     def __init__(self, *args):
         QMainWindow.__init__(self, *args)
         self.saveWorkflowSettings={}
+        self.serverSettings={}
         self.__scheme_margins_enabled = True
         self.__document_title = "untitled"
         self.__first_show = True
@@ -632,7 +633,10 @@ class CanvasMainWindow(QMainWindow):
         self.reset_widget_settings_action = \
             QAction(self.tr("Reset Widget Settings..."), self,
                     triggered=self.reset_widget_settings)
-
+                    
+        self.loadServersAction = QAction(self.tr('Load servers'), self, objectName='loadServers-action', toolTip=self.tr('Load set of servers from file'), triggered=self.loadServers, enabled=True)
+        self.editServersAction = QAction(self.tr('Edit servers'), self, objectName='editServers-action', toolTip=self.tr('Edit servers'), triggered=self.editServers, enabled=True)
+        self.serverlessAction = QAction(self.tr('Serverless'), self, objectName='serverless-action', toolTip=self.tr('Setup serverless execution'), triggered=self.serverless, enabled=True)
     def setup_menu(self):
         if sys.platform == "darwin" and QT_VERSION >= 0x50000:
             self.__menu_glob = QMenuBar(None)
@@ -729,23 +733,11 @@ class CanvasMainWindow(QMainWindow):
                 
         menu_bar.addMenu(self.toolDock_menu)
 
-        # self.notebook_menu = QMenu(self.tr("&Notebooks"), self)
-        # self.notebook_menu.addAction(self.loadNotebookAction)
-        # self.notebook_menu.addAction(self.addNotebookAction)
-        # self.notebook_menu.addSeparator()
-        # self.notebook_menu.addAction(self.removeNotebookAction)
-
-        # menu_bar.addMenu(self.notebook_menu)
-
-
-        # Help menu.
-#        self.help_menu = QMenu(self.tr("&Help"), self)
-#        self.help_menu.addAction(self.about_action)
-#        self.help_menu.addAction(self.welcome_action)
-#        self.help_menu.addAction(self.tutorials_action)
-#        self.help_menu.addAction(self.examples_action)
-#        menu_bar.addMenu(self.help_menu)
-
+        self.scheduler_menu = QMenu(self.tr('&Scheduler'), self)
+        self.scheduler_menu.addAction(self.loadServersAction)
+        self.scheduler_menu.addAction(self.editServersAction)
+        self.scheduler_menu.addAction(self.serverlessAction)
+        menu_bar.addMenu(self.scheduler_menu)
 
     def loadNotebook(self):
         pass
@@ -762,7 +754,15 @@ class CanvasMainWindow(QMainWindow):
         widget.showNormal()
         widget.raise_()
         widget.activateWindow()
-        
+    
+    def serverless(self):
+        pass
+
+    def editServers(self):
+        pass
+
+    def loadServers(self):
+        ServerUtils.importIPs(self,self.serverSettings)        
     def reload_settings(self,startingWorkflow=None):
         if startingWorkflow:
             os.system('echo {} > /tmp/pid.{}/workflow'.format(startingWorkflow,os.getpid())) 
