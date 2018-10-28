@@ -15,6 +15,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from workflowTools import exportWorkflow, importWorkflow
 from OWWidgetBuilder import SaveWorkflowForm
+from collections import OrderedDict
 import pkg_resources
 
 from AnyQt.QtWidgets import (
@@ -634,7 +635,6 @@ class CanvasMainWindow(QMainWindow):
             QAction(self.tr("Reset Widget Settings..."), self,
                     triggered=self.reset_widget_settings)
                     
-        self.loadServersAction = QAction(self.tr('Load servers'), self, objectName='loadServers-action', toolTip=self.tr('Load set of servers from file'), triggered=self.loadServers, enabled=True)
         self.editServersAction = QAction(self.tr('Edit servers'), self, objectName='editServers-action', toolTip=self.tr('Edit servers'), triggered=self.editServers, enabled=True)
         self.serverlessAction = QAction(self.tr('Serverless'), self, objectName='serverless-action', toolTip=self.tr('Setup serverless execution'), triggered=self.serverless, enabled=True)
     def setup_menu(self):
@@ -734,7 +734,6 @@ class CanvasMainWindow(QMainWindow):
         menu_bar.addMenu(self.toolDock_menu)
 
         self.scheduler_menu = QMenu(self.tr('&Scheduler'), self)
-        self.scheduler_menu.addAction(self.loadServersAction)
         self.scheduler_menu.addAction(self.editServersAction)
         self.scheduler_menu.addAction(self.serverlessAction)
         menu_bar.addMenu(self.scheduler_menu)
@@ -759,10 +758,8 @@ class CanvasMainWindow(QMainWindow):
         pass
 
     def editServers(self):
-        pass
-
-    def loadServers(self):
-        ServerUtils.importIPs(self,self.serverSettings)        
+        ServerUtils.editIPs(self,self.serverSettings)        
+        
     def reload_settings(self,startingWorkflow=None):
         if startingWorkflow:
             os.system('echo {} > /tmp/pid.{}/workflow'.format(startingWorkflow,os.getpid())) 
