@@ -305,7 +305,7 @@ class OWBwBWidget(widget.OWWidget):
         self.filesBoxLayout=QtGui.QVBoxLayout()
         self.fileDirRequiredLayout=BwbGridLayout()
         self.fileDirOptionalLayout=BwbGridLayout()
-        self.fileDirScheduleLayout=QHBoxLayout()
+        self.fileDirScheduleLayout=QtGui.QGridLayout()
         #lineEdits
         self.leditRequiredLayout=BwbGridLayout()
         self.leditOptionalLayout=BwbGridLayout()
@@ -580,29 +580,50 @@ class OWBwBWidget(widget.OWWidget):
         cbLabel=QtGui.QLabel('Threads:')
         threadSpin=gui.spin(self.scheduleBox, self,'schedulerThreads' , minv=1, maxv=128, label=None, checked=None, checkCallback=lambda : self.updateSpinCheckbox('schedulerThreads'))
 
-        #add a checkbox and label
+        self.iterate=False
+        self.scheduleCheckbox=gui.checkBox(None, self,'useScheduler',label='Schedule')
+        iterateCheckbox=gui.checkBox(None, self,'iterate',label='Iterate')
+        self.iterateBtn.setEnabled(iterateCheckbox.isChecked())
+        iterateCheckbox.stateChanged.connect(lambda : self.iterateBtn.setEnabled(iterateCheckbox.isChecked()))
+        iterateCheckbox.stateChanged.connect(lambda : self.updateScheduleCheckBox(iterateCheckbox.isChecked()))
         
-        checkbox=gui.checkBox(None, self,'useScheduler',label='Use scheduler')
-        controlAreaVisible = settings.Setting(True, schema_only=True)
-        self.iterateBtn.setEnabled(checkbox.isChecked())
-        self.IPBtn.setEnabled(checkbox.isChecked())
-        self.schedulerBtn.setEnabled(checkbox.isChecked())
-        threadSpin.setEnabled(checkbox.isChecked())
         
-        checkbox.stateChanged.connect(lambda : self.iterateBtn.setEnabled(checkbox.isChecked()))
-        checkbox.stateChanged.connect(lambda : self.IPBtn.setEnabled(checkbox.isChecked()))
-        checkbox.stateChanged.connect(lambda : self.schedulerBtn.setEnabled(checkbox.isChecked()))
-        checkbox.stateChanged.connect(lambda : threadSpin.setEnabled(checkbox.isChecked()))
+
+        self.IPBtn.setEnabled(self.scheduleCheckbox.isChecked())
+        self.schedulerBtn.setEnabled(self.scheduleCheckbox.isChecked())
+        threadSpin.setEnabled(self.scheduleCheckbox.isChecked())
+        
+        
+        self.scheduleCheckbox.stateChanged.connect(lambda : self.IPBtn.setEnabled(self.scheduleCheckbox.isChecked()))
+        self.scheduleCheckbox.stateChanged.connect(lambda : self.schedulerBtn.setEnabled(self.scheduleCheckbox.isChecked()))
+        self.scheduleCheckbox.stateChanged.connect(lambda : threadSpin.setEnabled(self.scheduleCheckbox.isChecked()))
         
         self.fileDirScheduleLayout.setAlignment(Qt.AlignTop)
-        self.fileDirScheduleLayout.addWidget(checkbox)
-        self.fileDirScheduleLayout.addWidget(self.iterateBtn)
-        self.fileDirScheduleLayout.addWidget(self.IPBtn)
-        self.fileDirScheduleLayout.addWidget(self.schedulerBtn)
-        self.fileDirScheduleLayout.addStretch(1)
-        self.fileDirScheduleLayout.addWidget(cbLabel)
-        self.fileDirScheduleLayout.addWidget(threadSpin)
+        
+        iterateBox=QtGui.QHBoxLayout()
+        iterateBox.addWidget(iterateCheckbox)
+        iterateBox.addWidget(self.iterateBtn)
+        iterateBox.addStretch(1)
+        
+        scheduleBox=QtGui.QHBoxLayout()
+        scheduleBox.addWidget(self.scheduleCheckbox)
+        scheduleBox.addWidget(self.schedulerBtn)
+        scheduleBox.addWidget(self.IPBtn)
+        scheduleBox.addStretch(1)
+        scheduleBox.addWidget(cbLabel)
+        scheduleBox.addWidget(threadSpin)
+        
+        
+        self.fileDirScheduleLayout.addLayout(iterateBox,0,0)
+        self.fileDirScheduleLayout.addLayout(scheduleBox,0,2)
 
+    def updateScheduleCheckBox(self,iterateState):
+        if not iterateState:
+            self.scheduleCheckbox.setChecked(False)
+            self.scheduleCheckbox.setEnabled(False)
+        else:
+            self.scheduleCheckbox.setEnabled(True)
+            
     def drawCheckbox(self,pname,pvalue, box=None):
         #for booleans - their value is the same as the checkbox state
         sys.stderr.write('drawCB pname {} pvalue {} label {}\n'.format(pname, pvalue,pvalue['label']))
