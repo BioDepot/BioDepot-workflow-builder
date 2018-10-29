@@ -1,1 +1,1 @@
-{"data": {"py/reduce": [{"py/type": "collections.OrderedDict"}, {"py/tuple": []}, null, null, {"py/tuple": [{"py/tuple": ["127.0.0.1", {"maxThreads": "1", "volumeMapping": ""}]}]}]}, "saveIPDir": "/data/BioDepot-workflow-builder"}
+{"data": {"py/reduce": [{"py/type": "collections.OrderedDict"}, {"py/tuple": []}, null, null, {"py/tuple": [{"py/tuple": ["127.0.0.1", {"maxThreads": "1", "volumeMapping": ""}]}]}]}, "saveIPDir": "/data"}
