@@ -551,7 +551,6 @@ class OWWidgetBuilder(widget.OWWidget):
         self.pickleWidget()
         qm= QtGui.QMessageBox
         title='Save {}'.format(self.widgetName)
-        message='Saved widget to {}'.format(self.widgetDir)
         ret=qm.question(self,title, "Saved widget to {} - Reload?".format(self.widgetDir), qm.Yes | qm.No)
         if ret == qm.No:
             return

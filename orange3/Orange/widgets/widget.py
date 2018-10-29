@@ -174,7 +174,7 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
     contextClosed = Signal()
 
     # pylint: disable=protected-access
-    def __new__(cls, *args, captionTitle=None, **kwargs):
+    def __new__(cls, *args, captionTitle=None,**kwargs):
         self = super().__new__(cls, None, cls.get_flags())
         QDialog.__init__(self, None, self.get_flags())
         OWComponent.__init__(self)

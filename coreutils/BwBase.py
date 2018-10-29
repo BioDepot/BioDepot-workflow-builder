@@ -2,11 +2,13 @@ import os
 import re
 import sys
 import logging
+import jsonpickle
 from OWWidgetBuilder import tabbedWindow
 from functools import partial
 from pathlib import Path
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
+from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 from time import sleep
@@ -257,6 +259,7 @@ class ConnectionDict:
         return False
 
 class OWBwBWidget(widget.OWWidget):
+    serversFile='/biodepot/serverSettings.json'
     dockerClient = DockerClient('unix:///var/run/docker.sock', 'local')
     defaultFileIcon=QtGui.QIcon('/icons/bluefile.png')
     browseIcon=QtGui.QIcon('/icons/bluefile.png')
@@ -521,9 +524,16 @@ class OWBwBWidget(widget.OWWidget):
         self.drawElements(optionalList,isOptional=True)
         
     def drawScheduleElements(self):
+        with open(self.serversFile) as f:
+            serverSettings=jsonpickle.decode(f.read())
         self.widgetThreads=1
         self.widgetThreadsChecked=True
-        self.IPs=['localhost']
+        self.IPs=[]
+        if 'data' in serverSettings and serverSettings['data']:
+            for addr in serverSettings['data']:
+                self.IPs.append(addr)
+        if not self.IPs:
+            self.IPs=["127.0.0.1"]
         self.schedulers=['Default']
         self.iterableAttrs=self.findIterables()
         self.iterateBtn=QtGui.QToolButton(self)
@@ -544,7 +554,7 @@ class OWBwBWidget(widget.OWWidget):
         
         self.IPMenu=QtGui.QMenu(self)
         self.IPBtn=QtGui.QToolButton(self)
-        self.IPBtn.setText('IPs to Use')        
+        self.IPBtn.setText('Servers to Use')        
         for attr in self.IPs:
             action=self.IPMenu.addAction(attr)
             action.setCheckable(True)

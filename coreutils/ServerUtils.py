@@ -32,7 +32,7 @@ from AnyQt.QtWidgets import (
 )
 
 defaultIconFile='/icons/default.png'
-
+ 
 class ServerDialog(QDialog):
     def __init__(self, serverSettings):
         super().__init__()
@@ -47,26 +47,35 @@ class ServerDialog(QDialog):
         QPushButton:hover {background-color: blue; }
         QPushButton:hover:pressed { background-color: lightBlue; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: white; border: 1px solid gray; } 
-        '''   
+        '''
+        self.serverSettings=serverSettings
+        self.setWindowTitle('Edit server settings')
+        self.settingsFile='/biodepot/serverSettings.json'   
         self.addIcon=QtGui.QIcon('/icons/add.png')
         self.removeIcon=QtGui.QIcon('/icons/remove.png')
-        
-        self.serverSettings=serverSettings
-        if 'data' not in self.serverSettings:
-            self.serverSettings['data']=OrderedDict()
         self.table=TableWidgetDragRows()
         self.table.setColumnCount(3)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(['Server IP', 'Threads', 'Volume map'])
-        nRows=len(serverSettings['data'].keys())
+        #start with blank slate - and keep temp copy of serverSettings
+        #only update when dialog is done and if the 
+        self.serverSettingsCopy={}
+        try:
+            self.importServers(filename=self.settingsFile)
+        except Exception as e:
+            self.serverSettingsCopy={}
+        
+        if 'data' not in self.serverSettingsCopy:
+            self.serverSettingsCopy['data']=OrderedDict()
+        nRows=len(self.serverSettingsCopy['data'].keys())
         if nRows:
             self.table.setRowCount(nRows)
             rowNum=0
-            for addr in serverSettings['data']:
-            #sys.stderr.write('addr {} data {}\n'.format(addr,serverSettings['data'][addr])) 
+            for addr in self.serverSettingsCopy['data']:
+            #sys.stderr.write('addr {} data {}\n'.format(addr,serverSettingsCopy['data'][addr])) 
                 self.table.setItem(rowNum,0,QTableWidgetItem(addr))
-                self.table.setItem(rowNum,1,QTableWidgetItem(serverSettings['data'][addr]['maxThreads']))
-                self.table.setItem(rowNum,2,QTableWidgetItem(serverSettings['data'][addr]['volumeMapping']))
+                self.table.setItem(rowNum,1,QTableWidgetItem(self.serverSettingsCopy['data'][addr]['maxThreads']))
+                self.table.setItem(rowNum,2,QTableWidgetItem(self.serverSettingsCopy['data'][addr]['volumeMapping']))
                 rowNum=rowNum+1
 
         #buttons for save and load
@@ -75,9 +84,13 @@ class ServerDialog(QDialog):
         loadBtn.setStyleSheet(self.css)
         loadBtn.setFixedSize(70,20)
         
-        saveBtn = gui.button(None, self, "Save", callback=self.exportServers)
+        saveBtn = gui.button(None, self, "Save", callback=self.save)
         saveBtn.setStyleSheet(self.css)
         saveBtn.setFixedSize(70,20)
+        
+        saveAsBtn = gui.button(None, self, "Save As", callback=self.exportServers)
+        saveAsBtn.setStyleSheet(self.css)
+        saveAsBtn.setFixedSize(70,20)
         
         addBtn=gui.button(None, self, "", callback=self.addRow)
         removeBtn=gui.button(None, self, "", callback=self.removeRow)
@@ -100,6 +113,7 @@ class ServerDialog(QDialog):
         buttonLayout=QHBoxLayout()
         buttonLayout.addWidget(loadBtn)
         buttonLayout.addWidget(saveBtn)
+        buttonLayout.addWidget(saveAsBtn)
         buttonLayout.addStretch(1)
         buttonLayout.addWidget(addBtn)
         buttonLayout.addWidget(removeBtn)
@@ -114,70 +128,135 @@ class ServerDialog(QDialog):
         self.table.itemSelectionChanged.connect(lambda: removeBtn.setEnabled(bool(len(self.table.selectionModel().selectedRows()))))
         # boxEdit.itemSelectionChanged.connect(lambda: self.onListWidgetSelect(boxEdit,addBtn,removeBtn,lineItem))
         # boxEdit.itemMoved.connect(lambda oldRow,newRow : self.onItemMoved(oldRow,newRow,boxEdit))
+
         
     def redrawTable(self):
-        if not self.serverSettings['data']:
+        if 'data' not in self.serverSettingsCopy or not self.serverSettingsCopy['data']:
             return
-        nRows=len(self.serverSettings['data'].keys())
+        nRows=len(self.serverSettingsCopy['data'].keys())
         if nRows:
             self.table.setRowCount(nRows)
             rowNum=0
-            for addr in self.serverSettings['data']:
-            #sys.stderr.write('addr {} data {}\n'.format(addr,self.serverSettings['data'][addr])) 
+            for addr in self.serverSettingsCopy['data']:
+            #sys.stderr.write('addr {} data {}\n'.format(addr,self.serverSettingsCopy['data'][addr])) 
                 self.table.setItem(rowNum,0,QTableWidgetItem(addr))
-                self.table.setItem(rowNum,1,QTableWidgetItem(self.serverSettings['data'][addr]['maxThreads']))
-                self.table.setItem(rowNum,2,QTableWidgetItem(self.serverSettings['data'][addr]['volumeMapping']))
+                self.table.setItem(rowNum,1,QTableWidgetItem(self.serverSettingsCopy['data'][addr]['maxThreads']))
+                self.table.setItem(rowNum,2,QTableWidgetItem(self.serverSettingsCopy['data'][addr]['volumeMapping']))
                 rowNum=rowNum+1
                         
     def closeEvent(self, event):
-        self.updateTable()
-        event.accept()
-        
-    def updateTable(self):
+        if self.serverSettings == self.serverSettingsCopy:
+            event.accept()
+            return
+        qm= QMessageBox(self)
+        qm.setWindowTitle('Save input')
+        qm.setInformativeText("Save input to current settings?")
+        qm.setStandardButtons(QMessageBox.Yes| QMessageBox.No| QMessageBox.Cancel  )
+        qm.setDefaultButton(QMessageBox.Cancel)
+        reply = qm.exec_()
+        if reply == QMessageBox.Yes:
+            self.save()
+        elif reply == QMessageBox.No:
+            event.accept()
+        else:
+            event.ignore()
+        return
+
+    def updateSettings(self):
         newData=OrderedDict()
         for i in range(self.table.rowCount()):
             addr=itemToText(self.table.item(i,0))
             newData[addr]={'maxThreads':itemToText(self.table.item(i,1)),'volumeMapping':itemToText(self.table.item(i,2))}
-            sys.stderr.write('row {}: {} {} {}\n'.format(i,itemToText(self.table.item(i,0)),itemToText(self.table.item(i,1)),itemToText(self.table.item(i,2))))
-        self.serverSettings['data']=newData
+        self.serverSettingsCopy['data']=newData
         
     def parseServers(self,filename):
-        self.serverSettings['data']=OrderedDict()
+        self.serverSettingsCopy['data']=OrderedDict()
         with open (filename,'r') as f:
-            for line in f:
-                line=line.rstrip("\n\r")
+            data=f.read()
+        if data.lstrip()[0] == '{':
+            #json file
+            try:
+                temp=jsonpickle.decode(data)
+                if temp:
+                    self.serverSettingsCopy=temp
+                return True
+            except Exception as e:
+                return False
+        elif checkIP(data.lstrip().strip('\t')):
+            #tsv file
+            lines=data.splitlines()
+            for line in lines:
                 addr,maxThreads,volumeMapping=line.split('\t')
-                if checkIP(addr) and addr not in self.serverSettings['data']:
-                    self.serverSettings['data'][addr]={'maxThreads':maxThreads,'volumeMapping':volumeMapping}
-    def importServers(self):
+                if checkIP(addr) and addr not in self.serverSettingsCopy['data']:
+                    self.serverSettingsCopy['data'][addr]={'maxThreads':maxThreads,'volumeMapping':volumeMapping}
+            return True
+        else:
+            ret=QtGui.QMessageBox.warning(None,'','Unable to detect valid json or tsv servers file')
+            return False;
+    def save(self):
+        self.updateSettings()
+        try:
+            self.serverSettings=self.serverSettingsCopy
+            with open (self.settingsFile,'w') as f:
+                f.write(jsonpickle.encode(self.serverSettings))
+            title='Save settings'
+            message='Settings successfully saved'
+            ret=QtGui.QMessageBox.information(self,title,message,QtGui.QMessageBox.Ok)
+        except Exception as e:
+            warning=QtGui.QMessageBox.warning(None,'','Settings not saved - error: {}\n'.format(str(e)))
+
+    def importServers(self,filename=None):
         startDir='/'
-        if 'saveIPDir' in self.serverSettings and self.serverSettings['saveIPDir']:
-            startDir=self.serverSettings['saveIPDir']
+        if 'saveIPDir' in self.serverSettingsCopy and self.serverSettingsCopy['saveIPDir']:
+            startDir=self.serverSettingsCopy['saveIPDir']
         elif os.path.isdir('/data'):
             startDir='/data'
-        filename = QFileDialog.getOpenFileName(self,"Load IPs from File",startDir)[0]
         if not filename:
-            return QFileDialog.Rejected
-        self.serverSettings['saveIPDir']=os.path.dirname(filename)
-        self.parseServers(filename)
-        self.redrawTable()  
+            filename = QFileDialog.getOpenFileName(self,"Load IPs from File",startDir)[0]
+            if not filename:
+                return QFileDialog.Rejected
+        self.serverSettingsCopy['saveIPDir']=os.path.dirname(filename)
+        if self.parseServers(filename):
+            self.redrawTable()  
               
     def exportServers(self):
         startDir='/'
-        if 'saveIPDir' in self.serverSettings and self.serverSettings['saveIPDir']:
-            startDir=self.serverSettings['saveIPDir']
+        if 'saveIPDir' in self.serverSettingsCopy and self.serverSettingsCopy['saveIPDir']:
+            startDir=self.serverSettingsCopy['saveIPDir']
         elif os.path.isdir('/data'):
             startDir='/data'
-        filename, filter = QFileDialog.getSaveFileName(self, 'Save servers', startDir, "tab delimited (*.tsv)")
+        filename, filter = QFileDialog.getSaveFileName(self, 'Save servers', startDir, "tab delimited (*.tsv);; json (*.json)")
         if not filename:
             return QFileDialog.Rejected
-        self.serverSettings['saveIPDir']=os.path.dirname(filename)
+        self.serverSettingsCopy['saveIPDir']=os.path.dirname(filename)
+        saveJson=False
+        fileStub,extension=os.path.splitext(filename);
+        sys.stderr.write('extension of filename {} is {}\n'.format(filename,extension)) 
+        if extension == '.json' or extension == '.JSON' or extension == '.jsn' or extension =='.JSN':
+            saveJson=True
+        elif extension is not '.tsv':
+            qm= QtGui.QMessageBox
+            title='Which save format'
+            ret=qm.question(self,title, "Can save as tsv or json. Save as json?", qm.Yes | qm.No)
+            if ret == qm.Yes:
+                saveJson=True        
         with open (filename,'w') as f:
-            for i in range(self.table.rowCount()):
-                addr=itemToText(self.table.item(i,0))
-                if checkIP(addr):
-                    output=[addr,itemToText(self.table.item(i,1)),itemToText(self.table.item(i,2))]
-                f.write('\t'.join(output)+'\n')
+            self.updateSettings()
+            if saveJson:
+                f.write(jsonpickle.encode(self.serverSettingsCopy))
+            else:
+                for addr in self.serverSettingsCopy['data']:
+                    if checkIP(addr):
+                        output=[addr]
+                        if 'maxThreads' in self.serverSettingsCopy['data'][addr]:
+                            output.append(self.serverSettingsCopy['data'][addr]['maxThreads'])
+                        else:
+                            output.append("")
+                        if 'volumeMapping' in self.serverSettingsCopy['data'][addr]:
+                            output.append(self.serverSettingsCopy['data'][addr]['volumeMapping'])
+                        else:
+                            output.append("")
+                                                
     def addRow(self):
         self.table.insertRow(self.table.rowCount())
     def removeRow(self):
@@ -262,10 +341,8 @@ def itemToText(item):
 
 def registerDirectory(baseToolPath):
     os.system('cd {} && pip install -e .'.format(baseToolPath))
-
-
     
-def editIPs(parent,serverSettings):
+def editIPs(serverSettings):
     serverDialog=ServerDialog(serverSettings)
     serverDialog.exec_()
 

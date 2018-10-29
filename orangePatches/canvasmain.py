@@ -9,6 +9,7 @@ import OWWidgetBuilder, toolDockEdit, ServerUtils
 #import workflowList
 import logging
 import operator
+import jsonpickle
 from functools import partial
 from io import BytesIO, StringIO
 from PyQt5.QtWidgets import *
@@ -173,6 +174,13 @@ class CanvasMainWindow(QMainWindow):
         QMainWindow.__init__(self, *args)
         self.saveWorkflowSettings={}
         self.serverSettings={}
+        self.serversFile='/biodepot/serverSettings.json'
+        try:
+            with open (self.serversFile, 'r') as f:
+                self.serverSettings=jsonpickle.decode(f.read())
+        except Exception as e:
+            self.serverSettings={}
+        sys.stderr.write('read in server settings {}\n'.format(self.serverSettings))
         self.__scheme_margins_enabled = True
         self.__document_title = "untitled"
         self.__first_show = True
@@ -758,7 +766,8 @@ class CanvasMainWindow(QMainWindow):
         pass
 
     def editServers(self):
-        ServerUtils.editIPs(self,self.serverSettings)        
+        sys.stderr.write('server settings are {}\n'.format(self.serverSettings))
+        ServerUtils.editIPs(self.serverSettings)        
         
     def reload_settings(self,startingWorkflow=None):
         if startingWorkflow:
