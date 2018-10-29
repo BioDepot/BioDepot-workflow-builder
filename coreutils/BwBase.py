@@ -267,7 +267,9 @@ class OWBwBWidget(widget.OWWidget):
     removeIcon=QtGui.QIcon('/icons/remove.png')
     submitIcon=QtGui.QIcon('/icons/submit.png')
     reloadIcon=QtGui.QIcon('icons/reload.png')
-    
+    useScheduler = settings.Setting(False, schema_only=True)
+    schedulerThreads=settings.Setting(1, schema_only=True)
+    #pset=functools.partial(settings.Setting,schema_only=True)
     
 #Initialization
     def __init__(self, image_name, image_tag):
@@ -289,7 +291,7 @@ class OWBwBWidget(widget.OWWidget):
         QPushButton:hover {background-color: #1555f5; }
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
-        '''
+        '''      
         self.useTestMode=False        
         self.jobRunning=False
         self.saveBashFile=None
@@ -303,8 +305,7 @@ class OWBwBWidget(widget.OWWidget):
         self.filesBoxLayout=QtGui.QVBoxLayout()
         self.fileDirRequiredLayout=BwbGridLayout()
         self.fileDirOptionalLayout=BwbGridLayout()
-        self.fileDirScheduleLayout=QtGui.QGridLayout()
-        self.fileDirScheduleLayout.setSpacing(5)
+        self.fileDirScheduleLayout=QHBoxLayout()
         #lineEdits
         self.leditRequiredLayout=BwbGridLayout()
         self.leditOptionalLayout=BwbGridLayout()
@@ -537,7 +538,7 @@ class OWBwBWidget(widget.OWWidget):
         self.schedulers=['Default']
         self.iterableAttrs=self.findIterables()
         self.iterateBtn=QtGui.QToolButton(self)
-        self.iterateBtn.setText('Iterated parameters')
+        self.iterateBtn.setText('Parameters')
         self.iterablesMenuItems={}
         self.IPMenuItems={}
         self.schedulerMenuItems={}
@@ -554,7 +555,7 @@ class OWBwBWidget(widget.OWWidget):
         
         self.IPMenu=QtGui.QMenu(self)
         self.IPBtn=QtGui.QToolButton(self)
-        self.IPBtn.setText('Servers to Use')        
+        self.IPBtn.setText('Servers')        
         for attr in self.IPs:
             action=self.IPMenu.addAction(attr)
             action.setCheckable(True)
@@ -566,7 +567,7 @@ class OWBwBWidget(widget.OWWidget):
         
         self.schedulerMenu=QtGui.QMenu(self)
         self.schedulerBtn=QtGui.QToolButton(self)
-        self.schedulerBtn.setText('Scheduler to Use')        
+        self.schedulerBtn.setText('Scheduler')        
         for attr in self.schedulers:
             action=self.schedulerMenu.addAction(attr)
             action.setCheckable(True)
@@ -575,15 +576,32 @@ class OWBwBWidget(widget.OWWidget):
             self.schedulerMenuItems[action]=attr
         self.schedulerBtn.setMenu(self.schedulerMenu)
         self.schedulerBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
-                
-        threadCheck,threadSpin=gui.spin(self.scheduleBox, self,'widgetThreads' , minv=1, maxv=128, label='Number of threads', checked='widgetThreadsChecked', checkCallback=lambda : self.updateSpinCheckbox('widgetThreads'))
-
         
-        self.fileDirScheduleLayout.addWidget(self.iterateBtn,1,0)
-        self.fileDirScheduleLayout.addWidget(self.IPBtn,2,0)
-        self.fileDirScheduleLayout.addWidget(self.schedulerBtn,3,0)
-        self.fileDirScheduleLayout.addWidget(threadCheck,4,0)
-        self.fileDirScheduleLayout.addWidget(threadSpin,4,1)
+        cbLabel=QtGui.QLabel('Threads:')
+        threadSpin=gui.spin(self.scheduleBox, self,'schedulerThreads' , minv=1, maxv=128, label=None, checked=None, checkCallback=lambda : self.updateSpinCheckbox('schedulerThreads'))
+
+        #add a checkbox and label
+        
+        checkbox=gui.checkBox(None, self,'useScheduler',label='Use scheduler')
+        controlAreaVisible = settings.Setting(True, schema_only=True)
+        self.iterateBtn.setEnabled(checkbox.isChecked())
+        self.IPBtn.setEnabled(checkbox.isChecked())
+        self.schedulerBtn.setEnabled(checkbox.isChecked())
+        threadSpin.setEnabled(checkbox.isChecked())
+        
+        checkbox.stateChanged.connect(lambda : self.iterateBtn.setEnabled(checkbox.isChecked()))
+        checkbox.stateChanged.connect(lambda : self.IPBtn.setEnabled(checkbox.isChecked()))
+        checkbox.stateChanged.connect(lambda : self.schedulerBtn.setEnabled(checkbox.isChecked()))
+        checkbox.stateChanged.connect(lambda : threadSpin.setEnabled(checkbox.isChecked()))
+        
+        self.fileDirScheduleLayout.setAlignment(Qt.AlignTop)
+        self.fileDirScheduleLayout.addWidget(checkbox)
+        self.fileDirScheduleLayout.addWidget(self.iterateBtn)
+        self.fileDirScheduleLayout.addWidget(self.IPBtn)
+        self.fileDirScheduleLayout.addWidget(self.schedulerBtn)
+        self.fileDirScheduleLayout.addStretch(1)
+        self.fileDirScheduleLayout.addWidget(cbLabel)
+        self.fileDirScheduleLayout.addWidget(threadSpin)
 
     def drawCheckbox(self,pname,pvalue, box=None):
         #for booleans - their value is the same as the checkbox state

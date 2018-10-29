@@ -48,6 +48,7 @@ class ServerDialog(QDialog):
         QPushButton:hover:pressed { background-color: lightBlue; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: white; border: 1px solid gray; } 
         '''
+        self.setMinimumSize(640, 384)
         self.serverSettings=serverSettings
         self.setWindowTitle('Edit server settings')
         self.settingsFile='/biodepot/serverSettings.json'   
@@ -55,6 +56,9 @@ class ServerDialog(QDialog):
         self.removeIcon=QtGui.QIcon('/icons/remove.png')
         self.table=TableWidgetDragRows()
         self.table.setColumnCount(3)
+        self.table.horizontalHeader().setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().setResizeMode(1, QtGui.QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().setResizeMode(2, QtGui.QHeaderView.Stretch)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(['Server IP', 'Threads', 'Volume map'])
         #start with blank slate - and keep temp copy of serverSettings
