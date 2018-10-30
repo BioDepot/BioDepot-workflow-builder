@@ -9,6 +9,7 @@ import tempfile,shutil
 import OWImageBuilder
 import workflowTools
 import socket
+import copy
 from xml.dom import minidom
 from glob import glob
 from pathlib import Path
@@ -32,7 +33,178 @@ from AnyQt.QtWidgets import (
 )
 
 defaultIconFile='/icons/default.png'
- 
+
+
+class IterateDialog(QDialog):
+    def __init__(self, iterateSettings):
+        nRows=len(iterateSettings['iterableAttrs'])
+        if not nRows:
+            return
+        nCols=4
+        super().__init__()
+        self.css = '''
+        QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
+        QPushButton:hover {background-color: #1555f5; }
+        QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
+        QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
+        '''
+        self.setMinimumSize(400,240)
+        self.iterateSettings=iterateSettings
+        self.setWindowTitle('Edit iterate settings')
+        self.table=QTableWidget()
+        self.table.setColumnCount(nCols)
+        for col in range(nCols-1):
+            self.table.horizontalHeader().setResizeMode(col, QtGui.QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().setResizeMode(nCols-1, QtGui.QHeaderView.Stretch)
+        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.setHorizontalHeaderLabels(['','Parameter', 'Group size', 'Threads'])
+        self.settingsCopy=copy.deepcopy(self.iterateSettings)
+        self.table.setRowCount(nRows)
+        rowNum=0
+        
+        for parm in self.settingsCopy['iterableAttrs']:
+            #init values if they are not there
+            if parm not in self.settingsCopy['data']:
+                self.settingsCopy['data'][parm]={'groupSize':'1','threads':'1'}
+                
+            if 'groupSize' not in self.settingsCopy['data'][parm].keys() or not self.settingsCopy['data'][parm]['groupSize']:
+                self.settingsCopy['data'][parm]['groupSize']='1'
+            if 'threads' not in self.settingsCopy['data'][parm].keys() or not self.settingsCopy['data'][parm] ['threads']:
+                self.settingsCopy['data'][parm]['threads']='1' 
+            
+            #make column items
+            cb=QTableWidgetItem()
+            parmItem=QTableWidgetItem(parm)
+            groupSizeItem=QTableWidgetItem(self.settingsCopy['data'][parm]['groupSize'])
+            threadItem=QTableWidgetItem(self.settingsCopy['data'][parm]['threads'])
+            
+            self.setSelect(parmItem,False)
+            parmItem.setFlags(parmItem.flags() ^ Qt.ItemIsEditable)
+            
+            if parm in self.settingsCopy['iteratedAttrs']:
+                cb.setCheckState(QtCore.Qt.Checked)
+            else:
+                cb.setCheckState(QtCore.Qt.Unchecked)
+                self.setEnable(parmItem,False)
+                self.setEnableSelect(groupSizeItem,False)
+                self.setEnableSelect(threadItem,False)
+
+            self.table.setItem(rowNum,0,cb)
+            self.table.setItem(rowNum,1,parmItem)
+            self.table.setItem(rowNum,2,groupSizeItem)
+            self.table.setItem(rowNum,3,threadItem)
+            rowNum=rowNum+1
+        self.table.cellChanged.connect(self.onCheckBoxChanged)
+
+        #buttons for save and load
+        
+        saveBtn = gui.button(None, self, "Save", callback=self.save)
+        saveBtn.setStyleSheet(self.css)
+        saveBtn.setFixedSize(70,20)
+
+                
+        #table
+        tableBox=QGroupBox()
+        scroll_area = QScrollArea(verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn)
+        scroll_area.setWidget(tableBox)
+        scroll_area.setWidgetResizable(True)
+        tableLayout=QHBoxLayout()
+        tableLayout.addWidget(self.table)
+        tableBox.setLayout(tableLayout)
+        
+        #buttons
+        buttonLayout=QHBoxLayout()
+        buttonLayout.setAlignment(Qt.AlignTop)
+        buttonLayout.addWidget(saveBtn)
+        
+        iterateLayout=QVBoxLayout()
+        iterateLayout.addWidget(tableBox)
+        iterateLayout.addLayout(buttonLayout)
+        self.setLayout(iterateLayout)
+
+    def setEnable(self,item,state):
+        if state:
+            item.setFlags(item.flags() |  Qt.ItemIsEnabled )          
+        else:
+            item.setFlags(item.flags() ^  Qt.ItemIsEnabled )
+
+    def setSelect(self,item,state):
+        if state:
+            item.setFlags(item.flags() |  Qt.ItemIsSelectable )            
+        else:
+            item.setFlags(item.flags() ^  Qt.ItemIsSelectable ) 
+    
+    def setEnableSelect(self,item,state):
+        if state:
+            item.setFlags(item.flags() |  Qt.ItemIsEnabled )
+            item.setFlags(item.flags() |  Qt.ItemIsSelectable )            
+        else:
+            item.setFlags(item.flags() ^  Qt.ItemIsEnabled )
+            item.setFlags(item.flags() ^  Qt.ItemIsSelectable )
+            
+    def onCheckBoxChanged(self,row,column):
+        if column:
+            return
+        cb=self.table.item(row,0)
+        parmItem=self.table.item(row,1)
+        parm=parmItem.text()
+        if cb.checkState() ==  QtCore.Qt.Checked:
+            self.setEnable(parmItem,True)
+            for col in range(2,4):
+                item=self.table.item(row,col)
+                self.setEnableSelect(item,True)
+            if parm not in self.settingsCopy['iteratedAttrs']:
+                self.settingsCopy['iteratedAttrs'].append(parm)
+        else:
+            self.setEnable(parmItem,False)
+            for col in range(2,4):
+                item=self.table.item(row,col)
+                self.setEnableSelect(item,False)
+            if parm in self.settingsCopy['iteratedAttrs']:
+                self.settingsCopy['iteratedAttrs'].remove(parm)
+    
+    def closeEvent(self, event):
+        if self.iterateSettings == self.settingsCopy:
+            event.accept()
+            return
+        qm= QMessageBox(self)
+        qm.setWindowTitle('Save input')
+        qm.setInformativeText("Save input to current settings?")
+        qm.setStandardButtons(QMessageBox.Yes| QMessageBox.No| QMessageBox.Cancel  )
+        qm.setDefaultButton(QMessageBox.Cancel)
+        reply = qm.exec_()
+        if reply == QMessageBox.Yes:
+            self.save()
+        elif reply == QMessageBox.No:
+            event.accept()
+        else:
+            event.ignore()
+        return
+
+    def updateSettings(self):
+        newData=OrderedDict()
+        newIteratedAttrs=[]
+        for i in range(self.table.rowCount()):
+            parm=itemToText(self.table.item(i,1))
+            newData[parm]={'groupSize':itemToText(self.table.item(i,2)),'threads':itemToText(self.table.item(i,3))}
+            if self.table.item(i,0).checkState() == QtCore.Qt.Checked:
+                newIteratedAttrs.append(parm)
+        self.settingsCopy['data']=newData
+        self.settingsCopy['iteratedAttrs']=newIteratedAttrs
+        
+        
+    def save(self):
+        self.updateSettings()
+        try:
+            self.iterateSettings=self.settingsCopy
+            title='Save settings'
+            message='Settings successfully saved'
+            ret=QtGui.QMessageBox.information(self,title,message,QtGui.QMessageBox.Ok)
+        except Exception as e:
+            warning=QtGui.QMessageBox.warning(None,'','Settings not saved - error: {}\n'.format(str(e)))
+
+
+        
 class ServerDialog(QDialog):
     def __init__(self, serverSettings):
         super().__init__()
@@ -349,4 +521,5 @@ def registerDirectory(baseToolPath):
 def editIPs(serverSettings):
     serverDialog=ServerDialog(serverSettings)
     serverDialog.exec_()
+    serverSettings=serverDialog.serverSettings
 

@@ -4,6 +4,7 @@ import sys
 import logging
 import jsonpickle
 from OWWidgetBuilder import tabbedWindow
+from ServerUtils import IterateDialog
 from functools import partial
 from pathlib import Path
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
@@ -295,8 +296,10 @@ class OWBwBWidget(widget.OWWidget):
         self.useTestMode=False        
         self.jobRunning=False
         self.saveBashFile=None
-        self.iterableAttrs=[]
-        self.iteratedAttrs=[]
+        self.iterateSettings={}
+        self.iterateSettings['iteratedAttrs']=[]
+        self.iterateSettings['data']={}
+        
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self._dockerImageName = image_name
         self._dockerImageTag = image_tag
@@ -536,23 +539,15 @@ class OWBwBWidget(widget.OWWidget):
         if not self.IPs:
             self.IPs=["127.0.0.1"]
         self.schedulers=['Default']
-        self.iterableAttrs=self.findIterables()
-        self.iterateBtn=QtGui.QToolButton(self)
-        self.iterateBtn.setText('Parameters')
-        self.iterablesMenuItems={}
+        
+        #have to wait until the OWxxx.py instance loads data from json before finding iterables - so don't move 
+        self.iterateSettings['iterableAttrs']=self.findIterables()
+        
+        self.iterateSettingsBtn = gui.button(None, self, "Settings", callback=self.setIteration)
+        self.iterateSettingsBtn.setStyleSheet(self.css)
+        self.iterateSettingsBtn.setFixedSize(80,20)
         self.IPMenuItems={}
         self.schedulerMenuItems={}
-        if self.iterableAttrs:
-            self.iterablesMenu=QtGui.QMenu(self)
-            for attr in self.iterableAttrs:
-                action=self.iterablesMenu.addAction(attr)
-                action.setCheckable(True)
-                action.setChecked( bool(attr in self.iteratedAttrs))
-                action.changed.connect(self.chooseIterable)
-                self.iterablesMenuItems[action]=attr
-            self.iterateBtn.setMenu(self.iterablesMenu)
-            self.iterateBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
-        
         self.IPMenu=QtGui.QMenu(self)
         self.IPBtn=QtGui.QToolButton(self)
         self.IPBtn.setText('Servers')        
@@ -578,31 +573,31 @@ class OWBwBWidget(widget.OWWidget):
         self.schedulerBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
         
         cbLabel=QtGui.QLabel('Threads:')
-        threadSpin=gui.spin(self.scheduleBox, self,'schedulerThreads' , minv=1, maxv=128, label=None, checked=None, checkCallback=lambda : self.updateSpinCheckbox('schedulerThreads'))
-
+        self.threadSpin=gui.spin(self.scheduleBox, self,'schedulerThreads' , minv=1, maxv=128, label=None, checked=None, checkCallback=lambda : self.updateSpinCheckbox('schedulerThreads'))
+        self.updateThreadSpin()
+        
         self.iterate=False
         self.scheduleCheckbox=gui.checkBox(None, self,'useScheduler',label='Schedule')
         iterateCheckbox=gui.checkBox(None, self,'iterate',label='Iterate')
-        self.iterateBtn.setEnabled(iterateCheckbox.isChecked())
-        iterateCheckbox.stateChanged.connect(lambda : self.iterateBtn.setEnabled(iterateCheckbox.isChecked()))
+        self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked())
         iterateCheckbox.stateChanged.connect(lambda : self.updateScheduleCheckBox(iterateCheckbox.isChecked()))
-        
+        iterateCheckbox.stateChanged.connect(lambda : self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked()))
         
 
         self.IPBtn.setEnabled(self.scheduleCheckbox.isChecked())
         self.schedulerBtn.setEnabled(self.scheduleCheckbox.isChecked())
-        threadSpin.setEnabled(self.scheduleCheckbox.isChecked())
+        self.threadSpin.setEnabled(self.scheduleCheckbox.isChecked())
         
         
         self.scheduleCheckbox.stateChanged.connect(lambda : self.IPBtn.setEnabled(self.scheduleCheckbox.isChecked()))
         self.scheduleCheckbox.stateChanged.connect(lambda : self.schedulerBtn.setEnabled(self.scheduleCheckbox.isChecked()))
-        self.scheduleCheckbox.stateChanged.connect(lambda : threadSpin.setEnabled(self.scheduleCheckbox.isChecked()))
+        self.scheduleCheckbox.stateChanged.connect(lambda : self.threadSpin.setEnabled(self.scheduleCheckbox.isChecked()))
         
         self.fileDirScheduleLayout.setAlignment(Qt.AlignTop)
         
         iterateBox=QtGui.QHBoxLayout()
         iterateBox.addWidget(iterateCheckbox)
-        iterateBox.addWidget(self.iterateBtn)
+        iterateBox.addWidget(self.iterateSettingsBtn)
         iterateBox.addStretch(1)
         
         scheduleBox=QtGui.QHBoxLayout()
@@ -611,11 +606,29 @@ class OWBwBWidget(widget.OWWidget):
         scheduleBox.addWidget(self.IPBtn)
         scheduleBox.addStretch(1)
         scheduleBox.addWidget(cbLabel)
-        scheduleBox.addWidget(threadSpin)
+        scheduleBox.addWidget(self.threadSpin)
         
         
         self.fileDirScheduleLayout.addLayout(iterateBox,0,0)
-        self.fileDirScheduleLayout.addLayout(scheduleBox,0,2)
+        self.fileDirScheduleLayout.addLayout(scheduleBox,1,0)
+    
+    def setIteration(self):
+        iterateDialog=IterateDialog(self.iterateSettings)
+        iterateDialog.exec_()
+        self.iterateSettings=iterateDialog.iterateSettings
+        self.updateThreadSpin()
+    
+    def updateThreadSpin(self):
+        maxThreads=1
+        for attr in self.iterateSettings['iteratedAttrs']:
+            if attr in self.iterateSettings['data'] and 'threads' in self.iterateSettings['data'][attr]:
+                threads= self.iterateSettings['data'][attr]['threads']
+                if int(threads) > maxThreads:
+                    maxThreads=int(threads)
+                
+        self.threadSpin.setMinimum(maxThreads)
+        self.threadSpin.setValue(maxThreads)
+        
 
     def updateScheduleCheckBox(self,iterateState):
         if not iterateState:
@@ -1065,11 +1078,11 @@ class OWBwBWidget(widget.OWWidget):
         attr=self.iterablesMenuItems[action]
         checked=action.isChecked()
         if attr is None or checked is None:
-            self.iteratedAttrs.append(attr)
-        if checked and attr not in self.iteratedAttrs:
-            self.iteratedAttrs.append(attr)
-        if not checked and attr in self.iteratedAttrs:
-            del(self.iteratedAttrs[attr])
+            self.iterateSettings['iteratedAttrs'].append(attr)
+        if checked and attr not in self.iterateSettings['iteratedAttrs']:
+            self.iterateSettings['iteratedAttrs'].append(attr)
+        if not checked and attr in self.iterateSettings['iteratedAttrs']:
+            del(self.iterateSettings['iteratedAttrs'][attr])
             
     def chooseIP (self):
         action=self.IPMenu.sender()
@@ -1265,7 +1278,7 @@ class OWBwBWidget(widget.OWWidget):
             #generate cmds here
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,_nThreads=self.widgetThreads)
+            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,scheduleSettings=None)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
@@ -1397,7 +1410,7 @@ class OWBwBWidget(widget.OWWidget):
             #environment variables can have a Null value in the flags field
             #arguments are the only type that have no flag
             if 'argument' in pvalue:
-                if pname in self.iteratedAttrs:
+                if pname in self.iterateSettings['iteratedAttrs']:
                     fStr="_iterate{{{}}}".format(pname)
                 else:
                     fStr=self.flagString(pname)
@@ -1422,7 +1435,7 @@ class OWBwBWidget(widget.OWWidget):
                 addParms=True
 
             if addParms:
-                if pname in self.iteratedAttrs:
+                if pname in self.iterateSettings['iteratedAttrs']:
                     fStr="_iterate{{{}}}".format(pname)
                 else:
                     fStr=self.flagString(pname)
@@ -1506,7 +1519,7 @@ class OWBwBWidget(widget.OWWidget):
         sys.stderr.write('replaceIteratedVarsL command is {}\n'.format(cmd))
         for match in regex.finditer(cmd):
             pname=match.group(1)
-            if pname and self.iteratedAttrs and pname in self.iteratedAttrs:
+            if pname and self.iterateSettings['iteratedAttrs'] and pname in self.iterateSettings['iteratedAttrs']:
                 cmd=cmd.replace('_bwb{{{}}}'.format(pname),'_iterate{{{}}}'.format(pname))
         return cmd 
                 

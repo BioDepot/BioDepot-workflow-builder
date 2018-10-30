@@ -86,7 +86,7 @@ class DockerClient:
         ["pwd", "touch newfile.txt"]
     
     """
-    def create_container_iter(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None,_nThreads=1):
+    def create_container_iter(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None,scheduleSettings=None):
         #reset logFile when it is not None - can be "" though - this allows an active reset
         if logFile is not None:
             self.logFile = logFile
@@ -115,6 +115,10 @@ class DockerClient:
         for cmd in cmds:
             dockerCmds.append(dockerBaseFlags + ' {} {} {} {}'.format(volumeMappings,envs,name,cmd))
         consoleProc.state='running'
+        env = QtCore.QProcessEnvironment.systemEnvironment()
+        env.insert("WIDGETTHREADS", "1")
+        consoleProc.process.setProcessEnvironment(env)
+
         if testMode:
             baseCmd='docker  run -i --rm --init '
             echoStr=''
@@ -126,10 +130,9 @@ class DockerClient:
             if self.logFile:
                 with open (self.logFile,'a') as f:
                     f.write(echoStr)
-                        
+                   
             consoleProc.process.start('echo',[echoStr])
         else:
-            dockerCmds=[str(_nThreads)] + dockerCmds   
             consoleProc.process.start('runDockerJob.sh',dockerCmds)
             
 

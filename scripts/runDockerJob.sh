@@ -7,11 +7,10 @@
 #if interrupted - still cleanup
 myjobs=( "$@" )
 echo "$@"
-nThreads=$1
 lockDir=/tmp/locks.$$
 echo "mkdir -p $lockDir"
 mkdir -p $lockDir
-echo nThreads $nThreads
+echo nThreads $WIDGETTHREADS
 #wait until all the variables i.e. lockDir have been defined
 for ((i=1; i<${#myjobs[@]}; ++i)); do
     cmd="${myjobs[i]}"
@@ -30,7 +29,7 @@ cleanup(){
     exit
 }
 runJob(){
-    for ((i=1; i<${#myjobs[@]}; ++i)); do
+    for ((i=0; i<${#myjobs[@]}; ++i)); do
         #make a lock directory will fail if it exists
         #can replace this with another signaling/messaging method - but need to know when a job is taken
         if (mkdir $lockDir/lock$i 2> /dev/null ); then
@@ -45,7 +44,7 @@ runJob(){
     exit
 }
 
-for i in $(seq 1 $nThreads); do
+for i in $(seq 1 $WIDGETTHREADS); do
     echo "starting job with thread $i"
     runJob $i &
 done
