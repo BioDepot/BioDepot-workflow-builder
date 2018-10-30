@@ -538,7 +538,9 @@ class OWBwBWidget(widget.OWWidget):
                 self.IPs.append(addr)
         if not self.IPs:
             self.IPs=["127.0.0.1"]
-        self.schedulers=['Default']
+        self.schedulers=['Default','Kubernetes','Amazon batch','Amazon lambda']
+        
+
         
         #have to wait until the OWxxx.py instance loads data from json before finding iterables - so don't move 
         self.iterateSettings['iterableAttrs']=self.findIterables()
@@ -559,39 +561,37 @@ class OWBwBWidget(widget.OWWidget):
             self.IPMenuItems[action]=attr
         self.IPBtn.setMenu(self.IPMenu)
         self.IPBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
+       
+        schedulerBox=QHBoxLayout()
+        self.schedulerLabel=QtGui.QLabel('Scheduler')
+        self.schedulerComboBox=QtGui.QComboBox()
+        self.schedulerComboBox.addItems(self.schedulers)
+        self.schedulerComboBox.currentIndex=0
+        schedulerBox.addWidget(self.schedulerLabel)
+        schedulerBox.addWidget(self.schedulerComboBox)
         
-        self.schedulerMenu=QtGui.QMenu(self)
-        self.schedulerBtn=QtGui.QToolButton(self)
-        self.schedulerBtn.setText('Scheduler')        
-        for attr in self.schedulers:
-            action=self.schedulerMenu.addAction(attr)
-            action.setCheckable(True)
-            action.setChecked( bool(attr in self.schedulers))
-            action.changed.connect(self.chooseScheduler)
-            self.schedulerMenuItems[action]=attr
-        self.schedulerBtn.setMenu(self.schedulerMenu)
-        self.schedulerBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
-        
-        cbLabel=QtGui.QLabel('Threads:')
+        cbLabel=QtGui.QLabel('Number of threads:')
         self.threadSpin=gui.spin(self.scheduleBox, self,'schedulerThreads' , minv=1, maxv=128, label=None, checked=None, checkCallback=lambda : self.updateSpinCheckbox('schedulerThreads'))
         self.updateThreadSpin()
+       
         
         self.iterate=False
-        self.scheduleCheckbox=gui.checkBox(None, self,'useScheduler',label='Schedule')
+        self.scheduleCheckbox=gui.checkBox(None, self,'useScheduler',label='')
         iterateCheckbox=gui.checkBox(None, self,'iterate',label='Iterate')
         self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked())
         iterateCheckbox.stateChanged.connect(lambda : self.updateScheduleCheckBox(iterateCheckbox.isChecked()))
         iterateCheckbox.stateChanged.connect(lambda : self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked()))
+        iterateCheckbox.stateChanged.connect(lambda: self.threadSpin.setEnabled(iterateCheckbox.isChecked()))
+        self.threadSpin.setEnabled(iterateCheckbox.isChecked())
         
 
         self.IPBtn.setEnabled(self.scheduleCheckbox.isChecked())
-        self.schedulerBtn.setEnabled(self.scheduleCheckbox.isChecked())
-        self.threadSpin.setEnabled(self.scheduleCheckbox.isChecked())
-        
+        self.schedulerLabel.setEnabled(self.scheduleCheckbox.isChecked())
+        self.schedulerComboBox.setEnabled(self.scheduleCheckbox.isChecked())
         
         self.scheduleCheckbox.stateChanged.connect(lambda : self.IPBtn.setEnabled(self.scheduleCheckbox.isChecked()))
-        self.scheduleCheckbox.stateChanged.connect(lambda : self.schedulerBtn.setEnabled(self.scheduleCheckbox.isChecked()))
-        self.scheduleCheckbox.stateChanged.connect(lambda : self.threadSpin.setEnabled(self.scheduleCheckbox.isChecked()))
+        self.scheduleCheckbox.stateChanged.connect(lambda : self.schedulerLabel.setEnabled(self.scheduleCheckbox.isChecked()))
+        self.scheduleCheckbox.stateChanged.connect(lambda : self.schedulerComboBox.setEnabled(self.scheduleCheckbox.isChecked()))
         
         self.fileDirScheduleLayout.setAlignment(Qt.AlignTop)
         
@@ -602,15 +602,19 @@ class OWBwBWidget(widget.OWWidget):
         
         scheduleBox=QtGui.QHBoxLayout()
         scheduleBox.addWidget(self.scheduleCheckbox)
-        scheduleBox.addWidget(self.schedulerBtn)
+        scheduleBox.addLayout(schedulerBox)
         scheduleBox.addWidget(self.IPBtn)
         scheduleBox.addStretch(1)
-        scheduleBox.addWidget(cbLabel)
-        scheduleBox.addWidget(self.threadSpin)
+        
+        threadBox=QtGui.QHBoxLayout()
+        threadBox.addWidget(cbLabel)
+        threadBox.addWidget(self.threadSpin)
+        threadBox.addStretch(1)
         
         
         self.fileDirScheduleLayout.addLayout(iterateBox,0,0)
         self.fileDirScheduleLayout.addLayout(scheduleBox,1,0)
+        self.fileDirScheduleLayout.addLayout(threadBox,2,0)
     
     def setIteration(self):
         iterateDialog=IterateDialog(self.iterateSettings)
@@ -1199,6 +1203,7 @@ class OWBwBWidget(widget.OWWidget):
     def updateSpinCheckbox(self,pname):
         checkAttr=pname+'Checked'
         self.optionsChecked[pname]=getattr(self,checkAttr)
+
         
 #Handle inputs
     def handleInputs(self,attr,value,sourceId,test=False):

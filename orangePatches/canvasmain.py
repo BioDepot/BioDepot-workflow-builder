@@ -644,7 +644,8 @@ class CanvasMainWindow(QMainWindow):
                     triggered=self.reset_widget_settings)
                     
         self.editServersAction = QAction(self.tr('Edit servers'), self, objectName='editServers-action', toolTip=self.tr('Edit servers'), triggered=self.editServers, enabled=True)
-        self.serverlessAction = QAction(self.tr('Serverless'), self, objectName='serverless-action', toolTip=self.tr('Setup serverless execution'), triggered=self.serverless, enabled=True)
+        self.serverlessAction = QAction(self.tr('Serverless settings'), self, objectName='serverless-action', toolTip=self.tr('Set up serverless execution'), triggered=self.serverless, enabled=True)
+        self.authenticateAction = QAction(self.tr('Authentication'), self, objectName='authenticate-action', toolTip=self.tr('Set up authentication'), triggered=self.authenticate, enabled=True)
     def setup_menu(self):
         if sys.platform == "darwin" and QT_VERSION >= 0x50000:
             self.__menu_glob = QMenuBar(None)
@@ -744,6 +745,7 @@ class CanvasMainWindow(QMainWindow):
         self.scheduler_menu = QMenu(self.tr('&Scheduler'), self)
         self.scheduler_menu.addAction(self.editServersAction)
         self.scheduler_menu.addAction(self.serverlessAction)
+        self.scheduler_menu.addAction(self.authenticateAction)
         menu_bar.addMenu(self.scheduler_menu)
 
     def loadNotebook(self):
@@ -764,10 +766,12 @@ class CanvasMainWindow(QMainWindow):
     
     def serverless(self):
         pass
-
+    def authenticate(self):
+        pass
     def editServers(self):
         sys.stderr.write('server settings are {}\n'.format(self.serverSettings))
         ServerUtils.editIPs(self.serverSettings)        
+        self.reload_settings()
         
     def reload_settings(self,startingWorkflow=None):
         if startingWorkflow:

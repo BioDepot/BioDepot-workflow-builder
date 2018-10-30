@@ -80,7 +80,8 @@ class IterateDialog(QDialog):
             
             self.setSelect(parmItem,False)
             parmItem.setFlags(parmItem.flags() ^ Qt.ItemIsEditable)
-            
+            parmItem.setFlags(parmItem.flags() ^ Qt.ItemIsSelectable)
+            cb.setFlags(cb.flags() ^ Qt.ItemIsSelectable)
             if parm in self.settingsCopy['iteratedAttrs']:
                 cb.setCheckState(QtCore.Qt.Checked)
             else:
@@ -202,8 +203,6 @@ class IterateDialog(QDialog):
             ret=QtGui.QMessageBox.information(self,title,message,QtGui.QMessageBox.Ok)
         except Exception as e:
             warning=QtGui.QMessageBox.warning(None,'','Settings not saved - error: {}\n'.format(str(e)))
-
-
         
 class ServerDialog(QDialog):
     def __init__(self, serverSettings):
@@ -299,11 +298,8 @@ class ServerDialog(QDialog):
         serverLayout.addLayout(buttonLayout)
         self.setLayout(serverLayout)
         
-
         removeBtn.setEnabled(bool(len(self.table.selectionModel().selectedRows())))
         self.table.itemSelectionChanged.connect(lambda: removeBtn.setEnabled(bool(len(self.table.selectionModel().selectedRows()))))
-        # boxEdit.itemSelectionChanged.connect(lambda: self.onListWidgetSelect(boxEdit,addBtn,removeBtn,lineItem))
-        # boxEdit.itemMoved.connect(lambda oldRow,newRow : self.onItemMoved(oldRow,newRow,boxEdit))
 
         
     def redrawTable(self):
