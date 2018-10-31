@@ -57,7 +57,7 @@ class IterateDialog(QDialog):
             self.table.horizontalHeader().setResizeMode(col, QtGui.QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setResizeMode(nCols-1, QtGui.QHeaderView.Stretch)
         self.table.horizontalHeader().setStretchLastSection(True)
-        self.table.setHorizontalHeaderLabels(['','Parameter', 'Group size', 'Threads'])
+        self.table.setHorizontalHeaderLabels(['','Parameter', 'Group size', 'Threads needed'])
         self.settingsCopy=copy.deepcopy(self.iterateSettings)
         self.table.setRowCount(nRows)
         rowNum=0

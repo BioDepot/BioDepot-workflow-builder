@@ -19,7 +19,31 @@ class ConsoleProcess():
             self.process.readyReadStandardError.connect(lambda: self.writeConsole(self.process, console,self.process.readAllStandardError,Qt.red))
         if finishHandler:
             self.process.finished.connect(finishHandler)
-            
+    def addIterateSettings(self,settings):
+        env=QtCore.QProcessEnvironment.systemEnvironment()
+        attrs=[]
+        maxThreads=1
+        env.insert("WIDGETTHREADS", "{}".settings.['widgetThreads'])
+        if not settings['iteratedAttrs']:
+            return
+        for attr in settings.['iteratedAttrs']:
+            attrs.append(attr)
+            if attr in settings['data'] and 'threads' in settings['data'][attr] and settings['data'][attr]['threads']:
+                if int(settings['data'][attr]['threads']) > maxThreads:
+                    maxThreads=int(settings['data'][attr]['threads'])
+            if attr in settings['data'] and 'groupSize' in settings['data'][attr] and settings['data'][attr]['groupSize']:
+                groupSizes.append(settings['data'][attr]['groupSize'])
+            else:
+                groupSizes.append('1')
+    
+        env = QtCore.QProcessEnvironment.systemEnvironment()
+        self.process.setProcessEnvironment(env)
+
+    
+        
+    def addServerSettings(self,settings):
+        pass
+    
     def writeConsole(self,process,console,read,color):
         console.setTextColor(color)
         console.append(read().data().decode('utf-8',errors="ignore"))
@@ -86,7 +110,7 @@ class DockerClient:
         ["pwd", "touch newfile.txt"]
     
     """
-    def create_container_iter(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None,scheduleSettings=None):
+    def create_container_iter(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None,scheduleSettings=None,iterateSettings=None):
         #reset logFile when it is not None - can be "" though - this allows an active reset
         if logFile is not None:
             self.logFile = logFile
@@ -115,9 +139,14 @@ class DockerClient:
         for cmd in cmds:
             dockerCmds.append(dockerBaseFlags + ' {} {} {} {}'.format(volumeMappings,envs,name,cmd))
         consoleProc.state='running'
-        env = QtCore.QProcessEnvironment.systemEnvironment()
-        env.insert("WIDGETTHREADS", "1")
-        consoleProc.process.setProcessEnvironment(env)
+        #pass on iterateSettings
+        if iterateSettings:
+            consoleProc.addIterateSettings(iterateSettings)
+        else:
+            #need to have WIDGETTHREADS set
+             env.insert("WIDGETTHREADS", "1")
+        if serverSettings:
+             consoleProc.addServerSettings(iterateSettings)
 
         if testMode:
             baseCmd='docker  run -i --rm --init '

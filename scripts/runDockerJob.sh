@@ -1,22 +1,23 @@
 #!/bin/bash
 
-#First argument is the number of threads - the other arguments are passed are the commands
+#Arguments are passed are the commands
 #A lock directory will be made by the starting process with the pid in the name
-#It spawns nthreads runJob processes and then 
-
 #if interrupted - still cleanup
+
 myjobs=( "$@" )
 echo "$@"
 lockDir=/tmp/locks.$$
 echo "mkdir -p $lockDir"
 mkdir -p $lockDir
-echo nThreads $WIDGETTHREADS
+echo nThreads $NWORKERS
+
 #wait until all the variables i.e. lockDir have been defined
 for ((i=1; i<${#myjobs[@]}; ++i)); do
     cmd="${myjobs[i]}"
     echo "job $i is docker run -i --rm  --init --cidfile=$lockDir/lock$i/pid.$BASHPID $cmd"
 done
 trap "cleanup ${lockDir} " SIGINT INT TERM
+
 cleanup(){
     echo "cleaning up $1"
     find $1 -type f -name 'pid.*' 2> /dev/null | while read file; do
@@ -28,6 +29,7 @@ cleanup(){
     rm ${lockDir} -rf
     exit
 }
+
 runJob(){
     for ((i=0; i<${#myjobs[@]}; ++i)); do
         #make a lock directory will fail if it exists
@@ -44,7 +46,7 @@ runJob(){
     exit
 }
 
-for i in $(seq 1 $WIDGETTHREADS); do
+for i in $(seq 1 $NWORKERS); do
     echo "starting job with thread $i"
     runJob $i &
 done

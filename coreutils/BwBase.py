@@ -298,6 +298,7 @@ class OWBwBWidget(widget.OWWidget):
         self.saveBashFile=None
         self.iterateSettings={}
         self.iterateSettings['iteratedAttrs']=[]
+        self.iterateSettings['widgetThreads']=1
         self.iterateSettings['data']={}
         
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
@@ -540,7 +541,9 @@ class OWBwBWidget(widget.OWWidget):
             self.IPs=["127.0.0.1"]
         self.schedulers=['Default','Kubernetes','Amazon batch','Amazon lambda']
         
-
+        threadBox=QtGui.QHBoxLayout()
+        scheduleBox=QtGui.QHBoxLayout()
+        iterateBox=QtGui.QHBoxLayout()
         
         #have to wait until the OWxxx.py instance loads data from json before finding iterables - so don't move 
         self.iterateSettings['iterableAttrs']=self.findIterables()
@@ -571,7 +574,7 @@ class OWBwBWidget(widget.OWWidget):
         schedulerBox.addWidget(self.schedulerComboBox)
         
         cbLabel=QtGui.QLabel('Number of threads:')
-        self.threadSpin=gui.spin(self.scheduleBox, self,'schedulerThreads' , minv=1, maxv=128, label=None, checked=None, checkCallback=lambda : self.updateSpinCheckbox('schedulerThreads'))
+        self.threadSpin=gui.spin(threadBox, self,'schedulerThreads' , minv=1, maxv=128, label=None, checked=None, checkCallback=lambda : self.updateSpinCheckbox('schedulerThreads'))
         self.updateThreadSpin()
        
         
@@ -595,18 +598,18 @@ class OWBwBWidget(widget.OWWidget):
         
         self.fileDirScheduleLayout.setAlignment(Qt.AlignTop)
         
-        iterateBox=QtGui.QHBoxLayout()
+        
         iterateBox.addWidget(iterateCheckbox)
         iterateBox.addWidget(self.iterateSettingsBtn)
         iterateBox.addStretch(1)
         
-        scheduleBox=QtGui.QHBoxLayout()
+        
         scheduleBox.addWidget(self.scheduleCheckbox)
         scheduleBox.addLayout(schedulerBox)
         scheduleBox.addWidget(self.IPBtn)
         scheduleBox.addStretch(1)
         
-        threadBox=QtGui.QHBoxLayout()
+
         threadBox.addWidget(cbLabel)
         threadBox.addWidget(self.threadSpin)
         threadBox.addStretch(1)
@@ -629,7 +632,6 @@ class OWBwBWidget(widget.OWWidget):
                 threads= self.iterateSettings['data'][attr]['threads']
                 if int(threads) > maxThreads:
                     maxThreads=int(threads)
-                
         self.threadSpin.setMinimum(maxThreads)
         self.threadSpin.setValue(maxThreads)
         
@@ -1274,6 +1276,8 @@ class OWBwBWidget(widget.OWWidget):
         cmd=self.generateCmdFromData()
         self.envVars={}
         self.getEnvironmentVariables()
+        if hasAttr(self,'schedulerThreads') and self.schedulerThreads :
+            self.iterateSettings['widgetThreads']=self.schedulerThreads
         try:
             imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
@@ -1283,7 +1287,7 @@ class OWBwBWidget(widget.OWWidget):
             #generate cmds here
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,scheduleSettings=None)
+            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,scheduleSettings=self.scheduleSettings,iterateSettings=self.iterateSettings)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
