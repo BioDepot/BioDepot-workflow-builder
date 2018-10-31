@@ -241,6 +241,12 @@ Note that the fluxbox windowing system is inside the browser window. You still h
 
 ## Bwb application
 
+### Bwb window with kallisto-sleuth-jupyter workflow showing main features
+![](./docs/images/maximized-figure.png)
+
+### Bwb fluxbox desktop with Bwb minimized
+![](./docs/images/minimized-figure.png)
+
 ### Overview
 
 Bioinformatics analytical pipelines are comprised of multiple modules. The output from one module becomes the input processed by the next module in the pipeline. Scripting languages such as Python, R, Perl, and bash are used to connect workflows and to generate the final output, often in the form of tables and graphcs.
