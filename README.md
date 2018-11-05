@@ -275,9 +275,36 @@ To interact with a widget, it is first dragged from the Tool Dock onto the canva
 
 #### Widget user interaction window 
 
-The Bwb interaction window pops up when when a widget is double clicked. There are up to 3 tabs in each window: Required entries, optional entries and console. Required entries are parameters that must be entered before the widget can execute. An example would be fastq files for an alignment widget. Additional optional entries are optional flags and parameters that are not required for program execution. When these are present, they are displayed by clicking on the optional entires tab. Finally, clicking on the console tab brings up a window with the text output from the widget.
+The Bwb interaction window pops up when when a widget is double clicked. There are up to 3 tabs in each window: Required entries, optional entries and console. 
 
-At the bottom of the UI window are a series of controls that affect the execution of the widget. The start button starts the execution. The stop button then becomes active and pressing it will terminate execution. The export graphics option, if checked allows the widget to output graphics to the Bwb screen. The last option controls how the widget will be executed. Manual, the default option means that tghe widget can only be run by the user pressing the start button. Automatic means that the widget will run once all the required options are entered. The last run mode is the triggered run mode. The widget will start execution after one or more inputs are received *AND* all the required parameters are set. If the triggered mode is chosen, the user can then specify which inputs will trigger execution. If more than one input is chosen, the widget will wait until all inputs are received before executing. Manual start mode is typically used for widgets at the beginning of pipelines or in optional sections of the pipeline. Triggered mode is typcially used in downstream widgets to allow widgets to sequentially process the data as it flows through the analytical pipeline.
+![](./docs/images/required.png)
+##### Required parameters screen
+Required entries are parameters that must be entered before the widget can execute. An example would be fastq files for an alignment widget. 
+
+![](./docs/images/optional.png)
+##### Optional parameters screen
+Additional optional entries are optional flags and parameters that are not required for program execution. When these are present, they are displayed by clicking on the optional entires tab. 
+ 
+![](./docs/images/console.png)
+##### Console screen
+Finally, clicking on the console tab brings up a window with the text output from the widget. This is useful for monitoring the progress of a widget and for debugging.
+.
+![](./docs/images/executionBar.png)
+##### Execution bar
+At the bottom of the UI window are a series of controls that affect the execution of the widget. 
+###### Start
+The start button starts the execution.
+###### Stop 
+The stop button then becomes active and pressing it will terminate execution.
+###### Export graphics 
+The export graphics box, if checked allows the widget to output interactive graphics to the Bwb screen. This is necessary for applications such as Jupyter and Cytoscape that have their own GUI.
+###### Test mode
+The test mode box, if checked runs the widget and downstream widgets in test mode. In test mode, upon pressing the start button, the docker  commands are not executed but are generated and recorded in console windows. An option will also appear to allow the user to save the commands to an executable bash script that can be run without Bwb.
+###### Run mode
+The runmode menu controls how the widget will be executed. In manual mode, the default option, the widget can only be run by the user pressing the start button. Automatic mode meanst that the widget will run without user input, once all the required options are entered. The last run mode is the triggered run mode. The widget will start execution after one or more inputs are received *AND* all the required parameters are set. Manual start mode is typically used for widgets at the beginning of pipelines or in optional sections of the pipeline. Triggered mode is typcially used in downstream widgets to allow widgets to sequentially process the data as it flows through the analytical pipeline.
+###### Select triggers
+The Select triggers menu  allows the user to specify which inputs will trigger execution. If more than one input is chosen, the widget will wait until all inputs are received before executing. This menu is only active if the Triggered runmode is chosen
+
 
 #### Widget definition window
 
@@ -287,11 +314,11 @@ Right clicking on the widget brings up the option to edit its definition paramet
 
 The general tab allows the user to enter general information about the widget. The entries are:
 ###### description
-A description of the widgets function
+A description of the widgets function. When the user mouses over a widget in the Tool Dock, this text will appear in the help box below the Tool Dock.
 ###### docker_image_name
 The name of the Docker container that is used. 
 ###### docker image tag
-The image tag for the Docker container. The default tag for any conainer is latest which is not necessarily the most recent in spite of the name. Bwb has he version of software and the major dependencies and the date separated by underscores to proivde a detailed yet human readable versioning tag
+The image tag for the Docker container. The default tag for any conainer is latest which is not necessarily the most recent in spite of the name. Bwb has the version of software and the major dependencies and the date separated by underscores to proivde a detailed yet human readable versioning tag
 ###### priority
 Determines the order of appearance in the Tool Dock drawer
 ###### icon
