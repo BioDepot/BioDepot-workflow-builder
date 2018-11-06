@@ -269,7 +269,7 @@ class OWBwBWidget(widget.OWWidget):
     submitIcon=QtGui.QIcon('/icons/submit.png')
     reloadIcon=QtGui.QIcon('icons/reload.png')
     useScheduler = settings.Setting(False, schema_only=True)
-    schedulerThreads=settings.Setting(1, schema_only=True)
+    nWorkers=settings.Setting(1, schema_only=True)
     #pset=functools.partial(settings.Setting,schema_only=True)
     
 #Initialization
@@ -573,9 +573,14 @@ class OWBwBWidget(widget.OWWidget):
         schedulerBox.addWidget(self.schedulerLabel)
         schedulerBox.addWidget(self.schedulerComboBox)
         
-        cbLabel=QtGui.QLabel('Number of threads:')
-        self.threadSpin=gui.spin(threadBox, self,'schedulerThreads' , minv=1, maxv=128, label=None, checked=None, checkCallback=lambda : self.updateSpinCheckbox('schedulerThreads'))
-        self.updateThreadSpin()
+    
+        cbLabel=QtGui.QLabel('Number of workers:')
+        if not hasattr(self,'nWorkers'):
+            self.nWorkers=1
+        self.threadSpin=QSpinBox()
+        self.threadSpin.setRange(1, 128)
+        self.threadSpin.valueChanged.connect(self.updateThreadSpin)
+        self.threadSpin.setValue(self.nWorkers)
        
         
         self.iterate=False
@@ -623,18 +628,10 @@ class OWBwBWidget(widget.OWWidget):
         iterateDialog=IterateDialog(self.iterateSettings)
         iterateDialog.exec_()
         self.iterateSettings=iterateDialog.iterateSettings
-        self.updateThreadSpin()
+
     
     def updateThreadSpin(self):
-        maxThreads=1
-        for attr in self.iterateSettings['iteratedAttrs']:
-            if attr in self.iterateSettings['data'] and 'threads' in self.iterateSettings['data'][attr]:
-                threads= self.iterateSettings['data'][attr]['threads']
-                if int(threads) > maxThreads:
-                    maxThreads=int(threads)
-        self.threadSpin.setMinimum(maxThreads)
-        self.threadSpin.setValue(maxThreads)
-        
+        self.nWorkers=self.threadSpin.value()
 
     def updateScheduleCheckBox(self,iterateState):
         if not iterateState:
@@ -1205,6 +1202,7 @@ class OWBwBWidget(widget.OWWidget):
     def updateSpinCheckbox(self,pname):
         checkAttr=pname+'Checked'
         self.optionsChecked[pname]=getattr(self,checkAttr)
+        
 
         
 #Handle inputs
@@ -1276,8 +1274,8 @@ class OWBwBWidget(widget.OWWidget):
         cmd=self.generateCmdFromData()
         self.envVars={}
         self.getEnvironmentVariables()
-        if hasAttr(self,'schedulerThreads') and self.schedulerThreads :
-            self.iterateSettings['widgetThreads']=self.schedulerThreads
+        if hasattr(self,'nWorkers') and self.nWorkers :
+            self.iterateSettings['nWorkers']=self.nWorkers
         try:
             imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
@@ -1287,7 +1285,7 @@ class OWBwBWidget(widget.OWWidget):
             #generate cmds here
             self.status='running'
             self.setStatusMessage('Running...')
-            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,scheduleSettings=self.scheduleSettings,iterateSettings=self.iterateSettings)
+            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,scheduleSettings=None,iterateSettings=self.iterateSettings)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()

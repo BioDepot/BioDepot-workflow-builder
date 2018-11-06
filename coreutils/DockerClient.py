@@ -22,11 +22,12 @@ class ConsoleProcess():
     def addIterateSettings(self,settings):
         env=QtCore.QProcessEnvironment.systemEnvironment()
         attrs=[]
+        groupSizes=[]
         maxThreads=1
-        env.insert("WIDGETTHREADS", "{}".settings.['widgetThreads'])
+        env.insert("NWORKERS", "{}".format(settings['nWorkers']))
         if not settings['iteratedAttrs']:
             return
-        for attr in settings.['iteratedAttrs']:
+        for attr in settings['iteratedAttrs']:
             attrs.append(attr)
             if attr in settings['data'] and 'threads' in settings['data'][attr] and settings['data'][attr]['threads']:
                 if int(settings['data'][attr]['threads']) > maxThreads:
@@ -35,12 +36,11 @@ class ConsoleProcess():
                 groupSizes.append(settings['data'][attr]['groupSize'])
             else:
                 groupSizes.append('1')
-    
-        env = QtCore.QProcessEnvironment.systemEnvironment()
+        #need to add code to pass environment arrays to process
+        env.insert("ITERATEDATTRS",":".join(attrs))
+        env.insert("GROUPSIZES",":".join(groupSizes))
         self.process.setProcessEnvironment(env)
 
-    
-        
     def addServerSettings(self,settings):
         pass
     
@@ -143,10 +143,10 @@ class DockerClient:
         if iterateSettings:
             consoleProc.addIterateSettings(iterateSettings)
         else:
-            #need to have WIDGETTHREADS set
-             env.insert("WIDGETTHREADS", "1")
-        if serverSettings:
-             consoleProc.addServerSettings(iterateSettings)
+            #need to have NWORKERS set
+             env.insert("NWORKERS", "1")
+#        if serverSettings:
+#             consoleProc.addServerSettings(iterateSettings)
 
         if testMode:
             baseCmd='docker  run -i --rm --init '
