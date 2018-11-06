@@ -241,6 +241,12 @@ Note that the fluxbox windowing system is inside the browser window. You still h
 
 ## Bwb application
 
+### Bwb window with kallisto-sleuth-jupyter workflow showing main features
+![](./docs/images/maximized-figure.png)
+
+### Bwb fluxbox desktop with Bwb minimized
+![](./docs/images/minimized-figure.png)
+
 ### Overview
 
 Bioinformatics analytical pipelines are comprised of multiple modules. The output from one module becomes the input processed by the next module in the pipeline. Scripting languages such as Python, R, Perl, and bash are used to connect workflows and to generate the final output, often in the form of tables and graphcs.
@@ -269,54 +275,85 @@ To interact with a widget, it is first dragged from the Tool Dock onto the canva
 
 #### Widget user interaction window 
 
-The Bwb interaction window pops up when when a widget is double clicked. There are up to 3 tabs in each window: Required entries, optional entries and console. Required entries are parameters that must be entered before the widget can execute. An example would be fastq files for an alignment widget. Additional optional entries are optional flags and parameters that are not required for program execution. When these are present, they are displayed by clicking on the optional entires tab. Finally, clicking on the console tab brings up a window with the text output from the widget.
+The Bwb interaction window pops up when when a widget is double clicked. There are up to 3 tabs in each window: Required entries, optional entries and console. 
 
-At the bottom of the UI window are a series of controls that affect the execution of the widget. The start button starts the execution. The stop button then becomes active and pressing it will terminate execution. The export graphics option, if checked allows the widget to output graphics to the Bwb screen. The last option controls how the widget will be executed. Manual, the default option means that tghe widget can only be run by the user pressing the start button. Automatic means that the widget will run once all the required options are entered. The last run mode is the triggered run mode. The widget will start execution after one or more inputs are received *AND* all the required parameters are set. If the triggered mode is chosen, the user can then specify which inputs will trigger execution. If more than one input is chosen, the widget will wait until all inputs are received before executing. Manual start mode is typically used for widgets at the beginning of pipelines or in optional sections of the pipeline. Triggered mode is typcially used in downstream widgets to allow widgets to sequentially process the data as it flows through the analytical pipeline.
+##### Required parameters screen
+Required entries are parameters that must be entered before the widget can execute. An example would be fastq files for an alignment widget. 
+![](./docs/images/required.png)
+
+
+##### Optional parameters screen
+Additional optional entries are optional flags and parameters that are not required for program execution. When these are present, they are displayed by clicking on the optional entires tab. 
+![](./docs/images/optional.png)
+
+##### Console screen
+Finally, clicking on the console tab brings up a window with the text output from the widget. This is useful for monitoring the progress of a widget and for debugging.
+![](./docs/images/console.png)
+
+##### Execution bar
+At the bottom of the UI window are a series of controls that affect the execution of the widget. 
+![](./docs/images/executionBar.png)
+
+###### Start
+The start button starts the execution.
+###### Stop 
+The stop button then becomes active and pressing it will terminate execution.
+###### Export graphics 
+The export graphics box, if checked allows the widget to output interactive graphics to the Bwb screen. This is necessary for applications such as Jupyter and Cytoscape that have their own GUI.
+###### Test mode
+The test mode box, if checked runs the widget and downstream widgets in test mode. In test mode, upon pressing the start button, the docker  commands are not executed but are generated and recorded in console windows. An option will also appear to allow the user to save the commands to an executable bash script that can be run without Bwb.
+###### Run mode
+The runmode menu controls how the widget will be executed. In manual mode, the default option, the widget can only be run by the user pressing the start button. Automatic mode meanst that the widget will run without user input, once all the required options are entered. The last run mode is the triggered run mode. The widget will start execution after one or more inputs are received *AND* all the required parameters are set. Manual start mode is typically used for widgets at the beginning of pipelines or in optional sections of the pipeline. Triggered mode is typcially used in downstream widgets to allow widgets to sequentially process the data as it flows through the analytical pipeline.
+###### Select triggers
+The Select triggers menu  allows the user to specify which inputs will trigger execution. If more than one input is chosen, the widget will wait until all inputs are received before executing. This menu is only active if the Triggered runmode is chosen
+
 
 #### Widget definition window
 
 Right clicking on the widget brings up the option to edit its definition parameters. Choosing the edit option edits the present widget. Choosing the new option edits a new widget. The same options are also available from the main menu. Upon entering the edit widget mode, a window pops up with multiple tabs described next:
 
 ##### General tab
+The general tab allows the user to enter general information about the widget. 
+![](./docs/images/def_gen.png)
 
-The general tab allows the user to enter general information about the widget. The entries are:
+The entries are:
 ###### description
-A description of the widgets function
+A description of the widgets function. When the user mouses over a widget in the Tool Dock, this text will appear in the help box below the Tool Dock.
 ###### docker_image_name
 The name of the Docker container that is used. 
 ###### docker image tag
-The image tag for the Docker container. The default tag for any conainer is latest which is not necessarily the most recent in spite of the name. Bwb has he version of software and the major dependencies and the date separated by underscores to proivde a detailed yet human readable versioning tag
+The image tag for the Docker container. The default tag for any conainer is latest which is not necessarily the most recent in spite of the name. Bwb has the version of software and the major dependencies and the date separated by underscores to proivde a detailed yet human readable versioning tag
 ###### priority
 Determines the order of appearance in the Tool Dock drawer
 ###### icon
 The icon used for the widget
 
 ##### Inputs tab
-
+![](./docs/images/def_inputs.png)
 The input section allows the user to specify the name of the inputs accepted by the widget. These are variable names that can also be assigned to parameters and outputs. Currently the callback option is not used. When an input name is also a parameter name, the value of the parameter will be determined by the input if it is connected to the output of another widget
 
 ##### Outputs tab
-
+![](./docs/images/def_outputs.png)
 The output section allows the user to specify the names of outputs that will be sent when the widget is finished execution.
 
 ##### Volumes tab
-
+![](./docs/images/def_volumes.png)
 Volumes allow the user to map a user volume to a container volume. This allows the workflows to operate on data that is on the host system. The Bwb container already has one mapped volume and by default this is passed to the workflow containers. For example, the default mapping is that the current host directory where Bwb is launched is accessed through the /data mountpoint in the Bwb container. By default, all workflow containers will also be able to access the host directory through the /data mountpoint.
 
 The volumes tab allows the user to enter a variable name and an internal container volume or mount point. The user is then queried (using the parameters section) for the local directory that is to be mapped to the internal container volume.
 
 ##### Ports tab
-
+![](./docs/images/def_ports.png)
 Similar to the volumes tab except the widget can query a host port to map to an internal port. 
 
 ##### Parameters tab
-
+![](./docs/images/def_parms.png)
 Different flags and environment variables to be queried an be entered in this section. The name box is the internal variable name. This can also  be an output, input, volume, or port variable defined in previous section that the widget wants the user to input. The type of the variable determines the manner of entry. For example, a file type will bring up a line for manual entry and a button to browse for files. A boolean type will bring up a check box in the UI window. There is an optional flag field. This can be a single -, -- or any string that appears before the value that is entered. The variable can be an argument with no flag. Arguments and flags are passed in the command line. The value can also be passed to the container as an environment variable as well. The entry of a value for the variable can be optional.
 
 Individual parameters are entered using the + button. This will add the parameter to the box where they can be dragged to change the order, deleted using the x button, or edited.
 
 ##### Command tab
-
+![](./docs/images/def_command.png)
 The command is the command that is executed upon in the docker container. A command will be followed by the flags and arguments specified in the parameters section in order from top to bottom. Arguments always appear at the end of the command. It is also possible to specify a specific order using the _bwb{<variable>} notation. Multiple lines are possible - these are joined by the && operator to form a single command (in bash...)
 
 For example the command
@@ -330,10 +367,14 @@ will generate the following command
 	rm -f Counts/* && Rscript Programs/analyze.R <ConfigurationFile> <flags> <arguments>
 ```
 ##### Docker tab
+![](./docs/images/def_docker.png)
+The Docker tab contains information about the Dockerfiles and build commands used to construct the container. This currently is mainly for documenting the provenance of the container. However, we will be adding the option of generating the containers from this section rather than downloading the container from a repo. 
 
-The Docker tab contains information about the Dockerfiles and build commands used to construct the container. This currently is mainly for documenting the provenance of the container. However, we will be adding the option of generating the containers from this section rather than downloading the container from a repo.
+Currently buttons exist to copy a Dockerfile to the widget directory (Add Dockerfile), delete Dockerfiles (Clear).
+There is also a button to bring up the BiocImageBuilder utility which facilitates the building of Docker containers.
 
 ##### Widget definition save options and further customization by editing the .py file
+![](./docs/images/def_bar.png)
 
 At the bottom of the window are the save options. To understand the save options, let's first explain the files gernerated by the Bwb widget builder after saving the definition. The files generated for widget mywidget are
 ```
@@ -425,18 +466,27 @@ The bash script is portalbe and can be run without Bwb with 3 caveats:
 Four demo workflows are included with the Bwb container. They are found in the */workflows* directory
 
 ### DToxS demo
+![](./docs/images/dtox_wf.png)
 This is an workflow used for processing UMI (Unique Molecular Identifier) barcoded RNA-seq data. This is one of the first workflows that we converted for Bwb. The first downloadURL widget downloads the fastq files, directories and support files needed for the workflow. Upon completion it signals the DetoxS alignment widget. This widget calls bwa using a bash script and two python scripts. These are the original scripts used by DToxS. The alignment on full files would take overnight to run so our sample files are shortened versions of the true reads. However, the short files are too short to give any detectable differential expression in the subsequent steps. Therefore, in this demo, we have a second downloadURL widget which downloads the SAM files produced by bwa on the complete files. These are fed to the DtoX analyses which consists of a series of R scripts that use the edgeR package to identify differentially expressed genes. The top40 most confidently predicted differentially expressed genes are then displayed by gnumeric, an open-source spreadsheet program. 
 
 ### kallisto-sleuth demo
+![](./docs/images/kallisto_wf.png)
 This workflow is a popular RNA-seq workflow using kallisto to pseudo-align the reads and sleuth to determine which transcripts are differentially expressed. The workflow starts with a downloadURL widget that downloads the necessary directory structure and files that are used by sleuth to translate the transcript names to gene names and a file that describes which data are in the control group and which data are from the treatment group. Upon completion, the widget then signals a second downloadURL widget to download the human genomic sequence that will be used by the kallisto index to create the indices need for alignment. The first widget also signals the fastqDump widget to download 6 paired-end reads in 12 fastq files. These are the data obtained from 6 samples that will be analysed. The widget is set to only download the first 10000 spots to allow the demo to complete in a few minutes. The kallisto align widget is triggered when both kallisto index and fastqDump are finished, i.e. it will start running after the index is made and the files are downloaded. kallisto-widget is a bash wrapper around the kallisto pseudo-alignment program. The bash wrapper sends multiple pairs of paired-end reads to the kallisto pseudo-alignment executable. kallisto then produces a series of directories that contain estimates of the abundance of the reads at each transcript. Sleuth is a R script that uses a model based on the observed abundances to determine whether a gene is differentially expressed and obtains a p-value. The sleuth widget itself is a bash script which generates an R script that calls sleuth with the parameters given by the user. The resulting p-values are then output to a file which is read by gnumeric, an open-source spreadsheet, that is displays the results to the screen.
 
 ### kallisto-sleuth with Jupyter demo
+![](./docs/images/kallisto_jup_wf.png)
+
+[Accompanying video link](https://www.youtube.com/watch?v=jtu-jCU2DU0) https://www.youtube.com/watch?v=jtu-jCU2DU0
+
 The kallisto-sleuth workflow with Jupyter demo is identical to the kallisto-sleuth workflow except that instead of wrapping sleuth in a bash script and outputting the results using gnumeric - a Jupyter notebook is used to run and display the results. The first notebook widget runs nbconvert which runs the code in the notebook and generates a filled notebook with the results, including a graph of the expression of the top differentially expressed gene. This widget triggers a second jupyter widget which opens the filled notebook. The second widget is run in a container with firefox which automatically opens the notebook at the end of the workflow. The user is free to interact with the code to change the analyses or conduct further analyses using the filled notebook as it is a fully functional dynamic instance of Jupyter.
 
 ### STAR demo
+![](./docs/images/star_wf.png)
 STAR aligner is another popular RNA-seq aligner. Here we have paired it with DESEQ2 to perform the differential analyses. The pipeline is very similar in structure to the kallisto-sleuth pipeline. A downloadURL widget downloads the directory structure which then signals the download of the human genome and the calculation of indices. The fastqDump widget downloads the fastq files. STAR align waits for the downloads to complete and the index to be formed. Like Kallisto, this is wrapped in a bash script to allow STAR to run on multiple pairs of pair-end reads. A small widget runs a bash script then rearranges the output columns into a form that DESEQ2 can read. DESEQ2 is R based and like the sleuth widget uses a bash script to pre-process the parameters and construct a R script. Gnumeric displays the final output as in the kallisto-sleuth demo.
 
 ## Tutorial - Adding a Python script to a Bwb workflow
+
+[Link to accompanying video](https://www.youtube.com/watch?v=r_03_UG1mBg&feature=youtu.be) https://www.youtube.com/watch?v=r_03_UG1mBg&feature=youtu.be
 
 The aims of this workflow are to demonstrate how to build a widget for a custom Python script and modify and customize an existing workflow. In this tutorial we will write a script to call cutadapt ( a Python app for removing adapters from reads) and insert it into the kallisto-jupyter demo workflow to trim the reads before alignment.
 
@@ -711,7 +761,7 @@ Bioconductor and R are installed. Ubuntu is the operating system as it is the ba
 ##### Java8  
 The java 8 engine is installed and uses alpine 
 ##### Perl
-Alpine linux with perl
+Alpine Linux with Perl
 ##### Python2
 Alpine and Python 2.7
 ##### Python3
