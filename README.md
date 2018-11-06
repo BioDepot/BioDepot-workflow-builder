@@ -277,21 +277,23 @@ To interact with a widget, it is first dragged from the Tool Dock onto the canva
 
 The Bwb interaction window pops up when when a widget is double clicked. There are up to 3 tabs in each window: Required entries, optional entries and console. 
 
-![](./docs/images/required.png)
 ##### Required parameters screen
 Required entries are parameters that must be entered before the widget can execute. An example would be fastq files for an alignment widget. 
+![](./docs/images/required.png)
 
-![](./docs/images/optional.png)
+
 ##### Optional parameters screen
 Additional optional entries are optional flags and parameters that are not required for program execution. When these are present, they are displayed by clicking on the optional entires tab. 
- 
-![](./docs/images/console.png)
+![](./docs/images/optional.png)
+
 ##### Console screen
 Finally, clicking on the console tab brings up a window with the text output from the widget. This is useful for monitoring the progress of a widget and for debugging.
-.
-![](./docs/images/executionBar.png)
+![](./docs/images/console.png)
+
 ##### Execution bar
 At the bottom of the UI window are a series of controls that affect the execution of the widget. 
+![](./docs/images/executionBar.png)
+
 ###### Start
 The start button starts the execution.
 ###### Stop 
@@ -311,8 +313,10 @@ The Select triggers menu  allows the user to specify which inputs will trigger e
 Right clicking on the widget brings up the option to edit its definition parameters. Choosing the edit option edits the present widget. Choosing the new option edits a new widget. The same options are also available from the main menu. Upon entering the edit widget mode, a window pops up with multiple tabs described next:
 
 ##### General tab
+The general tab allows the user to enter general information about the widget. 
+![](./docs/images/def_gen.png)
 
-The general tab allows the user to enter general information about the widget. The entries are:
+The entries are:
 ###### description
 A description of the widgets function. When the user mouses over a widget in the Tool Dock, this text will appear in the help box below the Tool Dock.
 ###### docker_image_name
@@ -325,31 +329,31 @@ Determines the order of appearance in the Tool Dock drawer
 The icon used for the widget
 
 ##### Inputs tab
-
+![](./docs/images/def_inputs.png)
 The input section allows the user to specify the name of the inputs accepted by the widget. These are variable names that can also be assigned to parameters and outputs. Currently the callback option is not used. When an input name is also a parameter name, the value of the parameter will be determined by the input if it is connected to the output of another widget
 
 ##### Outputs tab
-
+![](./docs/images/def_outputs.png)
 The output section allows the user to specify the names of outputs that will be sent when the widget is finished execution.
 
 ##### Volumes tab
-
+![](./docs/images/def_volumes.png)
 Volumes allow the user to map a user volume to a container volume. This allows the workflows to operate on data that is on the host system. The Bwb container already has one mapped volume and by default this is passed to the workflow containers. For example, the default mapping is that the current host directory where Bwb is launched is accessed through the /data mountpoint in the Bwb container. By default, all workflow containers will also be able to access the host directory through the /data mountpoint.
 
 The volumes tab allows the user to enter a variable name and an internal container volume or mount point. The user is then queried (using the parameters section) for the local directory that is to be mapped to the internal container volume.
 
 ##### Ports tab
-
+![](./docs/images/def_ports.png)
 Similar to the volumes tab except the widget can query a host port to map to an internal port. 
 
 ##### Parameters tab
-
+![](./docs/images/def_parms.png)
 Different flags and environment variables to be queried an be entered in this section. The name box is the internal variable name. This can also  be an output, input, volume, or port variable defined in previous section that the widget wants the user to input. The type of the variable determines the manner of entry. For example, a file type will bring up a line for manual entry and a button to browse for files. A boolean type will bring up a check box in the UI window. There is an optional flag field. This can be a single -, -- or any string that appears before the value that is entered. The variable can be an argument with no flag. Arguments and flags are passed in the command line. The value can also be passed to the container as an environment variable as well. The entry of a value for the variable can be optional.
 
 Individual parameters are entered using the + button. This will add the parameter to the box where they can be dragged to change the order, deleted using the x button, or edited.
 
 ##### Command tab
-
+![](./docs/images/def_command.png)
 The command is the command that is executed upon in the docker container. A command will be followed by the flags and arguments specified in the parameters section in order from top to bottom. Arguments always appear at the end of the command. It is also possible to specify a specific order using the _bwb{<variable>} notation. Multiple lines are possible - these are joined by the && operator to form a single command (in bash...)
 
 For example the command
@@ -363,10 +367,14 @@ will generate the following command
 	rm -f Counts/* && Rscript Programs/analyze.R <ConfigurationFile> <flags> <arguments>
 ```
 ##### Docker tab
+![](./docs/images/def_docker.png)
+The Docker tab contains information about the Dockerfiles and build commands used to construct the container. This currently is mainly for documenting the provenance of the container. However, we will be adding the option of generating the containers from this section rather than downloading the container from a repo. 
 
-The Docker tab contains information about the Dockerfiles and build commands used to construct the container. This currently is mainly for documenting the provenance of the container. However, we will be adding the option of generating the containers from this section rather than downloading the container from a repo.
+Currently buttons exist to copy a Dockerfile to the widget directory (Add Dockerfile), delete Dockerfiles (Clear).
+There is also a button to bring up the BiocImageBuilder utility which facilitates the building of Docker containers.
 
 ##### Widget definition save options and further customization by editing the .py file
+![](./docs/images/def_bar.png)
 
 At the bottom of the window are the save options. To understand the save options, let's first explain the files gernerated by the Bwb widget builder after saving the definition. The files generated for widget mywidget are
 ```
@@ -744,7 +752,7 @@ Bioconductor and R are installed. Ubuntu is the operating system as it is the ba
 ##### Java8  
 The java 8 engine is installed and uses alpine 
 ##### Perl
-Alpine linux with perl
+Alpine Linux with Perl
 ##### Python2
 Alpine and Python 2.7
 ##### Python3
