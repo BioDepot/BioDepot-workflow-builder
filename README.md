@@ -475,6 +475,9 @@ This workflow is a popular RNA-seq workflow using kallisto to pseudo-align the r
 
 ### kallisto-sleuth with Jupyter demo
 ![](./docs/images/kallisto_jup_wf.png)
+
+[Accompanying video link](https://www.youtube.com/watch?v=jtu-jCU2DU0) https://www.youtube.com/watch?v=jtu-jCU2DU0
+
 The kallisto-sleuth workflow with Jupyter demo is identical to the kallisto-sleuth workflow except that instead of wrapping sleuth in a bash script and outputting the results using gnumeric - a Jupyter notebook is used to run and display the results. The first notebook widget runs nbconvert which runs the code in the notebook and generates a filled notebook with the results, including a graph of the expression of the top differentially expressed gene. This widget triggers a second jupyter widget which opens the filled notebook. The second widget is run in a container with firefox which automatically opens the notebook at the end of the workflow. The user is free to interact with the code to change the analyses or conduct further analyses using the filled notebook as it is a fully functional dynamic instance of Jupyter.
 
 ### STAR demo
@@ -482,6 +485,8 @@ The kallisto-sleuth workflow with Jupyter demo is identical to the kallisto-sleu
 STAR aligner is another popular RNA-seq aligner. Here we have paired it with DESEQ2 to perform the differential analyses. The pipeline is very similar in structure to the kallisto-sleuth pipeline. A downloadURL widget downloads the directory structure which then signals the download of the human genome and the calculation of indices. The fastqDump widget downloads the fastq files. STAR align waits for the downloads to complete and the index to be formed. Like Kallisto, this is wrapped in a bash script to allow STAR to run on multiple pairs of pair-end reads. A small widget runs a bash script then rearranges the output columns into a form that DESEQ2 can read. DESEQ2 is R based and like the sleuth widget uses a bash script to pre-process the parameters and construct a R script. Gnumeric displays the final output as in the kallisto-sleuth demo.
 
 ## Tutorial - Adding a Python script to a Bwb workflow
+
+[Link to accompanying video](https://www.youtube.com/watch?v=r_03_UG1mBg&feature=youtu.be) https://www.youtube.com/watch?v=r_03_UG1mBg&feature=youtu.be
 
 The aims of this workflow are to demonstrate how to build a widget for a custom Python script and modify and customize an existing workflow. In this tutorial we will write a script to call cutadapt ( a Python app for removing adapters from reads) and insert it into the kallisto-jupyter demo workflow to trim the reads before alignment.
 
