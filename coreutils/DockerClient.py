@@ -23,6 +23,7 @@ class ConsoleProcess():
         env=QtCore.QProcessEnvironment.systemEnvironment()
         attrs=[]
         groupSizes=[]
+        ramSizes=[]
         maxThreads=1
         env.insert("NWORKERS", "{}".format(settings['nWorkers']))
         if not settings['iteratedAttrs']:
@@ -36,9 +37,15 @@ class ConsoleProcess():
                 groupSizes.append(settings['data'][attr]['groupSize'])
             else:
                 groupSizes.append('1')
+            if attr in settings['data'] and 'ram' in settings['data'][attr] and settings['data'][attr]['ram']:
+                ramSizes.append(settings['data'][attr]['ram'])
+            else:
+                ramSizes.append('0')            
         #need to add code to pass environment arrays to process
-        env.insert("ITERATEDATTRS",":".join(attrs))
-        env.insert("GROUPSIZES",":".join(groupSizes))
+        if attrs:
+            env.insert("ITERATEDATTRS",":".join(attrs))
+            env.insert("GROUPSIZES",":".join(groupSizes))
+            env.insert('RAMSIZES',":".join(ramSizes))
         self.process.setProcessEnvironment(env)
 
     def addServerSettings(self,settings):
@@ -147,7 +154,6 @@ class DockerClient:
              env.insert("NWORKERS", "1")
 #        if serverSettings:
 #             consoleProc.addServerSettings(iterateSettings)
-
         if testMode:
             baseCmd='docker  run -i --rm --init '
             echoStr=''

@@ -40,7 +40,7 @@ class IterateDialog(QDialog):
         nRows=len(iterateSettings['iterableAttrs'])
         if not nRows:
             return
-        nCols=4
+        nCols=5
         super().__init__()
         self.css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
@@ -48,7 +48,7 @@ class IterateDialog(QDialog):
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
         '''
-        self.setMinimumSize(400,240)
+        self.setMinimumSize(520,240)
         self.iterateSettings=iterateSettings
         self.setWindowTitle('Edit iterate settings')
         self.table=QTableWidget()
@@ -57,7 +57,7 @@ class IterateDialog(QDialog):
             self.table.horizontalHeader().setResizeMode(col, QtGui.QHeaderView.ResizeToContents)
         self.table.horizontalHeader().setResizeMode(nCols-1, QtGui.QHeaderView.Stretch)
         self.table.horizontalHeader().setStretchLastSection(True)
-        self.table.setHorizontalHeaderLabels(['','Parameter', 'Group size', 'Threads needed'])
+        self.table.setHorizontalHeaderLabels(['','Parameter', 'Group size', 'Threads needed','Required RAM (MB)'])
         self.settingsCopy=copy.deepcopy(self.iterateSettings)
         self.table.setRowCount(nRows)
         rowNum=0
@@ -65,18 +65,20 @@ class IterateDialog(QDialog):
         for parm in self.settingsCopy['iterableAttrs']:
             #init values if they are not there
             if parm not in self.settingsCopy['data']:
-                self.settingsCopy['data'][parm]={'groupSize':'1','threads':'1'}
+                self.settingsCopy['data'][parm]={'groupSize':'1','threads':'1','ram':'0'}
                 
             if 'groupSize' not in self.settingsCopy['data'][parm].keys() or not self.settingsCopy['data'][parm]['groupSize']:
                 self.settingsCopy['data'][parm]['groupSize']='1'
             if 'threads' not in self.settingsCopy['data'][parm].keys() or not self.settingsCopy['data'][parm] ['threads']:
                 self.settingsCopy['data'][parm]['threads']='1' 
-            
+            if 'ram' not in self.settingsCopy['data'][parm].keys() or not self.settingsCopy['data'][parm] ['ram']:
+                self.settingsCopy['data'][parm]['ram']='0'           
             #make column items
             cb=QTableWidgetItem()
             parmItem=QTableWidgetItem(parm)
             groupSizeItem=QTableWidgetItem(self.settingsCopy['data'][parm]['groupSize'])
             threadItem=QTableWidgetItem(self.settingsCopy['data'][parm]['threads'])
+            ramItem=QTableWidgetItem(self.settingsCopy['data'][parm]['ram'])
             
             self.setSelect(parmItem,False)
             parmItem.setFlags(parmItem.flags() ^ Qt.ItemIsEditable)
@@ -89,11 +91,13 @@ class IterateDialog(QDialog):
                 self.setEnable(parmItem,False)
                 self.setEnableSelect(groupSizeItem,False)
                 self.setEnableSelect(threadItem,False)
-
+                self.setEnableSelect(ramItem,False)
+                
             self.table.setItem(rowNum,0,cb)
             self.table.setItem(rowNum,1,parmItem)
             self.table.setItem(rowNum,2,groupSizeItem)
             self.table.setItem(rowNum,3,threadItem)
+            self.table.setItem(rowNum,4,ramItem)
             rowNum=rowNum+1
         self.table.cellChanged.connect(self.onCheckBoxChanged)
 
@@ -151,14 +155,14 @@ class IterateDialog(QDialog):
         parm=parmItem.text()
         if cb.checkState() ==  QtCore.Qt.Checked:
             self.setEnable(parmItem,True)
-            for col in range(2,4):
+            for col in range(2,5):
                 item=self.table.item(row,col)
                 self.setEnableSelect(item,True)
             if parm not in self.settingsCopy['iteratedAttrs']:
                 self.settingsCopy['iteratedAttrs'].append(parm)
         else:
             self.setEnable(parmItem,False)
-            for col in range(2,4):
+            for col in range(2,5):
                 item=self.table.item(row,col)
                 self.setEnableSelect(item,False)
             if parm in self.settingsCopy['iteratedAttrs']:
@@ -187,7 +191,7 @@ class IterateDialog(QDialog):
         newIteratedAttrs=[]
         for i in range(self.table.rowCount()):
             parm=itemToText(self.table.item(i,1))
-            newData[parm]={'groupSize':itemToText(self.table.item(i,2)),'threads':itemToText(self.table.item(i,3))}
+            newData[parm]={'groupSize':itemToText(self.table.item(i,2)),'threads':itemToText(self.table.item(i,3)),'ram':itemToText(self.table.item(i,4))}
             if self.table.item(i,0).checkState() == QtCore.Qt.Checked:
                 newIteratedAttrs.append(parm)
         self.settingsCopy['data']=newData

@@ -3,13 +3,14 @@ import re
 import sys
 import logging
 import jsonpickle
+import functools
+from itertools import zip_longest
 from OWWidgetBuilder import tabbedWindow
 from ServerUtils import IterateDialog
 from functools import partial
 from pathlib import Path
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
-from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 from time import sleep
@@ -269,12 +270,15 @@ class OWBwBWidget(widget.OWWidget):
     submitIcon=QtGui.QIcon('/icons/submit.png')
     reloadIcon=QtGui.QIcon('icons/reload.png')
     useScheduler = settings.Setting(False, schema_only=True)
-    nWorkers=settings.Setting(1, schema_only=True)
-    #pset=functools.partial(settings.Setting,schema_only=True)
+    pset=functools.partial(settings.Setting,schema_only=True)
+    nWorkers=pset(1)
+    iterateSettings=pset({})
+    iterate=pset(False)
     
 #Initialization
     def __init__(self, image_name, image_tag):
         super().__init__()
+        
         self.css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
         QPushButton:hover {background-color: #1555f5; }
@@ -296,10 +300,11 @@ class OWBwBWidget(widget.OWWidget):
         self.useTestMode=False        
         self.jobRunning=False
         self.saveBashFile=None
-        self.iterateSettings={}
-        self.iterateSettings['iteratedAttrs']=[]
-        self.iterateSettings['widgetThreads']=1
-        self.iterateSettings['data']={}
+        if not hasattr(self,'iterateSettings'):
+            setattr(self,'iterateSettings',{})
+            self.iterateSettings['iteratedAttrs']=[]
+            self.iterateSettings['widgetThreads']=1
+            self.iterateSettings['data']={}
         
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self._dockerImageName = image_name
@@ -539,7 +544,7 @@ class OWBwBWidget(widget.OWWidget):
                 self.IPs.append(addr)
         if not self.IPs:
             self.IPs=["127.0.0.1"]
-        self.schedulers=['Default','Kubernetes','Amazon batch','Amazon lambda']
+        self.schedulers=['Default','GKE','AWS batch','AWS lambda']
         
         threadBox=QtGui.QHBoxLayout()
         scheduleBox=QtGui.QHBoxLayout()
@@ -583,7 +588,8 @@ class OWBwBWidget(widget.OWWidget):
         self.threadSpin.setValue(self.nWorkers)
        
         
-        self.iterate=False
+        if not hasattr(self,'iterate'):
+            self.iterate=False
         self.scheduleCheckbox=gui.checkBox(None, self,'useScheduler',label='')
         iterateCheckbox=gui.checkBox(None, self,'iterate',label='Iterate')
         self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked())
@@ -629,7 +635,6 @@ class OWBwBWidget(widget.OWWidget):
         iterateDialog.exec_()
         self.iterateSettings=iterateDialog.iterateSettings
 
-    
     def updateThreadSpin(self):
         self.nWorkers=self.threadSpin.value()
 
@@ -1285,6 +1290,7 @@ class OWBwBWidget(widget.OWWidget):
             #generate cmds here
             self.status='running'
             self.setStatusMessage('Running...')
+            sys.stderr.write('cmds are {}\n'.format(cmds))
             self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,scheduleSettings=None,iterateSettings=self.iterateSettings)
         except BaseException as e:
             self.bgui.reenableAll(self)
@@ -1452,37 +1458,55 @@ class OWBwBWidget(widget.OWWidget):
                     flags.append(fStr)
                         
         return self.generateCmdFromBash(self.data['command'],flags=flags,args=args)
-    
+ 
     def iteratedfString(self,pname):
         # flagstrings and findIteratedflags put the iterated names in the correct order place
         #this routine creates a list of values either flagstrings or other values to substitute into the command strings
         
         if 'parameters' in self.data and pname in self.data['parameters']:
             pvalue= self.data['parameters'][pname]
+            #check if there is a flag
             if 'flag' in pvalue  and hasattr(self,pname):
                 flagName=pvalue['flag']
-                flagValues=getattr(self,pname)
-                if pvalue['type'] == 'file list':
-                    files=flagValues
-                    if files:
-                        flags=[]
-                        baseFlag=""
-                        if flagName:
-                            #this is done to avoid the string None appearing as a flag name
-                            baseFlag=flagName
-                        for f in files:
-                            hostFile=(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
-                            flags.append(baseFlag+hostFile)
-                        return flags
-                elif pvalue['type'][-4:] =='list':
+            else:
+                flagName=""
+                
+            #get flag values and groupSize
+            groupSize=1
+            if 'data' in self.iterateSettings and pname in self.iterateSettings['data'] and 'groupSize' in self.iterateSettings['data'][pname] and self.iterateSettings['data'][pname]['groupSize']:
+                groupSize=int(self.iterateSettings['data'][pname]['groupSize'])
+                
+            flagValues=getattr(self,pname)
+            #make list of tuplets of groupSize 
+            flagValues= list(zip_longest(*[iter(flagValues)]*groupSize, fillvalue=flagValues[-1]))
+            sys.stderr.write('flagValues {}\n'.format(flagValues))
+            if pvalue['type'] == 'file list':
+                files=flagValues
+                if files:
                     flags=[]
                     baseFlag=""
-                    if flagValues:
+                    for fgroup in files:
                         if flagName:
                             baseFlag=flagName
-                            for value in flagValues:
-                                flags.append(baseFlag+value)
+                        else:
+                            baseFlag=""
+                        for f in fgroup:
+                            hostFile=(self.bwbPathToContainerPath(f, isFile=True,returnNone=False))
+                            baseFlag+=hostFile+" "
+                        flags.append(baseFlag)
                     return flags
+            elif pvalue['type'][-4:] =='list':
+                flags=[]
+                
+                if flagValues:
+                    for fgroup in flagValues:
+                        if flagName:
+                            baseFlag=flagName
+                        else:
+                            baseFlag=""
+                        baseFlag+=' '.join(fgroup)
+                        flags.append(baseFlag+value)
+                return flags
         return None
             
     def findIteratedFlags(self,cmd):
@@ -1501,10 +1525,12 @@ class OWBwBWidget(widget.OWWidget):
             sub=match.group(1)
             if sub not in subs:
                 subs.append(sub)
-                subFlags[sub]=self.iteratedfString(sub) 
-                breakpoint(message='sub is {} flags are{}'.format(sub,subFlags[sub]))   
+                subFlags[sub]=self.iteratedfString(sub)
+                sys.stderr.write('sub is {} flags are {}'.format(sub,subFlags[sub]))   
                 if len(subFlags[sub]) > maxLen:
                     maxLen=len(subFlags[sub])
+        sys.stderr.write('subs are {}\n'.format(subs))
+        
         if not maxLen:
             return [cmd]
         for i in range(maxLen):
@@ -1523,7 +1549,6 @@ class OWBwBWidget(widget.OWWidget):
         pattern = r'\_bwb\{([^\}]+)\}'
         regex = re.compile(pattern)
         subs=[]
-        sys.stderr.write('replaceIteratedVarsL command is {}\n'.format(cmd))
         for match in regex.finditer(cmd):
             pname=match.group(1)
             if pname and self.iterateSettings['iteratedAttrs'] and pname in self.iterateSettings['iteratedAttrs']:
@@ -1723,6 +1748,7 @@ class OWBwBWidget(widget.OWWidget):
                 myConPath= os.path.normpath(str.join(os.sep,(cleanConVol, prefix)))
                 if conPath is None or len(myConPath) < len(conPath):
                     conPath=myConPath
+        
         if conPath is not None :
             if isFile:
                 return os.path.normpath(str.join(os.sep,(conPath, pathFile)))
