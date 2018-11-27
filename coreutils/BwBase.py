@@ -1344,7 +1344,7 @@ class OWBwBWidget(widget.OWWidget):
         if flag:
             if flag.strip():
                 if flag.strip()[-1] == '=':
-                    return flag.strip()+value.strip()
+                    return flag.strip()+str(value).strip()
                 else:
                     return flag.strip()+ ' ' + str(value).strip()
             else:
