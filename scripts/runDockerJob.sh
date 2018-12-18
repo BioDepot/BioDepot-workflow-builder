@@ -33,8 +33,10 @@ runJob(){
             cmd="${myjobs[i]}"
         #write the pid of the process in the name of a file in the lock directory
         #this will also contain the cid of the docker process so that it can be aborted
-        echo "docker run -i --rm  --init --cidfile=$lockDir/lock$i/pid.$BASHPID $cmd"
-        docker run -i --rm  --init --cidfile=$lockDir/lock$i/pid.$BASHPID $cmd
+        cmdStr="docker run -i --rm  --init --cidfile=$lockDir/lock$i/pid.$BASHPID" 
+        cmdStr="$cmdStr $cmd"
+        echo "$cmdStr"
+        eval $cmdStr
         rm $lockDir/lock$i/pid.$BASHPID
         fi
     done
