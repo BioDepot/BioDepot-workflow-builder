@@ -26,7 +26,7 @@ class ConsoleProcess():
         ramSizes=[]
         maxThreads=1
         env.insert("NWORKERS", "{}".format(settings['nWorkers']))
-        if not settings['iteratedAttrs']:
+        if 'iteratedAttrs' not in settings or not settings['iteratedAttrs']:
             return
         for attr in settings['iteratedAttrs']:
             attrs.append(attr)
@@ -169,69 +169,7 @@ class DockerClient:
             consoleProc.process.start('echo',[echoStr])
         else:
             consoleProc.process.start('runDockerJob.sh',dockerCmds)
-            
-
-        
-    def create_container(self, name, volumes=None, commands=None, environment=None, hostVolumes=None):
-        #hostVolues is a dict with keys being the container volumes
-        # TODO should we use Image ID instead of Image Name?
-        host_config = None
-  
-        if not (hostVolumes is None):
-            binds = []
-            for container_dir, host_dir in hostVolumes.items():
-                binds.append(self.to_best_host_directory(host_dir) + ":" + container_dir)
-            host_config = self.cli.create_host_config(binds=binds)
-            volumes = list(hostVolumes.keys())           
-        elif type(volumes) is dict:
-        # this is backwards - it is possible to have the same host directory mapped to multiple containers but not the other way
-        # keep this so as not to break early widgets
-            binds = []
-            for host_dir, container_dir in volumes.items():
-                binds.append(self.to_best_host_directory(host_dir) + ":" + container_dir)
-            host_config = self.cli.create_host_config(binds=binds)
-            volumes = list(volumes.values())
-        if type(commands) is list:
-            commands = "bash -c \"" + ' && '.join(commands) + "\""
-        return self.cli.create_container(image=name,
-                                         volumes=volumes,
-                                         command=commands,
-                                         environment=environment,
-                                         stdin_open=True,
-                                         host_config=host_config)
-    def start_container(self, id):
-        return self.cli.start(id)
-
-    def container_running(self, id):
-        for container in self.containers(all=False):
-            if container['Id'] == id:
-                return True
-        return False
-
-    def remove_container(self, id, force=False):
-        self.cli.remove_container(id, force=force)
-
-    def stop_container(self, id):
-        self.cli.stop(id)
-
-    def pause_container(self, id):
-        self.cli.pause(id)
-
-    def unpause_container(self, id):
-        self.cli.unpause(id)
-
-    def version(self):
-        return self.cli.version()
-
-    def info(self):
-        return self.cli.info()
-
-    def volumes(self):
-        return self.cli.volumes()['Volumes']
-
-    def remove_volume(self, name):
-        self.cli.remove_volume(name)
-    
+                   
     def findVolumeMappings(self):
         for c in self.cli.containers():
             container_id = c['Id']

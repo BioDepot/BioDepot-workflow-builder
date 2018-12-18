@@ -24,7 +24,7 @@ from AnyQt.QtWidgets import (
 
 def breakpoint(title=None,message=None):
     return
-    QtGui.QMessageBox.warning(title,'',message)
+    #QtGui.QMessageBox.warning(title,'',message)
     
 def getJsonName(filename,widgetName):
     widgetPy=os.path.realpath(filename)
@@ -1423,7 +1423,7 @@ class OWBwBWidget(widget.OWWidget):
             #environment variables can have a Null value in the flags field
             #arguments are the only type that have no flag
             if 'argument' in pvalue:
-                if pname in self.iterateSettings['iteratedAttrs']:
+                if hasattr(self,'iterateSettings') and 'iteratedAttrs' in self.iterateSettings and pname in self.iterateSettings['iteratedAttrs']:
                     fStr="_iterate{{{}}}".format(pname)
                 else:
                     fStr=self.flagString(pname)
@@ -1444,11 +1444,11 @@ class OWBwBWidget(widget.OWWidget):
             if pvalue['type'] == 'bool'and hasattr(self,pname) and getattr(self,pname):
                 addParms=True
                 
-            if pname in self.data['requiredParameters'] and hasattr(self,pname):
+            if hasattr(self,'iterateSettings') and 'iteratedAttrs' in self.iterateSettings and pname in self.data['requiredParameters'] and hasattr(self,pname):
                 addParms=True
 
             if addParms:
-                if pname in self.iterateSettings['iteratedAttrs']:
+                if hasattr(self,'iterateSettings') and 'iteratedAttrs' in self.iterateSettings and pname in self.iterateSettings['iteratedAttrs']:
                     fStr="_iterate{{{}}}".format(pname)
                 else:
                     fStr=self.flagString(pname)
