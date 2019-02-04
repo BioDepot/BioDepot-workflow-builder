@@ -579,11 +579,11 @@ class OWBwBWidget(widget.OWWidget):
         schedulerBox.addWidget(self.schedulerComboBox)
         
     
-        cbLabel=QtGui.QLabel('Number of workers:')
+        cbLabel=QtGui.QLabel('Number of workers: ')
         if not hasattr(self,'nWorkers'):
-            self.nWorkers=1
+            self.nWorkers=0
         self.threadSpin=QSpinBox()
-        self.threadSpin.setRange(1, 128)
+        self.threadSpin.setRange(0, 128)
         self.threadSpin.valueChanged.connect(self.updateThreadSpin)
         self.threadSpin.setValue(self.nWorkers)
        

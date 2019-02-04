@@ -68,6 +68,47 @@ class ConsoleProcess():
             self.writeMessage(message)
 
         
+class CmdJson:
+    def __init__(self):
+        self.jsonObj={}
+        self.jsonObj['args']=[]
+        self.jsonObj['image']=name
+        self.jsonObj['deps']=""
+        self.jsonObj['envs']=[]
+        self.jsonObj['volumes']=[]
+
+    def addBaseArgs(self,cmd):
+        self.jsonObj['args']=['-i', '--rm', '--init',cmd]
+
+    def addVolume(self,host_dir,mount_dir,mode):
+        volumeMapping['host_dir']=host_dir
+        volumeMapping['mount_dir']=container_dir
+        volumeMapping['mode']=mode
+        self.jsonObj['volumes'].append(volumeMapping)
+        
+    def addEnv(self,key,val):
+        key.strip()
+        #strip quotes if present
+        if key[0] == key[-1] and key.startswith(("'",'"')):
+            key=key[1:-1]
+        envDict['key']=key
+        envDict['val']=val
+        self.jsonObj['envs'].append(envDict)
+    
+    #need to fix this so that we can add parameters for maxWorkers and threads per worker    
+    def addThreadsRam(self,nThreads,ram):
+        self.jsonObj['nThreads']=nThreads
+        self.jsonObj['ram']=ram
+
+        
+class TaskJson:
+    def __init__(self,name,description,cmds):
+        self.jsonObj['commands']={}
+        #cmds is an list of cmdJson object
+        self.jsonObj['commands']['command']=cmds 
+        self.jsonObj['commands']['name']=name
+        self.jsonObj['commands']['description']=description
+        
 class DockerClient:
     def __init__(self, url, name):
         self.url = url
@@ -107,16 +148,39 @@ class DockerClient:
         
     def containers(self, all=True):
         return self.cli.containers(all=all)
-
-    """
-    volumes is a dict mapping host directory to container directory
-    {
-        "/Users/host/directory": "path/to/container/directory"
-    }
-    commands is a list of bash commands to run on container
-        ["pwd", "touch newfile.txt"]
     
-    """
+    def findMaxIterateValues(settings):
+        maxThreads=0
+        maxRam=0
+        for attr in settings['iteratedAttrs']:
+            if attr in settings['data'] and 'threads' in settings['data'][attr] and settings['data'][attr]['threads']:
+                if int(settings['data'][attr]['threads']) > maxThreads:
+                    maxThreads=int(settings['data'][attr]['threads'])
+            if attr in settings['data'] and 'ram' in settings['data'][attr] and settings['data'][attr]['ram']:
+                ramSize=int(settings['data'][attr]['ram'])
+                if ramSizes > maxRam:
+                    maxRam =ramSizes
+        return maxThreads, maxRam
+        
+    def create_container_external(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None,  exportGraphics=False, portMappings=None,testMode=False,logFile=None,scheduleSettings=None,iterateSettings=None):
+        cmdsJson=[]
+        for cmd in cmds:
+            cmdJson=CmdJson()
+            cmdJson.addBaseArgs(cmd)
+            for env, var in environment.items():
+                cmdJson.addEnv(env,var)
+            for container_dir, host_dir in hostVolumes.items():
+                cmdJson.addVolume(host_dir,container_dir,'rw')
+            if exportGraphics:
+                cmdJson.addEnv('DISPLAY',':1')
+                cmdJson.addVolume('/tmp/.X11-unix','/tmp/.X11-unix','rw')
+            maxThreads=1
+            maxRam=0
+            if iterateSettings:
+                maxThreads,maxRam=findMaxIterateValues(iterateSettings)
+            cmdJson.addThreadsRam(maxThreads,maxRam)
+        taskJson=TaskJson('testTask','test description',cmds)
+
     def create_container_iter(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None,scheduleSettings=None,iterateSettings=None):
         #reset logFile when it is not None - can be "" though - this allows an active reset
         if logFile is not None:
@@ -146,14 +210,13 @@ class DockerClient:
         for cmd in cmds:
             dockerCmds.append(dockerBaseFlags + ' {} {} {} {}'.format(volumeMappings,envs,name,cmd))
         consoleProc.state='running'
+        
         #pass on iterateSettings
         if iterateSettings:
             consoleProc.addIterateSettings(iterateSettings)
         else:
             #need to have NWORKERS set
              env.insert("NWORKERS", "1")
-#        if serverSettings:
-#             consoleProc.addServerSettings(iterateSettings)
         if testMode:
             baseCmd='docker  run -i --rm --init '
             echoStr=''

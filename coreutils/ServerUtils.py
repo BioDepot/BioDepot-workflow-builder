@@ -64,6 +64,8 @@ class IterateDialog(QDialog):
         
         for parm in self.settingsCopy['iterableAttrs']:
             #init values if they are not there
+            if 'data' not in self.settingsCopy:
+                self.settingsCopy['data']={}
             if parm not in self.settingsCopy['data']:
                 self.settingsCopy['data'][parm]={'groupSize':'1','threads':'1','ram':'0'}
                 
@@ -84,7 +86,7 @@ class IterateDialog(QDialog):
             parmItem.setFlags(parmItem.flags() ^ Qt.ItemIsEditable)
             parmItem.setFlags(parmItem.flags() ^ Qt.ItemIsSelectable)
             cb.setFlags(cb.flags() ^ Qt.ItemIsSelectable)
-            if parm in self.settingsCopy['iteratedAttrs']:
+            if 'iteratedAttrs' in self.settingsCopy and parm in self.settingsCopy['iteratedAttrs']:
                 cb.setCheckState(QtCore.Qt.Checked)
             else:
                 cb.setCheckState(QtCore.Qt.Unchecked)
@@ -158,14 +160,14 @@ class IterateDialog(QDialog):
             for col in range(2,5):
                 item=self.table.item(row,col)
                 self.setEnableSelect(item,True)
-            if parm not in self.settingsCopy['iteratedAttrs']:
+            if 'iteratedAttrs' in self.settingsCopy and parm not in self.settingsCopy['iteratedAttrs']:
                 self.settingsCopy['iteratedAttrs'].append(parm)
         else:
             self.setEnable(parmItem,False)
             for col in range(2,5):
                 item=self.table.item(row,col)
                 self.setEnableSelect(item,False)
-            if parm in self.settingsCopy['iteratedAttrs']:
+            if 'iteratedAttrs' in self.settingsCopy and parm not in self.settingsCopy['iteratedAttrs']:
                 self.settingsCopy['iteratedAttrs'].remove(parm)
     
     def closeEvent(self, event):
