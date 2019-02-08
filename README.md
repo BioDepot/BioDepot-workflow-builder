@@ -17,8 +17,9 @@ Source code	: [https://github.com/BioDepot/BioDepot-workflow-builder](https://gi
 
 
 ### Overview: Running Bwb
-<div class="lower_alpha"></div>1\. Install Docker
-2\. Start the container with Bwb by executing the following Docker command by typing into a window (Linux) or on the Docker command line (Windows/macOs)
+1\. Install Docker
+
+2\. Start the container with Bwb by executing the following Docker command by typing into a window (Linux) or on the Docker command line (Windows/macOs). For Windows, it may be necessary to run the Docker application as an Administrator. 
 
 ```bash 
     docker run --rm   -p 6080:6080 \
@@ -35,8 +36,9 @@ Source code	: [https://github.com/BioDepot/BioDepot-workflow-builder](https://gi
 
 For cloud instances and remote servers use the ip of the instance or remote server instead of localhost.
 
+For Windows and Macs the IP may vary depending on your setup
 
-For Windows and Macs the IP may vary depending on your setup - instructions are [https://docs.docker.com/network/](#Docker Network) for more information)
+Windows 10 Pro and newer Mac's running native Docker will use the same localhost setup. Windows 7, 8 and 10 Home edition, and older Macs that use a Virtual machine (VM) will need to use the IP of the virtual machine instead of localhost - usually 192.168.99.100. In addition, for these VM setups, the available RAM of the VM limits the RAM that can be used (usually 1 or 2 GB only). The VM settings must be adjusted to increase the available memory for applications such as Kallisto (roughly 8 GB and STAR (roughly 32 GB for human datasets) . 
 
 4\. To quit the container, right click inside the browser and choose the QUIT container option. Alternatively, you can also stop it by finding the container id and stopping the container. Quitting the browser just closes the viewport to the container - it does not stop the container.
 
@@ -129,10 +131,12 @@ For other versions of Windows, the older toolbox version that uses VirtualBox wi
 * If you just installed the app, you also get a popup success message with suggested next steps, and a link to this documentation. 
 ![](./docs/images/image15.png) 
 
+
 3\. By default, Docker for Windows limit the memory usage to 2 GB. Given that most Bioinformatics workflows are computationally intensive, some of the tasks may require a higher memory usage. To change the memory allocation, go to `Docker Preferences (Right Click on the docker Icon) -> Preferences -> Advanced`, and adjust the memory allocation as needed. We recommend allowing Docker engine to use at least 10 Gb of memory or more. 
 
 ![](./docs/images/image26.png)
 
+4\. For those using the Docker version that uses VirtualBox start the Docker application as an Administrator. To adjust the available memory, the user must launch Oracle VirtualBox, stop the Virtual machine and adjust the Systems settings to give the machine more RAM. The default is just 1 GB.
 
 ### On The Cloud
 
@@ -188,13 +192,21 @@ docker pull biodepot/bwb:latest
 
 Alternatively, you can build the image from the GitHub repo:
 
+On Linux and Macs
 ```bash
 git clone https://github.com/BioDepot/BioDepot-workflow-builder.git
 cd BioDepot-workflow-builder
 docker build -t bwb/biodepot:latest .
 ```
+On Windows (using Git for Windows)
 
-    
+Right click on the git bash icon and choose to run as an administrator
+```bash
+git config --system core.longpaths true
+git clone https://github.com/BioDepot/BioDepot-workflow-builder.git
+cd BioDepot-workflow-builder
+docker build -t bwb/biodepot:latest .
+``` 
 2\.  Start the Bwb container 
 
 ```bash
@@ -205,7 +217,8 @@ This command will launch a mini-webserver and start a windowing environment insi
 
 To access the container open up a browser window and type in the IP of the container and port that it is listening to into the address bar. For a local installation using Linux, the IP of the container is localhost or 127.0.0.1 so the user would type localhost:6080 into the address bar of the browser. For a remote installation, the ip is the ip of the server.
 <a name="findip"></a>
-For Macs and Windows machines the local ip is usually [192:168:99:100](http://192:168:99:100:6080) but if that does not work you can find the IP with the following command in a terminal if using Linux/MacOS or in the Docker window if using Windows.
+
+For Macs and Windows machines using VirtualBox, the local ip is usually [192:168:99:100](http://192:168:99:100:6080) but if that does not work you can find the IP with the following command in a terminal if using Linux/MacOS or in the Docker window if using Windows.
 
 ```bash
 docker ps
