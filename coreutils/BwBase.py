@@ -4,6 +4,7 @@ import sys
 import logging
 import jsonpickle
 import functools
+import multiprocessing
 from itertools import zip_longest
 from OWWidgetBuilder import tabbedWindow
 from ServerUtils import IterateDialog
@@ -14,6 +15,7 @@ from Orange.widgets import widget, gui, settings
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 from time import sleep
+
 
 from AnyQt.QtWidgets import (
     QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
@@ -1279,19 +1281,25 @@ class OWBwBWidget(widget.OWWidget):
         cmd=self.generateCmdFromData()
         self.envVars={}
         self.getEnvironmentVariables()
-        if hasattr(self,'nWorkers') and self.nWorkers :
-            self.iterateSettings['nWorkers']=self.nWorkers
+        if hasattr(self,'nWorkers') and self.nWorkers is not None:
+            if self.nWorkers:
+                self.iterateSettings['nWorkers']=self.nWorkers
+            else:
+                self.iterateSettings['nWorkers']=multiprocessing.cpu_count()
         try:
             imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
             self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
-            breakpoint(message='cmd is {}'.format(cmd))
-            cmds=self.findIteratedFlags(cmd)
-            breakpoint(message='cmds are {}'.format(cmds))
+            if (self.iterate):
+                breakpoint(message='cmd is {}'.format(cmd))
+                cmds=self.findIteratedFlags(cmd)
+                breakpoint(message='cmds are {}'.format(cmds))
+            else:
+                cmds=[cmd]
             #generate cmds here
             self.status='running'
             self.setStatusMessage('Running...')
             sys.stderr.write('cmds are {}\n'.format(cmds))
-            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,scheduleSettings=None,iterateSettings=self.iterateSettings)
+            self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,scheduleSettings=None,iterateSettings=self.iterateSettings,iterate=self.iterate)
         except BaseException as e:
             self.bgui.reenableAll(self)
             self.reenableExec()
@@ -1423,7 +1431,7 @@ class OWBwBWidget(widget.OWWidget):
             #environment variables can have a Null value in the flags field
             #arguments are the only type that have no flag
             if 'argument' in pvalue:
-                if hasattr(self,'iterateSettings') and 'iteratedAttrs' in self.iterateSettings and pname in self.iterateSettings['iteratedAttrs']:
+                if self.iterate and hasattr(self,'iterateSettings') and 'iteratedAttrs' in self.iterateSettings and pname in self.iterateSettings['iteratedAttrs']:
                     fStr="_iterate{{{}}}".format(pname)
                 else:
                     fStr=self.flagString(pname)
@@ -1444,11 +1452,11 @@ class OWBwBWidget(widget.OWWidget):
             if pvalue['type'] == 'bool'and hasattr(self,pname) and getattr(self,pname):
                 addParms=True
                 
-            if hasattr(self,'iterateSettings') and 'iteratedAttrs' in self.iterateSettings and pname in self.data['requiredParameters'] and hasattr(self,pname):
+            if self.iterate and hasattr(self,'iterateSettings') and 'iteratedAttrs' in self.iterateSettings and pname in self.data['requiredParameters'] and hasattr(self,pname):
                 addParms=True
 
             if addParms:
-                if hasattr(self,'iterateSettings') and 'iteratedAttrs' in self.iterateSettings and pname in self.iterateSettings['iteratedAttrs']:
+                if self.iterate and hasattr(self,'iterateSettings') and 'iteratedAttrs' in self.iterateSettings and pname in self.iterateSettings['iteratedAttrs']:
                     fStr="_iterate{{{}}}".format(pname)
                 else:
                     fStr=self.flagString(pname)

@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 import json
 import requests
 import subprocess
@@ -19,16 +19,24 @@ class ConsoleProcess():
             self.process.readyReadStandardError.connect(lambda: self.writeConsole(self.process, console,self.process.readAllStandardError,Qt.red))
         if finishHandler:
             self.process.finished.connect(finishHandler)
+            
     def addIterateSettings(self,settings):
         env=QtCore.QProcessEnvironment.systemEnvironment()
         attrs=[]
         groupSizes=[]
         ramSizes=[]
         maxThreads=1
-        env.insert("NWORKERS", "{}".format(settings['nWorkers']))
+        sys.stderr.write('finished method init\n')
+        nWorkers=1
+        if 'nWorkers' in settings:
+            nWorkers=settings['nWorkers']      
+        env.insert("NWORKERS", "{}".format(nWorkers))
+       
         if 'iteratedAttrs' not in settings or not settings['iteratedAttrs']:
             return
+        sys.stderr.write('checking attrs in settings\n')
         for attr in settings['iteratedAttrs']:
+            sys.stderr.write('adding attr {}\n'.format(attr))
             attrs.append(attr)
             if attr in settings['data'] and 'threads' in settings['data'][attr] and settings['data'][attr]['threads']:
                 if int(settings['data'][attr]['threads']) > maxThreads:
@@ -40,7 +48,7 @@ class ConsoleProcess():
             if attr in settings['data'] and 'ram' in settings['data'][attr] and settings['data'][attr]['ram']:
                 ramSizes.append(settings['data'][attr]['ram'])
             else:
-                ramSizes.append('0')            
+                ramSizes.append('0')
         #need to add code to pass environment arrays to process
         if attrs:
             env.insert("ITERATEDATTRS",":".join(attrs))
@@ -66,7 +74,6 @@ class ConsoleProcess():
         self.process.terminate()
         if message:
             self.writeMessage(message)
-
         
 class CmdJson:
     def __init__(self):
@@ -180,8 +187,9 @@ class DockerClient:
                 maxThreads,maxRam=findMaxIterateValues(iterateSettings)
             cmdJson.addThreadsRam(maxThreads,maxRam)
         taskJson=TaskJson('testTask','test description',cmds)
+        sys.stderr.write('{}\n'.format(json.dumps(taskJson)))
 
-    def create_container_iter(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None,scheduleSettings=None,iterateSettings=None):
+    def create_container_iter(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None,scheduleSettings=None,iterateSettings=None,iterate=False):
         #reset logFile when it is not None - can be "" though - this allows an active reset
         if logFile is not None:
             self.logFile = logFile
@@ -210,13 +218,15 @@ class DockerClient:
         for cmd in cmds:
             dockerCmds.append(dockerBaseFlags + ' {} {} {} {}'.format(volumeMappings,envs,name,cmd))
         consoleProc.state='running'
-        
+        for dcmd in dockerCmds:
+            sys.stderr.write('{}\n'.format(dcmd))
         #pass on iterateSettings
-        if iterateSettings:
+        if iterate and iterateSettings:
+            sys.stderr.write('adding iterate settings\n')
             consoleProc.addIterateSettings(iterateSettings)
+            sys.stderr.write('added iterate settings\n')
         else:
-            #need to have NWORKERS set
-             env.insert("NWORKERS", "1")
+            envs+ "-e NWORKERS=1 "            
         if testMode:
             baseCmd='docker  run -i --rm --init '
             echoStr=''
@@ -231,6 +241,7 @@ class DockerClient:
                    
             consoleProc.process.start('echo',[echoStr])
         else:
+            sys.stderr.write('starting runDockerJob.sh\n')
             consoleProc.process.start('runDockerJob.sh',dockerCmds)
                    
     def findVolumeMappings(self):
