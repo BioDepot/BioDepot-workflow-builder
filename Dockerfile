@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y wget libssl1.0 \
 
 #files for web interface noVNC
 ADD web /web/
-RUN apt-get update && apt-get install -y docker.io  build-essential gcc python-pip python-dev python3-pip \
+RUN apt-get update && apt-get install -y build-essential gcc python-pip python-dev python3-pip \
     && pip install --upgrade pip==9.0.3 \
     && pip install -U setuptools \
     && pip install -r /web/requirements.txt \
@@ -60,12 +60,27 @@ RUN apt-get update && apt-get install -y build-essential gcc python-dev python3-
     && pip3 install -r orange3/requirements-gui.txt \
     && pip3 install docker pysam beautifulsoup4\
     && pip3 install -e orange3 \
-#    && apt-get remove -y git gcc build-essential python3-pip python-pip \
     && apt-get remove -y gcc build-essential \
     && apt-get autoclean -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
     
+#install Docker-ce
+RUN apt-get update && apt-get install -y  \
+    apt-transport-https ca-certificates curl software-properties-common gnupg2 \
+    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -\
+    && apt-get remove -y curl gnupg2 \
+    && apt-get autoclean -y \
+    && apt-get autoremove -y \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN add-apt-repository -y \
+   "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" \
+   && apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io\
+   && apt-get remove -y apt-transport-https software-properties-common \
+   && apt-get autoclean -y \
+   && apt-get autoremove -y \
+   && rm -rf /var/lib/apt/lists/*    
 #nginx and supervisor setup
 ADD supervisord.conf /etc/supervisor/conf.d/
 ADD nginx.conf /etc/nginx/sites-enabled/default
