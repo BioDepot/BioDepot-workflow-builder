@@ -1,0 +1,6 @@
+connexion==1.1.15
+docker==3.5.1
+python_dateutil==2.6.0
+psutil==5.4.8
+setuptools>=21.0.0
+redis==3.0.1

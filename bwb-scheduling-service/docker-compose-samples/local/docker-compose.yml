@@ -1,0 +1,28 @@
+version: '2'
+services:
+  service:
+    image: biodepot/bwb-scheduling-service
+    restart: always
+    ports:
+    - "8080:8080"
+    command: service
+  redis:
+    image: redis
+  agent:
+    build: ./agent-dockerfile
+    restart: always
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint:
+    - /bin/bash
+    - /usr/src/app/docker_init.sh
+    - agent
+    - --api_url
+    - http://service:8080
+    - --hostname
+    - agent
+    - local-agent
+    - --redis_host
+    - redis
+    - --redis_port
+    - "6379"

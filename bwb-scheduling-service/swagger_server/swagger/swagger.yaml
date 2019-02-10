@@ -1,0 +1,203 @@
+---
+swagger: "2.0"
+info:
+  description: "Docker container scheduler for BWB"
+  version: "1.0.0"
+  title: "BWB Scheduler"
+host: "bwb-scheduler.net"
+basePath: "/1.0.0"
+tags:
+- name: "client"
+  description: "Client endpoints for interacting with scheduler."
+- name: "agent"
+  description: "Agent endpoints for interacting with scheduler."
+schemes:
+- "https"
+- "http"
+paths:
+  /schedule-job:
+    post:
+      tags:
+      - "client"
+      summary: "Schedule Job"
+      description: "Allocates resources for job to be run on the scheduler.\n"
+      operationId: "schedule_job"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "job"
+        in: "body"
+        description: "Docker commands to be run"
+        required: true
+        schema:
+          properties:
+            commands:
+              type: "array"
+              items:
+                $ref: '#/definitions/Task'
+      - name: "cpu_count"
+        in: "query"
+        description: "number of cpu(s) required"
+        required: true
+        type: "integer"
+        minimum: 1
+        format: "int32"
+      - name: "memory"
+        in: "query"
+        description: "amount of RAM required"
+        required: true
+        type: "integer"
+        minimum: 0
+        format: "int32"
+      responses:
+        200:
+          description: "Job Accepted"
+          schema:
+            $ref: "#/definitions/InventoryItem"
+        400:
+          description: "bad input parameter"
+      x-swagger-router-controller: "swagger_server.controllers.client_controller"
+  /register-host:
+    post:
+      tags:
+      - "agent"
+      summary: "Register Agent"
+      description: "Register agent to make it available for processing.\n"
+      operationId: "register_agent"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "host_name"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "host_port"
+        in: "query"
+        required: true
+        type: "integer"
+        format: "int32"
+      - name: "redis_host"
+        in: "query"
+        required: true
+        type: "string"
+      - name: "redis_port"
+        in: "query"
+        required: true
+        type: "integer"
+        format: "int32"
+      - name: "core_count"
+        in: "query"
+        description: "number of cpu(s) required"
+        required: true
+        type: "integer"
+        minimum: 1
+        format: "int32"
+      - name: "memory"
+        in: "query"
+        description: "amount of RAM required"
+        required: true
+        type: "integer"
+        minimum: 0
+        format: "int32"
+      responses:
+        200:
+          description: "Registered host"
+        400:
+          description: "bad input parameter"
+      x-swagger-router-controller: "swagger_server.controllers.agent_controller"
+definitions:
+  InventoryItem:
+    type: "object"
+    required:
+    - "host"
+    - "id"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+        example: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+      host:
+        type: "string"
+        example: "docker-host-1"
+    example:
+      host: "docker-host-1"
+      id: "d290f1ee-6c54-4b01-90e6-d701748f0851"
+  DockerVolume:
+    type: "object"
+    required:
+    - "host_dir"
+    - "mount_dir"
+    - "mode"
+    properties:
+      host_dir:
+        type: "string"
+        example:
+          "/directory_on_docker_host"
+      mount_dir:
+        type: "string"
+        example:
+          "/mount_point_inside_container"
+      mode:
+        type: "string"
+        enum: ["ro", "rw"]
+    additionalProperties: false
+  DockerEnvironmentVariable:
+    type: "object"
+    required:
+    - "key"
+    - "val"
+    properties:
+      key:
+        type: "string"
+        example:
+          "FOO"
+      val:
+        type: "string"
+        example:
+          "BAR"
+    additionalProperties: false
+  DockerCommand:
+    type: "object"
+    required:
+    - "image"
+    - "args"
+    properties:
+      image:
+        type: "string"
+        example: "alpine"
+      args:
+        type: "array"
+        items:
+          type: string
+        example: ["echo", "'Hello World 1'"]
+      deps:
+        type: "array"
+        items:
+          type: string
+      volumes:
+        type: "array"
+        items:
+          $ref: "#/definitions/DockerVolume"
+      env:
+        type: "array"
+        items:
+          $ref: "#/definitions/DockerEnvironmentVariable"
+    additionalProperties: false
+  Task:
+    description: Task object
+    properties:
+      name:
+        type: string
+        description: task object name
+      description:
+        type: string
+        description: task description
+      commands:
+        type: array
+        items:
+          $ref: "#/definitions/DockerCommand"
+    required:
+    - name
+    - commands
+    - description
+    additionalProperties: false

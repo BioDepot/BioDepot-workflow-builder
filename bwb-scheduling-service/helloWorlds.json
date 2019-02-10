@@ -1,0 +1,60 @@
+{
+ "tasks":
+{
+  "commands": [
+    {
+      "command": {
+        "args": [
+          "echo",
+          "'Hello World 1'"
+        ],
+        "deps": [
+          "string"
+        ],
+        "env": [
+          {
+            "key": "FOO",
+            "val": "BAR"
+          }
+        ],
+        "image": "alpine",
+        "volumes": [
+          {
+            "host_dir": "/directory_on_docker_host",
+            "mode": "ro",
+            "mount_dir": "/mount_point_inside_container"
+          }
+        ]
+      },
+      "description": "Test Alpine Run",
+      "name": "alpine-1"
+    },
+    {
+      "command": {
+        "args": [
+          "echo",
+          "'Hello World 2'"
+        ],
+        "deps": [
+          "string"
+        ],
+        "env": [
+          {
+            "key": "FOO",
+            "val": "BAR"
+          }
+        ],
+        "image": "alpine",
+        "volumes": [
+          {
+            "host_dir": "/directory_on_docker_host",
+            "mode": "ro",
+            "mount_dir": "/mount_point_inside_container"
+          }
+        ]
+      },
+      "description": "Test Alpine Run",
+      "name": "alpine-2"
+    }
+  ]
+}}
