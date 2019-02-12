@@ -550,14 +550,10 @@ class OWBwBWidget(widget.OWWidget):
         
         threadBox=QtGui.QHBoxLayout()
         scheduleBox=QtGui.QHBoxLayout()
-        iterateBox=QtGui.QHBoxLayout()
+        
         
         #have to wait until the OWxxx.py instance loads data from json before finding iterables - so don't move 
-        self.iterateSettings['iterableAttrs']=self.findIterables()
-        
-        self.iterateSettingsBtn = gui.button(None, self, "Settings", callback=self.setIteration)
-        self.iterateSettingsBtn.setStyleSheet(self.css)
-        self.iterateSettingsBtn.setFixedSize(80,20)
+
         self.IPMenuItems={}
         self.schedulerMenuItems={}
         self.IPMenu=QtGui.QMenu(self)
@@ -589,18 +585,31 @@ class OWBwBWidget(widget.OWWidget):
         self.threadSpin.valueChanged.connect(self.updateThreadSpin)
         self.threadSpin.setValue(self.nWorkers)
        
-        
+        #only draw this if there are iterables
+   
         if not hasattr(self,'iterate'):
             self.iterate=False
-        self.scheduleCheckbox=gui.checkBox(None, self,'useScheduler',label='')
-        iterateCheckbox=gui.checkBox(None, self,'iterate',label='Iterate')
-        self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked())
-        iterateCheckbox.stateChanged.connect(lambda : self.updateScheduleCheckBox(iterateCheckbox.isChecked()))
-        iterateCheckbox.stateChanged.connect(lambda : self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked()))
-        iterateCheckbox.stateChanged.connect(lambda: self.threadSpin.setEnabled(iterateCheckbox.isChecked()))
-        self.threadSpin.setEnabled(iterateCheckbox.isChecked())
         
-
+        self.iterateSettings['iterableAttrs']=self.findIterables()
+        if self.iterateSettings['iterableAttrs']:
+            self.iterateSettingsBtn = gui.button(None, self, "Settings", callback=self.setIteration)
+            self.iterateSettingsBtn.setStyleSheet(self.css)
+            self.iterateSettingsBtn.setFixedSize(80,20)
+            iterateCheckbox=gui.checkBox(None, self,'iterate',label='Iterate')
+            self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked())
+            iterateCheckbox.stateChanged.connect(lambda : self.updateScheduleCheckBox(iterateCheckbox.isChecked()))
+            iterateCheckbox.stateChanged.connect(lambda : self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked()))
+            iterateCheckbox.stateChanged.connect(lambda: self.threadSpin.setEnabled(iterateCheckbox.isChecked()))
+            
+            iterateBox=QtGui.QHBoxLayout()
+            iterateBox.addWidget(iterateCheckbox)
+            iterateBox.addWidget(self.iterateSettingsBtn)
+            iterateBox.addStretch(1)
+        
+            self.threadSpin.setEnabled(iterateCheckbox.isChecked())
+            self.fileDirScheduleLayout.addLayout(iterateBox,0,0)
+        
+        self.scheduleCheckbox=gui.checkBox(None, self,'useScheduler',label='')
         self.IPBtn.setEnabled(self.scheduleCheckbox.isChecked())
         self.schedulerLabel.setEnabled(self.scheduleCheckbox.isChecked())
         self.schedulerComboBox.setEnabled(self.scheduleCheckbox.isChecked())
@@ -611,24 +620,15 @@ class OWBwBWidget(widget.OWWidget):
         
         self.fileDirScheduleLayout.setAlignment(Qt.AlignTop)
         
-        
-        iterateBox.addWidget(iterateCheckbox)
-        iterateBox.addWidget(self.iterateSettingsBtn)
-        iterateBox.addStretch(1)
-        
-        
         scheduleBox.addWidget(self.scheduleCheckbox)
         scheduleBox.addLayout(schedulerBox)
         scheduleBox.addWidget(self.IPBtn)
         scheduleBox.addStretch(1)
         
-
         threadBox.addWidget(cbLabel)
         threadBox.addWidget(self.threadSpin)
         threadBox.addStretch(1)
         
-        
-        self.fileDirScheduleLayout.addLayout(iterateBox,0,0)
         self.fileDirScheduleLayout.addLayout(scheduleBox,1,0)
         self.fileDirScheduleLayout.addLayout(threadBox,2,0)
     
@@ -1286,27 +1286,29 @@ class OWBwBWidget(widget.OWWidget):
                 self.iterateSettings['nWorkers']=self.nWorkers
             else:
                 self.iterateSettings['nWorkers']=multiprocessing.cpu_count()
-        try:
-            imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
-            self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
-            if (self.iterate):
-                breakpoint(message='cmd is {}'.format(cmd))
-                cmds=self.findIteratedFlags(cmd)
-                breakpoint(message='cmds are {}'.format(cmds))
-            else:
-                cmds=[cmd]
-            #generate cmds here
-            self.status='running'
-            self.setStatusMessage('Running...')
-            sys.stderr.write('cmds are {}\n'.format(cmds))
+#        try:
+        imageName='{}:{}'.format(self._dockerImageName, self._dockerImageTag)
+        self.pConsole.writeMessage('Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n'.format(imageName, self.hostVolumes, cmd , self.envVars))
+        if (self.iterate):
+            breakpoint(message='cmd is {}'.format(cmd))
+            cmds=self.findIteratedFlags(cmd)
+            breakpoint(message='cmds are {}'.format(cmds))
+        else:
+            cmds=[cmd]
+        #generate cmds here
+        self.status='running'
+        self.setStatusMessage('Running...')
+        sys.stderr.write('cmds are {}\n'.format(cmds))
+        if (hasattr(self,'useScheduler') and self.useScheduler):
+            self.dockerClient.create_container_external(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,scheduleSettings=None,iterateSettings=self.iterateSettings,iterate=self.iterate)
+        else:
             self.dockerClient.create_container_iter(imageName, hostVolumes=self.hostVolumes, cmds=cmds, environment=self.envVars,consoleProc=self.pConsole,exportGraphics=self.exportGraphics,portMappings=self.portMappings(),testMode=self.useTestMode,logFile=self.saveBashFile,scheduleSettings=None,iterateSettings=self.iterateSettings,iterate=self.iterate)
-        except BaseException as e:
-            self.bgui.reenableAll(self)
-            self.reenableExec()
-            self.jobRunning=False
-            self.pConsole.writeMessage("unable to start Docker command "+ str(e))
-            self.setStatusMessage('Error')
-            
+        # except BaseException as e:
+            # self.bgui.reenableAll(self)
+            # self.reenableExec()
+            # self.jobRunning=False
+            # self.pConsole.writeMessage("unable to start Docker command "+ str(e))
+            # self.setStatusMessage('Error')
     
     def portMappings(self):
         if 'portMappings' in self.data:
@@ -1398,6 +1400,8 @@ class OWBwBWidget(widget.OWWidget):
                     path=str(flagValue)
                     if path:
                         hostPath=self.bwbPathToContainerPath(path, returnNone=False)
+                    else:
+                        raise Exception ('Exception -no path flagValue is {} path is {}\n'.format(flagValue, path))
                     return self.joinFlagValue(flagName,str(hostPath))
                 elif pvalue['type'][-4:] =='list':
                     if flagName:
@@ -1734,7 +1738,7 @@ class OWBwBWidget(widget.OWWidget):
             sys.stderr.write('dirPath {} pathFile {} hostPath {}\n'.format(dirPath,pathFile,hostPath))
         else:
             hostPath=os.path.normpath(self.dockerClient.to_best_host_directory(path,returnNone=False))
-            sys.stderr.write('hostPath {}\n'.format(hostPath))
+            sys.stderr.write('bwbPath {} hostPath {}\n'.format(path,hostPath))
         conPath=None
         #now get all the possible submappings to volumeMappings by comparing the true hostmappings
         #if submap is found convert the common path to the container path

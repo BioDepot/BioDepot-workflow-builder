@@ -6,3 +6,4 @@ nginx -c /etc/nginx/nginx.conf
 
 cp /root/.fluxbox/bwb.svg /orange3/Orange/canvas/icons/orange-canvas.svg
 echo `hostname` > /etc/dockerid
+startScheduler.sh &> /tmp/schedulerLog &

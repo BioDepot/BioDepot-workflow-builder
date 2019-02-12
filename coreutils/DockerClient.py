@@ -5,8 +5,8 @@ import subprocess
 from docker import APIClient
 from PyQt5.QtCore import QThread, pyqtSignal,QProcess, Qt
 from PyQt5 import QtWidgets, QtGui, QtCore
-import socket
 import datetime
+import time
 
 class ConsoleProcess():
     #subclass that attaches a process and pipes the output to textedit widget console widget
@@ -76,10 +76,10 @@ class ConsoleProcess():
             self.writeMessage(message)
         
 class CmdJson:
-    def __init__(self):
+    def __init__(self,imageName):
         self.jsonObj={}
         self.jsonObj['args']=[]
-        self.jsonObj['image']=name
+        self.jsonObj['image']=imageName
         self.jsonObj['deps']=""
         self.jsonObj['envs']=[]
         self.jsonObj['volumes']=[]
@@ -87,7 +87,8 @@ class CmdJson:
     def addBaseArgs(self,cmd):
         self.jsonObj['args']=['-i', '--rm', '--init',cmd]
 
-    def addVolume(self,host_dir,mount_dir,mode):
+    def addVolume(self,host_dir,container_dir,mode):
+        volumeMapping={}
         volumeMapping['host_dir']=host_dir
         volumeMapping['mount_dir']=container_dir
         volumeMapping['mode']=mode
@@ -106,25 +107,32 @@ class CmdJson:
     def addThreadsRam(self,nThreads,ram):
         self.jsonObj['nThreads']=nThreads
         self.jsonObj['ram']=ram
+    def addName(self,name):
+        self.jsonObj['name']=name
+    def addDescription(self,description):
+        self.jsonObj['description']=description
 
         
 class TaskJson:
-    def __init__(self,name,description,cmds):
-        self.jsonObj['commands']={}
-        #cmds is an list of cmdJson object
-        self.jsonObj['commands']['command']=cmds 
-        self.jsonObj['commands']['name']=name
-        self.jsonObj['commands']['description']=description
+    def __init__(self,cmdsJson):
+        self.jsonObj={}
+        self.jsonObj['tasks']={}
+        self.jsonObj['tasks']['commands']=[] 
+        for cmdJson in cmdsJson:
+            self.jsonObj['tasks']['commands'].append(cmdJson.jsonObj)
+        
+
         
 class DockerClient:
     def __init__(self, url, name):
         self.url = url
         self.name = name
         self.cli = APIClient(base_url=url)
-        self.bwb_instance_id = socket.gethostname()
+        self.bwb_instance_id = str(subprocess.check_output('cat /proc/self/cgroup | head -1 | cut -d "/" -f3', shell=True,universal_newlines=True)).splitlines()[0]
         self.bwbMounts={}
         self.findVolumeMappings()
         self.logFile=None
+        self.schedulerStarted=False
 
     def getClient(self):
         return self.cli
@@ -156,23 +164,25 @@ class DockerClient:
     def containers(self, all=True):
         return self.cli.containers(all=all)
     
-    def findMaxIterateValues(settings):
+    def findMaxIterateValues(self,settings):
         maxThreads=0
         maxRam=0
-        for attr in settings['iteratedAttrs']:
-            if attr in settings['data'] and 'threads' in settings['data'][attr] and settings['data'][attr]['threads']:
-                if int(settings['data'][attr]['threads']) > maxThreads:
-                    maxThreads=int(settings['data'][attr]['threads'])
-            if attr in settings['data'] and 'ram' in settings['data'][attr] and settings['data'][attr]['ram']:
-                ramSize=int(settings['data'][attr]['ram'])
-                if ramSizes > maxRam:
-                    maxRam =ramSizes
+        if 'iteratedAttrs' in settings:
+            for attr in settings['iteratedAttrs']:
+                if attr in settings['data'] and 'threads' in settings['data'][attr] and settings['data'][attr]['threads']:
+                    if int(settings['data'][attr]['threads']) > maxThreads:
+                        maxThreads=int(settings['data'][attr]['threads'])
+                if attr in settings['data'] and 'ram' in settings['data'][attr] and settings['data'][attr]['ram']:
+                    ramSize=int(settings['data'][attr]['ram'])
+                    if ramSizes > maxRam:
+                        maxRam =ramSizes
         return maxThreads, maxRam
         
-    def create_container_external(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None,  exportGraphics=False, portMappings=None,testMode=False,logFile=None,scheduleSettings=None,iterateSettings=None):
+    def create_container_external(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None,scheduleSettings=None,iterateSettings=None,iterate=False):
         cmdsJson=[]
+        count=0
         for cmd in cmds:
-            cmdJson=CmdJson()
+            cmdJson=CmdJson(name)
             cmdJson.addBaseArgs(cmd)
             for env, var in environment.items():
                 cmdJson.addEnv(env,var)
@@ -183,17 +193,23 @@ class DockerClient:
                 cmdJson.addVolume('/tmp/.X11-unix','/tmp/.X11-unix','rw')
             maxThreads=1
             maxRam=0
-            if iterateSettings:
-                maxThreads,maxRam=findMaxIterateValues(iterateSettings)
+            if iterate and iterateSettings:
+                maxThreads,maxRam=self.findMaxIterateValues(iterateSettings)
             cmdJson.addThreadsRam(maxThreads,maxRam)
-        taskJson=TaskJson('testTask','test description',cmds)
-        sys.stderr.write('{}\n'.format(json.dumps(taskJson)))
+            cmdJson.addName('cmdName{}'.format(count))
+            cmdJson.addDescription('command{}'.format(count))
+            cmdsJson.append(cmdJson)
+            count+=1
+        taskJson=TaskJson(cmdsJson)
+        jsonFile='/tmp/docker.{}.json'.format(time.strftime("%Y%m%d-%H%M%S"))
+        with open(jsonFile, 'w') as outfile:
+            json.dump(taskJson.jsonObj, outfile)
+        consoleProc.process.start('runScheduler.sh',[jsonFile,'1','1024'])
 
     def create_container_iter(self, name, volumes=None, cmds=None, environment=None, hostVolumes=None, consoleProc=None, exportGraphics=False, portMappings=None,testMode=False,logFile=None,scheduleSettings=None,iterateSettings=None,iterate=False):
         #reset logFile when it is not None - can be "" though - this allows an active reset
         if logFile is not None:
             self.logFile = logFile
-         
         volumeMappings=''
         for container_dir, host_dir in hostVolumes.items():
             volumeMappings=volumeMappings+"-v {}:{} ".format(self.to_best_host_directory(host_dir),container_dir)
@@ -247,16 +263,17 @@ class DockerClient:
     def findVolumeMappings(self):
         for c in self.cli.containers():
             container_id = c['Id']
-            if len(container_id) < 12: 
-                continue
-            if container_id[:12] == self.bwb_instance_id:
+            if container_id == self.bwb_instance_id:
                 for m in c['Mounts']:
-                    if not ('/var/run' in m['Source']):
+                    sys.stderr.write('Container mount points include {}\n'.format(m))
+                    if not ('/var/run' in m['Source'] or '/tmp/.X11-unix' in m['Source']):
                         self.bwbMounts[m['Source']]=m['Destination']
 
     def to_best_host_directory(self, path, returnNone=False):
+        sys.stderr.write('bwbMounts are {}\n'.format(self.bwbMounts))
         if self.bwbMounts == {}:
-            return path
+            self.findVolumeMappings()
+            sys.stderr.write('bwbMounts after findVolume are {}\n'.format(self.bwbMounts))
         bestPath = None
         for source, dest in self.bwbMounts.items():
             absPath=self.to_host_directory(path, source, dest)

@@ -4,7 +4,6 @@ if [ $# -eq 0 ]; then
 else
     cmd="$*"
 fi
-
 while true
 do
 $cmd $workflow &

@@ -69,14 +69,14 @@ RUN apt-get update && apt-get install -y build-essential gcc python-dev python3-
 RUN apt-get update && apt-get install -y  \
     apt-transport-https ca-certificates curl software-properties-common gnupg2 \
     && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -\
-    && apt-get remove -y curl gnupg2 \
+    && apt-get remove -y gnupg2 \
     && apt-get autoclean -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN add-apt-repository -y \
    "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" \
-   && apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io\
+   && apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose\
    && apt-get remove -y apt-transport-https software-properties-common \
    && apt-get autoclean -y \
    && apt-get autoremove -y \
@@ -94,22 +94,16 @@ RUN pip3 install --user jsonpickle
 ADD biodepot biodepot
 RUN pip3 install -e biodepot 
 
-ADD startup.sh /
-EXPOSE 6080
-WORKDIR /data
 
-#install rsync
-RUN apt-get update && apt-get install -y rsync \
+
+#install dev files
+RUN apt-get update && apt-get install -y wget geany rsync openssh-client \
     && apt-get autoclean -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
 
 #Change app name to Bwb
 RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
-
-#devfiles
-
-RUN apt-get update && apt-get install -y wget geany firefox inkscape gimp openssh-client
 
 #set up some config files
 COPY fluxbox_config/ /root/.fluxbox/
@@ -129,6 +123,8 @@ COPY orangePatches/signals.py /orange3/Orange/widgets/utils/signals.py
 #add bwb start scripts
 COPY scripts/startBwb.sh /bin/startBwb.sh
 COPY scripts/runDockerJob.sh /bin/runDockerJob.sh
+COPY scripts/startScheduler.sh /bin/startScheduler.sh
+COPY scripts/runScheduler.sh /bin/runScheduler.sh
 
 #add widgets and workflows
 ADD widgets /widgets/
@@ -139,7 +135,11 @@ ADD coreutils /coreutils/
 ADD icons /icons/
 ADD tutorialFiles /tutorialFiles
 ADD serverSettings.json /biodepot
+ADD bwb-scheduling-service /bwb-scheduling-service
 
 #start it up
+ADD startup.sh /
+EXPOSE 6080
+WORKDIR /data
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
 
