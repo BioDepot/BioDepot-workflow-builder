@@ -597,7 +597,6 @@ class OWBwBWidget(widget.OWWidget):
             self.iterateSettingsBtn.setFixedSize(80,20)
             iterateCheckbox=gui.checkBox(None, self,'iterate',label='Iterate')
             self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked())
-            iterateCheckbox.stateChanged.connect(lambda : self.updateScheduleCheckBox(iterateCheckbox.isChecked()))
             iterateCheckbox.stateChanged.connect(lambda : self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked()))
             iterateCheckbox.stateChanged.connect(lambda: self.threadSpin.setEnabled(iterateCheckbox.isChecked()))
             
@@ -617,6 +616,7 @@ class OWBwBWidget(widget.OWWidget):
         self.scheduleCheckbox.stateChanged.connect(lambda : self.IPBtn.setEnabled(self.scheduleCheckbox.isChecked()))
         self.scheduleCheckbox.stateChanged.connect(lambda : self.schedulerLabel.setEnabled(self.scheduleCheckbox.isChecked()))
         self.scheduleCheckbox.stateChanged.connect(lambda : self.schedulerComboBox.setEnabled(self.scheduleCheckbox.isChecked()))
+     
         
         self.fileDirScheduleLayout.setAlignment(Qt.AlignTop)
         
@@ -640,12 +640,6 @@ class OWBwBWidget(widget.OWWidget):
     def updateThreadSpin(self):
         self.nWorkers=self.threadSpin.value()
 
-    def updateScheduleCheckBox(self,iterateState):
-        if not iterateState:
-            self.scheduleCheckbox.setChecked(False)
-            self.scheduleCheckbox.setEnabled(False)
-        else:
-            self.scheduleCheckbox.setEnabled(True)
             
     def drawCheckbox(self,pname,pvalue, box=None):
         #for booleans - their value is the same as the checkbox state
