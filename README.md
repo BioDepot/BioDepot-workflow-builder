@@ -5,6 +5,8 @@
 
 Bioinformatics Group
 University of Washington Tacoma
+# Table of Contents
+   * [FAQ](#faq) 
    * [MANUAL](#manual)
       * [GENERAL INFORMATION](#general-information)
          * [Overview: Running Bwb](#overview-running-bwb)
@@ -134,7 +136,19 @@ University of Washington Tacoma
             * [Handling input signals](#handling-input-signals)
             * [Drawing an managing the GUI form](#drawing-an-managing-the-gui-form)
             * [Launching the executable with Docker](#launching-the-executable-with-docker)
-	    
+
+# FAQ
+## General
+### Why should I use Bwb?
+## Usage
+### How do I use Bwb on my own data files?
+### How do I run Bwb on the cloud?
+### What browser should I use?
+### Where are the sample datasets?
+### Is it possible to use Bwb to run a batch of datasets?
+### Miscellaneous
+## How should I reference Bwb if I use it?
+
 # MANUAL
 ## GENERAL INFORMATION
 
