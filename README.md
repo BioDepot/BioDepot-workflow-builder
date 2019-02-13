@@ -5,149 +5,29 @@
 
 Bioinformatics Group
 University of Washington Tacoma
-# Table of Contents
-   * [FAQ](#faq) 
-   * [MANUAL](#manual)
-      * [GENERAL INFORMATION](#general-information)
-         * [Overview: Running Bwb](#overview-running-bwb)
-      * [Installing and starting Docker](#installing-and-starting-docker)
-         * [Linux](#linux)
-         * [macOS](#macos)
-         * [Windows](#windows)
-         * [On The Cloud](#on-the-cloud)
-            * [Amazon AWS](#amazon-aws)
-      * [Starting Bwb](#starting-bwb)
-      * [The Bwb/fluxbox work environment](#the-bwbfluxbox-work-environment)
-         * [Graphics support for containerized apps](#graphics-support-for-containerized-apps)
-         * [Basic window manipulations](#basic-window-manipulations)
-         * [Application menu](#application-menu)
-         * [Multiple Bwb instances and workspaces](#multiple-bwb-instances-and-workspaces)
-         * [Interaction with host windowing system](#interaction-with-host-windowing-system)
-      * [Bwb application](#bwb-application)
-         * [Bwb window with kallisto-sleuth-jupyter workflow showing main features](#bwb-window-with-kallisto-sleuth-jupyter-workflow-showing-main-features)
-         * [Bwb fluxbox desktop with Bwb minimized](#bwb-fluxbox-desktop-with-bwb-minimized)
-         * [Overview](#overview)
-         * [Tool Dock](#tool-dock)
-         * [Editing the Tool dock](#editing-the-tool-dock)
-         * [Interacting with widgets](#interacting-with-widgets)
-            * [Widget user interaction window](#widget-user-interaction-window)
-               * [Required parameters screen](#required-parameters-screen)
-               * [Optional parameters screen](#optional-parameters-screen)
-               * [Console screen](#console-screen)
-               * [Execution bar](#execution-bar)
-                  * [Start](#start)
-                  * [Stop](#stop)
-                  * [Export graphics](#export-graphics)
-                  * [Test mode](#test-mode)
-                  * [Run mode](#run-mode)
-                  * [Select triggers](#select-triggers)
-            * [Widget definition window](#widget-definition-window)
-               * [General tab](#general-tab)
-                  * [description](#description)
-                  * [docker_image_name](#docker_image_name)
-                  * [docker image tag](#docker-image-tag)
-                  * [priority](#priority)
-                  * [icon](#icon)
-               * [Inputs tab](#inputs-tab)
-               * [Outputs tab](#outputs-tab)
-               * [Volumes tab](#volumes-tab)
-               * [Ports tab](#ports-tab)
-               * [Parameters tab](#parameters-tab)
-               * [Command tab](#command-tab)
-               * [Docker tab](#docker-tab)
-               * [Widget definition save options and further customization by editing the .py file](#widget-definition-save-options-and-further-customization-by-editing-the-py-file)
-                  * [Save mode: Overwrite](#save-mode-overwrite)
-                  * [Save mode: Merge](#save-mode-merge)
-                  * [Save mode: Data](#save-mode-data)
-                  * [Load button](#load-button)
-         * [Building workflows from widgets](#building-workflows-from-widgets)
-            * [TLDR;](#tldr)
-            * [Workflow structure](#workflow-structure)
-            * [Connecting widgets](#connecting-widgets)
-               * [Input from connections override user input](#input-from-connections-override-user-input)
-               * [Connections to triggers are used to control the execution of widgets](#connections-to-triggers-are-used-to-control-the-execution-of-widgets)
-            * [Saving workflows](#saving-workflows)
-            * [Loading and executing a workflow](#loading-and-executing-a-workflow)
-            * [Testing and exporting workflows as a bash script](#testing-and-exporting-workflows-as-a-bash-script)
-      * [Demo workflows](#demo-workflows)
-         * [DToxS demo](#dtoxs-demo)
-         * [kallisto-sleuth demo](#kallisto-sleuth-demo)
-         * [kallisto-sleuth with Jupyter demo](#kallisto-sleuth-with-jupyter-demo)
-         * [STAR demo](#star-demo)
-      * [Tutorial - Adding a Python script to a Bwb workflow](#tutorial---adding-a-python-script-to-a-bwb-workflow)
-         * [Overview](#overview-1)
-         * [Add Python2 widget to the kallisto-sleuth-jupyter workflow](#add-python2-widget-to-the-kallisto-sleuth-jupyter-workflow)
-         * [Rename and customize the Python2 widget](#rename-and-customize-the-python2-widget)
-         * [Creating the Docker image](#creating-the-docker-image)
-         * [Save widget and load the workflow again](#save-widget-and-load-the-workflow-again)
-         * [Creating or copying the wrapper Python script](#creating-or-copying-the-wrapper-python-script)
-         * [Connecting the widget to the workflow](#connecting-the-widget-to-the-workflow)
-         * [Running and testing the workflow](#running-and-testing-the-workflow)
-      * [Appendices](#appendices)
-         * [1. Development environment](#1-development-environment)
-         * [How Bwb executes workflows](#how-bwb-executes-workflows)
-            * [TLDR;](#tldr-1)
-         * [Organization of code](#organization-of-code)
-            * [coreutils](#coreutils)
-               * [BwBase](#bwbase)
-               * [DockerClient](#dockerclient)
-               * [OWWidgetBuilder](#owwidgetbuilder)
-               * [createWidget](#createwidget)
-            * [OWBiocImageBuilder](#owbiocimagebuilder)
-            * [ToolDockEdit](#tooldockedit)
-            * [makeToolDockCategories](#maketooldockcategories)
-            * [workflowTools](#workflowtools)
-         * [Organization of widget definition directory](#organization-of-widget-definition-directory)
-         * [Organization of workflow directory](#organization-of-workflow-directory)
-         * [List and description of included widgets](#list-and-description-of-included-widgets)
-            * [Scripting widgets](#scripting-widgets)
-               * [bash_utils](#bash_utils)
-               * [bioc_R](#bioc_r)
-               * [Java8](#java8)
-               * [Perl](#perl)
-               * [Python2](#python2)
-               * [Python3](#python3)
-            * [Jupyter widgets:](#jupyter-widgets)
-               * [jupyter_base](#jupyter_base)
-               * [jupyter_bioc](#jupyter_bioc)
-               * [jupyter_sleuth](#jupyter_sleuth)
-            * [RNA_seq:](#rna_seq)
-               * [deseq2](#deseq2)
-               * [DtoxSAnalysis](#dtoxsanalysis)
-               * [DtoxSAlignment](#dtoxsalignment)
-               * [kallistoIndex](#kallistoindex)
-               * [kallistoQuant](#kallistoquant)
-               * [starIndex](#starindex)
-               * [starAlign](#staralign)
-               * [startodeseq2](#startodeseq2)
-               * [sleuth](#sleuth)
-            * [Miscellaneous:](#miscellaneous)
-               * [Directory](#directory)
-               * [File](#file)
-            * [User:](#user)
-            * [Utilities:](#utilities)
-               * [downloadURL](#downloadurl)
-               * [fastqc](#fastqc)
-               * [fastqDump](#fastqdump)
-               * [gnumeric](#gnumeric)
-         * [Description of json descriptors for widgets (Note that some of this may be outdated)](#description-of-json-descriptors-for-widgets-note-that-some-of-this-may-be-outdated)
-         * [BwBase class](#bwbase-class)
-            * [Keeping track of connections](#keeping-track-of-connections)
-            * [Handling input signals](#handling-input-signals)
-            * [Drawing an managing the GUI form](#drawing-an-managing-the-gui-form)
-            * [Launching the executable with Docker](#launching-the-executable-with-docker)
 
 # FAQ
 ## General
+
 ### Why should I use Bwb?
+
 ## Usage
+
 ### How do I use Bwb on my own data files?
 ### How do I run Bwb on the cloud?
-### What browser should I use?
+### What browser should I use with Bwb?
 ### Where are the sample datasets?
 ### Is it possible to use Bwb to run a batch of datasets?
-### Miscellaneous
-## How should I reference Bwb if I use it?
+### How do I add my own scripts to a Bwb pipeline?
+
+## Common problems
+
+### My window is too small
+### STAR and Kallisto won't run
+### The Bwb container won't build on Windows when using the git repository
+
+## Miscellaneous
+### How should I reference Bwb if I use it?
 
 # MANUAL
 ## GENERAL INFORMATION
