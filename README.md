@@ -1,4 +1,10 @@
-   * [BioDepot-Workflow-builder (Bwb)](#biodepot-workflow-builder-bwb)
+# BioDepot-Workflow-builder (Bwb)
+
+![](./docs/images/image19.png) ![](./docs/images/image23.png) 
+   
+
+Bioinformatics Group
+University of Washington Tacoma
    * [MANUAL](#manual)
       * [GENERAL INFORMATION](#general-information)
          * [Overview: Running Bwb](#overview-running-bwb)
@@ -128,15 +134,8 @@
             * [Handling input signals](#handling-input-signals)
             * [Drawing an managing the GUI form](#drawing-an-managing-the-gui-form)
             * [Launching the executable with Docker](#launching-the-executable-with-docker)
-# BioDepot-Workflow-builder (Bwb)
+	    
 # MANUAL
-
-![](./docs/images/image19.png) ![](./docs/images/image23.png) 
-   
-
-Bioinformatics Group
-University of Washington Tacoma
-
 ## GENERAL INFORMATION
 
 The BioDepot-workflow-builder (Bwb) can be used to build bioinformatics workflows by combining  interchangeable and encapsulated widgets, allowing researchers to easily implement and test new algorithms and observe how the outputs differ. Widgets call  Docker containers to execute software tools that could potentially be written in a different programming language, require different system configurations and/or developed by different research groups.
