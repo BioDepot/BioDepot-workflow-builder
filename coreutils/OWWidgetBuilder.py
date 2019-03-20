@@ -17,10 +17,14 @@ from functools import partial
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
-from PyQt5 import QtWidgets, QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import *
 from makeToolDockCategories import niceForm
 
+#TODO
+#fix the intialization step by checking what fields are necessary for each tab
+#and checking if those fields are defined in the pickle
+#if not then fill the empties with default values or None
 from AnyQt.QtWidgets import (
     QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
     QDoubleSpinBox, QComboBox, QSpinBox, QListView, QLabel,
@@ -379,6 +383,7 @@ class OWWidgetBuilder(widget.OWWidget):
             allStatesFile='/templates/Generic/Generic.states'
             self.allAttrs=self.unPickleData(allAttrsFile)
             self.allStates=self.unPickleData(allStatesFile)
+            self.addGroupToStates()
             self.makeDefaultFiles()
             self.startWidget()
             return
@@ -392,6 +397,7 @@ class OWWidgetBuilder(widget.OWWidget):
                 self.allAttrs=self.unPickleData(allAttrsFile)
             if os.path.exists(allStatesFile):
                 self.allStates=self.unPickleData(allStatesFile)
+                self.addGroupToStates()
             #we need to make default files in case the default files change from versions
             if loadNameCheck or not self.widgetName:
                 self.widgetName=self.getWidgetName()
@@ -531,6 +537,8 @@ class OWWidgetBuilder(widget.OWWidget):
                     newDict['type']=myDict['type']
                 if 'env' in myDict and myDict['env']:
                     newDict['env']=myDict['env']
+                if 'group' in myDict and myDict['group']:
+                    newDict['group']=myDict['group']
                 myData['parameters'][key]=newDict
         return myData
     def saveJson(self):
@@ -551,7 +559,6 @@ class OWWidgetBuilder(widget.OWWidget):
         self.pickleWidget()
         qm= QtGui.QMessageBox
         title='Save {}'.format(self.widgetName)
-        message='Saved widget to {}'.format(self.widgetDir)
         ret=qm.question(self,title, "Saved widget to {} - Reload?".format(self.widgetDir), qm.Yes | qm.No)
         if ret == qm.No:
             return
@@ -830,7 +837,16 @@ class OWWidgetBuilder(widget.OWWidget):
         else:
             self.allStates[pname]=None
             self.data[pname]=qWidgetItem.getStateValue(None)
-            
+    
+    def addGroupToStates(self):
+        #for older files
+        if 'parameters' in self.allStates:
+            for serialState in self.allStates['parameters']:
+                if len(serialState) < 9:
+                    serialState.append(serialState[7])
+                    serialState[7]=[[True,False],[True,'group'],[False,'']]
+                
+
     def qwInitAllStates(self,pname,qWidgetList,qWidgetItem):
         widgetList=[]
         if pname in self.allStates and self.allStates[pname]:
@@ -1231,7 +1247,7 @@ class OWWidgetBuilder(widget.OWWidget):
         return boxEdit
         
     #multiple widget elements
-    def makeListWidgetUnit (self, pname,layout=None, lineWidgets=None, otherWidgets=None, elementsPerLine=4):
+    def makeListWidgetUnit (self, pname,layout=None, lineWidgets=None, otherWidgets=None, elementsPerLine=5):
         #widgets is ordered dict of widgets managed by listWidget
         boxEdit=self.makeListWidget(pname,None)
         setattr(boxEdit,'states',[])
@@ -1246,11 +1262,19 @@ class OWWidgetBuilder(widget.OWWidget):
         boxEdit.itemSelectionChanged.connect(lambda: removeBtn.setEnabled(bool(boxEdit.selectedItems())))
         boxEdit.itemSelectionChanged.connect(lambda: self.onListWidgetSelect(boxEdit,addBtn,removeBtn,lineItem))
         boxEdit.itemMoved.connect(lambda oldRow,newRow : self.onItemMoved(oldRow,newRow,boxEdit))
+        
+        #make button box for buttons so that they don't expand in linelayout
+        #setmaximumwidth seems to be ignored
+        #need blank field and high columns to push the buttons to the right and keep their size
+        buttonBoxLabel=QtGui.QLabel("")
+        buttonBox=QtGui.QGridLayout()
+        buttonBox.addWidget(buttonBoxLabel,0,0,1,20)
+        buttonBox.addWidget(addBtn,0,25)
+        buttonBox.addWidget(removeBtn,0,26)
         addBtn.setIcon(self.addIcon)
         addBtn.setStyleSheet(self.addRemoveCSS)
         removeBtn.setIcon(self.removeIcon)
         removeBtn.setStyleSheet(self.addRemoveCSS)
-        
         #layout
         #basic layout is other widgets on top with filesBox below and the lineItem underneath
         
@@ -1284,8 +1308,9 @@ class OWWidgetBuilder(widget.OWWidget):
             else:
                 lineLayout.addLayout(layout,row,col)
             col+=1
-        lineLayout.addWidget(addBtn,row,col)
-        lineLayout.addWidget(removeBtn,row,col+1)
+        lineLayout.addLayout(buttonBox,row,col)
+        #lineLayout.addWidget(addBtn,row,col+1)
+        #lineLayout.addWidget(removeBtn,row,col+2)
         
         #now add the two layouts to the bigBox layout
         filesBoxLeditLayout.addWidget(boxEdit)
@@ -1324,6 +1349,7 @@ class OWWidgetBuilder(widget.OWWidget):
         labelBox=self.makeLedit(pname+'labelLedit','Enter label', 'label',addCheckBox=True)
         envBox=self.makeLedit(pname+'envLedit','Enter ENV variable', 'env',addCheckBox=True)
         defaultBox=self.makeLedit(pname+'defaultLedit','Enter default', 'default',addCheckBox=True)
+        groupBox=self.makeLedit(pname+'groupLedit','Enter group', 'group',addCheckBox=True)
         setattr(self,'optional',False)
         setattr(self,'argument',False)
         optionalCb=self.makeCheckBox ('optional','Optional')
@@ -1339,7 +1365,8 @@ class OWWidgetBuilder(widget.OWWidget):
                     ('env',envBox),
                     ('label',labelBox), 
                     ('default',defaultBox),
-                    ('optional',optionalCb)
+                    ('group',groupBox),
+                    ('optional',optionalCb),
                    ]
         self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
 

@@ -295,6 +295,9 @@ class OWBwBWidget(widget.OWWidget):
         self.inputConnections=ConnectionDict(self.inputConnectionsStore)
         self._dockerImageName = image_name
         self._dockerImageTag = image_tag
+        #setting the qbutton groups
+        
+        
         #drawing layouts for gui
         #file directory
         self.filesBoxLayout=QtGui.QVBoxLayout()
@@ -310,10 +313,30 @@ class OWBwBWidget(widget.OWWidget):
         
         #For compatibility if triggers are not being kept
         if not hasattr(self,'triggerReady'):
-            self.triggerReady={}        
-        
+            self.triggerReady={}
+                    
+    def getQBGroups(self):
+        QBList=[]
+        self.QButtonHash={}
+        if not hasattr(self,'QButtons'):
+            self.QButtons=[]
+        if not hasattr(self,'QBGroups'):
+            self.QBGroups={}
+        if not ('parameters' in self.data):
+             return
+        for pname in self.data['parameters']:
+            pvalue=self.data['parameters'][pname]
+            if 'group' in pvalue and pvalue['group']:
+                myGroup=pvalue['group']
+                if pvalue['group'] not in QBList:
+                    self.QBList.append(myGroup)
+                    self.QButtons.append(QButtonGroup())
+                self.QButtonHash[pname]=self.QButtons[self.QBList.index(myGroup)]
+            
     def initVolumes(self):
         #initializes container volumes
+        #also initializes button groups - to avoid changing old widgets we do that here
+        self.getQBGroups()
         if 'volumeMappings' in self.data and self.data['volumeMappings']:
             for mapping in self.data['volumeMappings']:
                 bwbVolAttr=mapping['attr']
@@ -532,16 +555,19 @@ class OWBwBWidget(widget.OWWidget):
                 setattr(self,pname,False)
         sys.stderr.write('draw CB pname {} value {}\n'.format(pname,getattr(self,pname)))
         cb=gui.checkBox(box, self, pname, pvalue['label'])
+        if pname in self.QButtonHash:
+            self.QButtonHash[pname].addButton(cb)
         checkAttr=pname+'Checked'
         setattr(self,checkAttr,getattr(self,pname))
         #check if inactive
         self.bgui.add(pname,cb)
-            
+
+        
     def drawSpin(self,pname,pvalue, box=None,addCheckbox=False):
         #for drawSpin - we use the origin version which already has a checkbox connected
         #TODO could change this to the same way we handle ledits with separate cbo
         #the gui spin box returns either (cb,sbox) or just sbox depending on whether there is a checkabox
-        checkBox=None
+        checkbox=None
         checkAttr=None
         if addCheckbox:
             if pname not in self.optionsChecked:
@@ -566,13 +592,15 @@ class OWBwBWidget(widget.OWWidget):
             else:
                 setattr(self,pname,float(default))
         if addCheckbox:
-            (checkBox,mySpin)=gui.spin(box, self, pname, minv=-2147483648, maxv=2147483647, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
+            (checkbox,mySpin)=gui.spin(box, self, pname, minv=-2147483648, maxv=2147483647, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
+            if pname in self.QButtonHash:
+                self.QButtonHash[pname].addButton(checkbox)
         else:
              mySpin=gui.spin(box, self, pname, minv=-2147483648, maxv=2147483647, label=pvalue['label'], checked=checkAttr, checkCallback=lambda : self.updateSpinCheckbox(pname))
            
         if getattr(self,pname) is None:
             mySpin.clear()
-        self.bgui.add(pname,mySpin,enableCallback=lambda value,clearLedit  : self.enableSpin(value,clearLedit,checkBox,mySpin))
+        self.bgui.add(pname,mySpin,enableCallback=lambda value,clearLedit  : self.enableSpin(value,clearLedit,checkbox,mySpin))
         
     def drawLedit(self,pname,pvalue,box=None,layout=None,addCheckbox=False):
         checkAttr=None
@@ -584,6 +612,8 @@ class OWBwBWidget(widget.OWWidget):
             checkAttr=pname+'Checked'
             setattr(self,checkAttr,self.optionsChecked[pname])
             checkbox=gui.checkBox(None, self,checkAttr,label=None)
+            if pname in self.QButtonHash:
+                self.QButtonHash[pname].addButton(checkbox)
             checkbox.stateChanged.connect(lambda : ledit.setEnabled(checkbox.isChecked()))
             checkbox.stateChanged.connect(lambda : self.updateCheckbox(pname,checkbox.isChecked(),ledit.text()))
             self.bgui.add(pname,checkbox)
@@ -622,6 +652,8 @@ class OWBwBWidget(widget.OWWidget):
                 self.optionsChecked[pname]=False
             setattr(self,checkAttr,self.optionsChecked[pname])
             checkbox=gui.checkBox(None, self,checkAttr,label=None)
+            if pname in self.QButtonHash:
+                self.QButtonHash[pname].addButton(checkbox)
             sys.stderr.write('updating filedir {}\n'.format(pname))
             checkbox.stateChanged.connect(lambda : self.updateCheckbox(pname,checkbox.isChecked(),getattr(self,pname)))
             self.bgui.add(pname,checkbox)
@@ -712,6 +744,8 @@ class OWBwBWidget(widget.OWWidget):
             checkAttr=pname+'Checked' #this is not actually used but needed for orange gui checkbox element
             setattr(self,checkAttr,self.optionsChecked[pname])
             checkbox=gui.checkBox(None, self,checkAttr,label=None)
+            if pname in self.QButtonHash:
+                self.QButtonHash[pname].addButton(checkbox)
             checkbox.stateChanged.connect(lambda : self.updateCheckbox(pname,checkbox.isChecked(),value=value))
             elements.append(checkbox)
             
@@ -1451,7 +1485,6 @@ class OWBwBWidget(widget.OWWidget):
             else:
                 cmdStr+=" && "
         return cmdStr
-
     def getEnvironmentVariables(self):
         #dynamic environment variables
         if 'parameters' in self.data and self.data['parameters'] is not None:
