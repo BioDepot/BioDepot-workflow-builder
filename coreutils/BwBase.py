@@ -1267,6 +1267,8 @@ class OWBwBWidget(widget.OWWidget):
         if missingVols:
             self.console.append("missing or incorrect volume mappings to: {}".format(missingVols))
             return
+            
+        
         #get ready to start
         attrList=self.__dict__.keys()
         self.bgui.disableAll()
@@ -1439,9 +1441,11 @@ class OWBwBWidget(widget.OWWidget):
             #do not add to arguments if it is an environment variable and there is no flag
             #if you really want it added put a space in the flag field 
             if pvalue['flag'] is None or pvalue['flag'] == "" and 'env' in pvalue:
+                sys.stderr.write('Found env: pname {} pvalue{}\n'.format(pname,pvalue))
                 continue
             #if required or checked then it is added to the flags
             addParms=False
+            
             #checkattr is needed for the orange gui checkboxes but is not otherwise updated 
             if pname in self.optionsChecked and self.optionsChecked[pname]:
                 addParms=True
@@ -1449,8 +1453,12 @@ class OWBwBWidget(widget.OWWidget):
             #also need to check for booleans which are not tracked by optionsChecked
             if pvalue['type'] == 'bool'and hasattr(self,pname) and getattr(self,pname):
                 addParms=True
-                
-            if self.iterate and hasattr(self,'iterateSettings') and 'iteratedAttrs' in self.iterateSettings and pname in self.data['requiredParameters'] and hasattr(self,pname):
+
+            if self.iterate:
+                if hasattr(self,'iterateSettings') and 'iteratedAttrs' in self.iterateSettings and pname in self.data['requiredParameters'] and hasattr(self,pname):
+                    addParms=True
+
+            elif pname in self.data['requiredParameters'] and hasattr(self,pname):
                 addParms=True
 
             if addParms:
