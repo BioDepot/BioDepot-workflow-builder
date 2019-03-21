@@ -158,6 +158,18 @@ University of Washington Tacoma
 
 ### Why should I use Bwb?
 
+#### Biomedical scientists 
+
+The Bwb GUI is designed for non-programmers who want to use a workflow on their own data without worrying about installation and reproducibility. Bwb auto-installs the components and provides a very simple and intuitive forms interface for modifying key parameters and accepting custom files and executing all or part of a workflow. We realise that for many users, interactive visualization is a large part of their analyses and Bwb supports Jupyter notebooks, Cytoscape and other software that have their own graphics and GUIs. The casual user can use familiar tools to customize the final stages of the analyses while maintaining a complete record and provenance of the entire pipeline which is essential for publication, sharing and reproducibility. Advanced users can swap in different parameter sets or even different modules just by dragging and dropping into an existing tested pipeline.
+
+#### Bioinformaticists
+
+Bwb is also designed for bioinformaticists who support a group of users by installing and customizing workflows by writing scripts. By distributing Bwb pipelines to their users, the workload for bioinformaticists is reduced as users are able to more easily adapt workflows by tweaking parameters on their own. The widget building utilities allow the bioinformaticists to quickly customize the parameters and components that are exposed to the user. Bwb also comes with widgets that support the major scripting languages used in Bioinformatics: Python, R, Perl, Bash and Java to allow for customization and implementation and testing of new workflows. We provide a [tutorial] (#tutorial---adding-a-python-script-to-a-bwb-workflow) and video showing how to add a custom script to an Bwb pipeline. 
+
+#### Software tool developers
+
+A major motivation for our development of Bwb was that our software tools were not being adopted or even tested by user. The barrier of installing and integrating new software into existing workflows are very high. By providing a GUI and an auto-installation method across different platforms, the adoption cost is greatly reduce. Bwb is designed to allow the developer an mechanism to provide a GUI for their software largely consists of filling out a set of forms. In some cases, an additional wrapper script will be needed. This is far less work than writing a custom GUI or providing a web-based API. 
+
 ## Usage
 
 ### How do I use Bwb on my own data files?
