@@ -98,8 +98,10 @@ ADD startup.sh /
 EXPOSE 6080
 WORKDIR /data
 
-#install rsync
-RUN apt-get update && apt-get install -y rsync \
+#install rsync curl and docker-compose
+RUN apt-get update && apt-get install -y rsync curl \
+    && curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
+    && chmod +x /usr/local/bin/docker-compose\
     && apt-get autoclean -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
@@ -109,7 +111,7 @@ RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
 
 #devfiles
 
-RUN apt-get update && apt-get install -y wget geany firefox inkscape gimp openssh-client
+RUN apt-get update && apt-get install -y wget geany firefox openssh-client
 
 #set up some config files
 COPY fluxbox_config/ /root/.fluxbox/
@@ -129,6 +131,7 @@ COPY orangePatches/signals.py /orange3/Orange/widgets/utils/signals.py
 #add bwb start scripts
 COPY scripts/startBwb.sh /bin/startBwb.sh
 COPY scripts/runDockerJob.sh /bin/runDockerJob.sh
+COPY scripts/startScheduler.sh /bin/startScheduler.sh
 
 #add widgets and workflows
 ADD widgets /widgets/
@@ -139,6 +142,7 @@ ADD coreutils /coreutils/
 ADD icons /icons/
 ADD tutorialFiles /tutorialFiles
 ADD serverSettings.json /biodepot
+ADD bwb-scheduling-service /bwb-scheduling-service/
 
 #start it up
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
