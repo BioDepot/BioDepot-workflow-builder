@@ -158,23 +158,84 @@ University of Washington Tacoma
 
 ### Why should I use Bwb?
 
+#### Biomedical scientists 
+
+The Bwb GUI is designed for non-programmers who want to use a workflow on their own data without worrying about installation and reproducibility. Bwb auto-installs the components and provides a very simple and intuitive forms interface for modifying key parameters and accepting custom files and executing all or part of a workflow. We realise that for many users, interactive visualization is a large part of their analyses and Bwb supports Jupyter notebooks, Cytoscape and other software that have their own graphics and GUIs. The casual user can use familiar tools to customize the final stages of the analyses while maintaining a complete record and provenance of the entire pipeline which is essential for publication, sharing and reproducibility. Advanced users can swap in different parameter sets or even different modules just by dragging and dropping into an existing tested pipeline. A bash script can be created for the purpose of publication or to use in one of the many schedulers that support bash scripts such as SLURM/SGE/Torque-Maui.
+
+#### Bioinformaticists
+
+Bwb is also designed for bioinformaticists who support a group of users by installing and customizing workflows by writing scripts. By distributing Bwb pipelines to their users, the workload for bioinformaticists is reduced as users are able to more easily adapt workflows by tweaking parameters on their own when using a familiar interface. The widget building utilities allow the bioinformaticists to quickly customize the parameters and components that are exposed to the user. Bwb also comes with widgets that support the major scripting languages used in Bioinformatics: Python, R, Perl, Bash and Java to allow for rapid customization, implementation and testing of new workflows. We provide a [tutorial](#tutorial---adding-a-python-script-to-a-bwb-workflow) and [video](https://www.youtube.com/watch?v=jtu-jCU2DU0) showing how to add a custom script to a Bwb pipeline. The export of Docker bash scripts allows for portable documentation of the workflows and execution on job schedulers, or for inclusion in custom scripts. 
+
+#### Software tool developers
+
+A major motivation for our development of Bwb was that our own software tools were not being adopted or even tested by may users. The barriers of installing and integrating new software into existing workflows are very high. By providing a GUI and an auto-installation method across different platforms, the adoption costs are greatly reduced. **Bwb is NOT meant to be a visual programming language** as this is a cumbersome method for writing software. Bwb is designed to allow the developer an mechanism to provide a GUI for their software that largely consists of filling out a set of forms. In some cases, an additional wrapper script will be needed. Filling out the Bwb forms to skin an application is usually less work than the alternatives of writing a custom GUI, providing a web-based API, writing, or dragging-and-dropping together a script in one or more workflow descriptors. Our test cases are examples of ready-to-run modifiable workflows that self-install executables, dependencies and data. These can be added to a GitHub to encourage users to try out new software.
+
 ## Usage
 
 ### How do I use Bwb on my own data files?
+This happens in the command line.
+
+The -v option allows you to map one or more personal (local) directory to an internal directory that the Bwb container can see them. Usually we map them to /data internally. The following flag for example maps the current directory to the /data directory inside the container. 
+```
+-v $PWD:/data
+
+```
+This maps your home directory to /data:
+```
+-v /home/<username>:/data
+```
+In other words, the Bwb container can read and write files to your local directory by reading and writing to the /data directory (or whatever directory you choose). You will be able to interact with files through the /data directory on Bwb. Bwb knows about these mappings or mountpoints and automatically handles all the filename mapping to any containers that it launches in the workflows by using these mountpoints. 
+
 ### How do I run Bwb on the cloud?
+Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws)
+
 ### What browser should I use with Bwb?
+We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine. In the past we have had some problems with Edge but the latest versions of Firefox and Safari work well. 
+
 ### Where are the sample datasets?
+Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we recommend the use of the provided Download widget to download files from an external source (eg. Google drive) for use with the containers. This is the mechanism that we use in all our examples.
+
 ### Is it possible to use Bwb to run a batch of datasets?
+Currently, this is possible in a couple of ways:
+
+1) A wrapper script can be used inside the widget to distribute the computing to multiple threads. An example is [here} (https://github.com/BioDepot/LINCS_RNAseq_cpp/blob/master/scripts/multibwa.sh)
+
+2) Export the pipeline as a [bash script](#testing-and-exporting-workflows-as-a-bash-script) and then using a batch scheduler such as SLURM, SGE or Torque-Maui to run the jobs. One could also use the script as the basis for a CWL or WDL descriptor for the workflow.
+
+We do have a built-in job scheduler that is under development for Bwb. You can take a look at the latest upstream build with this at the iterate2 branch of the GitHub.
+
 ### How do I add my own scripts to a Bwb pipeline?
+We have provided basic widgets for Python, R, Perl, Bash, and Java. There is a [tutorial](#tutorial---adding-a-python-script-to-a-bwb-workflow) and a [video](https://www.youtube.com/watch?v=jtu-jCU2DU0)  showing how to add a script to a Bwb pipeline.
 
 ## Common problems
 
 ### My window is too small
+Try the following:
+1. Open a new browser window
+2. Maximize the window
+3. Type in the url to connect to Bwb but do not let it auto-complete e.g. localhost:6080 **NOT** localhost:6080/auto_html
+
+The technical explanation is that Bwb resizes to the window size that it detects it is first connected to a browser by cycling through a series of different endpoints. However, the last url may get cached and may skip the resizing steps.
+
 ### STAR and Kallisto won't run
+There are two common reasons:
+1. These applications have RAM requirements. For the datasets in question, Kallisto requires about 7 GB of RAM and STAR requires about 30 GB of RAM. This amount of memory must be available on your host or the application will crash or run very slowly.
+
+2. For systems running Docker using a Virtual Machine (VM) the VM is set to use a maximum amount of RAM. For Windows machines, this can be as low as 1 GB. The amount of RAM available to the VM must be adjusted. Instructions to adjust the VM size for the latest Docker versions are [here](https://docs.docker.com/docker-for-windows/#advanced) For earlier VirtualBox based installations (i.e. Windows 10 Home, older Macs), a video how to do this is [here](https://www.youtube.com/watch?v=lLuIVGNfM4w).
+
 ### The Bwb container won't build on Windows when using the git repository
+The two most common causes for this are the length of the internal filenames used by git and the difference between linefeeds used by Windows/DOS and Unix.
+
+```
+git config --global core.autocrlf input
+git config --system core.longpaths true
+git clone https://github.com/BioDepot/BioDepot-workflow-builder
+```
+The container should build correctly now.
 
 ## Miscellaneous
 ### How should I reference Bwb if I use it?
+Please reference our biorXiv preprint https://www.biorxiv.org/content/10.1101/099010v2
 
 # MANUAL
 ## GENERAL INFORMATION
