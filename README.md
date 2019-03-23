@@ -164,7 +164,7 @@ The Bwb GUI is designed for non-programmers who want to use a workflow on their 
 
 #### Bioinformaticists
 
-Bwb is also designed for bioinformaticists who support a group of users by installing and customizing workflows by writing scripts. By distributing Bwb pipelines to their users, the workload for bioinformaticists is reduced as users are able to more easily adapt workflows by tweaking parameters on their own when using a familiar interface. The widget building utilities allow the bioinformaticists to quickly customize the parameters and components that are exposed to the user. Bwb also comes with widgets that support the major scripting languages used in Bioinformatics: Python, R, Perl, Bash and Java to allow for rapid customization, implementation and testing of new workflows. We provide a [tutorial](#tutorial---adding-a-python-script-to-a-bwb-workflow) and [video](https://www.youtube.com/watch?v=jtu-jCU2DU0) showing how to add a custom script to a Bwb pipeline. The export of Docker bash scripts allows for portable documentation of the workflows and execution on job schedulers, or for inclusion in custom scripts. 
+Bwb is also designed for bioinformaticists who support a group of users through installing and customizing workflows. By distributing Bwb pipelines to their users, the workload for bioinformaticists is reduced as users can auto-install workflows regardless of the underlying hardware, and adapt workflows by tweaking parameters on their own through a familiar interface. The widget building utilities allow the bioinformaticists to quickly customize the parameters and components that are exposed to the user. Bwb also comes with widgets that support the major scripting languages used in Bioinformatics: Python, R, Perl, Bash and Java to allow for rapid customization, implementation and testing of new workflows. We provide a [tutorial](#tutorial---adding-a-python-script-to-a-bwb-workflow) and [video](https://www.youtube.com/watch?v=jtu-jCU2DU0) showing how to add a custom script to a Bwb pipeline. The export of Docker bash scripts allows for portable documentation of the workflows and execution on job schedulers, or for inclusion in custom scripts. 
 
 #### Software tool developers
 
@@ -175,16 +175,39 @@ A major motivation for our development of Bwb was that our own software tools we
 ### How do I use Bwb on my own data files?
 This happens in the command line.
 
-The -v option allows you to map one or more personal (local) directory to an internal directory that the Bwb container can see them. Usually we map them to /data internally. The following flag for example maps the current directory to the /data directory inside the container. 
+The -v option allows you to map one or more personal (local) directory to an internal directory that the Bwb container can see them. Usually we map them to /data internally. The following start command for example maps the current directory to the /data directory inside the container. 
 ```
--v $PWD:/data
+docker run --rm   -p 6080:6080 \
+    -v  ${PWD}/:/data  \
+    -v  /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    --privileged --group-add root \
+    biodepot/bwb
+ ```
+ whereas the following maps the home directory of myUser to /data
+ ```
+docker run --rm   -p 6080:6080 \
+    -v  /home/myUser/:/data  \
+    -v  /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    --privileged --group-add root \
+    biodepot/bwb
+ ```
+In other words, the Bwb container can read and write files to your local directory by reading and writing to the /data directory (or whatever directory you choose). This directory (/data) will be created automatically by Bwb. You will then be able to interact with files through the /data directory on Bwb. Bwb knows about these mappings or mountpoints and automatically handles all the filename mapping to any containers that it launches in the workflows by using these mountpoints.
+
+More than one mapping is possible. The following maps the home directory of myUser to /data and the /opt/sequenceData directory on the host to /sequenceData in Bwb. Just make sure that the mappings are not contradictory or unexpected things will happen.
 
 ```
-This maps your home directory to /data:
-```
--v /home/<username>:/data
-```
-In other words, the Bwb container can read and write files to your local directory by reading and writing to the /data directory (or whatever directory you choose). You will be able to interact with files through the /data directory on Bwb. Bwb knows about these mappings or mountpoints and automatically handles all the filename mapping to any containers that it launches in the workflows by using these mountpoints. 
+docker run --rm   -p 6080:6080 \
+    -v  /home/myUser/:/data  \
+    -v  /opt/sequenceData:/sequenceData \
+    -v  /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    --privileged --group-add root \
+    biodepot/bwb
+ ```
+
+ 
 
 ### How do I run Bwb on the cloud?
 Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws)
@@ -213,9 +236,9 @@ We have provided basic widgets for Python, R, Perl, Bash, and Java. There is a [
 Try the following:
 1. Open a new browser window
 2. Maximize the window
-3. Type in the url to connect to Bwb but do not let it auto-complete e.g. localhost:6080 **NOT** localhost:6080/auto_html
+3. Type in the url to connect to Bwb but do not let it auto-complete e.g. localhost:6080 **NOT** localhost:6080/vnc_auto.html
 
-The technical explanation is that Bwb resizes to the window size that it detects it is first connected to a browser by cycling through a series of different endpoints. However, the last url may get cached and may skip the resizing steps.
+The technical explanation is that Bwb resizes to the window size that it detects when it is first connected to a browser by cycling through a series of different endpoints. However, the last url may get cached and may skip the resizing steps.
 
 ### STAR and Kallisto won't run
 There are two common reasons:
@@ -254,7 +277,7 @@ Source code	: [https://github.com/BioDepot/BioDepot-workflow-builder](https://gi
 
 ```bash 
     docker run --rm   -p 6080:6080 \
-    -v  ~/Desktop/:/data  \
+    -v  ${PWD}/:/data  \
     -v  /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     --privileged --group-add root \
