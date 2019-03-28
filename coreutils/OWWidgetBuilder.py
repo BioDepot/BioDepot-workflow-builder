@@ -1179,15 +1179,29 @@ class OWWidgetBuilder(widget.OWWidget):
         if state[0] is None:
             comboBox=None
         else:
-           comboBox.setEnabled(state[0][0])
-           comboBox.clear()
-           comboBox.addItems(state[0][2])
-           comboBox.setCurrentIndex(state[0][1])
+            comboBox.setEnabled(state[0][0])
+            #can have different states stored if the comboBox values are changed
+            self.adjustComboBoxState(state,comboBox)
+            comboBox.setCurrentIndex(state[0][1])
         if state[1] is None:
             label=None
         else:
             label.setEnabled(state[1][0])
             label.setText(state[1][1])
+    def adjustComboBoxState(self,state,comboBox):
+        allItems = [comboBox.itemText(i) for i in range(comboBox.count())]
+        if allItems == state[0][2]:
+            return
+        #find the value of the current element
+        currentStateElement=state[0][2][state[0][1]]
+        for i in range(len(allItems)):
+            if allItems[i] == currentStateElement:
+                state[0][2]=allItems
+                state[0][1]=i
+                return
+        #no match then set current element to 0
+        state[0][2]=allItems
+        state[0][1]=0
         
     def makeCheckBox (self, attr,label,default=False,persist=False,track=False):
         #checkbox for binary options
@@ -1357,7 +1371,7 @@ class OWWidgetBuilder(widget.OWWidget):
         #connect argument checkbox to disabling the flag checkbox
         flagBox.checkBox.stateChanged.connect(lambda : (not flagBox.checkBox.isChecked()) or (argumentCb.setChecked(False)))
         argumentCb.stateChanged.connect(lambda : (not argumentCb.isChecked()) or (flagBox.checkBox.setChecked(False) or flagBox.ledit.clear()))       
-        comboBox=self.makeComboBox(pname,'Type:',['str','file','file list','directory','directory list','bool','bool list','text','text list','int','int list','double','double list'])
+        comboBox=self.makeComboBox(pname,'Type:',['str','file','file list','directory','directory list','bool','bool list','text','text list','int','int list','double','double list','patternQuery'])
         widgetList=[('name',nameBox),
                     ('type',comboBox),
                     ('flag',flagBox), 

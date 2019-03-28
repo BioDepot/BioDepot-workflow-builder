@@ -520,7 +520,18 @@ class OWBwBWidget(widget.OWWidget):
                 self.drawCheckbox(pname,pvalue,self.optionalBox)
             else:
                 self.drawCheckbox(pname,pvalue,self.requiredBox)
-        
+                
+        for pname in elementList:
+            if not ('parameters' in self.data) or not ( pname in self.data['parameters']):
+                continue
+            pvalue=self.data['parameters'][pname]
+            if ('gui' in pvalue and pvalue['gui'] != 'patternQuery') or (pvalue['type'] != 'patternQuery'):
+                continue
+            if isOptional:
+                self.drawPatternQuery(pname,pvalue,self.optionalBox)
+            else:
+                self.drawPatternQuery(pname,pvalue,self.requiredBox)
+                        
     def drawRequiredElements(self):
         for pname in self.data['requiredParameters']:
             if not ('parameters' in self.data) or not (pname in self.data['parameters']):
@@ -728,7 +739,95 @@ class OWBwBWidget(widget.OWWidget):
         if getattr(self,pname) is None:
             mySpin.clear()
         self.bgui.add(pname,mySpin,enableCallback=lambda value,clearLedit  : self.enableSpin(value,clearLedit,checkbox,mySpin))
+
+    def drawPatternQuery(self,pname,pvalue,box=None,layout=None,addCheckbox=False):
+        #stores a vector consisting of root directory, pattern, search for file, search for directory, search for both
+        #add mindepth maxdepth later as options...
         
+        #At *runtime* it will use the vector to generate a set of files
+        #This type of input is needed so that Bwb's iterator can be used
+        
+        #This checkbox is here when the input is optional
+        #Should disable everything but itself when checked
+        
+        queryElements=[]
+        if not hasattr(self,pname):
+            setattr(self,pname,{})
+        checkbox=None
+        
+        #ask for root directory
+        rootAttr=pname+'Root'
+        setattr(self,rootAttr,"")
+        rootLedit=gui.lineEdit(None, self, rootAttr,disabled=addCheckbox)
+        
+        #note that using lambda does not work in this function - truncates string variable so partial used instead
+        browseBtn=gui.button(None, self, "", callback= partial(self.browseFileDir, attr= pname ,filetype='directory'),
+                          autoDefault=True, width=19, height=19,disabled=addCheckbox)
+        if getattr(self,rootAttr) is None:
+            rootLedit.clear()
+        if addCheckbox:
+            checkAttr=pname+'Checked'
+            if pname not in self.optionsChecked:
+                self.optionsChecked[pname]=False
+            setattr(self,checkAttr,self.optionsChecked[pname])
+            checkbox=gui.checkBox(None, self,checkAttr,label=None)
+            if pname in self.QButtonHash:
+                self.QButtonHash[pname].addButton(checkbox)
+            checkbox.stateChanged.connect(lambda : self.updateCheckbox(pname,checkbox.isChecked(),getattr(self,pname)))
+            queryElements.append(checkbox)
+        labelValue=pvalue['label']
+        if labelValue is None:
+            labelValue=""
+        sys.stderr.write('adding filedir for pname {} using layout {}\n'.format(pname,layout))    
+        self.bwbFileEntry(box,browseBtn,rootLedit,layout=layout,label=labelValue+':', entryType=pvalue['type'], checkbox=checkbox, placeHolderText='Enter root directory')
+        
+        #query layout section
+        #box for query layout
+        layout.addLinefeed(startCol=2)
+        patternAttr=pname+'Pattern'
+        setattr(self,patternAttr,'')
+        patternLedit=gui.lineEdit(None, self, patternAttr,disabled=addCheckbox)        
+        patternLedit.setClearButtonEnabled(True)
+        patternLedit.setPlaceholderText("Enter search pattern eg. *.fq")
+        layout.addWidget(patternLedit,width=1)
+        findFileAttr=pname+'findFile'
+        setattr(self,findFileAttr,True)
+        findDirectoryAttr=pname+'findDirectory'
+        setattr(self,findDirectoryAttr,False)
+        findFileCB=gui.checkBox(None, self,findFileAttr,label='Find files')
+        findDirectoryCB=gui.checkBox(None, self,findDirectoryAttr,label='Find directories')
+        findFileCB.setDisabled(addCheckbox)
+        findDirectoryCB.setDisabled(addCheckbox)
+        if addCheckbox:
+            checkbox.stateChanged.connect(lambda: findDirectoryCB.setEnabled(checkbox.isChecked()))
+            checkbox.stateChanged.connect(lambda: findFileCB.setEnabled(checkbox.isChecked()))
+        layout.addLinefeed(startCol=2)
+        layout.addWidget(findFileCB,width=1)
+        layout.addLinefeed(startCol=2)
+        layout.addWidget(findDirectoryCB,width=1)
+        queryElements.extend([browseBtn,rootLedit,patternLedit,findFileCB,findDirectoryCB])
+        
+        self.bgui.addList(pname,queryElements,enableCallback=lambda value, clearLedit: self.enablePatternQuery(value,clearLedit,checkbox,browseBtn,rootLedit,patternLedit, findFileCB, findDirectoryCB),updateCallback=lambda: self.updatePatternQuery(pname,rootAttr,patternAttr,findFileAttr,findDirectoryAttr))
+    
+    def updatePatternQuery(self,attr,root,pattern,findFile,findDir): #updates for input - called before and after addition and deletion of input
+        if not hasattr(self,attr):
+            setattr(self,attr,{})
+        patternQuery=getAttr(self,attr)
+        patternQuery['root']=root
+        patternQuery['pattern']=pattern
+        patternQuery['findFile']=findFile
+        patternQuery['findDir']=findDir
+
+    def enablePatternQuery(self, value,clearLedit,checkbox,browseBtn,rootLedit,patternLedit, findFileCB, findDirectoryCB):
+        #first element is checkbox
+        #last element is browseBtn if it exists
+        if checkbox:
+            checkbox.setEnabled(True)
+        if not checkbox or checkbox.isChecked():
+            for g in  [browseBtn,rootLedit,patternLedit,findFileCB,findDirectoryCB]:
+                if g:
+                    g.setEnabled(True)          
+                    
     def drawLedit(self,pname,pvalue,box=None,layout=None,addCheckbox=False):
         checkAttr=None
         checkbox=None
@@ -744,7 +843,8 @@ class OWBwBWidget(widget.OWWidget):
             checkbox.stateChanged.connect(lambda : ledit.setEnabled(checkbox.isChecked()))
             checkbox.stateChanged.connect(lambda : self.updateCheckbox(pname,checkbox.isChecked(),ledit.text()))
             self.bgui.add(pname,checkbox)
-        self.bwbLedit(box,checkbox,ledit,layout=layout, label=pvalue['label'])
+            
+        self.bwbLedit(box,None,ledit,layout=layout, label=pvalue['label'])
         #check if the value is none - then we clear it
         if getattr(self,pname) is None or getattr(self,pname) is "":
             ledit.clear()
@@ -752,6 +852,7 @@ class OWBwBWidget(widget.OWWidget):
         if addCheckbox:
             self.updateCheckbox(pname,checkbox.isChecked(),ledit.text())
         return {'ledit' : ledit, 'checkbox' : checkbox}
+
     
     def enableLedit(self,value,clearLedit,cb,ledit):
         if cb:
@@ -1152,11 +1253,14 @@ class OWBwBWidget(widget.OWWidget):
                     return
             self.onRunClicked()
 
-    def bwbFileEntry(self, widget, button, ledit, icon=browseIcon,layout=None, label=None,entryType='file', checkbox=None):
+    def bwbFileEntry(self, widget, button, ledit, icon=browseIcon,layout=None, label=None,entryType='file', checkbox=None,placeHolderText=None):
         button.setIcon(icon)
         button.setStyleSheet(self.browseCSS)
         ledit.setClearButtonEnabled(True)
-        ledit.setPlaceholderText("Enter {}".format(entryType))
+        if placeHolderText is None:
+            ledit.setPlaceholderText("Enter {}".format(entryType))
+        else:
+            ledit.setPlaceholderText(placeHolderText)
         if checkbox:
             layout.addWidget(checkbox)
         if label:
