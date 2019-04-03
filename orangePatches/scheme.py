@@ -551,7 +551,7 @@ class Scheme(QObject):
                 #type_checks = issubclass(name_lookup(out_c.type),
                 #                         name_lookup(in_c.type))
                 type_checks=True
-                assert type_checks or out_c.dynamic
+                #assert type_checks or out_c.dynamic
                 # Dynamic signals that require runtime instance type check
                 # are considered last.
                 check = [type_checks,

@@ -20,7 +20,7 @@ class OWDirectory(OWBwBWidget):
     docker_image_name = "biodepot/alpine-bash"
     docker_image_tag = "3.7"
     inputs = [("Directory",str,"handleInputsDirectory")]
-    outputs = [("Directory",str)]
+    outputs = [("directory",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
     exportGraphics=pset(False)
@@ -41,9 +41,9 @@ class OWDirectory(OWBwBWidget):
         if args and len(args) > 0: 
             self.handleInputs("Directory", value, args[0][0], test=args[0][3])
         else:
-            self.handleInputs("inputFile", value, None)
+            self.handleInputs("inputFile", value, None, False)
     def handleOutputs(self):
         outputValue=None
-        if hasattr(self,"Directory"):
-            outputValue=getattr(self,"Directory")
-        self.send("Directory", outputValue)
+        if hasattr(self,"directory"):
+            outputValue=getattr(self,"directory")
+        self.send("directory", outputValue)

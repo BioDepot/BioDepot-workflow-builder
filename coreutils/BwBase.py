@@ -1480,20 +1480,16 @@ class OWBwBWidget(widget.OWWidget):
         #check for test mode pre-signal
         if  type(value) is str and value[0:8]  == '__purge ':
             #remove signal - this used to be None which was also passed when the value actually was None
-            #value is __purge <type>
             self.inputConnections.remove(attr,sourceId)
             sys.stderr.write('sig handler removing {} disabled {}\n'.format(attr,self.inputConnections.isConnected(attr)))
-            if len(self.convertOrangeTypes(value.split())) > 1:
-                inputType=self.convertOrangeTypes(value.split()[1])
+            inputType=self.convertOrangeTypes(value.split()[-1])
             self.initializeAttr(attr,inputType=inputType)
             if attr in self.runTriggers:
                 self.triggerReady[attr]=False
             value=None
         elif type(value) is str and value[0:6]  == '__add ':
             #this is a new connection - and not just a signal - does not activate
-            #value is __add <type>
-            if len(self.convertOrangeTypes(value.split())) > 1:
-                inputType=self.convertOrangeTypes(value.split()[1])
+            inputType=self.convertOrangeTypes(value.split()[1])
             self.initializeAttr(attr,inputType=inputType)
             disableFtn=self.helpers.function(attr,'disableGUI')
             sys.stderr.write('attr is {} disableFtn is {} inputType is {}\n'.format(attr,disableFtn,inputType))
