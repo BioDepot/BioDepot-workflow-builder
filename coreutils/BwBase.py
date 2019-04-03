@@ -67,6 +67,29 @@ class getExistingDirectories(QtWidgets.QFileDialog):
         self.findChildren(QtWidgets.QListView)[0].setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.findChildren(QtWidgets.QTreeView)[0].setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.findChildren(QtWidgets.QTreeView)[0].setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+
+class BwbHelperFunctions():
+    def __init__(self):
+        self.initialize={}
+        self.disableGUI={}
+        self.generate={}
+        self.receive={}
+    def add(self,attr,functionType,function):
+        try:
+            myDict=getattr(self,functionType)
+            myDict[attr]=function
+        except Exception as e:
+            sys.stderr.write('unable to add function {} for attribute {} to helper functions\n'.format(functionType,attr))
+            sys.exit()
+    def function(self,attr,functionType):
+        if hasattr(self,functionType):
+            myDict=getattr(self,functionType)
+            if attr in myDict:
+                return myDict[attr]
+        else:
+            sys.stderr.write('no functionType {} for attr {}'.format(functionType,attr))
+        return None
+    
 class BwbGridLayout():
     #adds methods to keep track of rows and columns
     def __init__(self, spacing=5, startCol=0,startRow=0):
@@ -145,8 +168,12 @@ class BwbGuiElements():
         if enableCallback is not None:
             self._enableCallbacks[attr]=enableCallback
                 
-    def disable(self,attr,ignoreCheckbox=False): #gray out to disable
+    def disable(self,attr,ignoreCheckbox=False,disableFtn=None): #gray out to disable
+        #if the disabling is due to an input - there may be a custom partial disable function
         if attr in self._dict:
+            if disableFtn:
+                disableFtn()
+                return
             if ignoreCheckbox:
                 for g in self._dict[attr]:
                     if not isinstance(g, QtWidgets.QCheckBox):
@@ -160,26 +187,27 @@ class BwbGuiElements():
         return False
         
     def clear(self,attr,activate=False):
-        #will activate cb when activate is True
-        #otherwise  
-        if attr in self._dict:
-            for g in self._dict[attr]:
-                if isinstance(g, QtWidgets.QCheckBox):
-                    g.setCheckState(activate)
-                elif isinstance(g,tuple):
-                    for element in g:
-                        if isinstance(element, QtWidgets.QCheckBox):
-                            element.setCheckState(activate)
-                        else:
-                            try:
-                                element.clear()
-                            except AttributeError:
-                                pass
-                else:
-                    try:
-                        g.clear()
-                    except AttributeError:
-                        pass
+        #will activate first cb when activate is True
+        #otherwise
+        if not attr in self._dict or not self._dict[attr]:
+            return
+        i=0
+        if isinstance (self._dict[attr][0],QtWidgets.QCheckBox):
+            self._dict[attr][0].setCheckState(activate)
+            i=1
+        #check for all ledits which are the only elements with a clear function
+        #some of the orange gui elements are tuples
+        while i < len(self._dict[attr]) :
+            g=self._dict[attr][i]
+            if isinstance(g,tuple):
+                for element in g:
+                    if isinstance(element, QtWidgets.QLineEdit):
+                        element.clear()
+            else:
+                if isinstance(g, QtWidgets.QLineEdit):
+                    sys.stderr.write('clearing line edit {}\n'.format(g))
+                    g.clear()
+            i=i+1
         
     def enable(self,attr,value):
         sys.stderr.write('checking attr {}\n'.format(attr))
@@ -247,6 +275,8 @@ class ConnectionDict:
             if connectionId:
                 if connectionId in self._dict[slot]:
                     return True
+                else:
+                    return False
             elif not self._dict[slot]:
                 del self._dict[slot]
                 sys.stderr.write('deleted slot\n')
@@ -276,10 +306,12 @@ class OWBwBWidget(widget.OWWidget):
     nWorkers=pset(1)
     iterateSettings=pset({})
     iterate=pset(False)
-    
+
+
 #Initialization
     def __init__(self, image_name, image_tag):
         super().__init__()
+        self.helpers=BwbHelperFunctions()
         
         self.css = '''
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
@@ -528,9 +560,9 @@ class OWBwBWidget(widget.OWWidget):
             if ('gui' in pvalue and pvalue['gui'] != 'patternQuery') or (pvalue['type'] != 'patternQuery'):
                 continue
             if isOptional:
-                self.drawPatternQuery(pname,pvalue,self.optionalBox)
+                self.drawPatternQuery(pname, pvalue, box=self.optionalBox,layout=self.fileDirOptionalLayout,addCheckbox=True)
             else:
-                self.drawPatternQuery(pname,pvalue,self.requiredBox)
+                self.drawPatternQuery(pname, pvalue, box=self.requiredBox,layout=self.fileDirRequiredLayout)
                         
     def drawRequiredElements(self):
         for pname in self.data['requiredParameters']:
@@ -749,10 +781,11 @@ class OWBwBWidget(widget.OWWidget):
         
         #This checkbox is here when the input is optional
         #Should disable everything but itself when checked
-        
-        queryElements=[]
-        if not hasattr(self,pname):
+       
+        if not hasattr(self,pname) or not getattr(self,pname):
             setattr(self,pname,{})
+    
+        queryElements=[]
         checkbox=None
         
         #ask for root directory
@@ -783,13 +816,7 @@ class OWBwBWidget(widget.OWWidget):
         
         #query layout section
         #box for query layout
-        layout.addLinefeed(startCol=2)
-        patternAttr=pname+'Pattern'
-        setattr(self,patternAttr,'')
-        patternLedit=gui.lineEdit(None, self, patternAttr,disabled=addCheckbox)        
-        patternLedit.setClearButtonEnabled(True)
-        patternLedit.setPlaceholderText("Enter search pattern eg. *.fq")
-        layout.addWidget(patternLedit,width=1)
+
         findFileAttr=pname+'findFile'
         setattr(self,findFileAttr,True)
         findDirectoryAttr=pname+'findDirectory'
@@ -798,20 +825,28 @@ class OWBwBWidget(widget.OWWidget):
         findDirectoryCB=gui.checkBox(None, self,findDirectoryAttr,label='Find directories')
         findFileCB.setDisabled(addCheckbox)
         findDirectoryCB.setDisabled(addCheckbox)
+        startCol=1
         if addCheckbox:
+            startCol+=1
             checkbox.stateChanged.connect(lambda: findDirectoryCB.setEnabled(checkbox.isChecked()))
             checkbox.stateChanged.connect(lambda: findFileCB.setEnabled(checkbox.isChecked()))
-        layout.addLinefeed(startCol=2)
+        layout.addLinefeed(startCol=startCol)
+        patternAttr=pname+'Pattern'
+        setattr(self,patternAttr,'')
+        patternLedit=gui.lineEdit(None, self, patternAttr,disabled=addCheckbox)        
+        patternLedit.setClearButtonEnabled(True)
+        patternLedit.setPlaceholderText("Enter search pattern eg. **/*.fq")
+        layout.addWidget(patternLedit,width=1)
+        layout.addLinefeed(startCol=startCol)
         layout.addWidget(findFileCB,width=1)
-        layout.addLinefeed(startCol=2)
+        layout.addLinefeed(startCol=startCol)
         layout.addWidget(findDirectoryCB,width=1)
-        queryElements.extend([browseBtn,rootLedit,patternLedit,findFileCB,findDirectoryCB])
+        queryElements.extend([rootLedit,browseBtn,patternLedit,findFileCB,findDirectoryCB])
         
-        self.bgui.addList(pname,queryElements,enableCallback=lambda value, clearLedit: self.enablePatternQuery(value,clearLedit,checkbox,browseBtn,rootLedit,patternLedit, findFileCB, findDirectoryCB),updateCallback=lambda: self.updatePatternQuery(pname,rootAttr,patternAttr,findFileAttr,findDirectoryAttr))
-    
+        self.initializePatternQueryHelpers(pname,rootLedit,browseBtn,patternLedit,findFileCB,findDirectoryCB)
+        self.bgui.addList(pname,queryElements,enableCallback=lambda value, clearLedit: self.enablePatternQuery(value,clearLedit,checkbox,rootLedit,browseBtn,patternLedit, findFileCB, findDirectoryCB),updateCallback=lambda: self.updatePatternQuery(pname,rootAttr,patternAttr,findFileAttr,findDirectoryAttr))
+
     def updatePatternQuery(self,attr,root,pattern,findFile,findDir): #updates for input - called before and after addition and deletion of input
-        if not hasattr(self,attr):
-            setattr(self,attr,{})
         patternQuery=getAttr(self,attr)
         patternQuery['root']=root
         patternQuery['pattern']=pattern
@@ -826,8 +861,97 @@ class OWBwBWidget(widget.OWWidget):
         if not checkbox or checkbox.isChecked():
             for g in  [browseBtn,rootLedit,patternLedit,findFileCB,findDirectoryCB]:
                 if g:
-                    g.setEnabled(True)          
-                    
+                    g.setEnabled(True)
+
+
+    def receivePatternQuery(self,attr,value,rootLedit,patternLedit, findFileCB, findDirCB):
+        patternQuery=getattr(self,attr)
+        if type(value) is str:
+            patternQuery['root']=value
+            rootLedit.setText(value)
+        elif type(value) is dict:
+            if 'root' in value:
+                patternQuery['root']=value['root']
+                rootLedit.setText(value['root'])
+            if 'pattern' in value:
+                patternQuery['pattern']=value['pattern']
+                patterLedit.setText(value['pattern'])
+            if 'findFile' in value:
+                patternQuery['findFile']=value['findFile']
+                findFileCb.setChecked(value['findFile'])
+            if 'findDir' in value:
+                patternQuery['findDir']=value['findDir']
+                findDirCb.setChecked(value['findDir'])
+
+    def initializePatternQueryHelpers(self,pname,rootLedit,browseBtn,patternLedit,findFileCB,findDirCB):
+        self.helpers.add(pname,'generate',lambda :self.generatePatternQuery(pname))
+        self.helpers.add(pname,'receive',lambda value :self.receivePatternQuery(pname,value,rootLedit,patternLedit, findFileCB, findDirCB))
+        self.helpers.add(pname,'initialize',lambda value=None,inputType=None:self.initializePatternQuery(pname,rootLedit,patternLedit,findFileCB,findDirCB,value,inputType))
+        self.helpers.add(pname,'disableGUI',lambda value=None,inputType=None:self.disableGUIPatternQuery(pname,rootLedit,browseBtn,patternLedit,findFileCB,findDirCB,value=value,inputType=inputType))
+    
+    def initializePatternQuery(self,pname,rootLedit,patternLedit,findFileCB,findDirCB,value, inputType):
+        if value is None:
+            rootLedit.clear()
+        elif type(value) is str and value:
+            rootLedit.setText(value)
+        if type(value) is str or inputType == 'str':
+            return
+        patternLedit.clear()
+        findFileCB.setChecked(True)
+        findDirCB.setChecked(False)      
+        
+    def disableGUIPatternQuery(self,pname,rootLedit,browseBtn,patternLedit,findFileCB,findDirCB,value=None, inputType=None):
+        if type(value) is dict or inputType == 'dict':
+            self.pname={}
+            if value:
+                self.pname=value
+            for element in [rootLedit,browseBtn,patternLedit,findFileCB,findDirCB]:
+                element.setDisabled(True)
+        elif type(value) is str or inputType == 'str':
+            if value is None or value is "":
+                rootLedit.clear()
+            else:
+                rootLedit.setText(value)
+            rootLedit.setDisabled(True)
+            browseBtn.setDisabled(True)
+
+    def generatePatternQuery(self,pname):        
+        patternQuery=getAttr(self,pname)
+        path=patternQuery['root']
+        pattern=patternQuery['pattern']=pattern
+        findFile=patternQuery['findFile']
+        findDir=patternQuery['findDir']
+        matches=[]
+        if findFile:
+            matches=matches.extend(self.getGlobFiles(path,pattern))
+        if findDir:
+            matches=matches.extend(self.getGlobDirs(path,pattern))
+        return matches
+
+    def getGlobFiles(self,path,pattern):
+        glob=[]
+        pwd=os.getcwd()
+        os.chdir(path)
+        for match in glob.glob(pattern,recursive=True):
+            #make sure it is a file
+            if(os.path.isfile(match)):
+                glob.append(match)
+        os.chdir(pwd)
+        return glob
+    
+    def getGlobDir (self,path,pattern):
+        glob=[]
+        pwd=os.getcwd()
+        os.chdir(path)
+        if pattern[-1] != '/':
+            pattern=pattern+'/'
+        for match in glob.glob(pattern,recursive=True):
+            #make sure it is a file
+            if(os.path.isdir(match)):
+                glob.append(match)
+        os.chdir(pwd)
+        return glob
+      
     def drawLedit(self,pname,pvalue,box=None,layout=None,addCheckbox=False):
         checkAttr=None
         checkbox=None
@@ -855,6 +979,7 @@ class OWBwBWidget(widget.OWWidget):
 
     
     def enableLedit(self,value,clearLedit,cb,ledit):
+        sys.stderr.write('cb is {} ledit is {}\n'.format(cb,ledit))
         if cb:
             cb.setEnabled(True)
             if cb.isChecked():
@@ -896,6 +1021,7 @@ class OWBwBWidget(widget.OWWidget):
             self.updateCheckbox(pname,checkbox.isChecked(),ledit.text())
             
     def enableFileDir(self,value, clearLedit, cb,ledit,btn):
+        sys.stderr.write('cb is {} ledit is {}\n'.format(cb,ledit))
         if cb:
             cb.setEnabled(True)
             if cb.isChecked():
@@ -1320,6 +1446,7 @@ class OWBwBWidget(widget.OWWidget):
     
     def updateCheckbox(self, pname, state, value=None):
         self.optionsChecked[pname]=state
+        return
         sys.stderr.write('updating checkbox pname {} connect {} isChecked {}\n'.format(pname,self.inputConnections.isConnected(pname),state))
         if not (self.inputConnections.isConnected(pname)) and state:
             self.bgui.enable(pname,value)
@@ -1343,30 +1470,44 @@ class OWBwBWidget(widget.OWWidget):
         self.optionsChecked[pname]=getattr(self,checkAttr)
         
 
-        
+    def convertOrangeTypes(self,inputType):
+        inputTypeArray=inputType.split(".")
+        return inputTypeArray[-1]
 #Handle inputs
     def handleInputs(self,attr,value,sourceId,test=False):
+        inputType=None
         sys.stderr.write('INPUT RECEIVED value is {} sourceId is {}\n'.format(value,sourceId))
         #check for test mode pre-signal
-        if value is '__purge':
+        if  type(value) is str and value[0:8]  == '__purge ':
             #remove signal - this used to be None which was also passed when the value actually was None
+            #value is __purge <type>
             self.inputConnections.remove(attr,sourceId)
             sys.stderr.write('sig handler removing {} disabled {}\n'.format(attr,self.inputConnections.isConnected(attr)))
-            #just setting to None in ledit for some reason
-            self.bgui.clear(attr)
-            if hasattr(self,attr) and getattr(self,attr):
-                setattr(self,attr,None)
+            if len(self.convertOrangeTypes(value.split())) > 1:
+                inputType=self.convertOrangeTypes(value.split()[1])
+            self.initializeAttr(attr,inputType=inputType)
             if attr in self.runTriggers:
                 self.triggerReady[attr]=False
-        elif value is '__add':
-            self.bgui.clear(attr,activate=True)
-            if hasattr(self,attr) and getattr(self,attr):
-                setattr(self,attr,None)
-            self.bgui.disable(attr)
+            value=None
+        elif type(value) is str and value[0:6]  == '__add ':
+            #this is a new connection - and not just a signal - does not activate
+            #value is __add <type>
+            if len(self.convertOrangeTypes(value.split())) > 1:
+                inputType=self.convertOrangeTypes(value.split()[1])
+            self.initializeAttr(attr,inputType=inputType)
+            disableFtn=self.helpers.function(attr,'disableGUI')
+            sys.stderr.write('attr is {} disableFtn is {} inputType is {}\n'.format(attr,disableFtn,inputType))
+            if disableFtn:
+                self.bgui.disable(attr,disableFtn=lambda:disableFtn(inputType=inputType))
+            else:
+                self.bgui.clear(attr,activate=True)
+                self.bgui.disable(attr)
             self.inputConnections.add(attr,sourceId)
             sys.stderr.write('sig handler adding node with no signal: attr {} sourceId {} value {}\n'.format(attr,sourceId,value))
             sys.stderr.write('connection dict value for {} is {}\n'.format(attr,self.inputConnections._dict[attr]))
             self.checkTrigger(inputReceived=False)
+            #don't go through the default update since we have already disabled the new connection
+            return
         else:
             if test:
                 self.saveBashFile=None
@@ -1374,18 +1515,42 @@ class OWBwBWidget(widget.OWWidget):
             self.inputConnections.add(attr,sourceId)
             sys.stderr.write('sig handler adding input: attr {} sourceId {} value {}\n'.format(attr,sourceId,value))
             sys.stderr.write('connection dict value for {} is {}\n'.format(attr,self.inputConnections._dict[attr]))
-            setattr(self,attr,value)
+            #put transfer value here
+            receiveFtn=self.helpers.function(attr,'receive')
+            if receiveFtn:
+                receiveFtn(value)
+            else:
+                setattr(self,attr,value)
             self.checkTrigger(inputReceived=True)
             if attr in self.runTriggers:
                 sys.stderr.write("trigger value for attr {} is {}\n".format(attr,self.triggerReady[attr])) 
                 self.triggerReady[attr]=True
-        self.updateGui(attr,value)
-
-    def updateGui(self,attr,value,removeFlag=False):
+        if value is not None:
+            inputType=type(value)
+        self.updateGui(attr,value,inputType=inputType)
+    
+    def initializeAttr(self,attr,inputType=None):
+        if not hasattr(self,attr):
+            setattr(self,attr,None)
+        value=getattr(self,attr)
+        initFunction=self.helpers.function(attr,'initialize')
+        if initFunction:
+            initFunction(value=value,inputType=inputType)
+        else:
+            if type(getattr(self,attr)) is str:
+                setattr(self,attr,"")
+            else:
+                setattr(self,attr,None)
+                
+    def updateGui(self,attr,value,removeFlag=False,disableFtn=None,inputType=None):
         #disables manual input when the value has been given by an input connection
         if self.inputConnections.isConnected(attr):
-            sys.stderr.write('disabling {}\n'.format(attr))
-            self.bgui.disable(attr)
+            if disableFtn:
+                if value is not None:
+                    inputType=type(value)
+                self.bgui.disable(attr,disableFtn=lambda: disableFtn(value,inputType))
+            else:
+                self.bgui.disable(attr)
         else:
             sys.stderr.write('enabling {} with {}\n'.format(attr,value))
             self.bgui.enable(attr,value)
@@ -1412,6 +1577,9 @@ class OWBwBWidget(widget.OWWidget):
         self.bgui.disableAll()
         self.disableExec()
         self.jobRunning=True
+        
+        #generate any needed data
+        
         cmd=self.generateCmdFromData()
         self.envVars={}
         self.getEnvironmentVariables()
@@ -1501,7 +1669,7 @@ class OWBwBWidget(widget.OWWidget):
             sys.stderr.write('pname {} pvalue {}\n'.format(pname,pvalue))
             if('flag' in pvalue  and hasattr(self,pname)):
                 flagName=pvalue['flag']
-                flagValue=getattr(self,pname)
+                flagValue=self.getAttrValue(pname)
                 if pvalue['type'] == 'bool':
                     if flagValue:
                         return flagName
@@ -1544,9 +1712,19 @@ class OWBwBWidget(widget.OWWidget):
                         return " ".join(flagValue)
                 elif flagValue:
                     return self.joinFlagValue(flagName,flagValue)
-            
         return None
-                           
+        
+    def getAttrValue(self,attr):
+        #wrapper - returns the value of self.attr if there is not generate function
+        if hasattr(self,attr):
+            value=getattr(self,attr)
+            generateFunction=self.helpers.function(attr,'generate')
+            if generateFunction:
+                return generateFunction(value=value)
+            return value
+        return None
+    
+
     def generateCmdFromData (self):
         flags=[]
         args=[]
@@ -1628,7 +1806,7 @@ class OWBwBWidget(widget.OWWidget):
             if 'data' in self.iterateSettings and pname in self.iterateSettings['data'] and 'groupSize' in self.iterateSettings['data'][pname] and self.iterateSettings['data'][pname]['groupSize']:
                 groupSize=int(self.iterateSettings['data'][pname]['groupSize'])
                 
-            flagValues=getattr(self,pname)
+            flagValues=self.getAttrValue(pname)
             #make list of tuplets of groupSize 
             flagValues= list(zip_longest(*[iter(flagValues)]*groupSize, fillvalue=flagValues[-1]))
             sys.stderr.write('flagValues {}\n'.format(flagValues))
@@ -1796,11 +1974,11 @@ class OWBwBWidget(widget.OWWidget):
                     else:
                         if pname in self.optionsChecked:
                             if self.optionsChecked[pname]:
-                                self.envVars[pvalue['env']] = getattr(self,pname)
-                                sys.stderr.write('env optional var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
+                                self.envVars[pvalue['env']] = self.getAttrValue(pname)
+                                sys.stderr.write('env optional var {} env {} assigned to {}\n'.format(pname,pvalue['env'],self.getAttrValue(pname)))
                         else:
-                            self.envVars[pvalue['env']] = getattr(self,pname)
-                            sys.stderr.write('var {} env {} assigned to {}\n'.format(pname,pvalue['env'],getattr(self,pname)))
+                            self.envVars[pvalue['env']] = self.getAttrValue(pname)
+                            sys.stderr.write('var {} env {} assigned to {}\n'.format(pname,pvalue['env'],self.getAttrValue(pname)))
                     
         #now assign static environment variables
         if 'env' in self.data:

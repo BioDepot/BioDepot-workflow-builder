@@ -198,9 +198,11 @@ class SignalManager(QObject):
          #   self._update()
 
             #we send a signal so that the widget can update its internal dictionayr
+        
+        sys.stderr.write('source type is {}\nsink type is {}\n'.format(link.source_channel.type,link.sink_channel.type))
         sourceWidget=self.scheme().widget_for_node(link.source_node)
         sourceID=sourceWidget.widget_id
-        self.send_to_node(link.sink_node,[_Signal(link, '__add', [sourceID])])
+        self.send_to_node(link.sink_node,[_Signal(link, '__add {}'.format(link.source_channel.type), [sourceID])])
         link.enabled_changed.connect(self.link_enabled_changed)
 
     def link_removed(self, link):
@@ -268,6 +270,7 @@ class SignalManager(QObject):
         """
         Purge the link (send "__purge" for all ids currently present)
         """
+        sys.stderr.write('source type is {}\nsink type is {}\n'.format(link.source_channel.type,link.sink_channel.type))
         contents = self.link_contents(link)
         ids = list(contents.keys())
         #check if there are no ids - this occurs when the link is not enabled or live
@@ -275,9 +278,9 @@ class SignalManager(QObject):
         if not ids:
             sourceWidget=self.scheme().widget_for_node(link.source_node)
             sourceID=sourceWidget.widget_id
-            self.send_to_node(link.sink_node,[_Signal(link, '__purge', [sourceID])])
+            self.send_to_node(link.sink_node,[_Signal(link, '__purge {}'.format(link.source_channel.type), [sourceID])])
         else:
-            signals = [_Signal(link, '__purge' , id) for id in ids]
+            signals = [_Signal(link, '__purge ' , id) for id in ids]
             self._schedule(signals)
         
 

@@ -548,8 +548,9 @@ class Scheme(QObject):
             else:
                 # Does the connection type check (can only ever be False for
                 # dynamic signals)
-                type_checks = issubclass(name_lookup(out_c.type),
-                                         name_lookup(in_c.type))
+                #type_checks = issubclass(name_lookup(out_c.type),
+                #                         name_lookup(in_c.type))
+                type_checks=True
                 assert type_checks or out_c.dynamic
                 # Dynamic signals that require runtime instance type check
                 # are considered last.

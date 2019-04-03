@@ -126,6 +126,7 @@ COPY orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
 COPY orangePatches/canvasmain.py /orange3/Orange/canvas/application/canvasmain.py
 COPY orangePatches/widgetsscheme.py /orange3/Orange/canvas/scheme/widgetsscheme.py
 COPY orangePatches/signalmanager.py /orange3/Orange/canvas/scheme/signalmanager.py
+COPY orangePatches/link.py /orange3/Orange/canvas/scheme/link.py
 COPY orangePatches/signals.py /orange3/Orange/widgets/utils/signals.py
 
 #add bwb start scripts

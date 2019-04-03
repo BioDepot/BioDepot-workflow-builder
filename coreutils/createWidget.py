@@ -124,11 +124,11 @@ def createWidget(inputJson,outputWidget,widgetName,inputData=None):
                 else:               
                     if pvalue['type'] == type('str') :
                         f.write('    {}=pset("")\n'.format(pname),None)
-                    if pvalue['type'] == 'bool' :
+                    elif pvalue['type'] == 'bool' :
                         f.write('    {}=pset(False)\n'.format(pname))
                     elif pvalue['type'][-4:] == 'list' or pvalue['type'][-4:] == 'List':
                         f.write('    {}=pset([])\n'.format(pname))
-                    elif pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
+                    elif pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict' or pvalue['type'] == 'patternQuery':
                         f.write('    {}=pset({{}})\n'.format(pname))
                     else:
                         f.write('    {}=pset(None)\n'.format(pname))
@@ -262,11 +262,11 @@ def mergeWidget(inputJson,outputWidget,widgetName,inputData=None):
             else:               
                 if pvalue['type'] == type('str') :
                     fwrite(afterClass,searchStr,'    {}=pset("")\n'.format(pname),None)
-                if pvalue['type'] == 'bool' :
+                elif pvalue['type'] == 'bool' :
                     fwrite(afterClass,searchStr,'    {}=pset(False)\n'.format(pname))
                 elif pvalue['type'][-4:] == 'list' or pvalue['type'][-4:] == 'List':
                     fwrite(afterClass,searchStr,'    {}=pset([])\n'.format(pname))
-                elif pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict':
+                elif pvalue['type'][-4:] == 'dict' or pvalue['type'][-4:] == 'Dict' or pvalue['type'] == 'patternQuery':
                     fwrite(afterClass,searchStr,'    {}=pset({{}})\n'.format(pname))
                 else:                   
                     fwrite(afterClass,searchStr,'    {}=pset(None)\n'.format(pname))

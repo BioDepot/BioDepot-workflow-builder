@@ -1333,14 +1333,14 @@ class OWWidgetBuilder(widget.OWWidget):
     def drawIListWidget (self, pname, layout=None):
         nameBox=self.makeLedit(pname+'nameLedit','Enter name','Name')
         callbackBox=self.makeLedit(pname+'callbackLedit','Enter callback', 'callback',addCheckBox=True)
-        comboBox=self.makeComboBox(pname,'Type:',['str','Orange.data.Table'])   
+        comboBox=self.makeComboBox(pname,'Type:',['str','dict','Orange.data.Table'])   
         widgetList=[('name',nameBox),('callback',callbackBox),('type',comboBox)]
         self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
         
     def drawOListWidget (self, pname, layout=None):
         nameBox=self.makeLedit(pname+'nameLedit','Enter name','Name')
         defaultBox=self.makeLedit(pname+'defaultLedit','Enter default', 'Default value',addCheckBox=True)
-        comboBox=self.makeComboBox(pname,'Type:',['str','Orange.data.Table'])       
+        comboBox=self.makeComboBox(pname,'Type:',['str','dict','Orange.data.Table'])       
         widgetList=[('name',nameBox),('default',defaultBox),('type',comboBox)]
         self.makeListWidgetUnit (pname, layout=layout, lineWidgets=widgetList)
 
