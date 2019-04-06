@@ -1291,8 +1291,8 @@ class OWBwBWidget(widget.OWWidget):
         if self.data['parameters'] is None:
             return retList
         for pname, pvalue in self.data['parameters'].items():
-            if 'list' in pvalue['type']:
-                retList.append(pname) 
+            if 'list' in pvalue['type'] or pvalue['type'] == 'patternQuery':
+                retList.append(pname)
         return retList
         
     def drawExec(self, box=None):
@@ -1866,11 +1866,16 @@ class OWBwBWidget(widget.OWWidget):
                 groupSize=int(self.iterateSettings['data'][pname]['groupSize'])
                 
             flagValues=self.getAttrValue(pname)
+            sys.stderr.write('original flagvalues are {}\n'.format(flagValues))
             #make list of tuplets of groupSize 
             flagValues= list(zip_longest(*[iter(flagValues)]*groupSize, fillvalue=flagValues[-1]))
-            sys.stderr.write('flagValues {}\n'.format(flagValues))
-            if pvalue['type'] == 'file list':
+            sys.stderr.write('chunked flagvalues are {}\n'.format(flagValues))
+            if pvalue['type'] == 'file list' or pvalue['type'] == 'directory list' or pvalue['type'] == 'patternQuery'  :
                 files=flagValues
+                #can pass isFile flag for patternQuery - even if there are directories because the root directory is always given and must be mappable
+                isFileFlag=True
+                if pvalue['type'] == 'directory list':
+                    isFileFlag=False
                 if files:
                     flags=[]
                     baseFlag=""
