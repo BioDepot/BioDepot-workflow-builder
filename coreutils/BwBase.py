@@ -5,6 +5,7 @@ import logging
 import jsonpickle
 import functools
 import multiprocessing
+import glob
 from itertools import zip_longest
 from OWWidgetBuilder import tabbedWindow
 from ServerUtils import IterateDialog
@@ -14,6 +15,9 @@ from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from time import sleep
 
 
@@ -37,7 +41,26 @@ def getIconName(filename,iconFile):
     widgetPy=os.path.realpath(filename)
     widgetDir=os.path.dirname(widgetPy)
     return '{}/icon/{}'.format(widgetDir,iconFile)
-
+    
+class ScrollMessageBox(QMessageBox):
+    def __init__(self, l, *args, **kwargs):
+        QMessageBox.__init__(self, *args, **kwargs)
+        scroll = QScrollArea(self)
+        scroll.setWidgetResizable(True)
+        self.content = QWidget()
+        scroll.setWidget(self.content)
+        lay = QVBoxLayout(self.content)
+        if l:
+            for item in l:
+                lay.addWidget(QLabel(item, self))
+                self.layout().addWidget(scroll, 0, 0, 1, self.layout().columnCount())
+            self.setStyleSheet("QScrollArea{min-width:300 px; min-height: 400px}")
+        else:
+            lay.addWidget(QLabel('No Match', self))
+            self.layout().addWidget(scroll, 0, 0, 1, self.layout().columnCount())
+            self.setStyleSheet("QScrollArea{min-width:50 px;}")
+        
+      
 class DragAndDropList(QtGui.QListWidget):
      #overloads the Drag and dropEvents to emit code
      itemMoved = pyqtSignal(int, int) # Old index, new index, item
@@ -782,19 +805,24 @@ class OWBwBWidget(widget.OWWidget):
         #This checkbox is here when the input is optional
         #Should disable everything but itself when checked
        
+        rootAttr=pname+'Root'
+        findFileAttr=pname+'findFile'
+        findDirAttr=pname+'findDir'
+        patternAttr=pname+'Pattern'
         if not hasattr(self,pname) or not getattr(self,pname):
             setattr(self,pname,{})
+        self.initializePatterQueryAttrs(pname,rootAttr,patternAttr,findFileAttr,findDirAttr)
+
     
         queryElements=[]
         checkbox=None
         
         #ask for root directory
-        rootAttr=pname+'Root'
-        setattr(self,rootAttr,"")
+    
         rootLedit=gui.lineEdit(None, self, rootAttr,disabled=addCheckbox)
         
         #note that using lambda does not work in this function - truncates string variable so partial used instead
-        browseBtn=gui.button(None, self, "", callback= partial(self.browseFileDir, attr= pname ,filetype='directory'),
+        browseBtn=gui.button(None, self, "", callback= partial(self.browseFileDir, attr=rootAttr ,filetype='directory'),
                           autoDefault=True, width=19, height=19,disabled=addCheckbox)
         if getattr(self,rootAttr) is None:
             rootLedit.clear()
@@ -808,7 +836,7 @@ class OWBwBWidget(widget.OWWidget):
                 self.QButtonHash[pname].addButton(checkbox)
             checkbox.stateChanged.connect(lambda : self.updateCheckbox(pname,checkbox.isChecked(),getattr(self,pname)))
             queryElements.append(checkbox)
-        labelValue=pvalue['label']
+        labelValue=pvalue['label']+ ' directory'
         if labelValue is None:
             labelValue=""
         sys.stderr.write('adding filedir for pname {} using layout {}\n'.format(pname,layout))    
@@ -817,49 +845,65 @@ class OWBwBWidget(widget.OWWidget):
         #query layout section
         #box for query layout
 
-        findFileAttr=pname+'findFile'
-        setattr(self,findFileAttr,True)
-        findDirectoryAttr=pname+'findDirectory'
-        setattr(self,findDirectoryAttr,False)
         findFileCB=gui.checkBox(None, self,findFileAttr,label='Find files')
-        findDirectoryCB=gui.checkBox(None, self,findDirectoryAttr,label='Find directories')
+        findDirCB=gui.checkBox(None, self,findDirAttr,label='Find directories')
         findFileCB.setDisabled(addCheckbox)
-        findDirectoryCB.setDisabled(addCheckbox)
-        startCol=1
+        findDirCB.setDisabled(addCheckbox)
+        startCol=0
         if addCheckbox:
             startCol+=1
-            checkbox.stateChanged.connect(lambda: findDirectoryCB.setEnabled(checkbox.isChecked()))
+            checkbox.stateChanged.connect(lambda: findDirCB.setEnabled(checkbox.isChecked()))
             checkbox.stateChanged.connect(lambda: findFileCB.setEnabled(checkbox.isChecked()))
         layout.addLinefeed(startCol=startCol)
-        patternAttr=pname+'Pattern'
-        setattr(self,patternAttr,'')
+        
+        patternLabel=QtGui.QLabel(pvalue['label']+ ' pattern')
         patternLedit=gui.lineEdit(None, self, patternAttr,disabled=addCheckbox)        
         patternLedit.setClearButtonEnabled(True)
         patternLedit.setPlaceholderText("Enter search pattern eg. **/*.fq")
-        layout.addWidget(patternLedit,width=1)
-        layout.addLinefeed(startCol=startCol)
-        layout.addWidget(findFileCB,width=1)
-        layout.addLinefeed(startCol=startCol)
-        layout.addWidget(findDirectoryCB,width=1)
-        queryElements.extend([rootLedit,browseBtn,patternLedit,findFileCB,findDirectoryCB])
         
-        self.initializePatternQueryHelpers(pname,rootLedit,browseBtn,patternLedit,findFileCB,findDirectoryCB)
-        self.bgui.addList(pname,queryElements,enableCallback=lambda value, clearLedit: self.enablePatternQuery(value,clearLedit,checkbox,rootLedit,browseBtn,patternLedit, findFileCB, findDirectoryCB),updateCallback=lambda: self.updatePatternQuery(pname,rootAttr,patternAttr,findFileAttr,findDirectoryAttr))
-
+        testBtn = gui.button(None, self, "Test", callback=lambda: self.testPatternQuery(pname))
+        testBtn.setStyleSheet(self.css)
+        testBtn.setFixedSize(60,20)
+        
+        layout.addWidget(patternLabel,width=1)
+        layout.addWidget(patternLedit,width=1)
+        layout.addWidget(testBtn)
+        layout.addLinefeed(startCol=startCol+1)
+        layout.addWidget(findFileCB,width=1)
+        layout.addLinefeed(startCol=startCol+1)
+        layout.addWidget(findDirCB,width=1)
+        layout.addLinefeed(startCol=startCol+1)
+        
+        queryElements.extend([rootLedit,browseBtn,patternLedit,findFileCB,findDirCB])
+        
+        self.initializePatternQueryHelpers(pname,rootLedit,browseBtn,patternLedit,findFileCB,findDirCB)
+        self.bgui.addList(pname,queryElements,enableCallback=lambda value, clearLedit: self.enablePatternQuery(value,clearLedit,checkbox,rootLedit,browseBtn,patternLedit, findFileCB, findDirCB),updateCallback=lambda: self.updatePatternQuery(pname,rootAttr,patternAttr,findFileAttr,findDirAttr))
+        #update the values on changes
+        rootLedit.textChanged.connect(lambda : self.updatePatternQuery(pname,getattr(self,rootAttr),getattr(self,patternAttr),getattr(self,findFileAttr),getattr(self,findDirAttr)))
+        patternLedit.textChanged.connect(lambda : self.updatePatternQuery(pname,getattr(self,rootAttr),getattr(self,patternAttr),getattr(self,findFileAttr),getattr(self,findDirAttr)))
+        findFileCB.stateChanged.connect(lambda : self.updatePatternQuery(pname,getattr(self,rootAttr),getattr(self,patternAttr),getattr(self,findFileAttr),getattr(self,findDirAttr)))
+        findDirCB.stateChanged.connect(lambda : self.updatePatternQuery(pname,getattr(self,rootAttr),getattr(self,patternAttr),getattr(self,findFileAttr),getattr(self,findDirAttr)))
+    
+    def testPatternQuery(self,pname):
+        queryResults=self.generatePatternQuery(pname)    
+        qm=ScrollMessageBox(queryResults, None)
+        qm.setWindowTitle('{} query values'.format(pname))
+        qm.exec_()
+        
     def updatePatternQuery(self,attr,root,pattern,findFile,findDir): #updates for input - called before and after addition and deletion of input
-        patternQuery=getAttr(self,attr)
+        patternQuery=getattr(self,attr)
         patternQuery['root']=root
         patternQuery['pattern']=pattern
         patternQuery['findFile']=findFile
         patternQuery['findDir']=findDir
 
-    def enablePatternQuery(self, value,clearLedit,checkbox,browseBtn,rootLedit,patternLedit, findFileCB, findDirectoryCB):
+    def enablePatternQuery(self, value,clearLedit,checkbox,browseBtn,rootLedit,patternLedit, findFileCB, findDirCB):
         #first element is checkbox
         #last element is browseBtn if it exists
         if checkbox:
             checkbox.setEnabled(True)
         if not checkbox or checkbox.isChecked():
-            for g in  [browseBtn,rootLedit,patternLedit,findFileCB,findDirectoryCB]:
+            for g in  [browseBtn,rootLedit,patternLedit,findFileCB,findDirCB]:
                 if g:
                     g.setEnabled(True)
 
@@ -882,7 +926,20 @@ class OWBwBWidget(widget.OWWidget):
             if 'findDir' in value:
                 patternQuery['findDir']=value['findDir']
                 findDirCb.setChecked(value['findDir'])
-
+                
+    def initializePatterQueryAttrs(self,attr,rootAttr,patternAttr,findFileAttr,findDirAttr):
+        patternQuery=getattr(self,attr)
+        if patternQuery:
+            setattr(self,rootAttr,patternQuery['root'])
+            setattr(self,patternAttr,patternQuery['pattern'])
+            setattr(self,findFileAttr,patternQuery['findFile'])
+            setattr(self,findDirAttr,patternQuery['findDir'])
+        else:
+            setattr(self,rootAttr,"")
+            setattr(self,patternAttr,"")
+            setattr(self,findFileAttr,True)
+            setattr(self,findDirAttr,False)            
+    
     def initializePatternQueryHelpers(self,pname,rootLedit,browseBtn,patternLedit,findFileCB,findDirCB):
         self.helpers.add(pname,'generate',lambda :self.generatePatternQuery(pname))
         self.helpers.add(pname,'receive',lambda value :self.receivePatternQuery(pname,value,rootLedit,patternLedit, findFileCB, findDirCB))
@@ -916,31 +973,31 @@ class OWBwBWidget(widget.OWWidget):
             browseBtn.setDisabled(True)
 
     def generatePatternQuery(self,pname):        
-        patternQuery=getAttr(self,pname)
+        patternQuery=getattr(self,pname)
         path=patternQuery['root']
-        pattern=patternQuery['pattern']=pattern
+        pattern=patternQuery['pattern']
         findFile=patternQuery['findFile']
         findDir=patternQuery['findDir']
         matches=[]
         if findFile:
-            matches=matches.extend(self.getGlobFiles(path,pattern))
+            matches.extend(self.getGlobFiles(path,pattern))
         if findDir:
-            matches=matches.extend(self.getGlobDirs(path,pattern))
+            matches.extend(self.getGlobDirs(path,pattern))
         return matches
 
     def getGlobFiles(self,path,pattern):
-        glob=[]
+        globOutput=[]
         pwd=os.getcwd()
         os.chdir(path)
         for match in glob.glob(pattern,recursive=True):
             #make sure it is a file
             if(os.path.isfile(match)):
-                glob.append(match)
+                globOutput.append(os.path.join(path,match))
         os.chdir(pwd)
-        return glob
+        return globOutput
     
     def getGlobDir (self,path,pattern):
-        glob=[]
+        globOutput=[]
         pwd=os.getcwd()
         os.chdir(path)
         if pattern[-1] != '/':
@@ -948,9 +1005,9 @@ class OWBwBWidget(widget.OWWidget):
         for match in glob.glob(pattern,recursive=True):
             #make sure it is a file
             if(os.path.isdir(match)):
-                glob.append(match)
+                globOutput.append(match)
         os.chdir(pwd)
-        return glob
+        return globOutput
       
     def drawLedit(self,pname,pvalue,box=None,layout=None,addCheckbox=False):
         checkAttr=None
@@ -1446,7 +1503,6 @@ class OWBwBWidget(widget.OWWidget):
     
     def updateCheckbox(self, pname, state, value=None):
         self.optionsChecked[pname]=state
-        return
         sys.stderr.write('updating checkbox pname {} connect {} isChecked {}\n'.format(pname,self.inputConnections.isConnected(pname),state))
         if not (self.inputConnections.isConnected(pname)) and state:
             self.bgui.enable(pname,value)
@@ -1665,8 +1721,15 @@ class OWBwBWidget(widget.OWWidget):
             sys.stderr.write('pname {} pvalue {}\n'.format(pname,pvalue))
             if('flag' in pvalue  and hasattr(self,pname)):
                 flagName=pvalue['flag']
+                if flagName is None:
+                    flagName=""
                 flagValue=self.getAttrValue(pname)
-                if pvalue['type'] == 'bool':
+                if pvalue['type'] == 'patternQuery':
+                    if flagValue:
+                        return " ".join([flagName] + flagValue)
+                    else:
+                        return flagName
+                elif pvalue['type'] == 'bool':
                     if flagValue:
                         return flagName
                     return None
@@ -1716,7 +1779,7 @@ class OWBwBWidget(widget.OWWidget):
             value=getattr(self,attr)
             generateFunction=self.helpers.function(attr,'generate')
             if generateFunction:
-                return generateFunction(value=value)
+                return generateFunction()
             return value
         return None
     
