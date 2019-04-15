@@ -18,6 +18,7 @@ University of Washington Tacoma
          * [Is it possible to use Bwb to run a batch of datasets?](#is-it-possible-to-use-bwb-to-run-a-batch-of-datasets)
          * [How do I add my own scripts to a Bwb pipeline?](#how-do-i-add-my-own-scripts-to-a-bwb-pipeline)
       * [Common problems](#common-problems)
+         * [I'm having problems with windows](#im-having-problems-with-windows)
          * [My window is too small](#my-window-is-too-small)
          * [STAR and Kallisto won't run](#star-and-kallisto-wont-run)
          * [The Bwb container won't build on Windows when using the git repository](#the-bwb-container-wont-build-on-windows-when-using-the-git-repository)
@@ -232,6 +233,20 @@ We have provided basic widgets for Python, R, Perl, Bash, and Java. There is a [
 
 ## Common problems
 
+### I'm having problems with windows
+
+1. Check that virtualization is turned on. This may require booting into BIOS by restarting and pressing a function key (typically F1, F8 or F10). 
+2. If you are using VirtualBox (Docker toolbox) make sure that you allow Docker to install it i.e. you should uninstall Virtualbox if there is a previous installation before running the Docker installer.
+3. Make sure that you have read/write permissions to the directory that you using to share files with Bwb and Docker. One method is use your Desktop or a folder on your Desktop as the starting point for sharing files. For example when launching from Docker toolbox the starting command would be
+
+```
+docker run --rm   -p 6080:6080 \
+    -v  /c/Users/Desktop:/data  \
+    -v  /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    --privileged --group-add root \
+    biodepot/bwb
+```    
 ### My window is too small
 Try the following:
 1. Open a new browser window
