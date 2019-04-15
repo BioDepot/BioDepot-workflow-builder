@@ -98,10 +98,13 @@ EXPOSE 6080
 WORKDIR /data
 
 #install rsync
-RUN apt-get update && apt-get install -y rsync \
+#install rsync curl and docker-compose
+RUN apt-get update && apt-get install -y rsync curl \
+    && curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
+    && chmod +x /usr/local/bin/docker-compose\
     && apt-get autoclean -y \
     && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/**
 
 #Change app name to Bwb
 RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
@@ -115,11 +118,13 @@ COPY orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
 COPY orangePatches/canvasmain.py /orange3/Orange/canvas/application/canvasmain.py
 COPY orangePatches/widgetsscheme.py /orange3/Orange/canvas/scheme/widgetsscheme.py
 COPY orangePatches/signalmanager.py /orange3/Orange/canvas/scheme/signalmanager.py
+COPY orangePatches/link.py /orange3/Orange/canvas/scheme/link.py
 COPY orangePatches/signals.py /orange3/Orange/widgets/utils/signals.py
 
 #add bwb start scripts
 COPY scripts/startBwb.sh /bin/startBwb.sh
 COPY scripts/runDockerJob.sh /bin/runDockerJob.sh
+COPY scripts/startScheduler.sh /bin/startScheduler.sh
 
 #add widgets and workflows
 ADD widgets /widgets/

@@ -99,9 +99,7 @@ class CmdJson:
         #strip quotes if present
         if key[0] == key[-1] and key.startswith(("'",'"')):
             key=key[1:-1]
-        envDict['key']=key
-        envDict['val']=val
-        self.jsonObj['envs'].append(envDict)
+        self.jsonObj['envs'].append({'key':key,'val':val})
     
     #need to fix this so that we can add parameters for maxWorkers and threads per worker    
     def addThreadsRam(self,nThreads,ram):

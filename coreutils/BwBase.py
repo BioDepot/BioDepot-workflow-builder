@@ -983,6 +983,8 @@ class OWBwBWidget(widget.OWWidget):
             matches.extend(self.getGlobFiles(path,pattern))
         if findDir:
             matches.extend(self.getGlobDirs(path,pattern))
+        if matches:
+            matches.sort()
         return matches
 
     def getGlobFiles(self,path,pattern):
