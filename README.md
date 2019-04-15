@@ -178,7 +178,7 @@ This happens in the command line.
 The -v option allows you to map one or more personal (local) directory to an internal directory that the Bwb container can see them. Usually we map them to /data internally. The following start command for example maps the current directory to the /data directory inside the container. 
 ```
 docker run --rm   -p 6080:6080 \
-    -v  ${PWD}/:/data  \
+    -v  $pwd/:/data  \
     -v  /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     --privileged --group-add root \
@@ -213,7 +213,7 @@ docker run --rm   -p 6080:6080 \
 Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws)
 
 ### What browser should I use with Bwb?
-We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine. In the past we have had some problems with Edge but the latest versions of Firefox and Safari work well. 
+We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine. In the past we have had some problems with Edge but the latest versions of Firefox and Safari work well.
 
 ### Where are the sample datasets?
 Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we recommend the use of the provided Download widget to download files from an external source (eg. Google drive) for use with the containers. This is the mechanism that we use in all our examples.
@@ -221,7 +221,7 @@ Bwb includes a set of sample workflows. These are found under the /workflows dir
 ### Is it possible to use Bwb to run a batch of datasets?
 Currently, this is possible in a couple of ways:
 
-1) A wrapper script can be used inside the widget to distribute the computing to multiple threads. An example is [here} (https://github.com/BioDepot/LINCS_RNAseq_cpp/blob/master/scripts/multibwa.sh)
+1) A wrapper script can be used inside the widget to distribute the computing to multiple threads. An example is [here] (https://github.com/BioDepot/LINCS_RNAseq_cpp/blob/master/scripts/multibwa.sh)
 
 2) Export the pipeline as a [bash script](#testing-and-exporting-workflows-as-a-bash-script) and then using a batch scheduler such as SLURM, SGE or Torque-Maui to run the jobs. One could also use the script as the basis for a CWL or WDL descriptor for the workflow.
 
