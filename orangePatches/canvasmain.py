@@ -742,11 +742,11 @@ class CanvasMainWindow(QMainWindow):
                 
         menu_bar.addMenu(self.toolDock_menu)
 
-        self.scheduler_menu = QMenu(self.tr('&Scheduler'), self)
-        self.scheduler_menu.addAction(self.editServersAction)
-        self.scheduler_menu.addAction(self.serverlessAction)
-        self.scheduler_menu.addAction(self.authenticateAction)
-        menu_bar.addMenu(self.scheduler_menu)
+        # self.scheduler_menu = QMenu(self.tr('&Scheduler'), self)
+        # self.scheduler_menu.addAction(self.editServersAction)
+        # self.scheduler_menu.addAction(self.serverlessAction)
+        # self.scheduler_menu.addAction(self.authenticateAction)
+        # menu_bar.addMenu(self.scheduler_menu)
 
     def loadNotebook(self):
         pass
