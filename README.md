@@ -12,9 +12,10 @@ University of Washington Tacoma
          * [Why should I use Bwb?](#why-should-i-use-bwb)
       * [Usage](#usage)
          * [How do I use Bwb on my own data files?](#how-do-i-use-bwb-on-my-own-data-files)
+         * [How do I connect one widget to another?](#how-do-i-connect-one widget-to-another)
          * [How do I run Bwb on the cloud?](#how-do-i-run-bwb-on-the-cloud)
          * [What browser should I use with Bwb?](#what-browser-should-i-use-with-bwb)
-         * [Where are the sample datasets?](#where-are-the-sample-datasets)
+         * [Where are the sample workflows and datasets?](#where-are-the-sample-workflows-and-datasets)
          * [Is it possible to use Bwb to run a batch of datasets?](#is-it-possible-to-use-bwb-to-run-a-batch-of-datasets)
          * [How do I add my own scripts to a Bwb pipeline?](#how-do-i-add-my-own-scripts-to-a-bwb-pipeline)
       * [Common problems](#common-problems)
@@ -161,20 +162,20 @@ University of Washington Tacoma
 
 #### Biomedical scientists 
 
-The Bwb GUI is designed for non-programmers who want to use a workflow on their own data without worrying about installation and reproducibility. Bwb auto-installs the components and provides a very simple and intuitive forms interface for modifying key parameters and accepting custom files and executing all or part of a workflow. We realise that for many users, interactive visualization is a large part of their analyses and Bwb supports Jupyter notebooks, Cytoscape and other software that have their own graphics and GUIs. The casual user can use familiar tools to customize the final stages of the analyses while maintaining a complete record and provenance of the entire pipeline which is essential for publication, sharing and reproducibility. Advanced users can swap in different parameter sets or even different modules just by dragging and dropping into an existing tested pipeline. A bash script can be created for the purpose of publication or to use in one of the many schedulers that support bash scripts such as SLURM/SGE/Torque-Maui.
+The Bwb GUI is designed for non-programmers who want to use a workflow on their own data without worrying about installation and reproducibility. Bwb auto-installs the components and provides a very simple and intuitive GUI interface for modifying key parameters and accepting user files. We realise that for many users, interactive visualization is a large part of their analyses and Bwb supports Jupyter notebooks, Cytoscape and other software that have their own graphics and GUIs. The casual user can use familiar tools to customize the final stages of the analyses while maintaining a complete record and provenance of the entire pipeline which is essential for publication, sharing and reproducibility. Advanced users can swap in different parameter sets or even different modules just by dragging and dropping into an existing tested pipeline. A bash script can be created for the purpose of publication or to use in one of the many schedulers that support bash scripts such as SLURM/SGE/Torque-Maui.
 
-#### Bioinformaticists
+#### Bioinformaticians
 
-Bwb is also designed for bioinformaticists who support a group of users by analyzing data and installing and customizing workflows. For data analyses, bioinformaticists can more easily implement new pipelines and document existing ones using Bwb's GUI and support for Jupyter notebooks. Furthermore, Bwb pipelines can reduce the workload for bioinformaticists as users can auto-install pre-tested workflows and adapt workflows by tweaking parameters on their own through a familiar interface. There is no need to re-implement a pipeline after a minor OS or package upgrade, or for new hardware. In addition, the widget building utilities allow the bioinformaticists to quickly customize the parameters and components that are exposed to the end user. Bwb also comes with widgets that support the major scripting languages used in Bioinformatics: Python, R, Perl, Bash and Java to allow for rapid customization, implementation and testing of new workflows. We provide a [tutorial](#tutorial---adding-a-python-script-to-a-bwb-workflow) and [video](https://www.youtube.com/watch?v=jtu-jCU2DU0) showing how to add a custom script to a Bwb pipeline. The export of Docker bash scripts allows for portable documentation of the workflows and execution on job schedulers, or for inclusion in custom scripts. 
+Bwb is also designed for bioinformaticians who support a group of users by analyzing data and installing and customizing workflows. For data analyses, bioinformaticians can more easily implement new pipelines and document existing ones using Bwb's GUI and support for Jupyter notebooks. Furthermore, Bwb pipelines can reduce the workload for bioinformaticians as users are able auto-install pre-tested workflows and adapt workflows by tweaking parameters on their own through a familiar interface. There is no need to re-implement a pipeline after a minor OS or package upgrade, or for new hardware. In addition, the widget building utilities allow the bioinformaticians to quickly customize the parameters and components that are exposed to the end user. Bwb also comes with widgets that support the major scripting languages used in Bioinformatics: Python, R, Perl, Bash and Java to allow for rapid customization, implementation and testing of new workflows. We provide a [tutorial](#tutorial---adding-a-python-script-to-a-bwb-workflow) and [video](https://www.youtube.com/watch?v=jtu-jCU2DU0) showing how to add a custom script to a Bwb pipeline. The export of Docker bash scripts allows for portable documentation of the workflows and execution on job schedulers, or for inclusion in custom scripts. 
 
 #### Software tool developers
 
-A major motivation for our development of Bwb was that our own software tools were not being adopted or even tested by may users. The barriers of installing and integrating new software into existing workflows are very high. By providing a GUI and an auto-installation method across different platforms, the adoption costs are greatly reduced. **Bwb is NOT meant to be a visual programming language** as this is a cumbersome method for writing software. Bwb is designed to allow the developer an mechanism to provide a GUI for their software that largely consists of filling out a set of forms. In some cases, an additional wrapper script will be needed. Filling out the Bwb forms to skin an application is usually less work than the alternatives of writing a custom GUI, providing a web-based API, writing, or dragging-and-dropping together a script in one or more workflow descriptors. Our test cases are examples of ready-to-run modifiable workflows that self-install executables, dependencies and data. These can be added to a GitHub to encourage users to try out new software.
+A major motivation for our development of Bwb was that our own software tools were not being adopted or even tested by may users. The barriers of installing and integrating new software into existing workflows are very high. By providing a GUI and an auto-installation method across different platforms, the adoption costs are greatly reduced. **Bwb is NOT meant to be a visual programming language** as this we find this a cumbersome method for writing software and probably too complicated to be used by users without a programming background. Bwb is designed to allow the developer an mechanism to provide a consistent and intuitive GUI for their software that largely consists of filling out a set of forms. In some cases, an additional wrapper script may be needed. Filling out the Bwb forms to skin an application is usually less work than the alternatives of writing a custom GUI, providing or conforming to a web-based API, writing, or dragging-and-dropping together a script toe create a workflow one or more workflow description languages. Our test cases are examples of ready-to-run modifiable workflows that self-install executables, dependencies and data. Bwb workflows can be added, for example, to a GitHub to encourage users to try out new software.
 
 ## Usage
 
 ### How do I use Bwb on my own data files?
-This happens in the command line.
+The mapping of local files to be used by Bwb workflows happens in the command line at launch time.
 
 The -v option allows you to map one or more personal (local) directory to an internal directory that the Bwb container can see them. Usually we map them to /data internally. The following start command for example maps the current directory to the /data directory inside the container. 
 ```
@@ -207,8 +208,10 @@ docker run --rm   -p 6080:6080 \
     --privileged --group-add root \
     biodepot/bwb
  ```
-
  
+### How do I connect one widget to another?
+
+Drag the mouse from the right side of the source widget to the left side of the sink widget. If they can be connected a dialog box should appear allowing you to choose which widgets to connect. This is shown in our [video](#tutorial---adding-a-python-script-to-a-bwb-workflow)
 
 ### How do I run Bwb on the cloud?
 Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws)
@@ -216,15 +219,15 @@ Bwb is a containerized mini webserver that can be run on any platform. To run it
 ### What browser should I use with Bwb?
 We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine. In the past we have had some problems with Edge but the latest versions of Firefox and Safari work well.
 
-### Where are the sample datasets?
-Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we recommend the use of the provided Download widget to download files from an external source (eg. Google drive) for use with the containers. This is the mechanism that we use in all our examples.
+### Where are the sample workflows and datasets?
+Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we use of the provided downloadURL widget to download files from an external source (eg. Google drive) for use with the containers. This is the mechanism that we use in all our examples. You can use our widget to download the data or look at the widget parameters to find the URL of the files and download them yourself. Then you can save these files if you wish and use them directly.
 
 ### Is it possible to use Bwb to run a batch of datasets?
 Currently, this is possible in a couple of ways:
 
 1) A wrapper script can be used inside the widget to distribute the computing to multiple threads. An example is [here] (https://github.com/BioDepot/LINCS_RNAseq_cpp/blob/master/scripts/multibwa.sh)
 
-2) Export the pipeline as a [bash script](#testing-and-exporting-workflows-as-a-bash-script) and then using a batch scheduler such as SLURM, SGE or Torque-Maui to run the jobs. One could also use the script as the basis for a CWL or WDL descriptor for the workflow.
+2) Export the pipeline as a [bash script](#testing-and-exporting-workflows-as-a-bash-script) and modify the scripts to be used with a HPC scheduler such as SLURM, SGE or Torque-Maui. One could also use the script as the basis for a CWL or WDL descriptor for the workflow.
 
 We do have a built-in job scheduler that is under development for Bwb. You can take a look at the latest upstream build with this at the iterate2 branch of the GitHub.
 
