@@ -12,7 +12,7 @@ University of Washington Tacoma
          * [Why should I use Bwb?](#why-should-i-use-bwb)
       * [Usage](#usage)
          * [How do I use Bwb on my own data files?](#how-do-i-use-bwb-on-my-own-data-files)
-         * [How do I connect one widget to another?](#how-do-i-connect-one widget-to-another)
+         * [How do I connect one widget to another?](#how-do-i-connect-one-widget-to-another)
          * [How do I run Bwb on the cloud?](#how-do-i-run-bwb-on-the-cloud)
          * [What browser should I use with Bwb?](#what-browser-should-i-use-with-bwb)
          * [Where are the sample workflows and datasets?](#where-are-the-sample-workflows-and-datasets)
@@ -217,7 +217,8 @@ Drag the mouse from the right side of the source widget to the left side of the 
 Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws)
 
 ### What browser should I use with Bwb?
-We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine. In the past we have had some problems with Edge but the latest versions of Firefox and Safari work well.
+
+We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine. In the past we have with Edge but the latest versions of Firefox and Safari work well. If you must use Edge it **may** be possible to use by following this [recipe](https://www.hanselman.com/blog/FixedMicrosoftEdgeCantSeeOrOpenVirtualBoxhostedLocalWebSites.aspx) to allow it to connect to a local URL or by running Bwb from a remote server.
 
 ### Where are the sample workflows and datasets?
 Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we use of the provided downloadURL widget to download files from an external source (eg. Google drive) for use with the containers. This is the mechanism that we use in all our examples. You can use our widget to download the data or look at the widget parameters to find the URL of the files and download them yourself. Then you can save these files if you wish and use them directly.
