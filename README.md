@@ -211,7 +211,7 @@ docker run --rm   -p 6080:6080 \
  
 ### How do I connect one widget to another?
 
-Drag the mouse from the right side of the source widget to the left side of the sink widget. If they can be connected a dialog box should appear allowing you to choose which widgets to connect. This is shown in our [video](#tutorial---adding-a-python-script-to-a-bwb-workflow)
+Drag the mouse from the right side of the source widget to the left side of the sink widget. If they can be connected a dialog box should appear allowing you to choose which widgets to connect. This is shown in our [video](#tutorial---adding-a-python-script-to-a-bwb-workflow) at 5:49 to 6:05.
 
 ### How do I run Bwb on the cloud?
 Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws)
