@@ -500,9 +500,9 @@ class OWBwBWidget(widget.OWWidget):
             setattr(self.leditOptionalLayout.layout(), "added", True)
             self.drawOptionalElements()
 
-        # self.scheduleBox,scheduleLayout=self.tabs.addBox('Scheduler',minHeight=160)
-        # self.scheduleBox.layout().addLayout(self.fileDirScheduleLayout.layout())
-        # self.drawScheduleElements()
+            self.scheduleBox,scheduleLayout=self.tabs.addBox('Scheduler',minHeight=160)
+            self.scheduleBox.layout().addLayout(self.fileDirScheduleLayout.layout())
+            self.drawScheduleElements()
 
         # disable connected elements
         for i in self.inputs:
