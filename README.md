@@ -230,7 +230,7 @@ Currently, this is possible in a couple of ways:
 
 2) Export the pipeline as a [bash script](#testing-and-exporting-workflows-as-a-bash-script) and modify the scripts to be used with a HPC scheduler such as SLURM, SGE or Torque-Maui. One could also use the script as the basis for a CWL or WDL descriptor for the workflow.
 
-We do have a built-in job scheduler that is under development for Bwb. You can take a look at the latest upstream build with this at the iterate2 branch of the GitHub.
+We do have a built-in job scheduler that is under development for Bwb. You can take a look at the latest upstream build with this at the dev branch.
 
 ### How do I add my own scripts to a Bwb pipeline?
 We have provided basic widgets for Python, R, Perl, Bash, and Java. There is a [tutorial](#tutorial---adding-a-python-script-to-a-bwb-workflow) and a [video](https://www.youtube.com/watch?v=jtu-jCU2DU0)  showing how to add a script to a Bwb pipeline.
