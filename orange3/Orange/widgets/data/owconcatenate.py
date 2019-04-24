@@ -30,10 +30,9 @@ class OWConcatenate(widget.OWWidget):
 
     class Inputs:
         primary_data = Input("Primary Data", Orange.data.Table)
-        additional_data = Input("Additional Data",
-                                Orange.data.Table,
-                                multiple=True,
-                                default=True)
+        additional_data = Input(
+            "Additional Data", Orange.data.Table, multiple=True, default=True
+        )
 
     class Outputs:
         data = Output("Data", Orange.data.Table)
@@ -56,8 +55,10 @@ class OWConcatenate(widget.OWWidget):
     want_main_area = False
     resizing_enabled = False
 
-    domain_opts = ("Union of attributes appearing in all tables",
-                   "Intersection of attributes in all tables")
+    domain_opts = (
+        "Union of attributes appearing in all tables",
+        "Intersection of attributes in all tables",
+    )
 
     id_roles = ("Class attribute", "Attribute", "Meta attribute")
 
@@ -71,12 +72,12 @@ class OWConcatenate(widget.OWWidget):
 
         self.mergebox = gui.vBox(self.controlArea, "Domain Merging")
         box = gui.radioButtons(
-            self.mergebox, self, "merge_type",
-            callback=self._merge_type_changed)
+            self.mergebox, self, "merge_type", callback=self._merge_type_changed
+        )
 
         gui.widgetLabel(
-            box, self.tr("When there is no primary table, " +
-                         "the domain should be:"))
+            box, self.tr("When there is no primary table, " + "the domain should be:")
+        )
 
         for opts in self.domain_opts:
             gui.appendRadioButton(box, self.tr(opts))
@@ -85,19 +86,25 @@ class OWConcatenate(widget.OWWidget):
 
         label = gui.widgetLabel(
             box,
-            self.tr("The resulting table will have a class only if there " +
-                    "is no conflict between input classes."))
+            self.tr(
+                "The resulting table will have a class only if there "
+                + "is no conflict between input classes."
+            ),
+        )
         label.setWordWrap(True)
 
         ###
         box = gui.vBox(
-            self.controlArea, self.tr("Source Identification"),
-            addSpace=False)
+            self.controlArea, self.tr("Source Identification"), addSpace=False
+        )
 
         cb = gui.checkBox(
-            box, self, "append_source_column",
+            box,
+            self,
+            "append_source_column",
             self.tr("Append data source IDs"),
-            callback=self._source_changed)
+            callback=self._source_changed,
+        )
 
         ibox = gui.indentedBox(box, sep=gui.checkButtonOffsetHint(cb))
 
@@ -105,18 +112,30 @@ class OWConcatenate(widget.OWWidget):
             spacing=8,
             labelAlignment=Qt.AlignLeft,
             formAlignment=Qt.AlignLeft,
-            fieldGrowthPolicy=QFormLayout.AllNonFixedFieldsGrow
+            fieldGrowthPolicy=QFormLayout.AllNonFixedFieldsGrow,
         )
 
         form.addRow(
             self.tr("Feature name:"),
-            gui.lineEdit(ibox, self, "source_attr_name", valueType=str,
-                         callback=self._source_changed))
+            gui.lineEdit(
+                ibox,
+                self,
+                "source_attr_name",
+                valueType=str,
+                callback=self._source_changed,
+            ),
+        )
 
         form.addRow(
             self.tr("Place:"),
-            gui.comboBox(ibox, self, "source_column_role", items=self.id_roles,
-                         callback=self._source_changed))
+            gui.comboBox(
+                ibox,
+                self,
+                "source_column_role",
+                items=self.id_roles,
+                callback=self._source_changed,
+            ),
+        )
 
         ibox.layout().addLayout(form)
         mleft, mtop, mright, _ = ibox.layout().getContentsMargins()
@@ -126,8 +145,14 @@ class OWConcatenate(widget.OWWidget):
         cb.makeConsistent()
 
         box = gui.auto_commit(
-            self.controlArea, self, "auto_commit", "Apply", commit=self.apply,
-            orientation=Qt.Horizontal, checkbox_label="Apply automatically")
+            self.controlArea,
+            self,
+            "auto_commit",
+            "Apply",
+            commit=self.apply,
+            orientation=Qt.Horizontal,
+            checkbox_label="Apply automatically",
+        )
         box.button.setFixedWidth(180)
         box.layout().insertStretch(0)
 
@@ -156,33 +181,30 @@ class OWConcatenate(widget.OWWidget):
         elif self.more_data:
             tables = self.more_data.values()
             if self.merge_type == OWConcatenate.MergeUnion:
-                domain = reduce(domain_union,
-                                (table.domain for table in tables))
+                domain = reduce(domain_union, (table.domain for table in tables))
             else:
-                domain = reduce(domain_intersection,
-                                (table.domain for table in tables))
+                domain = reduce(domain_intersection, (table.domain for table in tables))
 
         if tables and self.append_source_column:
             assert domain is not None
-            names = [getattr(t, 'name', '') for t in tables]
+            names = [getattr(t, "name", "") for t in tables]
             if len(names) != len(set(names)):
-                names = ['{} ({})'.format(name, i)
-                         for i, name in enumerate(names)]
+                names = ["{} ({})".format(name, i) for i, name in enumerate(names)]
             source_var = Orange.data.DiscreteVariable(
-                self.source_attr_name,
-                values=names
+                self.source_attr_name, values=names
             )
             places = ["class_vars", "attributes", "metas"]
             domain = add_columns(
-                domain,
-                **{places[self.source_column_role]: (source_var,)})
+                domain, **{places[self.source_column_role]: (source_var,)}
+            )
 
         tables = [table.transform(domain) for table in tables]
         if tables:
             data = type(tables[0]).concatenate(tables, axis=0)
             if source_var:
-                source_ids = np.array(list(flatten(
-                    [i] * len(table) for i, table in enumerate(tables)))).reshape((-1, 1))
+                source_ids = np.array(
+                    list(flatten([i] * len(table) for i, table in enumerate(tables)))
+                ).reshape((-1, 1))
                 data[:, source_var] = source_ids
 
         else:
@@ -190,7 +212,7 @@ class OWConcatenate(widget.OWWidget):
 
         self.Outputs.data.send(data)
 
-    def _merge_type_changed(self, ):
+    def _merge_type_changed(self,):
         if self.primary_data is None and self.more_data:
             self.apply()
 
@@ -205,8 +227,8 @@ class OWConcatenate(widget.OWWidget):
             items["Domain"] = self.tr(self.domain_opts[self.merge_type]).lower()
         if self.append_source_column:
             items["Source data ID"] = "{} (as {})".format(
-                self.source_attr_name,
-                self.id_roles[self.source_column_role].lower())
+                self.source_attr_name, self.id_roles[self.source_column_role].lower()
+            )
         self.report_items(items)
 
 
@@ -222,7 +244,7 @@ def domain_union(A, B):
     union = Orange.data.Domain(
         tuple(unique(A.attributes + B.attributes)),
         tuple(unique(A.class_vars + B.class_vars)),
-        tuple(unique(A.metas + B.metas))
+        tuple(unique(A.metas + B.metas)),
     )
     return union
 

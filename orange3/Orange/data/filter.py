@@ -60,8 +60,9 @@ class IsDefined(Filter):
             except NotImplementedError:
                 pass
 
-        r = np.fromiter((not bn.anynan(inst._x) for inst in data),
-                        dtype=bool, count=len(data))
+        r = np.fromiter(
+            (not bn.anynan(inst._x) for inst in data), dtype=bool, count=len(data)
+        )
         if self.negate:
             r = np.logical_not(r)
         return data[r]
@@ -153,8 +154,7 @@ class SameValue(Filter):
                 pass
 
         column = data.domain.index(self.column)
-        if (data.domain[column].is_primitive() and
-                not isinstance(self.value, Real)):
+        if data.domain[column].is_primitive() and not isinstance(self.value, Real):
             value = data.domain[column].to_val(self.value)
         else:
             value = self.value
@@ -162,22 +162,22 @@ class SameValue(Filter):
         if column >= 0:
             if self.negate:
                 retain = np.fromiter(
-                    (inst[column] != value for inst in data),
-                     bool, len(data))
+                    (inst[column] != value for inst in data), bool, len(data)
+                )
             else:
                 retain = np.fromiter(
-                    (inst[column] == value for inst in data),
-                     bool, len(data))
+                    (inst[column] == value for inst in data), bool, len(data)
+                )
         else:
             column = -1 - column
             if self.negate:
                 retain = np.fromiter(
-                    (inst._metas[column] != value for inst in data),
-                     bool, len(data))
+                    (inst._metas[column] != value for inst in data), bool, len(data)
+                )
             else:
                 retain = np.fromiter(
-                    (inst._metas[column] == value for inst in data),
-                     bool, len(data))
+                    (inst._metas[column] == value for inst in data), bool, len(data)
+                )
         return data[retain]
 
 
@@ -288,8 +288,11 @@ class FilterDiscrete(ValueFilter):
             return value in self.values
 
     def __eq__(self, other):
-        return isinstance(other, FilterDiscrete) and \
-               self.column == other.column and self.values == other.values
+        return (
+            isinstance(other, FilterDiscrete)
+            and self.column == other.column
+            and self.values == other.values
+        )
 
 
 class FilterContinuous(ValueFilter):
@@ -316,11 +319,23 @@ class FilterContinuous(ValueFilter):
         `LessEqual`, `Greater`, `GreaterEqual`, `Between`, `Outside` or
         `IsDefined`.
     """
-    Type = Enum('FilterContinuous',
-                'Equal, NotEqual, Less, LessEqual, Greater,'
-                'GreaterEqual, Between, Outside, IsDefined')
-    (Equal, NotEqual, Less, LessEqual, Greater, GreaterEqual,
-     Between, Outside, IsDefined) = Type
+
+    Type = Enum(
+        "FilterContinuous",
+        "Equal, NotEqual, Less, LessEqual, Greater,"
+        "GreaterEqual, Between, Outside, IsDefined",
+    )
+    (
+        Equal,
+        NotEqual,
+        Less,
+        LessEqual,
+        Greater,
+        GreaterEqual,
+        Between,
+        Outside,
+        IsDefined,
+    ) = Type
 
     def __init__(self, position, oper, ref=None, max=None, min=None):
         super().__init__(position)
@@ -364,9 +379,13 @@ class FilterContinuous(ValueFilter):
         raise ValueError("invalid operator")
 
     def __eq__(self, other):
-        return isinstance(other, FilterContinuous) and \
-               self.column == other.column and self.oper == other.oper and \
-               self.ref == other.ref and self.max == other.max
+        return (
+            isinstance(other, FilterContinuous)
+            and self.column == other.column
+            and self.oper == other.oper
+            and self.ref == other.ref
+            and self.max == other.max
+        )
 
     def __str__(self):
         if isinstance(self.column, str):
@@ -376,9 +395,14 @@ class FilterContinuous(ValueFilter):
         else:
             column = "feature({})".format(self.column)
 
-        names = {self.Equal: "=", self.NotEqual: "≠",
-                 self.Less: "<", self.LessEqual: "≤",
-                 self.Greater: ">", self.GreaterEqual: "≥"}
+        names = {
+            self.Equal: "=",
+            self.NotEqual: "≠",
+            self.Less: "<",
+            self.LessEqual: "≤",
+            self.Greater: ">",
+            self.GreaterEqual: "≥",
+        }
         if self.oper in names:
             return "{} {} {}".format(column, names[self.oper], self.ref)
         if self.oper == self.Between:
@@ -418,20 +442,33 @@ class FilterString(ValueFilter):
 
         Tells whether the comparisons are case sensitive
     """
-    Type = Enum('FilterString',
-                'Equal, NotEqual, Less, LessEqual, Greater,'
-                'GreaterEqual, Between, Outside, Contains,'
-                'StartsWith, EndsWith, IsDefined')
-    (Equal, NotEqual, Less, LessEqual, Greater, GreaterEqual,
-     Between, Outside, Contains, StartsWith, EndsWith, IsDefined) = Type
 
-    def __init__(self, position, oper, ref=None, max=None,
-                 case_sensitive=True, **a):
+    Type = Enum(
+        "FilterString",
+        "Equal, NotEqual, Less, LessEqual, Greater,"
+        "GreaterEqual, Between, Outside, Contains,"
+        "StartsWith, EndsWith, IsDefined",
+    )
+    (
+        Equal,
+        NotEqual,
+        Less,
+        LessEqual,
+        Greater,
+        GreaterEqual,
+        Between,
+        Outside,
+        Contains,
+        StartsWith,
+        EndsWith,
+        IsDefined,
+    ) = Type
+
+    def __init__(self, position, oper, ref=None, max=None, case_sensitive=True, **a):
         super().__init__(position)
         if a:
             if len(a) != 1 or "min" not in a:
-                raise TypeError(
-                    "FilterContinuous got unexpected keyword arguments")
+                raise TypeError("FilterContinuous got unexpected keyword arguments")
             else:
                 ref = a["min"]
         self.ref = ref
@@ -531,6 +568,7 @@ class FilterStringList(ValueFilter):
 
 class FilterRegex(ValueFilter):
     """Filter that checks whether the values match the regular expression."""
+
     def __init__(self, column, pattern, flags=0):
         super().__init__(column)
         self._re = re.compile(pattern, flags)
@@ -539,4 +577,4 @@ class FilterRegex(ValueFilter):
         self.flags = flags
 
     def __call__(self, inst):
-        return bool(self._re.search(inst or ''))
+        return bool(self._re.search(inst or ""))

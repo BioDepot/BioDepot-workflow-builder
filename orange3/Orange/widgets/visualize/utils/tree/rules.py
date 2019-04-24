@@ -69,20 +69,24 @@ class DiscreteRule(Rule):
     def merge_with(self, rule):
         # It does not make sense to merge discrete rules, since they can only
         # be eq or not eq.
-        warnings.warn('Merged two discrete rules `%s` and `%s`' % (self, rule))
+        warnings.warn("Merged two discrete rules `%s` and `%s`" % (self, rule))
         return rule
 
     @property
     def description(self):
-        return '{} {}'.format('=' if self.equals else '≠', self.value)
+        return "{} {}".format("=" if self.equals else "≠", self.value)
 
     def __str__(self):
-        return '{} {} {}'.format(
-            self.attr_name, '=' if self.equals else '≠', self.value)
+        return "{} {} {}".format(
+            self.attr_name, "=" if self.equals else "≠", self.value
+        )
 
     def __repr__(self):
         return "DiscreteRule(attr_name='%s', equals=%s, value=%s)" % (
-            self.attr_name, self.equals, self.value)
+            self.attr_name,
+            self.equals,
+            self.value,
+        )
 
 
 class ContinuousRule(Rule):
@@ -121,8 +125,10 @@ class ContinuousRule(Rule):
 
     def merge_with(self, rule):
         if not isinstance(rule, ContinuousRule):
-            raise NotImplementedError('Continuous rules can currently only be '
-                                      'merged with other continuous rules')
+            raise NotImplementedError(
+                "Continuous rules can currently only be "
+                "merged with other continuous rules"
+            )
         # Handle when both have same sign
         if self.greater == rule.greater:
             # When both are GT
@@ -140,16 +146,16 @@ class ContinuousRule(Rule):
 
     @property
     def description(self):
-        return '%s %.3f' % ('>' if self.greater else '≤', self.value)
+        return "%s %.3f" % (">" if self.greater else "≤", self.value)
 
     def __str__(self):
-        return '%s %s %.3f' % (
-            self.attr_name, '>' if self.greater else '≤', self.value)
+        return "%s %s %.3f" % (self.attr_name, ">" if self.greater else "≤", self.value)
 
     def __repr__(self):
-        return "ContinuousRule(attr_name='%s', greater=%s, value=%s, " \
-               "inclusive=%s)" % (self.attr_name, self.greater, self.value,
-                                  self.inclusive)
+        return (
+            "ContinuousRule(attr_name='%s', greater=%s, value=%s, "
+            "inclusive=%s)" % (self.attr_name, self.greater, self.value, self.inclusive)
+        )
 
 
 class IntervalRule(Rule):
@@ -181,12 +187,12 @@ class IntervalRule(Rule):
     def __init__(self, attr_name, left_rule, right_rule):
         if not isinstance(left_rule, ContinuousRule):
             raise AttributeError(
-                'The left rule must be an instance of the `ContinuousRule` '
-                'class.')
+                "The left rule must be an instance of the `ContinuousRule` " "class."
+            )
         if not isinstance(right_rule, ContinuousRule):
             raise AttributeError(
-                'The right rule must be an instance of the `ContinuousRule` '
-                'class.')
+                "The right rule must be an instance of the `ContinuousRule` " "class."
+            )
 
         self.attr_name = attr_name
         self.left_rule = left_rule
@@ -196,37 +202,41 @@ class IntervalRule(Rule):
         if isinstance(rule, ContinuousRule):
             if rule.greater:
                 return IntervalRule(
-                    self.attr_name, self.left_rule.merge_with(rule),
-                    self.right_rule)
+                    self.attr_name, self.left_rule.merge_with(rule), self.right_rule
+                )
             else:
                 return IntervalRule(
-                    self.attr_name, self.left_rule,
-                    self.right_rule.merge_with(rule))
+                    self.attr_name, self.left_rule, self.right_rule.merge_with(rule)
+                )
 
         elif isinstance(rule, IntervalRule):
             return IntervalRule(
                 self.attr_name,
                 self.left_rule.merge_with(rule.left_rule),
-                self.right_rule.merge_with(rule.right_rule))
+                self.right_rule.merge_with(rule.right_rule),
+            )
 
     @property
     def description(self):
-        return '∈ %s%.3f, %.3f%s' % (
-            '[' if self.left_rule.inclusive else '(',
+        return "∈ %s%.3f, %.3f%s" % (
+            "[" if self.left_rule.inclusive else "(",
             self.left_rule.value,
             self.right_rule.value,
-            ']' if self.right_rule.inclusive else ')'
+            "]" if self.right_rule.inclusive else ")",
         )
 
     def __str__(self):
-        return '%s ∈ %s%.3f, %.3f%s' % (
+        return "%s ∈ %s%.3f, %.3f%s" % (
             self.attr_name,
-            '[' if self.left_rule.inclusive else '(',
+            "[" if self.left_rule.inclusive else "(",
             self.left_rule.value,
             self.right_rule.value,
-            ']' if self.right_rule.inclusive else ')'
+            "]" if self.right_rule.inclusive else ")",
         )
 
     def __repr__(self):
         return "IntervalRule(attr_name='%s', left_rule=%s, right_rule=%s)" % (
-            self.attr_name, repr(self.left_rule), repr(self.right_rule))
+            self.attr_name,
+            repr(self.left_rule),
+            repr(self.right_rule),
+        )

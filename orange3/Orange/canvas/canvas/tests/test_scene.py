@@ -13,8 +13,7 @@ class TestScene(QAppTestCase):
         QAppTestCase.setUp(self)
         self.scene = CanvasScene()
         self.view = QGraphicsView(self.scene)
-        self.view.setRenderHints(QPainter.Antialiasing | \
-                                 QPainter.TextAntialiasing)
+        self.view.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
         self.view.show()
         self.view.resize(400, 300)
 
@@ -33,13 +32,13 @@ class TestScene(QAppTestCase):
 
         # Remove a node
         self.scene.remove_node_item(bayes_item)
-        self.assertSequenceEqual(self.scene.node_items(),
-                                 [file_item, disc_item])
+        self.assertSequenceEqual(self.scene.node_items(), [file_item, disc_item])
 
         # And add it again
         self.scene.add_node_item(bayes_item)
-        self.assertSequenceEqual(self.scene.node_items(),
-                                 [file_item, disc_item, bayes_item])
+        self.assertSequenceEqual(
+            self.scene.node_items(), [file_item, disc_item, bayes_item]
+        )
 
         # Adding the same item again should raise an exception
         with self.assertRaises(ValueError):
@@ -166,8 +165,9 @@ class TestScene(QAppTestCase):
         disc_item = self.scene.add_node(disc_node)
         bayes_item = self.scene.add_node(bayes_node)
 
-        self.assertSequenceEqual(self.scene.node_items(),
-                                 [file_item, disc_item, bayes_item])
+        self.assertSequenceEqual(
+            self.scene.node_items(), [file_item, disc_item, bayes_item]
+        )
         self.assertSequenceEqual(self.scene.node_items(), node_items)
 
         # The scheme is still the same.
@@ -188,19 +188,18 @@ class TestScene(QAppTestCase):
         self.scene.commit_scheme_node(disc_node)
         self.scene.commit_scheme_node(bayes_node)
 
-        self.assertSequenceEqual(self.scene.node_items(),
-                                 [file_item, disc_item, bayes_item])
+        self.assertSequenceEqual(
+            self.scene.node_items(), [file_item, disc_item, bayes_item]
+        )
         self.assertSequenceEqual(self.scene.node_items(), node_items)
-        self.assertSequenceEqual(test_scheme.nodes,
-                                 [file_node, disc_node, bayes_node])
+        self.assertSequenceEqual(test_scheme.nodes, [file_node, disc_node, bayes_node])
 
         link1 = scheme.SchemeLink(file_node, "Data", disc_node, "Data")
         link2 = scheme.SchemeLink(disc_node, "Data", bayes_node, "Data")
         link_item1 = self.scene.add_link(link1)
         link_item2 = self.scene.add_link(link2)
 
-        self.assertSequenceEqual(self.scene.link_items(),
-                                 [link_item1, link_item2])
+        self.assertSequenceEqual(self.scene.link_items(), [link_item1, link_item2])
         self.assertSequenceEqual(self.scene.link_items(), link_items)
         self.assertSequenceEqual(test_scheme.links, [])
 
@@ -208,28 +207,21 @@ class TestScene(QAppTestCase):
         self.scene.commit_scheme_link(link1)
         self.scene.commit_scheme_link(link2)
 
-        self.assertSequenceEqual(self.scene.link_items(),
-                                 [link_item1, link_item2])
+        self.assertSequenceEqual(self.scene.link_items(), [link_item1, link_item2])
         self.assertSequenceEqual(self.scene.link_items(), link_items)
-        self.assertSequenceEqual(test_scheme.links,
-                                 [link1, link2])
+        self.assertSequenceEqual(test_scheme.links, [link1, link2])
 
         self.app.exec_()
 
     def widget_desc(self):
         from ...registry.tests import small_testing_registry
+
         reg = small_testing_registry()
 
-        file_desc = reg.widget(
-            "Orange.widgets.data.owfile.OWFile"
-        )
+        file_desc = reg.widget("Orange.widgets.data.owfile.OWFile")
 
-        discretize_desc = reg.widget(
-            "Orange.widgets.data.owdiscretize.OWDiscretize"
-        )
+        discretize_desc = reg.widget("Orange.widgets.data.owdiscretize.OWDiscretize")
 
-        bayes_desc = reg.widget(
-            "Orange.widgets.classify.ownaivebayes.OWNaiveBayes"
-        )
+        bayes_desc = reg.widget("Orange.widgets.classify.ownaivebayes.OWNaiveBayes")
 
         return file_desc, discretize_desc, bayes_desc

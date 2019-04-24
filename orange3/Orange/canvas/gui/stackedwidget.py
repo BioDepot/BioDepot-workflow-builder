@@ -56,6 +56,7 @@ class StackLayout(QStackedLayout):
     `current` widget.
 
     """
+
     def __init__(self, parent=None):
         self.__rect = QRect()
         QStackedLayout.__init__(self, parent)
@@ -66,8 +67,7 @@ class StackLayout(QStackedLayout):
         if current:
             hint = current.sizeHint()
             # Clip the hint with min/max sizes.
-            hint = clipMinMax(hint, current.minimumSize(),
-                              current.maximumSize())
+            hint = clipMinMax(hint, current.minimumSize(), current.maximumSize())
             return hint
         else:
             return QStackedLayout.sizeHint(self)
@@ -132,14 +132,13 @@ class AnimatedStackedWidget(QFrame):
 
         self.__fadeWidget = CrossFadePixmapWidget(self)
 
-        self.transitionAnimation = \
-            QPropertyAnimation(self.__fadeWidget, b"blendingFactor_", self)
+        self.transitionAnimation = QPropertyAnimation(
+            self.__fadeWidget, b"blendingFactor_", self
+        )
         self.transitionAnimation.setStartValue(0.0)
         self.transitionAnimation.setEndValue(1.0)
         self.transitionAnimation.setDuration(100 if animationEnabled else 0)
-        self.transitionAnimation.finished.connect(
-            self.__onTransitionFinished
-        )
+        self.transitionAnimation.finished.connect(self.__onTransitionFinished)
 
         layout.addWidget(self.__fadeWidget)
         layout.currentChanged.connect(self.__onLayoutCurrentChanged)
@@ -156,9 +155,7 @@ class AnimatedStackedWidget(QFrame):
         """
         if self.__animationEnabled != animationEnabled:
             self.__animationEnabled = animationEnabled
-            self.transitionAnimation.setDuration(
-                100 if animationEnabled else 0
-            )
+            self.transitionAnimation.setDuration(100 if animationEnabled else 0)
 
     def animationEnabled(self):
         """
@@ -228,18 +225,20 @@ class AnimatedStackedWidget(QFrame):
             self.__currentIndex = index
             return
 
-#        if not self.animationEnabled():
-#            self.layout().setCurrentIndex(index)
-#            self.__currentIndex = index
-#            return
+        #        if not self.animationEnabled():
+        #            self.layout().setCurrentIndex(index)
+        #            self.__currentIndex = index
+        #            return
 
         # else start the animation
         current = self.__widgets[self.__currentIndex]
         next_widget = self.__widgets[index]
 
         def has_pending_resize(widget):
-            return widget.testAttribute(Qt.WA_PendingResizeEvent) or \
-                   not widget.testAttribute(Qt.WA_WState_Created)
+            return widget.testAttribute(
+                Qt.WA_PendingResizeEvent
+            ) or not widget.testAttribute(Qt.WA_WState_Created)
+
         current_pix = next_pix = None
         if not has_pending_resize(current):
             current_pix = current.grab()
@@ -296,6 +295,7 @@ class CrossFadePixmapWidget(QWidget):
     """
     A widget for cross fading between two pixmaps.
     """
+
     def __init__(self, parent=None, pixmap1=None, pixmap2=None):
         QWidget.__init__(self, parent)
         self.setPixmap(pixmap1)
@@ -330,8 +330,7 @@ class CrossFadePixmapWidget(QWidget):
         """
         return self.__blendingFactor
 
-    blendingFactor_ = Property(float, fget=blendingFactor,
-                               fset=setBlendingFactor)
+    blendingFactor_ = Property(float, fget=blendingFactor, fset=setBlendingFactor)
 
     def sizeHint(self):
         """
@@ -353,8 +352,8 @@ class CrossFadePixmapWidget(QWidget):
         p = QPainter(self)
         p.setClipRect(event.rect())
         factor = self.blendingFactor_ ** 2
-        if self.pixmap1 and 1. - factor:
-            p.setOpacity(1. - factor)
+        if self.pixmap1 and 1.0 - factor:
+            p.setOpacity(1.0 - factor)
             p.drawPixmap(QPoint(0, 0), self.pixmap1)
         if self.pixmap2 and factor:
             p.setOpacity(factor)

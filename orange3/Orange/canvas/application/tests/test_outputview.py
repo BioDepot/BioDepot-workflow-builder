@@ -96,9 +96,10 @@ class TestOutputView(QAppTestCase):
             else:
                 writer = red
 
-            writer.write("Greetings from thread {0}. "
-                         "This is {1}\n".format(current_thread().name,
-                                                fizzbuz))
+            writer.write(
+                "Greetings from thread {0}. "
+                "This is {1}\n".format(current_thread().name, fizzbuz)
+            )
 
         pool = multiprocessing.pool.ThreadPool(100)
         res = pool.map_async(printer, range(10000))

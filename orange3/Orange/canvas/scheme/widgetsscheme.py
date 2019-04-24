@@ -97,12 +97,14 @@ class WidgetsScheme(Scheme):
 
     def show_report_view(self):
         from Orange.canvas.report.owreport import OWReport
+
         inst = OWReport.get_instance()
         inst.show()
         inst.raise_()
 
     def dump_settings(self, node: SchemeNode):
         from Orange.widgets.settings import SettingsPrinter
+
         widget = self.widget_for_node(node)
 
         pp = SettingsPrinter(indent=4)
@@ -117,6 +119,7 @@ class WidgetManager(QObject):
     :class:`WidgetsScheme`.
 
     """
+
     #: A new OWWidget was created and added by the manager.
     widget_for_node_added = Signal(SchemeNode, QWidget)
 
@@ -125,6 +128,7 @@ class WidgetManager(QObject):
 
     class ProcessingState(enum.IntEnum):
         """Widget processing state flags"""
+
         #: Signal manager is updating/setting the widget's inputs
         InputUpdate = 1
         #: Widget has entered a blocking state (OWWidget.isBlocking)
@@ -141,17 +145,15 @@ class WidgetManager(QObject):
     _DelayDeleteMask = InputUpdate | BlockingUpdate
 
     #: Widget initialization states
-    Delayed = namedtuple(
-        "Delayed", ["node"])
+    Delayed = namedtuple("Delayed", ["node"])
     PartiallyInitialized = namedtuple(
-        "Materializing",
-        ["node", "partially_initialized_widget"])
-    Materialized = namedtuple(
-        "Materialized",
-        ["node", "widget"])
+        "Materializing", ["node", "partially_initialized_widget"]
+    )
+    Materialized = namedtuple("Materialized", ["node", "widget"])
 
     class CreationPolicy(enum.Enum):
         """Widget Creation Policy"""
+
         #: Widgets are scheduled to be created from the event loop, or when
         #: first accessed with `widget_for_node`
         Normal = "Normal"
@@ -236,12 +238,15 @@ class WidgetManager(QObject):
             return state.widget
         elif isinstance(state, WidgetManager.PartiallyInitialized):
             widget = state.partially_initialized_widget
-            log.warning("WidgetManager.widget_for_node: "
-                        "Accessing a partially created widget instance. "
-                        "This is most likely a result of explicit "
-                        "QApplication.processEvents call from the '%s.%s' "
-                        "widgets __init__.",
-                        type(widget).__module__, type(widget).__name__)
+            log.warning(
+                "WidgetManager.widget_for_node: "
+                "Accessing a partially created widget instance. "
+                "This is most likely a result of explicit "
+                "QApplication.processEvents call from the '%s.%s' "
+                "widgets __init__.",
+                type(widget).__module__,
+                type(widget).__name__,
+            )
             return widget
         elif isinstance(state, WidgetManager.Materialized):
             return state.widget
@@ -375,9 +380,10 @@ class WidgetManager(QObject):
                 "A widget/node {} was removed while being initialized. "
                 "This is most likely a result of an explicit "
                 "QApplication.processEvents call from the '{}.{}' "
-                "widgets __init__.\n"
-                .format(state.node.title, type(widget).__module__,
-                        type(widget).__init__))
+                "widgets __init__.\n".format(
+                    state.node.title, type(widget).__module__, type(widget).__init__
+                )
+            )
 
     def _widget_settings(self, widget):
         return widget.settingsHandler.pack_data(widget)
@@ -396,8 +402,11 @@ class WidgetManager(QObject):
         if state & WidgetManager._DelayDeleteMask:
             # If the widget is in an update loop and/or blocking we
             # delay the scheduled deletion until the widget is done.
-            log.debug("Widget %s removed but still in state :%s. "
-                      "Deferring deletion.", widget, state)
+            log.debug(
+                "Widget %s removed but still in state :%s. " "Deferring deletion.",
+                widget,
+                state,
+            )
             self.__delay_delete.add(widget)
         else:
             widget.deleteLater()
@@ -430,8 +439,12 @@ class WidgetManager(QObject):
             initialized = True
 
         if widget is None:
-            log.info("WidgetManager: Creating '%s.%s' instance '%s'.",
-                     klass.__module__, klass.__name__, node.title)
+            log.info(
+                "WidgetManager: Creating '%s.%s' instance '%s'.",
+                klass.__module__,
+                klass.__name__,
+                node.title,
+            )
 
             widget = klass.__new__(
                 klass,
@@ -441,7 +454,7 @@ class WidgetManager(QObject):
                 stored_settings=node.properties,
                 # NOTE: env is a view of the real env and reflects
                 # changes to the environment.
-                env=self.scheme().runtime_env()
+                env=self.scheme().runtime_env(),
             )
             initialized = False
 
@@ -455,8 +468,9 @@ class WidgetManager(QObject):
         self.__widget_for_node[node] = widget
         self.__node_for_widget[widget] = node
         self.__widget_processing_state[widget] = WidgetManager.Initializing
-        self.__initstate_for_node[node] = \
-            WidgetManager.PartiallyInitialized(node, widget)
+        self.__initstate_for_node[node] = WidgetManager.PartiallyInitialized(
+            node, widget
+        )
 
         if not initialized:
             try:
@@ -464,9 +478,7 @@ class WidgetManager(QObject):
             except Exception:
                 sys.excepthook(*sys.exc_info())
                 msg = traceback.format_exc()
-                msg = "Could not create {0!r}\n\n{1}".format(
-                    node.description.name, msg
-                )
+                msg = "Could not create {0!r}\n\n{1}".format(node.description.name, msg)
                 # remove state tracking for widget ...
                 del self.__widget_for_node[node]
                 del self.__node_for_widget[widget]
@@ -477,11 +489,11 @@ class WidgetManager(QObject):
                 self.__widget_for_node[node] = widget
                 self.__node_for_widget[widget] = node
                 self.__widget_processing_state[widget] = 0
-                self.__initstate_for_node[node] = \
-                    WidgetManager.Materialized(node, widget)
+                self.__initstate_for_node[node] = WidgetManager.Materialized(
+                    node, widget
+                )
 
-        self.__initstate_for_node[node] = \
-            WidgetManager.Materialized(node, widget)
+        self.__initstate_for_node[node] = WidgetManager.Materialized(node, widget)
         # Clear Initializing flag
         self.__widget_processing_state[widget] &= ~WidgetManager.Initializing
 
@@ -500,9 +512,7 @@ class WidgetManager(QObject):
 
         # Widget processing state (progressBarInit/Finished)
         # and the blocking state.
-        widget.processingStateChanged.connect(
-            self.__on_processing_state_changed
-        )
+        widget.processingStateChanged.connect(self.__on_processing_state_changed)
         widget.blockingStateChanged.connect(self.__on_blocking_state_changed)
 
         if widget.isBlocking():
@@ -523,14 +533,11 @@ class WidgetManager(QObject):
             help_action.triggered.connect(self.__on_help_request)
 
         # Up shortcut (activate/open parent)
-        up_shortcut = QShortcut(
-            QKeySequence(Qt.ControlModifier + Qt.Key_Up), widget)
+        up_shortcut = QShortcut(QKeySequence(Qt.ControlModifier + Qt.Key_Up), widget)
         up_shortcut.activated.connect(self.__on_activate_parent)
 
         # Call setters only after initialization.
-        widget.setWindowIcon(
-            icon_loader.from_description(desc).get(desc.icon)
-        )
+        widget.setWindowIcon(icon_loader.from_description(desc).get(desc.icon))
         widget.setCaption(node.title)
 
         # Schedule an update with the signal manager, due to the cleared
@@ -569,8 +576,7 @@ class WidgetManager(QObject):
             node = state.node
             self.__initstate_for_node[node] = self.__materialize(state)
 
-        if self.__creation_policy == WidgetManager.Normal and \
-                self.__init_queue:
+        if self.__creation_policy == WidgetManager.Normal and self.__init_queue:
             # restart the timer if pending widgets still in the queue
             self.__init_timer.start()
 
@@ -713,15 +719,14 @@ class WidgetManager(QObject):
         node.set_processing_state(1 if state else 0)
 
     def __try_delete(self, widget):
-        if not (self.__widget_processing_state[widget]
-                & WidgetManager._DelayDeleteMask):
+        if not (
+            self.__widget_processing_state[widget] & WidgetManager._DelayDeleteMask
+        ):
             log.debug("Delayed delete for widget %s", widget)
             self.__delay_delete.remove(widget)
             del self.__widget_processing_state[widget]
-            widget.blockingStateChanged.disconnect(
-                self.__on_blocking_state_changed)
-            widget.processingStateChanged.disconnect(
-                self.__on_processing_state_changed)
+            widget.blockingStateChanged.disconnect(self.__on_blocking_state_changed)
+            widget.processingStateChanged.disconnect(self.__on_processing_state_changed)
             widget.deleteLater()
 
     def __on_env_changed(self, key, newvalue, oldvalue):
@@ -734,15 +739,16 @@ def user_message_from_state(message_group):
     return UserMessage(
         severity=message_group.severity,
         message_id=message_group,
-        contents="<br/>".join(msg.formatted
-                              for msg in message_group.active) or None,
-        data={"content-type": "text/html"})
+        contents="<br/>".join(msg.formatted for msg in message_group.active) or None,
+        data={"content-type": "text/html"},
+    )
 
 
 class WidgetsSignalManager(SignalManager):
     """
     A signal manager for a WidgetsScheme.
     """
+
     def __init__(self, scheme):
         SignalManager.__init__(self, scheme)
 
@@ -761,16 +767,20 @@ class WidgetsSignalManager(SignalManager):
             node = scheme.node_for_widget(widget)
         except KeyError:
             # The Node/Widget was already removed from the scheme.
-            log.debug("Node for '%s' (%s.%s) is not in the scheme.",
-                      widget.captionTitle,
-                      type(widget).__module__, type(widget).__name__)
+            log.debug(
+                "Node for '%s' (%s.%s) is not in the scheme.",
+                widget.captionTitle,
+                type(widget).__module__,
+                type(widget).__name__,
+            )
             return
 
         try:
             channel = node.output_channel(channelname)
         except ValueError:
-            log.error("%r is not valid signal name for %r",
-                      channelname, node.description.name)
+            log.error(
+                "%r is not valid signal name for %r", channelname, node.description.name
+            )
             return
 
         # Expand the signal_id with the unique widget id and the
@@ -782,9 +792,11 @@ class WidgetsSignalManager(SignalManager):
 
     def is_blocking(self, node):
         """Reimplemented from `SignalManager`"""
-        mask = (WidgetManager.InputUpdate |
-                WidgetManager.BlockingUpdate |
-                WidgetManager.Initializing)
+        mask = (
+            WidgetManager.InputUpdate
+            | WidgetManager.BlockingUpdate
+            | WidgetManager.Initializing
+        )
         return self.scheme().widget_manager.node_processing_state(node) & mask
 
     def send_to_node(self, node, signals):
@@ -810,8 +822,7 @@ class WidgetsSignalManager(SignalManager):
         # This replaces the old OWBaseWidget.processSignals method
 
         if sip.isdeleted(widget):
-            log.critical("Widget %r was deleted. Cannot process signals",
-                         widget)
+            log.critical("Widget %r was deleted. Cannot process signals", widget)
             return
 
         app = QCoreApplication.instance()
@@ -834,20 +845,26 @@ class WidgetsSignalManager(SignalManager):
             handler = getattr(widget, handler)
 
             if link.sink_channel.single:
-                args = (value, )
+                args = (value,)
             else:
                 args = (value, signal.id)
 
-            log.debug("Process signals: calling %s.%s (from %s with id:%s)",
-                      type(widget).__name__, handler.__name__, link, signal.id)
+            log.debug(
+                "Process signals: calling %s.%s (from %s with id:%s)",
+                type(widget).__name__,
+                handler.__name__,
+                link,
+                signal.id,
+            )
 
             app.setOverrideCursor(Qt.WaitCursor)
             try:
                 handler(*args)
             except Exception:
                 sys.excepthook(*sys.exc_info())
-                log.exception("Error calling '%s' of '%s'",
-                              handler.__name__, node.title)
+                log.exception(
+                    "Error calling '%s' of '%s'", handler.__name__, node.title
+                )
             finally:
                 app.restoreOverrideCursor()
 
@@ -856,8 +873,7 @@ class WidgetsSignalManager(SignalManager):
             widget.handleNewSignals()
         except Exception:
             sys.excepthook(*sys.exc_info())
-            log.exception("Error calling 'handleNewSignals()' of '%s'",
-                          node.title)
+            log.exception("Error calling 'handleNewSignals()' of '%s'", node.title)
         finally:
             app.restoreOverrideCursor()
 
@@ -874,9 +890,11 @@ class WidgetsSignalManager(SignalManager):
                 state = None
 
             if state == SignalManager.Processing:
-                log.info("Deferring a 'DeferredDelete' event for the Scheme "
-                         "instance until SignalManager exits the current "
-                         "update loop.")
+                log.info(
+                    "Deferring a 'DeferredDelete' event for the Scheme "
+                    "instance until SignalManager exits the current "
+                    "update loop."
+                )
                 event.setAccepted(False)
                 self.processingFinished.connect(self.scheme().deleteLater)
                 self.stop()
@@ -907,6 +925,7 @@ def mock_error_owwidget(node, message):
         """
         Dummy OWWidget used to report import/init errors in the canvas.
         """
+
         name = "Placeholder"
 
         # Fake settings handler that preserves the settings
@@ -932,13 +951,9 @@ def mock_error_owwidget(node, message):
         def __init__(self, parent=None):
             super().__init__(parent)
             self.errorLabel = QLabel(
-                textInteractionFlags=Qt.TextSelectableByMouse,
-                wordWrap=True,
+                textInteractionFlags=Qt.TextSelectableByMouse, wordWrap=True
             )
-            self.errorLabel.setSizePolicy(
-                QSizePolicy.Expanding,
-                QSizePolicy.Expanding
-            )
+            self.errorLabel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
             self.controlArea.layout().addWidget(self.errorLabel)
 
         def setErrorMessage(self, message):

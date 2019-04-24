@@ -20,20 +20,23 @@ def _get_variable(dat, variable, expected_type=None, expected_name=""):
         variable = dat.variable
     else:
         failed = True
-    if failed or (expected_type is not None and not isinstance(variable, expected_type)):
+    if failed or (
+        expected_type is not None and not isinstance(variable, expected_type)
+    ):
         if isinstance(variable, data.Variable):
             raise ValueError("expected %s variable not %s" % (expected_name, variable))
         else:
-            raise ValueError("expected %s, not '%s'" % (
-                expected_type.__name__, type(variable).__name__))
+            raise ValueError(
+                "expected %s, not '%s'"
+                % (expected_type.__name__, type(variable).__name__)
+            )
     return variable
 
 
 class Distribution(np.ndarray):
     def __eq__(self, other):
-        return (
-            np.array_equal(self, other) and
-            (not hasattr(other, "unknowns") or self.unknowns == other.unknowns)
+        return np.array_equal(self, other) and (
+            not hasattr(other, "unknowns") or self.unknowns == other.unknowns
         )
 
     def __ne__(self, other):
@@ -98,7 +101,9 @@ class Discrete(Distribution):
             self.unknowns = unknowns or 0
         else:
             self[:] = dat
-            self.unknowns = unknowns if unknowns is not None else getattr(dat, "unknowns", 0)
+            self.unknowns = (
+                unknowns if unknowns is not None else getattr(dat, "unknowns", 0)
+            )
         return self
 
     @classmethod
@@ -197,7 +202,9 @@ class Discrete(Distribution):
         return data.Value(self.variable, val) if self.variable is not None else val
 
     def sample(self, size=None, replace=True):
-        value_indices = np.random.choice(range(len(self)), size, replace, self.normalize())
+        value_indices = np.random.choice(
+            range(len(self)), size, replace, self.normalize()
+        )
         if isinstance(value_indices, Iterable):
             to_value = np.vectorize(lambda idx: data.Value(self.variable, idx))
             return to_value(value_indices)
@@ -227,7 +234,9 @@ class Continuous(Distribution):
                 dat = np.asarray(dat)
             self = super().__new__(cls, dat.shape)
             self[:] = dat
-            self.unknowns = (unknowns if unknowns is not None else getattr(dat, "unknowns", 0))
+            self.unknowns = (
+                unknowns if unknowns is not None else getattr(dat, "unknowns", 0)
+            )
         self.variable = variable
         return self
 
@@ -286,7 +295,9 @@ class Continuous(Distribution):
 
     def variance(self):
         mean = self.mean()
-        return sum(((x - mean) ** 2) * w for x, w in zip(self[0], self[1])) / sum(self[1])
+        return sum(((x - mean) ** 2) * w for x, w in zip(self[0], self[1])) / sum(
+            self[1]
+        )
 
     def standard_deviation(self):
         return np.sqrt(self.variance())
@@ -359,5 +370,7 @@ def get_distributions_for_columns(data, columns):
         return [get_distribution(data, i) for i in columns]
     else:
         # dist_unkn is a list of (values, unknowns)
-        return [get_distribution(dist, domain[col], unknown)
-                for col, (dist, unknown) in zip(columns, dist_unks)]
+        return [
+            get_distribution(dist, domain[col], unknown)
+            for col, (dist, unknown) in zip(columns, dist_unks)
+        ]

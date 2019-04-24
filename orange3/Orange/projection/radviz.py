@@ -20,13 +20,16 @@ def radviz(data, attrs, points=None):
     if points is not None:
         s = points[:, :2]
     else:
-        s = np.array([(np.cos(t), np.sin(t))
-                      for t in [2.0 * np.pi * (i / float(m))
-                                for i in range(m)]])
+        s = np.array(
+            [
+                (np.cos(t), np.sin(t))
+                for t in [2.0 * np.pi * (i / float(m)) for i in range(m)]
+            ]
+        )
     for i in range(n):
         row = x[i]
         row_ = np.repeat(np.expand_dims(row, axis=1), 2, axis=1)
-        with np.errstate(divide='ignore', invalid='ignore'):
+        with np.errstate(divide="ignore", invalid="ignore"):
             a = (s * row_).sum(axis=0)
             b = row.sum()
             y = np.divide(a, b, out=np.zeros_like(a), where=b != 0)

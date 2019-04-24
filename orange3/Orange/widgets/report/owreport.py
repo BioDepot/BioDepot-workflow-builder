@@ -11,7 +11,12 @@ from enum import IntEnum
 from AnyQt.QtCore import Qt, QObject, QFile, QTimer, QUrl, pyqtSlot, QT_VERSION
 from AnyQt.QtGui import QIcon, QCursor, QStandardItemModel, QStandardItem
 from AnyQt.QtWidgets import (
-    QApplication, QDialog, QFileDialog, QTableView, QHeaderView, QSizePolicy
+    QApplication,
+    QDialog,
+    QFileDialog,
+    QTableView,
+    QHeaderView,
+    QSizePolicy,
 )
 from AnyQt.QtPrintSupport import QPrinter, QPrintDialog
 
@@ -28,10 +33,12 @@ try:
     from Orange.widgets.utils.webview import WebviewWidget
 except ImportError:
     from unittest.mock import Mock
+
     WebviewWidget = Mock
 
 
 log = logging.getLogger(__name__)
+
 
 class Column(IntEnum):
     item = 0
@@ -58,8 +65,14 @@ class ReportItem(QStandardItem):
         super().__init__(icon, name)
 
     def __getnewargs__(self):
-        return (self.name, self.html, self.scheme, self.module, self.icon_name,
-                self.comment)
+        return (
+            self.name,
+            self.html,
+            self.scheme,
+            self.module,
+            self.icon_name,
+            self.comment,
+        )
 
 
 class ReportItemModel(QStandardItemModel):
@@ -90,10 +103,12 @@ class ReportItemModel(QStandardItemModel):
 class ReportTable(QTableView):
     def __init__(self, parent):
         super().__init__(parent)
-        self._icon_remove = QIcon(pkg_resources.resource_filename(
-            __name__, "icons/delete.svg"))
-        self._icon_scheme = QIcon(pkg_resources.resource_filename(
-            __name__, "icons/scheme.svg"))
+        self._icon_remove = QIcon(
+            pkg_resources.resource_filename(__name__, "icons/delete.svg")
+        )
+        self._icon_scheme = QIcon(
+            pkg_resources.resource_filename(__name__, "icons/scheme.svg")
+        )
 
     def mouseMoveEvent(self, event):
         self._clear_icons()
@@ -158,22 +173,21 @@ class OWReport(OWWidget):
         self.table.setColumnWidth(Column.scheme, 25)
         self.table.clicked.connect(self._table_clicked)
         self.table.selectionModel().selectionChanged.connect(
-            self._table_selection_changed)
+            self._table_selection_changed
+        )
         self.controlArea.layout().addWidget(self.table)
 
         self.last_scheme = None
         self.scheme_button = gui.button(
-            self.controlArea, self, "Back to Last Scheme",
-            callback=self._show_last_scheme
+            self.controlArea,
+            self,
+            "Back to Last Scheme",
+            callback=self._show_last_scheme,
         )
         box = gui.hBox(self.controlArea)
         box.setContentsMargins(-6, 0, -6, 0)
-        self.save_button = gui.button(
-            box, self, "Save", callback=self.save_report
-        )
-        self.print_button = gui.button(
-            box, self, "Print", callback=self._print_report
-        )
+        self.save_button = gui.button(box, self, "Save", callback=self.save_report)
+        self.print_button = gui.button(box, self, "Print", callback=self._print_report)
 
         class PyBridge(QObject):
             @pyqtSlot(str)
@@ -194,8 +208,14 @@ class OWReport(OWWidget):
     @deprecated("Widgets should not be pickled")
     def __getstate__(self):
         rep_dict = self.__dict__.copy()
-        for key in ('_OWWidget__env', 'controlArea', 'mainArea',
-                    'report_view', 'table', 'table_model'):
+        for key in (
+            "_OWWidget__env",
+            "controlArea",
+            "mainArea",
+            "report_view",
+            "table",
+            "table_model",
+        ):
             del rep_dict[key]
         items_len = self.table_model.rowCount()
         return rep_dict, [self.table_model.item(i) for i in range(items_len)]
@@ -208,8 +228,14 @@ class OWReport(OWWidget):
         for i in range(len(items)):
             item = items[i]
             self.table_model.add_item(
-                ReportItem(item.name, item.html, item.scheme,
-                           item.module, item.icon_name, item.comment)
+                ReportItem(
+                    item.name,
+                    item.html,
+                    item.scheme,
+                    item.module,
+                    item.icon_name,
+                    item.comment,
+                )
             )
 
     def _table_clicked(self, index):
@@ -242,8 +268,9 @@ class OWReport(OWWidget):
     def _add_item(self, widget):
         name = widget.get_widget_name_extension()
         name = "{} - {}".format(widget.name, name) if name else widget.name
-        item = ReportItem(name, widget.report_html, self._get_scheme(),
-                          widget.__module__, widget.icon)
+        item = ReportItem(
+            name, widget.report_html, self._get_scheme(), widget.__module__, widget.icon
+        )
         self.table_model.add_item(item)
         self.report_changed = True
         return item
@@ -253,14 +280,16 @@ class OWReport(OWWidget):
         html += "<body>"
         for i in range(self.table_model.rowCount()):
             item = self.table_model.item(i)
-            html += "<div id='{}' class='normal' " \
-                    "onClick='pybridge._select_item(this.id)'>{}<div " \
-                    "class='textwrapper'><textarea " \
-                    "placeholder='Write a comment...'" \
-                    "onInput='this.innerHTML = this.value;" \
-                    "pybridge._add_comment(this.parentNode.parentNode.id, this.value);'" \
-                    ">{}</textarea></div>" \
-                    "</div>".format(item.id, item.html, item.comment)
+            html += (
+                "<div id='{}' class='normal' "
+                "onClick='pybridge._select_item(this.id)'>{}<div "
+                "class='textwrapper'><textarea "
+                "placeholder='Write a comment...'"
+                "onInput='this.innerHTML = this.value;"
+                "pybridge._add_comment(this.parentNode.parentNode.id, this.value);'"
+                ">{}</textarea></div>"
+                "</div>".format(item.id, item.html, item.comment)
+            )
         html += "</body></html>"
         self.report_view.setHtml(html)
 
@@ -273,10 +302,11 @@ class OWReport(OWWidget):
         self.report_view.evalJS(
             "var sel_el = document.getElementsByClassName('selected')[0]; "
             "if (sel_el.id != {}) "
-            "   sel_el.className = 'normal';".format(item.id))
+            "   sel_el.className = 'normal';".format(item.id)
+        )
         self.report_view.evalJS(
-            "document.getElementById('{}').className = 'selected';"
-            .format(item.id))
+            "document.getElementById('{}').className = 'selected';".format(item.id)
+        )
         self.report_changed = True
 
     def make_report(self, widget):
@@ -306,12 +336,17 @@ class OWReport(OWWidget):
 
     def save_report(self):
         """Save report"""
-        formats = OrderedDict((('HTML (*.html)', '.html'),
-                               ('PDF (*.pdf)', '.pdf'),
-                               ('Report (*.report)', '.report')))
+        formats = OrderedDict(
+            (
+                ("HTML (*.html)", ".html"),
+                ("PDF (*.pdf)", ".pdf"),
+                ("Report (*.report)", ".report"),
+            )
+        )
 
         filename, selected_format = QFileDialog.getSaveFileName(
-            self, "Save Report", self.save_dir, ';;'.join(formats.keys()))
+            self, "Save Report", self.save_dir, ";;".join(formats.keys())
+        )
         if not filename:
             return QDialog.Rejected
 
@@ -332,6 +367,7 @@ class OWReport(OWWidget):
         elif extension == ".report":
             self.save(filename)
         else:
+
             def save_html(contents):
                 try:
                     with open(filename, "w", encoding="utf-8") as f:
@@ -369,7 +405,8 @@ class OWReport(OWWidget):
 
     def open_report(self):
         filename, _ = QFileDialog.getOpenFileName(
-            self, "Open Report", self.open_dir, "Report (*.report)")
+            self, "Open Report", self.open_dir, "Report (*.report)"
+        )
         if not filename:
             return
 
@@ -381,12 +418,14 @@ class OWReport(OWWidget):
             report = self.load(filename)
         except (IOError, AttributeError, pickle.UnpicklingError) as e:
             message_critical(
-                 self.tr("Could not load an Orange Report file"),
-                 title=self.tr("Error"),
-                 informative_text=self.tr("Error occurred "
-                                          "while loading '{}'.").format(filename),
-                 exc_info=True,
-                 parent=self)
+                self.tr("Could not load an Orange Report file"),
+                title=self.tr("Error"),
+                informative_text=self.tr(
+                    "Error occurred " "while loading '{}'."
+                ).format(filename),
+                exc_info=True,
+                parent=self,
+            )
             log.error(str(e), exc_info=True)
             return
         self.set_instance(report)
@@ -398,34 +437,37 @@ class OWReport(OWWidget):
 
     def save(self, filename):
         attributes = {}
-        for key in ('last_scheme', 'open_dir'):
+        for key in ("last_scheme", "open_dir"):
             attributes[key] = getattr(self, key, None)
-        items = [self.table_model.item(i)
-                 for i in range(self.table_model.rowCount())]
-        report = dict(__version__=1,
-                      attributes=attributes,
-                      items=items)
+        items = [self.table_model.item(i) for i in range(self.table_model.rowCount())]
+        report = dict(__version__=1, attributes=attributes, items=items)
 
         try:
-            with open(filename, 'wb') as f:
+            with open(filename, "wb") as f:
                 pickle.dump(report, f)
         except PermissionError:
             self.permission_error(filename)
 
     @classmethod
     def load(cls, filename):
-        with open(filename, 'rb') as f:
+        with open(filename, "rb") as f:
             report = pickle.load(f)
 
         if not isinstance(report, dict):
             return report
 
         self = cls()
-        self.__dict__.update(report['attributes'])
-        for item in report['items']:
+        self.__dict__.update(report["attributes"])
+        for item in report["items"]:
             self.table_model.add_item(
-                ReportItem(item.name, item.html, item.scheme,
-                           item.module, item.icon_name, item.comment)
+                ReportItem(
+                    item.name,
+                    item.html,
+                    item.scheme,
+                    item.module,
+                    item.icon_name,
+                    item.comment,
+                )
             )
         return self
 
@@ -433,10 +475,12 @@ class OWReport(OWWidget):
         message_critical(
             self.tr("Permission error when trying to write report."),
             title=self.tr("Error"),
-            informative_text=self.tr("Permission error occurred "
-                                     "while saving '{}'.").format(filename),
+            informative_text=self.tr(
+                "Permission error occurred " "while saving '{}'."
+            ).format(filename),
             exc_info=True,
-            parent=self)
+            parent=self,
+        )
         log.error("PermissionError when trying to write report.", exc_info=True)
 
     def is_empty(self):

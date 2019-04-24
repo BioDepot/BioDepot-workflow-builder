@@ -7,13 +7,25 @@ from bisect import bisect_left
 from operator import attrgetter
 
 from AnyQt.QtCore import (
-    Qt, QSize, pyqtSignal as Signal, QSortFilterProxyModel, QThread, QObject,
-    pyqtSlot as Slot, QCoreApplication, QTimer
+    Qt,
+    QSize,
+    pyqtSignal as Signal,
+    QSortFilterProxyModel,
+    QThread,
+    QObject,
+    pyqtSlot as Slot,
+    QCoreApplication,
+    QTimer,
 )
 from AnyQt.QtGui import QStandardItemModel, QStandardItem, QColor, QBrush, QPen
 from AnyQt.QtWidgets import (
-    QTableView, QGraphicsTextItem, QGraphicsRectItem, QGraphicsView, QDialog,
-    QVBoxLayout, QLineEdit
+    QTableView,
+    QGraphicsTextItem,
+    QGraphicsRectItem,
+    QGraphicsView,
+    QDialog,
+    QVBoxLayout,
+    QLineEdit,
 )
 from Orange.data import Variable
 from Orange.widgets import gui
@@ -121,20 +133,21 @@ class VizRankDialog(QDialog, ProgressBarMixin, WidgetMessagesMixin):
         self.rank_table = view = QTableView(
             selectionBehavior=QTableView.SelectRows,
             selectionMode=QTableView.SingleSelection,
-            showGrid=False)
+            showGrid=False,
+        )
         if self._has_bars:
             view.setItemDelegate(TableBarItem())
         else:
             view.setItemDelegate(HorizontalGridDelegate())
         view.setModel(self.model_proxy)
-        view.selectionModel().selectionChanged.connect(
-            self.on_selection_changed)
+        view.selectionModel().selectionChanged.connect(self.on_selection_changed)
         view.horizontalHeader().setStretchLastSection(True)
         view.horizontalHeader().hide()
         self.layout().addWidget(view)
 
         self.button = gui.button(
-            self, self, "Start", callback=self.toggle, default=True)
+            self, self, "Start", callback=self.toggle, default=True
+        )
 
     @property
     def _has_bars(self):
@@ -164,8 +177,8 @@ class VizRankDialog(QDialog, ProgressBarMixin, WidgetMessagesMixin):
 
         vizrank = cls(master)
         button = gui.button(
-            widget, master, button_label, callback=vizrank.reshow,
-            enabled=False)
+            widget, master, button_label, callback=vizrank.reshow, enabled=False
+        )
         vizrank.selectionChanged.connect(lambda args: set_attr_callback(*args))
 
         master_close_event = master.closeEvent
@@ -384,8 +397,7 @@ class Worker(QObject):
                     row_items = self.obj.row_for_state(score, state)
                     bar_length = self.obj.bar_length(score)
                     if bar_length is not None:
-                        row_items[0].setData(bar_length,
-                                             gui.TableBarItem.BarRole)
+                        row_items[0].setData(bar_length, gui.TableBarItem.BarRole)
                     self.obj.add_to_model.put((pos, row_items))
                     self.obj.scores.insert(pos, score)
             except Exception:  # ignore current state in case of any problem
@@ -422,9 +434,11 @@ class VizRankDialogAttr(VizRankDialog):
 
     def check_preconditions(self):
         """Refuse ranking if there are no features or instances."""
-        can_rank = self.master.data is not None and \
-            self.master.data.domain.attributes and \
-            len(self.master.data) != 0
+        can_rank = (
+            self.master.data is not None
+            and self.master.data.domain.attributes
+            and len(self.master.data) != 0
+        )
         self.Information.nothing_to_rank(shown=not can_rank)
         return can_rank
 
@@ -473,9 +487,11 @@ class VizRankDialogAttrPair(VizRankDialog):
 
     def check_preconditions(self):
         """Refuse ranking if there are less than two feature or instances."""
-        can_rank = self.master.data is not None and \
-            len(self.master.data.domain.attributes) >= 2 and \
-            len(self.master.data) >= 2
+        can_rank = (
+            self.master.data is not None
+            and len(self.master.data.domain.attributes) >= 2
+            and len(self.master.data) >= 2
+        )
         self.Information.nothing_to_rank(shown=not can_rank)
         return can_rank
 
@@ -524,9 +540,22 @@ class CanvasText(QGraphicsTextItem):
            vertical (bool): if `True`, the text is rotated by 90 degrees
                (default: `False`)
     """
-    def __init__(self, scene, text="", x=0, y=0,
-                 alignment=Qt.AlignLeft | Qt.AlignTop, bold=False, font=None,
-                 z=0, html_text=None, tooltip=None, show=True, vertical=False):
+
+    def __init__(
+        self,
+        scene,
+        text="",
+        x=0,
+        y=0,
+        alignment=Qt.AlignLeft | Qt.AlignTop,
+        bold=False,
+        font=None,
+        z=0,
+        html_text=None,
+        tooltip=None,
+        show=True,
+        vertical=False,
+    ):
         QGraphicsTextItem.__init__(self, text, None)
 
         if font:
@@ -567,11 +596,11 @@ class CanvasText(QGraphicsTextItem):
         if int(self.alignment & Qt.AlignRight):
             x -= rect.width()
         elif int(self.alignment & Qt.AlignHCenter):
-            x -= rect.width() / 2.
+            x -= rect.width() / 2.0
         if int(self.alignment & Qt.AlignBottom):
             y -= rect.height()
         elif int(self.alignment & Qt.AlignVCenter):
-            y -= rect.height() / 2.
+            y -= rect.height() / 2.0
         QGraphicsTextItem.setPos(self, x, y)
 
 
@@ -597,10 +626,23 @@ class CanvasRectangle(QGraphicsRectItem):
         onclick (callable): callback for mouse click event
     """
 
-    def __init__(self, scene, x=0, y=0, width=0, height=0,
-                 pen_color=QColor(128, 128, 128), brush_color=None, pen_width=1,
-                 z=0, pen_style=Qt.SolidLine, pen=None, tooltip=None, show=True,
-                 onclick=None):
+    def __init__(
+        self,
+        scene,
+        x=0,
+        y=0,
+        width=0,
+        height=0,
+        pen_color=QColor(128, 128, 128),
+        brush_color=None,
+        pen_width=1,
+        z=0,
+        pen_style=Qt.SolidLine,
+        pen=None,
+        tooltip=None,
+        show=True,
+        onclick=None,
+    ):
         super().__init__(x, y, width, height, None)
         self.onclick = onclick
         if brush_color:
@@ -629,6 +671,7 @@ class ViewWithPress(QGraphicsView):
     """QGraphicsView with a callback for mouse press event. The callback
     is given as keyword argument `handler`.
     """
+
     def __init__(self, *args, **kwargs):
         self.handler = kwargs.pop("handler")
         super().__init__(*args)
@@ -637,5 +680,3 @@ class ViewWithPress(QGraphicsView):
         super().mousePressEvent(event)
         if not event.isAccepted():
             self.handler()
-
-

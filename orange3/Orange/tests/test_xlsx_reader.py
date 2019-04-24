@@ -27,11 +27,10 @@ class TestExcelHeader0(unittest.TestCase):
         for i, var in enumerate(domain.attributes):
             self.assertIsInstance(var, ContinuousVariable)
             self.assertEqual(var.name, "Feature {}".format(i + 1))
-        np.testing.assert_almost_equal(table.X,
-                                       np.array([[0.1, 0.5, 0.1, 21],
-                                                 [0.2, 0.1, 2.5, 123],
-                                                 [0, 0, 0, 0]]))
-        self.assertEqual(table.name, 'header_0')
+        np.testing.assert_almost_equal(
+            table.X, np.array([[0.1, 0.5, 0.1, 21], [0.2, 0.1, 2.5, 123], [0, 0, 0, 0]])
+        )
+        self.assertEqual(table.name, "header_0")
 
 
 class TextExcelSheets(unittest.TestCase):
@@ -39,20 +38,18 @@ class TextExcelSheets(unittest.TestCase):
         self.reader = io.ExcelReader(get_dataset("header_0_sheet.xlsx"))
 
     def test_sheets(self):
-        self.assertSequenceEqual(self.reader.sheets,
-                                 ["Sheet1", "my_sheet", "Sheet3"])
+        self.assertSequenceEqual(self.reader.sheets, ["Sheet1", "my_sheet", "Sheet3"])
 
     def test_named_sheet(self):
         self.reader.select_sheet("my_sheet")
         table = self.reader.read()
         self.assertEqual(len(table.domain.attributes), 4)
-        self.assertEqual(table.name, 'header_0_sheet-my_sheet')
+        self.assertEqual(table.name, "header_0_sheet-my_sheet")
 
     def test_named_sheet_table(self):
-        table = Table.from_file(get_dataset("header_0_sheet.xlsx"),
-                                sheet="my_sheet")
+        table = Table.from_file(get_dataset("header_0_sheet.xlsx"), sheet="my_sheet")
         self.assertEqual(len(table.domain.attributes), 4)
-        self.assertEqual(table.name, 'header_0_sheet-my_sheet')
+        self.assertEqual(table.name, "header_0_sheet-my_sheet")
 
 
 class TestExcelHeader1(unittest.TestCase):
@@ -68,10 +65,9 @@ class TestExcelHeader1(unittest.TestCase):
         for i, var in enumerate(domain.variables):
             self.assertEqual(var.name, chr(97 + i))
         self.assertEqual(domain[0].values, ["green", "red"])
-        np.testing.assert_almost_equal(table.X,
-                                       np.array([[1, 0.5, 0, 21],
-                                                 [1, 0.1, 0, 123],
-                                                 [0, 0, np.nan, 0]]))
+        np.testing.assert_almost_equal(
+            table.X, np.array([[1, 0.5, 0, 21], [1, 0.1, 0, 123], [0, 0, np.nan, 0]])
+        )
         np.testing.assert_equal(table.Y, np.array([]).reshape(3, 0))
 
     def test_flags(self):
@@ -89,7 +85,8 @@ class TestExcelHeader1(unittest.TestCase):
         self.assertEqual(class_.name, "b")
         self.assertIsInstance(class_, ContinuousVariable)
         np.testing.assert_almost_equal(
-            table.Y, np.array([.5, .1, 0, 0] * 5 + [.5, .1, 0]))
+            table.Y, np.array([0.5, 0.1, 0, 0] * 5 + [0.5, 0.1, 0])
+        )
 
         self.assertEqual(len(domain.metas), 3)
         for n, var in zip("acf", domain.metas):
@@ -98,9 +95,11 @@ class TestExcelHeader1(unittest.TestCase):
         self.assertEqual(domain.metas[0].values, ["green", "red"])
         self.assertIsInstance(domain.metas[1], ContinuousVariable)
         np.testing.assert_almost_equal(
-            table.metas[:, 0], np.array([1, 1, 0] * 7 + [1, 1]))
+            table.metas[:, 0], np.array([1, 1, 0] * 7 + [1, 1])
+        )
         np.testing.assert_almost_equal(
-            table.metas[:, 1], np.array([0, 1, 2, 3] * 5 + [0, 1, 2]))
+            table.metas[:, 1], np.array([0, 1, 2, 3] * 5 + [0, 1, 2])
+        )
 
 
 class TestExcelHeader3(unittest.TestCase):
@@ -116,15 +115,17 @@ class TestExcelHeader3(unittest.TestCase):
         attr = domain.attributes[1]
         self.assertEqual(attr.name, "g")
         self.assertIsInstance(attr, DiscreteVariable)
-        np.testing.assert_almost_equal(table.X[:, 1],
-                                       np.array([1, 0] + [float("nan")] * 21))
+        np.testing.assert_almost_equal(
+            table.X[:, 1], np.array([1, 0] + [float("nan")] * 21)
+        )
 
         self.assertEqual(len(domain.class_vars), 1)
         class_ = domain.class_var
         self.assertEqual(class_.name, "b")
         self.assertIsInstance(class_, ContinuousVariable)
         np.testing.assert_almost_equal(
-            table.Y, np.array([.5, .1, 0, 0] * 5 + [.5, .1, 0]))
+            table.Y, np.array([0.5, 0.1, 0, 0] * 5 + [0.5, 0.1, 0])
+        )
 
         self.assertEqual(len(domain.metas), 3)
         for n, var in zip("acf", domain.metas):
@@ -133,11 +134,14 @@ class TestExcelHeader3(unittest.TestCase):
         self.assertEqual(domain.metas[0].values, ["green", "red"])
         self.assertIsInstance(domain.metas[1], ContinuousVariable)
         np.testing.assert_almost_equal(
-            table.metas[:, 0], np.array([1, 1, 0] * 7 + [1, 1]))
+            table.metas[:, 0], np.array([1, 1, 0] * 7 + [1, 1])
+        )
         np.testing.assert_almost_equal(
-            table.metas[:, 1], np.array([0, 1, 2, 3] * 5 + [0, 1, 2]))
+            table.metas[:, 1], np.array([0, 1, 2, 3] * 5 + [0, 1, 2])
+        )
         np.testing.assert_equal(
-            table.metas[:, 2], np.array(list("abcdefghijklmnopqrstuvw")))
+            table.metas[:, 2], np.array(list("abcdefghijklmnopqrstuvw"))
+        )
 
 
 if __name__ == "__main__":

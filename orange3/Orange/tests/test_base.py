@@ -23,9 +23,11 @@ class TestLearner(unittest.TestCase):
         preprocessors were passed in to the constructor"""
         learner = DummyLearner()
         self.assertEqual(
-            type(learner).preprocessors, tuple(learner.active_preprocessors),
-            'Learner should use default preprocessors, unless preprocessors '
-            'were specified in init')
+            type(learner).preprocessors,
+            tuple(learner.active_preprocessors),
+            "Learner should use default preprocessors, unless preprocessors "
+            "were specified in init",
+        )
 
     def test_overrides_custom_preprocessors(self):
         """Passing preprocessors to the learner constructor should override the
@@ -33,9 +35,11 @@ class TestLearner(unittest.TestCase):
         pp = Discretize()
         learner = DummyLearnerPP(preprocessors=(pp,))
         self.assertEqual(
-            tuple(learner.active_preprocessors), (pp,),
-            'Learner should override default preprocessors when specified in '
-            'constructor')
+            tuple(learner.active_preprocessors),
+            (pp,),
+            "Learner should override default preprocessors when specified in "
+            "constructor",
+        )
 
     def test_use_default_preprocessors_property(self):
         """We can specify that we want to use default preprocessors despite
@@ -45,12 +49,16 @@ class TestLearner(unittest.TestCase):
 
         preprocessors = list(learner.active_preprocessors)
         self.assertEqual(
-            len(preprocessors), 2,
-            'Learner did not properly insert custom preprocessor into '
-            'preprocessor list')
+            len(preprocessors),
+            2,
+            "Learner did not properly insert custom preprocessor into "
+            "preprocessor list",
+        )
         self.assertIsInstance(
-            preprocessors[0], Discretize,
-            'Custom preprocessor was inserted in incorrect order')
+            preprocessors[0],
+            Discretize,
+            "Custom preprocessor was inserted in incorrect order",
+        )
         self.assertIsInstance(preprocessors[1], Randomize)
 
     def test_preprocessors_can_be_passed_in_as_non_iterable(self):
@@ -58,18 +66,22 @@ class TestLearner(unittest.TestCase):
         pp = Discretize()
         learner = DummyLearnerPP(preprocessors=pp)
         self.assertEqual(
-            tuple(learner.active_preprocessors), (pp,),
-            'Preprocessors should be able to be passed in as single object '
-            'as well as an iterable object')
+            tuple(learner.active_preprocessors),
+            (pp,),
+            "Preprocessors should be able to be passed in as single object "
+            "as well as an iterable object",
+        )
 
     def test_preprocessors_can_be_passed_in_as_generator(self):
         """Since we support iterables, we should support generators as well"""
         pp = (Discretize(),)
         learner = DummyLearnerPP(p for p in pp)
         self.assertEqual(
-            tuple(learner.active_preprocessors), pp,
-            'Preprocessors should be able to be passed in as single object '
-            'as well as an iterable object')
+            tuple(learner.active_preprocessors),
+            pp,
+            "Preprocessors should be able to be passed in as single object "
+            "as well as an iterable object",
+        )
 
 
 class TestSklLearner(unittest.TestCase):
@@ -99,7 +111,8 @@ class TestSklLearner(unittest.TestCase):
         self.assertTrue(
             LinearRegressionLearner().supports_weights,
             "Either LinearRegression no longer supports weighted tables or "
-            "SklLearner.supports_weights is out-of-date.")
+            "SklLearner.supports_weights is out-of-date.",
+        )
 
 
 class TestModel(unittest.TestCase):

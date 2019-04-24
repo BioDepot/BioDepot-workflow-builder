@@ -9,8 +9,16 @@ import unicodedata
 from itertools import chain
 
 from AnyQt.QtWidgets import (
-    QWidget, QListView, QTreeView, QVBoxLayout, QHBoxLayout, QFormLayout,
-    QToolButton, QLineEdit, QAction, QStackedWidget
+    QWidget,
+    QListView,
+    QTreeView,
+    QVBoxLayout,
+    QHBoxLayout,
+    QFormLayout,
+    QToolButton,
+    QLineEdit,
+    QAction,
+    QStackedWidget,
 )
 from AnyQt.QtGui import QStandardItemModel, QStandardItem, QKeySequence
 from AnyQt.QtCore import Qt, QSize
@@ -50,17 +58,15 @@ def variable_description(var, skip_attributes=False):
     if not skip_attributes:
         attributes = tuple(sorted(var.attributes.items()))
     if var.is_discrete:
-        return (var_type.__module__,
-                var_type.__name__,
-                var.name,
-                (("values", tuple(var.values)),),
-                attributes)
+        return (
+            var_type.__module__,
+            var_type.__name__,
+            var.name,
+            (("values", tuple(var.values)),),
+            attributes,
+        )
     else:
-        return (var_type.__module__,
-                var_type.__name__,
-                var.name,
-                (),
-                attributes)
+        return (var_type.__module__, var_type.__name__, var.name, (), attributes)
 
 
 def variable_from_description(description, compute_value=None):
@@ -72,8 +78,7 @@ def variable_from_description(description, compute_value=None):
     try:
         constructor = get_qualified(module, type_name)
     except (ImportError, AttributeError):
-        raise ValueError("Invalid descriptor type '{}.{}"
-                         "".format(module, type_name))
+        raise ValueError("Invalid descriptor type '{}.{}" "".format(module, type_name))
 
     var = constructor(name, compute_value=compute_value, **dict(list(kwargs)))
     var.attributes.update(attrs)
@@ -85,6 +90,7 @@ class DictItemsModel(QStandardItemModel):
     dictionary.
 
     """
+
     # Implement a proper model with in-place editing.
     # (Maybe it should be a TableModel with 2 columns)
     def __init__(self, parent=None, dict={}):
@@ -106,11 +112,12 @@ class DictItemsModel(QStandardItemModel):
     def get_dict(self):
         # Use the same functionality that parses attributes
         # when reading text files
-        return Orange.data.Flags([
-            "{}={}".format(self.item(row, 0).text(),
-                           self.item(row, 1).text())
-            for row in range(self.rowCount())
-        ]).attributes
+        return Orange.data.Flags(
+            [
+                "{}={}".format(self.item(row, 0).text(), self.item(row, 1).text())
+                for row in range(self.rowCount())
+            ]
+        ).attributes
 
 
 class VariableEditor(QWidget):
@@ -119,6 +126,7 @@ class VariableEditor(QWidget):
     Can edit the variable name, and its attributes dictionary.
 
     """
+
     variable_changed = Signal()
 
     def __init__(self, parent=None):
@@ -162,7 +170,8 @@ class VariableEditor(QWidget):
         self.labels_edit.setModel(self.labels_model)
 
         self.labels_edit.selectionModel().selectionChanged.connect(
-            self.on_label_selection_changed)
+            self.on_label_selection_changed
+        )
 
         # Necessary signals to know when the labels change
         self.labels_model.dataChanged.connect(self.on_labels_changed)
@@ -174,18 +183,22 @@ class VariableEditor(QWidget):
         hlayout.setContentsMargins(0, 0, 0, 0)
         hlayout.setSpacing(1)
         self.add_label_action = QAction(
-            "+", self,
+            "+",
+            self,
             toolTip="Add a new label.",
             triggered=self.on_add_label,
             enabled=False,
-            shortcut=QKeySequence(QKeySequence.New))
+            shortcut=QKeySequence(QKeySequence.New),
+        )
 
         self.remove_label_action = QAction(
-            unicodedata.lookup("MINUS SIGN"), self,
+            unicodedata.lookup("MINUS SIGN"),
+            self,
             toolTip="Remove selected label.",
             triggered=self.on_remove_label,
             enabled=False,
-            shortcut=QKeySequence(QKeySequence.Delete))
+            shortcut=QKeySequence(QKeySequence.Delete),
+        )
 
         button_size = gui.toolButtonSizeHint()
         button_size = QSize(button_size, button_size)
@@ -243,8 +256,11 @@ class VariableEditor(QWidget):
         """
         name = str(self.name_edit.text()).strip()
         labels = self.labels_model.get_dict()
-        return (self.var is not None and name == self.var.name and
-                labels == self.var.attributes)
+        return (
+            self.var is not None
+            and name == self.var.name
+            and labels == self.var.attributes
+        )
 
     def clear(self):
         """Clear the editor state.
@@ -297,6 +313,7 @@ class DiscreteVariableEditor(VariableEditor):
     variables values.
 
     """
+
     def setup_gui(self):
         layout = QVBoxLayout()
         self.setLayout(layout)
@@ -312,8 +329,9 @@ class DiscreteVariableEditor(VariableEditor):
     def _setup_gui_values(self):
         self.values_edit = QListView()
         self.values_edit.setEditTriggers(QTreeView.CurrentChanged)
-        self.values_model = itemmodels.PyListModel(flags=Qt.ItemIsSelectable | \
-                                        Qt.ItemIsEnabled | Qt.ItemIsEditable)
+        self.values_model = itemmodels.PyListModel(
+            flags=Qt.ItemIsSelectable | Qt.ItemIsEnabled | Qt.ItemIsEditable
+        )
         self.values_edit.setModel(self.values_model)
 
         self.values_model.dataChanged.connect(self.on_values_changed)
@@ -345,8 +363,11 @@ class DiscreteVariableEditor(VariableEditor):
         """Is the current model state the same as the input.
         """
         values = list(map(str, self.values_model))
-        return (VariableEditor.is_same(self) and self.var is not None and
-                self.var.values == values)
+        return (
+            VariableEditor.is_same(self)
+            and self.var is not None
+            and self.var.values == values
+        )
 
     def clear(self):
         """Clear the model state.
@@ -394,12 +415,12 @@ class OWEditDomain(widget.OWWidget):
 
         self.domain_model = itemmodels.VariableListModel()
         self.domain_view = QListView(
-            selectionMode=QListView.SingleSelection,
-            uniformItemSizes=True
+            selectionMode=QListView.SingleSelection, uniformItemSizes=True
         )
         self.domain_view.setModel(self.domain_model)
         self.domain_view.selectionModel().selectionChanged.connect(
-            self._on_selection_changed)
+            self._on_selection_changed
+        )
         box.layout().addWidget(self.domain_view)
 
         box = gui.hBox(self.controlArea)
@@ -417,9 +438,7 @@ class OWEditDomain(widget.OWWidget):
 
         box.layout().addWidget(self.editor_stack)
 
-        self.Error.add_message(
-            "duplicate_var_name",
-            "A variable name is duplicated.")
+        self.Error.add_message("duplicate_var_name", "A variable name is duplicated.")
 
     @Inputs.data
     @check_sql_input
@@ -484,7 +503,8 @@ class OWEditDomain(widget.OWWidget):
             if vdesc in self.domain_change_hints:
                 return variable_from_description(
                     self.domain_change_hints[vdesc],
-                    compute_value=Orange.preprocess.transformation.Identity(var))
+                    compute_value=Orange.preprocess.transformation.Identity(var),
+                )
             else:
                 return var
 
@@ -539,7 +559,6 @@ class OWEditDomain(widget.OWWidget):
         )
         self.domain_model[self.selected_index] = new_var
 
-
         # Store the transformation hint.
         old_var_desc = variable_description(old_var, skip_attributes=True)
         self.domain_change_hints[old_var_desc] = variable_description(new_var)
@@ -560,9 +579,9 @@ class OWEditDomain(widget.OWWidget):
                 n_attrs = len(input_domain.attributes)
                 n_class_vars = len(input_domain.class_vars)
                 all_new_vars = list(self.domain_model)
-                attrs = all_new_vars[: n_attrs]
-                class_vars = all_new_vars[n_attrs: n_attrs + n_class_vars]
-                new_metas = all_new_vars[n_attrs + n_class_vars:]
+                attrs = all_new_vars[:n_attrs]
+                class_vars = all_new_vars[n_attrs : n_attrs + n_class_vars]
+                new_metas = all_new_vars[n_attrs + n_class_vars :]
                 new_domain = Orange.data.Domain(attrs, class_vars, new_metas)
                 new_data = self.data.transform(new_domain)
             else:
@@ -576,9 +595,15 @@ class OWEditDomain(widget.OWWidget):
 
     def send_report(self):
         if self.data is not None:
-            self.report_raw("", EditDomainReport(
-                old_domain=chain(self.data.domain.variables, self.data.domain.metas),
-                new_domain=self.domain_model).to_html())
+            self.report_raw(
+                "",
+                EditDomainReport(
+                    old_domain=chain(
+                        self.data.domain.variables, self.data.domain.metas
+                    ),
+                    new_domain=self.domain_model,
+                ).to_html(),
+            )
         else:
             self.report_data(None)
 
@@ -607,19 +632,28 @@ class EditDomainReport:
         """
         all_changes = []
         for old_var, new_var in zip(self.old_domain, self.new_domain):
-            changes = list(chain.from_iterable([
-                self._section("Values", self._value_changes(old_var, new_var)),
-                self._section("Labels", self._label_changes(old_var, new_var))
-            ]))
+            changes = list(
+                chain.from_iterable(
+                    [
+                        self._section("Values", self._value_changes(old_var, new_var)),
+                        self._section("Labels", self._label_changes(old_var, new_var)),
+                    ]
+                )
+            )
 
             padding_top = ".5em" if all_changes else "0"
             if old_var.name != new_var.name:
-                all_changes.append(self.VARIABLE_HTML(
-                    padding_top, "{} → {}".format(old_var.name, new_var.name)))
+                all_changes.append(
+                    self.VARIABLE_HTML(
+                        padding_top, "{} → {}".format(old_var.name, new_var.name)
+                    )
+                )
             elif changes:
                 all_changes.append(self.VARIABLE_HTML(padding_top, old_var.name))
             all_changes.extend(changes)
-        return "<ul>{}</ul>".format("".join(all_changes)) if all_changes else "No changes"
+        return (
+            "<ul>{}</ul>".format("".join(all_changes)) if all_changes else "No changes"
+        )
 
     def _section(self, name, changes):
         """Generator that adds section name if there were any changes made."""
@@ -643,22 +677,28 @@ class EditDomainReport:
 
         for name, value in new_labels.items():
             if name not in old_labels:
-                yield self.INDENTED_ITEM("<i>{}</i>: {}&nbsp;&nbsp;&nbsp;<i>(new)</i>"
-                                         .format(name, value))
+                yield self.INDENTED_ITEM(
+                    "<i>{}</i>: {}&nbsp;&nbsp;&nbsp;<i>(new)</i>".format(name, value)
+                )
 
         for name, value in old_labels.items():
             if name not in new_labels:
-                yield self.INDENTED_ITEM("<strike><i>{}</i>: {}</strike>"
-                                         .format(name, value))
+                yield self.INDENTED_ITEM(
+                    "<strike><i>{}</i>: {}</strike>".format(name, value)
+                )
 
         for name in old_labels:
             if name in new_labels and new_labels[name] != old_labels[name]:
-                yield self.INDENTED_ITEM("<i>{}</i>: {} → {}"
-                                         .format(name, old_labels[name], new_labels[name]))
+                yield self.INDENTED_ITEM(
+                    "<i>{}</i>: {} → {}".format(
+                        name, old_labels[name], new_labels[name]
+                    )
+                )
 
 
 def main():
     from AnyQt.QtWidgets import QApplication
+
     app = QApplication([])
     w = OWEditDomain()
     data = Orange.data.Table("iris")

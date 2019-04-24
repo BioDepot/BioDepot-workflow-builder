@@ -14,17 +14,17 @@ except:
 # noinspection PyStatementEffect
 class BenchBasic(Benchmark):
     def setUp(self):
-        self.iris = Table('iris')
-        self.adult = Table('adult')
+        self.iris = Table("iris")
+        self.adult = Table("adult")
         self.discretizer = Discretize(EqualFreq(n=3))
 
     @benchmark(number=100)
     def bench_iris_read(self):
-        Table('iris')
+        Table("iris")
 
     @benchmark(number=5, warmup=1)
     def bench_adult_read(self):
-        Table('adult')
+        Table("adult")
 
     @benchmark(number=100)
     def bench_iris_create_X(self):
@@ -37,12 +37,14 @@ class BenchBasic(Benchmark):
     @pandas_only
     @benchmark(number=20)
     def bench_adult_filter_pandas(self):
-        self.adult[(self.adult.age > 30) & (self.adult.workclass == 'Private')]
+        self.adult[(self.adult.age > 30) & (self.adult.workclass == "Private")]
 
     @non_pandas_only
     @benchmark(number=20)
     def bench_adult_filter_pre_pandas(self):
-        age_filter = FilterContinuous(self.adult.domain["age"], FilterContinuous.Greater, 30)
+        age_filter = FilterContinuous(
+            self.adult.domain["age"], FilterContinuous.Greater, 30
+        )
         workclass_filter = FilterDiscrete(self.adult.domain["workclass"], [0])
         combined = Values([age_filter, workclass_filter])
         combined(self.adult)

@@ -15,16 +15,20 @@ from Orange.widgets.tests.base import (
 class TestOWClassificationTree(WidgetTest, WidgetLearnerTestMixin):
     def setUp(self):
         self.widget = self.create_widget(
-            OWTreeLearner, stored_settings={"auto_apply": False})
+            OWTreeLearner, stored_settings={"auto_apply": False}
+        )
         self.init()
         self.model_class = Model
 
         self.parameters = [
-            ParameterMapping.from_attribute(self.widget, 'max_depth'),
+            ParameterMapping.from_attribute(self.widget, "max_depth"),
             ParameterMapping.from_attribute(
-                self.widget, 'min_internal', 'min_samples_split'),
+                self.widget, "min_internal", "min_samples_split"
+            ),
             ParameterMapping.from_attribute(
-                self.widget, 'min_leaf', 'min_samples_leaf')]
+                self.widget, "min_leaf", "min_samples_leaf"
+            ),
+        ]
         # NB. sufficient_majority is divided by 100, so it cannot be tested
         # like this
 
@@ -36,8 +40,10 @@ class TestOWClassificationTree(WidgetTest, WidgetLearnerTestMixin):
         """
         for cb in self.checks:
             cb.setCheckState(False)
-        self.parameters = [DefaultParameterMapping(par.name, val)
-                           for par, val in zip(self.parameters, (None, 2, 1))]
+        self.parameters = [
+            DefaultParameterMapping(par.name, val)
+            for par, val in zip(self.parameters, (None, 2, 1))
+        ]
         self.test_parameters()
 
     def test_sparse_data_classification(self):

@@ -7,12 +7,17 @@ from time import time
 from psycopg2 import Error, OperationalError
 from psycopg2.pool import ThreadedConnectionPool
 
-from Orange.data import ContinuousVariable, DiscreteVariable, StringVariable, TimeVariable
+from Orange.data import (
+    ContinuousVariable,
+    DiscreteVariable,
+    StringVariable,
+    TimeVariable,
+)
 from Orange.data.sql.backend.base import Backend, ToSql, BackendError
 
 log = logging.getLogger(__name__)
 
-EXTENSIONS = ('tsm_system_time', 'quantile')
+EXTENSIONS = ("tsm_system_time", "quantile")
 
 
 class Psycopg2Backend(Backend):
@@ -35,7 +40,8 @@ class Psycopg2Backend(Backend):
     def _create_connection_pool(self):
         try:
             self.connection_pool = ThreadedConnectionPool(
-                1, 16, **self.connection_params)
+                1, 16, **self.connection_params
+            )
         except Error as ex:
             raise BackendError(str(ex)) from ex
 
@@ -48,12 +54,18 @@ class Psycopg2Backend(Backend):
             except OperationalError:
                 warnings.warn("Database is missing extension {}".format(ext))
 
-    def create_sql_query(self, table_name, fields, filters=(),
-                         group_by=None, order_by=None,
-                         offset=None, limit=None,
-                         use_time_sample=None):
-        sql = ["SELECT", ', '.join(fields),
-               "FROM", table_name]
+    def create_sql_query(
+        self,
+        table_name,
+        fields,
+        filters=(),
+        group_by=None,
+        order_by=None,
+        offset=None,
+        limit=None,
+        use_time_sample=None,
+    ):
+        sql = ["SELECT", ", ".join(fields), "FROM", table_name]
         if use_time_sample is not None:
             sql.append("TABLESAMPLE system_time(%i)" % use_time_sample)
         if filters:
@@ -73,7 +85,7 @@ class Psycopg2Backend(Backend):
         connection = self.connection_pool.getconn()
         cur = connection.cursor()
         try:
-            utfquery = cur.mogrify(query, params).decode('utf-8')
+            utfquery = cur.mogrify(query, params).decode("utf-8")
             log.debug("Executing: %s", utfquery)
             t = time()
             cur.execute(query, params)
@@ -90,7 +102,7 @@ class Psycopg2Backend(Backend):
 
     def unquote_identifier(self, quoted_name):
         if quoted_name.startswith('"'):
-            return quoted_name[1:len(quoted_name) - 1]
+            return quoted_name[1 : len(quoted_name) - 1]
         else:
             return quoted_name
 
@@ -109,27 +121,26 @@ class Psycopg2Backend(Backend):
                         AND n.nspname !~ '^pg_toast'
                         {}
                         AND NOT c.relname LIKE '\\_\\_%'
-                   ORDER BY 1;""".format(schema_clause)
+                   ORDER BY 1;""".format(
+            schema_clause
+        )
 
-    def create_variable(self, field_name, field_metadata,
-                        type_hints, inspect_table=None):
+    def create_variable(
+        self, field_name, field_metadata, type_hints, inspect_table=None
+    ):
         if field_name in type_hints:
             var = type_hints[field_name]
         else:
-            var = self._guess_variable(field_name, field_metadata,
-                                       inspect_table)
+            var = self._guess_variable(field_name, field_metadata, inspect_table)
 
         field_name_q = self.quote_identifier(field_name)
         if var.is_continuous:
             if isinstance(var, TimeVariable):
-                var.to_sql = ToSql("extract(epoch from {})"
-                                   .format(field_name_q))
+                var.to_sql = ToSql("extract(epoch from {})".format(field_name_q))
             else:
-                var.to_sql = ToSql("({})::double precision"
-                                   .format(field_name_q))
+                var.to_sql = ToSql("({})::double precision".format(field_name_q))
         else:  # discrete or string
-            var.to_sql = ToSql("({})::text"
-                               .format(field_name_q))
+            var.to_sql = ToSql("({})::text".format(field_name_q))
         return var
 
     def _guess_variable(self, field_name, field_metadata, inspect_table):
@@ -137,11 +148,11 @@ class Psycopg2Backend(Backend):
 
         FLOATISH_TYPES = (700, 701, 1700)  # real, float8, numeric
         INT_TYPES = (20, 21, 23)  # bigint, int, smallint
-        CHAR_TYPES = (25, 1042, 1043,)  # text, char, varchar
+        CHAR_TYPES = (25, 1042, 1043)  # text, char, varchar
         BOOLEAN_TYPES = (16,)  # bool
-        DATE_TYPES = (1082, 1114, 1184, )  # date, timestamp, timestamptz
+        DATE_TYPES = (1082, 1114, 1184)  # date, timestamp, timestamptz
         # time, timestamp, timestamptz, timetz
-        TIME_TYPES = (1083, 1114, 1184, 1266,)
+        TIME_TYPES = (1083, 1114, 1184, 1266)
 
         if type_code in FLOATISH_TYPES:
             return ContinuousVariable.make(field_name)
@@ -160,7 +171,7 @@ class Psycopg2Backend(Backend):
             return ContinuousVariable.make(field_name)
 
         if type_code in BOOLEAN_TYPES:
-            return DiscreteVariable.make(field_name, ['false', 'true'])
+            return DiscreteVariable.make(field_name, ["false", "true"])
 
         if type_code in CHAR_TYPES:
             if inspect_table:
@@ -173,13 +184,13 @@ class Psycopg2Backend(Backend):
     def count_approx(self, query):
         sql = "EXPLAIN " + query
         with self.execute_sql_query(sql) as cur:
-            s = ''.join(row[0] for row in cur.fetchall())
-        return int(re.findall(r'rows=(\d*)', s)[0])
+            s = "".join(row[0] for row in cur.fetchall())
+        return int(re.findall(r"rows=(\d*)", s)[0])
 
     def __getstate__(self):
         # Drop connection_pool from state as it cannot be pickled
         state = dict(self.__dict__)
-        state.pop('connection_pool', None)
+        state.pop("connection_pool", None)
         return state
 
     def __setstate__(self, state):

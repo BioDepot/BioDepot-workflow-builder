@@ -21,8 +21,7 @@ class TestToolGrid(test.QAppTestCase):
             return list(map(w.buttonForAction, w.actions()))
 
         def assertOrdered():
-            self.assertSequenceEqual(buttonsOrderedLogical(),
-                                     buttonsOrderedVisual())
+            self.assertSequenceEqual(buttonsOrderedLogical(), buttonsOrderedVisual())
 
         action_a = QAction("A", w)
         action_b = QAction("B", w)
@@ -31,44 +30,37 @@ class TestToolGrid(test.QAppTestCase):
 
         w.addAction(action_b)
         w.insertAction(0, action_a)
-        self.assertSequenceEqual(w.actions(),
-                                 [action_a, action_b])
+        self.assertSequenceEqual(w.actions(), [action_a, action_b])
         assertOrdered()
 
         w.addAction(action_d)
         w.insertAction(action_d, action_c)
 
-        self.assertSequenceEqual(w.actions(),
-                                 [action_a, action_b, action_c, action_d])
+        self.assertSequenceEqual(w.actions(), [action_a, action_b, action_c, action_d])
         assertOrdered()
 
         w.removeAction(action_c)
-        self.assertSequenceEqual(w.actions(),
-                                 [action_a, action_b, action_d])
+        self.assertSequenceEqual(w.actions(), [action_a, action_b, action_d])
 
         assertOrdered()
 
         w.removeAction(action_a)
-        self.assertSequenceEqual(w.actions(),
-                                 [action_b, action_d])
+        self.assertSequenceEqual(w.actions(), [action_b, action_d])
 
         assertOrdered()
 
         w.insertAction(0, action_a)
-        self.assertSequenceEqual(w.actions(),
-                                 [action_a, action_b, action_d])
+        self.assertSequenceEqual(w.actions(), [action_a, action_b, action_d])
 
         assertOrdered()
 
         w.setColumnCount(2)
-        self.assertSequenceEqual(w.actions(),
-                                 [action_a, action_b, action_d])
+        self.assertSequenceEqual(w.actions(), [action_a, action_b, action_d])
 
         assertOrdered()
 
         w.insertAction(2, action_c)
-        self.assertSequenceEqual(w.actions(),
-                                 [action_a, action_b, action_c, action_d])
+        self.assertSequenceEqual(w.actions(), [action_a, action_b, action_c, action_d])
         assertOrdered()
 
         w.clear()
@@ -76,13 +68,11 @@ class TestToolGrid(test.QAppTestCase):
         w.insertAction(0, action_a)
         self.assertIs(action_a, w.actions()[0])
         w.insertAction(1, action_b)
-        self.assertSequenceEqual(w.actions(),
-                                 [action_a, action_b])
+        self.assertSequenceEqual(w.actions(), [action_a, action_b])
 
         w.clear()
         w.setActions([action_a, action_b, action_c, action_d])
-        self.assertSequenceEqual(w.actions(),
-                                 [action_a, action_b, action_c, action_d])
+        self.assertSequenceEqual(w.actions(), [action_a, action_b, action_c, action_d])
         assertOrdered()
 
         triggered_actions = []

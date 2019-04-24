@@ -75,9 +75,16 @@ class TestOWSieveDiagram(WidgetTest, WidgetOutputsTestMixin):
     def _select_data(self):
         self.widget.attr_x, self.widget.attr_y = self.data.domain[:2]
         area = self.widget.areas[0]
-        self.widget.select_area(area, QMouseEvent(
-            QEvent.MouseButtonPress, QPoint(), Qt.LeftButton,
-            Qt.LeftButton, Qt.KeyboardModifiers()))
+        self.widget.select_area(
+            area,
+            QMouseEvent(
+                QEvent.MouseButtonPress,
+                QPoint(),
+                Qt.LeftButton,
+                Qt.LeftButton,
+                Qt.KeyboardModifiers(),
+            ),
+        )
         return [0, 4, 6, 7, 11, 17, 19, 21, 22, 24, 26, 39, 40, 43, 44, 46]
 
     def test_missing_values(self):
@@ -117,15 +124,13 @@ class TestOWSieveDiagram(WidgetTest, WidgetOutputsTestMixin):
             Domain(
                 [],
                 [],
-                [ContinuousVariable("a"),
-                 DiscreteVariable("b", values=["y", "n"])]
+                [ContinuousVariable("a"), DiscreteVariable("b", values=["y", "n"])],
             ),
-            list(zip(
-                [42.48, 16.84, 15.23, 23.8],
-                "yynn"))
+            list(zip([42.48, 16.84, 15.23, 23.8], "yynn")),
         )
-        with patch("Orange.widgets.visualize.owsieve.Discretize",
-                   wraps=Discretize) as disc:
+        with patch(
+            "Orange.widgets.visualize.owsieve.Discretize", wraps=Discretize
+        ) as disc:
             self.send_signal(self.widget.Inputs.data, table)
             self.assertTrue(disc.called)
         metas = self.widget.discrete_data.domain.metas
@@ -137,8 +142,7 @@ class TestOWSieveDiagram(WidgetTest, WidgetOutputsTestMixin):
         Sparse support.
         """
         self.send_signal(self.widget.Inputs.data, self.iris)
-        self.assertEqual(len(self.widget.discrete_data.domain),
-                         len(self.iris.domain))
+        self.assertEqual(len(self.widget.discrete_data.domain), len(self.iris.domain))
         output = self.get_output("Data")
         self.assertFalse(output.is_sparse())
 

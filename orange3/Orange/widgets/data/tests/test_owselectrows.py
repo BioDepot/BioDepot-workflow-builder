@@ -6,10 +6,12 @@ from AnyQt.QtWidgets import QLineEdit, QComboBox
 
 import numpy as np
 
-from Orange.data import (
-    Table, ContinuousVariable, StringVariable, DiscreteVariable)
+from Orange.data import Table, ContinuousVariable, StringVariable, DiscreteVariable
 from Orange.widgets.data.owselectrows import (
-    OWSelectRows, FilterDiscreteType, SelectRowsContextHandler)
+    OWSelectRows,
+    FilterDiscreteType,
+    SelectRowsContextHandler,
+)
 from Orange.widgets.tests.base import WidgetTest, datasets
 
 from Orange.data.filter import FilterContinuous, FilterString
@@ -41,7 +43,7 @@ SFValues = {
     FilterString.Contains: ["aa"],
     FilterString.StartsWith: ["aa"],
     FilterString.EndsWith: ["ark"],
-    FilterString.IsDefined: []
+    FilterString.IsDefined: [],
 }
 
 DFValues = {
@@ -138,7 +140,8 @@ class TestOWSelectRows(WidgetTest):
         iris = Table("iris")[:5]
         # Settings with string value
         self.widget = self.widget_with_context(
-            iris.domain, [["sepal length", 2, ("5.2",)]])
+            iris.domain, [["sepal length", 2, ("5.2",)]]
+        )
         self.send_signal(self.widget.Inputs.data, iris)
 
         values = self.widget.conditions[0][2]
@@ -146,7 +149,8 @@ class TestOWSelectRows(WidgetTest):
 
         # Settings with float value
         self.widget = self.widget_with_context(
-            iris.domain, [["sepal length", 2, (5.2,)]])
+            iris.domain, [["sepal length", 2, (5.2,)]]
+        )
         self.send_signal(self.widget.Inputs.data, iris)
 
         values = self.widget.conditions[0][2]
@@ -157,7 +161,8 @@ class TestOWSelectRows(WidgetTest):
         iris = Table("iris")[:5]
         # Settings with string value
         self.widget = self.widget_with_context(
-            iris.domain, [["sepal length", 2, ("5.2",)]])
+            iris.domain, [["sepal length", 2, ("5.2",)]]
+        )
         self.send_signal(self.widget.Inputs.data, iris)
 
         values = self.widget.conditions[0][2]
@@ -165,7 +170,8 @@ class TestOWSelectRows(WidgetTest):
 
         # Settings with float value
         self.widget = self.widget_with_context(
-            iris.domain, [["sepal length", 2, (5.2,)]])
+            iris.domain, [["sepal length", 2, (5.2,)]]
+        )
         self.send_signal(self.widget.Inputs.data, iris)
 
         values = self.widget.conditions[0][2]
@@ -272,8 +278,8 @@ class TestOWSelectRows(WidgetTest):
                 value_inputs = [value_inputs]
             else:
                 value_inputs = [
-                    w for w in value_inputs.children()
-                    if isinstance(w, QLineEdit)]
+                    w for w in value_inputs.children() if isinstance(w, QLineEdit)
+                ]
         return value_inputs
 
     def __set_value(self, widget, value):

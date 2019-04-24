@@ -14,11 +14,23 @@ from xml.sax.saxutils import escape
 import numpy
 
 from AnyQt.QtWidgets import (
-    QComboBox, QGraphicsScene, QGraphicsView, QGraphicsWidget,
-    QGraphicsPathItem, QGraphicsTextItem, QStyle, QApplication
+    QComboBox,
+    QGraphicsScene,
+    QGraphicsView,
+    QGraphicsWidget,
+    QGraphicsPathItem,
+    QGraphicsTextItem,
+    QStyle,
+    QApplication,
 )
 from AnyQt.QtGui import (
-    QPainterPath, QPainter, QTransform, QColor, QBrush, QPen, QPalette
+    QPainterPath,
+    QPainter,
+    QTransform,
+    QColor,
+    QBrush,
+    QPen,
+    QPalette,
 )
 from AnyQt.QtCore import Qt, QPointF, QRectF, QLineF
 from AnyQt.QtCore import pyqtSignal as Signal
@@ -27,8 +39,10 @@ import Orange.data
 import Orange.statistics.util as util
 from Orange.widgets import widget, gui, settings
 from Orange.widgets.utils import itemmodels, colorpalette
-from Orange.widgets.utils.annotated_data import (create_annotated_table,
-                                                 ANNOTATED_DATA_SIGNAL_NAME)
+from Orange.widgets.utils.annotated_data import (
+    create_annotated_table,
+    ANNOTATED_DATA_SIGNAL_NAME,
+)
 from Orange.widgets.io import FileFormat
 from Orange.widgets.utils.sql import check_sql_input
 from Orange.widgets.widget import Input, Output
@@ -40,8 +54,10 @@ _ItemSet = namedtuple("_ItemSet", ["key", "name", "title", "items"])
 
 class OWVennDiagram(widget.OWWidget):
     name = "Venn Diagram"
-    description = "A graphical visualization of the overlap of data instances " \
-                  "from a collection of input datasets."
+    description = (
+        "A graphical visualization of the overlap of data instances "
+        "from a collection of input datasets."
+    )
     icon = "icons/VennDiagram.svg"
     priority = 280
 
@@ -86,9 +102,12 @@ class OWVennDiagram(widget.OWWidget):
         self.info = gui.widgetLabel(box, "No data on input.\n")
 
         self.identifiersBox = gui.radioButtonsInBox(
-            self.controlArea, self, "useidentifiers", [],
+            self.controlArea,
+            self,
+            "useidentifiers",
+            [],
             box="Data Instance Identifiers",
-            callback=self._on_useidentifiersChanged
+            callback=self._on_useidentifiersChanged,
         )
         self.useequalityButton = gui.appendRadioButton(
             self.identifiersBox, "Use instance equality"
@@ -102,13 +121,12 @@ class OWVennDiagram(widget.OWWidget):
         self.inputsBox.setEnabled(bool(self.useidentifiers))
 
         for i in range(5):
-            box = gui.vBox(self.inputsBox, "Dataset #%i" % (i + 1),
-                           addSpace=False)
+            box = gui.vBox(self.inputsBox, "Dataset #%i" % (i + 1), addSpace=False)
             box.setFlat(True)
             model = itemmodels.VariableListModel(parent=self)
             cb = gui.OrangeComboBox(
                 minimumContentsLength=12,
-                sizeAdjustPolicy=QComboBox.AdjustToMinimumContentsLengthWithIcon
+                sizeAdjustPolicy=QComboBox.AdjustToMinimumContentsLengthWithIcon,
             )
             cb.setModel(model)
             cb.activated[int].connect(self._on_inputAttrActivated)
@@ -120,9 +138,16 @@ class OWVennDiagram(widget.OWWidget):
         gui.rubber(self.controlArea)
 
         box = gui.vBox(self.controlArea, "Output")
-        gui.checkBox(box, self, "output_duplicates", "Output duplicates",
-                     callback=lambda: self.commit())
-        gui.auto_commit(box, self, "autocommit", "Send Selection", "Send Automatically", box=False)
+        gui.checkBox(
+            box,
+            self,
+            "output_duplicates",
+            "Output duplicates",
+            callback=lambda: self.commit(),
+        )
+        gui.auto_commit(
+            box, self, "autocommit", "Send Selection", "Send Automatically", box=False
+        )
 
         # Main area view
         self.scene = QGraphicsScene()
@@ -139,8 +164,10 @@ class OWVennDiagram(widget.OWWidget):
 
         self.scene.addItem(self.vennwidget)
 
-        self.resize(self.controlArea.sizeHint().width() + 550,
-                    max(self.controlArea.sizeHint().height(), 550))
+        self.resize(
+            self.controlArea.sizeHint().width() + 550,
+            max(self.controlArea.sizeHint().height(), 550),
+        )
 
         self._queue = []
 
@@ -178,13 +205,14 @@ class OWVennDiagram(widget.OWWidget):
 
         self.samedomain = samedomain
 
-        has_identifiers = all(source_attributes(input.table.domain)
-                              for input in self.data.values())
-        has_any_identifiers = any(source_attributes(input.table.domain)
-                                  for input in self.data.values())
+        has_identifiers = all(
+            source_attributes(input.table.domain) for input in self.data.values()
+        )
+        has_any_identifiers = any(
+            source_attributes(input.table.domain) for input in self.data.values()
+        )
         self.useequalityButton.setEnabled(samedomain)
-        self.useidentifiersButton.setEnabled(
-            has_any_identifiers or len(self.data) == 0)
+        self.useidentifiersButton.setEnabled(has_any_identifiers or len(self.data) == 0)
         self.inputsBox.setEnabled(has_any_identifiers)
 
         if not samedomain and has_any_identifiers and not self.useidentifiers:
@@ -207,8 +235,7 @@ class OWVennDiagram(widget.OWWidget):
 
         self._createDiagram()
         if self.data:
-            self.info.setText(
-                "{} datasets on input.\n".format(len(self.data)))
+            self.info.setText("{} datasets on input.\n".format(len(self.data)))
         else:
             self.info.setText("No data on input\n")
 
@@ -312,8 +339,11 @@ class OWVennDiagram(widget.OWWidget):
         def items_by_key(key, input):
             attr = self.itemsetAttr(key)
             if attr is not None:
-                return [str(inst[attr]) for inst in input.table
-                        if not numpy.isnan(inst[attr])]
+                return [
+                    str(inst[attr])
+                    for inst in input.table
+                    if not numpy.isnan(inst[attr])
+                ]
             else:
                 return []
 
@@ -366,8 +396,7 @@ class OWVennDiagram(widget.OWWidget):
                 else:
                     attr_name = None
                 itemset = self.itemsets[key]
-                self.inputhints[(i, input.name, attrs)] = \
-                    (attr_name, itemset.title)
+                self.inputhints[(i, input.name, attrs)] = (attr_name, itemset.title)
 
     def _restoreHints(self):
         settings = []
@@ -405,9 +434,9 @@ class OWVennDiagram(widget.OWWidget):
             count = len(set(item.items))
             count_all = len(item.items)
             if count != count_all:
-                fmt = '{} <i>(all: {})</i>'
+                fmt = "{} <i>(all: {})</i>"
             else:
-                fmt = '{}'
+                fmt = "{}"
             counts = fmt.format(count, count_all)
             gr = VennSetItem(text=item.title, informativeText=counts)
             color = colors[i]
@@ -428,12 +457,12 @@ class OWVennDiagram(widget.OWWidget):
             if len(area_items) > 32:
                 items_str = ", ".join(map(escape, area_items[:32]))
                 hidden = len(area_items) - 32
-                tooltip = ("{}<span>{}, ...</br>({} items not shown)<span>"
-                           .format(head, items_str, hidden))
+                tooltip = "{}<span>{}, ...</br>({} items not shown)<span>".format(
+                    head, items_str, hidden
+                )
             elif area_items:
                 tooltip = "{}<span>{}</span>".format(
-                    head,
-                    ", ".join(map(escape, area_items))
+                    head, ", ".join(map(escape, area_items))
                 )
             else:
                 tooltip = head
@@ -454,27 +483,31 @@ class OWVennDiagram(widget.OWWidget):
         if not len(self.data):
             self.info.setText("No data on input\n")
         else:
-            self.info.setText(
-                "{0} datasets on input\n".format(len(self.data)))
+            self.info.setText("{0} datasets on input\n".format(len(self.data)))
 
         if self.useidentifiers:
-            no_idx = ["#{}".format(i + 1)
-                      for i, key in enumerate(self.data)
-                      if not source_attributes(self.data[key].table.domain)]
+            no_idx = [
+                "#{}".format(i + 1)
+                for i, key in enumerate(self.data)
+                if not source_attributes(self.data[key].table.domain)
+            ]
             if len(no_idx) == 1:
-                self.warning("Dataset {} has no suitable identifiers."
-                             .format(no_idx[0]))
+                self.warning(
+                    "Dataset {} has no suitable identifiers.".format(no_idx[0])
+                )
             elif len(no_idx) > 1:
-                self.warning("Datasets {} and {} have no suitable identifiers."
-                             .format(", ".join(no_idx[:-1]), no_idx[-1]))
+                self.warning(
+                    "Datasets {} and {} have no suitable identifiers.".format(
+                        ", ".join(no_idx[:-1]), no_idx[-1]
+                    )
+                )
 
     def _on_selectionChanged(self):
         if self._updating:
             return
 
         areas = self.vennwidget.vennareas()
-        indices = [i for i, area in enumerate(areas)
-                   if area.isSelected()]
+        indices = [i for i, area in enumerate(areas) if area.isSelected()]
 
         self.selection = indices
 
@@ -523,8 +556,7 @@ class OWVennDiagram(widget.OWWidget):
         annotated_data_subsets = []
         annotated_data_masks = []
         selected_items = reduce(
-            set.union, [self.disjoint[index] for index in self.selection],
-            set()
+            set.union, [self.disjoint[index] for index in self.selection], set()
         )
 
         def match(val):
@@ -554,12 +586,14 @@ class OWVennDiagram(widget.OWWidget):
 
                 def instance_key_all(inst):
                     return str(inst[attr])
+
             else:
-                mask = [ComparableInstance(inst) in selected_items
-                        for inst in input.table]
+                mask = [
+                    ComparableInstance(inst) in selected_items for inst in input.table
+                ]
                 _map = {item: str(i) for i, item in enumerate(selected_items)}
                 _map_all = {
-                    ComparableInstance(i):  hash(ComparableInstance(i))
+                    ComparableInstance(i): hash(ComparableInstance(i))
                     for i in input.table
                 }
 
@@ -574,12 +608,15 @@ class OWVennDiagram(widget.OWWidget):
 
             annotated_subset = input.table
             id_column = numpy.array(
-                [[instance_key_all(inst)] for inst in annotated_subset])
+                [[instance_key_all(inst)] for inst in annotated_subset]
+            )
             source_names = numpy.array([[names[i]]] * len(annotated_subset))
             annotated_subset = append_column(
-                annotated_subset, "M", source_var, source_names)
+                annotated_subset, "M", source_var, source_names
+            )
             annotated_subset = append_column(
-                annotated_subset, "M", item_id_var, id_column)
+                annotated_subset, "M", item_id_var, id_column
+            )
             annotated_data_subsets.append(annotated_subset)
             annotated_data_masks.append(mask)
 
@@ -589,10 +626,10 @@ class OWVennDiagram(widget.OWWidget):
             # add columns with source table id and set id
 
             if not self.output_duplicates:
-                id_column = numpy.array([[instance_key(inst)] for inst in subset],
-                                        dtype=object)
-                source_names = numpy.array([[names[i]]] * len(subset),
-                                           dtype=object)
+                id_column = numpy.array(
+                    [[instance_key(inst)] for inst in subset], dtype=object
+                )
+                source_names = numpy.array([[names[i]]] * len(subset), dtype=object)
 
                 subset = append_column(subset, "M", source_var, source_names)
                 subset = append_column(subset, "M", item_id_var, id_column)
@@ -623,8 +660,9 @@ class OWVennDiagram(widget.OWWidget):
             varying = varying_between(annotated_data, item_id_var)
             if source_var in varying:
                 varying.remove(source_var)
-            annotated_data = reshape_wide(annotated_data, varying,
-                                          [item_id_var], [source_var])
+            annotated_data = reshape_wide(
+                annotated_data, varying, [item_id_var], [source_var]
+            )
             annotated_data = drop_columns(annotated_data, [item_id_var])
 
         self.Outputs.selected_data.send(data)
@@ -670,18 +708,19 @@ class ComparableInstance:
     def __init__(self, inst):
         self.inst = inst
         self.domain = inst.domain
-        self.__hash = hash((self.inst.x.data.tobytes(),
-                            self.inst.y.data.tobytes()))
+        self.__hash = hash((self.inst.x.data.tobytes(), self.inst.y.data.tobytes()))
 
     def __hash__(self):
         return self.__hash
 
     def __eq__(self, other):
         # XXX: comparing NaN with different payload
-        return (isinstance(other, ComparableInstance)
-                and domain_eq(self.domain, other.domain)
-                and self.inst.x.data.tobytes() == other.inst.x.data.tobytes()
-                and self.inst.y.data.tobytes() == other.inst.y.data.tobytes())
+        return (
+            isinstance(other, ComparableInstance)
+            and domain_eq(self.domain, other.domain)
+            and self.inst.x.data.tobytes() == other.inst.x.data.tobytes()
+            and self.inst.y.data.tobytes() == other.inst.y.data.tobytes()
+        )
 
     def __iter__(self):
         return iter(self.inst)
@@ -706,16 +745,13 @@ def table_concat(tables):
     variables_seen = set()
 
     for table in tables:
-        attributes.extend(v for v in table.domain.attributes
-                          if v not in variables_seen)
+        attributes.extend(v for v in table.domain.attributes if v not in variables_seen)
         variables_seen.update(table.domain.attributes)
 
-        class_vars.extend(v for v in table.domain.class_vars
-                          if v not in variables_seen)
+        class_vars.extend(v for v in table.domain.class_vars if v not in variables_seen)
         variables_seen.update(table.domain.class_vars)
 
-        metas.extend(v for v in table.domain.metas
-                     if v not in variables_seen)
+        metas.extend(v for v in table.domain.metas if v not in variables_seen)
 
         variables_seen.update(table.domain.metas)
 
@@ -773,6 +809,7 @@ def reshape_wide(table, varlist, idvarlist, groupvarlist):
         (i.e. conditions).
 
     """
+
     def inst_key(inst, vars):
         return tuple(str(inst[var]) for var in vars)
 
@@ -804,9 +841,10 @@ def reshape_wide(table, varlist, idvarlist, groupvarlist):
     expanded_features = {}
 
     def expanded(feat):
-        return [copy_descriptor(feat, newname="%s (%s)" %
-                                (feat.name, group_name))
-                for group_name in group_names]
+        return [
+            copy_descriptor(feat, newname="%s (%s)" % (feat.name, group_name))
+            for group_name in group_names
+        ]
 
     for feat in table.domain.attributes:
         if feat in varlist:
@@ -842,8 +880,11 @@ def reshape_wide(table, varlist, idvarlist, groupvarlist):
         if var in idvarlist or var in in_expanded:
             continue
         col, _ = newtable.get_column_view(var)
-        nan_indices = (i for i in col.nonzero()[0]
-                       if isinstance(col[i], str) or numpy.isnan(col[i]))
+        nan_indices = (
+            i
+            for i in col.nonzero()[0]
+            if isinstance(col[i], str) or numpy.isnan(col[i])
+        )
         for i in nan_indices:
             for ind in inst_by_id[ids[i]]:
                 if not numpy.isnan(table[ind, var]):
@@ -881,7 +922,7 @@ def unique(seq):
 
 def unique_non_nan(ar):
     # metas have sometimes object dtype, but values are numpy floats
-    ar = ar.astype('float64')
+    ar = ar.astype("float64")
     uniq = numpy.unique(ar)
     return uniq[~numpy.isnan(uniq)]
 
@@ -892,8 +933,9 @@ def varying_between(table, idvar):
     groups defined by `idvar`.
 
     """
-    all_possible = [var for var in table.domain.variables + table.domain.metas
-                    if var != idvar]
+    all_possible = [
+        var for var in table.domain.variables + table.domain.metas if var != idvar
+    ]
     candidate_set = set(all_possible)
 
     idmap = group_table_indices(table, idvar)
@@ -997,12 +1039,12 @@ def disjoint_set_label(i, n, simplify=False):
         return chr(ord("A") + i)
 
     if simplify:
-        return "".join(label_for_index(i) for i, b in enumerate(setkey(i, n))
-                       if b)
+        return "".join(label_for_index(i) for i, b in enumerate(setkey(i, n)) if b)
     else:
-        return intersection.join(label_for_index(i) +
-                                 ("" if b else "<sup>" + comp + "</sup>")
-                                 for i, b in enumerate(setkey(i, n)))
+        return intersection.join(
+            label_for_index(i) + ("" if b else "<sup>" + comp + "</sup>")
+            for i, b in enumerate(setkey(i, n))
+        )
 
 
 class VennSetItem(QGraphicsPathItem):
@@ -1013,8 +1055,10 @@ class VennSetItem(QGraphicsPathItem):
         # Extra informative text (possibly rich text)
         self.informativeText = informativeText
 
+
 # TODO: Use palette's selected/highligted text / background colors to
 # indicate selection
+
 
 class VennIntersectionArea(QGraphicsPathItem):
     def __init__(self, parent=None, text=""):
@@ -1199,19 +1243,15 @@ class VennDiagram(QGraphicsWidget):
             text.adjustSize()
             text.editingStarted.connect(self._on_editingStarted)
             text.editingFinished.connect(self._on_editingFinished)
-            text.documentSizeChanged.connect(
-                self._on_itemTextSizeChanged
-            )
+            text.documentSizeChanged.connect(self._on_itemTextSizeChanged)
 
             self._textitems.append(text)
 
         self._vennareas = [
-            VennIntersectionArea(parent=self)
-            for i in range(2 ** len(items))
+            VennIntersectionArea(parent=self) for i in range(2 ** len(items))
         ]
         self._subsettextitems = [
-            QGraphicsTextItem(parent=self)
-            for i in range(2 ** len(items))
+            QGraphicsTextItem(parent=self) for i in range(2 ** len(items))
         ]
 
         self._updateLayout()
@@ -1223,9 +1263,7 @@ class VennDiagram(QGraphicsWidget):
         for item in self._textitems:
             item.editingStarted.disconnect(self._on_editingStarted)
             item.editingFinished.disconnect(self._on_editingFinished)
-            item.documentSizeChanged.disconnect(
-                self._on_itemTextSizeChanged
-            )
+            item.documentSizeChanged.disconnect(self._on_itemTextSizeChanged)
 
         self._items = []
         self._vennareas = []
@@ -1260,8 +1298,7 @@ class VennDiagram(QGraphicsWidget):
         transform = QTransform().scale(1, -1)
         regions = list(map(transform.map, regions))
 
-        union_brect = reduce(QRectF.united,
-                             (path.boundingRect() for path in regions))
+        union_brect = reduce(QRectF.united, (path.boundingRect() for path in regions))
 
         scalex = rect.width() / union_brect.width()
         scaley = rect.height() / union_brect.height()
@@ -1332,7 +1369,8 @@ class VennDiagram(QGraphicsWidget):
 
     def paint(self, painter, option, w):
         super(VennDiagram, self).paint(painter, option, w)
-#         painter.drawRect(self.boundingRect())
+
+    #         painter.drawRect(self.boundingRect())
 
     def _on_editingStarted(self):
         item = self.sender()
@@ -1351,8 +1389,8 @@ class VennDiagram(QGraphicsWidget):
             self.itemTextEdited.emit(index, text)
 
         item.setHtml(
-            self.TitleFormat.format(
-                escape(text), self._items[index].informativeText))
+            self.TitleFormat.format(escape(text), self._items[index].informativeText)
+        )
         item.adjustSize()
 
     def _on_itemTextSizeChanged(self):
@@ -1361,9 +1399,12 @@ class VennDiagram(QGraphicsWidget):
         self._updateTextItemPos(index)
 
 
-def anchor_rect(rect, anchor_pos,
-                anchor_h=Qt.AnchorHorizontalCenter,
-                anchor_v=Qt.AnchorVerticalCenter):
+def anchor_rect(
+    rect,
+    anchor_pos,
+    anchor_h=Qt.AnchorHorizontalCenter,
+    anchor_v=Qt.AnchorVerticalCenter,
+):
 
     if anchor_h == Qt.AnchorLeft:
         x = anchor_pos.x()
@@ -1405,23 +1446,31 @@ _CATEGORY_ANCHORS = (
     # n == 1
     ((90, Qt.AnchorHorizontalCenter, Qt.AnchorBottom),),
     # n == 2
-    ((180, Qt.AnchorRight, Qt.AnchorVerticalCenter),
-     (0, Qt.AnchorLeft, Qt.AnchorVerticalCenter)),
+    (
+        (180, Qt.AnchorRight, Qt.AnchorVerticalCenter),
+        (0, Qt.AnchorLeft, Qt.AnchorVerticalCenter),
+    ),
     # n == 3
-    ((150, Qt.AnchorRight, Qt.AnchorBottom),
-     (30, Qt.AnchorLeft, Qt.AnchorBottom),
-     (270, Qt.AnchorHorizontalCenter, Qt.AnchorTop)),
+    (
+        (150, Qt.AnchorRight, Qt.AnchorBottom),
+        (30, Qt.AnchorLeft, Qt.AnchorBottom),
+        (270, Qt.AnchorHorizontalCenter, Qt.AnchorTop),
+    ),
     # n == 4
-    ((270 + 45, Qt.AnchorLeft, Qt.AnchorTop),
-     (270 - 45, Qt.AnchorRight, Qt.AnchorTop),
-     (90 - 15, Qt.AnchorLeft, Qt.AnchorBottom),
-     (90 + 15, Qt.AnchorRight, Qt.AnchorBottom)),
+    (
+        (270 + 45, Qt.AnchorLeft, Qt.AnchorTop),
+        (270 - 45, Qt.AnchorRight, Qt.AnchorTop),
+        (90 - 15, Qt.AnchorLeft, Qt.AnchorBottom),
+        (90 + 15, Qt.AnchorRight, Qt.AnchorBottom),
+    ),
     # n == 5
-    ((90 - 5, Qt.AnchorHorizontalCenter, Qt.AnchorBottom),
-     (18 - 5, Qt.AnchorLeft, Qt.AnchorVerticalCenter),
-     (306 - 5, Qt.AnchorLeft, Qt.AnchorTop),
-     (234 - 5, Qt.AnchorRight, Qt.AnchorTop),
-     (162 - 5, Qt.AnchorRight, Qt.AnchorVerticalCenter),)
+    (
+        (90 - 5, Qt.AnchorHorizontalCenter, Qt.AnchorBottom),
+        (18 - 5, Qt.AnchorLeft, Qt.AnchorVerticalCenter),
+        (306 - 5, Qt.AnchorLeft, Qt.AnchorTop),
+        (234 - 5, Qt.AnchorRight, Qt.AnchorTop),
+        (162 - 5, Qt.AnchorRight, Qt.AnchorVerticalCenter),
+    ),
 )
 
 
@@ -1430,34 +1479,34 @@ def subset_anchors(shapes):
     if n == 1:
         return [(0, 0)]
     elif n == 2:
-        return [unit_point(180, r=1/3),
-                unit_point(0, r=1/3),
-                (0, 0)]
+        return [unit_point(180, r=1 / 3), unit_point(0, r=1 / 3), (0, 0)]
     elif n == 3:
-        return [unit_point(150, r=0.35),  # A
-                unit_point(30, r=0.35),   # B
-                unit_point(90, r=0.27),   # AB
-                unit_point(270, r=0.35),  # C
-                unit_point(210, r=0.27),  # AC
-                unit_point(330, r=0.27),  # BC
-                unit_point(0, r=0),]      # ABC
+        return [
+            unit_point(150, r=0.35),  # A
+            unit_point(30, r=0.35),  # B
+            unit_point(90, r=0.27),  # AB
+            unit_point(270, r=0.35),  # C
+            unit_point(210, r=0.27),  # AC
+            unit_point(330, r=0.27),  # BC
+            unit_point(0, r=0),
+        ]  # ABC
     elif n == 4:
         anchors = [
-            (0.400, 0.110),    # A
-            (-0.400, 0.110),   # B
-            (0.000, -0.285),   # AB
-            (0.180, 0.330),    # C
-            (0.265, 0.205),    # AC
+            (0.400, 0.110),  # A
+            (-0.400, 0.110),  # B
+            (0.000, -0.285),  # AB
+            (0.180, 0.330),  # C
+            (0.265, 0.205),  # AC
             (-0.240, -0.110),  # BC
             (-0.100, -0.190),  # ABC
-            (-0.180, 0.330),   # D
-            (0.240, -0.110),   # AD
-            (-0.265, 0.205),   # BD
-            (0.100, -0.190),   # ABD
-            (0.000, 0.250),    # CD
-            (0.153, 0.090),    # ACD
-            (-0.153, 0.090),   # BCD
-            (0.000, -0.060),   # ABCD
+            (-0.180, 0.330),  # D
+            (0.240, -0.110),  # AD
+            (-0.265, 0.205),  # BD
+            (0.100, -0.190),  # ABD
+            (0.000, 0.250),  # CD
+            (0.153, 0.090),  # ACD
+            (-0.153, 0.090),  # BCD
+            (0.000, -0.060),  # ABCD
         ]
         return anchors
 
@@ -1474,18 +1523,20 @@ def subset_anchors(shapes):
 
         anchors[-1] = ABCDE
 
-        bases = [(0b00001, A),
-                 (0b01001, AD),
-                 (0b10001, AE),
-                 (0b10101, ACE),
-                 (0b11001, ADE),
-                 (0b11101, ACDE)]
+        bases = [
+            (0b00001, A),
+            (0b01001, AD),
+            (0b10001, AE),
+            (0b10101, ACE),
+            (0b11001, ADE),
+            (0b11101, ACDE),
+        ]
 
         for i in range(5):
             for index, anchor in bases:
                 index = bit_rot_left(index, i, bits=5)
                 assert anchors[index] is None
-                anchors[index] = rotate_point(anchor, - 72 * i)
+                anchors[index] = rotate_point(anchor, -72 * i)
 
         assert all(anchors[1:])
         return anchors[1:]
@@ -1499,8 +1550,7 @@ def bit_rot_left(x, y, bits=32):
 
 def rotate_point(p, angle):
     r = radians(angle)
-    R = numpy.array([[math.cos(r), -math.sin(r)],
-                     [math.sin(r), math.cos(r)]])
+    R = numpy.array([[math.cos(r), -math.sin(r)], [math.sin(r), math.cos(r)]])
     x, y = numpy.dot(R, p)
     return (float(x), float(y))
 
@@ -1556,12 +1606,10 @@ def venn_diagram(n, shape=VennDiagram.Circle):
         paths = [circle_path(center=(0, 0), r=0.5)]
     elif n == 2:
         angles = [180, 0]
-        paths = [circle_path(center=unit_point(x, r=1/6), r=1/3)
-                 for x in angles]
+        paths = [circle_path(center=unit_point(x, r=1 / 6), r=1 / 3) for x in angles]
     elif n == 3:
         angles = [150 - 120 * i for i in range(3)]
-        paths = [circle_path(center=unit_point(x, r=1/6), r=1/3)
-                 for x in angles]
+        paths = [circle_path(center=unit_point(x, r=1 / 6), r=1 / 3) for x in angles]
     elif n == 4:
         # Constants shamelessly stolen from VennDiagram R package
         paths = [
@@ -1576,9 +1624,10 @@ def venn_diagram(n, shape=VennDiagram.Circle):
         a, b = 0.24, 0.48
         a, b = b, a
         a, b = 0.48, 0.24
-        paths = [ellipse_path(unit_point((1 - i) * 72, r=d),
-                              a, b, rotation=90 - (i * 72))
-                 for i in range(5)]
+        paths = [
+            ellipse_path(unit_point((1 - i) * 72, r=d), a, b, rotation=90 - (i * 72))
+            for i in range(5)
+        ]
 
     return paths
 
@@ -1605,14 +1654,18 @@ def venn_intersection(paths, key):
         return QPainterPath()
 
     # first take the intersection of all included paths
-    path = reduce(QPainterPath.intersected,
-                  (path for path, included in zip(paths, key) if included))
+    path = reduce(
+        QPainterPath.intersected,
+        (path for path, included in zip(paths, key) if included),
+    )
 
     # subtract all the excluded sets (i.e. take the intersection
     # with the excluded set complements)
-    path = reduce(QPainterPath.subtracted,
-                  (path for path, included in zip(paths, key) if not included),
-                  path)
+    path = reduce(
+        QPainterPath.subtracted,
+        (path for path, included in zip(paths, key) if not included),
+        path,
+    )
 
     return path
 
@@ -1649,7 +1702,7 @@ def drop_columns(data, columns):
     domain = Orange.data.Domain(
         filter_vars(data.domain.attributes),
         filter_vars(data.domain.class_vars),
-        filter_vars(data.domain.metas)
+        filter_vars(data.domain.metas),
     )
     return Orange.data.Table.from_table(domain, data)
 
@@ -1673,11 +1726,14 @@ def test():
     app = QApplication([])
     w = OWVennDiagram()
     data = Orange.data.Table("brown-selected")
-    data = append_column(data, "M", Orange.data.StringVariable("Test"),
-                         numpy.arange(len(data)).reshape(-1, 1) % 30)
+    data = append_column(
+        data,
+        "M",
+        Orange.data.StringVariable("Test"),
+        numpy.arange(len(data)).reshape(-1, 1) % 30,
+    )
 
-    res = ShuffleSplit(data, [None], n_resamples=5,
-                       test_size=0.7, stratified=False)
+    res = ShuffleSplit(data, [None], n_resamples=5, test_size=0.7, stratified=False)
     indices = iter(res.indices)
 
     def select(data):
@@ -1718,6 +1774,7 @@ def test1():
 
     del w
     return app
+
 
 if __name__ == "__main__":
     test()

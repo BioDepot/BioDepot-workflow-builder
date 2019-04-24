@@ -94,8 +94,9 @@ class TestEntropyMDL(TestCase):
 
     def test_entropy_constant(self):
         X = np.zeros((100, 1))
-        domain = Domain([ContinuousVariable('v1')],
-                        [DiscreteVariable('c1', values=["1"])])
+        domain = Domain(
+            [ContinuousVariable("v1")], [DiscreteVariable("c1", values=["1"])]
+        )
         table = data.Table(domain, X, X)
         disc = discretize.EntropyMDL()
         dvar = disc(table, table.domain[0])
@@ -103,8 +104,7 @@ class TestEntropyMDL(TestCase):
         self.assertEqual(dvar.compute_value.points, [])
 
     def test_entropy(self):
-        X = np.array([0] * 25 + [1] * 25 + [2] * 25 + [3] * 25
-                    ).reshape((100, 1))
+        X = np.array([0] * 25 + [1] * 25 + [2] * 25 + [3] * 25).reshape((100, 1))
         Y = np.array([0] * 25 + [1] * 75)
         table = data.Table(X, Y)
         disc = discretize.EntropyMDL()
@@ -121,114 +121,99 @@ class TestDiscretizer(TestCase):
         self.var.sparse = False
 
     def test_create_discretized_var(self):
-        dvar = discretize.Discretizer.create_discretized_var(
-            self.var, [1, 2, 3])
-        self.assertIsInstance(dvar.compute_value,
-                              discretize.Discretizer)
+        dvar = discretize.Discretizer.create_discretized_var(self.var, [1, 2, 3])
+        self.assertIsInstance(dvar.compute_value, discretize.Discretizer)
         self.assertEqual(dvar.compute_value.points, [1, 2, 3])
 
-
     def test_create_discretized_var_formatting(self):
-        dvar = discretize.Discretizer.create_discretized_var(
-            self.var, [1, 2, 3])
+        dvar = discretize.Discretizer.create_discretized_var(self.var, [1, 2, 3])
         self.assertEqual(dvar.values, ["< 1", "1 - 2", "2 - 3", "≥ 3"])
 
-        dvar = discretize.Discretizer.create_discretized_var(
-            self.var, [10])
+        dvar = discretize.Discretizer.create_discretized_var(self.var, [10])
         self.assertEqual(dvar.values, ["< 10", "≥ 10"])
 
-        dvar = discretize.Discretizer.create_discretized_var(
-            self.var, [10.1234])
+        dvar = discretize.Discretizer.create_discretized_var(self.var, [10.1234])
         self.assertEqual(dvar.values, ["< 10.1", "≥ 10.1"])
 
         self.var.number_of_decimals = 3
 
-        dvar = discretize.Discretizer.create_discretized_var(
-            self.var, [5, 10.1234])
+        dvar = discretize.Discretizer.create_discretized_var(self.var, [5, 10.1234])
         self.assertEqual(dvar.values, ["< 5", "5 - 10.123", "≥ 10.123"])
 
     def test_discretizer_computation(self):
-        dvar = discretize.Discretizer.create_discretized_var(
-            self.var, [1, 2, 3])
+        dvar = discretize.Discretizer.create_discretized_var(self.var, [1, 2, 3])
         X = np.array([0, 0.9, 1, 1.1, 1.9, 2, 2.5, 3, 3.5])
         np.testing.assert_equal(dvar.compute_value.transform(X), np.floor(X))
 
     def test_discretizer_computation_sparse(self):
-        dvar = discretize.Discretizer.create_discretized_var(
-            self.var, [1, 2, 3])
+        dvar = discretize.Discretizer.create_discretized_var(self.var, [1, 2, 3])
         X = sp.csr_matrix(np.array([0, 0.9, 1, 1.1, 1.9, 2, 2.5, 3, 3.5]))
         self.assertEqual((dvar.compute_value.transform(X) != np.floor(X)).nnz, 0)
 
     def test_discretizer_computation_sparse_no_points(self):
-        dvar = discretize.Discretizer.create_discretized_var(
-            self.var, [])
+        dvar = discretize.Discretizer.create_discretized_var(self.var, [])
         X = sp.csr_matrix(np.array([0, 0.9, 1, 1.1, 1.9, 2, 2.5, 3, 3.5]))
         empty = sp.csr_matrix(X.shape)
         self.assertEqual((dvar.compute_value.transform(X) != empty).nnz, 0)
 
     def test_transform(self):
-        table = data.Table('iris')
+        table = data.Table("iris")
         table2 = Discretize()(table)
         ins = data.Instance(table2.domain, table[0])
         table3 = data.Table(table2.domain, table[:10])
         self.assertEqual(ins, table3[0])
 
     def test_remove_constant(self):
-        table = data.Table('iris')
+        table = data.Table("iris")
         table[:, 0] = 1
         discretize = Discretize(remove_const=True)
         new_table = discretize(table)
-        self.assertNotEqual(len(table.domain.attributes),
-                            len(new_table.domain.attributes))
+        self.assertNotEqual(
+            len(table.domain.attributes), len(new_table.domain.attributes)
+        )
 
     def test_keep_constant(self):
-        table = data.Table('iris')
+        table = data.Table("iris")
         table[:, 0] = 1
         discretize = Discretize(remove_const=False)
         new_table = discretize(table)
-        self.assertEqual(len(table.domain.attributes),
-                         len(new_table.domain.attributes))
+        self.assertEqual(len(table.domain.attributes), len(new_table.domain.attributes))
 
     def test_discretize_class(self):
-        table = data.Table('iris')
+        table = data.Table("iris")
         domain = table.domain
-        regr_domain = data.Domain(domain.attributes[:3],
-                                  [domain.attributes[3], domain.class_var])
+        regr_domain = data.Domain(
+            domain.attributes[:3], [domain.attributes[3], domain.class_var]
+        )
         table = data.Table.from_table(regr_domain, table)
 
         discretize = Discretize(remove_const=False)
         new_table = discretize(table)
-        self.assertIs(new_table.domain.class_vars[0],
-                      new_table.domain.class_vars[0])
-        self.assertIs(new_table.domain.class_vars[1],
-                      new_table.domain.class_vars[1])
+        self.assertIs(new_table.domain.class_vars[0], new_table.domain.class_vars[0])
+        self.assertIs(new_table.domain.class_vars[1], new_table.domain.class_vars[1])
 
         discretize = Discretize(remove_const=False, discretize_classes=True)
         new_table = discretize(table)
         self.assertIsInstance(new_table.domain.class_vars[0], DiscreteVariable)
-        self.assertIs(new_table.domain.class_vars[1],
-                      new_table.domain.class_vars[1])
+        self.assertIs(new_table.domain.class_vars[1], new_table.domain.class_vars[1])
 
     def test_discretize_metas(self):
-        table = data.Table('iris')
+        table = data.Table("iris")
         domain = table.domain
-        regr_domain = data.Domain(domain.attributes[:3],
-                                  [],
-                                  [domain.attributes[3], domain.class_var])
+        regr_domain = data.Domain(
+            domain.attributes[:3], [], [domain.attributes[3], domain.class_var]
+        )
         table = data.Table.from_table(regr_domain, table)
 
         discretize = Discretize(remove_const=False)
         new_table = discretize(table)
-        self.assertIs(new_table.domain.metas[0],
-                      new_table.domain.metas[0])
-        self.assertIs(new_table.domain.metas[1],
-                      new_table.domain.metas[1])
+        self.assertIs(new_table.domain.metas[0], new_table.domain.metas[0])
+        self.assertIs(new_table.domain.metas[1], new_table.domain.metas[1])
 
         discretize = Discretize(remove_const=False, discretize_metas=True)
         new_table = discretize(table)
         self.assertIsInstance(new_table.domain.metas[0], DiscreteVariable)
-        self.assertIs(new_table.domain.metas[1],
-                      new_table.domain.metas[1])
+        self.assertIs(new_table.domain.metas[1], new_table.domain.metas[1])
 
 
 # noinspection PyPep8Naming
@@ -277,8 +262,9 @@ class TestDiscretizeTable(TestCase):
         self.assertEqual(len(dom[1].values), 2)
 
     def test_fixed(self):
-        dom = discretize.DomainDiscretizer(method=discretize.EqualWidth(n=2),
-                                           fixed={"Feature 2": [1, 11]})
+        dom = discretize.DomainDiscretizer(
+            method=discretize.EqualWidth(n=2), fixed={"Feature 2": [1, 11]}
+        )
         dom = dom(self.table_no_class)
         self.assertEqual(len(dom.attributes), 2)
         self.assertEqual(dom[0].compute_value.points, [0.5])
@@ -290,10 +276,14 @@ class TestDiscretizeTable(TestCase):
         X2 = np.arange(100).reshape((100, 1))
         X3 = np.ones((100, 1))
         X = np.hstack([X1, X2, X3])
-        domain = data.Domain([data.DiscreteVariable("a", values="MF"),
-                              data.ContinuousVariable("b"),
-                              data.DiscreteVariable("c", values="AB")],
-                             data.ContinuousVariable("d"))
+        domain = data.Domain(
+            [
+                data.DiscreteVariable("a", values="MF"),
+                data.ContinuousVariable("b"),
+                data.DiscreteVariable("c", values="AB"),
+            ],
+            data.ContinuousVariable("d"),
+        )
         table = data.Table(domain, X, X1)
         dom = discretize.DomainDiscretizer()(table)
         self.assertIs(dom[0], table.domain[0])
@@ -301,10 +291,14 @@ class TestDiscretizeTable(TestCase):
         self.assertIs(dom[2], table.domain[2])
         self.assertIs(dom.class_var, table.domain.class_var)
 
-        domain = data.Domain([data.DiscreteVariable("a", values="MF"),
-                              data.ContinuousVariable("b"),
-                              data.DiscreteVariable("c", values="AB")],
-                             data.DiscreteVariable("d"))
+        domain = data.Domain(
+            [
+                data.DiscreteVariable("a", values="MF"),
+                data.ContinuousVariable("b"),
+                data.DiscreteVariable("c", values="AB"),
+            ],
+            data.DiscreteVariable("d"),
+        )
         table = data.Table(domain, X, X1)
         dom = discretize.DomainDiscretizer()(table)
         self.assertIs(dom[0], table.domain[0])

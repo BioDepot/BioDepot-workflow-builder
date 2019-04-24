@@ -9,9 +9,23 @@ from scipy.stats import linregress
 
 from AnyQt.QtCore import Qt, QObject, QEvent, QRectF, QPointF, QSize
 from AnyQt.QtGui import (
-    QStaticText, QColor, QPen, QBrush, QPainterPath, QTransform, QPainter, QKeySequence)
-from AnyQt.QtWidgets import QApplication, QToolTip, QPinchGesture, \
-    QGraphicsTextItem, QGraphicsRectItem, QAction
+    QStaticText,
+    QColor,
+    QPen,
+    QBrush,
+    QPainterPath,
+    QTransform,
+    QPainter,
+    QKeySequence,
+)
+from AnyQt.QtWidgets import (
+    QApplication,
+    QToolTip,
+    QPinchGesture,
+    QGraphicsTextItem,
+    QGraphicsRectItem,
+    QAction,
+)
 
 import pyqtgraph as pg
 from pyqtgraph.graphicsItems.ViewBox import ViewBox
@@ -24,10 +38,12 @@ from pyqtgraph.Point import Point
 
 from Orange.widgets import gui
 from Orange.widgets.utils import classdensity, get_variable_values_sorted
-from Orange.widgets.utils.colorpalette import (ColorPaletteGenerator,
-                                               ContinuousPaletteGenerator, DefaultRGBColors)
-from Orange.widgets.utils.plot import \
-    OWPalette, OWPlotGUI, SELECT, PANNING, ZOOMING
+from Orange.widgets.utils.colorpalette import (
+    ColorPaletteGenerator,
+    ContinuousPaletteGenerator,
+    DefaultRGBColors,
+)
+from Orange.widgets.utils.plot import OWPalette, OWPlotGUI, SELECT, PANNING, ZOOMING
 from Orange.widgets.utils.scaling import ScaleScatterPlotData
 from Orange.widgets.settings import Setting, ContextSetting
 
@@ -53,10 +69,13 @@ class PaletteItemSample(ItemSample):
         super().__init__(None)
         self.palette = palette
         self.scale = scale
-        cuts = ["{0:.{1}f}".format(scale.offset + i * scale.width, scale.decimals)
-                for i in range(scale.bins + 1)]
-        self.labels = [QStaticText("{} - {}".format(fr, to))
-                       for fr, to in zip(cuts, cuts[1:])]
+        cuts = [
+            "{0:.{1}f}".format(scale.offset + i * scale.width, scale.decimals)
+            for i in range(scale.bins + 1)
+        ]
+        self.labels = [
+            QStaticText("{} - {}".format(fr, to)) for fr, to in zip(cuts, cuts[1:])
+        ]
         for label in self.labels:
             label.prepare()
         self.text_width = max(label.size().width() for label in self.labels)
@@ -169,7 +188,7 @@ ANCHORS = {
     Qt.TopLeftCorner: (0, 0),
     Qt.TopRightCorner: (1, 0),
     Qt.BottomLeftCorner: (0, 1),
-    Qt.BottomRightCorner: (1, 1)
+    Qt.BottomRightCorner: (1, 1),
 }
 
 
@@ -233,8 +252,12 @@ def rect_anchor_pos(rect, parent_rect):
         return None
 
     # Find the closest corner of rect to parent rect
-    corners = (Qt.TopLeftCorner, Qt.TopRightCorner,
-               Qt.BottomRightCorner, Qt.BottomLeftCorner)
+    corners = (
+        Qt.TopLeftCorner,
+        Qt.TopRightCorner,
+        Qt.BottomRightCorner,
+        Qt.BottomLeftCorner,
+    )
 
     def rect_corner(rect, corner):
         if corner == Qt.TopLeftCorner:
@@ -249,27 +272,33 @@ def rect_anchor_pos(rect, parent_rect):
             assert False
 
     def corner_dist(c1, c2):
-        d = (rect_corner(rect, c1) - rect_corner(parent_rect, c2))
+        d = rect_corner(rect, c1) - rect_corner(parent_rect, c2)
         return d.x() ** 2 + d.y() ** 2
 
     if parent_rect.contains(rect):
-        closest = min(corners,
-                      key=lambda corner: corner_dist(corner, corner))
+        closest = min(corners, key=lambda corner: corner_dist(corner, corner))
         p = rect_corner(rect, closest)
 
-        return (closest, closest,
-                (p.x() - parent_rect.left()) / parent_rect.width(),
-                (p.y() - parent_rect.top()) / parent_rect.height())
+        return (
+            closest,
+            closest,
+            (p.x() - parent_rect.left()) / parent_rect.width(),
+            (p.y() - parent_rect.top()) / parent_rect.height(),
+        )
     else:
 
-        c1, c2 = min(itertools.product(corners, corners),
-                     key=lambda pair: corner_dist(*pair))
+        c1, c2 = min(
+            itertools.product(corners, corners), key=lambda pair: corner_dist(*pair)
+        )
 
         p = rect_corner(rect, c1)
 
-        return (c1, c2,
-                (p.x() - parent_rect.left()) / parent_rect.width(),
-                (p.y() - parent_rect.top()) / parent_rect.height())
+        return (
+            c1,
+            c2,
+            (p.x() - parent_rect.left()) / parent_rect.width(),
+            (p.y() - parent_rect.top()) / parent_rect.height(),
+        )
 
 
 class DiscretizedScale:
@@ -294,6 +323,7 @@ class DiscretizedScale:
     .. attribute:: decimals
         The number of decimals used for printing out the boundaries
     """
+
     def __init__(self, min_v, max_v):
         """
         :param min_v: Minimal value
@@ -387,17 +417,19 @@ class InteractiveViewBox(ViewBox):
         self.tag_history()
 
     def tag_history(self):
-        #add current view to history if it differs from the last view
+        # add current view to history if it differs from the last view
         if self.axHistory:
             currentview = self.viewRect()
             lastview = self.axHistory[self.axHistoryPointer]
             inters = currentview & lastview
             united = currentview.united(lastview)
-            if inters.width()*inters.height()/(united.width()*united.height()) > 0.95:
+            if (
+                inters.width() * inters.height() / (united.width() * united.height())
+                > 0.95
+            ):
                 return
         self.axHistoryPointer += 1
-        self.axHistory = self.axHistory[:self.axHistoryPointer] + \
-                         [self.viewRect()]
+        self.axHistory = self.axHistory[: self.axHistoryPointer] + [self.viewRect()]
 
     def init_history(self):
         self.axHistory = []
@@ -407,8 +439,8 @@ class InteractiveViewBox(ViewBox):
         super().autoRange(padding=padding, items=items, item=item)
         self.tag_history()
 
-    def suggestPadding(self, axis): #no padding so that undo works correcty
-        return 0.
+    def suggestPadding(self, axis):  # no padding so that undo works correcty
+        return 0.0
 
     def scaleHistory(self, d):
         self.tag_history()
@@ -466,7 +498,8 @@ def _define_symbols():
 
     tr = QTransform()
     tr.rotate(180)
-    symbols['t'] = tr.map(symbols['t'])
+    symbols["t"] = tr.map(symbols["t"])
+
 
 _define_symbols()
 
@@ -498,17 +531,22 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
     DarkerValue = 120
     UnknownColor = (168, 50, 168)
 
-    def __init__(self, scatter_widget, parent=None, _="None", view_box=InteractiveViewBox):
+    def __init__(
+        self, scatter_widget, parent=None, _="None", view_box=InteractiveViewBox
+    ):
         gui.OWComponent.__init__(self, scatter_widget)
         self.view_box = view_box(self)
-        self.plot_widget = pg.PlotWidget(viewBox=self.view_box, parent=parent,
-                                         background="w")
+        self.plot_widget = pg.PlotWidget(
+            viewBox=self.view_box, parent=parent, background="w"
+        )
         self.plot_widget.getPlotItem().buttonsHidden = True
         self.plot_widget.setAntialiasing(True)
         self.plot_widget.sizeHint = lambda: QSize(500, 500)
         scene = self.plot_widget.scene()
         self._create_drag_tooltip(scene)
-        self._data = None  # Original Table as passed from widget to new_data before transformations
+        self._data = (
+            None
+        )  # Original Table as passed from widget to new_data before transformations
 
         self.replot = self.plot_widget.replot
         ScaleScatterPlotData.__init__(self)
@@ -523,16 +561,17 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
         self.master.Warning.add_message(
             "missing_coords",
             "Plot cannot be displayed because '{}' or '{}' is missing for "
-            "all data points")
+            "all data points",
+        )
         self.master.Information.add_message(
-            "missing_coords",
-            "Points with missing '{}' or '{}' are not displayed")
+            "missing_coords", "Points with missing '{}' or '{}' are not displayed"
+        )
         self.master.Information.add_message(
-            "missing_size",
-            "Points with undefined '{}' are shown in smaller size")
+            "missing_size", "Points with undefined '{}' are shown in smaller size"
+        )
         self.master.Information.add_message(
-            "missing_shape",
-            "Points with undefined '{}' are shown as crossed circles")
+            "missing_shape", "Points with undefined '{}' are shown as crossed circles"
+        )
         self.shown_attribute_indices = []
         self.shown_x = self.shown_y = None
         self.pen_colors = self.brush_colors = None
@@ -543,7 +582,8 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
 
         self.gui = OWPlotGUI(self)
         self.continuous_palette = ContinuousPaletteGenerator(
-            QColor(255, 255, 0), QColor(0, 0, 255), True)
+            QColor(255, 255, 0), QColor(0, 0, 255), True
+        )
         self.discrete_palette = ColorPaletteGenerator()
 
         self.selection_behavior = 0
@@ -568,10 +608,13 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
     def _create_drag_tooltip(self, scene):
         tip_parts = [
             (Qt.ShiftModifier, "Shift: Add group"),
-            (Qt.ShiftModifier + Qt.ControlModifier,
-             "Shift-{}: Append to group".
-             format("Cmd" if sys.platform == "darwin" else "Ctrl")),
-            (Qt.AltModifier, "Alt: Remove")
+            (
+                Qt.ShiftModifier + Qt.ControlModifier,
+                "Shift-{}: Append to group".format(
+                    "Cmd" if sys.platform == "darwin" else "Ctrl"
+                ),
+            ),
+            (Qt.AltModifier, "Alt: Remove"),
         ]
         all_parts = ", ".join(part for _, part in tip_parts)
         self.tiptexts = {
@@ -630,12 +673,14 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
         if data is None or not data.is_sparse():
             return data
 
-        attrs = {self.shown_x,
-                 self.shown_y,
-                 self.attr_color,
-                 self.attr_shape,
-                 self.attr_size,
-                 self.attr_label}
+        attrs = {
+            self.shown_x,
+            self.shown_y,
+            self.attr_color,
+            self.attr_shape,
+            self.attr_size,
+            self.attr_label,
+        }
         domain = data.domain
         all_attrs = domain.variables + domain.metas
         attrs = list(set(all_attrs) & attrs)
@@ -687,20 +732,18 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
         if self.valid_data is None:
             self.selection = None
             self.n_points = 0
-            self.master.Warning.missing_coords(
-                self.shown_x.name, self.shown_y.name)
+            self.master.Warning.missing_coords(self.shown_x.name, self.shown_y.name)
             return
 
-        x_data, y_data = self.get_xy_data_positions(
-            attr_x, attr_y, self.valid_data)
+        x_data, y_data = self.get_xy_data_positions(attr_x, attr_y, self.valid_data)
         self.n_points = len(x_data)
 
         if reset_view:
             min_x, max_x = np.nanmin(x_data), np.nanmax(x_data)
             min_y, max_y = np.nanmin(y_data), np.nanmax(y_data)
             self.view_box.setRange(
-                QRectF(min_x, min_y, max_x - min_x, max_y - min_y),
-                padding=0.025)
+                QRectF(min_x, min_y, max_x - min_x, max_y - min_y), padding=0.025
+            )
             self.view_box.init_history()
             self.view_box.tag_history()
         [min_x, max_x], [min_y, max_y] = self.view_box.viewRange()
@@ -720,23 +763,31 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
         if self.should_draw_density():
             rgb_data = [pen.color().getRgb()[:3] for pen in color_data]
             self.density_img = classdensity.class_density_image(
-                min_x, max_x, min_y, max_y, self.resolution,
-                x_data, y_data, rgb_data)
+                min_x, max_x, min_y, max_y, self.resolution, x_data, y_data, rgb_data
+            )
             self.plot_widget.addItem(self.density_img)
 
         self.data_indices = np.flatnonzero(self.valid_data)
         if len(self.data_indices) != len(self.data):
-            self.master.Information.missing_coords(
-                self.shown_x.name, self.shown_y.name)
+            self.master.Information.missing_coords(self.shown_x.name, self.shown_y.name)
 
         self.scatterplot_item = ScatterPlotItem(
-            x=x_data, y=y_data, data=self.data_indices,
-            symbol=shape_data, size=size_data, pen=color_data, brush=brush_data
+            x=x_data,
+            y=y_data,
+            data=self.data_indices,
+            symbol=shape_data,
+            size=size_data,
+            pen=color_data,
+            brush=brush_data,
         )
         self.scatterplot_item_sel = ScatterPlotItem(
-            x=x_data, y=y_data, data=self.data_indices,
-            symbol=shape_data, size=size_data + SELECTION_WIDTH,
-            pen=color_data_sel, brush=brush_data_sel
+            x=x_data,
+            y=y_data,
+            data=self.data_indices,
+            symbol=shape_data,
+            size=size_data + SELECTION_WIDTH,
+            pen=color_data_sel,
+            brush=brush_data_sel,
         )
         self.plot_widget.addItem(self.scatterplot_item_sel)
         self.plot_widget.addItem(self.scatterplot_item)
@@ -757,30 +808,42 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
             angle = np.degrees(np.arctan((end_y - start_y) / (max_x - min_x)))
             rotate = ((angle + 45) % 180) - 45 > 90
             color = QColor("#505050")
-            l_opts = dict(color=color, position=abs(int(rotate) - 0.85),
-                          rotateAxis=(1, 0), movable=True)
+            l_opts = dict(
+                color=color,
+                position=abs(int(rotate) - 0.85),
+                rotateAxis=(1, 0),
+                movable=True,
+            )
             self.reg_line_item = InfiniteLine(
-                pos=QPointF(min_x, start_y), pen=pg.mkPen(color=color, width=1),
-                angle=angle, label="r = {:.2f}".format(rvalue), labelOpts=l_opts)
+                pos=QPointF(min_x, start_y),
+                pen=pg.mkPen(color=color, width=1),
+                angle=angle,
+                label="r = {:.2f}".format(rvalue),
+                labelOpts=l_opts,
+            )
             if rotate:
                 self.reg_line_item.label.angle = 180
                 self.reg_line_item.label.updateTransform()
             self.plot_widget.addItem(self.reg_line_item)
 
     def can_draw_density(self):
-        return self.domain is not None and \
-            self.attr_color is not None and \
-            self.attr_color.is_discrete and \
-            self.shown_x.is_continuous and \
-            self.shown_y.is_continuous
+        return (
+            self.domain is not None
+            and self.attr_color is not None
+            and self.attr_color.is_discrete
+            and self.shown_x.is_continuous
+            and self.shown_y.is_continuous
+        )
 
     def should_draw_density(self):
         return self.class_density and self.n_points > 1 and self.can_draw_density()
 
     def can_draw_regresssion_line(self):
-        return self.domain is not None and \
-               self.shown_x.is_continuous and \
-               self.shown_y.is_continuous
+        return (
+            self.domain is not None
+            and self.shown_x.is_continuous
+            and self.shown_y.is_continuous
+        )
 
     def set_labels(self, axis, labels):
         axis = self.plot_widget.getAxis(axis)
@@ -796,13 +859,13 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
     def compute_sizes(self):
         self.master.Information.missing_size.clear()
         if self.attr_size is None:
-            size_data = np.full((self.n_points,), self.point_width,
-                                dtype=float)
+            size_data = np.full((self.n_points,), self.point_width, dtype=float)
         else:
-            size_data = \
-                self.MinShapeSize + \
-                self.scaled_data.get_column_view(self.attr_size)[0][self.valid_data] * \
-                self.point_width
+            size_data = (
+                self.MinShapeSize
+                + self.scaled_data.get_column_view(self.attr_size)[0][self.valid_data]
+                * self.point_width
+            )
         nans = np.isnan(size_data)
         if np.any(nans):
             size_data[nans] = self.MinShapeSize - 2
@@ -825,8 +888,9 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
         colors = self.attr_color.colors
         if self.attr_color.is_discrete:
             self.discrete_palette = ColorPaletteGenerator(
-                number_of_colors=min(len(colors), MAX), rgb_colors=colors if len(colors) <= MAX
-                else DefaultRGBColors)
+                number_of_colors=min(len(colors), MAX),
+                rgb_colors=colors if len(colors) <= MAX else DefaultRGBColors,
+            )
         else:
             self.continuous_palette = ContinuousPaletteGenerator(*colors)
         return self.attr_color
@@ -839,17 +903,19 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
         if self.selection is not None:
             sels = np.max(self.selection)
             if sels == 1:
-                pens = [nopen,
-                        _make_pen(QColor(255, 190, 0, 255),
-                                  SELECTION_WIDTH + 1.)]
+                pens = [
+                    nopen,
+                    _make_pen(QColor(255, 190, 0, 255), SELECTION_WIDTH + 1.0),
+                ]
             else:
                 # Start with the first color so that the colors of the
                 # additional attribute in annotation (which start with 0,
                 # unselected) will match these colors
                 palette = ColorPaletteGenerator(number_of_colors=sels + 1)
-                pens = [nopen] + \
-                       [_make_pen(palette[i + 1], SELECTION_WIDTH + 1.)
-                        for i in range(sels)]
+                pens = [nopen] + [
+                    _make_pen(palette[i + 1], SELECTION_WIDTH + 1.0)
+                    for i in range(sels)
+                ]
             pen = [pens[a] for a in self.selection[self.valid_data]]
         else:
             pen = [nopen] * self.n_points
@@ -874,8 +940,9 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
         if len(attr.values) <= MAX:
             return attr.values
         values_to_replace, _ = self._reduce_values(attr)
-        return [attr.values[int(i)] for i in values_to_replace
-                if not np.isnan(i)][:MAX - 1] + ["Other"]
+        return [attr.values[int(i)] for i in values_to_replace if not np.isnan(i)][
+            : MAX - 1
+        ] + ["Other"]
 
     def _get_data(self, attr):
         values_to_replace, c_data = self._reduce_values(attr)
@@ -892,19 +959,25 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
 
         subset = None
         if self.subset_indices:
-            subset = np.array([ex.id in self.subset_indices
-                               for ex in self.data[self.valid_data]])
+            subset = np.array(
+                [ex.id in self.subset_indices for ex in self.data[self.valid_data]]
+            )
 
         if self.attr_color is None:  # same color
             color = self.plot_widget.palette().color(OWPalette.Data)
             pen = [_make_pen(color, 1.5)] * self.n_points
             if subset is not None:
-                brush = [(QBrush(QColor(128, 128, 128, 0)),
-                          QBrush(QColor(128, 128, 128, 255)))[s]
-                         for s in subset]
+                brush = [
+                    (
+                        QBrush(QColor(128, 128, 128, 0)),
+                        QBrush(QColor(128, 128, 128, 255)),
+                    )[s]
+                    for s in subset
+                ]
             else:
-                brush = [QBrush(QColor(128, 128, 128, self.alpha_value))] \
-                        * self.n_points
+                brush = [
+                    QBrush(QColor(128, 128, 128, self.alpha_value))
+                ] * self.n_points
             return pen, brush
 
         c_data = self._get_data(self.attr_color)
@@ -919,20 +992,25 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
                 palette = self.continuous_palette
                 self.pen_colors = palette.getRGB(c_data)
                 self.brush_colors = np.hstack(
-                    [self.pen_colors,
-                     np.full((self.n_points, 1), self.alpha_value, dtype=int)])
+                    [
+                        self.pen_colors,
+                        np.full((self.n_points, 1), self.alpha_value, dtype=int),
+                    ]
+                )
                 self.pen_colors *= 100
                 self.pen_colors //= self.DarkerValue
-                self.pen_colors = [_make_pen(QColor(*col), 1.5)
-                                   for col in self.pen_colors.tolist()]
+                self.pen_colors = [
+                    _make_pen(QColor(*col), 1.5) for col in self.pen_colors.tolist()
+                ]
             if subset is not None:
                 self.brush_colors[:, 3] = 0
                 self.brush_colors[subset, 3] = 255
             else:
                 self.brush_colors[:, 3] = self.alpha_value
             pen = self.pen_colors
-            brush = np.array([QBrush(QColor(*col))
-                              for col in self.brush_colors.tolist()])
+            brush = np.array(
+                [QBrush(QColor(*col)) for col in self.brush_colors.tolist()]
+            )
         else:
             if self.pen_colors is None:
                 palette = self.discrete_palette
@@ -940,22 +1018,29 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
                 c_data = c_data.copy()
                 c_data[np.isnan(c_data)] = n_colors
                 c_data = c_data.astype(int)
-                colors = np.r_[palette.getRGB(np.arange(n_colors)),
-                               [[128, 128, 128]]]
+                colors = np.r_[palette.getRGB(np.arange(n_colors)), [[128, 128, 128]]]
                 pens = np.array(
-                    [_make_pen(QColor(*col).darker(self.DarkerValue), 1.5)
-                     for col in colors])
+                    [
+                        _make_pen(QColor(*col).darker(self.DarkerValue), 1.5)
+                        for col in colors
+                    ]
+                )
                 self.pen_colors = pens[c_data]
                 alpha = self.alpha_value if subset is None else 255
-                self.brush_colors = np.array([
-                    [QBrush(QColor(0, 0, 0, 0)),
-                     QBrush(QColor(col[0], col[1], col[2], alpha))]
-                    for col in colors])
+                self.brush_colors = np.array(
+                    [
+                        [
+                            QBrush(QColor(0, 0, 0, 0)),
+                            QBrush(QColor(col[0], col[1], col[2], alpha)),
+                        ]
+                        for col in colors
+                    ]
+                )
                 self.brush_colors = self.brush_colors[c_data]
             if subset is not None:
                 brush = np.where(
-                    subset,
-                    self.brush_colors[:, 1], self.brush_colors[:, 0])
+                    subset, self.brush_colors[:, 1], self.brush_colors[:, 0]
+                )
             else:
                 brush = self.brush_colors[:, 1]
             pen = self.pen_colors
@@ -996,10 +1081,12 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
             label_column = self.master.data.get_column_view(self.attr_label)[0]
         return label_column[self.data_indices]
 
-
     def update_labels(self):
-        if self.attr_label is None or \
-                self.label_only_selected and self.selection is None:
+        if (
+            self.attr_label is None
+            or self.label_only_selected
+            and self.selection is None
+        ):
             for label in self.labels:
                 label.setText("")
             return
@@ -1010,10 +1097,11 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
         formatter = self.attr_label.str_val
         label_data = map(formatter, label_column)
         black = pg.mkColor(0, 0, 0)
-        selection = self.selection[self.valid_data] if self.selection is not None else []
+        selection = (
+            self.selection[self.valid_data] if self.selection is not None else []
+        )
         if self.label_only_selected:
-            for label, text, selected \
-                    in zip(self.labels, label_data, selection):
+            for label, text, selected in zip(self.labels, label_data, selection):
                 label.setText(text if selected else "", black)
         else:
             for label, text in zip(self.labels, label_data):
@@ -1090,9 +1178,13 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
                 brush = QBrush(color)
                 self.legend.addItem(
                     ScatterPlotItem(
-                        pen=pen, brush=brush, size=10,
-                        symbol=self.CurveSymbols[i] if use_shape else "o"),
-                    escape(value))
+                        pen=pen,
+                        brush=brush,
+                        size=10,
+                        symbol=self.CurveSymbols[i] if use_shape else "o",
+                    ),
+                    escape(value),
+                )
         else:
             legend = self.color_legend = LegendItem()
             legend.setParentItem(self.plot_widget.getViewBox())
@@ -1111,23 +1203,31 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
         color.setAlpha(self.alpha_value)
         for i, value in enumerate(self._get_values(self.attr_shape)):
             self.legend.addItem(
-                ScatterPlotItem(pen=color, brush=color, size=10,
-                                symbol=self.CurveSymbols[i]), escape(value))
+                ScatterPlotItem(
+                    pen=color, brush=color, size=10, symbol=self.CurveSymbols[i]
+                ),
+                escape(value),
+            )
 
     def zoom_button_clicked(self):
         self.plot_widget.getViewBox().setMouseMode(
-            self.plot_widget.getViewBox().RectMode)
+            self.plot_widget.getViewBox().RectMode
+        )
 
     def pan_button_clicked(self):
         self.plot_widget.getViewBox().setMouseMode(
-            self.plot_widget.getViewBox().PanMode)
+            self.plot_widget.getViewBox().PanMode
+        )
 
     def select_button_clicked(self):
         self.plot_widget.getViewBox().setMouseMode(
-            self.plot_widget.getViewBox().RectMode)
+            self.plot_widget.getViewBox().RectMode
+        )
 
     def reset_button_clicked(self):
-        self.update_data(self.shown_x, self.shown_y, reset_view=True)  # also redraw density image
+        self.update_data(
+            self.shown_x, self.shown_y, reset_view=True
+        )  # also redraw density image
         # self.view_box.autoRange()
 
     def select_by_click(self, _, points):
@@ -1136,9 +1236,11 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
 
     def select_by_rectangle(self, value_rect):
         if self.scatterplot_item is not None:
-            points = [point
-                      for point in self.scatterplot_item.points()
-                      if value_rect.contains(QPointF(point.pos()))]
+            points = [
+                point
+                for point in self.scatterplot_item.points()
+                if value_rect.contains(QPointF(point.pos()))
+            ]
             self.select(points)
 
     def unselect_all(self):
@@ -1191,40 +1293,43 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
             return False
 
         domain = self.data.domain
-        PARTS = (("Class", "Classes", 4, domain.class_vars),
-                 ("Meta", "Metas", 4, domain.metas),
-                 ("Feature", "Features", 10, domain.attributes))
+        PARTS = (
+            ("Class", "Classes", 4, domain.class_vars),
+            ("Meta", "Metas", 4, domain.metas),
+            ("Feature", "Features", 10, domain.attributes),
+        )
 
         def format_val(var, point_data, bold=False):
-            text = escape('{} = {}'.format(var.name, point_data[var]))
+            text = escape("{} = {}".format(var.name, point_data[var]))
             if bold:
                 text = "<b>{}</b>".format(text)
             return text
 
         def show_part(point_data, singular, plural, max_shown, vars):
-            cols = [format_val(var, point_data)
-                    for var in vars[:max_shown + 2]
-                    if vars == domain.class_vars
-                    or var not in (self.shown_x, self.shown_y)][:max_shown]
+            cols = [
+                format_val(var, point_data)
+                for var in vars[: max_shown + 2]
+                if vars == domain.class_vars or var not in (self.shown_x, self.shown_y)
+            ][:max_shown]
             if not cols:
                 return ""
             n_vars = len(vars)
             if n_vars > max_shown:
                 cols[-1] = "... and {} others".format(n_vars - max_shown + 1)
-            return \
-                "<br/><b>{}</b>:<br/>".format(singular if n_vars < 2
-                                              else plural) \
-                + "<br/>".join(cols)
+            return "<br/><b>{}</b>:<br/>".format(
+                singular if n_vars < 2 else plural
+            ) + "<br/>".join(cols)
 
         def point_data(p):
             point_data = self.data[p.data()]
             text = "<br/>".join(
                 format_val(var, point_data, bold=self.tooltip_shows_all)
-                for var in (self.shown_x, self.shown_y))
+                for var in (self.shown_x, self.shown_y)
+            )
             if self.tooltip_shows_all:
-                text += "<br/>" + \
-                        "".join(show_part(point_data, *columns)
-                                for columns in PARTS)
+                text += "<br/>" + "".join(
+                    show_part(point_data, *columns) for columns in PARTS
+                )
             return text
 
         act_pos = self.scatterplot_item.mapFromScene(event.scenePos())
@@ -1234,7 +1339,9 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
             if len(points) > MAX_POINTS_IN_TOOLTIP:
                 text = "{} instances<hr/>{}<hr/>...".format(
                     len(points),
-                    "<hr/>".join(point_data(point) for point in points[:MAX_POINTS_IN_TOOLTIP])
+                    "<hr/>".join(
+                        point_data(point) for point in points[:MAX_POINTS_IN_TOOLTIP]
+                    ),
                 )
             else:
                 text = "<hr/>".join(point_data(point) for point in points)
@@ -1248,9 +1355,16 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
         g = self.gui
         box_zoom_select = gui.vBox(parent, "Zoom/Select")
         zoom_select_toolbar = g.zoom_select_toolbar(
-            box_zoom_select, nomargin=True,
-            buttons=[g.StateButtonsBegin, g.SimpleSelect, g.Pan, g.Zoom,
-                     g.StateButtonsEnd, g.ZoomReset]
+            box_zoom_select,
+            nomargin=True,
+            buttons=[
+                g.StateButtonsBegin,
+                g.SimpleSelect,
+                g.Pan,
+                g.Zoom,
+                g.StateButtonsEnd,
+                g.ZoomReset,
+            ],
         )
         buttons = zoom_select_toolbar.buttons
         buttons[g.Zoom].clicked.connect(self.zoom_button_clicked)
@@ -1270,23 +1384,26 @@ class OWScatterPlotGraph(gui.OWComponent, ScaleScatterPlotData):
         def fit_to_view():
             self.viewbox.autoRange()
 
-        zoom_in = QAction(
-            "Zoom in", parent, triggered=lambda: zoom(1.25)
+        zoom_in = QAction("Zoom in", parent, triggered=lambda: zoom(1.25))
+        zoom_in.setShortcuts(
+            [QKeySequence(QKeySequence.ZoomIn), QKeySequence(parent.tr("Ctrl+="))]
         )
-        zoom_in.setShortcuts([QKeySequence(QKeySequence.ZoomIn),
-                              QKeySequence(parent.tr("Ctrl+="))])
         zoom_out = QAction(
-            "Zoom out", parent, shortcut=QKeySequence.ZoomOut,
-            triggered=lambda: zoom(1 / 1.25)
+            "Zoom out",
+            parent,
+            shortcut=QKeySequence.ZoomOut,
+            triggered=lambda: zoom(1 / 1.25),
         )
         zoom_fit = QAction(
-            "Fit in view", parent,
+            "Fit in view",
+            parent,
             shortcut=QKeySequence(Qt.ControlModifier | Qt.Key_0),
-            triggered=fit_to_view
+            triggered=fit_to_view,
         )
         parent.addActions([zoom_in, zoom_out, zoom_fit])
 
-class HelpEventDelegate(QObject): #also used by owdistributions
+
+class HelpEventDelegate(QObject):  # also used by owdistributions
     def __init__(self, delegate, parent=None):
         super().__init__(parent)
         self.delegate = delegate

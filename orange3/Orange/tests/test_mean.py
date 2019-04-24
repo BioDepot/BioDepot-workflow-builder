@@ -42,11 +42,11 @@ class TestMeanLearner(unittest.TestCase):
         self.assertTrue(np.allclose(y2, expected_mean))
 
     def test_empty(self):
-        autompg = Table('auto-mpg')
+        autompg = Table("auto-mpg")
         clf = self.learn(autompg[:0])
         y = clf(autompg[0])
         self.assertEqual(y, 0)
 
     def test_discrete(self):
-        iris = Table('iris')
+        iris = Table("iris")
         self.assertRaises(ValueError, self.learn, iris)

@@ -20,11 +20,17 @@ from Orange.widgets import gui, settings
 from Orange.widgets.settings import SettingProvider
 from Orange.widgets.utils.sql import check_sql_input
 from Orange.widgets import report
-from Orange.widgets.visualize.owscatterplotgraph import OWScatterPlotGraph, InteractiveViewBox
+from Orange.widgets.visualize.owscatterplotgraph import (
+    OWScatterPlotGraph,
+    InteractiveViewBox,
+)
 from Orange.widgets.widget import Msg, OWWidget, Input, Output
 from Orange.widgets.utils.annotated_data import (
-    ANNOTATED_DATA_SIGNAL_NAME, create_annotated_table, create_groups_table,
-    get_unique_names)
+    ANNOTATED_DATA_SIGNAL_NAME,
+    create_annotated_table,
+    create_groups_table,
+    get_unique_names,
+)
 
 
 def stress(X, distD):
@@ -65,16 +71,18 @@ class OWMDSGraph(OWScatterPlotGraph):
 
         self.master.Information.missing_size.clear()
         if self.attr_size is None:
-            size_data = np.full((self.n_points,), self.point_width,
-                                dtype=float)
+            size_data = np.full((self.n_points,), self.point_width, dtype=float)
         elif self.attr_size == "Stress":
-            size_data = scale(stress(self.master.embedding, self.master.effective_matrix))
+            size_data = scale(
+                stress(self.master.embedding, self.master.effective_matrix)
+            )
             size_data = self.MinShapeSize + size_data * self.point_width
         else:
-            size_data = \
-                self.MinShapeSize + \
-                self.scaled_data.get_column_view(self.attr_size)[0][self.valid_data] * \
-                self.point_width
+            size_data = (
+                self.MinShapeSize
+                + self.scaled_data.get_column_view(self.attr_size)[0][self.valid_data]
+                * self.point_width
+            )
         nans = np.isnan(size_data)
         if np.any(nans):
             size_data[nans] = self.MinShapeSize - 2
@@ -85,10 +93,13 @@ class OWMDSGraph(OWScatterPlotGraph):
 #: Maximum number of displayed closest pairs.
 MAX_N_PAIRS = 10000
 
+
 class OWMDS(OWWidget):
     name = "MDS"
-    description = "Two-dimensional data projection by multidimensional " \
-                  "scaling constructed from a distance matrix."
+    description = (
+        "Two-dimensional data projection by multidimensional "
+        "scaling constructed from a distance matrix."
+    )
     icon = "icons/MDS.svg"
 
     class Inputs:
@@ -112,7 +123,7 @@ class OWMDS(OWWidget):
         ("Every 10 steps", 10),
         ("Every 25 steps", 25),
         ("Every 50 steps", 50),
-        ("None", -1)
+        ("None", -1),
     ]
 
     #: Runtime state
@@ -146,8 +157,7 @@ class OWMDS(OWWidget):
         not_enough_rows = Msg("Input data needs at least 2 rows")
         matrix_too_small = Msg("Input matrix must be at least 2x2")
         no_attributes = Msg("Data has no attributes")
-        mismatching_dimensions = \
-            Msg("Data and distances dimensions do not match.")
+        mismatching_dimensions = Msg("Data and distances dimensions do not match.")
         out_of_memory = Msg("Out of memory")
         optimization_error = Msg("Error during optimization\n{}")
 
@@ -188,23 +198,35 @@ class OWMDS(OWWidget):
             labelAlignment=Qt.AlignLeft,
             formAlignment=Qt.AlignLeft,
             fieldGrowthPolicy=QFormLayout.AllNonFixedFieldsGrow,
-            verticalSpacing=10
+            verticalSpacing=10,
         )
 
         form.addRow(
-            "Max iterations:",
-            gui.spin(box, self, "max_iter", 10, 10 ** 4, step=1))
+            "Max iterations:", gui.spin(box, self, "max_iter", 10, 10 ** 4, step=1)
+        )
 
         form.addRow(
             "Initialization:",
-            gui.radioButtons(box, self, "initialization", btnLabels=("PCA (Torgerson)", "Random"),
-                             callback=self.__invalidate_embedding))
+            gui.radioButtons(
+                box,
+                self,
+                "initialization",
+                btnLabels=("PCA (Torgerson)", "Random"),
+                callback=self.__invalidate_embedding,
+            ),
+        )
 
         box.layout().addLayout(form)
         form.addRow(
             "Refresh:",
-            gui.comboBox(box, self, "refresh_rate", items=[t for t, _ in OWMDS.RefreshRate],
-                         callback=self.__invalidate_refresh))
+            gui.comboBox(
+                box,
+                self,
+                "refresh_rate",
+                items=[t for t, _ in OWMDS.RefreshRate],
+                callback=self.__invalidate_refresh,
+            ),
+        )
         gui.separator(box, 10)
         self.runbutton = gui.button(box, self, "Run", callback=self._toggle_run)
 
@@ -218,18 +240,26 @@ class OWMDS(OWWidget):
         self.models = g.points_models
         self.size_model = self.models[2]
         self.label_model = self.models[3]
-        self.size_model.order = \
-            self.size_model.order[:1] + ("Stress", ) + self.models[2].order[1:]
+        self.size_model.order = (
+            self.size_model.order[:1] + ("Stress",) + self.models[2].order[1:]
+        )
 
-        gui.hSlider(box, self, "connected_pairs", label="Show similar pairs:", minValue=0,
-                    maxValue=20, createLabel=False, callback=self._on_connected_changed)
+        gui.hSlider(
+            box,
+            self,
+            "connected_pairs",
+            label="Show similar pairs:",
+            minValue=0,
+            maxValue=20,
+            createLabel=False,
+            callback=self._on_connected_changed,
+        )
         g.add_widgets(ids=[g.JitterSizeSlider], widget=box)
 
         box = gui.vBox(self.controlArea, "Plot Properties")
-        g.add_widgets([g.ShowLegend,
-                       g.ToolTipShowsAll,
-                       g.ClassDensity,
-                       g.LabelOnlySelected], box)
+        g.add_widgets(
+            [g.ShowLegend, g.ToolTipShowsAll, g.ClassDensity, g.LabelOnlySelected], box
+        )
 
         self.controlArea.layout().addStretch(100)
         self.icons = gui.attributeIconDict
@@ -241,9 +271,14 @@ class OWMDS(OWWidget):
 
         self.graph.box_zoom_select(self.controlArea)
 
-        gui.auto_commit(box, self, "auto_commit", "Send Selected",
-                        checkbox_label="Send selected automatically",
-                        box=None)
+        gui.auto_commit(
+            box,
+            self,
+            "auto_commit",
+            "Send Selected",
+            checkbox_label="Send selected automatically",
+            box=None,
+        )
 
         self.plot.getPlotItem().hideButtons()
         self.plot.setRenderHint(QPainter.Antialiasing)
@@ -298,7 +333,11 @@ class OWMDS(OWWidget):
 
         self.signal_data = data
 
-        if self.matrix is not None and data is not None and len(self.matrix) == len(data):
+        if (
+            self.matrix is not None
+            and data is not None
+            and len(self.matrix) == len(data)
+        ):
             self.closeContext()
             self.data = data
             self.init_attr_values()
@@ -361,8 +400,11 @@ class OWMDS(OWWidget):
         if self.signal_data is None and self.matrix is None:
             return
 
-        if self.signal_data is not None and self.matrix is not None and \
-                len(self.signal_data) != len(self.matrix):
+        if (
+            self.signal_data is not None
+            and self.matrix is not None
+            and len(self.signal_data) != len(self.matrix)
+        ):
             self.Error.mismatching_dimensions()
             self._update_plot()
             return
@@ -399,8 +441,7 @@ class OWMDS(OWWidget):
         elif self.__state == OWMDS.Finished:
             # Resume/continue from a previous run
             self.__start()
-        elif self.__state == OWMDS.Waiting and \
-                self.effective_matrix is not None:
+        elif self.__state == OWMDS.Waiting and self.effective_matrix is not None:
             self.__start()
 
     def stop(self):
@@ -430,9 +471,13 @@ class OWMDS(OWWidget):
             while not done:
                 step_iter = min(max_iter - iterations_done, step)
                 mds = Orange.projection.MDS(
-                    dissimilarity="precomputed", n_components=2,
-                    n_init=1, max_iter=step_iter,
-                    init_type=init_type, init_data=init)
+                    dissimilarity="precomputed",
+                    n_components=2,
+                    n_init=1,
+                    max_iter=step_iter,
+                    init_type=init_type,
+                    init_data=init,
+                )
 
                 mdsfit = mds(X)
                 iterations_done += step_iter
@@ -565,8 +610,11 @@ class OWMDS(OWWidget):
             self._initialize()
             self.start()
 
-        if self._subset_mask is None and self.subset_data is not None and \
-                self.data is not None:
+        if (
+            self._subset_mask is None
+            and self.subset_data is not None
+            and self.data is not None
+        ):
             self._subset_mask = np.in1d(self.data.ids, self.subset_data.ids)
 
         self._update_plot(new=True)
@@ -593,7 +641,8 @@ class OWMDS(OWWidget):
         if not (self.connected_pairs and self.__draw_similar_pairs):
             return
         emb_x, emb_y = self.graph.get_xy_data_positions(
-            self.variable_x, self.variable_y, self.graph.valid_data)
+            self.variable_x, self.variable_y, self.graph.valid_data
+        )
         if self._similar_pairs is None:
             # This code requires storing lower triangle of X (n x n / 2
             # doubles), n x n / 2 * 2 indices to X, n x n / 2 indices for
@@ -608,8 +657,10 @@ class OWMDS(OWWidget):
             # become an issue, I preferred using simpler code.
             m = self.effective_matrix
             n = len(m)
-            p = min(n * (n - 1) // 2 * self.connected_pairs // 100,
-                    MAX_N_PAIRS * self.connected_pairs // 20)
+            p = min(
+                n * (n - 1) // 2 * self.connected_pairs // 100,
+                MAX_N_PAIRS * self.connected_pairs // 20,
+            )
             indcs = np.triu_indices(n, 1)
             sorted = np.argsort(m[indcs])[:p]
             self._similar_pairs = fpairs = np.empty(2 * p, dtype=int)
@@ -626,9 +677,12 @@ class OWMDS(OWWidget):
         emb_x_pairs = emb_x_pairs[pairs_mask, :]
         emb_y_pairs = emb_y_pairs[pairs_mask, :]
         self._curve = pg.PlotCurveItem(
-            emb_x_pairs.ravel(), emb_y_pairs.ravel(),
+            emb_x_pairs.ravel(),
+            emb_y_pairs.ravel(),
             pen=pg.mkPen(0.8, width=2, cosmetic=True),
-            connect="pairs", antialias=True)
+            connect="pairs",
+            antialias=True,
+        )
         self.graph.plot_widget.addItem(self._curve)
 
     def _setup_plot(self, new=False):
@@ -637,11 +691,14 @@ class OWMDS(OWWidget):
 
         data = self.data
         attributes = data.domain.attributes + (self.variable_x, self.variable_y)
-        domain = Domain(attributes=attributes,
-                        class_vars=data.domain.class_vars,
-                        metas=data.domain.metas)
-        data = Table.from_numpy(domain, X=hstack((data.X, coords)),
-                                Y=data.Y, metas=data.metas)
+        domain = Domain(
+            attributes=attributes,
+            class_vars=data.domain.class_vars,
+            metas=data.domain.metas,
+        )
+        data = Table.from_numpy(
+            domain, X=hstack((data.X, coords)), Y=data.Y, metas=data.metas
+        )
         subset_data = data[self._subset_mask] if self._subset_mask is not None else None
         self.graph.new_data(data, subset_data=subset_data, new=new)
         self.graph.update_data(self.variable_x, self.variable_y, True)
@@ -649,20 +706,25 @@ class OWMDS(OWWidget):
 
     def commit(self):
         if self.embedding is not None:
-            names = get_unique_names([v.name for v in self.data.domain.variables],
-                                     ["mds-x", "mds-y"])
+            names = get_unique_names(
+                [v.name for v in self.data.domain.variables], ["mds-x", "mds-y"]
+            )
             output = embedding = Orange.data.Table.from_numpy(
-                Orange.data.Domain([ContinuousVariable(names[0]), ContinuousVariable(names[1])]),
-                self.embedding
+                Orange.data.Domain(
+                    [ContinuousVariable(names[0]), ContinuousVariable(names[1])]
+                ),
+                self.embedding,
             )
         else:
             output = embedding = None
 
         if self.embedding is not None and self.data is not None:
             domain = self.data.domain
-            domain = Orange.data.Domain(domain.attributes,
-                                        domain.class_vars,
-                                        domain.metas + embedding.domain.attributes)
+            domain = Orange.data.Domain(
+                domain.attributes,
+                domain.class_vars,
+                domain.metas + embedding.domain.attributes,
+            )
             output = self.data.transform(domain)
             output.metas[:, -2:] = embedding.X
 
@@ -690,12 +752,19 @@ class OWMDS(OWWidget):
         def name(var):
             return var and var.name
 
-        caption = report.render_items_vert((
-            ("Color", name(self.graph.attr_color)),
-            ("Label", name(self.graph.attr_label)),
-            ("Shape", name(self.graph.attr_shape)),
-            ("Size", name(self.graph.attr_size)),
-            ("Jittering", self.graph.jitter_size != 0 and "{} %".format(self.graph.jitter_size))))
+        caption = report.render_items_vert(
+            (
+                ("Color", name(self.graph.attr_color)),
+                ("Label", name(self.graph.attr_label)),
+                ("Shape", name(self.graph.attr_shape)),
+                ("Size", name(self.graph.attr_size)),
+                (
+                    "Jittering",
+                    self.graph.jitter_size != 0
+                    and "{} %".format(self.graph.jitter_size),
+                ),
+            )
+        )
         self.report_plot()
         if caption:
             self.report_caption(caption)
@@ -704,14 +773,15 @@ class OWMDS(OWWidget):
     def migrate_settings(cls, settings_, version):
         if version < 2:
             settings_graph = {}
-            for old, new in (("label_only_selected", "label_only_selected"),
-                             ("symbol_opacity", "alpha_value"),
-                             ("symbol_size", "point_width"),
-                             ("jitter", "jitter_size")):
+            for old, new in (
+                ("label_only_selected", "label_only_selected"),
+                ("symbol_opacity", "alpha_value"),
+                ("symbol_size", "point_width"),
+                ("jitter", "jitter_size"),
+            ):
                 settings_graph[new] = settings_[old]
             settings_["graph"] = settings_graph
             settings_["auto_commit"] = settings_["autocommit"]
-
 
     @classmethod
     def migrate_context(cls, context, version):
@@ -720,10 +790,12 @@ class OWMDS(OWWidget):
             n_domain = [t for t in context.ordered_domain if t[1] == 2]
             c_domain = [t for t in context.ordered_domain if t[1] == 1]
             context_values_graph = {}
-            for _, old_val, new_val in ((domain, "color_value", "attr_color"),
-                                        (c_domain, "shape_value", "attr_shape"),
-                                        (n_domain, "size_value", "attr_size"),
-                                        (domain, "label_value", "attr_label")):
+            for _, old_val, new_val in (
+                (domain, "color_value", "attr_color"),
+                (c_domain, "shape_value", "attr_shape"),
+                (n_domain, "size_value", "attr_size"),
+                (domain, "label_value", "attr_label"),
+            ):
                 tmp = context.values[old_val]
                 if tmp[1] >= 0:
                     context_values_graph[new_val] = (tmp[0], tmp[1] + 100)
@@ -738,6 +810,7 @@ def main(argv=None):
     if argv is None:
         argv = sys.argv
     import gc
+
     app = QApplication(list(argv))
     argv = app.arguments()
     if len(argv) > 1:
@@ -766,6 +839,7 @@ def main(argv=None):
     gc.collect()
     app.processEvents()
     return rval
+
 
 if __name__ == "__main__":
     sys.exit(main())

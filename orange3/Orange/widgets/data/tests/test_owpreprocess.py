@@ -4,7 +4,13 @@ import numpy as np
 
 from Orange.data import Table
 from Orange.preprocess import (
-    Randomize, Scale, Discretize, Continuize, Impute, ProjectPCA, ProjectCUR
+    Randomize,
+    Scale,
+    Discretize,
+    Continuize,
+    Impute,
+    ProjectPCA,
+    ProjectCUR,
 )
 from Orange.preprocess import discretize, impute, fss, score
 from Orange.widgets.data import owpreprocess
@@ -18,9 +24,14 @@ class TestOWPreprocess(WidgetTest):
         self.zoo = Table("zoo")
 
     def test_randomize(self):
-        saved = {"preprocessors": [("orange.preprocess.randomize",
-                                    {"rand_type": Randomize.RandomizeClasses,
-                                     "rand_seed": 1})]}
+        saved = {
+            "preprocessors": [
+                (
+                    "orange.preprocess.randomize",
+                    {"rand_type": Randomize.RandomizeClasses, "rand_seed": 1},
+                )
+            ]
+        }
         model = self.widget.load(saved)
         self.widget.set_model(model)
         self.send_signal(self.widget.Inputs.data, self.zoo)
@@ -38,9 +49,17 @@ class TestOWPreprocess(WidgetTest):
 
     def test_normalize(self):
         data = Table("iris")
-        saved = {"preprocessors": [("orange.preprocess.scale",
-                                    {"center": Scale.CenteringType.Mean,
-                                     "scale": Scale.ScalingType.Std})]}
+        saved = {
+            "preprocessors": [
+                (
+                    "orange.preprocess.scale",
+                    {
+                        "center": Scale.CenteringType.Mean,
+                        "scale": Scale.ScalingType.Std,
+                    },
+                )
+            ]
+        }
         model = self.widget.load(saved)
         self.widget.set_model(model)
         self.send_signal(self.widget.Inputs.data, data)
@@ -56,9 +75,17 @@ class TestOWPreprocess(WidgetTest):
         GH-2064
         """
         table = datasets.data_one_column_nans()
-        saved = {"preprocessors": [("orange.preprocess.scale",
-                                    {"center": Scale.CenteringType.Mean,
-                                     "scale": Scale.ScalingType.Std})]}
+        saved = {
+            "preprocessors": [
+                (
+                    "orange.preprocess.scale",
+                    {
+                        "center": Scale.CenteringType.Mean,
+                        "scale": Scale.ScalingType.Std,
+                    },
+                )
+            ]
+        }
         model = self.widget.load(saved)
         self.widget.set_model(model)
         self.send_signal(self.widget.Inputs.data, table)
@@ -68,22 +95,20 @@ class TestOWPreprocess(WidgetTest):
 class TestDiscretizeEditor(WidgetTest):
     def test_editor(self):
         widget = owpreprocess.DiscretizeEditor()
-        self.assertEqual(widget.parameters(),
-                         {"method": owpreprocess.DiscretizeEditor.EqualFreq,
-                          "n": 4})
+        self.assertEqual(
+            widget.parameters(),
+            {"method": owpreprocess.DiscretizeEditor.EqualFreq, "n": 4},
+        )
         p = widget.createinstance(widget.parameters())
         self.assertIsInstance(p, Discretize)
         self.assertIsInstance(p.method, discretize.EqualFreq)
-        widget.setParameters(
-            {"method": owpreprocess.DiscretizeEditor.EntropyMDL}
-        )
+        widget.setParameters({"method": owpreprocess.DiscretizeEditor.EntropyMDL})
         p = widget.createinstance(widget.parameters())
         self.assertIsInstance(p, Discretize)
         self.assertIsInstance(p.method, discretize.EntropyMDL)
 
         widget.setParameters(
-            {"method": owpreprocess.DiscretizeEditor.EqualWidth,
-             "n": 10}
+            {"method": owpreprocess.DiscretizeEditor.EqualWidth, "n": 10}
         )
         p = widget.createinstance(widget.parameters())
         self.assertIsInstance(p, Discretize)
@@ -94,15 +119,15 @@ class TestDiscretizeEditor(WidgetTest):
 class TestContinuizeEditor(WidgetTest):
     def test_editor(self):
         widget = owpreprocess.ContinuizeEditor()
-        self.assertEqual(widget.parameters(),
-                         {"multinomial_treatment": Continuize.Indicators})
+        self.assertEqual(
+            widget.parameters(), {"multinomial_treatment": Continuize.Indicators}
+        )
 
         p = widget.createinstance(widget.parameters())
         self.assertIsInstance(p, Continuize)
         self.assertEqual(p.multinomial_treatment, Continuize.Indicators)
 
-        widget.setParameters(
-            {"multinomial_treatment": Continuize.FrequentAsBase})
+        widget.setParameters({"multinomial_treatment": Continuize.FrequentAsBase})
         p = widget.createinstance(widget.parameters())
         self.assertIsInstance(p, Continuize)
         self.assertEqual(p.multinomial_treatment, Continuize.FrequentAsBase)
@@ -111,11 +136,10 @@ class TestContinuizeEditor(WidgetTest):
 class TestImputeEditor(WidgetTest):
     def test_editor(self):
         widget = owpreprocess.ImputeEditor()
-        self.assertEqual(widget.parameters(),
-                         {"method": owpreprocess.ImputeEditor.Average})
-        widget.setParameters(
-            {"method": owpreprocess.ImputeEditor.Average}
+        self.assertEqual(
+            widget.parameters(), {"method": owpreprocess.ImputeEditor.Average}
         )
+        widget.setParameters({"method": owpreprocess.ImputeEditor.Average})
         p = widget.createinstance(widget.parameters())
         self.assertIsInstance(p, Impute)
         self.assertIsInstance(p.method, impute.Average)
@@ -138,8 +162,8 @@ class TestRandomFeatureSelectEditor(WidgetTest):
         self.assertEqual(p.k, 10)
 
         widget.setParameters(
-            {"strategy": owpreprocess.RandomFeatureSelectEditor.Percentage,
-             "p": 25})
+            {"strategy": owpreprocess.RandomFeatureSelectEditor.Percentage, "p": 25}
+        )
         p = widget.createinstance(widget.parameters())
         self.assertIsInstance(p, fss.SelectRandomFeatures)
         self.assertEqual(p.k, 0.25)
@@ -161,8 +185,7 @@ class TestRandomizeEditor(WidgetTest):
 class TestPCAEditor(WidgetTest):
     def test_editor(self):
         widget = owpreprocess.PCA()
-        self.assertEqual(widget.parameters(),
-                         {"n_components": 10})
+        self.assertEqual(widget.parameters(), {"n_components": 10})
         p = widget.createinstance(widget.parameters())
         self.assertIsInstance(p, ProjectPCA)
         self.assertEqual(p.n_components, 10)
@@ -176,8 +199,7 @@ class TestPCAEditor(WidgetTest):
 class TestCUREditor(WidgetTest):
     def test_editor(self):
         widget = owpreprocess.CUR()
-        self.assertEqual(widget.parameters(),
-                         {"rank": 10, "max_error": 1})
+        self.assertEqual(widget.parameters(), {"rank": 10, "max_error": 1})
         p = widget.createinstance(widget.parameters())
         self.assertIsInstance(p, ProjectCUR)
         self.assertEqual(p.rank, 10)

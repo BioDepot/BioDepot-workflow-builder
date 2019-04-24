@@ -18,19 +18,19 @@ class TestOWLiftCurve(WidgetTest, EvaluateTest):
         super().setUpClass()
         cls.lenses = data = Orange.data.Table("lenses")
         cls.res = Orange.evaluation.TestOnTestData(
-            train_data=data[::2], test_data=data[1::2],
-            learners=[Orange.classification.MajorityLearner(),
-                      Orange.classification.KNNLearner()],
+            train_data=data[::2],
+            test_data=data[1::2],
+            learners=[
+                Orange.classification.MajorityLearner(),
+                Orange.classification.KNNLearner(),
+            ],
             store_data=True,
         )
 
     def setUp(self):
         super().setUp()
         self.widget = self.create_widget(
-            OWLiftCurve,
-            stored_settings={
-                "display_convex_hull": True
-            }
+            OWLiftCurve, stored_settings={"display_convex_hull": True}
         )  # type: OWLiftCurve
 
     def test_basic(self):

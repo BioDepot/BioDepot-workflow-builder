@@ -17,12 +17,12 @@ class TestDomainBasicStats(TestCase):
         meta_stats = [BasicStats(self.zoo, a) for a in domain.metas]
 
         domain_stats = DomainBasicStats(self.zoo)
-        self.assertStatsEqual(domain_stats.stats,
-                              attr_stats + class_var_stats)
+        self.assertStatsEqual(domain_stats.stats, attr_stats + class_var_stats)
 
         domain_stats = DomainBasicStats(self.zoo, include_metas=True)
-        self.assertStatsEqual(domain_stats.stats,
-                              attr_stats + class_var_stats + meta_stats)
+        self.assertStatsEqual(
+            domain_stats.stats, attr_stats + class_var_stats + meta_stats
+        )
 
     def assertStatsEqual(self, stats1, stats2):
         self.assertEqual(len(stats1), len(stats2))

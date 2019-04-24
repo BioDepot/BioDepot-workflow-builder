@@ -7,12 +7,12 @@ class SelectAttributesDomainContextHandler(DomainContextHandler):
     """
 
     def match_value(self, setting, value, attrs, metas):
-        if setting.name == 'domain_role_hints':
+        if setting.name == "domain_role_hints":
             value = self.decode_setting(setting, value)
             matched = available = 0
             for item, category in value.items():
                 role, role_idx = category
-                if role != 'available':
+                if role != "available":
                     available += 1
                     if self._var_exists(setting, item, attrs, metas):
                         matched += 1

@@ -6,7 +6,13 @@ import numpy as np
 
 from AnyQt.QtCore import QRectF, QPointF
 
-from Orange.data import Table, Domain, ContinuousVariable, DiscreteVariable, StringVariable
+from Orange.data import (
+    Table,
+    Domain,
+    ContinuousVariable,
+    DiscreteVariable,
+    StringVariable,
+)
 from Orange.widgets.settings import Context
 from Orange.widgets.visualize.owlinearprojection import OWLinearProjection
 from Orange.widgets.tests.base import WidgetTest, WidgetOutputsTestMixin, datasets
@@ -29,7 +35,9 @@ class TestOWLinearProjection(WidgetTest, WidgetOutputsTestMixin):
         self.widget = self.create_widget(OWLinearProjection)  # type: OWLinearProjection
 
     def _select_data(self):
-        self.widget.graph.select_by_rectangle(QRectF(QPointF(-20, -20), QPointF(20, 20)))
+        self.widget.graph.select_by_rectangle(
+            QRectF(QPointF(-20, -20), QPointF(20, 20))
+        )
         return self.widget.graph.get_selection()
 
     def test_no_data(self):
@@ -86,12 +94,15 @@ class TestOWLinearProjection(WidgetTest, WidgetOutputsTestMixin):
 
     @classmethod
     def _get_projection_table(cls):
-        domain = Domain(attributes=[ContinuousVariable("Attr {}".format(i)) for i in range(4)],
-                        metas=[StringVariable("Component")])
-        table = Table.from_numpy(domain,
-                                 X=np.array([[0.522, -0.263, 0.581, 0.566],
-                                             [0.372, 0.926, 0.021, 0.065]]),
-                                 metas=[["PC1"], ["PC2"]])
+        domain = Domain(
+            attributes=[ContinuousVariable("Attr {}".format(i)) for i in range(4)],
+            metas=[StringVariable("Component")],
+        )
+        table = Table.from_numpy(
+            domain,
+            X=np.array([[0.522, -0.263, 0.581, 0.566], [0.372, 0.926, 0.021, 0.065]]),
+            metas=[["PC1"], ["PC2"]],
+        )
         return table
 
     def test_projection(self):
@@ -105,11 +116,13 @@ class TestOWLinearProjection(WidgetTest, WidgetOutputsTestMixin):
         self.assertTrue(self.widget.radio_placement.buttons[0].isChecked())
 
     def test_projection_error(self):
-        domain = Domain(attributes=[ContinuousVariable("Attr {}".format(i)) for i in range(4)],
-                        metas=[StringVariable("Component")])
-        table = Table.from_numpy(domain,
-                                 X=np.array([[0.522, -0.263, 0.581, 0.566]]),
-                                 metas=[["PC1"]])
+        domain = Domain(
+            attributes=[ContinuousVariable("Attr {}".format(i)) for i in range(4)],
+            metas=[StringVariable("Component")],
+        )
+        table = Table.from_numpy(
+            domain, X=np.array([[0.522, -0.263, 0.581, 0.566]]), metas=[["PC1"]]
+        )
         self.assertFalse(self.widget.Warning.not_enough_components.is_shown())
         self.send_signal(self.widget.Inputs.projection, table)
         self.assertTrue(self.widget.Warning.not_enough_components.is_shown())
@@ -119,7 +132,9 @@ class TestOWLinearProjection(WidgetTest, WidgetOutputsTestMixin):
         data = Table("iris")[:20]
         domain = data.domain
         domain = Domain(
-            attributes=domain.attributes[:4], class_vars=DiscreteVariable("class", values=["a"]))
+            attributes=domain.attributes[:4],
+            class_vars=DiscreteVariable("class", values=["a"]),
+        )
         data = Table.from_numpy(domain=domain, X=data.X, Y=data.Y)
         self.assertTrue(w.radio_placement.buttons[1].isEnabled())
         self.send_signal(w.Inputs.data, data)
@@ -128,10 +143,14 @@ class TestOWLinearProjection(WidgetTest, WidgetOutputsTestMixin):
     def test_no_data_for_lda(self):
         self.send_signal(self.widget.Inputs.data, self.data)
         self.widget.radio_placement.buttons[self.widget.Placement.LDA].click()
-        self.assertTrue(self.widget.radio_placement.buttons[self.widget.Placement.LDA].isEnabled())
+        self.assertTrue(
+            self.widget.radio_placement.buttons[self.widget.Placement.LDA].isEnabled()
+        )
         data = Table("housing")
         self.send_signal(self.widget.Inputs.data, data)
-        self.assertFalse(self.widget.radio_placement.buttons[self.widget.Placement.LDA].isEnabled())
+        self.assertFalse(
+            self.widget.radio_placement.buttons[self.widget.Placement.LDA].isEnabled()
+        )
 
     def test_data_no_cont_features(self):
         data = Table("titanic")
@@ -153,9 +172,11 @@ class TestOWLinearProjection(WidgetTest, WidgetOutputsTestMixin):
     def test_metas(self):
         data = Table("iris")
         domain = data.domain
-        domain = Domain(attributes=domain.attributes[:3],
-                        class_vars=domain.class_vars,
-                        metas=domain.attributes[3:])
+        domain = Domain(
+            attributes=domain.attributes[:3],
+            class_vars=domain.class_vars,
+            metas=domain.attributes[3:],
+        )
         data = data.transform(domain)
         self.send_signal(self.widget.Inputs.data, data)
 
@@ -166,36 +187,49 @@ class TestOWLinearProjection(WidgetTest, WidgetOutputsTestMixin):
 
         data = Table("iris")[::30]
         data[:, 0] = np.nan
-        for data, is_shown in zip([None, data, Table("iris")[:30]], [False, True, False]):
+        for data, is_shown in zip(
+            [None, data, Table("iris")[:30]], [False, True, False]
+        ):
             assertErrorShown(data, is_shown)
 
     def test_migrate_settings_from_version_1(self):
         # Settings from Orange 3.4.0
         settings = {
-            '__version__': 1,
-            'alpha_value': 255,
-            'auto_commit': True,
-            'class_density': False,
-            'context_settings': [
-                Context(attributes={'iris': 1,
-                                    'petal length': 2, 'petal width': 2,
-                                    'sepal length': 2, 'sepal width': 2},
-                        metas={},
-                        ordered_domain=[('sepal length', 2),
-                                        ('sepal width', 2),
-                                        ('petal length', 2),
-                                        ('petal width', 2),
-                                        ('iris', 1)],
-                        time=1504865133.098991,
-                        values={'__version__': 1,
-                                'color_index': (5, -2),
-                                'shape_index': (1, -2),
-                                'size_index': (1, -2),
-                                'variable_state': ({}, -2)})],
-            'jitter_value': 0,
-            'legend_anchor': ((1, 0), (1, 0)),
-            'point_size': 8,
-            'savedWidgetGeometry': None
+            "__version__": 1,
+            "alpha_value": 255,
+            "auto_commit": True,
+            "class_density": False,
+            "context_settings": [
+                Context(
+                    attributes={
+                        "iris": 1,
+                        "petal length": 2,
+                        "petal width": 2,
+                        "sepal length": 2,
+                        "sepal width": 2,
+                    },
+                    metas={},
+                    ordered_domain=[
+                        ("sepal length", 2),
+                        ("sepal width", 2),
+                        ("petal length", 2),
+                        ("petal width", 2),
+                        ("iris", 1),
+                    ],
+                    time=1504865133.098991,
+                    values={
+                        "__version__": 1,
+                        "color_index": (5, -2),
+                        "shape_index": (1, -2),
+                        "size_index": (1, -2),
+                        "variable_state": ({}, -2),
+                    },
+                )
+            ],
+            "jitter_value": 0,
+            "legend_anchor": ((1, 0), (1, 0)),
+            "point_size": 8,
+            "savedWidgetGeometry": None,
         }
         w = self.create_widget(OWLinearProjection, stored_settings=settings)
         iris = Table("iris")
@@ -223,6 +257,7 @@ class LinProjVizRankTests(WidgetTest):
     Linear Projection VizRank tests are mostly done without threading.
     This is because threads created with module coverage are not traced.
     """
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()

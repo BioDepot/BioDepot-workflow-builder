@@ -15,6 +15,7 @@ log = logging.getLogger(__name__)
 class ControlPoint(GraphicsPathObject):
     """A control point for annotations in the canvas.
     """
+
     Free = 0
 
     Left, Top, Right, Bottom, Center = 1, 2, 4, 8, 16
@@ -73,7 +74,8 @@ class ControlPoint(GraphicsPathObject):
 
             current = self.mapToParent(self.mapFromScene(event.scenePos()))
             down = self.mapToParent(
-                self.mapFromScene(event.buttonDownScenePos(Qt.LeftButton)))
+                self.mapFromScene(event.buttonDownScenePos(Qt.LeftButton))
+            )
 
             self.setPos(self.__initialPosition + current - down)
             event.accept()
@@ -133,17 +135,17 @@ class ControlPointRect(QGraphicsObject):
 
         self.__rect = rect if rect is not None else QRectF()
         self.__margins = QMargins()
-        points = \
-            [ControlPoint(self, ControlPoint.Left),
-             ControlPoint(self, ControlPoint.Top),
-             ControlPoint(self, ControlPoint.TopLeft),
-             ControlPoint(self, ControlPoint.Right),
-             ControlPoint(self, ControlPoint.TopRight),
-             ControlPoint(self, ControlPoint.Bottom),
-             ControlPoint(self, ControlPoint.BottomLeft),
-             ControlPoint(self, ControlPoint.BottomRight)
-             ]
-        assert(points == sorted(points, key=lambda p: p.anchor()))
+        points = [
+            ControlPoint(self, ControlPoint.Left),
+            ControlPoint(self, ControlPoint.Top),
+            ControlPoint(self, ControlPoint.TopLeft),
+            ControlPoint(self, ControlPoint.Right),
+            ControlPoint(self, ControlPoint.TopRight),
+            ControlPoint(self, ControlPoint.Bottom),
+            ControlPoint(self, ControlPoint.BottomLeft),
+            ControlPoint(self, ControlPoint.BottomRight),
+        ]
+        assert points == sorted(points, key=lambda p: p.anchor())
 
         self.__points = dict((p.anchor(), p) for p in points)
 
@@ -234,17 +236,20 @@ class ControlPointRect(QGraphicsObject):
             obj = toGraphicsObjectIfPossible(obj)
             if isinstance(obj, ControlPoint):
                 etype = event.type()
-                if etype == QEvent.GraphicsSceneMousePress and \
-                        event.button() == Qt.LeftButton:
+                if (
+                    etype == QEvent.GraphicsSceneMousePress
+                    and event.button() == Qt.LeftButton
+                ):
                     self.__setActiveControl(obj)
 
-                elif etype == QEvent.GraphicsSceneMouseRelease and \
-                        event.button() == Qt.LeftButton:
+                elif (
+                    etype == QEvent.GraphicsSceneMouseRelease
+                    and event.button() == Qt.LeftButton
+                ):
                     self.__setActiveControl(None)
 
         except Exception:
-            log.error("Error in 'ControlPointRect.sceneEventFilter'",
-                      exc_info=True)
+            log.error("Error in 'ControlPointRect.sceneEventFilter'", exc_info=True)
 
         return QGraphicsObject.sceneEventFilter(self, obj, event)
 
@@ -254,20 +259,19 @@ class ControlPointRect(QGraphicsObject):
             for p in self.__points.values():
                 p.installSceneEventFilter(self)
         except Exception:
-            log.error("Error in ControlPointRect.__installFilter",
-                      exc_info=True)
+            log.error("Error in ControlPointRect.__installFilter", exc_info=True)
 
     def __pointsLayout(self):
         """Layout the control points
         """
         rect = self.__rect
         margins = self.__margins
-        rect = rect.adjusted(-margins.left(), -margins.top(),
-                             margins.right(), margins.bottom())
+        rect = rect.adjusted(
+            -margins.left(), -margins.top(), margins.right(), margins.bottom()
+        )
         center = rect.center()
         cx, cy = center.x(), center.y()
-        left, top, right, bottom = \
-                rect.left(), rect.top(), rect.right(), rect.bottom()
+        left, top, right, bottom = rect.left(), rect.top(), rect.right(), rect.bottom()
 
         self.controlPoint(ControlPoint.Left).setPos(left, cy)
         self.controlPoint(ControlPoint.Right).setPos(right, cy)
@@ -289,9 +293,7 @@ class ControlPointRect(QGraphicsObject):
             self.__activeControl = control
 
             if control is not None:
-                control.positionChanged[QPointF].connect(
-                    self.__activeControlMoved
-                )
+                control.positionChanged[QPointF].connect(self.__activeControlMoved)
 
     def __activeControlMoved(self, pos):
         # The active control point has moved, update the control
@@ -338,10 +340,10 @@ class ControlPointLine(QGraphicsObject):
         self.setFlag(QGraphicsItem.ItemIsFocusable)
 
         self.__line = QLineF()
-        self.__points = \
-            [ControlPoint(self, ControlPoint.TopLeft),  # TopLeft is line start
-             ControlPoint(self, ControlPoint.BottomRight)  # line end
-             ]
+        self.__points = [
+            ControlPoint(self, ControlPoint.TopLeft),  # TopLeft is line start
+            ControlPoint(self, ControlPoint.BottomRight),  # line end
+        ]
 
         self.__activeControl = None
 
@@ -409,9 +411,7 @@ class ControlPointLine(QGraphicsObject):
             self.__activeControl = control
 
             if control is not None:
-                control.positionChanged[QPointF].connect(
-                    self.__activeControlMoved
-                )
+                control.positionChanged[QPointF].connect(self.__activeControlMoved)
 
     def __activeControlMoved(self, pos):
         line = QLineF(self.__line)

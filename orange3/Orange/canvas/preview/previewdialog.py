@@ -3,7 +3,12 @@ A dialog widget for selecting an item.
 """
 
 from AnyQt.QtWidgets import (
-    QDialog, QWidget, QVBoxLayout, QDialogButtonBox, QLabel, QSizePolicy
+    QDialog,
+    QWidget,
+    QVBoxLayout,
+    QDialogButtonBox,
+    QLabel,
+    QSizePolicy,
 )
 from AnyQt.QtCore import Qt, QStringListModel
 from AnyQt.QtCore import pyqtSignal as Signal
@@ -14,10 +19,10 @@ from . import previewbrowser
 class PreviewDialog(QDialog):
     """A Dialog for selecting an item from a PreviewItem.
     """
+
     currentIndexChanged = Signal(int)
 
-    def __init__(self, parent=None, flags=Qt.WindowFlags(0),
-                 model=None, **kwargs):
+    def __init__(self, parent=None, flags=Qt.WindowFlags(0), model=None, **kwargs):
         QDialog.__init__(self, parent, flags, **kwargs)
 
         self.__setupUi()
@@ -31,16 +36,15 @@ class PreviewDialog(QDialog):
 
         heading = self.tr("Preview")
         heading = "<h3>{0}</h3>".format(heading)
-        self.__heading = QLabel(heading, self,
-                                objectName="heading")
+        self.__heading = QLabel(heading, self, objectName="heading")
 
         self.__heading.setContentsMargins(12, 12, 12, 0)
 
         self.__browser = previewbrowser.PreviewBrowser(self)
 
-        self.__buttons = QDialogButtonBox(QDialogButtonBox.Open | \
-                                          QDialogButtonBox.Cancel,
-                                          Qt.Horizontal,)
+        self.__buttons = QDialogButtonBox(
+            QDialogButtonBox.Open | QDialogButtonBox.Cancel, Qt.Horizontal
+        )
         self.__buttons.button(QDialogButtonBox.Open).setAutoDefault(True)
 
         # Set the Open dialog as disabled until the current index changes
@@ -63,9 +67,7 @@ class PreviewDialog(QDialog):
 
         self.__buttons.accepted.connect(self.accept)
         self.__buttons.rejected.connect(self.reject)
-        self.__browser.currentIndexChanged.connect(
-            self.__on_currentIndexChanged
-        )
+        self.__browser.currentIndexChanged.connect(self.__on_currentIndexChanged)
         self.__browser.activated.connect(self.__on_activated)
 
         layout.setSizeConstraint(QVBoxLayout.SetFixedSize)
@@ -106,6 +108,7 @@ class PreviewDialog(QDialog):
     def heading(self):
         """Return the heading string.
         """
+
     def __on_currentIndexChanged(self, index):
         button = self.__buttons.button(QDialogButtonBox.Open)
         button.setEnabled(index >= 0)

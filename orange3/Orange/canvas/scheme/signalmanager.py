@@ -27,9 +27,8 @@ log = logging.getLogger(__name__)
 
 _Signal = namedtuple(
     "_Signal",
-    ["link",     # link on which the signal is sent
-     "value",    # signal value
-     "id"])      # signal id
+    ["link", "value", "id"],  # link on which the signal is sent  # signal value
+)  # signal id
 
 
 is_enabled = attrgetter("enabled")
@@ -45,6 +44,7 @@ class SignalManager(QObject):
     (nodes, links) are added to the scheme.
 
     """
+
     Running, Stoped, Paused, Error = range(4)
     """SignalManger state flags."""
 
@@ -71,7 +71,7 @@ class SignalManager(QObject):
     """Emitted when `SignalManager`'s runtime state changes."""
 
     def __init__(self, scheme):
-        assert(scheme)
+        assert scheme
         QObject.__init__(self, scheme)
         self._input_queue = []
 
@@ -179,8 +179,7 @@ class SignalManager(QObject):
         # NOTE: This does not remove output signals for this node. In
         # particular the final 'None' will be delivered to the sink
         # nodes even after the source node is no longer in the scheme.
-        log.info("Node %r removed. Removing pending signals.",
-                 node.title)
+        log.info("Node %r removed. Removing pending signals.", node.title)
         self.remove_pending_signals(node)
 
         del self._node_outputs[node]
@@ -236,15 +235,19 @@ class SignalManager(QObject):
             # if the the node was already removed it's tracked outputs in
             # _node_outputs are cleared, however the final 'None' signal
             # deliveries for the link are left in the _input_queue.
-            pending = [sig for sig in self._input_queue
-                       if sig.link is link]
+            pending = [sig for sig in self._input_queue if sig.link is link]
             return {sig.id: sig.value for sig in pending}
 
     def send(self, node, channel, value, id):
         """
         """
-        log.debug("%r sending %r (id: %r) on channel %r",
-                  node.title, type(value), id, channel.name)
+        log.debug(
+            "%r sending %r (id: %r) on channel %r",
+            node.title,
+            type(value),
+            id,
+            channel.name,
+        )
 
         scheme = self.scheme()
 
@@ -306,7 +309,9 @@ class SignalManager(QObject):
         if not (max_nodes is None or max_nodes == 1):
             warnings.warn(
                 "`max_nodes` is deprecated and unused (will always equal 1)",
-                DeprecationWarning, stacklevel=2)
+                DeprecationWarning,
+                stacklevel=2,
+            )
 
         if self.__runtime_state == SignalManager.Processing:
             raise RuntimeError("Cannot re-enter 'process_queued'")
@@ -317,8 +322,10 @@ class SignalManager(QObject):
         log.info("SignalManager: Processing queued signals")
 
         node_update_front = self.node_update_front()
-        log.debug("SignalManager: Nodes eligible for update %s",
-                  [node.title for node in node_update_front])
+        log.debug(
+            "SignalManager: Nodes eligible for update %s",
+            [node.title for node in node_update_front],
+        )
 
         if node_update_front:
             node = node_update_front[0]
@@ -337,14 +344,14 @@ class SignalManager(QObject):
 
         signals_in = self.compress_signals(signals_in)
 
-        log.debug("Processing %r, sending %i signals.",
-                  node.title, len(signals_in))
+        log.debug("Processing %r, sending %i signals.", node.title, len(signals_in))
         # Clear the link's pending flag.
         for link in {sig.link for sig in signals_in}:
             link.set_runtime_state(link.runtime_state() & ~SchemeLink.Pending)
 
-        assert ({sig.link for sig in self._input_queue}
-                .intersection({sig.link for sig in signals_in}) == set([]))
+        assert {sig.link for sig in self._input_queue}.intersection(
+            {sig.link for sig in signals_in}
+        ) == set([])
         self.processingStarted.emit()
         self.processingStarted[SchemeNode].emit(node)
         try:
@@ -398,8 +405,7 @@ class SignalManager(QObject):
         """
         Return a list of pending input signals for node.
         """
-        return [signal for signal in self._input_queue
-                if node is signal.link.sink_node]
+        return [signal for signal in self._input_queue if node is signal.link.sink_node]
 
     def remove_pending_signals(self, node):
         """
@@ -437,14 +443,12 @@ class SignalManager(QObject):
 
         dependents = partial(dependent_nodes, scheme)
 
-        blocked_nodes = reduce(set.union,
-                               map(dependents, blocking_nodes),
-                               set(blocking_nodes))
+        blocked_nodes = reduce(
+            set.union, map(dependents, blocking_nodes), set(blocking_nodes)
+        )
 
         pending = self.pending_nodes()
-        pending_downstream = reduce(set.union,
-                                    map(dependents, pending),
-                                    set())
+        pending_downstream = reduce(set.union, map(dependents, pending), set())
 
         log.debug("Pending nodes: %s", pending)
         log.debug("Blocking nodes: %s", blocking_nodes)
@@ -463,16 +467,22 @@ class SignalManager(QObject):
             # from the signal handlers.
             # A `__process_next` must be rescheduled when exiting
             # process_queued.
-            log.warning("Received 'UpdateRequest' while in 'process_queued'. "
-                        "An update will be re-scheduled when exiting the "
-                        "current update.")
+            log.warning(
+                "Received 'UpdateRequest' while in 'process_queued'. "
+                "An update will be re-scheduled when exiting the "
+                "current update."
+            )
             self.__reschedule = True
             return
 
         nbusy = len(self.blocking_nodes())
-        log.info("'UpdateRequest' event, queued signals: %i, nbusy: %i "
-                 "(MAX_CONCURRENT: %i)",
-                 len(self._input_queue), nbusy, MAX_CONCURRENT)
+        log.info(
+            "'UpdateRequest' event, queued signals: %i, nbusy: %i "
+            "(MAX_CONCURRENT: %i)",
+            len(self._input_queue),
+            nbusy,
+            MAX_CONCURRENT,
+        )
 
         if self._input_queue and nbusy < MAX_CONCURRENT:
             self.process_queued()
@@ -484,16 +494,16 @@ class SignalManager(QObject):
 
         nbusy = len(self.blocking_nodes())
         if self.node_update_front() and nbusy < MAX_CONCURRENT:
-            log.debug("More nodes are eligible for an update. "
-                      "Scheduling another update.")
+            log.debug(
+                "More nodes are eligible for an update. " "Scheduling another update."
+            )
             self._update()
 
     def _update(self):
         """
         Schedule processing at a later time.
         """
-        if self.__state == SignalManager.Running and \
-                not self.__update_timer.isActive():
+        if self.__state == SignalManager.Running and not self.__update_timer.isActive():
             self.__update_timer.start()
 
 
@@ -508,8 +518,7 @@ def compress_signals(signals):
     """
     Compress a list of signals.
     """
-    groups = group_by_all(reversed(signals),
-                          key=lambda sig: (sig.link, sig.id))
+    groups = group_by_all(reversed(signals), key=lambda sig: (sig.link, sig.id))
     signals = []
 
     def has_none(signals):
@@ -534,10 +543,13 @@ def dependent_nodes(scheme, node):
         This does not include nodes only reachable by disables links.
 
     """
+
     def expand(node):
-        return [link.sink_node
-                for link in scheme.find_links(source_node=node)
-                if link.enabled]
+        return [
+            link.sink_node
+            for link in scheme.find_links(source_node=node)
+            if link.enabled
+        ]
 
     nodes = list(traverse_bf(node, expand))
     assert nodes[0] is node

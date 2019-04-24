@@ -17,6 +17,7 @@ class TestAnnotations(test.QCoreApplication):
 
         def count():
             count.i += 1
+
         count.i = 0
 
         arrow.geometry_changed.connect(count)
@@ -32,6 +33,7 @@ class TestAnnotations(test.QCoreApplication):
 
         def count():
             count.i += 1
+
         count.i = 0
 
         text.geometry_changed.connect(count)
@@ -49,6 +51,6 @@ class TestAnnotations(test.QCoreApplication):
         self.assertEqual(text.text, "...")
         self.assertTrue(count.i == 1)
 
-        text.text = '=='
+        text.text = "=="
         self.assertEqual(text.text, "--")
         self.assertTrue(count.i == 2)

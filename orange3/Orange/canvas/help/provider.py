@@ -13,7 +13,10 @@ from xml.etree.ElementTree import TreeBuilder, Element
 from AnyQt.QtCore import QObject, QUrl
 
 from AnyQt.QtNetwork import (
-    QNetworkAccessManager, QNetworkDiskCache, QNetworkRequest, QNetworkReply
+    QNetworkAccessManager,
+    QNetworkDiskCache,
+    QNetworkRequest,
+    QNetworkReply,
 )
 
 
@@ -69,8 +72,10 @@ class BaseInventoryProvider(HelpProvider):
 
     def _on_finished(self, reply):
         if reply.error() != QNetworkReply.NoError:
-            log.error("An error occurred while fetching "
-                      "help inventory '{0}'".format(self.inventory))
+            log.error(
+                "An error occurred while fetching "
+                "help inventory '{0}'".format(self.inventory)
+            )
             self._error = reply.error(), reply.errorString()
 
         else:
@@ -120,9 +125,11 @@ class IntersphinxHelpProvider(BaseInventoryProvider):
             items = read_inventory_v2(stream, self.target, join)
         else:
             log.error("Invalid/unknown intersphinx inventory format.")
-            self._error = (ValueError,
-                           "{0} does not seem to be an intersphinx "
-                           "inventory file".format(self.target))
+            self._error = (
+                ValueError,
+                "{0} does not seem to be an intersphinx "
+                "inventory file".format(self.target),
+            )
             items = None
 
         self.items = items
@@ -149,8 +156,9 @@ class SimpleHelpProvider(HelpProvider):
                 url = QUrl.fromLocalFile("{}.html".format(path))
                 url.setFragment(fragment)
                 return url
-            elif os.path.isdir(path) and \
-                    os.path.isfile(os.path.join(path, "index.html")):
+            elif os.path.isdir(path) and os.path.isfile(
+                os.path.join(path, "index.html")
+            ):
                 url = QUrl.fromLocalFile(os.path.join(path, "index.html"))
                 url.setFragment(fragment)
                 return url
@@ -168,6 +176,7 @@ class HtmlIndexProvider(BaseInventoryProvider):
     """
     Provide help links from an html help index page.
     """
+
     class _XHTMLParser(parser.HTMLParser):
         # A helper class for parsing XHTML into an xml.etree.ElementTree
         def __init__(self, *args, **kwargs):
@@ -175,7 +184,7 @@ class HtmlIndexProvider(BaseInventoryProvider):
             self.builder = TreeBuilder(element_factory=Element)
 
         def handle_starttag(self, tag, attrs):
-            self.builder.start(tag, dict(attrs),)
+            self.builder.start(tag, dict(attrs))
 
         def handle_endtag(self, tag):
             self.builder.end(tag)

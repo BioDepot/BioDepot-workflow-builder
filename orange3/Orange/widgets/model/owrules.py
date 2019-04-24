@@ -4,8 +4,12 @@ import numpy as np
 from AnyQt.QtCore import Qt
 
 from Orange.classification.rules import (
-    WeightedRelativeAccuracyEvaluator, LaplaceAccuracyEvaluator,
-    EntropyEvaluator, _RuleClassifier, _RuleLearner, get_dist
+    WeightedRelativeAccuracyEvaluator,
+    LaplaceAccuracyEvaluator,
+    EntropyEvaluator,
+    _RuleClassifier,
+    _RuleLearner,
+    get_dist,
 )
 from Orange.data import Table
 from Orange.widgets import gui
@@ -18,6 +22,7 @@ class CustomRuleClassifier(_RuleClassifier):
     Custom rule induction classifier. Instances are classifier following
     either an unordered set of rules or a decision list.
     """
+
     def __init__(self, domain, rule_list, params):
         super().__init__(domain, rule_list)
         assert params is not None
@@ -27,12 +32,10 @@ class CustomRuleClassifier(_RuleClassifier):
         self.params = params
 
     def predict(self, X):
-        if (self.rule_ordering == "ordered" and
-                self.covering_algorithm == "exclusive"):
+        if self.rule_ordering == "ordered" and self.covering_algorithm == "exclusive":
             return self.ordered_predict(X)
 
-        if (self.rule_ordering == "unordered" or
-                self.covering_algorithm == "weighted"):
+        if self.rule_ordering == "unordered" or self.covering_algorithm == "weighted":
             return self.unordered_predict(X)
 
 
@@ -47,7 +50,8 @@ class CustomRuleLearner(_RuleLearner):
     For more information about function calls and the algorithm, refer
     to the base rule induction learner.
     """
-    name = 'Custom rule inducer'
+
+    name = "Custom rule inducer"
     __returns__ = CustomRuleClassifier
 
     def __init__(self, preprocessors, base_rules, params):
@@ -111,8 +115,9 @@ class CustomRuleLearner(_RuleLearner):
         """
         self.progress_advance_callback = None
 
-    def find_rules_and_measure_progress(self, X, Y, W, target_class,
-                                        base_rules, domain, progress_amount):
+    def find_rules_and_measure_progress(
+        self, X, Y, W, target_class, base_rules, domain, progress_amount
+    ):
         """
         The top-level control procedure of the separate-and-conquer
         algorithm. For given data and target class (may be None), return
@@ -155,8 +160,9 @@ class CustomRuleLearner(_RuleLearner):
             temp_class_dist = get_dist(Y, W, domain)
 
             # generate a new rule that has not been seen before
-            new_rule = self.rule_finder(X, Y, W, target_class, base_rules,
-                                        domain, initial_class_dist, rule_list)
+            new_rule = self.rule_finder(
+                X, Y, W, target_class, base_rules, domain, initial_class_dist, rule_list
+            )
 
             # None when no new, unique rules that pass
             # the general requirements can be found
@@ -169,12 +175,22 @@ class CustomRuleLearner(_RuleLearner):
 
             # update progress
             if self.progress_advance_callback is not None:
-                progress = (((temp_class_dist[target_class] -
-                              get_dist(Y, W, domain)[target_class])
-                             / initial_class_dist[target_class]
-                             * progress_amount) if target_class is not None else
-                            ((temp_class_dist - get_dist(Y, W, domain)).sum()
-                             / initial_class_dist.sum() * progress_amount))
+                progress = (
+                    (
+                        (
+                            temp_class_dist[target_class]
+                            - get_dist(Y, W, domain)[target_class]
+                        )
+                        / initial_class_dist[target_class]
+                        * progress_amount
+                    )
+                    if target_class is not None
+                    else (
+                        (temp_class_dist - get_dist(Y, W, domain)).sum()
+                        / initial_class_dist.sum()
+                        * progress_amount
+                    )
+                )
                 self.progress_advance_callback(progress)
 
         return rule_list
@@ -184,33 +200,49 @@ class CustomRuleLearner(_RuleLearner):
         Y = Y.astype(dtype=int)
         if self.rule_ordering == "ordered":
             rule_list = self.find_rules_and_measure_progress(
-                X, Y, np.copy(W) if W is not None else None, None,
-                self.base_rules, self.domain, progress_amount=1)
+                X,
+                Y,
+                np.copy(W) if W is not None else None,
+                None,
+                self.base_rules,
+                self.domain,
+                progress_amount=1,
+            )
             # add the default rule, if required
-            if (not rule_list or rule_list and rule_list[-1].length > 0 or
-                    self.covering_algorithm == "weighted"):
+            if (
+                not rule_list
+                or rule_list
+                and rule_list[-1].length > 0
+                or self.covering_algorithm == "weighted"
+            ):
                 rule_list.append(self.generate_default_rule(X, Y, W, self.domain))
 
         elif self.rule_ordering == "unordered":
             for curr_class in range(len(self.domain.class_var.values)):
-                rule_list.extend(self.find_rules_and_measure_progress(
-                    X, Y, np.copy(W) if W is not None else None,
-                    curr_class, self.base_rules, self.domain,
-                    progress_amount=1/len(self.domain.class_var.values)))
+                rule_list.extend(
+                    self.find_rules_and_measure_progress(
+                        X,
+                        Y,
+                        np.copy(W) if W is not None else None,
+                        curr_class,
+                        self.base_rules,
+                        self.domain,
+                        progress_amount=1 / len(self.domain.class_var.values),
+                    )
+                )
             # add the default rule
             rule_list.append(self.generate_default_rule(X, Y, W, self.domain))
 
-        return CustomRuleClassifier(domain=self.domain, rule_list=rule_list,
-                                    params=self.params)
+        return CustomRuleClassifier(
+            domain=self.domain, rule_list=rule_list, params=self.params
+        )
 
 
 class OWRuleLearner(OWBaseLearner):
     name = "CN2 Rule Induction"
     description = "Induce rules from data using CN2 algorithm."
     icon = "icons/CN2RuleInduction.svg"
-    replaces = [
-        "Orange.widgets.classify.owrules.OWRuleLearner",
-    ]
+    replaces = ["Orange.widgets.classify.owrules.OWRuleLearner"]
     priority = 19
 
     want_main_area = False
@@ -248,74 +280,133 @@ class OWRuleLearner(OWBaseLearner):
 
         rule_ordering_box = gui.hBox(widget=top_box, box="Rule ordering")
         rule_ordering_rbs = gui.radioButtons(
-            widget=rule_ordering_box, master=self, value="rule_ordering",
-            callback=self.settings_changed, btnLabels=("Ordered", "Unordered"))
+            widget=rule_ordering_box,
+            master=self,
+            value="rule_ordering",
+            callback=self.settings_changed,
+            btnLabels=("Ordered", "Unordered"),
+        )
         rule_ordering_rbs.layout().setSpacing(7)
 
-        covering_algorithm_box = gui.hBox(
-            widget=top_box, box="Covering algorithm")
+        covering_algorithm_box = gui.hBox(widget=top_box, box="Covering algorithm")
         covering_algorithm_rbs = gui.radioButtons(
-            widget=covering_algorithm_box, master=self,
+            widget=covering_algorithm_box,
+            master=self,
             value="covering_algorithm",
             callback=self.settings_changed,
-            btnLabels=("Exclusive", "Weighted"))
+            btnLabels=("Exclusive", "Weighted"),
+        )
         covering_algorithm_rbs.layout().setSpacing(7)
 
         insert_gamma_box = gui.vBox(widget=covering_algorithm_box, box=None)
         gui.separator(insert_gamma_box, 0, 14)
         self.gamma_spin = gui.doubleSpin(
-            widget=insert_gamma_box, master=self, value="gamma", minv=0.0,
-            maxv=1.0, step=0.01, label="γ:", orientation=Qt.Horizontal,
-            callback=self.settings_changed, alignment=Qt.AlignRight,
-            enabled=self.storage_covers[self.covering_algorithm] == "weighted")
+            widget=insert_gamma_box,
+            master=self,
+            value="gamma",
+            minv=0.0,
+            maxv=1.0,
+            step=0.01,
+            label="γ:",
+            orientation=Qt.Horizontal,
+            callback=self.settings_changed,
+            alignment=Qt.AlignRight,
+            enabled=self.storage_covers[self.covering_algorithm] == "weighted",
+        )
 
         # bottom-level search procedure (search bias)
         middle_box = gui.vBox(widget=self.controlArea, box="Rule search")
 
         evaluation_measure_box = gui.comboBox(
-            widget=middle_box, master=self, value="evaluation_measure",
-            label="Evaluation measure:", orientation=Qt.Horizontal,
+            widget=middle_box,
+            master=self,
+            value="evaluation_measure",
+            label="Evaluation measure:",
+            orientation=Qt.Horizontal,
             items=("Entropy", "Laplace accuracy", "WRAcc"),
-            callback=self.settings_changed, contentsLength=3)
+            callback=self.settings_changed,
+            contentsLength=3,
+        )
 
         beam_width_box = gui.spin(
-            widget=middle_box, master=self, value="beam_width", minv=1,
-            maxv=100, step=1, label="Beam width:", orientation=Qt.Horizontal,
-            callback=self.settings_changed, alignment=Qt.AlignRight,
-            controlWidth=80)
+            widget=middle_box,
+            master=self,
+            value="beam_width",
+            minv=1,
+            maxv=100,
+            step=1,
+            label="Beam width:",
+            orientation=Qt.Horizontal,
+            callback=self.settings_changed,
+            alignment=Qt.AlignRight,
+            controlWidth=80,
+        )
 
         # bottom-level search procedure (over-fitting avoidance bias)
         bottom_box = gui.vBox(widget=self.controlArea, box="Rule filtering")
 
         min_covered_examples_box = gui.spin(
-            widget=bottom_box, master=self, value="min_covered_examples", minv=1,
-            maxv=10000, step=1, label="Minimum rule coverage:",
-            orientation=Qt.Horizontal, callback=self.settings_changed,
-            alignment=Qt.AlignRight, controlWidth=80)
+            widget=bottom_box,
+            master=self,
+            value="min_covered_examples",
+            minv=1,
+            maxv=10000,
+            step=1,
+            label="Minimum rule coverage:",
+            orientation=Qt.Horizontal,
+            callback=self.settings_changed,
+            alignment=Qt.AlignRight,
+            controlWidth=80,
+        )
 
         max_rule_length_box = gui.spin(
-            widget=bottom_box, master=self, value="max_rule_length",
-            minv=1, maxv=100, step=1, label="Maximum rule length:",
-            orientation=Qt.Horizontal, callback=self.settings_changed,
-            alignment=Qt.AlignRight, controlWidth=80)
+            widget=bottom_box,
+            master=self,
+            value="max_rule_length",
+            minv=1,
+            maxv=100,
+            step=1,
+            label="Maximum rule length:",
+            orientation=Qt.Horizontal,
+            callback=self.settings_changed,
+            alignment=Qt.AlignRight,
+            controlWidth=80,
+        )
 
         default_alpha_spin = gui.doubleSpin(
-            widget=bottom_box, master=self, value="default_alpha", minv=0.0,
-            maxv=1.0, step=0.01, label="Statistical significance\n(default α):",
-            orientation=Qt.Horizontal, callback=self.settings_changed,
-            alignment=Qt.AlignRight, controlWidth=80,
-            checked="checked_default_alpha")
+            widget=bottom_box,
+            master=self,
+            value="default_alpha",
+            minv=0.0,
+            maxv=1.0,
+            step=0.01,
+            label="Statistical significance\n(default α):",
+            orientation=Qt.Horizontal,
+            callback=self.settings_changed,
+            alignment=Qt.AlignRight,
+            controlWidth=80,
+            checked="checked_default_alpha",
+        )
 
         parent_alpha_spin = gui.doubleSpin(
-            widget=bottom_box, master=self, value="parent_alpha", minv=0.0,
-            maxv=1.0, step=0.01, label="Relative significance\n(parent α):",
-            orientation=Qt.Horizontal, callback=self.settings_changed,
-            alignment=Qt.AlignRight, controlWidth=80,
-            checked="checked_parent_alpha")
+            widget=bottom_box,
+            master=self,
+            value="parent_alpha",
+            minv=0.0,
+            maxv=1.0,
+            step=0.01,
+            label="Relative significance\n(parent α):",
+            orientation=Qt.Horizontal,
+            callback=self.settings_changed,
+            alignment=Qt.AlignRight,
+            controlWidth=80,
+            checked="checked_parent_alpha",
+        )
 
     def settings_changed(self, *args, **kwargs):
         self.gamma_spin.setDisabled(
-            self.storage_covers[self.covering_algorithm] != "weighted")
+            self.storage_covers[self.covering_algorithm] != "weighted"
+        )
         super().settings_changed(*args, **kwargs)
 
     def update_model(self):
@@ -342,23 +433,30 @@ class OWRuleLearner(OWBaseLearner):
         return self.LEARNER(
             preprocessors=self.preprocessors,
             base_rules=self.base_rules,
-            params=self.get_learner_parameters()
+            params=self.get_learner_parameters(),
         )
 
     def get_learner_parameters(self):
-        return OrderedDict([
-            ("Rule ordering", self.storage_orders[self.rule_ordering]),
-            ("Covering algorithm", self.storage_covers[self.covering_algorithm]),
-            ("Gamma", self.gamma),
-            ("Evaluation measure", self.storage_measures[self.evaluation_measure]),
-            ("Beam width", self.beam_width),
-            ("Minimum rule coverage", self.min_covered_examples),
-            ("Maximum rule length", self.max_rule_length),
-            ("Default alpha", (1.0 if not self.checked_default_alpha
-                               else self.default_alpha)),
-            ("Parent alpha", (1.0 if not self.checked_parent_alpha
-                              else self.parent_alpha))
-        ])
+        return OrderedDict(
+            [
+                ("Rule ordering", self.storage_orders[self.rule_ordering]),
+                ("Covering algorithm", self.storage_covers[self.covering_algorithm]),
+                ("Gamma", self.gamma),
+                ("Evaluation measure", self.storage_measures[self.evaluation_measure]),
+                ("Beam width", self.beam_width),
+                ("Minimum rule coverage", self.min_covered_examples),
+                ("Maximum rule length", self.max_rule_length),
+                (
+                    "Default alpha",
+                    (1.0 if not self.checked_default_alpha else self.default_alpha),
+                ),
+                (
+                    "Parent alpha",
+                    (1.0 if not self.checked_parent_alpha else self.parent_alpha),
+                ),
+            ]
+        )
+
 
 if __name__ == "__main__":
     import sys
@@ -366,7 +464,7 @@ if __name__ == "__main__":
 
     a = QApplication(sys.argv)
     ow = OWRuleLearner()
-    d = Table('iris')
+    d = Table("iris")
     ow.set_data(d)
     ow.show()
     a.exec_()

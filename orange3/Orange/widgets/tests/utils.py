@@ -27,6 +27,7 @@ class EventSpy(QObject):
     etype : Union[QEvent.Type, Sequence[QEvent.Type]
         A event type (or types) that should be recorded
     """
+
     def __init__(self, object, etype, **kwargs):
         super().__init__(**kwargs)
         if not isinstance(object, QObject):
@@ -140,7 +141,9 @@ def excepthook_catch(raise_on_exit=True):
         warnings.warn(
             "sys.excepthook was already patched (is {})"
             "(just thought you should know this)".format(excepthook),
-            RuntimeWarning, stacklevel=2)
+            RuntimeWarning,
+            stacklevel=2,
+        )
     seen = []
 
     def excepthook_handle(exctype, value, traceback):
@@ -162,7 +165,8 @@ def excepthook_catch(raise_on_exit=True):
             raise RuntimeError(
                 "The sys.excepthook that was installed by "
                 "'excepthook_catch' context at enter is not "
-                "the one present at exit.")
+                "the one present at exit."
+            )
         if shouldraise and seen:
             raise seen[0][1]
 
@@ -171,6 +175,7 @@ class simulate:
     """
     Utility functions for simulating user interactions with Qt widgets.
     """
+
     @staticmethod
     def combobox_run_through_all(cbox, delay=-1, callback=None):
         """
@@ -261,8 +266,7 @@ class simulate:
         root = cbox.rootModelIndex()
         for i in range(model.rowCount(root)):
             index = model.index(i, column, root)
-            if index.data(role) == value and \
-                    index.flags() & Qt.ItemIsEnabled:
+            if index.data(role) == value and index.flags() & Qt.ItemIsEnabled:
                 pos = i
                 break
         else:
@@ -294,6 +298,7 @@ class simulate:
 
 def override_locale(language):
     """Execute the wrapped code with a different locale."""
+
     def wrapper(f):
         def wrap(*args, **kwargs):
             locale = QLocale()
@@ -301,5 +306,7 @@ def override_locale(language):
             result = f(*args, **kwargs)
             QLocale.setDefault(locale)
             return result
+
         return wrap
+
     return wrapper

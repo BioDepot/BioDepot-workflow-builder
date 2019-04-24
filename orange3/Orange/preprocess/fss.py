@@ -54,9 +54,9 @@ class SelectBestFeatures(Reprable):
         # select default method according to the provided data
         if method is None:
             autoMethod = True
-            discr_ratio = (sum(a.is_discrete
-                               for a in data.domain.attributes)
-                           / len(data.domain.attributes))
+            discr_ratio = sum(a.is_discrete for a in data.domain.attributes) / len(
+                data.domain.attributes
+            )
             if data.domain.has_discrete_class:
                 if discr_ratio >= 0.5:
                     method = GainRatio()
@@ -70,26 +70,31 @@ class SelectBestFeatures(Reprable):
             scores = method(data)
         except ValueError:
             scores = self.score_only_nice_features(data, method)
-        best = sorted(zip(scores, features), key=itemgetter(0),
-                      reverse=self.decreasing)
+        best = sorted(zip(scores, features), key=itemgetter(0), reverse=self.decreasing)
         if self.k:
-            best = best[:self.k]
+            best = best[: self.k]
         if self.threshold:
-            pred = ((lambda x: x[0] >= self.threshold) if self.decreasing else
-                    (lambda x: x[0] <= self.threshold))
+            pred = (
+                (lambda x: x[0] >= self.threshold)
+                if self.decreasing
+                else (lambda x: x[0] <= self.threshold)
+            )
             best = takewhile(pred, best)
 
-        domain = Orange.data.Domain([f for s, f in best],
-                                    data.domain.class_vars, data.domain.metas)
+        domain = Orange.data.Domain(
+            [f for s, f in best], data.domain.class_vars, data.domain.metas
+        )
         return data.transform(domain)
 
     def score_only_nice_features(self, data, method):
-        mask = np.array([isinstance(a, method.feature_type)
-                         for a in data.domain.attributes])
-        features = [f for f in data.domain.attributes
-                    if isinstance(f, method.feature_type)]
+        mask = np.array(
+            [isinstance(a, method.feature_type) for a in data.domain.attributes]
+        )
+        features = [
+            f for f in data.domain.attributes if isinstance(f, method.feature_type)
+        ]
         scores = [method(data, f) for f in features]
-        bad = float('-inf') if self.decreasing else float('inf')
+        bad = float("-inf") if self.decreasing else float("inf")
         all_scores = np.array([bad] * len(data.domain.attributes))
         all_scores[mask] = scores
         return all_scores
@@ -116,9 +121,12 @@ class SelectRandomFeatures(Reprable):
         if type(self.k) == float:
             self.k = int(len(data.domain.attributes) * self.k)
         domain = Orange.data.Domain(
-            random.sample(data.domain.attributes,
-                          min(self.k, len(data.domain.attributes))),
-            data.domain.class_vars, data.domain.metas)
+            random.sample(
+                data.domain.attributes, min(self.k, len(data.domain.attributes))
+            ),
+            data.domain.class_vars,
+            data.domain.metas,
+        )
         return data.transform(domain)
 
 
@@ -131,6 +139,7 @@ class RemoveNaNColumns(Preprocess):
     the fraction of the data size. When not provided, columns with only missing
     values are removed (default).
     """
+
     def __init__(self, threshold=None):
         self.threshold = threshold
 
@@ -140,12 +149,10 @@ class RemoveNaNColumns(Preprocess):
             return data
 
         if threshold is None:
-            threshold = data.X.shape[0] if self.threshold is None else \
-                        self.threshold
+            threshold = data.X.shape[0] if self.threshold is None else self.threshold
         if isinstance(threshold, float):
             threshold = threshold * data.X.shape[0]
         nans = np.sum(np.isnan(data.X), axis=0)
         att = [a for a, n in zip(data.domain.attributes, nans) if n < threshold]
-        domain = Orange.data.Domain(att, data.domain.class_vars,
-                                    data.domain.metas)
+        domain = Orange.data.Domain(att, data.domain.class_vars, data.domain.metas)
         return data.transform(domain)

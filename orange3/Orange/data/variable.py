@@ -11,9 +11,18 @@ import numpy as np
 from Orange.data import _variable
 from Orange.util import Registry, color_to_hex, hex_to_color, Reprable
 
-__all__ = ["Unknown", "MISSING_VALUES", "make_variable", "is_discrete_values",
-           "Value", "Variable", "ContinuousVariable", "DiscreteVariable",
-           "StringVariable", "TimeVariable"]
+__all__ = [
+    "Unknown",
+    "MISSING_VALUES",
+    "make_variable",
+    "is_discrete_values",
+    "Value",
+    "Variable",
+    "ContinuousVariable",
+    "DiscreteVariable",
+    "StringVariable",
+    "TimeVariable",
+]
 
 
 # For storing unknowns
@@ -44,11 +53,12 @@ def is_discrete_values(values):
     # If the first few values are, or can be converted to, floats,
     # the type is numeric
     try:
-        isinstance(next(iter(values)), Number) or \
-        [float(v) for _, v in zip(range(min(3, len(values))), values)]
+        isinstance(next(iter(values)), Number) or [
+            float(v) for _, v in zip(range(min(3, len(values))), values)
+        ]
     except ValueError:
         is_numeric = False
-        max_values = int(round(len(values)**.7))
+        max_values = int(round(len(values) ** 0.7))
     else:
         is_numeric = True
         max_values = DISCRETE_MAX_VALUES
@@ -61,9 +71,11 @@ def is_discrete_values(values):
             return False
 
     # Strip NaN from unique
-    unique = {i for i in unique
-              if (not i in MISSING_VALUES and
-                  not (isinstance(i, Number) and np.isnan(i)))}
+    unique = {
+        i
+        for i in unique
+        if (not i in MISSING_VALUES and not (isinstance(i, Number) and np.isnan(i)))
+    }
 
     # All NaNs => indeterminate
     if not unique:
@@ -83,8 +95,7 @@ def is_discrete_values(values):
         return unique
 
     # If only values are {0, 1} or {1, 2} (or a subset of those sets) => discrete
-    return (not (unique_float - {0, 1}) or
-            not (unique_float - {1, 2})) and unique
+    return (not (unique_float - {0, 1}) or not (unique_float - {1, 2})) and unique
 
 
 class Value(float):
@@ -129,6 +140,7 @@ class Value(float):
         that are neither discrete nor continuous. If `value` is `None`, the
         derived `float` value is used.
     """
+
     __slots__ = "variable", "_value"
 
     def __new__(cls, variable, value=Unknown):
@@ -149,8 +161,7 @@ class Value(float):
             self._value = None
         else:
             isunknown = value == variable.Unknown
-            self = super().__new__(
-                cls, np.nan if isunknown else np.finfo(float).min)
+            self = super().__new__(cls, np.nan if isunknown else np.finfo(float).min)
             self.variable = variable
             self._value = value
         return self
@@ -159,16 +170,18 @@ class Value(float):
         pass
 
     def __repr__(self):
-        return "Value('%s', %s)" % (self.variable.name,
-                                    self.variable.repr_val(self))
+        return "Value('%s', %s)" % (self.variable.name, self.variable.repr_val(self))
 
     def __str__(self):
         return self.variable.str_val(self)
 
     def __eq__(self, other):
         if isinstance(self, Real) and isnan(self):
-            return (isinstance(other, Real) and isnan(other)
-                    or other in self.variable.unknown_str)
+            return (
+                isinstance(other, Real)
+                and isnan(other)
+                or other in self.variable.unknown_str
+            )
         if isinstance(other, str):
             return self.variable.str_val(self) == other
         if isinstance(other, Value):
@@ -200,9 +213,11 @@ class Value(float):
         return not self.__lt__(other)
 
     def __contains__(self, other):
-        if (self._value is not None
-                and isinstance(self._value, str)
-                and isinstance(other, str)):
+        if (
+            self._value is not None
+            and isinstance(self._value, str)
+            and isinstance(other, str)
+        ):
             return other in self._value
         raise TypeError("invalid operation on Value()")
 
@@ -224,16 +239,16 @@ class Value(float):
         return self.variable, float(self)
 
     def __getstate__(self):
-        return dict(value=getattr(self, '_value', None))
+        return dict(value=getattr(self, "_value", None))
 
     def __setstate__(self, state):
-        self._value = state.get('value', None)
+        self._value = state.get("value", None)
 
 
 class VariableMeta(Registry):
     def __new__(cls, name, bases, attrs):
         obj = super().__new__(cls, name, bases, attrs)
-        if not hasattr(obj, '_all_vars') or obj._all_vars is Variable._all_vars:
+        if not hasattr(obj, "_all_vars") or obj._all_vars is Variable._all_vars:
             obj._all_vars = {}
         return obj
 
@@ -253,6 +268,7 @@ class _predicatedescriptor(property):
     >>> A.is_foo(a)
     False
     """
+
     def __get__(self, instance, objtype=None):
         if instance is None:
             return self.fget
@@ -301,6 +317,7 @@ class Variable(Reprable, metaclass=VariableMeta):
         copy, the copy has a reference to the original master. If the variable
         is not a copy, it is its own master.
     """
+
     Unknown = ValueUnknown
 
     def __init__(self, name="", compute_value=None, *, sparse=False):
@@ -426,8 +443,7 @@ class Variable(Reprable, metaclass=VariableMeta):
             return s
         if s in self.unknown_str:
             return Unknown
-        raise RuntimeError(
-            "primitive variable descriptors must overload to_val()")
+        raise RuntimeError("primitive variable descriptors must overload to_val()")
 
     def val_from_str_add(self, s):
         """
@@ -495,9 +511,11 @@ class ContinuousVariable(Variable):
     set to 0 to prevent changes by `to_val`.
     """
 
-    TYPE_HEADERS = ('continuous', 'c', 'numeric', 'n')
+    TYPE_HEADERS = ("continuous", "c", "numeric", "n")
 
-    def __init__(self, name="", number_of_decimals=None, compute_value=None, *, sparse=False):
+    def __init__(
+        self, name="", number_of_decimals=None, compute_value=None, *, sparse=False
+    ):
         """
         Construct a new continuous variable. The number of decimals is set to
         three, but adjusted at the first call of :obj:`to_val`.
@@ -527,8 +545,7 @@ class ContinuousVariable(Variable):
     @colors.setter
     def colors(self, value):
         col1, col2, black = self._colors = value
-        self.attributes["colors"] = \
-            [color_to_hex(col1), color_to_hex(col2), black]
+        self.attributes["colors"] = [color_to_hex(col1), color_to_hex(col2), black]
 
     # noinspection PyAttributeOutsideInit
     @number_of_decimals.setter
@@ -563,7 +580,9 @@ class ContinuousVariable(Variable):
     str_val = repr_val
 
     def copy(self, compute_value=None):
-        var = type(self)(self.name, self.number_of_decimals, compute_value, sparse=self.sparse)
+        var = type(self)(
+            self.name, self.number_of_decimals, compute_value, sparse=self.sparse
+        )
         var.attributes = dict(self.attributes)
         return var
 
@@ -592,13 +611,21 @@ class DiscreteVariable(Variable):
         for regression.
     """
 
-    TYPE_HEADERS = ('discrete', 'd', 'categorical')
+    TYPE_HEADERS = ("discrete", "d", "categorical")
 
     _all_vars = collections.defaultdict(list)
     presorted_values = []
 
-    def __init__(self, name="", values=(), ordered=False, base_value=-1,
-                 compute_value=None, *, sparse=False):
+    def __init__(
+        self,
+        name="",
+        values=(),
+        ordered=False,
+        base_value=-1,
+        compute_value=None,
+        *,
+        sparse=False
+    ):
         """ Construct a discrete variable descriptor with the given values. """
         self.values = list(values)
         if not all(isinstance(value, str) for value in self.values):
@@ -611,10 +638,11 @@ class DiscreteVariable(Variable):
     def colors(self):
         if self._colors is None:
             from Orange.widgets.utils.colorpalette import ColorPaletteGenerator
+
             self._colors = ColorPaletteGenerator.palette(self)
-            colors = self.attributes.get('colors')
+            colors = self.attributes.get("colors")
             if colors:
-                self._colors[:len(colors)] = [hex_to_color(color) for color in colors]
+                self._colors[: len(colors)] = [hex_to_color(color) for color in colors]
             self._colors.flags.writeable = False
         return self._colors
 
@@ -653,8 +681,9 @@ class DiscreteVariable(Variable):
         if s in self.unknown_str:
             return ValueUnknown
         if not isinstance(s, str):
-            raise TypeError('Cannot convert {} to value of "{}"'.format(
-                type(s).__name__, self.name))
+            raise TypeError(
+                'Cannot convert {} to value of "{}"'.format(type(s).__name__, self.name)
+            )
         return self.values.index(s)
 
     def add_value(self, s):
@@ -676,8 +705,7 @@ class DiscreteVariable(Variable):
         """
         s = str(s) if s is not None else s
         try:
-            return ValueUnknown if s in self.unknown_str \
-                else self.values.index(s)
+            return ValueUnknown if s in self.unknown_str else self.values.index(s)
         except ValueError:
             self.add_value(s)
             return len(self.values) - 1
@@ -693,16 +721,25 @@ class DiscreteVariable(Variable):
         """
         if isnan(val):
             return "?"
-        return '{}'.format(self.values[int(val)])
+        return "{}".format(self.values[int(val)])
 
     str_val = repr_val
 
     def __reduce__(self):
         if not self.name:
             raise PickleError("Variables without names cannot be pickled")
-        return make_variable, (self.__class__, self._compute_value, self.name,
-                               self.values, self.ordered, self.base_value), \
-            self.__dict__
+        return (
+            make_variable,
+            (
+                self.__class__,
+                self._compute_value,
+                self.name,
+                self.values,
+                self.ordered,
+                self.base_value,
+            ),
+            self.__dict__,
+        )
 
     @classmethod
     def make(cls, name, values=(), ordered=False, base_value=-1):
@@ -732,8 +769,7 @@ class DiscreteVariable(Variable):
         """
         if not name:
             raise ValueError("Variables without names cannot be stored or made")
-        var = cls._find_compatible(
-            name, values, ordered, base_value)
+        var = cls._find_compatible(name, values, ordered, base_value)
         if var:
             return var
         if not ordered:
@@ -768,9 +804,11 @@ class DiscreteVariable(Variable):
         if not ordered:
             values = cls.ordered_values(values)
         for var in existing:
-            if (var.ordered != ordered or
-                    var.base_value != -1
-                    and var.values[var.base_value] != base_rep):
+            if (
+                var.ordered != ordered
+                or var.base_value != -1
+                and var.values[var.base_value] != base_rep
+            ):
                 continue
             if not values:
                 break  # we have the variable - any existing values are OK
@@ -817,8 +855,14 @@ class DiscreteVariable(Variable):
             return sorted(values)
 
     def copy(self, compute_value=None):
-        var = DiscreteVariable(self.name, self.values, self.ordered,
-                               self.base_value, compute_value, sparse=self.sparse)
+        var = DiscreteVariable(
+            self.name,
+            self.values,
+            self.ordered,
+            self.base_value,
+            compute_value,
+            sparse=self.sparse,
+        )
         var.attributes = dict(self.attributes)
         return var
 
@@ -828,8 +872,9 @@ class StringVariable(Variable):
     Descriptor for string variables. String variables can only appear as
     meta attributes.
     """
+
     Unknown = ""
-    TYPE_HEADERS = ('string', 's', 'text')
+    TYPE_HEADERS = ("string", "s", "text")
 
     def to_val(self, s):
         """
@@ -874,53 +919,50 @@ class TimeVariable(ContinuousVariable):
 
     If time is specified wihout an UTC offset, localtime is assumed.
     """
+
     _all_vars = {}
-    TYPE_HEADERS = ('time', 't')
+    TYPE_HEADERS = ("time", "t")
     UNIX_EPOCH = datetime(1970, 1, 1)
     _ISO_FORMATS = [
         # have_date, have_time, format_str
         # in order of decreased probability
-        (1, 1, '%Y-%m-%d %H:%M:%S%z'),
-        (1, 1, '%Y-%m-%d %H:%M:%S'),
-        (1, 1, '%Y-%m-%d %H:%M'),
-        (1, 1, '%Y-%m-%dT%H:%M:%S%z'),
-        (1, 1, '%Y-%m-%dT%H:%M:%S'),
-
-        (1, 0, '%Y-%m-%d'),
-
-        (1, 1, '%Y-%m-%d %H:%M:%S.%f'),
-        (1, 1, '%Y-%m-%dT%H:%M:%S.%f'),
-        (1, 1, '%Y-%m-%d %H:%M:%S.%f%z'),
-        (1, 1, '%Y-%m-%dT%H:%M:%S.%f%z'),
-
-        (1, 1, '%Y%m%dT%H%M%S%z'),
-        (1, 1, '%Y%m%d%H%M%S%z'),
-
-        (0, 1, '%H:%M:%S.%f'),
-        (0, 1, '%H:%M:%S'),
-        (0, 1, '%H:%M'),
-
+        (1, 1, "%Y-%m-%d %H:%M:%S%z"),
+        (1, 1, "%Y-%m-%d %H:%M:%S"),
+        (1, 1, "%Y-%m-%d %H:%M"),
+        (1, 1, "%Y-%m-%dT%H:%M:%S%z"),
+        (1, 1, "%Y-%m-%dT%H:%M:%S"),
+        (1, 0, "%Y-%m-%d"),
+        (1, 1, "%Y-%m-%d %H:%M:%S.%f"),
+        (1, 1, "%Y-%m-%dT%H:%M:%S.%f"),
+        (1, 1, "%Y-%m-%d %H:%M:%S.%f%z"),
+        (1, 1, "%Y-%m-%dT%H:%M:%S.%f%z"),
+        (1, 1, "%Y%m%dT%H%M%S%z"),
+        (1, 1, "%Y%m%d%H%M%S%z"),
+        (0, 1, "%H:%M:%S.%f"),
+        (0, 1, "%H:%M:%S"),
+        (0, 1, "%H:%M"),
         # These parse as continuous features (plain numbers)
-        (1, 1, '%Y%m%dT%H%M%S'),
-        (1, 1, '%Y%m%d%H%M%S'),
-        (1, 0, '%Y%m%d'),
-        (1, 0, '%Y%j'),
-        (1, 0, '%Y'),
-        (0, 1, '%H%M%S.%f'),
-
+        (1, 1, "%Y%m%dT%H%M%S"),
+        (1, 1, "%Y%m%d%H%M%S"),
+        (1, 0, "%Y%m%d"),
+        (1, 0, "%Y%j"),
+        (1, 0, "%Y"),
+        (0, 1, "%H%M%S.%f"),
         # BUG: In Python as in C, %j doesn't necessitate 0-padding,
         # so these two lines must be in this order
-        (1, 0, '%Y-%m'),
-        (1, 0, '%Y-%j'),
+        (1, 0, "%Y-%m"),
+        (1, 0, "%Y-%j"),
     ]
     # The regex that matches all above formats
-    REGEX = (r'^('
-             r'\d{1,4}-\d{2}-\d{2}([ T]\d{2}:\d{2}(:\d{2}(\.\d+)?([+-]\d{4})?)?)?|'
-             r'\d{1,4}\d{2}\d{2}(T?\d{2}\d{2}\d{2}([+-]\d{4})?)?|'
-             r'\d{2}:\d{2}(:\d{2}(\.\d+)?)?|'
-             r'\d{2}\d{2}\d{2}\.\d+|'
-             r'\d{1,4}(-?\d{2,3})?'
-             r')$')
+    REGEX = (
+        r"^("
+        r"\d{1,4}-\d{2}-\d{2}([ T]\d{2}:\d{2}(:\d{2}(\.\d+)?([+-]\d{4})?)?)?|"
+        r"\d{1,4}\d{2}\d{2}(T?\d{2}\d{2}\d{2}([+-]\d{4})?)?|"
+        r"\d{2}:\d{2}(:\d{2}(\.\d+)?)?|"
+        r"\d{2}\d{2}\d{2}\.\d+|"
+        r"\d{1,4}(-?\d{2,3})?"
+        r")$"
+    )
     _matches_iso_format = re.compile(REGEX).match
 
     # UTC offset and associated timezone. If parsed datetime values provide an
@@ -941,13 +983,13 @@ class TimeVariable(ContinuousVariable):
         return copy
 
     @staticmethod
-    def _tzre_sub(s, _subtz=re.compile(r'([+-])(\d\d):(\d\d)$').sub):
+    def _tzre_sub(s, _subtz=re.compile(r"([+-])(\d\d):(\d\d)$").sub):
         # Replace +ZZ:ZZ with ISO-compatible +ZZZZ, or strip +0000
-        return s[:-6] if s.endswith(('+00:00', '-00:00')) else _subtz(r'\1\2\3', s)
+        return s[:-6] if s.endswith(("+00:00", "-00:00")) else _subtz(r"\1\2\3", s)
 
     def repr_val(self, val):
         if isnan(val):
-            return '?'
+            return "?"
         if not self.have_date and not self.have_time:
             # The time is relative, unitless. The value is absolute.
             return str(val.value) if isinstance(val, Value) else str(val)
@@ -958,7 +1000,9 @@ class TimeVariable(ContinuousVariable):
         if val < 0:
             if microseconds:
                 seconds, microseconds = seconds - 1, int(1e6) + microseconds
-            date = datetime.fromtimestamp(0, tz=self.timezone) + timedelta(seconds=seconds)
+            date = datetime.fromtimestamp(0, tz=self.timezone) + timedelta(
+                seconds=seconds
+            )
         else:
             date = datetime.fromtimestamp(seconds, tz=self.timezone)
         date = str(date.replace(microsecond=microseconds))
@@ -986,10 +1030,11 @@ class TimeVariable(ContinuousVariable):
         """
         if datestr in MISSING_VALUES:
             return Unknown
-        datestr = datestr.strip().rstrip('Z')
+        datestr = datestr.strip().rstrip("Z")
 
-        ERROR = ValueError("Invalid datetime format '{}'. "
-                           "Only ISO 8601 supported.".format(datestr))
+        ERROR = ValueError(
+            "Invalid datetime format '{}'. " "Only ISO 8601 supported.".format(datestr)
+        )
         if not self._matches_iso_format(datestr):
             try:
                 # If it is a number, assume it is a unix timestamp
@@ -1007,15 +1052,17 @@ class TimeVariable(ContinuousVariable):
             else:
                 # Pop this most-recently-used format to front
                 if 0 < i < len(self._ISO_FORMATS) - 2:
-                    self._ISO_FORMATS[i], self._ISO_FORMATS[0] = \
-                        self._ISO_FORMATS[0], self._ISO_FORMATS[i]
+                    self._ISO_FORMATS[i], self._ISO_FORMATS[0] = (
+                        self._ISO_FORMATS[0],
+                        self._ISO_FORMATS[i],
+                    )
 
                 self.have_date |= have_date
                 self.have_time |= have_time
                 if not have_date:
-                    dt = dt.replace(self.UNIX_EPOCH.year,
-                                    self.UNIX_EPOCH.month,
-                                    self.UNIX_EPOCH.day)
+                    dt = dt.replace(
+                        self.UNIX_EPOCH.year, self.UNIX_EPOCH.month, self.UNIX_EPOCH.day
+                    )
                 break
         else:
             raise ERROR

@@ -16,21 +16,29 @@ from scipy.sparse import issparse
 
 from AnyQt.QtGui import QFontMetrics
 from AnyQt.QtWidgets import (
-    QTableView, QRadioButton, QButtonGroup, QGridLayout,
-    QStackedWidget, QHeaderView, QCheckBox, QItemDelegate,
+    QTableView,
+    QRadioButton,
+    QButtonGroup,
+    QGridLayout,
+    QStackedWidget,
+    QHeaderView,
+    QCheckBox,
+    QItemDelegate,
 )
-from AnyQt.QtCore import (
-    Qt, QItemSelection, QItemSelectionRange, QItemSelectionModel,
-)
+from AnyQt.QtCore import Qt, QItemSelection, QItemSelectionRange, QItemSelectionModel
 
-from Orange.data import (Table, Domain, ContinuousVariable, DiscreteVariable,
-                         StringVariable)
+from Orange.data import (
+    Table,
+    Domain,
+    ContinuousVariable,
+    DiscreteVariable,
+    StringVariable,
+)
 from Orange.misc.cache import memoize_method
 from Orange.preprocess import score
 from Orange.widgets import report
 from Orange.widgets import gui
-from Orange.widgets.settings import (DomainContextHandler, Setting,
-                                     ContextSetting)
+from Orange.widgets.settings import DomainContextHandler, Setting, ContextSetting
 from Orange.widgets.utils.itemmodels import PyTableModel
 from Orange.widgets.utils.sql import check_sql_input
 from Orange.widgets.widget import OWWidget, Msg, Input, Output
@@ -44,48 +52,66 @@ class ProblemType:
 
     @classmethod
     def from_variable(cls, variable):
-        return (cls.CLASSIFICATION if isinstance(variable, DiscreteVariable) else
-                cls.REGRESSION if isinstance(variable, ContinuousVariable) else
-                cls.UNSUPERVISED)
+        return (
+            cls.CLASSIFICATION
+            if isinstance(variable, DiscreteVariable)
+            else cls.REGRESSION
+            if isinstance(variable, ContinuousVariable)
+            else cls.UNSUPERVISED
+        )
 
-ScoreMeta = namedtuple("score_meta", ["name", "shortname", "scorer", 'problem_type', 'is_default'])
+
+ScoreMeta = namedtuple(
+    "score_meta", ["name", "shortname", "scorer", "problem_type", "is_default"]
+)
 
 # Default scores.
 CLS_SCORES = [
-    ScoreMeta("Information Gain", "Info. gain",
-              score.InfoGain, ProblemType.CLASSIFICATION, False),
-    ScoreMeta("Information Gain Ratio", "Gain ratio",
-              score.GainRatio, ProblemType.CLASSIFICATION, True),
-    ScoreMeta("Gini Decrease", "Gini",
-              score.Gini, ProblemType.CLASSIFICATION, True),
-    ScoreMeta("ANOVA", "ANOVA",
-              score.ANOVA, ProblemType.CLASSIFICATION, False),
-    ScoreMeta("χ²", "χ²",
-              score.Chi2, ProblemType.CLASSIFICATION, False),
-    ScoreMeta("ReliefF", "ReliefF",
-              score.ReliefF, ProblemType.CLASSIFICATION, False),
-    ScoreMeta("FCBF", "FCBF",
-              score.FCBF, ProblemType.CLASSIFICATION, False)
+    ScoreMeta(
+        "Information Gain",
+        "Info. gain",
+        score.InfoGain,
+        ProblemType.CLASSIFICATION,
+        False,
+    ),
+    ScoreMeta(
+        "Information Gain Ratio",
+        "Gain ratio",
+        score.GainRatio,
+        ProblemType.CLASSIFICATION,
+        True,
+    ),
+    ScoreMeta("Gini Decrease", "Gini", score.Gini, ProblemType.CLASSIFICATION, True),
+    ScoreMeta("ANOVA", "ANOVA", score.ANOVA, ProblemType.CLASSIFICATION, False),
+    ScoreMeta("χ²", "χ²", score.Chi2, ProblemType.CLASSIFICATION, False),
+    ScoreMeta("ReliefF", "ReliefF", score.ReliefF, ProblemType.CLASSIFICATION, False),
+    ScoreMeta("FCBF", "FCBF", score.FCBF, ProblemType.CLASSIFICATION, False),
 ]
 REG_SCORES = [
-    ScoreMeta("Univariate Regression", "Univar. reg.",
-              score.UnivariateLinearRegression, ProblemType.REGRESSION, True),
-    ScoreMeta("RReliefF", "RReliefF",
-              score.RReliefF, ProblemType.REGRESSION, True)
+    ScoreMeta(
+        "Univariate Regression",
+        "Univar. reg.",
+        score.UnivariateLinearRegression,
+        ProblemType.REGRESSION,
+        True,
+    ),
+    ScoreMeta("RReliefF", "RReliefF", score.RReliefF, ProblemType.REGRESSION, True),
 ]
 SCORES = CLS_SCORES + REG_SCORES
 
 
 class TableView(QTableView):
     def __init__(self, parent=None, **kwargs):
-        super().__init__(parent=parent,
-                         selectionBehavior=QTableView.SelectRows,
-                         selectionMode=QTableView.ExtendedSelection,
-                         sortingEnabled=True,
-                         showGrid=True,
-                         cornerButtonEnabled=False,
-                         alternatingRowColors=False,
-                         **kwargs)
+        super().__init__(
+            parent=parent,
+            selectionBehavior=QTableView.SelectRows,
+            selectionMode=QTableView.ExtendedSelection,
+            sortingEnabled=True,
+            showGrid=True,
+            cornerButtonEnabled=False,
+            alternatingRowColors=False,
+            **kwargs
+        )
         self.setItemDelegate(gui.ColoredBarItemDelegate(self))
         self.setItemDelegateForColumn(0, QItemDelegate())
 
@@ -93,7 +119,9 @@ class TableView(QTableView):
         header.setSectionResizeMode(header.Fixed)
         header.setFixedWidth(50)
         header.setDefaultSectionSize(22)
-        header.setTextElideMode(Qt.ElideMiddle)  # Note: https://bugreports.qt.io/browse/QTBUG-62091
+        header.setTextElideMode(
+            Qt.ElideMiddle
+        )  # Note: https://bugreports.qt.io/browse/QTBUG-62091
 
         header = self.horizontalHeader()
         header.setSectionResizeMode(header.Fixed)
@@ -128,7 +156,7 @@ class TableModel(PyTableModel):
 
         # Display nothing for non-existent attr value counts in the first column
         if role == Qt.EditRole and index.column() == 0 and _isnan(value):
-            return ''
+            return ""
 
         return value
 
@@ -158,7 +186,7 @@ class TableModel(PyTableModel):
 
     def _argsortData(self, data, order):
         """Always sort NaNs last"""
-        indices = np.argsort(data, kind='mergesort')
+        indices = np.argsort(data, kind="mergesort")
         if order == Qt.DescendingOrder:
             return np.roll(indices[::-1], -np.isnan(data).sum())
         return indices
@@ -194,10 +222,12 @@ class OWRank(OWWidget):
     selectionMethod = ContextSetting(SelectNBest)
 
     class Information(OWWidget.Information):
-        no_target_var = Msg("Data does not have a single target variable. "
-                            "You can still connect in unsupervised scorers "
-                            "such as PCA.")
-        missings_imputed = Msg('Missing values will be imputed as needed.')
+        no_target_var = Msg(
+            "Data does not have a single target variable. "
+            "You can still connect in unsupervised scorers "
+            "such as PCA."
+        )
+        missings_imputed = Msg("Missing values will be imputed as needed.")
 
     class Error(OWWidget.Error):
         invalid_type = Msg("Cannot handle target variable type {}")
@@ -212,13 +242,14 @@ class OWRank(OWWidget):
         self.problem_type_mode = ProblemType.CLASSIFICATION
 
         if not self.selected_methods:
-            self.selected_methods = {method.name for method in SCORES
-                                     if method.is_default}
+            self.selected_methods = {
+                method.name for method in SCORES if method.is_default
+            }
 
         # GUI
 
         self.ranksModel = model = TableModel(parent=self)  # type: TableModel
-        self.ranksView = view = TableView(self)            # type: TableView
+        self.ranksView = view = TableView(self)  # type: TableView
         self.mainArea.layout().addWidget(view)
         view.setModel(model)
         view.setColumnWidth(0, 30)
@@ -234,17 +265,21 @@ class OWRank(OWWidget):
         self.measuresStack = stacked = QStackedWidget(self)
         self.controlArea.layout().addWidget(stacked)
 
-        for scoring_methods in (CLS_SCORES,
-                                REG_SCORES,
-                                []):
+        for scoring_methods in (CLS_SCORES, REG_SCORES, []):
             box = gui.vBox(None, "Scoring Methods" if scoring_methods else None)
             stacked.addWidget(box)
             for method in scoring_methods:
-                box.layout().addWidget(QCheckBox(
-                    method.name, self,
-                    objectName=method.shortname,  # To be easily found in tests
-                    checked=method.name in self.selected_methods,
-                    stateChanged=partial(self.methodSelectionChanged, method_name=method.name)))
+                box.layout().addWidget(
+                    QCheckBox(
+                        method.name,
+                        self,
+                        objectName=method.shortname,  # To be easily found in tests
+                        checked=method.name in self.selected_methods,
+                        stateChanged=partial(
+                            self.methodSelectionChanged, method_name=method.name
+                        ),
+                    )
+                )
             gui.rubber(box)
 
         gui.rubber(self.controlArea)
@@ -269,8 +304,14 @@ class OWRank(OWWidget):
         b3 = button(self.tr("Manual"), OWRank.SelectManual)
         b4 = button(self.tr("Best ranked:"), OWRank.SelectNBest)
 
-        s = gui.spin(selMethBox, self, "nSelected", 1, 100,
-                     callback=lambda: self.setSelectionMethod(OWRank.SelectNBest))
+        s = gui.spin(
+            selMethBox,
+            self,
+            "nSelected",
+            1,
+            100,
+            callback=lambda: self.setSelectionMethod(OWRank.SelectNBest),
+        )
 
         grid.addWidget(b1, 0, 0)
         grid.addWidget(b2, 1, 0)
@@ -306,8 +347,7 @@ class OWRank(OWWidget):
 
         self.Error.clear()
         self.Information.clear()
-        self.Information.missings_imputed(
-            shown=data is not None and data.has_missing())
+        self.Information.missings_imputed(shown=data is not None and data.has_missing())
 
         if data is not None and not len(data.domain.attributes):
             data = None
@@ -334,16 +374,17 @@ class OWRank(OWWidget):
 
             self.ranksModel.setVerticalHeaderLabels(domain.attributes)
             self.ranksView.setVHeaderFixedWidthFromLabel(
-                max((a.name for a in domain.attributes), key=len))
+                max((a.name for a in domain.attributes), key=len)
+            )
 
             self.selectionMethod = OWRank.SelectNBest
 
         self.openContext(data)
 
     def handleNewSignals(self):
-        self.setStatusMessage('Running')
+        self.setStatusMessage("Running")
         self.updateScores()
-        self.setStatusMessage('')
+        self.setStatusMessage("")
         self.on_select()
 
     @Inputs.scorer
@@ -356,9 +397,13 @@ class OWRank(OWWidget):
             if id in self.scorers:
                 self.get_scorer_scores.cache_clear()
 
-            self.scorers[id] = ScoreMeta(scorer.name, scorer.name, scorer,
-                                         ProblemType.from_variable(scorer.class_type),
-                                         False)
+            self.scorers[id] = ScoreMeta(
+                scorer.name,
+                scorer.name,
+                scorer,
+                ProblemType.from_variable(scorer.class_type),
+                False,
+            )
 
     @memoize_method()
     def get_method_scores(self, method):
@@ -367,15 +412,15 @@ class OWRank(OWWidget):
         try:
             scores = np.asarray(estimator(data))
         except ValueError:
-            log.warning("Scorer %s wasn't able to compute all scores at once",
-                        method.name)
+            log.warning(
+                "Scorer %s wasn't able to compute all scores at once", method.name
+            )
             try:
-                scores = np.array([estimator(data, attr)
-                                   for attr in data.domain.attributes])
+                scores = np.array(
+                    [estimator(data, attr) for attr in data.domain.attributes]
+                )
             except ValueError:
-                log.error(
-                    "Scorer %s wasn't able to compute scores at all",
-                    method.name)
+                log.error("Scorer %s wasn't able to compute scores at all", method.name)
                 scores = np.full(len(data.domain.attributes), np.nan)
         return scores
 
@@ -384,15 +429,16 @@ class OWRank(OWWidget):
         try:
             scores = scorer.scorer.score_data(self.data).T
         except ValueError:
-            log.error(
-                "Scorer %s wasn't able to compute scores at all",
-                scorer.name)
+            log.error("Scorer %s wasn't able to compute scores at all", scorer.name)
             scores = np.full((len(self.data.domain.attributes), 1), np.nan)
 
-        labels = ((scorer.shortname,)
-                  if scores.shape[1] == 1 else
-                  tuple(scorer.shortname + '_' + str(i)
-                        for i in range(1, 1 + scores.shape[1])))
+        labels = (
+            (scorer.shortname,)
+            if scores.shape[1] == 1
+            else tuple(
+                scorer.shortname + "_" + str(i) for i in range(1, 1 + scores.shape[1])
+            )
+        )
         return scores, labels
 
     def updateScores(self):
@@ -401,42 +447,54 @@ class OWRank(OWWidget):
             self.Outputs.scores.send(None)
             return
 
-        methods = [method
-                   for method in SCORES
-                   if (method.name in self.selected_methods and
-                       method.problem_type == self.problem_type_mode and
-                       (not issparse(self.data.X) or
-                        method.scorer.supports_sparse_data))]
+        methods = [
+            method
+            for method in SCORES
+            if (
+                method.name in self.selected_methods
+                and method.problem_type == self.problem_type_mode
+                and (not issparse(self.data.X) or method.scorer.supports_sparse_data)
+            )
+        ]
 
         scorers = []
         self.Error.inadequate_learner.clear()
         for scorer in self.scorers.values():
-            if scorer.problem_type in (self.problem_type_mode, ProblemType.UNSUPERVISED):
+            if scorer.problem_type in (
+                self.problem_type_mode,
+                ProblemType.UNSUPERVISED,
+            ):
                 scorers.append(scorer)
             else:
-                self.Error.inadequate_learner(scorer.name, scorer.learner_adequacy_err_msg)
+                self.Error.inadequate_learner(
+                    scorer.name, scorer.learner_adequacy_err_msg
+                )
 
-        method_scores = tuple(self.get_method_scores(method)
-                              for method in methods)
+        method_scores = tuple(self.get_method_scores(method) for method in methods)
 
         scorer_scores, scorer_labels = (), ()
         if scorers:
-            scorer_scores, scorer_labels = zip(*(self.get_scorer_scores(scorer)
-                                                 for scorer in scorers))
+            scorer_scores, scorer_labels = zip(
+                *(self.get_scorer_scores(scorer) for scorer in scorers)
+            )
             scorer_labels = tuple(chain.from_iterable(scorer_labels))
 
         labels = tuple(method.shortname for method in methods) + scorer_labels
         model_array = np.column_stack(
-            ([len(a.values) if a.is_discrete else np.nan
-              for a in self.data.domain.attributes],) +
-            (method_scores if method_scores else ()) +
-            (scorer_scores if scorer_scores else ())
+            (
+                [
+                    len(a.values) if a.is_discrete else np.nan
+                    for a in self.data.domain.attributes
+                ],
+            )
+            + (method_scores if method_scores else ())
+            + (scorer_scores if scorer_scores else ())
         )
         for column, values in enumerate(model_array.T):
             self.ranksModel.setExtremesFrom(column, values)
 
         self.ranksModel.wrap(model_array.tolist())
-        self.ranksModel.setHorizontalHeaderLabels(('#',) + labels)
+        self.ranksModel.setHorizontalHeaderLabels(("#",) + labels)
         self.ranksView.setColumnWidth(0, 40)
 
         # Re-apply sort
@@ -445,7 +503,9 @@ class OWRank(OWWidget):
             if sort_column < len(labels):
                 # adds 1 for '#' (discrete count) column
                 self.ranksModel.sort(sort_column + 1, sort_order)
-                self.ranksView.horizontalHeader().setSortIndicator(sort_column + 1, sort_order)
+                self.ranksView.horizontalHeader().setSortIndicator(
+                    sort_column + 1, sort_order
+                )
         except ValueError:
             pass
 
@@ -454,8 +514,9 @@ class OWRank(OWWidget):
 
     def on_select(self):
         # Save indices of attributes in the original, unsorted domain
-        self.selected_rows = self.ranksModel.mapToSourceRows([
-            i.row() for i in self.ranksView.selectionModel().selectedRows(0)])
+        self.selected_rows = self.ranksModel.mapToSourceRows(
+            [i.row() for i in self.ranksView.selectionModel().selectedRows(0)]
+        )
         self.commit()
 
     def setSelectionMethod(self, method):
@@ -475,21 +536,22 @@ class OWRank(OWWidget):
             selection = QItemSelection()
         elif self.selectionMethod == OWRank.SelectAll:
             selection = QItemSelection(
-                model.index(0, 0),
-                model.index(rowCount - 1, columnCount - 1)
+                model.index(0, 0), model.index(rowCount - 1, columnCount - 1)
             )
         elif self.selectionMethod == OWRank.SelectNBest:
             nSelected = min(self.nSelected, rowCount)
             selection = QItemSelection(
-                model.index(0, 0),
-                model.index(nSelected - 1, columnCount - 1)
+                model.index(0, 0), model.index(nSelected - 1, columnCount - 1)
             )
         else:
             selection = QItemSelection()
             if len(self.selected_rows):
                 for row in model.mapFromSourceRows(self.selected_rows):
-                    selection.append(QItemSelectionRange(
-                        model.index(row, 0), model.index(row, columnCount - 1)))
+                    selection.append(
+                        QItemSelectionRange(
+                            model.index(row, 0), model.index(row, columnCount - 1)
+                        )
+                    )
 
         selModel.select(selection, QItemSelectionModel.ClearAndSelect)
 
@@ -500,7 +562,9 @@ class OWRank(OWWidget):
 
         # Store the header states
         sort_order = self.ranksModel.sortOrder()
-        sort_column = self.ranksModel.sortColumn() - 1  # -1 for '#' (discrete count) column
+        sort_column = (
+            self.ranksModel.sortColumn() - 1
+        )  # -1 for '#' (discrete count) column
         self.sorting = (sort_column, sort_order)
 
     def methodSelectionChanged(self, state, method_name):
@@ -526,14 +590,14 @@ class OWRank(OWWidget):
             if len(attributes) == len(self.selected_rows):
                 self.selectionMethod = OWRank.SelectAll
                 self.selectButtons.button(self.selectionMethod).setChecked(True)
-            selected_attrs = [attributes[i]
-                              for i in self.selected_rows]
+            selected_attrs = [attributes[i] for i in self.selected_rows]
         if not selected_attrs:
             self.Outputs.reduced_data.send(None)
             self.out_domain_desc = None
         else:
             reduced_domain = Domain(
-                selected_attrs, self.data.domain.class_var, self.data.domain.metas)
+                selected_attrs, self.data.domain.class_var, self.data.domain.metas
+            )
             data = self.data.transform(reduced_domain)
             self.Outputs.reduced_data.send(data)
             self.out_domain_desc = report.describe_domain(data.domain)
@@ -543,8 +607,10 @@ class OWRank(OWWidget):
         if not model_list or len(model_list[0]) == 1:  # Empty or just n_values column
             return None
 
-        domain = Domain([ContinuousVariable(label) for label in labels],
-                        metas=[StringVariable("Feature")])
+        domain = Domain(
+            [ContinuousVariable(label) for label in labels],
+            metas=[StringVariable("Feature")],
+        )
 
         # Prevent np.inf scores
         finfo = np.finfo(np.float64)
@@ -573,7 +639,10 @@ class OWRank(OWWidget):
             if isinstance(headerState, bytes):
                 hview = QHeaderView(Qt.Horizontal)
                 hview.restoreState(headerState)
-                column, order = hview.sortIndicatorSection() - 1, hview.sortIndicatorOrder()
+                column, order = (
+                    hview.sortIndicatorSection() - 1,
+                    hview.sortIndicatorOrder(),
+                )
             settings["sorting"] = (column, order)
 
     @classmethod
@@ -582,15 +651,16 @@ class OWRank(OWWidget):
             # Old selection was saved as sorted indices. New selection is original indices.
             # Since we can't devise the latter without first computing the ranks,
             # just reset the selection to avoid confusion.
-            context.values['selected_rows'] = []
+            context.values["selected_rows"] = []
 
 
 if __name__ == "__main__":
     from AnyQt.QtWidgets import QApplication
     from Orange.classification import RandomForestLearner
+
     a = QApplication([])
     ow = OWRank()
-    ow.set_learner(RandomForestLearner(), (3, 'Learner', None))
+    ow.set_learner(RandomForestLearner(), (3, "Learner", None))
     ow.setData(Table("heart_disease.tab"))
     ow.show()
     a.exec_()

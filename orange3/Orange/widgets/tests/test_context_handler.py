@@ -4,11 +4,15 @@ from io import BytesIO
 from unittest import TestCase
 from unittest.mock import Mock, patch, call
 from Orange.widgets.settings import (
-    ContextHandler, ContextSetting, Context, Setting, SettingsPrinter,
-    VERSION_KEY
+    ContextHandler,
+    ContextSetting,
+    Context,
+    Setting,
+    SettingsPrinter,
+    VERSION_KEY,
 )
 
-__author__ = 'anze'
+__author__ = "anze"
 
 
 class SimpleWidget:
@@ -35,6 +39,7 @@ class DummyContext(Context):
 
     def __repr__(self):
         return "Context(id={})".format(self.id)
+
     __str__ = __repr__
 
     def __eq__(self, other):
@@ -71,7 +76,9 @@ class TestContextHandler(TestCase):
         with patch.object(SimpleWidget, "migrate_context", migrate_context):
             handler.read_defaults_file(create_defaults_file(contexts))
         self.assertSequenceEqual(handler.global_contexts, contexts)
-        migrate_context.assert_has_calls([call(c, c.values[VERSION_KEY]) for c in contexts])
+        migrate_context.assert_has_calls(
+            [call(c, c.values[VERSION_KEY]) for c in contexts]
+        )
 
     def test_initialize(self):
         handler = ContextHandler()
@@ -81,14 +88,14 @@ class TestContextHandler(TestCase):
         # Context settings from data
         widget = SimpleWidget()
         context_settings = [DummyContext()]
-        handler.initialize(widget, {'context_settings': context_settings})
-        self.assertTrue(hasattr(widget, 'context_settings'))
+        handler.initialize(widget, {"context_settings": context_settings})
+        self.assertTrue(hasattr(widget, "context_settings"))
         self.assertEqual(widget.context_settings, context_settings)
 
         # Default (global) context settings
         widget = SimpleWidget()
         handler.initialize(widget)
-        self.assertTrue(hasattr(widget, 'context_settings'))
+        self.assertTrue(hasattr(widget, "context_settings"))
         self.assertEqual(widget.context_settings, handler.global_contexts)
 
     def test_initialize_migrates_contexts(self):
@@ -109,7 +116,9 @@ class TestContextHandler(TestCase):
         migrate_context = Mock()
         with patch.object(SimpleWidget, "migrate_context", migrate_context):
             handler.initialize(widget, dict(context_settings=deepcopy(contexts)))
-        migrate_context.assert_has_calls([call(c, c.values[VERSION_KEY]) for c in contexts])
+        migrate_context.assert_has_calls(
+            [call(c, c.values[VERSION_KEY]) for c in contexts]
+        )
 
     def test_fast_save(self):
         handler = ContextHandler()
@@ -119,10 +128,12 @@ class TestContextHandler(TestCase):
         handler.initialize(widget)
 
         context = widget.current_context = handler.new_context()
-        handler.fast_save(widget, 'context_setting', 55)
-        self.assertEqual(context.values['context_setting'], 55)
-        self.assertEqual(handler.known_settings['context_setting'].default,
-                         SimpleWidget.context_setting.default)
+        handler.fast_save(widget, "context_setting", 55)
+        self.assertEqual(context.values["context_setting"], 55)
+        self.assertEqual(
+            handler.known_settings["context_setting"].default,
+            SimpleWidget.context_setting.default,
+        )
 
     def test_find_or_create_context(self):
         widget = SimpleWidget()
@@ -130,8 +141,7 @@ class TestContextHandler(TestCase):
         handler.match = lambda context, i: (context.i == i) * 2
         handler.clone_context = lambda context, i: copy(context)
 
-        c1, c2, c3, c4, c5, c6, c7, c8, c9 = (Context(i=i)
-                                              for i in range(1, 10))
+        c1, c2, c3, c4, c5, c6, c7, c8, c9 = (Context(i=i) for i in range(1, 10))
 
         # finding a perfect match in global_contexts should copy it to
         # the front of context_settings (and leave globals as-is)
@@ -196,15 +206,14 @@ class TestContextHandler(TestCase):
 
 class TestSettingsPrinter(TestCase):
     def test_formats_contexts(self):
-        settings = dict(key1=1, key2=2,
-                        context_settings=[
-                            Context(param1=1, param2=2,
-                                    values=dict(value1=1,
-                                                value2=2)),
-                            Context(param1=3, param2=4,
-                                    values=dict(value1=5,
-                                                value2=6))
-                        ])
+        settings = dict(
+            key1=1,
+            key2=2,
+            context_settings=[
+                Context(param1=1, param2=2, values=dict(value1=1, value2=2)),
+                Context(param1=3, param2=4, values=dict(value1=5, value2=6)),
+            ],
+        )
         pp = SettingsPrinter()
 
         output = pp.pformat(settings)

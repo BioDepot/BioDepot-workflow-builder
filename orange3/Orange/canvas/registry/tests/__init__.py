@@ -10,24 +10,14 @@ def small_testing_registry():
 
     registry = WidgetRegistry()
 
-    data_desc = CategoryDescription.from_package(
-        "Orange.widgets.data"
-    )
+    data_desc = CategoryDescription.from_package("Orange.widgets.data")
 
-    file_desc = WidgetDescription.from_module(
-        "Orange.widgets.data.owfile"
-    )
-    discretize_desc = WidgetDescription.from_module(
-        "Orange.widgets.data.owdiscretize"
-    )
+    file_desc = WidgetDescription.from_module("Orange.widgets.data.owfile")
+    discretize_desc = WidgetDescription.from_module("Orange.widgets.data.owdiscretize")
 
-    classify_desc = CategoryDescription.from_package(
-        "Orange.widgets.classify"
-    )
+    classify_desc = CategoryDescription.from_package("Orange.widgets.classify")
 
-    bayes_desc = WidgetDescription.from_module(
-        "Orange.widgets.classify.ownaivebayes"
-    )
+    bayes_desc = WidgetDescription.from_module("Orange.widgets.classify.ownaivebayes")
 
     registry.register_category(data_desc)
     registry.register_category(classify_desc)

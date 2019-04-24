@@ -7,10 +7,9 @@ class EvaluationResultsContextHandler(settings.ContextHandler):
         super().__init__()
         self.targetAttr, self.selectedAttr = targetAttr, selectedAttr
 
-    #noinspection PyMethodOverriding
+    # noinspection PyMethodOverriding
     def match(self, context, cnames, cvalues):
-        return (cnames, cvalues) == (
-            context.classifierNames, context.classValues) and 2
+        return (cnames, cvalues) == (context.classifierNames, context.classValues) and 2
 
     def fast_save(self, widget, name, value):
         context = widget.current_context
@@ -33,12 +32,13 @@ class EvaluationResultsContextHandler(settings.ContextHandler):
         if context.selectedClassifiers is not None:
             setattr(widget, self.selectedAttr, context.selectedClassifiers)
 
-    #noinspection PyMethodOverriding
+    # noinspection PyMethodOverriding
     def find_or_create_context(self, widget, results):
         cnames = [c.name for c in results.classifiers]
         cvalues = results.classValues
         context, isNew = super().find_or_create_context(
-            widget, results.classifierNames, results.classValues)
+            widget, results.classifierNames, results.classValues
+        )
         if isNew:
             context.classifierNames = results.classifierNames
             context.classValues = results.classValues

@@ -15,13 +15,22 @@ from xml.sax.saxutils import escape
 from AnyQt.QtWidgets import QGraphicsScene, QGraphicsItem
 from AnyQt.QtGui import QPainter, QColor, QFont
 from AnyQt.QtCore import (
-    Qt, QPointF, QRectF, QSizeF, QLineF, QBuffer, QObject, QSignalMapper,
-    QT_VERSION
+    Qt,
+    QPointF,
+    QRectF,
+    QSizeF,
+    QLineF,
+    QBuffer,
+    QObject,
+    QSignalMapper,
+    QT_VERSION,
 )
 from AnyQt.QtSvg import QSvgGenerator
 from AnyQt.QtCore import pyqtSignal as Signal
+
 try:
     from AnyQt.QtCore import PYQT_VERSION
+
     USE_PYQT = True
 except ImportError:
     USE_PYQT, PYQT_VERSION = False, -1
@@ -116,9 +125,7 @@ class CanvasScene(QGraphicsScene):
             lambda node: self.node_item_hovered.emit(node)
         )
         self.position_change_mapper = QSignalMapper(self)
-        self.position_change_mapper.mapped[QObject].connect(
-            self._on_position_change
-        )
+        self.position_change_mapper.mapped[QObject].connect(self._on_position_change)
         log.info("'%s' intitialized." % self)
 
     def clear_scene(self):
@@ -135,12 +142,8 @@ class CanvasScene(QGraphicsScene):
             self.scheme.annotation_added.disconnect(self.add_annotation)
             self.scheme.annotation_removed.disconnect(self.remove_annotation)
 
-            self.scheme.node_state_changed.disconnect(
-                self.on_widget_state_change
-            )
-            self.scheme.channel_state_changed.disconnect(
-                self.on_link_state_change
-            )
+            self.scheme.node_state_changed.disconnect(self.on_widget_state_change)
+            self.scheme.channel_state_changed.disconnect(self.on_link_state_change)
 
             # Remove all items to make sure all signals from scheme items
             # to canvas items are disconnected.
@@ -200,12 +203,8 @@ class CanvasScene(QGraphicsScene):
             self.scheme.annotation_added.connect(self.add_annotation)
             self.scheme.annotation_removed.connect(self.remove_annotation)
 
-            self.scheme.node_state_changed.connect(
-                self.on_widget_state_change
-            )
-            self.scheme.channel_state_changed.connect(
-                self.on_link_state_change
-            )
+            self.scheme.node_state_changed.connect(self.on_widget_state_change)
+            self.scheme.channel_state_changed.connect(self.on_link_state_change)
 
             self.scheme.topology_changed.connect(self.on_scheme_change)
 
@@ -416,8 +415,10 @@ class CanvasScene(QGraphicsScene):
 
         self.link_item_added.emit(item)
 
-        log.info("Added link %r -> %r to '%s'" % \
-                 (item.sourceItem.title(), item.sinkItem.title(), self))
+        log.info(
+            "Added link %r -> %r to '%s'"
+            % (item.sourceItem.title(), item.sinkItem.title(), self)
+        )
 
         self.__anchor_layout.invalidateLink(item)
 
@@ -436,8 +437,9 @@ class CanvasScene(QGraphicsScene):
         source = self.__item_for_node[scheme_link.source_node]
         sink = self.__item_for_node[scheme_link.sink_node]
 
-        item = self.new_link_item(source, scheme_link.source_channel,
-                                  sink, scheme_link.sink_channel)
+        item = self.new_link_item(
+            source, scheme_link.source_channel, sink, scheme_link.sink_channel
+        )
 
         item.setEnabled(scheme_link.enabled)
         scheme_link.enabled_changed.connect(item.setEnabled)
@@ -454,8 +456,7 @@ class CanvasScene(QGraphicsScene):
         self.__item_for_link[scheme_link] = item
         return item
 
-    def new_link_item(self, source_item, source_channel,
-                      sink_item, sink_channel):
+    def new_link_item(self, source_item, source_channel, sink_item, sink_channel):
         """
         Construct and return a new :class:`.LinkItem`
         """
@@ -473,10 +474,7 @@ class CanvasScene(QGraphicsScene):
         sink_name = channel_name(sink_channel)
 
         fmt = "<b>{0}</b>&nbsp; \u2192 &nbsp;<b>{1}</b>"
-        item.setToolTip(
-            fmt.format(escape(source_name),
-                       escape(sink_name))
-        )
+        item.setToolTip(fmt.format(escape(source_name), escape(sink_name)))
 
         item.setSourceName(source_name)
         item.setSinkName(sink_name)
@@ -489,12 +487,8 @@ class CanvasScene(QGraphicsScene):
         Remove a link (:class:`.LinkItem`) from the scene.
         """
         # Invalidate the anchor layout.
-        self.__anchor_layout.invalidateAnchorItem(
-            item.sourceItem.outputAnchorItem
-        )
-        self.__anchor_layout.invalidateAnchorItem(
-            item.sinkItem.inputAnchorItem
-        )
+        self.__anchor_layout.invalidateAnchorItem(item.sourceItem.outputAnchorItem)
+        self.__anchor_layout.invalidateAnchorItem(item.sinkItem.inputAnchorItem)
 
         self.__link_items.remove(item)
 
@@ -518,9 +512,7 @@ class CanvasScene(QGraphicsScene):
         scheme_link.enabled_changed.disconnect(item.setEnabled)
 
         if scheme_link.is_dynamic():
-            scheme_link.dynamic_enabled_changed.disconnect(
-                item.setDynamicEnabled
-            )
+            scheme_link.dynamic_enabled_changed.disconnect(item.setDynamicEnabled)
         scheme_link.state_changed.disconnect(item.setRuntimeState)
         self.remove_link_item(item)
 
@@ -567,9 +559,7 @@ class CanvasScene(QGraphicsScene):
             item.setLine(QLineF(QPointF(*start), QPointF(*end)))
             item.setColor(QColor(scheme_annot.color))
 
-        scheme_annot.geometry_changed.connect(
-            self.__on_scheme_annot_geometry_change
-        )
+        scheme_annot.geometry_changed.connect(self.__on_scheme_annot_geometry_change)
 
         self.add_annotation_item(item)
         self.__item_for_annotation[scheme_annot] = item
@@ -611,8 +601,7 @@ class CanvasScene(QGraphicsScene):
         return self.__item_for_annotation[scheme_annotation]
 
     def annotation_for_item(self, item):
-        rev = dict(reversed(item) \
-                   for item in self.__item_for_annotation.items())
+        rev = dict(reversed(item) for item in self.__item_for_annotation.items())
         return rev[item]
 
     def commit_scheme_node(self, node):
@@ -630,14 +619,14 @@ class CanvasScene(QGraphicsScene):
         try:
             self.scheme.add_node(node)
         except Exception:
-            log.error("An error occurred while committing node '%s'",
-                      node, exc_info=True)
+            log.error(
+                "An error occurred while committing node '%s'", node, exc_info=True
+            )
             # Cleanup (remove the node item)
             self.remove_node_item(item)
             raise
 
-        log.info("Commited node '%s' from '%s' to '%s'" % \
-                 (node, self, self.scheme))
+        log.info("Commited node '%s' from '%s' to '%s'" % (node, self, self.scheme))
 
     def commit_scheme_link(self, link):
         """
@@ -650,8 +639,7 @@ class CanvasScene(QGraphicsScene):
             raise ValueError("No 'LinkItem' for link.")
 
         self.scheme.add_link(link)
-        log.info("Commited link '%s' from '%s' to '%s'" % \
-                 (link, self, self.scheme))
+        log.info("Commited link '%s' from '%s' to '%s'" % (link, self, self.scheme))
 
     def node_for_item(self, item):
         """
@@ -695,32 +683,29 @@ class CanvasScene(QGraphicsScene):
         """
         Return all links from the `node_item` (:class:`NodeItem`).
         """
-        return self.node_output_links(node_item) + \
-               self.node_input_links(node_item)
+        return self.node_output_links(node_item) + self.node_input_links(node_item)
 
     def node_output_links(self, node_item):
         """
         Return a list of all output links from `node_item`.
         """
-        return [link for link in self.__link_items
-                if link.sourceItem == node_item]
+        return [link for link in self.__link_items if link.sourceItem == node_item]
 
     def node_input_links(self, node_item):
         """
         Return a list of all input links for `node_item`.
         """
-        return [link for link in self.__link_items
-                if link.sinkItem == node_item]
+        return [link for link in self.__link_items if link.sinkItem == node_item]
 
     def neighbor_nodes(self, node_item):
         """
         Return a list of `node_item`'s (class:`NodeItem`) neighbor nodes.
         """
-        neighbors = list(map(attrgetter("sourceItem"),
-                             self.node_input_links(node_item)))
+        neighbors = list(
+            map(attrgetter("sourceItem"), self.node_input_links(node_item))
+        )
 
-        neighbors.extend(map(attrgetter("sinkItem"),
-                             self.node_output_links(node_item)))
+        neighbors.extend(map(attrgetter("sinkItem"), self.node_output_links(node_item)))
         return neighbors
 
     def on_widget_state_change(self, widget, state):
@@ -729,7 +714,7 @@ class CanvasScene(QGraphicsScene):
     def on_link_state_change(self, link, state):
         pass
 
-    def on_scheme_change(self, ):
+    def on_scheme_change(self,):
         pass
 
     def _on_position_change(self, item):
@@ -767,8 +752,7 @@ class CanvasScene(QGraphicsScene):
 
         if buttons:
             items = itertools.dropwhile(
-                lambda item: not item.acceptedMouseButtons() & buttons,
-                items
+                lambda item: not item.acceptedMouseButtons() & buttons, items
             )
             items = list(items)[:1]
 
@@ -789,12 +773,20 @@ class CanvasScene(QGraphicsScene):
             return list(map(toGraphicsObjectIfPossible, items))
 
         def selectedItems(self, *args, **kwargs):
-            return list(map(toGraphicsObjectIfPossible,
-                       QGraphicsScene.selectedItems(self, *args, **kwargs)))
+            return list(
+                map(
+                    toGraphicsObjectIfPossible,
+                    QGraphicsScene.selectedItems(self, *args, **kwargs),
+                )
+            )
 
         def collidingItems(self, *args, **kwargs):
-            return list(map(toGraphicsObjectIfPossible,
-                       QGraphicsScene.collidingItems(self, *args, **kwargs)))
+            return list(
+                map(
+                    toGraphicsObjectIfPossible,
+                    QGraphicsScene.collidingItems(self, *args, **kwargs),
+                )
+            )
 
         def focusItem(self, *args, **kwargs):
             item = QGraphicsScene.focusItem(self, *args, **kwargs)
@@ -805,8 +797,10 @@ class CanvasScene(QGraphicsScene):
             return toGraphicsObjectIfPossible(item)
 
     def mousePressEvent(self, event):
-        if self.user_interaction_handler and \
-                self.user_interaction_handler.mousePressEvent(event):
+        if (
+            self.user_interaction_handler
+            and self.user_interaction_handler.mousePressEvent(event)
+        ):
             return
 
         # Right (context) click on the node item. If the widget is not
@@ -814,8 +808,11 @@ class CanvasScene(QGraphicsScene):
         # Else simply return and let customContextMenuRequested signal
         # handle it
         shape_item = self.item_at(event.scenePos(), items.NodeItem)
-        if shape_item and event.button() == Qt.RightButton and \
-                shape_item.flags() & QGraphicsItem.ItemIsSelectable:
+        if (
+            shape_item
+            and event.button() == Qt.RightButton
+            and shape_item.flags() & QGraphicsItem.ItemIsSelectable
+        ):
             if not shape_item.isSelected():
                 self.clearSelection()
                 shape_item.setSelected(True)
@@ -823,46 +820,60 @@ class CanvasScene(QGraphicsScene):
         return QGraphicsScene.mousePressEvent(self, event)
 
     def mouseMoveEvent(self, event):
-        if self.user_interaction_handler and \
-                self.user_interaction_handler.mouseMoveEvent(event):
+        if (
+            self.user_interaction_handler
+            and self.user_interaction_handler.mouseMoveEvent(event)
+        ):
             return
 
         return QGraphicsScene.mouseMoveEvent(self, event)
 
     def mouseReleaseEvent(self, event):
-        if self.user_interaction_handler and \
-                self.user_interaction_handler.mouseReleaseEvent(event):
+        if (
+            self.user_interaction_handler
+            and self.user_interaction_handler.mouseReleaseEvent(event)
+        ):
             return
         return QGraphicsScene.mouseReleaseEvent(self, event)
 
     def mouseDoubleClickEvent(self, event):
-        if self.user_interaction_handler and \
-                self.user_interaction_handler.mouseDoubleClickEvent(event):
+        if (
+            self.user_interaction_handler
+            and self.user_interaction_handler.mouseDoubleClickEvent(event)
+        ):
             return
 
         return QGraphicsScene.mouseDoubleClickEvent(self, event)
 
     def keyPressEvent(self, event):
-        if self.user_interaction_handler and \
-                self.user_interaction_handler.keyPressEvent(event):
+        if (
+            self.user_interaction_handler
+            and self.user_interaction_handler.keyPressEvent(event)
+        ):
             return
         return QGraphicsScene.keyPressEvent(self, event)
 
     def keyReleaseEvent(self, event):
-        if self.user_interaction_handler and \
-                self.user_interaction_handler.keyReleaseEvent(event):
+        if (
+            self.user_interaction_handler
+            and self.user_interaction_handler.keyReleaseEvent(event)
+        ):
             return
         return QGraphicsScene.keyReleaseEvent(self, event)
 
     def contextMenuEvent(self, event):
-        if self.user_interaction_handler and \
-                self.user_interaction_handler.contextMenuEvent(event):
+        if (
+            self.user_interaction_handler
+            and self.user_interaction_handler.contextMenuEvent(event)
+        ):
             return
         super().contextMenuEvent(event)
 
     def set_user_interaction_handler(self, handler):
-        if self.user_interaction_handler and \
-                not self.user_interaction_handler.isFinished():
+        if (
+            self.user_interaction_handler
+            and not self.user_interaction_handler.isFinished()
+        ):
             self.user_interaction_handler.cancel()
 
         log.info("Setting interaction '%s' to '%s'" % (handler, self))
@@ -872,8 +883,7 @@ class CanvasScene(QGraphicsScene):
             handler.start()
 
     def __str__(self):
-        return "%s(objectName=%r, ...)" % \
-                (type(self).__name__, str(self.objectName()))
+        return "%s(objectName=%r, ...)" % (type(self).__name__, str(self.objectName()))
 
 
 def font_from_dict(font_dict, font=None):
@@ -891,8 +901,10 @@ def font_from_dict(font_dict, font=None):
     return font
 
 
-if QT_VERSION >= 0x50900 and \
-      QSvgGenerator().metric(QSvgGenerator.PdmDevicePixelRatioScaled) == 1:
+if (
+    QT_VERSION >= 0x50900
+    and QSvgGenerator().metric(QSvgGenerator.PdmDevicePixelRatioScaled) == 1
+):
     # QTBUG-63159
     class QSvgGenerator(QSvgGenerator):
         def metric(self, metric):

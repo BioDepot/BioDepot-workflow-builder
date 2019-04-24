@@ -1,11 +1,26 @@
-from PyQt5.QtGui import (
-    QBrush, QFont, QSyntaxHighlighter, QTextCharFormat
-)
+from PyQt5.QtGui import QBrush, QFont, QSyntaxHighlighter, QTextCharFormat
 from PyQt5.QtCore import Qt, QRegExp
 
-keyword_list = ['ADD', 'COPY', 'RUN', 'FROM', 'CMD', 'ENTRYPOINT',
-                'VOLUME', 'LABEL', 'MAINTAINER', 'EXPOSE', 'ENV',
-                'USER', 'WORKDIR', 'ARG', 'STOPSIGNAL', 'HEALTHCHECK', 'SHELL']
+keyword_list = [
+    "ADD",
+    "COPY",
+    "RUN",
+    "FROM",
+    "CMD",
+    "ENTRYPOINT",
+    "VOLUME",
+    "LABEL",
+    "MAINTAINER",
+    "EXPOSE",
+    "ENV",
+    "USER",
+    "WORKDIR",
+    "ARG",
+    "STOPSIGNAL",
+    "HEALTHCHECK",
+    "SHELL",
+]
+
 
 class DockerSyntaxHighlighter(QSyntaxHighlighter):
     def __init__(self, parent=None):
@@ -17,13 +32,14 @@ class DockerSyntaxHighlighter(QSyntaxHighlighter):
 
         self.keywords = list(keyword_list)
 
-        self.rules = [(QRegExp(r"\b%s\b" % kwd), self.keywordFormat)
-                      for kwd in self.keywords] + \
-                     [(QRegExp(r"'.*'"), self.stringFormat),
-                      (QRegExp(r'".*"'), self.stringFormat),
-                      (QRegExp(r"#.*"), self.commentFormat),
-                      (QRegExp(r"@[A-Za-z_]+[A-Za-z0-9_]+"),
-                       self.decoratorFormat)]
+        self.rules = [
+            (QRegExp(r"\b%s\b" % kwd), self.keywordFormat) for kwd in self.keywords
+        ] + [
+            (QRegExp(r"'.*'"), self.stringFormat),
+            (QRegExp(r'".*"'), self.stringFormat),
+            (QRegExp(r"#.*"), self.commentFormat),
+            (QRegExp(r"@[A-Za-z_]+[A-Za-z0-9_]+"), self.decoratorFormat),
+        ]
 
         self.multilineStart = QRegExp(r"(''')|" + r'(""")')
         self.multilineEnd = QRegExp(r"(''')|" + r'(""")')
@@ -58,7 +74,7 @@ class DockerSyntaxHighlighter(QSyntaxHighlighter):
             else:
                 commentLen = endIndex - startIndex + 3
             self.setFormat(startIndex, commentLen, self.stringFormat)
-            startIndex, skip = (start.indexIn(text,startIndex + commentLen + 3), 3)
+            startIndex, skip = (start.indexIn(text, startIndex + commentLen + 3), 3)
 
     def _text_format(self, foreground=Qt.black, weight=QFont.Normal):
         fmt = QTextCharFormat()

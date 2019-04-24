@@ -10,7 +10,7 @@ A dock widget that can be a collapsed/expanded.
 import logging
 
 from AnyQt.QtWidgets import QDockWidget, QAbstractButton, QSizePolicy, QStyle
-from AnyQt.QtGui import  QIcon, QTransform
+from AnyQt.QtGui import QIcon, QTransform
 from AnyQt.QtCore import Qt, QEvent
 from AnyQt.QtCore import pyqtProperty as Property, pyqtSignal as Signal
 
@@ -45,8 +45,7 @@ class CollapsibleDockWidget(QDockWidget):
 
         self.__trueMinimumWidth = -1
 
-        self.setFeatures(QDockWidget.DockWidgetClosable | \
-                         QDockWidget.DockWidgetMovable)
+        self.setFeatures(QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetMovable)
         self.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
 
         self.featuresChanged.connect(self.__onFeaturesChanged)
@@ -54,9 +53,7 @@ class CollapsibleDockWidget(QDockWidget):
 
         # Use the toolbar horizontal extension button icon as the default
         # for the expand/collapse button
-        pm = self.style().standardPixmap(
-            QStyle.SP_ToolBarHorizontalExtensionButton
-        )
+        pm = self.style().standardPixmap(QStyle.SP_ToolBarHorizontalExtensionButton)
 
         # Rotate the icon
         transform = QTransform()
@@ -67,16 +64,14 @@ class CollapsibleDockWidget(QDockWidget):
         self.__iconRight = QIcon(pm)
         self.__iconLeft = QIcon(pm_rev)
 
-        close = self.findChild(QAbstractButton,
-                               name="qt_dockwidget_closebutton")
+        close = self.findChild(QAbstractButton, name="qt_dockwidget_closebutton")
 
         close.installEventFilter(self)
         self.__closeButton = close
 
         self.__stack = AnimatedStackedWidget()
 
-        self.__stack.setSizePolicy(QSizePolicy.Fixed,
-                                   QSizePolicy.Expanding)
+        self.__stack.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         self.__stack.transitionStarted.connect(self.__onTransitionStarted)
         self.__stack.transitionFinished.connect(self.__onTransitionFinished)
@@ -113,9 +108,9 @@ class CollapsibleDockWidget(QDockWidget):
 
     def setWidget(self, w):
         raise NotImplementedError(
-                "Please use the 'setExpandedWidget'/'setCollapsedWidget' "
-                "methods to set the contents of the dock widget."
-              )
+            "Please use the 'setExpandedWidget'/'setCollapsedWidget' "
+            "methods to set the contents of the dock widget."
+        )
 
     def setExpandedWidget(self, widget):
         """
@@ -206,8 +201,10 @@ class CollapsibleDockWidget(QDockWidget):
             if etype == QEvent.MouseButtonPress:
                 self.setExpanded(not self.__expanded)
                 return True
-            elif etype == QEvent.MouseButtonDblClick or \
-                    etype == QEvent.MouseButtonRelease:
+            elif (
+                etype == QEvent.MouseButtonDblClick
+                or etype == QEvent.MouseButtonRelease
+            ):
                 return True
             # TODO: which other events can trigger the button (is the button
             # focusable).
@@ -236,8 +233,7 @@ class CollapsibleDockWidget(QDockWidget):
         log.debug("Dock transition started.")
 
     def __onTransitionFinished(self):
-        log.debug("Dock transition finished (new width %i)",
-                  self.size().width())
+        log.debug("Dock transition finished (new width %i)", self.size().width())
 
     def __fixMinimumWidth(self):
         # A workaround for forcing the QDockWidget layout to disregard the
@@ -251,16 +247,19 @@ class CollapsibleDockWidget(QDockWidget):
 
             if width < self.minimumSizeHint().width():
                 if not self.__hasFixedWidth():
-                    log.debug("Overriding default minimum size "
-                              "(setFixedWidth(%i))", width)
+                    log.debug(
+                        "Overriding default minimum size " "(setFixedWidth(%i))", width
+                    )
                     self.__trueMinimumWidth = self.minimumSizeHint().width()
                 self.setFixedWidth(width)
             else:
                 if self.__hasFixedWidth():
                     if width >= self.__trueMinimumWidth:
                         # Unset the fixed size.
-                        log.debug("Restoring default minimum size "
-                                  "(setFixedWidth(%i))", QWIDGETSIZE_MAX)
+                        log.debug(
+                            "Restoring default minimum size " "(setFixedWidth(%i))",
+                            QWIDGETSIZE_MAX,
+                        )
                         self.__trueMinimumWidth = -1
                         self.setFixedWidth(QWIDGETSIZE_MAX)
                         self.updateGeometry()

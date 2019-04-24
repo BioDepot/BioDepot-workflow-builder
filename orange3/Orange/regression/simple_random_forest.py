@@ -3,7 +3,7 @@ import numpy as np
 from Orange.regression import Learner
 from Orange.classification.simple_random_forest import SimpleRandomForestModel as SRFM
 
-__all__ = ['SimpleRandomForestLearner']
+__all__ = ["SimpleRandomForestLearner"]
 
 
 class SimpleRandomForestLearner(Learner):
@@ -41,10 +41,17 @@ class SimpleRandomForestLearner(Learner):
         Random seed.
     """
 
-    name = 'simple rf reg'
+    name = "simple rf reg"
 
-    def __init__(self, n_estimators=10, min_instances=2, max_depth=1024,
-                 max_majority=1.0, skip_prob='sqrt', seed=42):
+    def __init__(
+        self,
+        n_estimators=10,
+        min_instances=2,
+        max_depth=1024,
+        max_majority=1.0,
+        skip_prob="sqrt",
+        seed=42,
+    ):
         super().__init__()
         self.n_estimators = n_estimators
         self.skip_prob = skip_prob

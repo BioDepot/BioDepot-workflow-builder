@@ -4,28 +4,34 @@ A LineEdit class with a button on left/right side.
 from collections import namedtuple
 
 from AnyQt.QtWidgets import (
-    QLineEdit, QToolButton, QStyleOptionToolButton, QStylePainter,
-    QStyle, QAction
+    QLineEdit,
+    QToolButton,
+    QStyleOptionToolButton,
+    QStylePainter,
+    QStyle,
+    QAction,
 )
 from AnyQt.QtGui import QPalette, QFontMetrics
 from AnyQt.QtCore import Qt, QSize, QRect, QT_VERSION
 from AnyQt.QtCore import pyqtSignal as Signal, pyqtProperty as Property
 
 
-_ActionSlot = \
-    namedtuple(
-        "_AcitonSlot",
-        ["position",  # Left/Right position
-         "action",    # QAction
-         "button",    # LineEditButton instance
-         "autoHide"]  # Auto hide when line edit is empty.
-        )
+_ActionSlot = namedtuple(
+    "_AcitonSlot",
+    [
+        "position",  # Left/Right position
+        "action",  # QAction
+        "button",  # LineEditButton instance
+        "autoHide",
+    ],  # Auto hide when line edit is empty.
+)
 
 
 class LineEditButton(QToolButton):
     """
     A button in the :class:`LineEdit`.
     """
+
     def __init__(self, parent=None, flat=True, **kwargs):
         QToolButton.__init__(self, parent, **kwargs)
 
@@ -39,8 +45,7 @@ class LineEditButton(QToolButton):
     def flat(self):
         return self.__flat
 
-    flat_ = Property(bool, fget=flat, fset=setFlat,
-                     designable=True)
+    flat_ = Property(bool, fget=flat, fset=setFlat, designable=True)
 
     def paintEvent(self, event):
         if self.__flat:
@@ -58,6 +63,7 @@ class LineEdit(QLineEdit):
     the left/right of the edited text
 
     """
+
     #: Position flags
     LeftPosition, RightPosition = 1, 2
 
@@ -173,8 +179,7 @@ class LineEdit(QLineEdit):
 
         def paintEvent(self, event):
             QLineEdit.paintEvent(self, event)
-            if not self.text() and self.placeholderText() and \
-                    not self.hasFocus():
+            if not self.text() and self.placeholderText() and not self.hasFocus():
                 p = QStylePainter(self)
                 font = self.font()
                 metrics = QFontMetrics(font)
@@ -184,9 +189,9 @@ class LineEdit(QLineEdit):
                 left, top, right, bottom = self.getTextMargins()
                 contents = self.contentsRect()
                 contents = contents.adjusted(left, top, -right, -bottom)
-                text = metrics.elidedText(self.placeholderText(),
-                                          Qt.ElideMiddle,
-                                          contents.width())
+                text = metrics.elidedText(
+                    self.placeholderText(), Qt.ElideMiddle, contents.width()
+                )
                 p.drawText(contents, Qt.AlignLeft | Qt.AlignVCenter, text)
 
     def __layoutActions(self):

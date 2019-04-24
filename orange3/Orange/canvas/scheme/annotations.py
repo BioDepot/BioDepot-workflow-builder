@@ -14,6 +14,7 @@ class BaseSchemeAnnotation(QObject):
     """
     Base class for scheme annotations.
     """
+
     # Signal emitted when the geometry of the annotation changes
     geometry_changed = Signal()
 
@@ -25,8 +26,7 @@ class SchemeArrowAnnotation(BaseSchemeAnnotation):
 
     color_changed = Signal(str)
 
-    def __init__(self, start_pos, end_pos, color="red", anchor=None,
-                 parent=None):
+    def __init__(self, start_pos, end_pos, color="red", anchor=None, parent=None):
         BaseSchemeAnnotation.__init__(self, parent)
         self.__start_pos = start_pos
         self.__end_pos = end_pos
@@ -111,8 +111,15 @@ class SchemeTextAnnotation(BaseSchemeAnnotation):
     # Signal emitted when the annotation text font changes.
     font_changed = Signal(dict)
 
-    def __init__(self, rect, text="", content_type="text/plain", font=None,
-                 anchor=None, parent=None):
+    def __init__(
+        self,
+        rect,
+        text="",
+        content_type="text/plain",
+        font=None,
+        anchor=None,
+        parent=None,
+    ):
         BaseSchemeAnnotation.__init__(self, parent)
         self.__rect = rect
         self.__content = text

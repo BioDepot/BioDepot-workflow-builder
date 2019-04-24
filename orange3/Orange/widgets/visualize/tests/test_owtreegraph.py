@@ -22,9 +22,14 @@ class TestOWTreeGraph(WidgetTest, WidgetOutputsTestMixin):
         cls.signal_data = cls.model
 
         # Load a dataset that contains two variables with the same entropy
-        data_same_entropy = Table(path.join(
-            path.dirname(path.dirname(path.dirname(__file__))), "tests",
-            "datasets", "same_entropy.tab"))
+        data_same_entropy = Table(
+            path.join(
+                path.dirname(path.dirname(path.dirname(__file__))),
+                "tests",
+                "datasets",
+                "same_entropy.tab",
+            )
+        )
         cls.data_same_entropy = tree(data_same_entropy)
         cls.data_same_entropy.instances = data_same_entropy
 
@@ -70,7 +75,7 @@ class TestOWTreeGraph(WidgetTest, WidgetOutputsTestMixin):
             self.assertTrue(
                 _check_all_same(node_row),
                 "The tree was not drawn identically in the %d times it was "
-                "sent to widget after receiving the iris dataset." % n_tries
+                "sent to widget after receiving the iris dataset." % n_tries,
             )
 
         # Make sure trees are deterministic with data where some variables have
@@ -84,5 +89,5 @@ class TestOWTreeGraph(WidgetTest, WidgetOutputsTestMixin):
                 _check_all_same(node_row),
                 "The tree was not drawn identically in the %d times it was "
                 "sent to widget after receiving a dataset with variables with "
-                "same entropy." % n_tries
+                "same entropy." % n_tries,
             )

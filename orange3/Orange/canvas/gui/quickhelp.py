@@ -20,8 +20,7 @@ class QuickHelp(QTextBrowser):
         self.__text = ""
         self.__permanentText = ""
 
-        self.__timer = QTimer(self, timeout=self.__on_timeout,
-                              singleShot=True)
+        self.__timer = QTimer(self, timeout=self.__on_timeout, singleShot=True)
         self.anchorClicked.connect(self.__on_anchorClicked)
 
     def showHelp(self, text, timeout=0):
@@ -114,11 +113,14 @@ class StatusTipPromoter(QObject):
     property of the object.
 
     """
+
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.StatusTip and \
-                not isinstance(event, QuickHelpTipEvent) and \
-                hasattr(obj, "whatsThis") and \
-                isinstance(obj.whatsThis, Callable):
+        if (
+            event.type() == QEvent.StatusTip
+            and not isinstance(event, QuickHelpTipEvent)
+            and hasattr(obj, "whatsThis")
+            and isinstance(obj.whatsThis, Callable)
+        ):
             tip = event.tip()
 
             try:

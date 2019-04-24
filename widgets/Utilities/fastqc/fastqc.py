@@ -11,41 +11,45 @@ from DockerClient import DockerClient
 from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
+
 class OWfastqc(OWBwBWidget):
     name = "fastqc"
     description = "fastqc"
     priority = 5
-    icon = getIconName(__file__,"fastqc_icon_100.png")
+    icon = getIconName(__file__, "fastqc_icon_100.png")
     want_main_area = False
     docker_image_name = "biodepot/fastqc"
     docker_image_tag = "latest"
-    inputs = [("inputDir",str,"handleInputsinputDir")]
-    outputs = [("outputDir",str)]
-    pset=functools.partial(settings.Setting,schema_only=True)
-    runMode=pset(0)
-    exportGraphics=pset(False)
-    runTriggers=pset([])
-    triggerReady=pset({})
-    inputConnectionsStore=pset({})
-    optionsChecked=pset({})
-    inputFiles=pset([])
-    outputDir=pset(None)
-    inputDir=pset(None)
+    inputs = [("inputDir", str, "handleInputsinputDir")]
+    outputs = [("outputDir", str)]
+    pset = functools.partial(settings.Setting, schema_only=True)
+    runMode = pset(0)
+    exportGraphics = pset(False)
+    runTriggers = pset([])
+    triggerReady = pset({})
+    inputConnectionsStore = pset({})
+    optionsChecked = pset({})
+    inputFiles = pset([])
+    outputDir = pset(None)
+    inputDir = pset(None)
+
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open(getJsonName(__file__,"fastqc")) as f:
-            self.data=jsonpickle.decode(f.read())
+        with open(getJsonName(__file__, "fastqc")) as f:
+            self.data = jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
+
     def handleInputsinputDir(self, value, *args):
-        if args and len(args) > 0: 
+        if args and len(args) > 0:
             self.handleInputs("inputDir", value, args[0][0], test=args[0][3])
         else:
             self.handleInputs("inputFile", value, None)
+
     def handleOutputs(self):
-        outputValue=None
-        if hasattr(self,"outputDir"):
-            outputValue=getattr(self,"outputDir")
+        outputValue = None
+        if hasattr(self, "outputDir"):
+            outputValue = getattr(self, "outputDir")
         self.send("outputDir", outputValue)

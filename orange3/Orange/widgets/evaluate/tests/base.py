@@ -3,7 +3,6 @@ from Orange.data import Table
 
 
 class EvaluateTest:
-
     def test_many_evaluation_results(self):
         """
         Now works with more than 9 evaluation results.
@@ -21,7 +20,7 @@ class EvaluateTest:
             classification.SGDClassificationLearner(),
             classification.RandomForestLearner(),
             classification.NaiveBayesLearner(),
-            classification.SGDClassificationLearner()
+            classification.SGDClassificationLearner(),
         ]
         res = evaluation.CrossValidation(data, learners, k=2, store_data=True)
         self.send_signal("Evaluation Results", res)

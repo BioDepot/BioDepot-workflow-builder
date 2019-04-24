@@ -7,8 +7,13 @@ import numpy as np
 import scipy.sparse as sp
 
 from Orange.data import Table, Domain, DiscreteVariable, ContinuousVariable
-from Orange.classification.tree import \
-    TreeModel, Node, DiscreteNode, MappedDiscreteNode, NumericNode
+from Orange.classification.tree import (
+    TreeModel,
+    Node,
+    DiscreteNode,
+    MappedDiscreteNode,
+    NumericNode,
+)
 
 
 class TestTree:
@@ -36,11 +41,13 @@ class TestTree:
         self.assertTrue(np.all(table.Y.flatten() == pred))
 
     def test_min_samples_split(self):
-        clf = self.TreeLearner(
-            min_samples_split=10, **self.no_pruning_args)(self.data)
+        clf = self.TreeLearner(min_samples_split=10, **self.no_pruning_args)(self.data)
         self.assertTrue(
-            all(not node.children or len(node.subset) >= 10
-                for node in self.all_nodes(clf.root)))
+            all(
+                not node.children or len(node.subset) >= 10
+                for node in self.all_nodes(clf.root)
+            )
+        )
 
     def test_min_samples_leaf(self):
         # This test is slow, but it has a good tendency to fail at extreme
@@ -50,13 +57,17 @@ class TestTree:
             args = dict(min_samples_split=2, min_samples_leaf=lim)
             args.update(self.no_pruning_args)
             clf = self.TreeLearner(binarize=False, **args)(self.data_mixed)
-            self.assertTrue(all(len(node.subset) >= lim
-                                for node in self.all_nodes(clf.root)
-                                if node))
+            self.assertTrue(
+                all(
+                    len(node.subset) >= lim for node in self.all_nodes(clf.root) if node
+                )
+            )
             clf = self.TreeLearner(binarize=True, **args)(self.data_mixed)
-            self.assertTrue(all(len(node.subset) >= lim
-                                for node in self.all_nodes(clf.root)
-                                if node))
+            self.assertTrue(
+                all(
+                    len(node.subset) >= lim for node in self.all_nodes(clf.root) if node
+                )
+            )
 
     def test_max_depth(self):
         for i in (1, 2, 5):
@@ -69,7 +80,8 @@ class TestTree:
 
         domain = Domain(
             [DiscreteVariable("x", ("v{}".format(i) for i in range(lim + 1)))],
-            self.class_var)
+            self.class_var,
+        )
         data = Table(domain, np.zeros((100, 2)))
 
         clf.binarize = False
@@ -79,7 +91,8 @@ class TestTree:
 
         domain = Domain(
             [DiscreteVariable("x", ("v{}".format(i) for i in range(lim)))],
-            self.class_var)
+            self.class_var,
+        )
         data = Table(domain, np.zeros((100, 2)))
         clf.binarize = True
         clf(data)
@@ -89,24 +102,36 @@ class TestTree:
     def test_find_mapping(self):
         clf = self.TreeLearner(binarize=True)
 
-        domain = Domain([DiscreteVariable("x", values="abcdefgh"),
-                         ContinuousVariable("r1"),
-                         DiscreteVariable("r2", values="abcd")],
-                        self.class_var)
+        domain = Domain(
+            [
+                DiscreteVariable("x", values="abcdefgh"),
+                ContinuousVariable("r1"),
+                DiscreteVariable("r2", values="abcd"),
+            ],
+            self.class_var,
+        )
         col_x = np.arange(80) % 8
-        for mapping in (np.array([0, 1, 0, 1, 0, 1, 0, 1]),
-                        np.array([0, 0, 0, 0, 0, 1, 1, 0]),
-                        np.array([0, 0, 1, 0, 0, 0, 0, 0]),
-                        np.array([1, 0, 0, 0, 0, 0, 0, 0]),
-                        np.array([0, 0, 0, 0, 0, 0, 0, 1]),
-                        np.array([1, 1, 1, 1, 1, 1, 1, 0]),
-                        np.array([0, 1, 1, 1, 1, 1, 1, 1]),
-                        np.array([1, 1, 1, 1, 0, 1, 1, 1])):
-            data = Table(domain,
-                         np.vstack((col_x,
-                                    np.random.random(80),
-                                    np.random.randint(0, 3, 80).astype(float),
-                                    mapping[col_x],)).T)
+        for mapping in (
+            np.array([0, 1, 0, 1, 0, 1, 0, 1]),
+            np.array([0, 0, 0, 0, 0, 1, 1, 0]),
+            np.array([0, 0, 1, 0, 0, 0, 0, 0]),
+            np.array([1, 0, 0, 0, 0, 0, 0, 0]),
+            np.array([0, 0, 0, 0, 0, 0, 0, 1]),
+            np.array([1, 1, 1, 1, 1, 1, 1, 0]),
+            np.array([0, 1, 1, 1, 1, 1, 1, 1]),
+            np.array([1, 1, 1, 1, 0, 1, 1, 1]),
+        ):
+            data = Table(
+                domain,
+                np.vstack(
+                    (
+                        col_x,
+                        np.random.random(80),
+                        np.random.randint(0, 3, 80).astype(float),
+                        mapping[col_x],
+                    )
+                ).T,
+            )
             root = clf(data).root
             self.assertIsInstance(root, MappedDiscreteNode)
             self.assertEqual(root.attr_idx, 0)
@@ -120,18 +145,28 @@ class TestTree:
     def test_find_threshold(self):
         clf = self.TreeLearner()
 
-        domain = Domain([ContinuousVariable("x"),
-                         DiscreteVariable("r1", values="abcd"),
-                         ContinuousVariable("r2")],
-                        self.class_var)
+        domain = Domain(
+            [
+                ContinuousVariable("x"),
+                DiscreteVariable("r1", values="abcd"),
+                ContinuousVariable("r2"),
+            ],
+            self.class_var,
+        )
 
         col_x = np.arange(80)
         np.random.shuffle(col_x)
-        data = Table(domain,
-                     np.vstack((col_x,
-                                np.random.randint(0, 3, 80).astype(float),
-                                np.random.random(80),
-                                col_x > 30,)).T)
+        data = Table(
+            domain,
+            np.vstack(
+                (
+                    col_x,
+                    np.random.randint(0, 3, 80).astype(float),
+                    np.random.random(80),
+                    col_x > 30,
+                )
+            ).T,
+        )
         root = clf(data).root
         self.assertIsInstance(root, NumericNode)
         self.assertEqual(root.attr_idx, 0)
@@ -143,24 +178,33 @@ class TestTree:
     def test_no_data(self):
         clf = self.TreeLearner()
 
-        domain = Domain([DiscreteVariable("r1", values="ab"),
-                         DiscreteVariable("r2", values="abcd"),
-                         ContinuousVariable("r3")],
-                        self.class_var)
+        domain = Domain(
+            [
+                DiscreteVariable("r1", values="ab"),
+                DiscreteVariable("r2", values="abcd"),
+                ContinuousVariable("r3"),
+            ],
+            self.class_var,
+        )
 
         data = Table(domain)
         tree = clf(data)
         self.assertIsInstance(tree.root, Node)
-        np.testing.assert_almost_equal(tree.predict(np.array([[0., 0., 0.]])),
-                                       self.blind_prediction)
+        np.testing.assert_almost_equal(
+            tree.predict(np.array([[0.0, 0.0, 0.0]])), self.blind_prediction
+        )
 
     def test_all_values_missing(self):
         clf = self.TreeLearner()
 
-        domain = Domain([DiscreteVariable("r1", values="ab"),
-                         DiscreteVariable("r2", values="abcd"),
-                         ContinuousVariable("r3")],
-                        self.class_var)
+        domain = Domain(
+            [
+                DiscreteVariable("r1", values="ab"),
+                DiscreteVariable("r2", values="abcd"),
+                ContinuousVariable("r3"),
+            ],
+            self.class_var,
+        )
         a = np.empty((10, 4))
         a[:, :3] = np.nan
         a[:, 3] = np.arange(10) % 2
@@ -169,24 +213,28 @@ class TestTree:
             tree = clf(data)
             self.assertIsInstance(tree.root, Node)
             np.testing.assert_almost_equal(
-                tree.predict(np.array([[0., 0., 0.]])),
-                self.prediction_on_0_1)
+                tree.predict(np.array([[0.0, 0.0, 0.0]])), self.prediction_on_0_1
+            )
 
     def test_single_valued_attr(self):
         clf = self.TreeLearner()
-        domain = Domain([DiscreteVariable("r1", values="a")],
-                        self.class_var)
+        domain = Domain([DiscreteVariable("r1", values="a")], self.class_var)
         data = Table(domain, np.array([[0, 0], [0, 1]]))
         tree = clf(data)
         self.assertIsInstance(tree.root, Node)
-        np.testing.assert_almost_equal(tree.predict(np.array([[0., 0., 0.]])),
-                                       self.prediction_on_0_1)
+        np.testing.assert_almost_equal(
+            tree.predict(np.array([[0.0, 0.0, 0.0]])), self.prediction_on_0_1
+        )
 
     def test_allow_null_nodes(self):
-        domain = Domain([DiscreteVariable("x", values="abc"),
-                         ContinuousVariable("r1"),
-                         DiscreteVariable("r2", values="ab")],
-                        self.class_var)
+        domain = Domain(
+            [
+                DiscreteVariable("x", values="abc"),
+                ContinuousVariable("r1"),
+                DiscreteVariable("r2", values="ab"),
+            ],
+            self.class_var,
+        )
         xy = np.array([[0, 0, 0, 0], [0, 1, 1, 0], [1, 0, 0, 1], [1, 1, 1, 1]])
         data = Table(domain, xy)
         clf = self.TreeLearner(binarize=False)
@@ -208,10 +256,10 @@ class TestClassifier(TestTree, unittest.TestCase):
         unittest.TestCase.setUpClass()
         TestTree.setUpClass()
 
-        cls.no_pruning_args = {'sufficient_majority': 1}
+        cls.no_pruning_args = {"sufficient_majority": 1}
 
-        cls.data = Table('iris')  # continuous attributes
-        cls.data_mixed = Table('heart_disease')  # mixed
+        cls.data = Table("iris")  # continuous attributes
+        cls.data_mixed = Table("heart_disease")  # mixed
         cls.class_var = DiscreteVariable("y", values="nyx")
         cls.blind_prediction = np.ones((1, 3)) / 3
         cls.prediction_on_0_1 = np.array([[0.5, 0.5, 0]])
@@ -225,11 +273,16 @@ class TestRegressor(TestTree, unittest.TestCase):
         unittest.TestCase.setUpClass()
         TestTree.setUpClass()
 
-        cls.data = Table('housing')
+        cls.data = Table("housing")
         imports = Table("imports-85")
-        new_domain = Domain([attr for attr in imports.domain.attributes
-                             if attr.is_continuous or len(attr.values) <= 16],
-                            imports.domain.class_var)
+        new_domain = Domain(
+            [
+                attr
+                for attr in imports.domain.attributes
+                if attr.is_continuous or len(attr.values) <= 16
+            ],
+            imports.domain.class_var,
+        )
         cls.data_mixed = Table(new_domain, imports)
 
         cls.class_var = ContinuousVariable("y")
@@ -276,11 +329,12 @@ class TestNodes(unittest.TestCase):
         self.assertTrue(np.isnan(node.descend([3, 4, float("nan"), 6])))
 
         mapping, branches = MappedDiscreteNode.branches_from_mapping(
-            np.array([2, 3, 1, 1, 0, 1, 4, 2]), int("1001", 2), 6)
+            np.array([2, 3, 1, 1, 0, 1, 4, 2]), int("1001", 2), 6
+        )
+        np.testing.assert_equal(mapping, np.array([1, 0, 0, 1, 0, 0], dtype=np.int16))
         np.testing.assert_equal(
-            mapping, np.array([1, 0, 0, 1, 0, 0], dtype=np.int16))
-        np.testing.assert_equal(
-            branches, np.array([0, 1, 0, 0, 1, 0, 0, 0], dtype=np.int16))
+            branches, np.array([0, 1, 0, 0, 1, 0, 0, 0], dtype=np.int16)
+        )
 
     def test_numeric_node(self):
         var = ContinuousVariable("y")
@@ -310,12 +364,11 @@ class TestTreeModel(unittest.TestCase):
         y = self.y = ContinuousVariable("y")
         self.domain = Domain([v1, v2, v3], y)
         self.data = Table(self.domain, np.arange(40).reshape(10, 4))
-        self.root = NumericNode(v1, 0, 13, np.array([0., 42]))
+        self.root = NumericNode(v1, 0, 13, np.array([0.0, 42]))
         self.root.subset = np.array([], dtype=np.int32)
         left = DiscreteNode(v2, 1, np.array([1, 42]))
         left.children = [Node(None, None, np.array([x, 42])) for x in [2, 3, 4]]
-        right = MappedDiscreteNode(v3, 2, np.array([1, 1, 0]),
-                                   np.array([5, 42]))
+        right = MappedDiscreteNode(v3, 2, np.array([1, 1, 0]), np.array([5, 42]))
         right.children = [Node(None, None, np.array([x, 42])) for x in [6, 7]]
         self.root.children = [left, right]
 
@@ -330,14 +383,17 @@ class TestTreeModel(unittest.TestCase):
 
         nan = float("nan")
         x = np.array(
-            [[nan, 0, 0],
-             [13, nan, 0],
-             [13, 0, 0],
-             [13, 1, 0],
-             [13, 2, 0],
-             [14, 2, nan],
-             [14, 2, 2],
-             [14, 2, 1]], dtype=float
+            [
+                [nan, 0, 0],
+                [13, nan, 0],
+                [13, 0, 0],
+                [13, 1, 0],
+                [13, 2, 0],
+                [14, 2, nan],
+                [14, 2, 2],
+                [14, 2, 1],
+            ],
+            dtype=float,
         )
         np.testing.assert_equal(model.get_values(x), expected_values)
         np.testing.assert_equal(model.get_values_in_python(x), expected_values)
@@ -350,17 +406,15 @@ class TestTreeModel(unittest.TestCase):
         y = DiscreteVariable("dy")
         domain = Domain([v1, v2, v3], y)
         data = Table(domain, np.zeros((10, 4)))
-        root = NumericNode(v1, 0, 13, np.array([0., 42]))
+        root = NumericNode(v1, 0, 13, np.array([0.0, 42]))
         left = DiscreteNode(v2, 1, np.array([1, 42]))
         left.children = [Node(None, None, np.array([x, 42])) for x in [2, 3, 4]]
-        right = MappedDiscreteNode(v3, 2, np.array([1, 1, 0]),
-                                   np.array([5, 42]))
+        right = MappedDiscreteNode(v3, 2, np.array([1, 1, 0]), np.array([5, 42]))
         right.children = [Node(None, None, np.array([x, 42])) for x in [6, 7]]
         root.children = [left, right]
 
         model = TreeModel(data, root)
-        normalized = \
-            expected_values / np.sum(expected_values, axis=1)[:, np.newaxis]
+        normalized = expected_values / np.sum(expected_values, axis=1)[:, np.newaxis]
         np.testing.assert_equal(model.predict(x), normalized)
 
     def test_null_nodes(self):
@@ -368,11 +422,11 @@ class TestTreeModel(unittest.TestCase):
         y = ContinuousVariable("ey")
         domain = Domain([a], y)
         data = Table(domain)
-        values = np.array([[42., 43], [44, 45]])
+        values = np.array([[42.0, 43], [44, 45]])
         root = DiscreteNode(a, 0, values[1])
         root.children = [Node(None, -1, values[0]), None]
         model = TreeModel(data, root)
-        x = np.array([[0.], [1]])
+        x = np.array([[0.0], [1]])
         np.testing.assert_equal(model.get_values(x), values)
         np.testing.assert_equal(model.get_values_in_python(x), values)
         np.testing.assert_equal(model.get_values_by_nodes(x), values)
@@ -394,14 +448,17 @@ class TestTreeModel(unittest.TestCase):
 
     def test_print(self):
         model = TreeModel(self.data, self.root)
-        self.assertEqual(model.print_tree(), """             [ 1 42] v1 ≤ 13.000
+        self.assertEqual(
+            model.print_tree(),
+            """             [ 1 42] v1 ≤ 13.000
              [ 2 42]     v2 a
              [ 3 42]     v2 b
              [ 4 42]     v2 c
              [ 5 42] v1 > 13.000
              [ 6 42]     v3 f
              [ 7 42]     v3 d or e
-""")
+""",
+        )
 
     def test_compile_and_run_cont_sparse(self):
         # pylint: disable=protected-access
@@ -412,38 +469,53 @@ class TestTreeModel(unittest.TestCase):
         self.assertEqual(model._thresholds.shape, (8,))
 
         nan = float("nan")
-        x = sp.csr_matrix(np.array(
-            [[nan, 0, 0],
-             [13, nan, 0],
-             [13, 0, 0],
-             [13, 1, 0],
-             [13, 2, 0],
-             [14, 2, nan],
-             [14, 2, 2],
-             [14, 2, 1]], dtype=float
-        ))
+        x = sp.csr_matrix(
+            np.array(
+                [
+                    [nan, 0, 0],
+                    [13, nan, 0],
+                    [13, 0, 0],
+                    [13, 1, 0],
+                    [13, 2, 0],
+                    [14, 2, nan],
+                    [14, 2, 2],
+                    [14, 2, 1],
+                ],
+                dtype=float,
+            )
+        )
         np.testing.assert_equal(model.get_values(x), expected_values)
 
-        x = sp.csc_matrix(np.array(
-            [[nan, 0, 0],
-             [13, nan, 0],
-             [13, 0, 0],
-             [13, 1, 0],
-             [13, 2, 0],
-             [14, 2, nan],
-             [14, 2, 2],
-             [14, 2, 1]], dtype=float
-        ))
+        x = sp.csc_matrix(
+            np.array(
+                [
+                    [nan, 0, 0],
+                    [13, nan, 0],
+                    [13, 0, 0],
+                    [13, 1, 0],
+                    [13, 2, 0],
+                    [14, 2, nan],
+                    [14, 2, 2],
+                    [14, 2, 1],
+                ],
+                dtype=float,
+            )
+        )
         np.testing.assert_equal(model.get_values(x), expected_values)
 
-        x = sp.lil_matrix(np.array(
-            [[nan, 0, 0],
-             [13, nan, 0],
-             [13, 0, 0],
-             [13, 1, 0],
-             [13, 2, 0],
-             [14, 2, nan],
-             [14, 2, 2],
-             [14, 2, 1]], dtype=float
-        ))
+        x = sp.lil_matrix(
+            np.array(
+                [
+                    [nan, 0, 0],
+                    [13, nan, 0],
+                    [13, 0, 0],
+                    [13, 1, 0],
+                    [13, 2, 0],
+                    [14, 2, nan],
+                    [14, 2, 2],
+                    [14, 2, 1],
+                ],
+                dtype=float,
+            )
+        )
         np.testing.assert_equal(model.get_values(x), expected_values)

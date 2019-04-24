@@ -10,7 +10,7 @@ from Orange.clustering.kmeans import KMeans
 class TestKMeans(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.iris = Orange.data.Table('iris')
+        cls.iris = Orange.data.Table("iris")
 
     def test_kmeans(self):
         kmeans = KMeans(n_clusters=2)
@@ -21,12 +21,14 @@ class TestKMeans(unittest.TestCase):
         assert len(set(p.ravel())) == 1
 
     def test_kmeans_parameters(self):
-        kmeans = KMeans(n_clusters=10,
-                        max_iter=10,
-                        random_state=42,
-                        tol=0.001,
-                        init='random',
-                        compute_silhouette_score=True)
+        kmeans = KMeans(
+            n_clusters=10,
+            max_iter=10,
+            random_state=42,
+            tol=0.001,
+            init="random",
+            compute_silhouette_score=True,
+        )
         c = kmeans(self.iris)
 
     def test_predict_single_instance(self):
@@ -46,4 +48,3 @@ class TestKMeans(unittest.TestCase):
         c = kmeans(self.iris)
         X = self.iris.X[::20]
         p = c(X)
-

@@ -20,7 +20,6 @@ def read_tab_file(filename):
 
 
 class TestTabReader(unittest.TestCase):
-
     def setUp(self):
         DiscreteVariable._clear_cache()
 
@@ -84,11 +83,11 @@ class TestTabReader(unittest.TestCase):
         f1, f2, c1, c2 = table.domain.variables
         self.assertIsInstance(f2, DiscreteVariable)
         self.assertEqual(f2.name, "Feature 2")
-        self.assertEqual(f2.attributes, {'a': 1, 'b': 2})
+        self.assertEqual(f2.attributes, {"a": 1, "b": 2})
         self.assertIn(c1, table.domain.class_vars)
         self.assertIsInstance(c1, DiscreteVariable)
         self.assertEqual(c1.name, "Class 1")
-        self.assertEqual(c1.attributes, {'x': 'a longer string'})
+        self.assertEqual(c1.attributes, {"x": "a longer string"})
         outf = io.StringIO()
         outf.close = lambda: None
         TabReader.write_file(outf, table)
@@ -100,11 +99,11 @@ class TestTabReader(unittest.TestCase):
         f1, f2, c1, c2 = table.domain.variables
         self.assertIsInstance(f2, DiscreteVariable)
         self.assertEqual(f2.name, "Feature 2")
-        self.assertEqual(f2.attributes, {'a': 1, 'b': 2})
+        self.assertEqual(f2.attributes, {"a": 1, "b": 2})
         self.assertIn(c1, table.domain.class_vars)
         self.assertIsInstance(c1, DiscreteVariable)
         self.assertEqual(c1.name, "Class 1")
-        self.assertEqual(c1.attributes, {'x': 'a longer string'})
+        self.assertEqual(c1.attributes, {"x": "a longer string"})
 
         path = "/path/to/somewhere"
         c1.attributes["path"] = path
@@ -128,7 +127,7 @@ class TestTabReader(unittest.TestCase):
 
         self.assertEqual(len(table), 2)
         self.assertEqual(len(table.domain), 3)
-        self.assertEqual(table.domain[0].name, 'data1')
+        self.assertEqual(table.domain[0].name, "data1")
 
     def test_read_data_no_header(self):
         samplefile = """\
@@ -141,19 +140,19 @@ class TestTabReader(unittest.TestCase):
         self.assertEqual(len(table), 2)
         self.assertEqual(len(table.domain), 3)
         self.assertTrue(table.domain[0].is_continuous)
-        self.assertEqual(table.domain[0].name, 'Feature 1')
+        self.assertEqual(table.domain[0].name, "Feature 1")
 
     def test_reuse_variables(self):
         file1 = io.StringIO("\n".join("xd dbac"))
         t1 = read_tab_file(file1)
 
-        self.assertSequenceEqual(t1.domain['x'].values, 'abcd')
+        self.assertSequenceEqual(t1.domain["x"].values, "abcd")
         np.testing.assert_almost_equal(t1.X.ravel(), [3, 1, 0, 2])
 
         file2 = io.StringIO("\n".join("xd hgacb"))
         t2 = read_tab_file(file2)
 
-        self.assertSequenceEqual(t2.domain['x'].values, 'abcdgh')
+        self.assertSequenceEqual(t2.domain["x"].values, "abcdgh")
         np.testing.assert_almost_equal(t2.X.ravel(), [5, 4, 0, 2, 1])
 
     def test_renaming(self):
@@ -169,27 +168,30 @@ class TestTabReader(unittest.TestCase):
             file.close()
             table = read_tab_file(filename)
             domain = table.domain
-            self.assertEqual([x.name for x in domain.attributes],
-                             ["a_1", "b_1", "a_2", "a_3", "c", "a_5"])
+            self.assertEqual(
+                [x.name for x in domain.attributes],
+                ["a_1", "b_1", "a_2", "a_3", "c", "a_5"],
+            )
             self.assertEqual([x.name for x in domain.class_vars], ["b_2", "a_4"])
             self.assertEqual([x.name for x in domain.metas], ["b_3"])
         finally:
             remove(filename)
 
-
     def test_dataset_with_weird_names_and_column_attributes(self):
-        data = Table(path.join(path.dirname(__file__), 'weird.tab'))
+        data = Table(path.join(path.dirname(__file__), "weird.tab"))
         self.assertEqual(len(data), 6)
         self.assertEqual(len(data.domain), 1)
         self.assertEqual(len(data.domain.metas), 1)
-        NAME = ['5534fab7fad58d5df50061f1', '5534fab8fad58d5de20061f8']
+        NAME = ["5534fab7fad58d5df50061f1", "5534fab8fad58d5de20061f8"]
         self.assertEqual(data.domain[0].name, str(NAME))
         ATTRIBUTES = dict(
             Timepoint=20,
             id=NAME,
-            Name=['Gene expressions (dd_AX4_on_Ka_20Hr_bio1_mapped.bam)',
-                  'Gene expressions (dd_AX4_on_Ka_20Hr_bio2_mapped.bam)'],
-            Replicate=['1', '2'],
+            Name=[
+                "Gene expressions (dd_AX4_on_Ka_20Hr_bio1_mapped.bam)",
+                "Gene expressions (dd_AX4_on_Ka_20Hr_bio2_mapped.bam)",
+            ],
+            Replicate=["1", "2"],
         )
         self.assertEqual(data.domain[0].attributes, ATTRIBUTES)
 
@@ -227,10 +229,10 @@ class TestTabReader(unittest.TestCase):
             shutil.rmtree(tempdir)
 
     def test_data_name(self):
-        table1 = Table('iris')
+        table1 = Table("iris")
         table2 = TabReader(table1.__file__).read()
-        self.assertEqual(table1.name, 'iris')
-        self.assertEqual(table2.name, 'iris')
+        self.assertEqual(table1.name, "iris")
+        self.assertEqual(table2.name, "iris")
 
     def test_metadata(self):
         tempdir = tempfile.mkdtemp()

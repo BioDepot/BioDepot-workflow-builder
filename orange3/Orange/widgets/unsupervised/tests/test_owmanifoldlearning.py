@@ -18,7 +18,8 @@ class TestOWManifoldLearning(WidgetTest):
 
     def setUp(self):
         self.widget = self.create_widget(
-            OWManifoldLearning, stored_settings={"auto_apply": False})  # type: OWManifoldLearning
+            OWManifoldLearning, stored_settings={"auto_apply": False}
+        )  # type: OWManifoldLearning
 
     def test_input_data(self):
         """Check widget's data"""
@@ -33,7 +34,9 @@ class TestOWManifoldLearning(WidgetTest):
         self.assertIsNone(self.get_output(self.widget.Outputs.transformed_data))
         self.send_signal(self.widget.Inputs.data, self.iris)
         self.widget.apply_button.button.click()
-        self.assertIsInstance(self.get_output(self.widget.Outputs.transformed_data), Table)
+        self.assertIsInstance(
+            self.get_output(self.widget.Outputs.transformed_data), Table
+        )
         self.send_signal(self.widget.Inputs.data, None)
         self.widget.apply_button.button.click()
         self.assertIsNone(self.get_output(self.widget.Outputs.transformed_data))
@@ -41,13 +44,17 @@ class TestOWManifoldLearning(WidgetTest):
     def test_n_components(self):
         """Check the output for various numbers of components"""
         self.send_signal(self.widget.Inputs.data, self.iris)
-        for i in range(self.widget.n_components_spin.minimum(),
-                       self.widget.n_components_spin.maximum()):
+        for i in range(
+            self.widget.n_components_spin.minimum(),
+            self.widget.n_components_spin.maximum(),
+        ):
             self.assertEqual(self.widget.data, self.iris)
             self.widget.n_components_spin.setValue(i)
             self.widget.n_components_spin.onEnter()
             self.widget.apply_button.button.click()
-            self._compare_tables(self.get_output(self.widget.Outputs.transformed_data), i)
+            self._compare_tables(
+                self.get_output(self.widget.Outputs.transformed_data), i
+            )
 
     def test_manifold_methods(self):
         """Check output for various manifold methods"""
@@ -57,7 +64,9 @@ class TestOWManifoldLearning(WidgetTest):
             self.assertEqual(self.widget.data, self.iris)
             self.widget.manifold_methods_combo.activated.emit(i)
             self.widget.apply_button.button.click()
-            self._compare_tables(self.get_output(self.widget.Outputs.transformed_data), n_comp)
+            self._compare_tables(
+                self.get_output(self.widget.Outputs.transformed_data), n_comp
+            )
 
     def _compare_tables(self, _output, n_components):
         """Helper function for table comparison"""
@@ -78,14 +87,17 @@ class TestOWManifoldLearning(WidgetTest):
         # GH 2158
         self.widget.manifold_method_index = 0
         self.assertEqual(
-            'TSNE',
-            self.widget.MANIFOLD_METHODS[self.widget.manifold_method_index].__name__)
+            "TSNE",
+            self.widget.MANIFOLD_METHODS[self.widget.manifold_method_index].__name__,
+        )
         self.send_signal(self.widget.Inputs.data, data)
         self.widget.apply_button.button.click()
         self.assertFalse(self.widget.Error.sparse_methods.is_shown())
         self.assertFalse(self.widget.Error.sparse_tsne_distance.is_shown())
-        self.assertIsInstance(self.get_output(self.widget.Outputs.transformed_data), Table)
-        self.widget.params_widget.parameters['metric'] = 'chebyshev'
+        self.assertIsInstance(
+            self.get_output(self.widget.Outputs.transformed_data), Table
+        )
+        self.widget.params_widget.parameters["metric"] = "chebyshev"
         self.widget.apply_button.button.click()
         self.assertTrue(self.widget.Error.sparse_tsne_distance.is_shown())
 
@@ -97,11 +109,9 @@ class TestOWManifoldLearning(WidgetTest):
         table = Table(
             Domain(
                 [ContinuousVariable("a"), ContinuousVariable("b")],
-                class_vars=DiscreteVariable("c", values=["0", "1"])),
-            list(zip(
-                [1, 1, 1],
-                [0, 1, 2],
-                [0, 1, 1]))
+                class_vars=DiscreteVariable("c", values=["0", "1"]),
+            ),
+            list(zip([1, 1, 1], [0, 1, 2], [0, 1, 1])),
         )
         self.send_signal(self.widget.Inputs.data, table)
         self.widget.manifold_methods_combo.activated.emit(0)  # t-SNE

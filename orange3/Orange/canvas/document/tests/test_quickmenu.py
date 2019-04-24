@@ -1,9 +1,7 @@
-
 from AnyQt.QtWidgets import QAction
 from AnyQt.QtCore import QPoint, QStringListModel
 
-from ..quickmenu import QuickMenu, SuggestMenuPage, FlattenedTreeItemModel, \
-                        MenuPage
+from ..quickmenu import QuickMenu, SuggestMenuPage, FlattenedTreeItemModel, MenuPage
 
 from ...gui.test import QAppTestCase
 from ...registry import global_registry

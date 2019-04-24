@@ -25,8 +25,9 @@ class _ReprableWithPreprocessors(Reprable):
                 return True
             else:
                 try:
-                    return all(p1 is p2 for p1, p2 in
-                               itertools.zip_longest(value, default_cls))
+                    return all(
+                        p1 is p2 for p1, p2 in itertools.zip_longest(value, default_cls)
+                    )
                 except (ValueError, TypeError):
                     return False
         else:
@@ -75,12 +76,13 @@ class Learner(_ReprableWithPreprocessors):
         The params that the learner is constructed with.
 
     """
+
     supports_multiclass = False
     supports_weights = False
     #: A sequence of data preprocessors to apply on data prior to
     #: fitting the model
     preprocessors = ()
-    learner_adequacy_err_msg = ''
+    learner_adequacy_err_msg = ""
 
     def __init__(self, preprocessors=None):
         self.use_default_preprocessors = False
@@ -92,7 +94,8 @@ class Learner(_ReprableWithPreprocessors):
 
     def fit(self, X, Y, W=None):
         raise RuntimeError(
-            "Descendants of Learner must overload method fit or fit_storage")
+            "Descendants of Learner must overload method fit or fit_storage"
+        )
 
     def fit_storage(self, data):
         """Default implementation of fit_storage defaults to calling fit.
@@ -112,8 +115,9 @@ class Learner(_ReprableWithPreprocessors):
         data = self.preprocess(data)
 
         if len(data.domain.class_vars) > 1 and not self.supports_multiclass:
-            raise TypeError("%s doesn't support multiple class variables" %
-                            self.__class__.__name__)
+            raise TypeError(
+                "%s doesn't support multiple class variables" % self.__class__.__name__
+            )
 
         self.domain = data.domain
         model = self._fit_model(data)
@@ -141,8 +145,10 @@ class Learner(_ReprableWithPreprocessors):
     @property
     def active_preprocessors(self):
         yield from self.preprocessors
-        if (self.use_default_preprocessors and
-                self.preprocessors is not type(self).preprocessors):
+        if (
+            self.use_default_preprocessors
+            and self.preprocessors is not type(self).preprocessors
+        ):
             yield from type(self).preprocessors
 
     def check_learner_adequacy(self, domain):
@@ -155,16 +161,19 @@ class Learner(_ReprableWithPreprocessors):
             return self.__name
         except AttributeError:
             name = self.__class__.__name__
-            if name.endswith('Learner'):
-                name = name[:-len('Learner')]
-            if name.endswith('Fitter'):
-                name = name[:-len('Fitter')]
-            if isinstance(self, SklLearner) and name.startswith('Skl'):
-                name = name[len('Skl'):]
-            name = name or 'learner'
+            if name.endswith("Learner"):
+                name = name[: -len("Learner")]
+            if name.endswith("Fitter"):
+                name = name[: -len("Fitter")]
+            if isinstance(self, SklLearner) and name.startswith("Skl"):
+                name = name[len("Skl") :]
+            name = name or "learner"
             # From http://stackoverflow.com/a/1176023/1090455 <3
-            self.name = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2',
-                               re.sub(r'(.)([A-Z][a-z]+)', r'\1 \2', name)).lower()
+            self.name = re.sub(
+                r"([a-z0-9])([A-Z])",
+                r"\1 \2",
+                re.sub(r"(.)([A-Z][a-z]+)", r"\1 \2", name),
+            ).lower()
             return self.name
 
     @name.setter
@@ -228,8 +237,9 @@ class Model(Reprable):
             return self.predict(data.X)
         elif isinstance(data, Instance):
             return self.predict(np.atleast_2d(data.x))
-        raise TypeError("Unrecognized argument (instance of '{}')"
-                        .format(type(data).__name__))
+        raise TypeError(
+            "Unrecognized argument (instance of '{}')".format(type(data).__name__)
+        )
 
     def __call__(self, data, ret=Value):
         if not 0 <= ret <= 2:
@@ -255,8 +265,9 @@ class Model(Reprable):
             data = data.transform(self.domain)
             prediction = self.predict_storage(data)
         else:
-            raise TypeError("Unrecognized argument (instance of '{}')"
-                            .format(type(data).__name__))
+            raise TypeError(
+                "Unrecognized argument (instance of '{}')".format(type(data).__name__)
+            )
 
         # Parse the result into value and probs
         multitarget = len(self.domain.class_vars) > 1
@@ -267,16 +278,14 @@ class Model(Reprable):
         elif prediction.ndim == 2 + multitarget:
             value, probs = None, prediction
         else:
-            raise TypeError("model returned a %i-dimensional array",
-                            prediction.ndim)
+            raise TypeError("model returned a %i-dimensional array", prediction.ndim)
 
         # Ensure that we have what we need to return
         if ret != Model.Probs and value is None:
             value = np.argmax(probs, axis=-1)
         if ret != Model.Value and probs is None:
             if multitarget:
-                max_card = max(len(c.values)
-                               for c in self.domain.class_vars)
+                max_card = max(len(c.values) for c in self.domain.class_vars)
                 probs = np.zeros(value.shape + (max_card,), float)
                 for i, cvar in enumerate(self.domain.class_vars):
                     probs[:, i, :] = one_hot(value[:, i])
@@ -300,9 +309,9 @@ class Model(Reprable):
     def __getstate__(self):
         """Skip (possibly large) data when pickling models"""
         state = self.__dict__
-        if 'original_data' in state:
+        if "original_data" in state:
             state = state.copy()
-            state['original_data'] = None
+            state["original_data"] = None
         return state
 
 
@@ -321,7 +330,7 @@ class SklModel(Model, metaclass=WrapperMeta):
 
     def __repr__(self):
         # Params represented as a comment because not passed into constructor
-        return super().__repr__() + '  # params=' + repr(self.params)
+        return super().__repr__() + "  # params=" + repr(self.params)
 
 
 class SklLearner(Learner, metaclass=WrapperMeta):
@@ -335,6 +344,7 @@ class SklLearner(Learner, metaclass=WrapperMeta):
         Defaults to
         `[RemoveNaNClasses(), Continuize(), SklImpute(), RemoveNaNColumns()]`
     """
+
     __wraps__ = None
     __returns__ = SklModel
     _params = {}
@@ -343,7 +353,8 @@ class SklLearner(Learner, metaclass=WrapperMeta):
         HasClass(),
         Continuize(),
         RemoveNaNColumns(),
-        SklImpute()]
+        SklImpute(),
+    ]
 
     @property
     def params(self):
@@ -359,8 +370,7 @@ class SklLearner(Learner, metaclass=WrapperMeta):
             spec = inspect.getargs(skllearner.__init__.__code__)
             # first argument is 'self'
             assert spec.args[0] == "self"
-            params = {name: values[name] for name in spec.args[1:]
-                      if name in values}
+            params = {name: values[name] for name in spec.args[1:] if name in values}
         else:
             raise TypeError("Wrapper does not define '__wraps__'")
         return params
@@ -368,10 +378,11 @@ class SklLearner(Learner, metaclass=WrapperMeta):
     def preprocess(self, data):
         data = super().preprocess(data)
 
-        if any(v.is_discrete and len(v.values) > 2
-               for v in data.domain.attributes):
-            raise ValueError("Wrapped scikit-learn methods do not support " +
-                             "multinomial variables.")
+        if any(v.is_discrete and len(v.values) > 2 for v in data.domain.attributes):
+            raise ValueError(
+                "Wrapped scikit-learn methods do not support "
+                + "multinomial variables."
+            )
 
         return data
 
@@ -391,7 +402,7 @@ class SklLearner(Learner, metaclass=WrapperMeta):
     def supports_weights(self):
         """Indicates whether this learner supports weighted instances.
         """
-        return 'sample_weight' in self.__wraps__.fit.__code__.co_varnames
+        return "sample_weight" in self.__wraps__.fit.__code__.co_varnames
 
     def __getattr__(self, item):
         try:
@@ -427,15 +438,24 @@ class RandomForestModel(Model):
 class KNNBase:
     """Base class for KNN (classification and regression) learners
     """
-    def __init__(self, n_neighbors=5, metric="euclidean", weights="uniform",
-                 algorithm='auto', metric_params=None,
-                 preprocessors=None):
+
+    def __init__(
+        self,
+        n_neighbors=5,
+        metric="euclidean",
+        weights="uniform",
+        algorithm="auto",
+        metric_params=None,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
     def fit(self, X, Y, W=None):
-        if self.params["metric_params"] is None and \
-                        self.params.get("metric") == "mahalanobis":
+        if (
+            self.params["metric_params"] is None
+            and self.params.get("metric") == "mahalanobis"
+        ):
             self.params["metric_params"] = {"V": np.cov(X.T)}
         return super().fit(X, Y, W)
 
@@ -443,15 +463,33 @@ class KNNBase:
 class NNBase:
     """Base class for neural network (classification and regression) learners
     """
+
     preprocessors = SklLearner.preprocessors + [Normalize()]
 
-    def __init__(self, hidden_layer_sizes=(100,), activation='relu',
-                 solver='adam', alpha=0.0001, batch_size='auto',
-                 learning_rate='constant', learning_rate_init=0.001,
-                 power_t=0.5, max_iter=200, shuffle=True, random_state=None,
-                 tol=0.0001, verbose=False, warm_start=False, momentum=0.9,
-                 nesterovs_momentum=True, early_stopping=False,
-                 validation_fraction=0.1, beta_1=0.9, beta_2=0.999,
-                 epsilon=1e-08, preprocessors=None):
+    def __init__(
+        self,
+        hidden_layer_sizes=(100,),
+        activation="relu",
+        solver="adam",
+        alpha=0.0001,
+        batch_size="auto",
+        learning_rate="constant",
+        learning_rate_init=0.001,
+        power_t=0.5,
+        max_iter=200,
+        shuffle=True,
+        random_state=None,
+        tol=0.0001,
+        verbose=False,
+        warm_start=False,
+        momentum=0.9,
+        nesterovs_momentum=True,
+        early_stopping=False,
+        validation_fraction=0.1,
+        beta_1=0.9,
+        beta_2=0.999,
+        epsilon=1e-08,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()

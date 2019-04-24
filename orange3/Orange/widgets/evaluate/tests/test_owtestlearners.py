@@ -12,14 +12,14 @@ from Orange.classification import MajorityLearner, LogisticRegressionLearner
 from Orange.classification.majority import ConstantModel
 from Orange.data import Table, Domain, DiscreteVariable, ContinuousVariable
 from Orange.evaluation import Results, TestOnTestData
-from Orange.evaluation.scoring import ClassificationScore, RegressionScore, \
-    Score
+from Orange.evaluation.scoring import ClassificationScore, RegressionScore, Score
 from Orange.modelling import ConstantLearner
 from Orange.regression import MeanLearner
-from Orange.widgets.evaluate.owtestlearners import (
-    OWTestLearners, results_one_vs_rest)
+from Orange.widgets.evaluate.owtestlearners import OWTestLearners, results_one_vs_rest
 from Orange.widgets.settings import (
-    ClassValuesContextHandler, PerfectDomainContextHandler)
+    ClassValuesContextHandler,
+    PerfectDomainContextHandler,
+)
 from Orange.widgets.tests.base import WidgetTest
 from Orange.widgets.tests.utils import simulate
 
@@ -31,9 +31,10 @@ class TestOWTestLearners(WidgetTest):
 
         self.scores_domain = Domain(
             [ContinuousVariable("a"), ContinuousVariable("b")],
-            [DiscreteVariable("c", values=["y", "n"])])
+            [DiscreteVariable("c", values=["y", "n"])],
+        )
 
-        self.scores_table_values = [[1, 1, 1.23, 23.8], [1., 2., 3., 4.]]
+        self.scores_table_values = [[1, 1, 1.23, 23.8], [1.0, 2.0, 3.0, 4.0]]
 
     def tearDown(self):
         self.widget.onDeleteWidget()
@@ -111,16 +112,20 @@ class TestOWTestLearners(WidgetTest):
         w.result_model.setHorizontalHeaderLabels(list(all))
         w._update_shown_columns()
         for i, name in enumerate(all):
-            self.assertEqual(name == "M" or name in shown,
-                             not header.isSectionHidden(i),
-                             msg="error in section {}({})".format(i, name))
+            self.assertEqual(
+                name == "M" or name in shown,
+                not header.isSectionHidden(i),
+                msg="error in section {}({})".format(i, name),
+            )
 
         w.shown_scores = set()
         w._update_shown_columns()
         for i, name in enumerate(all):
-            self.assertEqual(i == 0,
-                             not header.isSectionHidden(i),
-                             msg="error in section {}({})".format(i, name))
+            self.assertEqual(
+                i == 0,
+                not header.isSectionHidden(i),
+                msg="error in section {}({})".format(i, name),
+            )
 
     def test_show_column_chooser(self):
         w = self.widget  #: OWTestLearners
@@ -147,25 +152,28 @@ class TestOWTestLearners(WidgetTest):
             actions["B"].triggered.emit(False)
             self.assertEqual(w.shown_scores, set("ADEF"))
             for i, name in enumerate(all):
-                self.assertEqual(name == "M" or name in "ADEF",
-                                 not header.isSectionHidden(i),
-                                 msg="error in section {}({})".format(i, name))
+                self.assertEqual(
+                    name == "M" or name in "ADEF",
+                    not header.isSectionHidden(i),
+                    msg="error in section {}({})".format(i, name),
+                )
 
         # We must patch `QMenu.exec` because the Qt would otherwise (invisibly)
         # show the popup and wait for the user.
         # Assertions are made within `menuexec` since they check the
         # instances of `QAction`, which are invalid (destroyed by Qt?) after
         # `menuexec` finishes.
-        with unittest.mock.patch("AnyQt.QtWidgets.QMenu.addAction", addAction),\
-                unittest.mock.patch("AnyQt.QtWidgets.QMenu.exec", execmenu):
+        with unittest.mock.patch(
+            "AnyQt.QtWidgets.QMenu.addAction", addAction
+        ), unittest.mock.patch("AnyQt.QtWidgets.QMenu.exec", execmenu):
             w.show_column_chooser(QPoint(0, 0))
 
     def test_migrate_removes_invalid_contexts(self):
         context_invalid = ClassValuesContextHandler().new_context([0, 1, 2])
         context_valid = PerfectDomainContextHandler().new_context(*[[]] * 4)
-        settings = {'context_settings': [context_invalid, context_valid]}
+        settings = {"context_settings": [context_invalid, context_valid]}
         self.widget.migrate_settings(settings, 2)
-        self.assertEqual(settings['context_settings'], [context_valid])
+        self.assertEqual(settings["context_settings"], [context_valid])
 
     def test_memory_error(self):
         """
@@ -178,8 +186,11 @@ class TestOWTestLearners(WidgetTest):
 
         with unittest.mock.patch(
             "Orange.evaluation.testing.Results.get_augmented_data",
-            side_effect=MemoryError):
-            self.send_signal(self.widget.Inputs.learner, MajorityLearner(), 0, wait=5000)
+            side_effect=MemoryError,
+        ):
+            self.send_signal(
+                self.widget.Inputs.learner, MajorityLearner(), 0, wait=5000
+            )
             self.assertTrue(self.widget.Error.memory_error.is_shown())
 
     def test_one_class_value(self):
@@ -191,11 +202,9 @@ class TestOWTestLearners(WidgetTest):
         table = Table(
             Domain(
                 [ContinuousVariable("a"), ContinuousVariable("b")],
-                [DiscreteVariable("c", values=["y"])]),
-            list(zip(
-                [42.48, 16.84, 15.23, 23.8],
-                [1., 2., 3., 4.],
-                "yyyy"))
+                [DiscreteVariable("c", values=["y"])],
+            ),
+            list(zip([42.48, 16.84, 15.23, 23.8], [1.0, 2.0, 3.0, 4.0], "yyyy")),
         )
         self.widget.n_folds = 0
         self.widget.class_selection = "y"
@@ -209,6 +218,7 @@ class TestOWTestLearners(WidgetTest):
         Do not crash on a data with only nan class values.
         GH-2751
         """
+
         def assertErrorShown(data, is_shown):
             self.send_signal("Data", data)
             self.assertEqual(is_shown, self.widget.Error.no_class_values.is_shown())
@@ -216,11 +226,14 @@ class TestOWTestLearners(WidgetTest):
         data = Table("iris")[::30]
         data.Y[:] = np.nan
 
-        for data, is_shown in zip([None, data, Table("iris")[:30]], [False, True, False]):
+        for data, is_shown in zip(
+            [None, data, Table("iris")[:30]], [False, True, False]
+        ):
             assertErrorShown(data, is_shown)
 
     def test_addon_scorers(self):
         try:
+
             class NewScore(Score):
                 class_types = (DiscreteVariable, ContinuousVariable)
 
@@ -234,8 +247,9 @@ class TestOWTestLearners(WidgetTest):
             self.send_signal("Data", Table("iris"))
             scorer_names = [scorer.name for scorer in self.widget.scorers]
             self.assertEqual(
-                tuple(scorer_names[:len(builtins[DiscreteVariable])]),
-                builtins[DiscreteVariable])
+                tuple(scorer_names[: len(builtins[DiscreteVariable])]),
+                builtins[DiscreteVariable],
+            )
             self.assertIn("NewScore", scorer_names)
             self.assertIn("NewClassificationScore", scorer_names)
             self.assertNotIn("NewRegressionScore", scorer_names)
@@ -243,8 +257,9 @@ class TestOWTestLearners(WidgetTest):
             self.send_signal("Data", Table("housing"))
             scorer_names = [scorer.name for scorer in self.widget.scorers]
             self.assertEqual(
-                tuple(scorer_names[:len(builtins[ContinuousVariable])]),
-                builtins[ContinuousVariable])
+                tuple(scorer_names[: len(builtins[ContinuousVariable])]),
+                builtins[ContinuousVariable],
+            )
             self.assertIn("NewScore", scorer_names)
             self.assertNotIn("NewClassificationScore", scorer_names)
             self.assertIn("NewRegressionScore", scorer_names)
@@ -262,8 +277,9 @@ class TestOWTestLearners(WidgetTest):
 
         w.n_folds = 2
         self.send_signal(self.widget.Inputs.train_data, data)
-        self.send_signal(self.widget.Inputs.learner,
-                         LogisticRegressionLearner(), 0, wait=5000)
+        self.send_signal(
+            self.widget.Inputs.learner, LogisticRegressionLearner(), 0, wait=5000
+        )
 
         average_auc = float(w.view.model().item(0, 1).text())
 
@@ -291,13 +307,13 @@ class TestOWTestLearners(WidgetTest):
 
         class SetosaLearner:
             def __call__(self, data):
-                model = ConstantModel([1., 0, 0])
+                model = ConstantModel([1.0, 0, 0])
                 model.domain = iris.domain
                 return model
 
         class VersicolorLearner:
             def __call__(self, data):
-                model = ConstantModel([0, 1., 0])
+                model = ConstantModel([0, 1.0, 0])
                 model.domain = iris.domain
                 return model
 
@@ -317,13 +333,11 @@ class TestOWTestLearners(WidgetTest):
         # Ascending sort means that wrong model should be listed first
         self.assertEqual(header.sortIndicatorOrder(), Qt.AscendingOrder)
         self.assertEqual(
-            self.widget.view.model().item(0, 0).text(),
-            "VersicolorLearner")
+            self.widget.view.model().item(0, 0).text(), "VersicolorLearner"
+        )
 
         self.send_signal(self.widget.Inputs.test_data, versicolor, wait=5000)
-        self.assertEqual(
-            self.widget.view.model().item(0, 0).text(),
-            "SetosaLearner")
+        self.assertEqual(self.widget.view.model().item(0, 0).text(), "SetosaLearner")
 
         self.widget.hide()
 
@@ -351,75 +365,104 @@ class TestOWTestLearners(WidgetTest):
 
     def test_scores_constant_all_same(self):
         table = Table(
-            self.scores_domain,
-            list(zip(*self.scores_table_values + [list("yyyy")]))
+            self.scores_domain, list(zip(*self.scores_table_values + [list("yyyy")]))
         )
 
-        self.assertTupleEqual(self._test_scores(
-            table, table, ConstantLearner(), OWTestLearners.TestOnTest, None),
-                              (None, 1, 1, 1, 1))
+        self.assertTupleEqual(
+            self._test_scores(
+                table, table, ConstantLearner(), OWTestLearners.TestOnTest, None
+            ),
+            (None, 1, 1, 1, 1),
+        )
 
     def test_scores_log_reg_overfitted(self):
         table = Table(
-            self.scores_domain,
-            list(zip(*self.scores_table_values + [list("yyyn")]))
+            self.scores_domain, list(zip(*self.scores_table_values + [list("yyyn")]))
         )
 
-        self.assertTupleEqual(self._test_scores(
-            table, table, LogisticRegressionLearner(),
-            OWTestLearners.TestOnTest, None),
-                              (1, 1, 1, 1, 1))
+        self.assertTupleEqual(
+            self._test_scores(
+                table,
+                table,
+                LogisticRegressionLearner(),
+                OWTestLearners.TestOnTest,
+                None,
+            ),
+            (1, 1, 1, 1, 1),
+        )
 
     def test_scores_log_reg_bad(self):
         table_train = Table(
-            self.scores_domain,
-            list(zip(*self.scores_table_values + [list("nnny")]))
+            self.scores_domain, list(zip(*self.scores_table_values + [list("nnny")]))
         )
         table_test = Table(
-            self.scores_domain,
-            list(zip(*self.scores_table_values + [list("yyyn")]))
+            self.scores_domain, list(zip(*self.scores_table_values + [list("yyyn")]))
         )
 
-        self.assertTupleEqual(self._test_scores(
-            table_train, table_test, LogisticRegressionLearner(),
-            OWTestLearners.TestOnTest, None),
-                              (0, 0, 0, 0, 0))
+        self.assertTupleEqual(
+            self._test_scores(
+                table_train,
+                table_test,
+                LogisticRegressionLearner(),
+                OWTestLearners.TestOnTest,
+                None,
+            ),
+            (0, 0, 0, 0, 0),
+        )
 
     def test_scores_log_reg_bad2(self):
         table_train = Table(
-            self.scores_domain,
-            list(zip(*(self.scores_table_values + [list("nnyy")]))))
+            self.scores_domain, list(zip(*(self.scores_table_values + [list("nnyy")])))
+        )
         table_test = Table(
-            self.scores_domain,
-            list(zip(*(self.scores_table_values + [list("yynn")]))))
-        self.assertTupleEqual(self._test_scores(
-            table_train, table_test, LogisticRegressionLearner(),
-            OWTestLearners.TestOnTest, None),
-                              (0, 0, 0, 0, 0))
+            self.scores_domain, list(zip(*(self.scores_table_values + [list("yynn")])))
+        )
+        self.assertTupleEqual(
+            self._test_scores(
+                table_train,
+                table_test,
+                LogisticRegressionLearner(),
+                OWTestLearners.TestOnTest,
+                None,
+            ),
+            (0, 0, 0, 0, 0),
+        )
 
     def test_scores_log_reg_advanced(self):
         table_train = Table(
-            self.scores_domain, list(zip(
-                [1, 1, 1.23, 23.8, 5.], [1., 2., 3., 4., 3.], "yyynn"))
+            self.scores_domain,
+            list(zip([1, 1, 1.23, 23.8, 5.0], [1.0, 2.0, 3.0, 4.0, 3.0], "yyynn")),
         )
         table_test = Table(
-            self.scores_domain, list(zip(
-                [1, 1, 1.23, 23.8, 5.], [1., 2., 3., 4., 3.], "yynnn"))
+            self.scores_domain,
+            list(zip([1, 1, 1.23, 23.8, 5.0], [1.0, 2.0, 3.0, 4.0, 3.0], "yynnn")),
         )
 
-        self.assertTupleEqual(self._test_scores(
-            table_train, table_test, LogisticRegressionLearner(),
-            OWTestLearners.TestOnTest, None),
-                              (0.667, 0.8, 0.8, 0.867, 0.8))
+        self.assertTupleEqual(
+            self._test_scores(
+                table_train,
+                table_test,
+                LogisticRegressionLearner(),
+                OWTestLearners.TestOnTest,
+                None,
+            ),
+            (0.667, 0.8, 0.8, 0.867, 0.8),
+        )
 
     def test_scores_cross_validation(self):
         """
         Test more than two classes and cross-validation
         """
-        self.assertTupleEqual(self._test_scores(
-            Table("iris")[::15], None, LogisticRegressionLearner(),
-            OWTestLearners.KFold, 0),
-                              (0.917, 0.7, 0.6, 0.55, 0.7))
+        self.assertTupleEqual(
+            self._test_scores(
+                Table("iris")[::15],
+                None,
+                LogisticRegressionLearner(),
+                OWTestLearners.KFold,
+                0,
+            ),
+            (0.917, 0.7, 0.6, 0.55, 0.7),
+        )
 
 
 class TestHelpers(unittest.TestCase):
@@ -436,10 +479,10 @@ class TestHelpers(unittest.TestCase):
         np.testing.assert_almost_equal(np.sum(r3.probabilities, axis=2), 1.0)
 
         np.testing.assert_almost_equal(
-            r1.probabilities[:, :, 1] +
-            r2.probabilities[:, :, 1] +
-            r3.probabilities[:, :, 1],
-            1.0
+            r1.probabilities[:, :, 1]
+            + r2.probabilities[:, :, 1]
+            + r3.probabilities[:, :, 1],
+            1.0,
         )
         self.assertEqual(r1.folds, res.folds)
         self.assertEqual(r2.folds, res.folds)

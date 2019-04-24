@@ -21,8 +21,7 @@ from Orange.data.filter import HasClass
 from Orange.preprocess.discretize import EntropyMDL
 from Orange.preprocess import RemoveNaNColumns, Impute
 
-__all__ = ["CN2Learner", "CN2UnorderedLearner", "CN2SDLearner",
-           "CN2SDUnorderedLearner"]
+__all__ = ["CN2Learner", "CN2UnorderedLearner", "CN2SDLearner", "CN2SDUnorderedLearner"]
 
 
 def argmaxrnd(a, random_seed=None):
@@ -62,8 +61,7 @@ def argmaxrnd(a, random_seed=None):
     def rndc(x):
         return random.choice((x == bn.nanmax(x)).nonzero()[0])
 
-    random = (np.random if random_seed is None
-              else np.random.RandomState(random_seed))
+    random = np.random if random_seed is None else np.random.RandomState(random_seed)
 
     return rndc(a) if a.ndim == 1 else np.apply_along_axis(rndc, axis=1, arr=a)
 
@@ -108,7 +106,7 @@ def likelihood_ratio_statistic(x, y):
     x[x == 0] = 1e-5
     y[y == 0] = 1e-5
     y *= x.sum() / y.sum()
-    lrs = 2 * (x * np.log(x/y)).sum()
+    lrs = 2 * (x * np.log(x / y)).sum()
     return lrs
 
 
@@ -150,8 +148,7 @@ def hash_dist(x):
     hash : int
         Hash function result.
     """
-    return int(sha1(np.ascontiguousarray(x).data)
-               .hexdigest(), base=16) & 0xffffffff
+    return int(sha1(np.ascontiguousarray(x).data).hexdigest(), base=16) & 0xFFFFFFFF
 
 
 class Evaluator:
@@ -179,8 +176,11 @@ class EntropyEvaluator(Evaluator):
     def evaluate_rule(self, rule):
         tc = rule.target_class
         dist = rule.curr_class_dist
-        x = (np.array([dist[tc], dist.sum() - dist[tc]], dtype=float)
-             if tc is not None else dist.astype(float))
+        x = (
+            np.array([dist[tc], dist.sum() - dist[tc]], dtype=float)
+            if tc is not None
+            else dist.astype(float)
+        )
         return -entropy(x)
 
 
@@ -221,9 +221,11 @@ class WeightedRelativeAccuracyEvaluator(Evaluator):
             # prior probability of class c
             p_class = p_dist[d_modus] / p_dist_sum
 
-        return (p_cond * (p_true_positive - p_class) if
-                p_true_positive > p_class
-                else (p_true_positive - p_class) / max(p_cond, 1e-6))
+        return (
+            p_cond * (p_true_positive - p_class)
+            if p_true_positive > p_class
+            else (p_true_positive - p_class) / max(p_cond, 1e-6)
+        )
 
 
 class LengthEvaluator(Evaluator):
@@ -258,20 +260,29 @@ class GuardianValidator(Validator):
     - offer no additional advantage compared to their parent rule,
     - are too complex.
     """
+
     def __init__(self, max_rule_length=5, min_covered_examples=1):
         self.max_rule_length = max_rule_length
         self.min_covered_examples = min_covered_examples
 
     def validate_rule(self, rule):
-        num_target_covered = (rule.curr_class_dist[rule.target_class]
-                              if rule.target_class is not None
-                              else rule.curr_class_dist.sum())
+        num_target_covered = (
+            rule.curr_class_dist[rule.target_class]
+            if rule.target_class is not None
+            else rule.curr_class_dist.sum()
+        )
 
-        return (num_target_covered >= self.min_covered_examples and
-                rule.length <= self.max_rule_length and
-                (True if rule.parent_rule is None
-                 else not np.array_equal(rule.curr_class_dist,
-                                         rule.parent_rule.curr_class_dist)))
+        return (
+            num_target_covered >= self.min_covered_examples
+            and rule.length <= self.max_rule_length
+            and (
+                True
+                if rule.parent_rule is None
+                else not np.array_equal(
+                    rule.curr_class_dist, rule.parent_rule.curr_class_dist
+                )
+            )
+        )
 
 
 class LRSValidator(Validator):
@@ -284,6 +295,7 @@ class LRSValidator(Validator):
     score lowers, the apparent regularity is more likely observed due to
     chance.
     """
+
     def __init__(self, parent_alpha=1.0, default_alpha=1.0):
         self.parent_alpha = parent_alpha
         self.default_alpha = default_alpha
@@ -320,6 +332,7 @@ class SearchAlgorithm:
     Implement an algorithm to maneuver through the search space towards
     a better solution, guided by the search heuristics.
     """
+
     def select_candidates(self, rules):
         """
         Select candidate rules to be further specialised.
@@ -360,6 +373,7 @@ class BeamSearchAlgorithm(SearchAlgorithm):
     Remember the best rule found thus far and monitor a fixed number of
     alternatives (the beam).
     """
+
     def __init__(self, beam_width=10):
         self.beam_width = beam_width
 
@@ -367,14 +381,25 @@ class BeamSearchAlgorithm(SearchAlgorithm):
         return rules, []
 
     def filter_rules(self, rules):
-        return rules[:self.beam_width]
+        return rules[: self.beam_width]
 
 
 class SearchStrategy:
-    def initialise_rule(self, X, Y, W, target_class, base_rules, domain,
-                        initial_class_dist, prior_class_dist,
-                        quality_evaluator, complexity_evaluator,
-                        significance_validator, general_validator):
+    def initialise_rule(
+        self,
+        X,
+        Y,
+        W,
+        target_class,
+        base_rules,
+        domain,
+        initial_class_dist,
+        prior_class_dist,
+        quality_evaluator,
+        complexity_evaluator,
+        significance_validator,
+        general_validator,
+    ):
         """
         Develop a starting rule.
 
@@ -434,23 +459,37 @@ class TopDownSearchStrategy(SearchStrategy):
     instances is developed. The hypothesis space of possible rules is
     then searched repeatedly by specialising candidate rules.
     """
+
     def __init__(self, constrain_continuous=True, evaluate=True):
         self.constrain_continuous = constrain_continuous
         self.storage = None
         self.evaluate = evaluate
 
-    def initialise_rule(self, X, Y, W, target_class, base_rules, domain,
-                        initial_class_dist, prior_class_dist,
-                        quality_evaluator, complexity_evaluator,
-                        significance_validator, general_validator):
+    def initialise_rule(
+        self,
+        X,
+        Y,
+        W,
+        target_class,
+        base_rules,
+        domain,
+        initial_class_dist,
+        prior_class_dist,
+        quality_evaluator,
+        complexity_evaluator,
+        significance_validator,
+        general_validator,
+    ):
         rules = []
-        default_rule = Rule(domain=domain,
-                            initial_class_dist=initial_class_dist,
-                            prior_class_dist=prior_class_dist,
-                            quality_evaluator=quality_evaluator,
-                            complexity_evaluator=complexity_evaluator,
-                            significance_validator=significance_validator,
-                            general_validator=general_validator)
+        default_rule = Rule(
+            domain=domain,
+            initial_class_dist=initial_class_dist,
+            prior_class_dist=prior_class_dist,
+            quality_evaluator=quality_evaluator,
+            complexity_evaluator=complexity_evaluator,
+            significance_validator=significance_validator,
+            general_validator=general_validator,
+        )
 
         default_rule.filter_and_store(X, Y, W, target_class)
         if not base_rules and default_rule.is_valid():
@@ -459,14 +498,16 @@ class TopDownSearchStrategy(SearchStrategy):
             rules.append(default_rule)
 
         for base_rule in base_rules:
-            temp_rule = Rule(selectors=copy(base_rule.selectors),
-                             domain=domain,
-                             initial_class_dist=initial_class_dist,
-                             prior_class_dist=prior_class_dist,
-                             quality_evaluator=quality_evaluator,
-                             complexity_evaluator=complexity_evaluator,
-                             significance_validator=significance_validator,
-                             general_validator=general_validator)
+            temp_rule = Rule(
+                selectors=copy(base_rule.selectors),
+                domain=domain,
+                initial_class_dist=initial_class_dist,
+                prior_class_dist=prior_class_dist,
+                quality_evaluator=quality_evaluator,
+                complexity_evaluator=complexity_evaluator,
+                significance_validator=significance_validator,
+                general_validator=general_validator,
+            )
 
             temp_rule.filter_and_store(X, Y, W, target_class)
             if temp_rule.is_valid():
@@ -479,10 +520,18 @@ class TopDownSearchStrategy(SearchStrategy):
         return rules
 
     def refine_rule(self, X, Y, W, candidate_rule):
-        (target_class, candidate_rule_covered_examples,
-         candidate_rule_selectors, domain, initial_class_dist,
-         prior_class_dist, quality_evaluator, complexity_evaluator,
-         significance_validator, general_validator) = candidate_rule.seed()
+        (
+            target_class,
+            candidate_rule_covered_examples,
+            candidate_rule_selectors,
+            domain,
+            initial_class_dist,
+            prior_class_dist,
+            quality_evaluator,
+            complexity_evaluator,
+            significance_validator,
+            general_validator,
+        ) = candidate_rule.seed()
 
         # optimisation: to develop further rules is futile
         if candidate_rule.length == general_validator.max_rule_length:
@@ -491,24 +540,27 @@ class TopDownSearchStrategy(SearchStrategy):
         possible_selectors = self.find_new_selectors(
             X[candidate_rule_covered_examples],
             Y[candidate_rule_covered_examples],
-            W[candidate_rule_covered_examples]
-            if W is not None else None,
-            domain, candidate_rule_selectors)
+            W[candidate_rule_covered_examples] if W is not None else None,
+            domain,
+            candidate_rule_selectors,
+        )
 
         new_rules = []
         for curr_selector in possible_selectors:
             copied_selectors = copy(candidate_rule_selectors)
             copied_selectors.append(curr_selector)
 
-            new_rule = Rule(selectors=copied_selectors,
-                            parent_rule=candidate_rule,
-                            domain=domain,
-                            initial_class_dist=initial_class_dist,
-                            prior_class_dist=prior_class_dist,
-                            quality_evaluator=quality_evaluator,
-                            complexity_evaluator=complexity_evaluator,
-                            significance_validator=significance_validator,
-                            general_validator=general_validator)
+            new_rule = Rule(
+                selectors=copied_selectors,
+                parent_rule=candidate_rule,
+                domain=domain,
+                initial_class_dist=initial_class_dist,
+                prior_class_dist=prior_class_dist,
+                quality_evaluator=quality_evaluator,
+                complexity_evaluator=complexity_evaluator,
+                significance_validator=significance_validator,
+                general_validator=general_validator,
+            )
 
             if curr_selector not in self.storage:
                 self.storage[curr_selector] = curr_selector.filter_data(X)
@@ -525,8 +577,9 @@ class TopDownSearchStrategy(SearchStrategy):
         return new_rules
 
     def find_new_selectors(self, X, Y, W, domain, existing_selectors):
-        existing_selectors = (existing_selectors if existing_selectors is not
-                              None else [])
+        existing_selectors = (
+            existing_selectors if existing_selectors is not None else []
+        )
 
         possible_selectors = []
         # examine covered examples, for each variable
@@ -541,9 +594,11 @@ class TopDownSearchStrategy(SearchStrategy):
             # if continuous variable
             elif attribute.is_continuous:
                 # choose best thresholds if constrain_continuous is True
-                values = (self.discretize(X[:, i], Y, W, domain)
-                          if self.constrain_continuous
-                          else np.unique(X[:, i]))
+                values = (
+                    self.discretize(X[:, i], Y, W, domain)
+                    if self.constrain_continuous
+                    else np.unique(X[:, i])
+                )
                 # for each unique value, generate all possible selectors
                 for val in values:
                     s1 = Selector(column=i, op="<=", value=val)
@@ -551,31 +606,33 @@ class TopDownSearchStrategy(SearchStrategy):
                     possible_selectors.extend([s1, s2])
 
         # remove redundant selectors
-        possible_selectors = [smh for smh in possible_selectors if
-                              smh not in existing_selectors]
+        possible_selectors = [
+            smh for smh in possible_selectors if smh not in existing_selectors
+        ]
 
         return possible_selectors
 
     @staticmethod
     def discretize(X, Y, W, domain):
         values, counts, _ = _contingency.contingency_floatarray(
-            X, Y.astype(dtype=np.intp), len(domain.class_var.values), W)
+            X, Y.astype(dtype=np.intp), len(domain.class_var.values), W
+        )
         cut_ind = np.array(EntropyMDL._entropy_discretize_sorted(counts.T, True))
         return [values[smh] for smh in cut_ind]
 
 
-class Selector(namedtuple('Selector', 'column, op, value')):
+class Selector(namedtuple("Selector", "column, op, value")):
     """
     Define a single rule condition.
     """
+
     OPERATORS = {
         # discrete, nominal variables
-        '==': operator.eq,
-        '!=': operator.ne,
-
+        "==": operator.eq,
+        "!=": operator.ne,
         # continuous variables
-        '<=': operator.le,
-        '>=': operator.ge
+        "<=": operator.le,
+        ">=": operator.ge,
     }
 
     def filter_instance(self, x):
@@ -621,10 +678,19 @@ class Rule:
     covered examples from rule to rule, provided that the original
     learning data reference is still known.
     """
-    def __init__(self, selectors=None, parent_rule=None, domain=None,
-                 initial_class_dist=None, prior_class_dist=None,
-                 quality_evaluator=None, complexity_evaluator=None,
-                 significance_validator=None, general_validator=None):
+
+    def __init__(
+        self,
+        selectors=None,
+        parent_rule=None,
+        domain=None,
+        initial_class_dist=None,
+        prior_class_dist=None,
+        quality_evaluator=None,
+        complexity_evaluator=None,
+        significance_validator=None,
+        general_validator=None,
+    ):
         """
         Initialise a Rule.
 
@@ -690,10 +756,11 @@ class Rule:
             for selector in self.selectors:
                 self.covered_examples &= selector.filter_data(X)
 
-        self.curr_class_dist = get_dist(Y[self.covered_examples],
-                                        W[self.covered_examples]
-                                        if W is not None else None,
-                                        self.domain)
+        self.curr_class_dist = get_dist(
+            Y[self.covered_examples],
+            W[self.covered_examples] if W is not None else None,
+            self.domain,
+        )
 
     def is_valid(self):
         """
@@ -756,21 +823,32 @@ class Rule:
         Determine prediction class probabilities.
         """
         # laplace class probabilities
-        self.probabilities = ((self.curr_class_dist + 1) /
-                              (self.curr_class_dist.sum() +
-                               len(self.curr_class_dist)))
+        self.probabilities = (self.curr_class_dist + 1) / (
+            self.curr_class_dist.sum() + len(self.curr_class_dist)
+        )
         # predicted class
-        self.prediction = (self.target_class if self.target_class is not None
-                           else argmaxrnd(self.curr_class_dist))
+        self.prediction = (
+            self.target_class
+            if self.target_class is not None
+            else argmaxrnd(self.curr_class_dist)
+        )
 
     def seed(self):
         """
         Forward relevant information to develop new rules.
         """
-        return (self.target_class, self.covered_examples, self.selectors,
-                self.domain, self.initial_class_dist, self.prior_class_dist,
-                self.quality_evaluator, self.complexity_evaluator,
-                self.significance_validator, self.general_validator)
+        return (
+            self.target_class,
+            self.covered_examples,
+            self.selectors,
+            self.domain,
+            self.initial_class_dist,
+            self.prior_class_dist,
+            self.quality_evaluator,
+            self.complexity_evaluator,
+            self.significance_validator,
+            self.general_validator,
+        )
 
     def __eq__(self, other):
         # return self.selectors == other.selectors
@@ -784,10 +862,18 @@ class Rule:
         class_var = self.domain.class_var
 
         if self.selectors:
-            cond = " AND ".join([attributes[s.column].name + s.op +
-                                 (str(attributes[s.column].values[int(s.value)])
-                                  if attributes[s.column].is_discrete
-                                  else str(s.value)) for s in self.selectors])
+            cond = " AND ".join(
+                [
+                    attributes[s.column].name
+                    + s.op
+                    + (
+                        str(attributes[s.column].values[int(s.value)])
+                        if attributes[s.column].is_discrete
+                        else str(s.value)
+                    )
+                    for s in self.selectors
+                ]
+            )
         else:
             cond = "TRUE"
 
@@ -799,6 +885,7 @@ class RuleHuntress:
     """
     An experimental implementation of the CN2-R algorithm.
     """
+
     pass
 
 
@@ -814,8 +901,17 @@ class RuleHunter:
         self.general_validator = GuardianValidator()
         self.significance_validator = LRSValidator()
 
-    def __call__(self, X, Y, W, target_class, base_rules, domain,
-                 initial_class_dist, existing_rules):
+    def __call__(
+        self,
+        X,
+        Y,
+        W,
+        target_class,
+        base_rules,
+        domain,
+        initial_class_dist,
+        existing_rules,
+    ):
         """
         Return a single rule.
 
@@ -845,15 +941,25 @@ class RuleHunter:
         best_rule : Rule
             Highest quality rule discovered.
         """
+
         def rcmp(rule):
             return rule.quality, rule.complexity
 
         prior_class_dist = get_dist(Y, W, domain)
         rules = self.search_strategy.initialise_rule(
-            X, Y, W, target_class, base_rules, domain,
-            initial_class_dist, prior_class_dist,
-            self.quality_evaluator, self.complexity_evaluator,
-            self.significance_validator, self.general_validator)
+            X,
+            Y,
+            W,
+            target_class,
+            base_rules,
+            domain,
+            initial_class_dist,
+            prior_class_dist,
+            self.quality_evaluator,
+            self.complexity_evaluator,
+            self.significance_validator,
+            self.general_validator,
+        )
 
         if not rules:
             return None
@@ -864,13 +970,14 @@ class RuleHunter:
         while len(rules) > 0:
             candidates, rules = self.search_algorithm.select_candidates(rules)
             for candidate_rule in candidates:
-                new_rules = self.search_strategy.refine_rule(
-                    X, Y, W, candidate_rule)
+                new_rules = self.search_strategy.refine_rule(X, Y, W, candidate_rule)
                 rules.extend(new_rules)
                 for new_rule in new_rules:
-                    if (new_rule.quality > best_rule.quality and
-                            new_rule.is_significant() and
-                            new_rule not in existing_rules):
+                    if (
+                        new_rule.quality > best_rule.quality
+                        and new_rule.is_significant()
+                        and new_rule not in existing_rules
+                    ):
                         best_rule = new_rule
 
             rules = sorted(rules, key=rcmp, reverse=True)
@@ -902,6 +1009,7 @@ class _RuleLearner(Learner):
     .. [1] "Separate-and-Conquer Rule Learning", Johannes Fürnkranz,
            Artificial Intelligence Review 13, 3-54, 1999
     """
+
     preprocessors = [RemoveNaNColumns(), HasClass(), Impute()]
 
     def __init__(self, preprocessors=None, base_rules=None):
@@ -976,8 +1084,9 @@ class _RuleLearner(Learner):
         while not self.data_stopping(X, Y, W, target_class):
 
             # generate a new rule that has not been seen before
-            new_rule = self.rule_finder(X, Y, W, target_class, base_rules,
-                                        domain, initial_class_dist, rule_list)
+            new_rule = self.rule_finder(
+                X, Y, W, target_class, base_rules, domain, initial_class_dist, rule_list
+            )
 
             # None when no new, unique rules that pass
             # the general requirements can be found
@@ -1133,9 +1242,17 @@ class _RuleLearner(Learner):
         rf = self.rule_finder
         dist = get_dist(Y, W, domain)
 
-        default_rule = Rule(None, None, self.domain, dist, dist,
-                            rf.quality_evaluator, rf.complexity_evaluator,
-                            rf.significance_validator, rf.general_validator)
+        default_rule = Rule(
+            None,
+            None,
+            self.domain,
+            dist,
+            dist,
+            rf.quality_evaluator,
+            rf.complexity_evaluator,
+            rf.significance_validator,
+            rf.general_validator,
+        )
 
         default_rule.filter_and_store(X, Y, W, None)
         default_rule.do_evaluate()
@@ -1150,6 +1267,7 @@ class _RuleClassifier(Model):
     Descendants classify instances following either an unordered set of
     rules or a decision list.
     """
+
     def __init__(self, domain=None, rule_list=None):
         super().__init__(domain)
         self.domain = domain
@@ -1174,8 +1292,9 @@ class _RuleClassifier(Model):
             Probabilistic classification.
         """
         num_classes = len(self.domain.class_var.values)
-        probabilities = np.array([np.zeros(num_classes, dtype=float)
-                                  for _ in range(X.shape[0])])
+        probabilities = np.array(
+            [np.zeros(num_classes, dtype=float) for _ in range(X.shape[0])]
+        )
 
         status = np.ones(X.shape[0], dtype=bool)
         for rule in self.rule_list:
@@ -1209,8 +1328,9 @@ class _RuleClassifier(Model):
             Probabilistic classification.
         """
         num_classes = len(self.domain.class_var.values)
-        probabilities = np.array([np.zeros(num_classes, dtype=float)
-                                  for _ in range(X.shape[0])])
+        probabilities = np.array(
+            [np.zeros(num_classes, dtype=float) for _ in range(X.shape[0])]
+        )
 
         num_hits = np.zeros(X.shape[0], dtype=int)
         total_weight = np.vstack(np.zeros(X.shape[0], dtype=float))
@@ -1235,9 +1355,18 @@ class _BaseCN2Learner(_RuleLearner):
     """
     Base CN2 Learner used to extend CN2 rule induction algorithms.
     """
-    def __init__(self, preprocessors=None, base_rules=None, beam_width=5,
-                 constrain_continuous=True, min_covered_examples=1,
-                 max_rule_length=5, default_alpha=1.0, parent_alpha=1.0):
+
+    def __init__(
+        self,
+        preprocessors=None,
+        base_rules=None,
+        beam_width=5,
+        constrain_continuous=True,
+        min_covered_examples=1,
+        max_rule_length=5,
+        default_alpha=1.0,
+        parent_alpha=1.0,
+    ):
         super().__init__(preprocessors, base_rules)
         rf = self.rule_finder
         rf.search_algorithm.beam_width = beam_width
@@ -1262,6 +1391,7 @@ class CN2Learner(_RuleLearner):
     .. [1] "The CN2 Induction Algorithm", Peter Clark and Tim Niblett,
            Machine Learning Journal, 3 (4), pp261-283, (1989)
     """
+
     def __init__(self, preprocessors=None, base_rules=None):
         super().__init__(preprocessors, base_rules)
         self.rule_finder.quality_evaluator = EntropyEvaluator()
@@ -1313,7 +1443,8 @@ class CN2UnorderedLearner(_RuleLearner):
            Clark and Robin Boswell, Machine Learning - Proceedings of
            the 5th European Conference (EWSL-91), pp151-163, 1991
     """
-    name = 'CN2 unordered inducer'
+
+    name = "CN2 unordered inducer"
 
     def __init__(self, preprocessors=None, base_rules=None):
         super().__init__(preprocessors, base_rules)
@@ -1323,8 +1454,9 @@ class CN2UnorderedLearner(_RuleLearner):
         Y = Y.astype(dtype=int)
         rule_list = []
         for curr_class in range(len(self.domain.class_var.values)):
-            rule_list.extend(self.find_rules(X, Y, W, curr_class,
-                                             self.base_rules, self.domain))
+            rule_list.extend(
+                self.find_rules(X, Y, W, curr_class, self.base_rules, self.domain)
+            )
         # add the default rule
         rule_list.append(self.generate_default_rule(X, Y, W, self.domain))
         return CN2UnorderedClassifier(domain=self.domain, rule_list=rule_list)
@@ -1378,7 +1510,8 @@ class CN2SDLearner(_RuleLearner):
     .. [1] "Subgroup Discovery with CN2-SD", Nada Lavrač et al., Journal
            of Machine Learning Research 5 (2004), 153-188, 2004
     """
-    name = 'CN2-SD inducer'
+
+    name = "CN2-SD inducer"
 
     def __init__(self, preprocessors=None, base_rules=None):
         super().__init__(preprocessors, base_rules)
@@ -1388,8 +1521,14 @@ class CN2SDLearner(_RuleLearner):
 
     def fit(self, X, Y, W=None):
         Y = Y.astype(dtype=int)
-        rule_list = self.find_rules(X, Y, np.copy(W) if W is not None else None,
-                                    None, self.base_rules, self.domain)
+        rule_list = self.find_rules(
+            X,
+            Y,
+            np.copy(W) if W is not None else None,
+            None,
+            self.base_rules,
+            self.domain,
+        )
         # add the default rule, other
         # TRUE rules are insufficient
         rule_list.append(self.generate_default_rule(X, Y, W, self.domain))
@@ -1447,7 +1586,8 @@ class CN2SDUnorderedLearner(_RuleLearner):
     .. [1] "Subgroup Discovery with CN2-SD", Nada Lavrač et al., Journal
            of Machine Learning Research 5 (2004), 153-188, 2004
     """
-    name = 'CN2-SD unordered inducer'
+
+    name = "CN2-SD unordered inducer"
 
     def __init__(self, preprocessors=None, base_rules=None):
         super().__init__(preprocessors, base_rules)
@@ -1459,9 +1599,16 @@ class CN2SDUnorderedLearner(_RuleLearner):
         Y = Y.astype(dtype=int)
         rule_list = []
         for curr_class in range(len(self.domain.class_var.values)):
-            rule_list.extend(self.find_rules(
-                X, Y, np.copy(W) if W is not None else None,
-                curr_class, self.base_rules, self.domain))
+            rule_list.extend(
+                self.find_rules(
+                    X,
+                    Y,
+                    np.copy(W) if W is not None else None,
+                    curr_class,
+                    self.base_rules,
+                    self.domain,
+                )
+            )
         # add the default rule
         rule_list.append(self.generate_default_rule(X, Y, W, self.domain))
         return CN2SDUnorderedClassifier(domain=self.domain, rule_list=rule_list)
@@ -1495,14 +1642,14 @@ class CN2SDUnorderedClassifier(_RuleClassifier):
 
 
 def main():
-    data = Table('titanic')
+    data = Table("titanic")
     learner = CN2Learner()
     classifier = learner(data)
     for rule in classifier.rule_list:
         print(rule.curr_class_dist.tolist(), rule, rule.quality)
     print()
 
-    data = Table('iris.tab')
+    data = Table("iris.tab")
     learner = CN2UnorderedLearner()
     learner.rule_finder.general_validator.max_rule_length = 2
     learner.rule_finder.general_validator.min_covered_examples = 10
@@ -1510,6 +1657,7 @@ def main():
     for rule in classifier.rule_list:
         print(rule, rule.curr_class_dist.tolist())
     print()
+
 
 if __name__ == "__main__":
     main()

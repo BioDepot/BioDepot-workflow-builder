@@ -11,7 +11,7 @@ from Orange.evaluation import CrossValidation, CA
 class TestNaiveBayesLearner(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        data = Table('titanic')
+        data = Table("titanic")
         cls.learner = NaiveBayesLearner()
         cls.model = cls.learner(data)
         cls.table = data[::20]
@@ -37,11 +37,15 @@ class TestNaiveBayesLearner(unittest.TestCase):
         vals, probs = self.model(X, self.model.ValueProbs)
 
     def test_degenerate(self):
-        d = Domain((ContinuousVariable(name="A"),
-                    ContinuousVariable(name="B"),
-                    ContinuousVariable(name="C")),
-                    DiscreteVariable(name="CLASS", values=["M", "F"]))
-        t = Table(d, [[0,1,0,0], [0,1,0,1], [0,1,0,1]])
+        d = Domain(
+            (
+                ContinuousVariable(name="A"),
+                ContinuousVariable(name="B"),
+                ContinuousVariable(name="C"),
+            ),
+            DiscreteVariable(name="CLASS", values=["M", "F"]),
+        )
+        t = Table(d, [[0, 1, 0, 0], [0, 1, 0, 1], [0, 1, 0, 1]])
         nb = NaiveBayesLearner()
         model = nb(t)
         self.assertEqual(model.domain.attributes, ())
@@ -50,6 +54,6 @@ class TestNaiveBayesLearner(unittest.TestCase):
 
     def test_allnan_cv(self):
         # GH 2740
-        data = Table('voting')
+        data = Table("voting")
         results = CrossValidation(data, [self.learner])
         self.assertFalse(any(results.failed))

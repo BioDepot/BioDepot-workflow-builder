@@ -15,9 +15,18 @@ from Orange.statistics import distribution
 from Orange.util import Reprable, Enum, deprecated
 from . import impute, discretize, transformation
 
-__all__ = ["Continuize", "Discretize", "Impute",
-           "SklImpute", "Normalize", "Randomize",
-           "RemoveNaNClasses", "ProjectPCA", "ProjectCUR", "Scale"]
+__all__ = [
+    "Continuize",
+    "Discretize",
+    "Impute",
+    "SklImpute",
+    "Normalize",
+    "Randomize",
+    "RemoveNaNClasses",
+    "ProjectPCA",
+    "ProjectCUR",
+    "Scale",
+]
 
 
 class Preprocess(_RefuseDataInConstructor, Reprable):
@@ -29,6 +38,7 @@ class Preprocess(_RefuseDataInConstructor, Reprable):
     __call__(data: Table) -> Table
         Return preprocessed data.
     """
+
     def __call__(self, data):
         raise NotImplementedError("Subclasses need to implement __call__")
 
@@ -36,15 +46,32 @@ class Preprocess(_RefuseDataInConstructor, Reprable):
 class Continuize(Preprocess):
     MultinomialTreatment = Enum(
         "Continuize",
-        ("Indicators", "FirstAsBase", "FrequentAsBase", "Remove",
-         "RemoveMultinomial", "ReportError", "AsOrdinal", "AsNormalizedOrdinal",
-         "Leave"),
-        qualname="Continuize.MultinomialTreatment")
-    (Indicators, FirstAsBase, FrequentAsBase, Remove, RemoveMultinomial,
-     ReportError, AsOrdinal, AsNormalizedOrdinal, Leave) = MultinomialTreatment
+        (
+            "Indicators",
+            "FirstAsBase",
+            "FrequentAsBase",
+            "Remove",
+            "RemoveMultinomial",
+            "ReportError",
+            "AsOrdinal",
+            "AsNormalizedOrdinal",
+            "Leave",
+        ),
+        qualname="Continuize.MultinomialTreatment",
+    )
+    (
+        Indicators,
+        FirstAsBase,
+        FrequentAsBase,
+        Remove,
+        RemoveMultinomial,
+        ReportError,
+        AsOrdinal,
+        AsNormalizedOrdinal,
+        Leave,
+    ) = MultinomialTreatment
 
-    def __init__(self, zero_based=True,
-                 multinomial_treatment=Indicators):
+    def __init__(self, zero_based=True, multinomial_treatment=Indicators):
         self.zero_based = zero_based
         self.multinomial_treatment = multinomial_treatment
 
@@ -52,8 +79,8 @@ class Continuize(Preprocess):
         from . import continuize
 
         continuizer = continuize.DomainContinuizer(
-            zero_based=self.zero_based,
-            multinomial_treatment=self.multinomial_treatment)
+            zero_based=self.zero_based, multinomial_treatment=self.multinomial_treatment
+        )
         domain = continuizer(data)
         return data.transform(domain)
 
@@ -72,8 +99,13 @@ class Discretize(Preprocess):
         during discretization.
     """
 
-    def __init__(self, method=None, remove_const=True,
-                 discretize_classes=False, discretize_metas=False):
+    def __init__(
+        self,
+        method=None,
+        remove_const=True,
+        discretize_classes=False,
+        discretize_metas=False,
+    ):
         self.method = method
         self.remove_const = remove_const
         self.discretize_classes = discretize_classes
@@ -93,8 +125,9 @@ class Discretize(Preprocess):
         def transform(var):
             if var.is_continuous:
                 new_var = method(data, var)
-                if new_var is not None and \
-                        (len(new_var.values) >= 2 or not self.remove_const):
+                if new_var is not None and (
+                    len(new_var.values) >= 2 or not self.remove_const
+                ):
                     return new_var
                 else:
                     return None
@@ -111,7 +144,8 @@ class Discretize(Preprocess):
         domain = Orange.data.Domain(
             discretized(data.domain.attributes, True),
             discretized(data.domain.class_vars, self.discretize_classes),
-            discretized(data.domain.metas, self.discretize_metas))
+            discretized(data.domain.metas, self.discretize_metas),
+        )
         return data.transform(domain)
 
 
@@ -141,19 +175,19 @@ class Impute(Preprocess):
 
         method = self.method or impute.Average()
         newattrs = [method(data, var) for var in data.domain.attributes]
-        domain = Orange.data.Domain(
-            newattrs, data.domain.class_vars, data.domain.metas)
+        domain = Orange.data.Domain(newattrs, data.domain.class_vars, data.domain.metas)
         return data.transform(domain)
 
 
 class SklImpute(Preprocess):
     __wraps__ = skl_preprocessing.Imputer
 
-    def __init__(self, strategy='mean'):
+    def __init__(self, strategy="mean"):
         self.strategy = strategy
 
     def __call__(self, data):
         from Orange.data.sql.table import SqlTable
+
         if isinstance(data, SqlTable):
             return Impute()(data)
         imputer = skl_preprocessing.Imputer(strategy=self.strategy)
@@ -162,13 +196,13 @@ class SklImpute(Preprocess):
         # drop the ones which do not have valid `imputer.statistics_`
         # (i.e. all NaN columns). `sklearn.preprocessing.Imputer` already
         # drops them from the transformed X.
-        features = [impute.Average()(data, var, value)
-                    for var, value in zip(data.domain.attributes,
-                                          imputer.statistics_)
-                    if not np.isnan(value)]
+        features = [
+            impute.Average()(data, var, value)
+            for var, value in zip(data.domain.attributes, imputer.statistics_)
+            if not np.isnan(value)
+        ]
         assert X.shape[1] == len(features)
-        domain = Orange.data.Domain(features, data.domain.class_vars,
-                                    data.domain.metas)
+        domain = Orange.data.Domain(features, data.domain.class_vars, data.domain.metas)
         new_data = data.transform(domain)
         new_data.X = X
         return new_data
@@ -190,11 +224,9 @@ class RemoveConstant(Preprocess):
         data : an input dataset
         """
 
-        oks = bn.nanmin(data.X, axis=0) != \
-              bn.nanmax(data.X, axis=0)
+        oks = bn.nanmin(data.X, axis=0) != bn.nanmax(data.X, axis=0)
         atts = [data.domain.attributes[i] for i, ok in enumerate(oks) if ok]
-        domain = Orange.data.Domain(atts, data.domain.class_vars,
-                                    data.domain.metas)
+        domain = Orange.data.Domain(atts, data.domain.class_vars, data.domain.metas)
         return data.transform(domain)
 
 
@@ -255,14 +287,13 @@ class Normalize(Preprocess):
     >>> normalizer = Normalize(norm_type=Normalize.NormalizeBySpan)
     >>> normalized_data = normalizer(data)
     """
-    Type = Enum("Normalize", ("NormalizeBySpan", "NormalizeBySD"),
-                qualname="Normalize.Type")
+
+    Type = Enum(
+        "Normalize", ("NormalizeBySpan", "NormalizeBySD"), qualname="Normalize.Type"
+    )
     NormalizeBySpan, NormalizeBySD = Type
 
-    def __init__(self,
-                 zero_based=True,
-                 norm_type=NormalizeBySD,
-                 transform_class=False):
+    def __init__(self, zero_based=True, norm_type=NormalizeBySD, transform_class=False):
         self.zero_based = zero_based
         self.norm_type = norm_type
         self.transform_class = transform_class
@@ -284,8 +315,11 @@ class Normalize(Preprocess):
         """
         from . import normalize
 
-        if all(a.attributes.get('skip-normalization', False)
-               for a in data.domain.attributes if a.is_continuous):
+        if all(
+            a.attributes.get("skip-normalization", False)
+            for a in data.domain.attributes
+            if a.is_continuous
+        ):
             # Skip normalization for datasets where all features are marked as already normalized.
             # Required for SVMs (with normalizer as their default preprocessor) on sparse data to
             # retain sparse structure. Normalizing sparse data would otherwise result in a dense
@@ -295,7 +329,8 @@ class Normalize(Preprocess):
         normalizer = normalize.Normalizer(
             zero_based=self.zero_based,
             norm_type=self.norm_type,
-            transform_class=self.transform_class)
+            transform_class=self.transform_class,
+        )
         return normalizer(data)
 
 
@@ -326,12 +361,13 @@ class Randomize(Preprocess):
     >>> randomizer = Randomize(Randomize.RandomizeClasses)
     >>> randomized_data = randomizer(data)
     """
-    Type = Enum("Randomize",
-                dict(RandomizeClasses=1,
-                     RandomizeAttributes=2,
-                     RandomizeMetas=4),
-                type=int,
-                qualname="Randomize.Type")
+
+    Type = Enum(
+        "Randomize",
+        dict(RandomizeClasses=1, RandomizeAttributes=2, RandomizeMetas=4),
+        type=int,
+        qualname="Randomize.Type",
+    )
     RandomizeClasses, RandomizeAttributes, RandomizeMetas = Type
 
     def __init__(self, rand_type=RandomizeClasses, rand_seed=None):
@@ -371,8 +407,7 @@ class Randomize(Preprocess):
             table = table.tocsc()  # type: sp.spmatrix
             for i in range(table.shape[1]):
                 permutation = rstate.permutation(table.shape[0])
-                col_indices = \
-                    table.indices[table.indptr[i]: table.indptr[i + 1]]
+                col_indices = table.indices[table.indptr[i] : table.indptr[i + 1]]
                 col_indices[:] = permutation[col_indices]
         elif len(table.shape) > 1:
             for i in range(table.shape[1]):
@@ -383,7 +418,6 @@ class Randomize(Preprocess):
 
 
 class ProjectPCA(Preprocess):
-
     def __init__(self, n_components=None):
         self.n_components = n_components
 
@@ -393,16 +427,14 @@ class ProjectPCA(Preprocess):
 
 
 class ProjectCUR(Preprocess):
-
     def __init__(self, rank=3, max_error=1):
         self.rank = rank
         self.max_error = max_error
 
     def __call__(self, data):
-        rank = min(self.rank, min(data.X.shape)-1)
+        rank = min(self.rank, min(data.X.shape) - 1)
         cur = Orange.projection.CUR(
-            rank=rank, max_error=self.max_error,
-            compute_U=False,
+            rank=rank, max_error=self.max_error, compute_U=False
         )(data)
         return cur(data)
 
@@ -412,14 +444,17 @@ class Scale(Preprocess):
     Scale data preprocessor.  Scales data so that its distribution remains
     the same but its location on the axis changes.
     """
+
     class _MethodEnum(Enum):
         def __call__(self, *args, **kwargs):
-            return getattr(Scale, '_' + self.name)(*args, **kwargs)
+            return getattr(Scale, "_" + self.name)(*args, **kwargs)
 
-    CenteringType = _MethodEnum("Scale", ("NoCentering", "Mean", "Median"),
-                                qualname="Scale.CenteringType")
-    ScalingType = _MethodEnum("Scale", ("NoScaling", "Std", "Span"),
-                              qualname="Scale.ScalingType")
+    CenteringType = _MethodEnum(
+        "Scale", ("NoCentering", "Mean", "Median"), qualname="Scale.CenteringType"
+    )
+    ScalingType = _MethodEnum(
+        "Scale", ("NoScaling", "Std", "Span"), qualname="Scale.ScalingType"
+    )
     NoCentering, Mean, Median = CenteringType
     NoScaling, Std, Span = ScalingType
 
@@ -434,7 +469,7 @@ class Scale(Preprocess):
         cumdist = np.cumsum(counts)
         if cumdist[-1] > 0:
             cumdist /= cumdist[-1]
-        return np.interp(.5, cumdist, values)
+        return np.interp(0.5, cumdist, values)
 
     @staticmethod
     def _Std(dist):
@@ -472,7 +507,8 @@ class Scale(Preprocess):
                 s = 1
             factor = 1 / s
             transformed_var = var.copy(
-                compute_value=transformation.Normalizer(var, c, factor))
+                compute_value=transformation.Normalizer(var, c, factor)
+            )
             if s != 1:
                 transformed_var.number_of_decimals = 3
             return transformed_var
@@ -483,8 +519,7 @@ class Scale(Preprocess):
                 newvars.append(transform(var))
             else:
                 newvars.append(var)
-        domain = Orange.data.Domain(newvars, data.domain.class_vars,
-                                    data.domain.metas)
+        domain = Orange.data.Domain(newvars, data.domain.class_vars, data.domain.metas)
         return data.transform(domain)
 
 

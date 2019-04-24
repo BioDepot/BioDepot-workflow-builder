@@ -2,8 +2,12 @@ import numpy as np
 
 from Orange.base import Learner, Model, SklLearner, SklModel
 
-__all__ = ["LearnerClassification", "ModelClassification",
-           "SklModelClassification", "SklLearnerClassification"]
+__all__ = [
+    "LearnerClassification",
+    "ModelClassification",
+    "SklModelClassification",
+    "SklLearnerClassification",
+]
 
 
 class LearnerClassification(Learner):
@@ -41,8 +45,7 @@ class SklModelClassification(SklModel, ModelClassification):
                     i = 0
                     class_values = len(self.domain.class_vars[c].values)
                     for cv in range(class_values):
-                        if (i < len(self.used_vals[c]) and
-                                    cv == self.used_vals[c][i]):
+                        if i < len(self.used_vals[c]) and cv == self.used_vals[c][i]:
                             probs_ext[:, c, cv] = probs[:, c, i]
                             i += 1
                 if self.supports_multiclass:

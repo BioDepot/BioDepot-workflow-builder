@@ -7,8 +7,13 @@ from AnyQt.QtCore import Qt, QAbstractTableModel
 from AnyQt.QtGui import QColor
 from AnyQt.QtWidgets import QComboBox, QTableView, QSizePolicy
 
-from Orange.data import DiscreteVariable, ContinuousVariable, StringVariable, \
-    TimeVariable, Domain
+from Orange.data import (
+    DiscreteVariable,
+    ContinuousVariable,
+    StringVariable,
+    TimeVariable,
+    Domain,
+)
 from Orange.statistics.util import unique
 from Orange.widgets import gui
 from Orange.widgets.gui import HorizontalGridDelegate
@@ -69,8 +74,7 @@ class VarTableModel(QAbstractTableModel):
             if col == Column.tpe:
                 return gui.attributeIconDict[self.vartypes.index(val) + 1]
         if role == Qt.ForegroundRole:
-            if self.variables[row][Column.place] == Place.skip \
-                    and col != Column.place:
+            if self.variables[row][Column.place] == Place.skip and col != Column.place:
                 return QColor(160, 160, 160)
         if role == Qt.BackgroundRole:
             place = self.variables[row][Column.place]
@@ -86,8 +90,7 @@ class VarTableModel(QAbstractTableModel):
             elif col == Column.tpe:
                 vartype = self.name2type[value]
                 row_data[col] = vartype
-                if not vartype.is_primitive() and \
-                                row_data[Column.place] < Place.meta:
+                if not vartype.is_primitive() and row_data[Column.place] < Place.meta:
                     row_data[Column.place] = Place.meta
             elif col == Column.place:
                 row_data[col] = self.places.index(value)
@@ -133,8 +136,7 @@ class ComboDelegate(HorizontalGridDelegate):
 
             def hidePopup(me):
                 if me.popup_shown:
-                    self.view.model().setData(
-                        index, me.highlighted_text, Qt.EditRole)
+                    self.view.model().setData(index, me.highlighted_text, Qt.EditRole)
                     self.popup_shown = False
                 super().hidePopup()
                 self.view.closeEditor(me, self.NoHint)
@@ -147,8 +149,7 @@ class ComboDelegate(HorizontalGridDelegate):
 class VarTypeDelegate(ComboDelegate):
     def setEditorData(self, combo, index):
         combo.clear()
-        no_numeric = not self.view.model().variables[
-            index.row()][Column.not_valid]
+        no_numeric = not self.view.model().variables[index.row()][Column.not_valid]
         if no_numeric:
             # Do not allow selection of numeric and datetime
             items = [i for i in self.items if i not in ("numeric", "datetime")]
@@ -163,9 +164,10 @@ class VarTypeDelegate(ComboDelegate):
 class PlaceDelegate(ComboDelegate):
     def setEditorData(self, combo, index):
         combo.clear()
-        to_meta = not self.view.model().variables[
-            index.row()][Column.tpe].is_primitive()
-        combo.addItems(self.items[2 * to_meta:])
+        to_meta = (
+            not self.view.model().variables[index.row()][Column.tpe].is_primitive()
+        )
+        combo.addItems(self.items[2 * to_meta :])
         combo.setCurrentIndex(self.items.index(index.data()) - 2 * to_meta)
 
 
@@ -191,10 +193,8 @@ class DomainEditor(QTableView):
         self.setSelectionMode(QTableView.NoSelection)
         self.horizontalHeader().setStretchLastSection(True)
         self.setShowGrid(False)
-        self.setEditTriggers(
-            QTableView.SelectedClicked | QTableView.DoubleClicked)
-        self.setSizePolicy(
-            QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
+        self.setEditTriggers(QTableView.SelectedClicked | QTableView.DoubleClicked)
+        self.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
         # setItemDelegate(ForColumn) apparently does not take ownership
         # of delegates, and coredumps if a a references is not stored somewhere.
         # We thus store delegates as attributes
@@ -263,19 +263,27 @@ class DomainEditor(QTableView):
             return False
 
         # Exit early with original domain if the user didn't actually change anything
-        if all((name == orig_var.name and tpe == type(orig_var) and place == orig_plc)
-               for (name, tpe, place, _, _), (orig_var, orig_plc) in \
-                       zip(variables,
-                           chain(((at, Place.feature) for at in domain.attributes),
-                                 ((cl, Place.class_var) for cl in domain.class_vars),
-                                 ((mt, Place.meta) for mt in domain.metas)))):
+        if all(
+            (name == orig_var.name and tpe == type(orig_var) and place == orig_plc)
+            for (name, tpe, place, _, _), (orig_var, orig_plc) in zip(
+                variables,
+                chain(
+                    ((at, Place.feature) for at in domain.attributes),
+                    ((cl, Place.class_var) for cl in domain.class_vars),
+                    ((mt, Place.meta) for mt in domain.metas),
+                ),
+            )
+        ):
             return domain, [data.X, data.Y, data.metas]
 
-        for (name, tpe, place, _, may_be_numeric), (orig_var, orig_plc) in \
-                zip(variables,
-                        chain([(at, Place.feature) for at in domain.attributes],
-                              [(cl, Place.class_var) for cl in domain.class_vars],
-                              [(mt, Place.meta) for mt in domain.metas])):
+        for (name, tpe, place, _, may_be_numeric), (orig_var, orig_plc) in zip(
+            variables,
+            chain(
+                [(at, Place.feature) for at in domain.attributes],
+                [(cl, Place.class_var) for cl in domain.class_vars],
+                [(mt, Place.meta) for mt in domain.metas],
+            ),
+        ):
             if place == Place.skip:
                 continue
 
@@ -289,10 +297,14 @@ class DomainEditor(QTableView):
                 orig_var.name = name
                 var = orig_var
             elif tpe == DiscreteVariable:
-                values = list(str(i) for i in unique(col_data) if not self._is_missing(i))
+                values = list(
+                    str(i) for i in unique(col_data) if not self._is_missing(i)
+                )
                 round_numbers = numbers_are_round(orig_var, col_data)
-                col_data = [np.nan if self._is_missing(x) else values.index(str(x))
-                            for x in self._iter_vals(col_data)]
+                col_data = [
+                    np.nan if self._is_missing(x) else values.index(str(x))
+                    for x in self._iter_vals(col_data)
+                ]
                 if round_numbers:
                     values = [str(int(float(v))) for v in values]
                 var = tpe(name, values)
@@ -300,22 +312,32 @@ class DomainEditor(QTableView):
             elif tpe == StringVariable:
                 var = tpe.make(name)
                 if type(orig_var) == DiscreteVariable:
-                    col_data = [orig_var.repr_val(x) if not np.isnan(x) else ""
-                                for x in self._iter_vals(col_data)]
+                    col_data = [
+                        orig_var.repr_val(x) if not np.isnan(x) else ""
+                        for x in self._iter_vals(col_data)
+                    ]
                 elif type(orig_var) == ContinuousVariable:
                     round_numbers = numbers_are_round(orig_var, col_data)
-                    col_data = ['' if np.isnan(x) else
-                                str(int(x)) if round_numbers else
-                                orig_var.repr_val(x)
-                                for x in self._iter_vals(col_data)]
+                    col_data = [
+                        ""
+                        if np.isnan(x)
+                        else str(int(x))
+                        if round_numbers
+                        else orig_var.repr_val(x)
+                        for x in self._iter_vals(col_data)
+                    ]
                 # don't obey sparsity for StringVariable since they are
                 # in metas which are transformed to dense below
                 col_data = self._to_column(col_data, False, dtype=object)
             elif tpe == ContinuousVariable and type(orig_var) == DiscreteVariable:
                 var = tpe.make(name)
                 if may_be_numeric:
-                    col_data = [np.nan if self._is_missing(x) else float(orig_var.values[int(x)])
-                                for x in self._iter_vals(col_data)]
+                    col_data = [
+                        np.nan
+                        if self._is_missing(x)
+                        else float(orig_var.values[int(x)])
+                        for x in self._iter_vals(col_data)
+                    ]
                 col_data = self._to_column(col_data, is_sparse)
             else:
                 var = tpe(name)
@@ -372,17 +394,23 @@ class DomainEditor(QTableView):
             return False
 
         def discrete_value_display(value_list):
-            result = ", ".join(str(v)
-                               for v in value_list[:VarTableModel.DISCRETE_VALUE_DISPLAY_LIMIT])
+            result = ", ".join(
+                str(v) for v in value_list[: VarTableModel.DISCRETE_VALUE_DISPLAY_LIMIT]
+            )
             if len(value_list) > VarTableModel.DISCRETE_VALUE_DISPLAY_LIMIT:
                 result += ", ..."
             return result
 
         return [
-            [var.name, type(var), place,
-             discrete_value_display(var.values) if var.is_discrete else "",
-             may_be_numeric(var)]
+            [
+                var.name,
+                type(var),
+                place,
+                discrete_value_display(var.values) if var.is_discrete else "",
+                may_be_numeric(var),
+            ]
             for place, vars in enumerate(
-                (domain.attributes, domain.class_vars, domain.metas))
+                (domain.attributes, domain.class_vars, domain.metas)
+            )
             for var in vars
         ]

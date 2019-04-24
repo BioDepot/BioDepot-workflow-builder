@@ -5,14 +5,13 @@ from Orange.widgets.tests.base import (
     WidgetTest,
     DefaultParameterMapping,
     ParameterMapping,
-    WidgetLearnerTestMixin
+    WidgetLearnerTestMixin,
 )
 
 
 class TestOWSVMClassification(WidgetTest, WidgetLearnerTestMixin):
     def setUp(self):
-        self.widget = self.create_widget(
-            OWSVM, stored_settings={"auto_apply": False})
+        self.widget = self.create_widget(OWSVM, stored_settings={"auto_apply": False})
         self.init()
 
         # All this nonsense is necessary because we add an `auto` option to the
@@ -22,8 +21,11 @@ class TestOWSVMClassification(WidgetTest, WidgetLearnerTestMixin):
 
         def getter():
             value = gamma_spin.value()
-            return gamma_spin.specialValueText() \
-                if value == gamma_spin.minimum() else value
+            return (
+                gamma_spin.specialValueText()
+                if value == gamma_spin.minimum()
+                else value
+            )
 
         def setter(value):
             if value == gamma_spin.specialValueText():
@@ -33,12 +35,18 @@ class TestOWSVMClassification(WidgetTest, WidgetLearnerTestMixin):
 
         self.parameters = [
             ParameterMapping("C", self.widget.C_spin),
-            ParameterMapping("gamma", self.widget._kernel_params[0],
-                             values=values, setter=setter, getter=getter),
+            ParameterMapping(
+                "gamma",
+                self.widget._kernel_params[0],
+                values=values,
+                setter=setter,
+                getter=getter,
+            ),
             ParameterMapping("coef0", self.widget._kernel_params[1]),
             ParameterMapping("degree", self.widget._kernel_params[2]),
             ParameterMapping("tol", self.widget.tol_spin),
-            ParameterMapping("max_iter", self.widget.max_iter_spin[1])]
+            ParameterMapping("max_iter", self.widget.max_iter_spin[1]),
+        ]
 
     def test_parameters_unchecked(self):
         """Check learner and model for various values of all parameters
@@ -63,8 +71,7 @@ class TestOWSVMClassification(WidgetTest, WidgetLearnerTestMixin):
         """Check if the right equation is written according to kernel """
         for i in range(4):
             if self.widget.kernel_box.buttons[i].isChecked():
-                self.assertEqual(self.widget.kernel_eq,
-                                 self.widget.kernels[i][1])
+                self.assertEqual(self.widget.kernel_eq, self.widget.kernels[i][1])
                 break
         for i in range(4):
             self.widget.kernel_box.buttons[i].click()
@@ -72,18 +79,29 @@ class TestOWSVMClassification(WidgetTest, WidgetLearnerTestMixin):
 
     def test_kernel_spins(self):
         """Check if the right spins are visible according to kernel """
-        for i, hidden in enumerate([[True, True, True],
-                                    [False, False, False],
-                                    [False, True, True],
-                                    [False, False, True]]):
+        for i, hidden in enumerate(
+            [
+                [True, True, True],
+                [False, False, False],
+                [False, True, True],
+                [False, False, True],
+            ]
+        ):
             if self.widget.kernel_box.buttons[i].isChecked():
-                self.assertEqual([self.widget._kernel_params[j].box.isHidden()
-                                  for j in range(3)], hidden)
+                self.assertEqual(
+                    [self.widget._kernel_params[j].box.isHidden() for j in range(3)],
+                    hidden,
+                )
                 break
-        for i, hidden in enumerate([[True, True, True],
-                                    [False, False, False],
-                                    [False, True, True],
-                                    [False, False, True]]):
+        for i, hidden in enumerate(
+            [
+                [True, True, True],
+                [False, False, False],
+                [False, True, True],
+                [False, False, True],
+            ]
+        ):
             self.widget.kernel_box.buttons[i].click()
-            self.assertEqual([self.widget._kernel_params[j].box.isHidden()
-                              for j in range(3)], hidden)
+            self.assertEqual(
+                [self.widget._kernel_params[j].box.isHidden() for j in range(3)], hidden
+            )

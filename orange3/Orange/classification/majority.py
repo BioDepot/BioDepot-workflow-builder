@@ -19,10 +19,13 @@ class MajorityLearner(Learner):
     class value is selected randomly. In order to produce consistent results on
     the same dataset, this value is selected based on hash of the class vector.
     """
+
     def fit_storage(self, dat):
         if not dat.domain.has_discrete_class:
-            raise ValueError("classification.MajorityLearner expects a domain "
-                             "with a (single) categorical variable")
+            raise ValueError(
+                "classification.MajorityLearner expects a domain "
+                "with a (single) categorical variable"
+            )
         dist = distribution.get_distribution(dat, dat.domain.class_var)
         N = dist.sum()
         if N > 0:
@@ -33,8 +36,9 @@ class MajorityLearner(Learner):
         probs = np.array(dist)
         ties = np.flatnonzero(probs == probs.max())
         if len(ties) > 1:
-            random_idx = int(sha1(np.ascontiguousarray(dat.Y).data)
-                             .hexdigest(), 16) % len(ties)
+            random_idx = int(
+                sha1(np.ascontiguousarray(dat.Y).data).hexdigest(), 16
+            ) % len(ties)
             unif_maj = ties[random_idx]
         else:
             unif_maj = None
@@ -45,6 +49,7 @@ class ConstantModel(Model):
     """
     A classification model that returns a given class value.
     """
+
     def __init__(self, dist, unif_maj=None):
         """
         Constructs `Orange.classification.MajorityModel` that always
@@ -74,11 +79,12 @@ class ConstantModel(Model):
         """
         probs = np.tile(self.dist, (X.shape[0], 1))
         if self.unif_maj is not None:
-            value = np.tile(self.unif_maj, (X.shape[0], ))
+            value = np.tile(self.unif_maj, (X.shape[0],))
             return value, probs
         return probs
 
     def __str__(self):
-        return 'ConstantModel {}'.format(self.dist)
+        return "ConstantModel {}".format(self.dist)
+
 
 MajorityLearner.__returns__ = ConstantModel

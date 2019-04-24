@@ -32,6 +32,7 @@ import traceback
 from operator import attrgetter
 from warnings import warn
 from inspect import getattr_static
+
 # pylint: disable=unused-import
 from typing import Optional
 
@@ -49,6 +50,7 @@ class UnboundMsg(str):
 
     Note: this class is aliased to `Orange.widgets.widget.Msg`.
     """
+
     def __new__(cls, msg):
         return str.__new__(cls, msg)
 
@@ -109,6 +111,7 @@ class _BoundMsg(UnboundMsg):
         formatted (str): formatted message
 
     """
+
     def __new__(cls, unbound_msg, group):
         self = UnboundMsg.__new__(cls, unbound_msg)
         self.group = group
@@ -124,8 +127,7 @@ class _BoundMsg(UnboundMsg):
             self.formatted = self.format(*args, **kwargs)
             if exc_info:
                 if isinstance(exc_info, BaseException):
-                    exc_info = (type(exc_info), exc_info,
-                                exc_info.__traceback__)
+                    exc_info = (type(exc_info), exc_info, exc_info.__traceback__)
                 elif not isinstance(exc_info, tuple):
                     exc_info = sys.exc_info()
                 if exc_info is not None:
@@ -151,6 +153,7 @@ class _OldStyleMsg(_BoundMsg):
     with their old-style id's as keys. Instance of `_OldStyleMsg` are not
     members of message groups.
     """
+
     def __new__(cls, text, group):
         self = _BoundMsg.__new__(cls, text, group)
         self.formatted = text
@@ -167,6 +170,7 @@ class MessageGroup:
     Attributes:
         widget (widget.OWWidget): the widget instance to which the group belongs
     """
+
     def __init__(self, widget):
         self.widget = widget
         # Note: active messages are stored in the dictionary, in which
@@ -242,8 +246,7 @@ class MessageGroup:
         if msg not in self._active:
             return
         inst_msg = self._active.pop(msg)
-        self.widget.messageDeactivated.emit(
-            inst_msg if isinstance(msg, int) else msg)
+        self.widget.messageDeactivated.emit(inst_msg if isinstance(msg, int) else msg)
 
         # When when we no longer support old-style messages, replace with:
         # if msg not in self._active:
@@ -285,14 +288,17 @@ class MessagesMixin:
 
     Widgets should use `WidgetMessageMixin rather than this class.
     """
+
     def __init__(self):
         # type(self).__dict__ wouldn't return inherited messages, hence dir
         self.message_groups = []
         for name in dir(self):
             group_class = getattr_static(self, name)
-            if isinstance(group_class, type) and \
-                    issubclass(group_class, MessageGroup) and \
-                    group_class is not MessageGroup:
+            if (
+                isinstance(group_class, type)
+                and issubclass(group_class, MessageGroup)
+                and group_class is not MessageGroup
+            ):
                 bound_group = group_class(self)
                 setattr(self, name, bound_group)
                 self.message_groups.append(bound_group)
@@ -306,8 +312,10 @@ class WidgetMessagesMixin(MessagesMixin):
     The class defines member classes `Error`, `Warning` and `Information` that
     serve as base classes for these message groups.
     """
+
     class Error(MessageGroup):
         """Base class for groups of error messages in widgets"""
+
         severity = 3
         icon_path = gui.resource_filename("icons/error.png")
         bar_background = "#ffc6c6"
@@ -315,6 +323,7 @@ class WidgetMessagesMixin(MessagesMixin):
 
     class Warning(MessageGroup):
         """Base class for groups of warning messages in widgets"""
+
         severity = 2
         icon_path = gui.resource_filename("icons/warning.png")
         bar_background = "#ffffc9"
@@ -322,6 +331,7 @@ class WidgetMessagesMixin(MessagesMixin):
 
     class Information(MessageGroup):
         """Base class for groups of information messages in widgets"""
+
         severity = 1
         icon_path = gui.resource_filename("icons/information.png")
         bar_background = "#ceceff"
@@ -357,13 +367,12 @@ class WidgetMessagesMixin(MessagesMixin):
 
             return MessagesWidget.Message(
                 MessagesWidget.Severity(m.group.severity),
-                text=text, informativeText=extra,
-                detailedText=m.tb if m.tb else ""
+                text=text,
+                informativeText=extra,
+                detailedText=m.tb if m.tb else "",
             )
 
-        messages = [msg
-                    for group in self.message_groups
-                    for msg in group.active]
+        messages = [msg for group in self.message_groups for msg in group.active]
 
         self.message_bar.clear()
         if messages:
@@ -387,8 +396,10 @@ class WidgetMessagesMixin(MessagesMixin):
     @staticmethod
     def _warn_obsolete(text_or_id, what):
         if not isinstance(text_or_id, str) and text_or_id is not None:
-            warn("'{}' with id is deprecated; use {} class".
-                 format(what, what.title()), stacklevel=3)
+            warn(
+                "'{}' with id is deprecated; use {} class".format(what, what.title()),
+                stacklevel=3,
+            )
 
     def information(self, text_or_id=None, text=None, shown=True):
         self._warn_obsolete(text_or_id, "information")

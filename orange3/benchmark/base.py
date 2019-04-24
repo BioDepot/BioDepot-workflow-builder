@@ -8,7 +8,7 @@ import numpy as np
 from Orange.data import Table
 
 # override method prefix for niceness
-BENCH_METHOD_PREFIX = 'bench'
+BENCH_METHOD_PREFIX = "bench"
 unittest.TestLoader.testMethodPrefix = BENCH_METHOD_PREFIX
 
 
@@ -55,23 +55,29 @@ def _bench_skipper(condition, skip_message):
     function
         The custom skip decorator.
     """
+
     def decorator(func):
-        if (isinstance(condition, bool) and condition) or \
-                (not isinstance(condition, bool) and condition()):
+        if (isinstance(condition, bool) and condition) or (
+            not isinstance(condition, bool) and condition()
+        ):
             # display a message and skip bench
-            wrapper = unittest.skip("[{}] skipped: {}\n".format(_get_bench_name(func), skip_message))(func)
+            wrapper = unittest.skip(
+                "[{}] skipped: {}\n".format(_get_bench_name(func), skip_message)
+            )(func)
         else:
             # allow execution
             @wraps(func)
             def wrapper(*args, **kwargs):
                 func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 
 def _get_bench_name(bench_func):
     """Get the benchmark name from its function object."""
-    return bench_func.__name__[len(BENCH_METHOD_PREFIX) + 1:]
+    return bench_func.__name__[len(BENCH_METHOD_PREFIX) + 1 :]
 
 
 def benchmark(setup=None, number=10, repeat=3, warmup=5):
@@ -92,6 +98,7 @@ def benchmark(setup=None, number=10, repeat=3, warmup=5):
     warmup : int
         The number of warmup runs of the function.
     """
+
     def real_decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
@@ -108,18 +115,33 @@ def benchmark(setup=None, number=10, repeat=3, warmup=5):
                     clock_time_ends[i, j] = perf_counter()
             clock_times = (clock_time_ends - clock_time_starts).min(axis=1)
 
-            print("[{}] with {} loops, best of {}:"
-                  .format(_get_bench_name(func), number, repeat))
-            print("\tmin {:4s} per loop".format(_timeitlike_time_format(clock_times.min())))
-            print("\tavg {:4s} per loop".format(_timeitlike_time_format(clock_times.mean())))
+            print(
+                "[{}] with {} loops, best of {}:".format(
+                    _get_bench_name(func), number, repeat
+                )
+            )
+            print(
+                "\tmin {:4s} per loop".format(
+                    _timeitlike_time_format(clock_times.min())
+                )
+            )
+            print(
+                "\tavg {:4s} per loop".format(
+                    _timeitlike_time_format(clock_times.mean())
+                )
+            )
+
         return wrapper
+
     return real_decorator
 
 
-pandas_only = _bench_skipper(not hasattr(Table, '_metadata'),
-                             "Not a pandas environment.")
-non_pandas_only = _bench_skipper(hasattr(Table, '_metadata'),
-                                 "Not a pre-pandas environment.")
+pandas_only = _bench_skipper(
+    not hasattr(Table, "_metadata"), "Not a pandas environment."
+)
+non_pandas_only = _bench_skipper(
+    hasattr(Table, "_metadata"), "Not a pre-pandas environment."
+)
 
 
 # see Benchmark.setUpClass()
@@ -149,9 +171,12 @@ class Benchmark(unittest.TestCase):
         """Runs once globally to print system information."""
         global global_setup_ran
         if not global_setup_ran:
-            print("\nRunning benchmark with {} v{} on {} ({})"
-                  .format(platform.python_implementation(),
-                          platform.python_version(),
-                          platform.platform(),
-                          Benchmark.getPlatformSpecificDetails()))
+            print(
+                "\nRunning benchmark with {} v{} on {} ({})".format(
+                    platform.python_implementation(),
+                    platform.python_version(),
+                    platform.platform(),
+                    Benchmark.getPlatformSpecificDetails(),
+                )
+            )
             global_setup_ran = True

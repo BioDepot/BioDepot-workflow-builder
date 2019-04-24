@@ -12,7 +12,7 @@ class LDA(SklProjector, _FeatureScorerMixin):
     name = "LDA"
     supports_sparse = False
 
-    def __init__(self, n_components=2, solver='eigen', preprocessors=None):
+    def __init__(self, n_components=2, solver="eigen", preprocessors=None):
         super().__init__(preprocessors=preprocessors)
         self.n_components = n_components
         self.solver = solver
@@ -20,13 +20,14 @@ class LDA(SklProjector, _FeatureScorerMixin):
     def fit(self, X, Y=None):
         if self.n_components is not None:
             self.n_components = min(min(X.shape), self.n_components)
-        proj = LinearDiscriminantAnalysis(solver='eigen', n_components=2)
+        proj = LinearDiscriminantAnalysis(solver="eigen", n_components=2)
         proj = proj.fit(X, Y)
         return LDAModel(proj, self.domain)
 
 
 class _LDATransformDomain:
     """Computation common for all LDA variables."""
+
     def __init__(self, lda):
         self.lda = lda
 
@@ -45,18 +46,22 @@ class LDAModel(Projection):
 
         def lda_variable(i):
             return Orange.data.ContinuousVariable(
-                'LD%d' % (i + 1), compute_value=LDAProjector(self, i, lda_transform))
+                "LD%d" % (i + 1), compute_value=LDAProjector(self, i, lda_transform)
+            )
 
         super().__init__(proj=proj)
         self.orig_domain = domain
         self.n_components = self.components_.shape[0]
         self.domain = Orange.data.Domain(
             [lda_variable(i) for i in range(proj.n_components)],
-            domain.class_vars, domain.metas)
+            domain.class_vars,
+            domain.metas,
+        )
 
 
 class LDAProjector(SharedComputeValue):
     """Transform into a given LDA component."""
+
     def __init__(self, projection, feature, lda_transform):
         super().__init__(lda_transform)
         self.feature = feature

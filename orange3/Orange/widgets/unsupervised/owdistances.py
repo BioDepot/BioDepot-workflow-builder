@@ -36,14 +36,14 @@ class OWDistances(OWWidget):
 
     settings_version = 2
 
-    axis = settings.Setting(0)        # type: int
+    axis = settings.Setting(0)  # type: int
     metric_idx = settings.Setting(0)  # type: int
 
     #: Use normalized distances if the metric supports it.
     #: The default is `True`, expect when restoring from old pre v2 settings
     #: (see `migrate_settings`).
     normalized_dist = settings.Setting(True)  # type: bool
-    autocommit = settings.Setting(True)       # type: bool
+    autocommit = settings.Setting(True)  # type: bool
 
     want_main_area = False
     buttons_area_orientation = Qt.Vertical
@@ -63,20 +63,32 @@ class OWDistances(OWWidget):
 
         self.data = None
 
-        gui.radioButtons(self.controlArea, self, "axis", ["Rows", "Columns"],
-                         box="Distances between", callback=self._invalidate
-                        )
+        gui.radioButtons(
+            self.controlArea,
+            self,
+            "axis",
+            ["Rows", "Columns"],
+            box="Distances between",
+            callback=self._invalidate,
+        )
         box = gui.widgetBox(self.controlArea, "Distance Metric")
         self.metrics_combo = gui.comboBox(
-            box, self, "metric_idx",
+            box,
+            self,
+            "metric_idx",
             items=[m[0] for m in METRICS],
-            callback=self._metric_changed
+            callback=self._metric_changed,
         )
         self.normalization_check = gui.checkBox(
-            box, self, "normalized_dist", "Normalized",
+            box,
+            self,
+            "normalized_dist",
+            "Normalized",
             callback=self._invalidate,
-            tooltip=("All dimensions are (implicitly) scaled to a common"
-                     "scale to normalize the influence across the domain.")
+            tooltip=(
+                "All dimensions are (implicitly) scaled to a common"
+                "scale to normalize the influence across the domain."
+            ),
         )
         _, metric = METRICS[self.metric_idx]
         self.normalization_check.setEnabled(metric.supports_normalization)
@@ -113,9 +125,11 @@ class OWDistances(OWWidget):
         def _fix_discrete():
             nonlocal data
             if data.domain.has_discrete_attributes() and (
-                    issparse(data.X) and getattr(metric, "fallback", None)
-                    or not metric.supports_discrete
-                    or self.axis == 1):
+                issparse(data.X)
+                and getattr(metric, "fallback", None)
+                or not metric.supports_discrete
+                or self.axis == 1
+            ):
                 if not data.domain.has_continuous_attributes():
                     self.Error.no_continuous_features()
                     return False
@@ -136,8 +150,7 @@ class OWDistances(OWWidget):
                 return
         try:
             if metric.supports_normalization and self.normalized_dist:
-                return metric(data, axis=1 - self.axis, impute=True,
-                              normalize=True)
+                return metric(data, axis=1 - self.axis, impute=True, normalize=True)
             else:
                 return metric(data, axis=1 - self.axis, impute=True)
         except ValueError as e:
@@ -155,10 +168,12 @@ class OWDistances(OWWidget):
 
     def send_report(self):
         # pylint: disable=invalid-sequence-index
-        self.report_items((
-            ("Distances Between", ["Rows", "Columns"][self.axis]),
-            ("Metric", METRICS[self.metric_idx][0])
-        ))
+        self.report_items(
+            (
+                ("Distances Between", ["Rows", "Columns"][self.axis]),
+                ("Metric", METRICS[self.metric_idx][0]),
+            )
+        )
 
     @classmethod
     def migrate_settings(cls, settings, version):

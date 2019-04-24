@@ -7,6 +7,7 @@ from Orange.widgets.tests.base import GuiTest
 
 from Orange.widgets import io as imgio
 
+
 @unittest.skipUnless(hasattr(imgio, "PdfFormat"), "QPdfWriter not available")
 class TestIO(GuiTest):
     def test_pdf(self):

@@ -7,31 +7,51 @@ import types
 from operator import attrgetter
 
 from AnyQt.QtWidgets import (
-    QWidget, QDialog, QVBoxLayout, QSizePolicy, QApplication, QStyle,
-    QShortcut, QSplitter, QSplitterHandle, QPushButton, QStatusBar,
-    QProgressBar, QAction
+    QWidget,
+    QDialog,
+    QVBoxLayout,
+    QSizePolicy,
+    QApplication,
+    QStyle,
+    QShortcut,
+    QSplitter,
+    QSplitterHandle,
+    QPushButton,
+    QStatusBar,
+    QProgressBar,
+    QAction,
 )
-from AnyQt.QtCore import (
-    Qt, QByteArray, QSettings, QUrl, pyqtSignal as Signal
-)
+from AnyQt.QtCore import Qt, QByteArray, QSettings, QUrl, pyqtSignal as Signal
 from AnyQt.QtGui import QIcon, QKeySequence, QDesktopServices
 
 from Orange.data import FileFormat
 from Orange.widgets import settings, gui
+
 # OutputSignal and InputSignal are imported for compatibility, but shouldn't
 # be used; use Input and Output instead
-from Orange.canvas.registry import description as widget_description, \
-    WidgetDescription, OutputSignal, InputSignal
+from Orange.canvas.registry import (
+    description as widget_description,
+    WidgetDescription,
+    OutputSignal,
+    InputSignal,
+)
 from Orange.widgets.report import Report
 from Orange.widgets.gui import OWComponent
 from Orange.widgets.io import ClipboardFormat
 from Orange.widgets.settings import SettingsHandler
 from Orange.widgets.utils import saveplot, getdeepattr
 from Orange.widgets.utils.progressbar import ProgressBarMixin
-from Orange.widgets.utils.messages import \
-    WidgetMessagesMixin, UnboundMsg, MessagesWidget
-from Orange.widgets.utils.signals import \
-    WidgetSignalsMixin, Input, Output, AttributeList
+from Orange.widgets.utils.messages import (
+    WidgetMessagesMixin,
+    UnboundMsg,
+    MessagesWidget,
+)
+from Orange.widgets.utils.signals import (
+    WidgetSignalsMixin,
+    Input,
+    Output,
+    AttributeList,
+)
 from Orange.widgets.utils.overlay import MessageOverlayWidget, OverlayWidget
 from Orange.widgets.utils.buttons import SimpleButton
 
@@ -55,22 +75,27 @@ class WidgetMetaClass(type(QDialog)):
        of class settings.Setting: the setting is stored in the handler and
        the value of the attribute is replaced with the default."""
 
-    #noinspection PyMethodParameters
+    # noinspection PyMethodParameters
     # pylint: disable=bad-classmethod-argument
     def __new__(mcs, name, bases, kwargs):
         cls = super().__new__(mcs, name, bases, kwargs)
-        if not cls.name: # not a widget
+        if not cls.name:  # not a widget
             return cls
         cls.convert_signals()
-        cls.settingsHandler = \
-            SettingsHandler.create(cls, template=cls.settingsHandler)
+        cls.settingsHandler = SettingsHandler.create(cls, template=cls.settingsHandler)
         return cls
 
 
 # pylint: disable=too-many-instance-attributes
-class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
-               WidgetMessagesMixin, WidgetSignalsMixin,
-               metaclass=WidgetMetaClass):
+class OWWidget(
+    QDialog,
+    OWComponent,
+    Report,
+    ProgressBarMixin,
+    WidgetMessagesMixin,
+    WidgetSignalsMixin,
+    metaclass=WidgetMetaClass,
+):
     """Base widget class"""
 
     # Global widget count
@@ -174,18 +199,18 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
     contextClosed = Signal()
 
     # pylint: disable=protected-access
-    def __new__(cls, *args, captionTitle=None,**kwargs):
+    def __new__(cls, *args, captionTitle=None, **kwargs):
         self = super().__new__(cls, None, cls.get_flags())
         QDialog.__init__(self, None, self.get_flags())
         OWComponent.__init__(self)
         WidgetMessagesMixin.__init__(self)
         WidgetSignalsMixin.__init__(self)
 
-        stored_settings = kwargs.get('stored_settings', None)
+        stored_settings = kwargs.get("stored_settings", None)
         if self.settingsHandler:
             self.settingsHandler.initialize(self, stored_settings)
 
-        self.signalManager = kwargs.get('signal_manager', None)
+        self.signalManager = kwargs.get("signal_manager", None)
         self.__env = _asmappingproxy(kwargs.get("env", {}))
 
         self.graphButton = None
@@ -213,8 +238,13 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
         self.__msgchoice = 0
 
         self.__help_action = QAction(
-            "Help", self, objectName="action-help", toolTip="Show help",
-            enabled=False, visible=False, shortcut=QKeySequence(Qt.Key_F1)
+            "Help",
+            self,
+            objectName="action-help",
+            toolTip="Show help",
+            enabled=False,
+            visible=False,
+            shortcut=QKeySequence(Qt.Key_F1),
         )
         self.addAction(self.__help_action)
 
@@ -236,10 +266,11 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
 
         if self.__splitter is not None:
             self.__splitter.controlAreaVisibilityChanged.connect(
-                self.storeControlAreaVisibility)
+                self.storeControlAreaVisibility
+            )
             sc = QShortcut(
-                QKeySequence(Qt.ControlModifier | Qt.ShiftModifier | Qt.Key_D),
-                self)
+                QKeySequence(Qt.ControlModifier | Qt.ShiftModifier | Qt.Key_D), self
+            )
             sc.activated.connect(self.__splitter.flip)
         return self
 
@@ -251,30 +282,49 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
     def get_widget_description(cls):
         if not cls.name:
             return
-        properties = {name: getattr(cls, name) for name in
-                      ("name", "icon", "description", "priority", "keywords",
-                       "help", "help_ref", "url",
-                       "version", "background", "replaces")}
+        properties = {
+            name: getattr(cls, name)
+            for name in (
+                "name",
+                "icon",
+                "description",
+                "priority",
+                "keywords",
+                "help",
+                "help_ref",
+                "url",
+                "version",
+                "background",
+                "replaces",
+            )
+        }
         properties["id"] = cls.id or cls.__module__
         properties["inputs"] = cls.get_signals("inputs")
         properties["outputs"] = cls.get_signals("outputs")
-        properties["qualified_name"] = \
-            "{}.{}".format(cls.__module__, cls.__name__)
+        properties["qualified_name"] = "{}.{}".format(cls.__module__, cls.__name__)
         return properties
 
     @classmethod
     def get_flags(cls):
-        return (Qt.Window if cls.resizing_enabled
-                else Qt.Dialog | Qt.MSWindowsFixedSizeDialogHint)
+        return (
+            Qt.Window
+            if cls.resizing_enabled
+            else Qt.Dialog | Qt.MSWindowsFixedSizeDialogHint
+        )
 
     class _Splitter(QSplitter):
         controlAreaVisibilityChanged = Signal(int)
 
         def _adjusted_size(self, size_method):
             size = size_method(super())()
-            height = max((size_method(self.widget(i))().height()
-                          for i in range(self.count()) if self.sizes()[i]),
-                         default=0)
+            height = max(
+                (
+                    size_method(self.widget(i))().height()
+                    for i in range(self.count())
+                    if self.sizes()[i]
+                ),
+                default=0,
+            )
             size.setHeight(height)
             return size
 
@@ -286,8 +336,7 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
 
         def createHandle(self):
             """Create splitter handle"""
-            return self._Handle(
-                self.orientation(), self, cursor=Qt.PointingHandCursor)
+            return self._Handle(self.orientation(), self, cursor=Qt.PointingHandCursor)
 
         def flip(self):
             if self.count() == 1:  # Prevent hiding control area by shortcut
@@ -329,7 +378,8 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
             self.controlArea = self.left_side
         if self.want_main_area:
             self.controlArea.setSizePolicy(
-                QSizePolicy.Fixed, QSizePolicy.MinimumExpanding)
+                QSizePolicy.Fixed, QSizePolicy.MinimumExpanding
+            )
             m = 0
         else:
             m = 4
@@ -337,19 +387,23 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
 
     def _insert_buttons_area(self):
         self.buttonsArea = gui.widgetBox(
-            self.left_side, addSpace=0, spacing=9,
-            orientation=self.buttons_area_orientation)
+            self.left_side,
+            addSpace=0,
+            spacing=9,
+            orientation=self.buttons_area_orientation,
+        )
 
     def _insert_main_area(self):
         self.mainArea = gui.vBox(
-            self.__splitter, margin=4,
-            sizePolicy=QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            self.__splitter,
+            margin=4,
+            sizePolicy=QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding),
         )
         self.__splitter.addWidget(self.mainArea)
-        self.__splitter.setCollapsible(
-            self.__splitter.indexOf(self.mainArea), False)
+        self.__splitter.setCollapsible(self.__splitter.indexOf(self.mainArea), False)
         self.mainArea.layout().setContentsMargins(
-            0 if self.want_control_area else 4, 4, 4, 4)
+            0 if self.want_control_area else 4, 4, 4, 4
+        )
 
     def _create_default_buttons(self):
         # These buttons are inserted in buttons_area, if it exists
@@ -399,12 +453,15 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
             help = self.__help_action
             help_button = SimpleButton(
                 icon=QIcon(gui.resource_filename("icons/help.svg")),
-                toolTip="Show widget help", visible=help.isVisible(),
+                toolTip="Show widget help",
+                visible=help.isVisible(),
             )
+
             @help.changed.connect
             def _():
                 help_button.setVisible(help.isVisible())
                 help_button.setEnabled(help.isEnabled())
+
             help_button.clicked.connect(help.trigger)
             sb.addWidget(help_button)
 
@@ -418,13 +475,12 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
             if hasattr(self, "send_report"):
                 b = SimpleButton(
                     icon=QIcon(gui.resource_filename("icons/report.svg")),
-                    toolTip="Report"
+                    toolTip="Report",
                 )
                 b.clicked.connect(self.show_report)
                 sb.addWidget(b)
             self.message_bar = MessagesWidget(self)
-            self.message_bar.setSizePolicy(QSizePolicy.Preferred,
-                                           QSizePolicy.Preferred)
+            self.message_bar.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
             pb = QProgressBar(maximumWidth=120, minimum=0, maximum=100)
             pb.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Ignored)
             pb.setAttribute(Qt.WA_LayoutUsesWidgetRect)
@@ -474,7 +530,6 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
         self.controlAreaVisible = visible
 
     def __restoreWidgetGeometry(self):
-
         def _fullscreen_to_maximized(geometry):
             """Don't restore windows into full screen mode because it loses
             decorations and can't be de-fullscreened at least on some platforms.
@@ -483,7 +538,8 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
             w.restoreGeometry(QByteArray(geometry))
             if w.isFullScreen():
                 w.setWindowState(
-                    w.windowState() & ~Qt.WindowFullScreen | Qt.WindowMaximized)
+                    w.windowState() & ~Qt.WindowFullScreen | Qt.WindowMaximized
+                )
             return w.saveGeometry()
 
         restored = False
@@ -493,12 +549,13 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
                 geometry = _fullscreen_to_maximized(geometry)
                 restored = self.restoreGeometry(geometry)
 
-            if restored and not self.windowState() & \
-                    (Qt.WindowMaximized | Qt.WindowFullScreen):
+            if restored and not self.windowState() & (
+                Qt.WindowMaximized | Qt.WindowFullScreen
+            ):
                 space = QApplication.desktop().availableGeometry(self)
                 frame, geometry = self.frameGeometry(), self.geometry()
 
-                #Fix the widget size to fit inside the available space
+                # Fix the widget size to fit inside the available space
                 width = space.width() - (frame.width() - geometry.width())
                 width = min(width, geometry.width())
                 height = space.height() - (frame.height() - geometry.height())
@@ -709,16 +766,17 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
         else:
             QDialog.keyPressEvent(self, e)
 
-
     defaultKeyActions = {}
 
     if sys.platform == "darwin":
         defaultKeyActions = {
-            (Qt.ControlModifier, Qt.Key_M):
-                lambda self: self.showMaximized
-                if self.isMinimized() else self.showMinimized(),
-            (Qt.ControlModifier, Qt.Key_W):
-                lambda self: self.setVisible(not self.isVisible())}
+            (Qt.ControlModifier, Qt.Key_M): lambda self: self.showMaximized
+            if self.isMinimized()
+            else self.showMinimized(),
+            (Qt.ControlModifier, Qt.Key_W): lambda self: self.setVisible(
+                not self.isVisible()
+            ),
+        }
 
     def setBlocking(self, state=True):
         """
@@ -789,13 +847,18 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
             icon = Message.Information
 
         self.__msgwidget = MessageOverlayWidget(
-            parent=self, text=message.text, icon=icon, wordWrap=True,
-            standardButtons=buttons)
+            parent=self,
+            text=message.text,
+            icon=icon,
+            wordWrap=True,
+            standardButtons=buttons,
+        )
 
         btn = self.__msgwidget.button(MessageOverlayWidget.Ok)
         btn.setText("Ok, got it")
 
-        self.__msgwidget.setStyleSheet("""
+        self.__msgwidget.setStyleSheet(
+            """
             MessageOverlayWidget {
                 background: qlineargradient(
                     x1: 0, y1: 0, x2: 0, y2: 1,
@@ -803,13 +866,15 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
             }
             MessageOverlayWidget QLabel#text-label {
                 color: white;
-            }""")
+            }"""
+        )
 
         if message.moreurl is not None:
             helpbutton = self.__msgwidget.button(MessageOverlayWidget.Help)
             helpbutton.setText("Learn more\N{HORIZONTAL ELLIPSIS}")
             self.__msgwidget.helpRequested.connect(
-                lambda: QDesktopServices.openUrl(QUrl(message.moreurl)))
+                lambda: QDesktopServices.openUrl(QUrl(message.moreurl))
+            )
 
         self.__msgwidget.setWidget(self)
         self.__msgwidget.show()
@@ -828,18 +893,21 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
         except OSError:  # EPERM, EEXISTS, ...
             pass
 
-        filename = os.path.join(settings.widget_settings_dir(versioned=False),
-                                "user-session-state.ini")
-        namespace = ("user-message-history/{0.__module__}.{0.__qualname__}"
-                     .format(type(self)))
+        filename = os.path.join(
+            settings.widget_settings_dir(versioned=False), "user-session-state.ini"
+        )
+        namespace = "user-message-history/{0.__module__}.{0.__qualname__}".format(
+            type(self)
+        )
         session_hist = QSettings(filename, QSettings.IniFormat)
         session_hist.beginGroup(namespace)
         messages = self.UserAdviceMessages
 
         def _ispending(msg):
             return not session_hist.value(
-                "{}/confirmed".format(msg.persistent_id),
-                defaultValue=False, type=bool)
+                "{}/confirmed".format(msg.persistent_id), defaultValue=False, type=bool
+            )
+
         messages = [msg for msg in messages if _ispending(msg)]
 
         if not messages:
@@ -853,8 +921,7 @@ class OWWidget(QDialog, OWComponent, Report, ProgressBarMixin,
         def _userconfirmed():
             session_hist = QSettings(filename, QSettings.IniFormat)
             session_hist.beginGroup(namespace)
-            session_hist.setValue(
-                "{}/confirmed".format(message.persistent_id), True)
+            session_hist.setValue("{}/confirmed".format(message.persistent_id), True)
             session_hist.sync()
 
         self.__msgwidget.accepted.connect(_userconfirmed)
@@ -900,6 +967,7 @@ class Message(object):
 
     .. seealso:: :const:`OWWidget.UserAdviceMessages`
     """
+
     #: QStyle.SP_MessageBox* pixmap enums repeated for easier access
     Question = QStyle.SP_MessageBoxQuestion
     Information = QStyle.SP_MessageBoxInformation

@@ -4,8 +4,13 @@ Tests for DropShadowFrame wiget.
 """
 
 from AnyQt.QtWidgets import (
-    QMainWindow, QWidget, QListView, QTextEdit, QHBoxLayout, QToolBar,
-    QVBoxLayout
+    QMainWindow,
+    QWidget,
+    QListView,
+    QTextEdit,
+    QHBoxLayout,
+    QToolBar,
+    QVBoxLayout,
 )
 from AnyQt.QtGui import QColor
 

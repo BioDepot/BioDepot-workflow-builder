@@ -11,14 +11,26 @@ import numpy as np
 from Orange.base import SklLearner
 
 import Orange.classification
-from Orange.classification import (Learner, Model, NaiveBayesLearner,
-    LogisticRegressionLearner, NuSVMLearner, MajorityLearner, RandomForestLearner,
-    SimpleTreeLearner, SoftmaxRegressionLearner, SVMLearner, LinearSVMLearner,
-    OneClassSVMLearner, TreeLearner, KNNLearner, SimpleRandomForestLearner,
-    EllipticEnvelopeLearner)
+from Orange.classification import (
+    Learner,
+    Model,
+    NaiveBayesLearner,
+    LogisticRegressionLearner,
+    NuSVMLearner,
+    MajorityLearner,
+    RandomForestLearner,
+    SimpleTreeLearner,
+    SoftmaxRegressionLearner,
+    SVMLearner,
+    LinearSVMLearner,
+    OneClassSVMLearner,
+    TreeLearner,
+    KNNLearner,
+    SimpleRandomForestLearner,
+    EllipticEnvelopeLearner,
+)
 from Orange.classification.rules import _RuleLearner
-from Orange.data import (ContinuousVariable, DiscreteVariable,
-                         Domain, Table, Variable)
+from Orange.data import ContinuousVariable, DiscreteVariable, Domain, Table, Variable
 from Orange.evaluation import CrossValidation
 from Orange.tests.dummy_learners import DummyLearner, DummyMulticlassLearner
 from Orange.tests import test_filename
@@ -78,7 +90,7 @@ class ModelTest(unittest.TestCase):
         x = np.random.randint(0, 2, (nrows, ncols))
 
         # single class variable
-        y = np.random.randint(1, 4, (nrows, 1)) // 2    # majority = 1
+        y = np.random.randint(1, 4, (nrows, 1)) // 2  # majority = 1
         t = Table(x, y)
         learn = DummyLearner()
         clf = learn(t)
@@ -91,11 +103,12 @@ class ModelTest(unittest.TestCase):
 
         # multitarget
         y = np.random.randint(1, 6, (nrows, 2))
-        y[:, 0] = y[:, 0] // 3          # majority = 1
-        y[:, 1] = (y[:, 1] + 4) // 3    # majority = 2
-        domain = Domain([ContinuousVariable('i' + str(i)) for i in range(ncols)],
-                        [DiscreteVariable('c' + str(i), values="0123")
-                         for i in range(y.shape[1])])
+        y[:, 0] = y[:, 0] // 3  # majority = 1
+        y[:, 1] = (y[:, 1] + 4) // 3  # majority = 2
+        domain = Domain(
+            [ContinuousVariable("i" + str(i)) for i in range(ncols)],
+            [DiscreteVariable("c" + str(i), values="0123") for i in range(y.shape[1])],
+        )
         t = Table(domain, x, y)
         learn = DummyMulticlassLearner()
         clf = learn(t)
@@ -113,11 +126,15 @@ class ModelTest(unittest.TestCase):
 
         # single class variable
         y = np.random.randint(0, 2, (nrows, 1))
-        d = Domain([DiscreteVariable('v' + str(i),
-                                     values=[str(v)
-                                             for v in np.unique(x[:, i])])
-                    for i in range(ncols)],
-                   DiscreteVariable('c', values="12"))
+        d = Domain(
+            [
+                DiscreteVariable(
+                    "v" + str(i), values=[str(v) for v in np.unique(x[:, i])]
+                )
+                for i in range(ncols)
+            ],
+            DiscreteVariable("c", values="12"),
+        )
         t = Table(d, x, y)
         learn = DummyLearner()
         clf = learn(t)
@@ -125,16 +142,17 @@ class ModelTest(unittest.TestCase):
         y2 = clf(x, ret=Model.Probs)
         self.assertEqual(y2.shape, (nrows, 2))
         y2, probs = clf(x, ret=Model.ValueProbs)
-        self.assertEqual(y2.shape, (nrows, ))
+        self.assertEqual(y2.shape, (nrows,))
         self.assertEqual(probs.shape, (nrows, 2))
 
         # multitarget
         y = np.random.randint(1, 6, (nrows, 2))
-        y[:, 0] = y[:, 0] // 3             # majority = 1
-        y[:, 1] = (y[:, 1] + 4) // 3 - 1   # majority = 1
-        domain = Domain([ContinuousVariable('i' + str(i)) for i in range(ncols)],
-                        [DiscreteVariable('c' + str(i), values="0123")
-                         for i in range(y.shape[1])])
+        y[:, 0] = y[:, 0] // 3  # majority = 1
+        y[:, 1] = (y[:, 1] + 4) // 3 - 1  # majority = 1
+        domain = Domain(
+            [ContinuousVariable("i" + str(i)) for i in range(ncols)],
+            [DiscreteVariable("c" + str(i), values="0123") for i in range(y.shape[1])],
+        )
         t = Table(domain, x, y)
         learn = DummyMulticlassLearner()
         clf = learn(t)
@@ -151,11 +169,10 @@ class ExpandProbabilitiesTest(unittest.TestCase):
         attributes = ["Feature %i" % i for i in range(attr)]
         classes = ["Class %i" % i for i in range(vars)]
         attr_vars = [DiscreteVariable(name=a, values="01") for a in attributes]
-        class_vars = [DiscreteVariable(name=c,
-                                       values=[str(v)
-                                               for v in range(class_var_domain)]
-                                       )
-                      for c in classes]
+        class_vars = [
+            DiscreteVariable(name=c, values=[str(v) for v in range(class_var_domain)])
+            for c in classes
+        ]
         meta_vars = []
         self.domain = Domain(attr_vars, class_vars, meta_vars)
         self.x = np.random.randint(0, 2, (rows, attr))
@@ -215,20 +232,18 @@ class ClassfierListInputTest(unittest.TestCase):
     def test_discrete(self):
         table = Table("titanic")
         tree = Orange.classification.SklTreeLearner()(table)
-        strlist = [["crew", "adult", "male"],
-                   ["crew", "adult", None]]
-        for se in strlist: #individual examples
-            assert(all(tree(se) == tree(Orange.data.Table(table.domain, [se]))))
-        assert(all(tree(strlist) == tree(Orange.data.Table(table.domain, strlist))))
+        strlist = [["crew", "adult", "male"], ["crew", "adult", None]]
+        for se in strlist:  # individual examples
+            assert all(tree(se) == tree(Orange.data.Table(table.domain, [se])))
+        assert all(tree(strlist) == tree(Orange.data.Table(table.domain, strlist)))
 
     def test_continuous(self):
         table = Table("iris")
         tree = Orange.classification.SklTreeLearner()(table)
-        strlist = [[2, 3, 4, 5],
-                   [1, 2, 3, 5]]
-        for se in strlist: #individual examples
-            assert(all(tree(se) == tree(Orange.data.Table(table.domain, [se]))))
-        assert(all(tree(strlist) == tree(Orange.data.Table(table.domain, strlist))))
+        strlist = [[2, 3, 4, 5], [1, 2, 3, 5]]
+        for se in strlist:  # individual examples
+            assert all(tree(se) == tree(Orange.data.Table(table.domain, [se])))
+        assert all(tree(strlist) == tree(Orange.data.Table(table.domain, strlist)))
 
 
 class UnknownValuesInPrediction(unittest.TestCase):
@@ -258,7 +273,6 @@ class UnknownValuesInPrediction(unittest.TestCase):
 
 
 class LearnerAccessibility(unittest.TestCase):
-
     def setUp(self):
         Variable._clear_all_caches()
 
@@ -266,7 +280,8 @@ class LearnerAccessibility(unittest.TestCase):
         classification_modules = pkgutil.walk_packages(
             path=Orange.classification.__path__,
             prefix="Orange.classification.",
-            onerror=lambda x: None)
+            onerror=lambda x: None,
+        )
         for importer, modname, ispkg in classification_modules:
             try:
                 module = pkgutil.importlib.import_module(modname)
@@ -274,25 +289,29 @@ class LearnerAccessibility(unittest.TestCase):
                 continue
 
             for name, class_ in inspect.getmembers(module, inspect.isclass):
-                if (issubclass(class_, Learner) and
-                        not name.startswith('_') and
-                        'base' not in class_.__module__):
+                if (
+                    issubclass(class_, Learner)
+                    and not name.startswith("_")
+                    and "base" not in class_.__module__
+                ):
                     yield class_
 
     def test_all_learners_accessible_in_Orange_classification_namespace(self):
         for learner in self.all_learners():
             if not hasattr(Orange.classification, learner.__name__):
-                self.fail("%s is not visible in Orange.classification"
-                          " namespace" % learner.__name__)
+                self.fail(
+                    "%s is not visible in Orange.classification"
+                    " namespace" % learner.__name__
+                )
 
     def test_all_models_work_after_unpickling(self):
         Variable._clear_all_caches()
-        datasets = [Table('iris'), Table('titanic')]
+        datasets = [Table("iris"), Table("titanic")]
         for learner in list(self.all_learners()):
             try:
                 learner = learner()
             except Exception:
-                print('%s cannot be used with default parameters' % learner.__name__)
+                print("%s cannot be used with default parameters" % learner.__name__)
                 traceback.print_exc()
                 continue
             # Skip slow tests
@@ -305,11 +324,14 @@ class LearnerAccessibility(unittest.TestCase):
                 model2 = pickle.loads(s)
 
                 np.testing.assert_almost_equal(
-                    Table(model.domain, ds).X, Table(model2.domain, ds).X)
+                    Table(model.domain, ds).X, Table(model2.domain, ds).X
+                )
                 np.testing.assert_almost_equal(
-                    model(ds), model2(ds),
-                    err_msg='%s does not return same values when unpickled %s'
-                            % (learner.__class__.__name__, ds.name))
+                    model(ds),
+                    model2(ds),
+                    err_msg="%s does not return same values when unpickled %s"
+                    % (learner.__class__.__name__, ds.name),
+                )
 
     def test_adequacy_all_learners(self):
         for learner in self.all_learners():
@@ -349,8 +371,7 @@ class LearnerReprs(unittest.TestCase):
         el = EllipticEnvelopeLearner(store_precision=False)
         srf = SimpleRandomForestLearner(n_estimators=20)
 
-        learners = [lr, m, nb, rf, st, sm, svm,
-                    lsvm, nsvm, osvm, tl, knn, el, srf]
+        learners = [lr, m, nb, rf, st, sm, svm, lsvm, nsvm, osvm, tl, knn, el, srf]
 
         for l in learners:
             repr_str = repr(l)

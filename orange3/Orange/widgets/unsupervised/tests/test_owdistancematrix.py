@@ -3,6 +3,7 @@ from Orange.distance import Euclidean
 from Orange.widgets.tests.base import WidgetTest
 from Orange.widgets.unsupervised.owdistancematrix import OWDistanceMatrix
 
+
 class TestOWDistanceMatrix(WidgetTest):
     def setUp(self):
         self.widget = self.create_widget(OWDistanceMatrix)

@@ -3,10 +3,8 @@ A splash screen widget with support for positioning of the message text.
 
 """
 
-from AnyQt.QtWidgets import QSplashScreen,  QWidget, QApplication
-from AnyQt.QtGui import (
-    QPixmap, QPainter, QTextDocument, QTextBlockFormat, QTextCursor
-)
+from AnyQt.QtWidgets import QSplashScreen, QWidget, QApplication
+from AnyQt.QtGui import QPixmap, QPainter, QTextDocument, QTextBlockFormat, QTextCursor
 from AnyQt.QtCore import Qt
 
 from .utils import is_transparency_supported
@@ -14,6 +12,7 @@ from .utils import is_transparency_supported
 if hasattr(Qt, "mightBeRichText"):
     mightBeRichText = Qt.mightBeRichText
 else:
+
     def mightBeRichText(text):
         return False
 
@@ -36,8 +35,10 @@ class SplashScreen(QSplashScreen):
     textFormat : Qt.TextFormat
         How message text format should be interpreted.
     """
-    def __init__(self, parent=None, pixmap=None, textRect=None,
-                 textFormat=Qt.PlainText, **kwargs):
+
+    def __init__(
+        self, parent=None, pixmap=None, textRect=None, textFormat=Qt.PlainText, **kwargs
+    ):
         QSplashScreen.__init__(self, parent, **kwargs)
         self.__textRect = textRect
         self.__message = ""
@@ -134,9 +135,10 @@ class SplashScreen(QSplashScreen):
     # Reimplemented to allow graceful fall back if the windowing system
     # does not support transparency.
     def setPixmap(self, pixmap):
-        self.setAttribute(Qt.WA_TranslucentBackground,
-                          pixmap.hasAlpha() and \
-                          is_transparency_supported())
+        self.setAttribute(
+            Qt.WA_TranslucentBackground,
+            pixmap.hasAlpha() and is_transparency_supported(),
+        )
 
         self.__pixmap = pixmap
 

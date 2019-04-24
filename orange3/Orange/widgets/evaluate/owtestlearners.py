@@ -48,9 +48,11 @@ log = logging.getLogger(__name__)
 
 InputLearner = namedtuple(
     "InputLearner",
-    ["learner",  # :: Orange.base.Learner
-     "results",  # :: Option[Try[Orange.evaluation.Results]]
-     "stats"]    # :: Option[Sequence[Try[float]]]
+    [
+        "learner",  # :: Orange.base.Learner
+        "results",  # :: Option[Try[Orange.evaluation.Results]]
+        "stats",
+    ],  # :: Option[Sequence[Try[float]]]
 )
 
 
@@ -65,8 +67,9 @@ class Try(abc.ABC):
 
     class Success:
         """Data type for instance constructed on success"""
+
         __slots__ = ("__value",)
-#         __bool__ = lambda self: True
+        #         __bool__ = lambda self: True
         success = property(lambda self: True)
         value = property(lambda self: self.__value)
 
@@ -77,16 +80,16 @@ class Try(abc.ABC):
             return (self.value,)
 
         def __repr__(self):
-            return "{}({!r})".format(self.__class__.__qualname__,
-                                     self.value)
+            return "{}({!r})".format(self.__class__.__qualname__, self.value)
 
         def map(self, fn):
             return Try(lambda: fn(self.value))
 
     class Fail:
         """Data type for instance constructed on fail"""
-        __slots__ = ("__exception", )
-#         __bool__ = lambda self: False
+
+        __slots__ = ("__exception",)
+        #         __bool__ = lambda self: False
         success = property(lambda self: False)
         exception = property(lambda self: self.__exception)
 
@@ -94,11 +97,10 @@ class Try(abc.ABC):
             self.__exception = exception
 
         def __getnewargs__(self):
-            return (self.exception, )
+            return (self.exception,)
 
         def __repr__(self):
-            return "{}({!r})".format(self.__class__.__qualname__,
-                                     self.exception)
+            return "{}({!r})".format(self.__class__.__qualname__, self.exception)
 
         def map(self, fn):
             return self
@@ -112,12 +114,14 @@ class Try(abc.ABC):
         else:
             return Try.Success(rval)
 
+
 Try.register(Try.Success)
 Try.register(Try.Fail)
 
 
 def raise_(exc):
     raise exc
+
 
 Try.register = lambda cls: raise_(TypeError())
 
@@ -126,6 +130,7 @@ class State(enum.Enum):
     """
     OWTestLearner's runtime state.
     """
+
     #: No or insufficient input (i.e. no data or no learners)
     Waiting = "Waiting"
     #: Executing/running the evaluations
@@ -155,14 +160,21 @@ class OWTestLearners(OWWidget):
     settings_version = 3
     UserAdviceMessages = [
         widget.Message(
-            "Click on the table header to select shown columns",
-            "click_header")]
+            "Click on the table header to select shown columns", "click_header"
+        )
+    ]
 
     settingsHandler = settings.PerfectDomainContextHandler()
 
     #: Resampling/testing types
-    KFold, FeatureFold, ShuffleSplit, LeaveOneOut, TestOnTrain, TestOnTest \
-        = 0, 1, 2, 3, 4, 5
+    KFold, FeatureFold, ShuffleSplit, LeaveOneOut, TestOnTrain, TestOnTest = (
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+    )
     #: Numbers of folds
     NFolds = [2, 3, 5, 10, 20]
     #: Number of repetitions
@@ -191,10 +203,10 @@ class OWTestLearners(OWWidget):
 
     BUILTIN_ORDER = {
         DiscreteVariable: ("AUC", "CA", "F1", "Precision", "Recall"),
-        ContinuousVariable: ("MSE", "RMSE", "MAE", "R2")}
+        ContinuousVariable: ("MSE", "RMSE", "MAE", "R2"),
+    }
 
-    shown_scores = \
-        settings.Setting(set(chain(*BUILTIN_ORDER.values())))
+    shown_scores = settings.Setting(set(chain(*BUILTIN_ORDER.values())))
 
     class Error(OWWidget.Error):
         train_data_empty = Msg("Train dataset is empty.")
@@ -203,19 +215,22 @@ class OWTestLearners(OWWidget):
         too_many_classes = Msg("Too many target variables.")
         class_required_test = Msg("Test data input requires a target variable.")
         too_many_folds = Msg("Number of folds exceeds the data size")
-        class_inconsistent = Msg("Test and train datasets "
-                                 "have different target variables.")
+        class_inconsistent = Msg(
+            "Test and train datasets " "have different target variables."
+        )
         memory_error = Msg("Not enough memory.")
         no_class_values = Msg("Target variable has no values.")
         only_one_class_var_value = Msg("Target variable has only one value.")
 
     class Warning(OWWidget.Warning):
-        missing_data = \
-            Msg("Instances with unknown target values were removed from{}data.")
+        missing_data = Msg(
+            "Instances with unknown target values were removed from{}data."
+        )
         test_data_missing = Msg("Missing separate test data input.")
         scores_not_computed = Msg("Some scores could not be computed.")
-        test_data_unused = Msg("Test data is present but unused. "
-                               "Select 'Test on test data' to use it.")
+        test_data_unused = Msg(
+            "Test data is present but unused. " "Select 'Test on test data' to use it."
+        )
 
     class Information(OWWidget.Information):
         data_sampled = Msg("Train data has been sampled")
@@ -242,40 +257,66 @@ class OWTestLearners(OWWidget):
         self.__executor = ThreadExecutor()
 
         sbox = gui.vBox(self.controlArea, "Sampling")
-        rbox = gui.radioButtons(
-            sbox, self, "resampling", callback=self._param_changed)
+        rbox = gui.radioButtons(sbox, self, "resampling", callback=self._param_changed)
 
         gui.appendRadioButton(rbox, "Cross validation")
         ibox = gui.indentedBox(rbox)
         gui.comboBox(
-            ibox, self, "n_folds", label="Number of folds: ",
-            items=[str(x) for x in self.NFolds], maximumContentsLength=3,
-            orientation=Qt.Horizontal, callback=self.kfold_changed)
+            ibox,
+            self,
+            "n_folds",
+            label="Number of folds: ",
+            items=[str(x) for x in self.NFolds],
+            maximumContentsLength=3,
+            orientation=Qt.Horizontal,
+            callback=self.kfold_changed,
+        )
         gui.checkBox(
-            ibox, self, "cv_stratified", "Stratified",
-            callback=self.kfold_changed)
+            ibox, self, "cv_stratified", "Stratified", callback=self.kfold_changed
+        )
         gui.appendRadioButton(rbox, "Cross validation by feature")
         ibox = gui.indentedBox(rbox)
         self.feature_model = DomainModel(
-            order=DomainModel.METAS, valid_types=DiscreteVariable)
+            order=DomainModel.METAS, valid_types=DiscreteVariable
+        )
         self.features_combo = gui.comboBox(
-            ibox, self, "fold_feature", model=self.feature_model,
-            orientation=Qt.Horizontal, callback=self.fold_feature_changed)
+            ibox,
+            self,
+            "fold_feature",
+            model=self.feature_model,
+            orientation=Qt.Horizontal,
+            callback=self.fold_feature_changed,
+        )
 
         gui.appendRadioButton(rbox, "Random sampling")
         ibox = gui.indentedBox(rbox)
         gui.comboBox(
-            ibox, self, "n_repeats", label="Repeat train/test: ",
-            items=[str(x) for x in self.NRepeats], maximumContentsLength=3,
-            orientation=Qt.Horizontal, callback=self.shuffle_split_changed)
+            ibox,
+            self,
+            "n_repeats",
+            label="Repeat train/test: ",
+            items=[str(x) for x in self.NRepeats],
+            maximumContentsLength=3,
+            orientation=Qt.Horizontal,
+            callback=self.shuffle_split_changed,
+        )
         gui.comboBox(
-            ibox, self, "sample_size", label="Training set size: ",
+            ibox,
+            self,
+            "sample_size",
+            label="Training set size: ",
             items=["{} %".format(x) for x in self.SampleSizes],
-            maximumContentsLength=5, orientation=Qt.Horizontal,
-            callback=self.shuffle_split_changed)
+            maximumContentsLength=5,
+            orientation=Qt.Horizontal,
+            callback=self.shuffle_split_changed,
+        )
         gui.checkBox(
-            ibox, self, "shuffle_stratified", "Stratified",
-            callback=self.shuffle_split_changed)
+            ibox,
+            self,
+            "shuffle_stratified",
+            "Stratified",
+            callback=self.shuffle_split_changed,
+        )
 
         gui.appendRadioButton(rbox, "Leave one out")
 
@@ -284,16 +325,20 @@ class OWTestLearners(OWWidget):
 
         self.cbox = gui.vBox(self.controlArea, "Target Class")
         self.class_selection_combo = gui.comboBox(
-            self.cbox, self, "class_selection", items=[],
-            sendSelectedValue=True, valueType=str,
+            self.cbox,
+            self,
+            "class_selection",
+            items=[],
+            sendSelectedValue=True,
+            valueType=str,
             callback=self._on_target_class_changed,
-            contentsLength=8)
+            contentsLength=8,
+        )
 
         gui.rubber(self.controlArea)
 
         self.view = gui.TableView(
-            wordWrap=True,
-            editTriggers=gui.TableView.NoEditTriggers
+            wordWrap=True, editTriggers=gui.TableView.NoEditTriggers
         )
         header = self.view.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeToContents)
@@ -321,8 +366,7 @@ class OWTestLearners(OWWidget):
             if self.fold_feature is None and self.feature_model:
                 self.fold_feature = self.feature_model[0]
         enabled = bool(self.feature_model)
-        self.controls.resampling.buttons[
-            OWTestLearners.FeatureFold].setEnabled(enabled)
+        self.controls.resampling.buttons[OWTestLearners.FeatureFold].setEnabled(enabled)
         self.features_combo.setEnabled(enabled)
         if self.resampling == OWTestLearners.FeatureFold and not enabled:
             self.resampling = OWTestLearners.KFold
@@ -364,14 +408,19 @@ class OWTestLearners(OWWidget):
             self.Error.train_data_empty()
             data = None
         if data:
-            conds = [not data.domain.class_vars,
-                     len(data.domain.class_vars) > 1,
-                     np.isnan(data.Y).all(),
-                     data.domain.has_discrete_class and len(data.domain.class_var.values) == 1]
-            errors = [self.Error.class_required,
-                      self.Error.too_many_classes,
-                      self.Error.no_class_values,
-                      self.Error.only_one_class_var_value]
+            conds = [
+                not data.domain.class_vars,
+                len(data.domain.class_vars) > 1,
+                np.isnan(data.Y).all(),
+                data.domain.has_discrete_class
+                and len(data.domain.class_var.values) == 1,
+            ]
+            errors = [
+                self.Error.class_required,
+                self.Error.too_many_classes,
+                self.Error.no_class_values,
+                self.Error.only_one_class_var_value,
+            ]
             for cond, error in zip(conds, errors):
                 if cond:
                     error()
@@ -387,8 +436,7 @@ class OWTestLearners(OWWidget):
                 data_sample.download_data(AUTO_DL_LIMIT, partial=True)
                 data = Table(data_sample)
 
-        self.train_data_missing_vals = \
-            data is not None and np.isnan(data.Y).any()
+        self.train_data_missing_vals = data is not None and np.isnan(data.Y).any()
         if self.train_data_missing_vals or self.test_data_missing_vals:
             self.Warning.missing_data(self._which_missing_data())
             if data:
@@ -437,8 +485,7 @@ class OWTestLearners(OWWidget):
                 data_sample.download_data(AUTO_DL_LIMIT, partial=True)
                 data = Table(data_sample)
 
-        self.test_data_missing_vals = \
-            data is not None and np.isnan(data.Y).any()
+        self.test_data_missing_vals = data is not None and np.isnan(data.Y).any()
         if self.train_data_missing_vals or self.test_data_missing_vals:
             self.Warning.missing_data(self._which_missing_data())
             if data:
@@ -451,10 +498,11 @@ class OWTestLearners(OWWidget):
             self._invalidate()
 
     def _which_missing_data(self):
-        return {(True, True): " ",  # both, don't specify
-                (True, False): " train ",
-                (False, True): " test "}[(self.train_data_missing_vals,
-                                          self.test_data_missing_vals)]
+        return {
+            (True, True): " ",  # both, don't specify
+            (True, False): " train ",
+            (False, True): " test ",
+        }[(self.train_data_missing_vals, self.test_data_missing_vals)]
 
     # List of scorers shouldn't be retrieved globally, when the module is
     # loading since add-ons could have registered additional scorers.
@@ -466,12 +514,15 @@ class OWTestLearners(OWWidget):
             self.scorers = []
             return
         class_var = self.data and self.data.domain.class_var
-        order = {name: i
-                 for i, name in enumerate(self.BUILTIN_ORDER[type(class_var)])}
+        order = {name: i for i, name in enumerate(self.BUILTIN_ORDER[type(class_var)])}
         # 'abstract' is retrieved from __dict__ to avoid inheriting
-        usable = (cls for cls in scoring.Score.registry.values()
-                  if cls.is_scalar and not cls.__dict__.get("abstract")
-                  and isinstance(class_var, cls.class_types))
+        usable = (
+            cls
+            for cls in scoring.Score.registry.values()
+            if cls.is_scalar
+            and not cls.__dict__.get("abstract")
+            and isinstance(class_var, cls.class_types)
+        )
         self.scorers = sorted(usable, key=lambda cls: order.get(cls.name, 99))
 
     @Inputs.preprocessor
@@ -537,8 +588,10 @@ class OWTestLearners(OWWidget):
         target_index = None
         if self.data is not None:
             class_var = self.data.domain.class_var
-            if self.data.domain.has_discrete_class and \
-                            self.class_selection != self.TARGET_AVERAGE:
+            if (
+                self.data.domain.has_discrete_class
+                and self.class_selection != self.TARGET_AVERAGE
+            ):
                 target_index = class_var.values.index(self.class_selection)
         else:
             class_var = None
@@ -554,22 +607,29 @@ class OWTestLearners(OWWidget):
                 head.setToolTip(str(slot.results.exception))
                 head.setText("{} (error)".format(name))
                 head.setForeground(QtGui.QBrush(Qt.red))
-                errors.append("{name} failed with error:\n"
-                              "{exc.__class__.__name__}: {exc!s}"
-                              .format(name=name, exc=slot.results.exception))
+                errors.append(
+                    "{name} failed with error:\n"
+                    "{exc.__class__.__name__}: {exc!s}".format(
+                        name=name, exc=slot.results.exception
+                    )
+                )
 
             row = [head]
 
-            if class_var is not None and class_var.is_discrete and \
-                    target_index is not None:
+            if (
+                class_var is not None
+                and class_var.is_discrete
+                and target_index is not None
+            ):
                 if slot.results is not None and slot.results.success:
-                    ovr_results = results_one_vs_rest(
-                        slot.results.value, target_index)
+                    ovr_results = results_one_vs_rest(slot.results.value, target_index)
 
                     # Cell variable is used immediatelly, it's not stored
                     # pylint: disable=cell-var-from-loop
-                    stats = [Try(scorer_caller(scorer, ovr_results, target=1))
-                             for scorer in self.scorers]
+                    stats = [
+                        Try(scorer_caller(scorer, ovr_results, target=1))
+                        for scorer in self.scorers
+                    ]
                 else:
                     stats = None
             else:
@@ -589,10 +649,7 @@ class OWTestLearners(OWWidget):
 
         # Resort rows based on current sorting
         header = self.view.horizontalHeader()
-        model.sort(
-            header.sortIndicatorSection(),
-            header.sortIndicatorOrder()
-        )
+        model.sort(header.sortIndicatorSection(), header.sortIndicatorOrder())
 
         self.error("\n".join(errors), shown=bool(errors))
         self.Warning.scores_not_computed(shown=has_missing_scores)
@@ -622,20 +679,19 @@ class OWTestLearners(OWWidget):
         self._update_stats_model()
 
     def _invalidate(self, which=None):
-        self.fold_feature_selected = \
-            self.resampling == OWTestLearners.FeatureFold
+        self.fold_feature_selected = self.resampling == OWTestLearners.FeatureFold
         # Invalidate learner results for `which` input keys
         # (if None then all learner results are invalidated)
         if which is None:
             which = self.learners.keys()
 
         model = self.view.model()
-        statmodelkeys = [model.item(row, 0).data(Qt.UserRole)
-                         for row in range(model.rowCount())]
+        statmodelkeys = [
+            model.item(row, 0).data(Qt.UserRole) for row in range(model.rowCount())
+        ]
 
         for key in which:
-            self.learners[key] = \
-                self.learners[key]._replace(results=None, stats=None)
+            self.learners[key] = self.learners[key]._replace(results=None, stats=None)
 
             if key in statmodelkeys:
                 row = statmodelkeys.index(key)
@@ -673,15 +729,17 @@ class OWTestLearners(OWWidget):
         Commit the results to output.
         """
         self.Error.memory_error.clear()
-        valid = [slot for slot in self.learners.values()
-                 if slot.results is not None and slot.results.success]
+        valid = [
+            slot
+            for slot in self.learners.values()
+            if slot.results is not None and slot.results.success
+        ]
         combined = None
         predictions = None
         if valid:
             # Evaluation results
             combined = results_merge([slot.results.value for slot in valid])
-            combined.learner_names = [learner_name(slot.learner)
-                                      for slot in valid]
+            combined.learner_names = [learner_name(slot.learner) for slot in valid]
 
             # Predictions & Probabilities
             try:
@@ -697,17 +755,29 @@ class OWTestLearners(OWWidget):
         if not self.data or not self.learners:
             return
         if self.resampling == self.KFold:
-            stratified = 'Stratified ' if self.cv_stratified else ''
-            items = [("Sampling type", "{}{}-fold Cross validation".
-                      format(stratified, self.NFolds[self.n_folds]))]
+            stratified = "Stratified " if self.cv_stratified else ""
+            items = [
+                (
+                    "Sampling type",
+                    "{}{}-fold Cross validation".format(
+                        stratified, self.NFolds[self.n_folds]
+                    ),
+                )
+            ]
         elif self.resampling == self.LeaveOneOut:
             items = [("Sampling type", "Leave one out")]
         elif self.resampling == self.ShuffleSplit:
-            stratified = 'Stratified ' if self.shuffle_stratified else ''
-            items = [("Sampling type",
-                      "{}Shuffle split, {} random samples with {}% data "
-                      .format(stratified, self.NRepeats[self.n_repeats],
-                              self.SampleSizes[self.sample_size]))]
+            stratified = "Stratified " if self.shuffle_stratified else ""
+            items = [
+                (
+                    "Sampling type",
+                    "{}Shuffle split, {} random samples with {}% data ".format(
+                        stratified,
+                        self.NRepeats[self.n_repeats],
+                        self.SampleSizes[self.sample_size],
+                    ),
+                )
+            ]
         elif self.resampling == self.TestOnTrain:
             items = [("Sampling type", "No sampling, test on training data")]
         elif self.resampling == self.TestOnTest:
@@ -728,8 +798,10 @@ class OWTestLearners(OWWidget):
         if version < 3:
             # Older version used an incompatible context handler
             settings_["context_settings"] = [
-                c for c in settings_.get("context_settings", ())
-                if not hasattr(c, 'classes')]
+                c
+                for c in settings_.get("context_settings", ())
+                if not hasattr(c, "classes")
+            ]
 
     @Slot(float)
     def setProgressValue(self, value):
@@ -758,8 +830,10 @@ class OWTestLearners(OWWidget):
             self.__state = State.Waiting
             self.commit()
             return
-        if self.resampling == OWTestLearners.KFold and \
-                len(self.data) < self.NFolds[self.n_folds]:
+        if (
+            self.resampling == OWTestLearners.KFold
+            and len(self.data) < self.NFolds[self.n_folds]
+        ):
             self.Error.too_many_folds()
             self.__state = State.Waiting
             self.commit()
@@ -782,13 +856,11 @@ class OWTestLearners(OWWidget):
             self.Warning.test_data_unused()
 
         rstate = 42
-        common_args = dict(
-            store_data=True,
-            preprocessor=self.preprocessor,
-        )
+        common_args = dict(store_data=True, preprocessor=self.preprocessor)
         # items in need of an update
-        items = [(key, slot) for key, slot in self.learners.items()
-                 if slot.results is None]
+        items = [
+            (key, slot) for key, slot in self.learners.items() if slot.results is None
+        ]
         learners = [slot.learner for _, slot in items]
 
         # deepcopy all learners as they are not thread safe (by virtue of
@@ -801,38 +873,51 @@ class OWTestLearners(OWWidget):
             folds = self.NFolds[self.n_folds]
             test_f = partial(
                 Orange.evaluation.CrossValidation,
-                self.data, learners_c, k=folds,
-                random_state=rstate, **common_args)
+                self.data,
+                learners_c,
+                k=folds,
+                random_state=rstate,
+                **common_args
+            )
         elif self.resampling == OWTestLearners.FeatureFold:
             test_f = partial(
                 Orange.evaluation.CrossValidationFeature,
-                self.data, learners_c, self.fold_feature,
+                self.data,
+                learners_c,
+                self.fold_feature,
                 **common_args
             )
         elif self.resampling == OWTestLearners.LeaveOneOut:
             test_f = partial(
-                Orange.evaluation.LeaveOneOut,
-                self.data, learners_c, **common_args
+                Orange.evaluation.LeaveOneOut, self.data, learners_c, **common_args
             )
         elif self.resampling == OWTestLearners.ShuffleSplit:
             train_size = self.SampleSizes[self.sample_size] / 100
             test_f = partial(
                 Orange.evaluation.ShuffleSplit,
-                self.data, learners_c,
+                self.data,
+                learners_c,
                 n_resamples=self.NRepeats[self.n_repeats],
-                train_size=train_size, test_size=None,
+                train_size=train_size,
+                test_size=None,
                 stratified=self.shuffle_stratified,
-                random_state=rstate, **common_args
+                random_state=rstate,
+                **common_args
             )
         elif self.resampling == OWTestLearners.TestOnTrain:
             test_f = partial(
                 Orange.evaluation.TestOnTrainingData,
-                self.data, learners_c, **common_args
+                self.data,
+                learners_c,
+                **common_args
             )
         elif self.resampling == OWTestLearners.TestOnTest:
             test_f = partial(
                 Orange.evaluation.TestOnTestData,
-                self.data, self.test_data, learners_c, **common_args
+                self.data,
+                self.test_data,
+                learners_c,
+                **common_args
             )
         else:
             assert False, "self.resampling %s" % self.resampling
@@ -869,14 +954,16 @@ class OWTestLearners(OWWidget):
             if task.cancelled:
                 raise UserInterrupt()
             QMetaObject.invokeMethod(
-                self, "setProgressValue", Qt.QueuedConnection,
-                Q_ARG(float, 100 * finished)
+                self,
+                "setProgressValue",
+                Qt.QueuedConnection,
+                Q_ARG(float, 100 * finished),
             )
 
         def ondone(_):
             QMetaObject.invokeMethod(
-                self, "__task_complete", Qt.QueuedConnection,
-                Q_ARG(object, task))
+                self, "__task_complete", Qt.QueuedConnection, Q_ARG(object, task)
+            )
 
         testfunc = partial(testfunc, callback=progress_callback)
         task.future = self.__executor.submit(testfunc)
@@ -905,19 +992,17 @@ class OWTestLearners(OWWidget):
         assert result.done()
         self.__task = None
         try:
-            results = result.result()    # type: Results
+            results = result.result()  # type: Results
             learners = results.learners  # type: List[Learner]
         except Exception as er:
-            log.exception("testing error (in __task_complete):",
-                          exc_info=True)
+            log.exception("testing error (in __task_complete):", exc_info=True)
             self.error("\n".join(traceback.format_exception_only(type(er), er)))
             self.__state = State.Done
             return
 
         self.__state = State.Done
 
-        learner_key = {slot.learner: key for key, slot in
-                       self.learners.items()}
+        learner_key = {slot.learner: key for key, slot in self.learners.items()}
         assert all(learner in learner_key for learner in learners)
 
         # Update the results for individual learners
@@ -930,12 +1015,14 @@ class OWTestLearners(OWWidget):
                     stats = [Try.Fail(ex)] * len(self.scorers)
                     result = Try.Fail(ex)
                 else:
-                    stats = [Try(scorer_caller(scorer, result))
-                             for scorer in self.scorers]
+                    stats = [
+                        Try(scorer_caller(scorer, result)) for scorer in self.scorers
+                    ]
                     result = Try.Success(result)
             key = learner_key.get(learner)
-            self.learners[key] = \
-                self.learners[key]._replace(results=result, stats=stats)
+            self.learners[key] = self.learners[key]._replace(
+                results=result, stats=stats
+            )
 
         self._update_header()
         self._update_stats_model()
@@ -960,7 +1047,7 @@ class OWTestLearners(OWWidget):
 
 def scorer_caller(scorer, ovr_results, target=None):
     if scorer.is_binary:
-        return lambda: scorer(ovr_results, target=target, average='weighted')
+        return lambda: scorer(ovr_results, target=target, average="weighted")
     else:
         return lambda: scorer(ovr_results)
 
@@ -969,6 +1056,7 @@ class UserInterrupt(BaseException):
     """
     A BaseException subclass used for cooperative task/thread cancellation
     """
+
     pass
 
 
@@ -980,8 +1068,10 @@ def learner_name(learner):
 
 def results_add_by_model(x, y):
     def is_empty(res):
-        return (getattr(res, "models", None) is None
-                and getattr(res, "row_indices", None) is None)
+        return (
+            getattr(res, "models", None) is None
+            and getattr(res, "row_indices", None) is None
+        )
 
     if is_empty(x):
         return y
@@ -998,8 +1088,10 @@ def results_add_by_model(x, y):
     res.folds = x.folds
     res.actual = x.actual
     res.predicted = np.vstack((x.predicted, y.predicted))
-    if getattr(x, "probabilities", None) is not None \
-            and getattr(y, "probabilities") is not None:
+    if (
+        getattr(x, "probabilities", None) is not None
+        and getattr(y, "probabilities") is not None
+    ):
         res.probabilities = np.vstack((x.probabilities, y.probabilities))
 
     if x.models is not None:
@@ -1013,6 +1105,7 @@ def results_merge(results):
 
 def results_one_vs_rest(results, pos_index):
     from Orange.preprocess.transformation import Indicator
+
     actual = results.actual == pos_index
     predicted = results.predicted == pos_index
     if results.probabilities is not None:
@@ -1020,8 +1113,9 @@ def results_one_vs_rest(results, pos_index):
         assert c >= 2
         neg_indices = [i for i in range(c) if i != pos_index]
         pos_prob = results.probabilities[:, :, [pos_index]]
-        neg_prob = np.sum(results.probabilities[:, :, neg_indices],
-                          axis=2, keepdims=True)
+        neg_prob = np.sum(
+            results.probabilities[:, :, neg_indices], axis=2, keepdims=True
+        )
         probabilities = np.dstack((neg_prob, pos_prob))
     else:
         probabilities = None
@@ -1037,12 +1131,10 @@ def results_one_vs_rest(results, pos_index):
     class_var = Orange.data.DiscreteVariable(
         "I({}=={})".format(results.domain.class_var.name, value),
         values=["False", "True"],
-        compute_value=Indicator(results.domain.class_var, pos_index)
+        compute_value=Indicator(results.domain.class_var, pos_index),
     )
     domain = Orange.data.Domain(
-        results.domain.attributes,
-        [class_var],
-        results.domain.metas
+        results.domain.attributes, [class_var], results.domain.metas
     )
     res.data = None
     res.domain = domain
@@ -1053,12 +1145,13 @@ class Task:
     """
     A simple task state.
     """
+
     #: A future holding the results. This field is set by the client.
-    future = ...        # type: Future
+    future = ...  # type: Future
     #: True if the task was cancelled
-    cancelled = False   # type: bool
+    cancelled = False  # type: bool
     #: A function to call. Filled by the client.
-    func = ...          # type: Callable[Callable[float], Results]
+    func = ...  # type: Callable[Callable[float], Results]
 
     def cancel(self):
         """
@@ -1079,6 +1172,7 @@ class Task:
 def main(argv=None):
     """Show and test the widget"""
     from AnyQt.QtWidgets import QApplication
+
     logging.basicConfig(level=logging.DEBUG)
     if argv is None:
         argv = sys.argv
@@ -1095,15 +1189,19 @@ def main(argv=None):
     if class_var is None:
         return 1
     elif class_var.is_discrete:
-        learners = [lambda data: 1 / 0,
-                    Orange.classification.LogisticRegressionLearner(),
-                    Orange.classification.MajorityLearner(),
-                    Orange.classification.NaiveBayesLearner()]
+        learners = [
+            lambda data: 1 / 0,
+            Orange.classification.LogisticRegressionLearner(),
+            Orange.classification.MajorityLearner(),
+            Orange.classification.NaiveBayesLearner(),
+        ]
     else:
-        learners = [lambda data: 1 / 0,
-                    Orange.regression.MeanLearner(),
-                    Orange.regression.KNNRegressionLearner(),
-                    Orange.regression.RidgeRegressionLearner()]
+        learners = [
+            lambda data: 1 / 0,
+            Orange.regression.MeanLearner(),
+            Orange.regression.KNNRegressionLearner(),
+            Orange.regression.RidgeRegressionLearner(),
+        ]
 
     w = OWTestLearners()
     w.show()
@@ -1121,6 +1219,7 @@ def main(argv=None):
     w.handleNewSignals()
     w.saveSettings()
     return rval
+
 
 if __name__ == "__main__":
     sys.exit(main())

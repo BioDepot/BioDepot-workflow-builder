@@ -5,8 +5,14 @@ A widget containing a grid of clickable actions/buttons.
 from collections import namedtuple, deque
 
 from AnyQt.QtWidgets import (
-    QFrame, QAction, QToolButton, QGridLayout,  QSizePolicy,
-    QStyleOptionToolButton, QStylePainter, QStyle
+    QFrame,
+    QAction,
+    QToolButton,
+    QGridLayout,
+    QSizePolicy,
+    QStyleOptionToolButton,
+    QStylePainter,
+    QStyle,
 )
 from AnyQt.QtGui import QFontMetrics
 from AnyQt.QtCore import Qt, QObject, QSize, QEvent, QSignalMapper
@@ -15,14 +21,7 @@ from AnyQt.QtCore import pyqtSignal as Signal
 from . import utils
 
 
-_ToolGridSlot = namedtuple(
-    "_ToolGridSlot",
-    ["button",
-     "action",
-     "row",
-     "column"
-     ]
-    )
+_ToolGridSlot = namedtuple("_ToolGridSlot", ["button", "action", "row", "column"])
 
 
 class _ToolGridButton(QToolButton):
@@ -33,8 +32,7 @@ class _ToolGridButton(QToolButton):
 
     def actionEvent(self, event):
         QToolButton.actionEvent(self, event)
-        if event.type() == QEvent.ActionChanged or \
-                event.type() == QEvent.ActionAdded:
+        if event.type() == QEvent.ActionChanged or event.type() == QEvent.ActionAdded:
             self.__textLayout()
 
     def resizeEvent(self, event):
@@ -71,8 +69,7 @@ class _ToolGridButton(QToolButton):
                     # A single word that is too long must be elided.
                     # Also if the text overflows 2 lines
                     # Warning: hardcoded max lines
-                    curr_line = fm.elidedText(line_extended, Qt.ElideRight,
-                                              width)
+                    curr_line = fm.elidedText(line_extended, Qt.ElideRight, width)
                     curr_line = str(curr_line)
                 else:
                     # Put the word back
@@ -91,7 +88,7 @@ class _ToolGridButton(QToolButton):
             lines.append(curr_line)
 
         text = "\n".join(lines)
-        text = text.replace('&', '&&')  # Need escaped ampersand to show
+        text = text.replace("&", "&&")  # Need escaped ampersand to show
 
         self.__text = text
 
@@ -131,8 +128,14 @@ class ToolGrid(QFrame):
     actionTriggered = Signal(QAction)
     actionHovered = Signal(QAction)
 
-    def __init__(self, parent=None, columns=4, buttonSize=None,
-                 iconSize=None, toolButtonStyle=Qt.ToolButtonTextUnderIcon):
+    def __init__(
+        self,
+        parent=None,
+        columns=4,
+        buttonSize=None,
+        iconSize=None,
+        toolButtonStyle=Qt.ToolButtonTextUnderIcon,
+    ):
         QFrame.__init__(self, parent)
 
         if buttonSize is not None:
@@ -312,14 +315,9 @@ class ToolGrid(QFrame):
         row = index // self.__columns
         column = index % self.__columns
 
-        self.layout().addWidget(
-            button, row, column,
-            Qt.AlignLeft | Qt.AlignTop
-        )
+        self.layout().addWidget(button, row, column, Qt.AlignLeft | Qt.AlignTop)
 
-        self.__gridSlots.insert(
-            index, _ToolGridSlot(button, action, row, column)
-        )
+        self.__gridSlots.insert(index, _ToolGridSlot(button, action, row, column))
 
         self.__mapper.setMapping(button, action)
         button.clicked.connect(self.__mapper.map)
@@ -351,14 +349,18 @@ class ToolGrid(QFrame):
             start, end = start, button_count
 
         for index in range(start, end, -direction):
-            item = self.layout().itemAtPosition(index / self.__columns,
-                                                index % self.__columns)
+            item = self.layout().itemAtPosition(
+                index / self.__columns, index % self.__columns
+            )
             if item:
                 button = item.widget()
                 new_index = index + count
-                self.layout().addWidget(button, new_index / self.__columns,
-                                        new_index % self.__columns,
-                                        Qt.AlignLeft | Qt.AlignTop)
+                self.layout().addWidget(
+                    button,
+                    new_index / self.__columns,
+                    new_index % self.__columns,
+                    Qt.AlignLeft | Qt.AlignTop,
+                )
 
     def __relayout(self):
         """Relayout the buttons.
@@ -366,14 +368,17 @@ class ToolGrid(QFrame):
         for i in reversed(range(self.layout().count())):
             self.layout().takeAt(i)
 
-        self.__gridSlots = [_ToolGridSlot(slot.button, slot.action,
-                                          i / self.__columns,
-                                          i % self.__columns)
-                            for i, slot in enumerate(self.__gridSlots)]
+        self.__gridSlots = [
+            _ToolGridSlot(
+                slot.button, slot.action, i / self.__columns, i % self.__columns
+            )
+            for i, slot in enumerate(self.__gridSlots)
+        ]
 
         for slot in self.__gridSlots:
-            self.layout().addWidget(slot.button, slot.row, slot.column,
-                                    Qt.AlignLeft | Qt.AlignTop)
+            self.layout().addWidget(
+                slot.button, slot.row, slot.column, Qt.AlignLeft | Qt.AlignTop
+            )
 
     def __indexOf(self, button):
         """Return the index of button widget.
@@ -404,7 +409,7 @@ class ToolGrid(QFrame):
         return QFrame.eventFilter(self, obj, event)
 
     def __focusMove(self, focus, key):
-        assert(focus is self.focusWidget())
+        assert focus is self.focusWidget()
         try:
             index = self.__indexOf(focus)
         except IndexError:

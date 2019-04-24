@@ -27,9 +27,13 @@ class OWSave(widget.OWWidget):
 
     @classmethod
     def get_writers(cls, sparse):
-        return [f for f in FileFormat.formats
-                if getattr(f, 'write_file', None) and getattr(f, "EXTENSIONS", None)
-                and (not sparse or getattr(f, 'SUPPORT_SPARSE_DATA', False))]
+        return [
+            f
+            for f in FileFormat.formats
+            if getattr(f, "write_file", None)
+            and getattr(f, "EXTENSIONS", None)
+            and (not sparse or getattr(f, "SUPPORT_SPARSE_DATA", False))
+        ]
 
     def __init__(self):
         super().__init__()
@@ -38,12 +42,23 @@ class OWSave(widget.OWWidget):
         self.writer = None
 
         self.save = gui.auto_commit(
-            self.controlArea, self, "auto_save", "Save", box=False,
-            commit=self.save_file, callback=self.adjust_label,
-            disabled=True, addSpace=True)
+            self.controlArea,
+            self,
+            "auto_save",
+            "Save",
+            box=False,
+            commit=self.save_file,
+            callback=self.adjust_label,
+            disabled=True,
+            addSpace=True,
+        )
         self.saveAs = gui.button(
-            self.controlArea, self, "Save As...",
-            callback=self.save_file_as, disabled=True)
+            self.controlArea,
+            self,
+            "Save As...",
+            callback=self.save_file_as,
+            disabled=True,
+        )
         self.saveAs.setMinimumWidth(220)
         self.adjustSize()
 
@@ -62,11 +77,12 @@ class OWSave(widget.OWWidget):
             self.save_file()
 
     def save_file_as(self):
-        file_name = self.filename or \
-            os.path.join(self.last_dir or os.path.expanduser("~"),
-                         getattr(self.data, 'name', ''))
+        file_name = self.filename or os.path.join(
+            self.last_dir or os.path.expanduser("~"), getattr(self.data, "name", "")
+        )
         filename, writer, filter = filedialogs.open_filename_dialog_save(
-            file_name, self.last_filter, self.get_writers(self.data.is_sparse()))
+            file_name, self.last_filter, self.get_writers(self.data.is_sparse())
+        )
         if not filename:
             return
         self.filename = filename
@@ -93,6 +109,7 @@ class OWSave(widget.OWWidget):
 if __name__ == "__main__":
     import sys
     from AnyQt.QtWidgets import QApplication
+
     a = QApplication(sys.argv)
     table = Table("iris")
     ow = OWSave()

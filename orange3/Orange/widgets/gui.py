@@ -18,22 +18,43 @@ from AnyQt import QtWidgets, QtCore, QtGui
 from AnyQt.QtCore import Qt, QSize, QItemSelection, pyqtSignal as Signal
 from AnyQt.QtGui import QCursor, QColor
 from AnyQt.QtWidgets import (
-    QApplication, QStyle, QSizePolicy, QWidget, QLabel, QGroupBox, QSlider,
-    QComboBox, QLineEdit, QVBoxLayout, QHBoxLayout,
-    QTableWidget, QTableWidgetItem, QItemDelegate, QStyledItemDelegate,
-    QTableView, QHeaderView, QListView
+    QApplication,
+    QStyle,
+    QSizePolicy,
+    QWidget,
+    QLabel,
+    QGroupBox,
+    QSlider,
+    QComboBox,
+    QLineEdit,
+    QVBoxLayout,
+    QHBoxLayout,
+    QTableWidget,
+    QTableWidgetItem,
+    QItemDelegate,
+    QStyledItemDelegate,
+    QTableView,
+    QHeaderView,
+    QListView,
 )
 
 try:
     # Some Orange widgets might expect this here
-    from Orange.widgets.utils.webview import WebviewWidget  # pylint: disable=unused-import
+    from Orange.widgets.utils.webview import (
+        WebviewWidget,
+    )  # pylint: disable=unused-import
 except ImportError:
     pass  # Neither WebKit nor WebEngine are available
 
 import Orange.data
 from Orange.widgets.utils import getdeepattr
-from Orange.data import \
-    ContinuousVariable, StringVariable, TimeVariable, DiscreteVariable, Variable
+from Orange.data import (
+    ContinuousVariable,
+    StringVariable,
+    TimeVariable,
+    DiscreteVariable,
+    Variable,
+)
 from Orange.widgets.utils import vartype
 from Orange.widgets.utils.buttons import VariableTextPushButton
 from Orange.util import namegen
@@ -46,23 +67,27 @@ log = logging.getLogger(__name__)
 
 OrangeUserRole = itertools.count(Qt.UserRole)
 
-LAMBDA_NAME = namegen('_lambda_')
+LAMBDA_NAME = namegen("_lambda_")
 
 
 class TableView(QTableView):
     """An auxilliary table view for use with PyTableModel in control areas"""
+
     def __init__(self, parent=None, **kwargs):
         kwargs = dict(
-            dict(showGrid=False,
-                 sortingEnabled=True,
-                 cornerButtonEnabled=False,
-                 alternatingRowColors=True,
-                 selectionBehavior=self.SelectRows,
-                 selectionMode=self.ExtendedSelection,
-                 horizontalScrollMode=self.ScrollPerPixel,
-                 verticalScrollMode=self.ScrollPerPixel,
-                 editTriggers=self.DoubleClicked | self.EditKeyPressed),
-            **kwargs)
+            dict(
+                showGrid=False,
+                sortingEnabled=True,
+                cornerButtonEnabled=False,
+                alternatingRowColors=True,
+                selectionBehavior=self.SelectRows,
+                selectionMode=self.ExtendedSelection,
+                horizontalScrollMode=self.ScrollPerPixel,
+                verticalScrollMode=self.ScrollPerPixel,
+                editTriggers=self.DoubleClicked | self.EditKeyPressed,
+            ),
+            **kwargs
+        )
         super().__init__(parent, **kwargs)
         h = self.horizontalHeader()
         h.setCascadingSectionResizes(True)
@@ -89,6 +114,7 @@ class TableView(QTableView):
             Accepts model index and returns True if the item is to be
             rendered in bold font.
         """
+
         def __init__(self, parent=None, callback=None):
             super().__init__(parent)
             self._callback = callback
@@ -132,6 +158,7 @@ class OWComponent:
     Qt widgets inserted by function in `Orange.widgets.gui` module. See
     `OWScatterPlotGraph` for an example.
     """
+
     def __init__(self, widget=None):
         self.controlled_attributes = defaultdict(list)
         self.controls = ControlGetter(self)
@@ -183,9 +210,18 @@ class OWComponent:
                     callback(value)
 
 
-def miscellanea(control, box, parent,
-                addToLayout=True, stretch=0, sizePolicy=None, addSpace=False,
-                disabled=False, tooltip=None, **kwargs):
+def miscellanea(
+    control,
+    box,
+    parent,
+    addToLayout=True,
+    stretch=0,
+    sizePolicy=None,
+    addSpace=False,
+    disabled=False,
+    tooltip=None,
+    **kwargs
+):
     """
     Helper function that sets various properties of the widget using a common
     set of arguments.
@@ -246,9 +282,12 @@ def miscellanea(control, box, parent,
         box = None
     elif box and box is not control and not hasattr(control, "box"):
         control.box = box
-    if box and box.layout() is not None and \
-            isinstance(control, QtWidgets.QWidget) and \
-            box.layout().indexOf(control) == -1:
+    if (
+        box
+        and box.layout() is not None
+        and isinstance(control, QtWidgets.QWidget)
+        and box.layout().indexOf(control) == -1
+    ):
         box.layout().addWidget(control)
     if sizePolicy is not None:
         if isinstance(sizePolicy, tuple):
@@ -261,14 +300,16 @@ def miscellanea(control, box, parent,
 
 def _is_horizontal(orientation):
     if isinstance(orientation, str):
-        warnings.warn("string literals for orientation are deprecated",
-                      DeprecationWarning)
+        warnings.warn(
+            "string literals for orientation are deprecated", DeprecationWarning
+        )
     elif isinstance(orientation, bool):
-        warnings.warn("boolean values for orientation are deprecated",
-                      DeprecationWarning)
-    return (orientation == Qt.Horizontal or
-            orientation == 'horizontal' or
-            not orientation)
+        warnings.warn(
+            "boolean values for orientation are deprecated", DeprecationWarning
+        )
+    return (
+        orientation == Qt.Horizontal or orientation == "horizontal" or not orientation
+    )
 
 
 def setLayout(widget, layout):
@@ -337,8 +378,9 @@ def rubber(widget):
     widget.layout().addStretch(100)
 
 
-def widgetBox(widget, box=None, orientation=Qt.Vertical, margin=None, spacing=4,
-              **misc):
+def widgetBox(
+    widget, box=None, orientation=Qt.Vertical, margin=None, spacing=4, **misc
+):
     """
     Construct a box with vertical or horizontal layout, and optionally,
     a border with an optional label.
@@ -376,7 +418,7 @@ def widgetBox(widget, box=None, orientation=Qt.Vertical, margin=None, spacing=4,
     setLayout(b, orientation)
     b.layout().setSpacing(spacing)
     b.layout().setContentsMargins(margin, margin, margin, margin)
-    misc.setdefault('addSpace', bool(box))
+    misc.setdefault("addSpace", bool(box))
     miscellanea(b, None, widget, **misc)
     return b
 
@@ -437,8 +479,9 @@ def widgetLabel(widget, label="", labelWidth=None, **misc):
     return lbl
 
 
-def label(widget, master, label, labelWidth=None, box=None,
-          orientation=Qt.Vertical, **misc):
+def label(
+    widget, master, label, labelWidth=None, box=None, orientation=Qt.Vertical, **misc
+):
     """
     Construct a label that contains references to the master widget's
     attributes; when their values change, the label is updated.
@@ -528,6 +571,7 @@ class DoubleSpinBoxWFocusOut(QtWidgets.QDoubleSpinBox):
     """
     Same as :obj:`SpinBoxWFocusOut`, except that it is derived from
     :obj:`~QDoubleSpinBox`"""
+
     def __init__(self, minv, maxv, step, parent):
         super().__init__(parent)
         self.setDecimals(math.ceil(-math.log10(step)))
@@ -549,12 +593,30 @@ class DoubleSpinBoxWFocusOut(QtWidgets.QDoubleSpinBox):
         self.changed = False
 
 
-def spin(widget, master, value, minv, maxv, step=1, box=None, label=None,
-         labelWidth=None, orientation=Qt.Horizontal, callback=None,
-         controlWidth=None, callbackOnReturn=False, checked=None,
-         checkCallback=None, posttext=None, disabled=False,
-         alignment=Qt.AlignLeft, keyboardTracking=True,
-         decimals=None, spinType=int, **misc):
+def spin(
+    widget,
+    master,
+    value,
+    minv,
+    maxv,
+    step=1,
+    box=None,
+    label=None,
+    labelWidth=None,
+    orientation=Qt.Horizontal,
+    callback=None,
+    controlWidth=None,
+    callbackOnReturn=False,
+    checked=None,
+    checkCallback=None,
+    posttext=None,
+    disabled=False,
+    alignment=Qt.AlignLeft,
+    keyboardTracking=True,
+    decimals=None,
+    spinType=int,
+    **misc
+):
     """
     A spinbox with lots of bells and whistles, such as a checkbox and various
     callbacks. It constructs a control of type :obj:`SpinBoxWFocusOut` or
@@ -634,17 +696,18 @@ def spin(widget, master, value, minv, maxv, step=1, box=None, label=None,
 
     cbox = None
     if checked is not None:
-        cbox = checkBox(bi, master, checked, label, labelWidth=labelWidth,
-                        callback=checkCallback)
+        cbox = checkBox(
+            bi, master, checked, label, labelWidth=labelWidth, callback=checkCallback
+        )
     elif label:
         b.label = widgetLabel(b, label, labelWidth)
     if posttext:
         widgetLabel(bi, posttext)
 
     isDouble = spinType == float
-    sbox = bi.control = b.control = \
-        (SpinBoxWFocusOut, DoubleSpinBoxWFocusOut)[isDouble](minv, maxv,
-                                                             step, bi)
+    sbox = bi.control = b.control = (SpinBoxWFocusOut, DoubleSpinBoxWFocusOut)[
+        isDouble
+    ](minv, maxv, step, bi)
     if bi is not widget:
         bi.setDisabled(disabled)
     else:
@@ -660,10 +723,13 @@ def spin(widget, master, value, minv, maxv, step=1, box=None, label=None,
         sbox.setValue(getdeepattr(master, value))
 
     cfront, sbox.cback, sbox.cfunc = connectControl(
-        master, value, callback,
-        not (callback and callbackOnReturn) and
-        sbox.valueChanged[(int, float)[isDouble]],
-        (CallFrontSpin, CallFrontDoubleSpin)[isDouble](sbox))
+        master,
+        value,
+        callback,
+        not (callback and callbackOnReturn)
+        and sbox.valueChanged[(int, float)[isDouble]],
+        (CallFrontSpin, CallFrontDoubleSpin)[isDouble](sbox),
+    )
     if checked:
         sbox.cbox = cbox
         cbox.disables = [sbox]
@@ -672,10 +738,8 @@ def spin(widget, master, value, minv, maxv, step=1, box=None, label=None,
         sbox.valueChanged.connect(sbox.onValueChanged)
         sbox.editingFinished.connect(sbox.onEnter)
         if hasattr(sbox, "upButton"):
-            sbox.upButton().clicked.connect(
-                lambda c=sbox.editor(): c.setFocus())
-            sbox.downButton().clicked.connect(
-                lambda c=sbox.editor(): c.setFocus())
+            sbox.upButton().clicked.connect(lambda c=sbox.editor(): c.setFocus())
+            sbox.downButton().clicked.connect(lambda c=sbox.editor(): c.setFocus())
 
     miscellanea(sbox, b if b is not widget else bi, widget, **misc)
     if checked:
@@ -688,29 +752,70 @@ def spin(widget, master, value, minv, maxv, step=1, box=None, label=None,
         return sbox
 
 
-
 # noinspection PyTypeChecker
-def doubleSpin(widget, master, value, minv, maxv, step=1, box=None, label=None,
-               labelWidth=None, orientation=Qt.Horizontal, callback=None,
-               controlWidth=None, callbackOnReturn=False, checked=None,
-               checkCallback=None, posttext=None,
-               alignment=Qt.AlignLeft, keyboardTracking=True,
-               decimals=None, **misc):
+def doubleSpin(
+    widget,
+    master,
+    value,
+    minv,
+    maxv,
+    step=1,
+    box=None,
+    label=None,
+    labelWidth=None,
+    orientation=Qt.Horizontal,
+    callback=None,
+    controlWidth=None,
+    callbackOnReturn=False,
+    checked=None,
+    checkCallback=None,
+    posttext=None,
+    alignment=Qt.AlignLeft,
+    keyboardTracking=True,
+    decimals=None,
+    **misc
+):
     """
     Backward compatilibity function: calls :obj:`spin` with `spinType=float`.
     """
-    return spin(widget, master, value, minv, maxv, step, box=box, label=label,
-                labelWidth=labelWidth, orientation=orientation,
-                callback=callback, controlWidth=controlWidth,
-                callbackOnReturn=callbackOnReturn, checked=checked,
-                checkCallback=checkCallback, posttext=posttext,
-                alignment=alignment, keyboardTracking=keyboardTracking,
-                decimals=decimals, spinType=float, **misc)
+    return spin(
+        widget,
+        master,
+        value,
+        minv,
+        maxv,
+        step,
+        box=box,
+        label=label,
+        labelWidth=labelWidth,
+        orientation=orientation,
+        callback=callback,
+        controlWidth=controlWidth,
+        callbackOnReturn=callbackOnReturn,
+        checked=checked,
+        checkCallback=checkCallback,
+        posttext=posttext,
+        alignment=alignment,
+        keyboardTracking=keyboardTracking,
+        decimals=decimals,
+        spinType=float,
+        **misc
+    )
 
 
-def checkBox(widget, master, value, label, box=None,
-             callback=None, getwidget=False, id_=None, labelWidth=None,
-             disables=None, **misc):
+def checkBox(
+    widget,
+    master,
+    value,
+    label,
+    box=None,
+    callback=None,
+    getwidget=False,
+    id_=None,
+    labelWidth=None,
+    disables=None,
+    **misc
+):
     """
     A simple checkbox.
 
@@ -752,11 +857,17 @@ def checkBox(widget, master, value, label, box=None,
         cbox.setFixedSize(labelWidth, cbox.sizeHint().height())
     cbox.setChecked(getdeepattr(master, value))
 
-    connectControl(master, value, None, cbox.toggled[bool],
-                   CallFrontCheckBox(cbox),
-                   cfunc=callback and FunctionCallback(
-                       master, callback, widget=cbox, getwidget=getwidget,
-                       id=id_))
+    connectControl(
+        master,
+        value,
+        None,
+        cbox.toggled[bool],
+        CallFrontCheckBox(cbox),
+        cfunc=callback
+        and FunctionCallback(
+            master, callback, widget=cbox, getwidget=getwidget, id=id_
+        ),
+    )
     if isinstance(disables, QtWidgets.QWidget):
         disables = [disables]
     cbox.disables = disables or []
@@ -825,10 +936,22 @@ class LineEditWFocusOut(QtWidgets.QLineEdit):
         return super().focusInEvent(*e)
 
 
-def lineEdit(widget, master, value, label=None, labelWidth=None,
-             orientation=Qt.Vertical, box=None, callback=None,
-             valueType=str, validator=None, controlWidth=None,
-             callbackOnType=False, focusInCallback=None, **misc):
+def lineEdit(
+    widget,
+    master,
+    value,
+    label=None,
+    labelWidth=None,
+    orientation=Qt.Vertical,
+    box=None,
+    callback=None,
+    valueType=str,
+    validator=None,
+    controlWidth=None,
+    callbackOnType=False,
+    focusInCallback=None,
+    **misc
+):
     """
     Insert a line edit.
 
@@ -891,17 +1014,32 @@ def lineEdit(widget, master, value, label=None, labelWidth=None,
         ledit.setValidator(validator)
     if value:
         ledit.cback = connectControl(
-            master, value,
-            callbackOnType and callback, ledit.textChanged[str],
-            CallFrontLineEdit(ledit), fvcb=value and valueType)[1]
+            master,
+            value,
+            callbackOnType and callback,
+            ledit.textChanged[str],
+            CallFrontLineEdit(ledit),
+            fvcb=value and valueType,
+        )[1]
 
     miscellanea(ledit, b, widget, **misc)
     return ledit
 
 
-def button(widget, master, label, callback=None, width=None, height=None,
-           toggleButton=False, value="", default=False, autoDefault=True,
-           buttonType=QtWidgets.QPushButton, **misc):
+def button(
+    widget,
+    master,
+    label,
+    callback=None,
+    width=None,
+    height=None,
+    toggleButton=False,
+    value="",
+    default=False,
+    autoDefault=True,
+    buttonType=QtWidgets.QPushButton,
+    **misc
+):
     """
     Insert a button (QPushButton, by default)
 
@@ -953,10 +1091,13 @@ def button(widget, master, label, callback=None, width=None, height=None,
     if value:
         button.setChecked(getdeepattr(master, value))
         connectControl(
-            master, value, None, button.toggled[bool],
+            master,
+            value,
+            None,
+            button.toggled[bool],
             CallFrontButton(button),
-            cfunc=callback and FunctionCallback(master, callback,
-                                                widget=button))
+            cfunc=callback and FunctionCallback(master, callback, widget=button),
+        )
     elif callback:
         button.clicked.connect(callback)
 
@@ -964,8 +1105,9 @@ def button(widget, master, label, callback=None, width=None, height=None,
     return button
 
 
-def toolButton(widget, master, label="", callback=None,
-               width=None, height=None, tooltip=None):
+def toolButton(
+    widget, master, label="", callback=None, width=None, height=None, tooltip=None
+):
     """
     Insert a tool button. Calls :obj:`button`
 
@@ -983,8 +1125,16 @@ def toolButton(widget, master, label="", callback=None,
     :type height: int
     :rtype: QToolButton
     """
-    return button(widget, master, label, callback, width, height,
-                  buttonType=QtWidgets.QToolButton, tooltip=tooltip)
+    return button(
+        widget,
+        master,
+        label,
+        callback,
+        width,
+        height,
+        buttonType=QtWidgets.QToolButton,
+        tooltip=tooltip,
+    )
 
 
 def createAttributePixmap(char, background=Qt.black, color=Qt.white):
@@ -1005,14 +1155,16 @@ def createAttributePixmap(char, background=Qt.black, color=Qt.white):
         pixmap.fill(Qt.transparent)
         painter = QtGui.QPainter()
         painter.begin(pixmap)
-        painter.setRenderHints(painter.Antialiasing | painter.TextAntialiasing |
-                               painter.SmoothPixmapTransform)
+        painter.setRenderHints(
+            painter.Antialiasing
+            | painter.TextAntialiasing
+            | painter.SmoothPixmapTransform
+        )
         painter.setPen(background)
         painter.setBrush(background)
         margin = 1 + size // 16
         text_margin = size // 20
-        rect = QtCore.QRectF(margin, margin,
-                             size - 2 * margin, size - 2 * margin)
+        rect = QtCore.QRectF(margin, margin, size - 2 * margin, size - 2 * margin)
         painter.drawRoundedRect(rect, 30.0, 30.0, Qt.RelativeSize)
         painter.setPen(color)
         font = painter.font()  # type: QtGui.QFont
@@ -1027,19 +1179,18 @@ def createAttributePixmap(char, background=Qt.black, color=Qt.white):
 class __AttributeIconDict(dict):
     def __getitem__(self, key):
         if not self:
-            for tpe, char, col in ((vartype(ContinuousVariable()),
-                                    "N", (202, 0, 32)),
-                                   (vartype(DiscreteVariable()),
-                                    "C", (26, 150, 65)),
-                                   (vartype(StringVariable()),
-                                    "S", (0, 0, 0)),
-                                   (vartype(TimeVariable()),
-                                    "T", (68, 170, 255)),
-                                   (-1, "?", (128, 128, 128))):
+            for tpe, char, col in (
+                (vartype(ContinuousVariable()), "N", (202, 0, 32)),
+                (vartype(DiscreteVariable()), "C", (26, 150, 65)),
+                (vartype(StringVariable()), "S", (0, 0, 0)),
+                (vartype(TimeVariable()), "T", (68, 170, 255)),
+                (-1, "?", (128, 128, 128)),
+            ):
                 self[tpe] = createAttributePixmap(char, QtGui.QColor(*col))
         if key not in self:
             key = vartype(key) if isinstance(key, Variable) else -1
         return super().__getitem__(key)
+
 
 #: A dict that returns icons for different attribute types. The dict is
 #: constructed on first use since icons cannot be created before initializing
@@ -1072,12 +1223,23 @@ class ListViewWithSizeHint(QListView):
         self.preferred_size = preferred_size
 
     def sizeHint(self):
-        return self.preferred_size if self.preferred_size is not None \
+        return (
+            self.preferred_size
+            if self.preferred_size is not None
             else super().sizeHint()
+        )
 
 
-def listView(widget, master, value=None, model=None, box=None, callback=None,
-             sizeHint=None, **misc):
+def listView(
+    widget,
+    master,
+    value=None,
+    model=None,
+    box=None,
+    callback=None,
+    sizeHint=None,
+    **misc
+):
     if box:
         bg = vBox(widget, box, addToLayout=False)
     else:
@@ -1085,20 +1247,34 @@ def listView(widget, master, value=None, model=None, box=None, callback=None,
     view = ListViewWithSizeHint(preferred_size=sizeHint)
     view.setModel(model)
     if value is not None:
-        connectControl(master, value, callback,
-                       view.selectionModel().selectionChanged,
-                       CallFrontListView(view),
-                       CallBackListView(model, view, master, value))
-    misc.setdefault('addSpace', True)
-    misc.setdefault('uniformItemSizes', True)
+        connectControl(
+            master,
+            value,
+            callback,
+            view.selectionModel().selectionChanged,
+            CallFrontListView(view),
+            CallBackListView(model, view, master, value),
+        )
+    misc.setdefault("addSpace", True)
+    misc.setdefault("uniformItemSizes", True)
     miscellanea(view, bg, widget, **misc)
     return view
 
 
-def listBox(widget, master, value=None, labels=None, box=None, callback=None,
-            selectionMode=QtWidgets.QListWidget.SingleSelection,
-            enableDragDrop=False, dragDropCallback=None,
-            dataValidityCallback=None, sizeHint=None, **misc):
+def listBox(
+    widget,
+    master,
+    value=None,
+    labels=None,
+    box=None,
+    callback=None,
+    selectionMode=QtWidgets.QListWidget.SingleSelection,
+    enableDragDrop=False,
+    dragDropCallback=None,
+    dataValidityCallback=None,
+    sizeHint=None,
+    **misc
+):
     """
     Insert a list box.
 
@@ -1137,8 +1313,9 @@ def listBox(widget, master, value=None, labels=None, box=None, callback=None,
         bg = hBox(widget, box, addToLayout=False)
     else:
         bg = widget
-    lb = OrangeListBox(master, enableDragDrop, dragDropCallback,
-                       dataValidityCallback, sizeHint, bg)
+    lb = OrangeListBox(
+        master, enableDragDrop, dragDropCallback, dataValidityCallback, sizeHint, bg
+    )
     lb.setSelectionMode(selectionMode)
     lb.ogValue = value
     lb.ogLabels = labels
@@ -1153,18 +1330,33 @@ def listBox(widget, master, value=None, labels=None, box=None, callback=None,
             clist = ControlledList(clist, lb)
             master.__setattr__(value, clist)
         setattr(master, value, clist)
-        connectControl(master, value, callback, lb.itemSelectionChanged,
-                       CallFrontListBox(lb), CallBackListBox(lb, master))
+        connectControl(
+            master,
+            value,
+            callback,
+            lb.itemSelectionChanged,
+            CallFrontListBox(lb),
+            CallBackListBox(lb, master),
+        )
 
-    misc.setdefault('addSpace', True)
+    misc.setdefault("addSpace", True)
     miscellanea(lb, bg, widget, **misc)
     return lb
 
 
 # btnLabels is a list of either char strings or pixmaps
-def radioButtons(widget, master, value, btnLabels=(), tooltips=None,
-                 box=None, label=None, orientation=Qt.Vertical,
-                 callback=None, **misc):
+def radioButtons(
+    widget,
+    master,
+    value,
+    btnLabels=(),
+    tooltips=None,
+    box=None,
+    label=None,
+    orientation=Qt.Vertical,
+    callback=None,
+    **misc
+):
     """
     Construct a button group and add radio buttons, if they are given.
     The value with which the buttons synchronize is the index of selected
@@ -1203,18 +1395,34 @@ def radioButtons(widget, master, value, btnLabels=(), tooltips=None,
     bg.ogMaster = master
     for i, lab in enumerate(btnLabels):
         appendRadioButton(bg, lab, tooltip=tooltips and tooltips[i], id=i + 1)
-    connectControl(master, value, callback, bg.group.buttonClicked[int],
-                   CallFrontRadioButtons(bg), CallBackRadioButton(bg, master))
-    misc.setdefault('addSpace', bool(box))
+    connectControl(
+        master,
+        value,
+        callback,
+        bg.group.buttonClicked[int],
+        CallFrontRadioButtons(bg),
+        CallBackRadioButton(bg, master),
+    )
+    misc.setdefault("addSpace", bool(box))
     miscellanea(bg.group, bg, widget, **misc)
     return bg
 
 
 radioButtonsInBox = radioButtons
 
-def appendRadioButton(group, label, insertInto=None,
-                      disabled=False, tooltip=None, sizePolicy=None,
-                      addToLayout=True, stretch=0, addSpace=False, id=None):
+
+def appendRadioButton(
+    group,
+    label,
+    insertInto=None,
+    disabled=False,
+    tooltip=None,
+    sizePolicy=None,
+    addToLayout=True,
+    stretch=0,
+    addSpace=False,
+    id=None,
+):
     """
     Construct a radio button and add it to the group. The group must be
     constructed with :obj:`radioButtons` since it adds additional
@@ -1264,10 +1472,25 @@ def appendRadioButton(group, label, insertInto=None,
     return w
 
 
-def hSlider(widget, master, value, box=None, minValue=0, maxValue=10, step=1,
-            callback=None, label=None, labelFormat=" %d", ticks=False,
-            divideFactor=1.0, vertical=False, createLabel=True, width=None,
-            intOnly=True, **misc):
+def hSlider(
+    widget,
+    master,
+    value,
+    box=None,
+    minValue=0,
+    maxValue=10,
+    step=1,
+    callback=None,
+    label=None,
+    labelFormat=" %d",
+    ticks=False,
+    divideFactor=1.0,
+    vertical=False,
+    createLabel=True,
+    width=None,
+    intOnly=True,
+    **misc
+):
     """
     Construct a slider.
 
@@ -1342,8 +1565,7 @@ def hSlider(widget, master, value, box=None, minValue=0, maxValue=10, step=1,
         label.setFixedSize(max(width1, width2), label.sizeHint().height())
         txt = labelFormat % (getdeepattr(master, value) / divideFactor)
         label.setText(txt)
-        label.setLbl = lambda x: \
-            label.setText(labelFormat % (x / divideFactor))
+        label.setLbl = lambda x: label.setText(labelFormat % (x / divideFactor))
         signal.connect(label.setLbl)
 
     connectControl(master, value, callback, signal, CallFrontHSlider(slider))
@@ -1352,9 +1574,20 @@ def hSlider(widget, master, value, box=None, minValue=0, maxValue=10, step=1,
     return slider
 
 
-def labeledSlider(widget, master, value, box=None,
-                  label=None, labels=(), labelFormat=" %d", ticks=False,
-                  callback=None, vertical=False, width=None, **misc):
+def labeledSlider(
+    widget,
+    master,
+    value,
+    box=None,
+    label=None,
+    labels=(),
+    labelFormat=" %d",
+    ticks=False,
+    callback=None,
+    vertical=False,
+    width=None,
+    **misc
+):
     """
     Construct a slider with labels instead of numbers.
 
@@ -1409,23 +1642,38 @@ def labeledSlider(widget, master, value, box=None,
     value_label.setFixedSize(max_label_size, value_label.sizeHint().height())
     value_label.setText(getdeepattr(master, value))
     if isinstance(labelFormat, str):
-        value_label.set_label = lambda x: \
-            value_label.setText(labelFormat % x)
+        value_label.set_label = lambda x: value_label.setText(labelFormat % x)
     else:
         value_label.set_label = lambda x: value_label.setText(labelFormat(x))
     slider.valueChanged[int].connect(value_label.set_label)
 
-    connectControl(master, value, callback, slider.valueChanged[int],
-                   CallFrontLabeledSlider(slider, labels),
-                   CallBackLabeledSlider(slider, master, labels))
+    connectControl(
+        master,
+        value,
+        callback,
+        slider.valueChanged[int],
+        CallFrontLabeledSlider(slider, labels),
+        CallBackLabeledSlider(slider, master, labels),
+    )
 
     miscellanea(slider, sliderBox, widget, **misc)
     return slider
 
 
-def valueSlider(widget, master, value, box=None, label=None,
-                values=(), labelFormat=" %d", ticks=False,
-                callback=None, vertical=False, width=None, **misc):
+def valueSlider(
+    widget,
+    master,
+    value,
+    box=None,
+    label=None,
+    values=(),
+    labelFormat=" %d",
+    ticks=False,
+    callback=None,
+    vertical=False,
+    width=None,
+    **misc
+):
     """
     Construct a slider with different values.
 
@@ -1487,9 +1735,14 @@ def valueSlider(widget, master, value, box=None, label=None,
     value_label.set_label = lambda x: value_label.setText(labelFormat(values[x]))
     slider.valueChanged[int].connect(value_label.set_label)
 
-    connectControl(master, value, callback, slider.valueChanged[int],
-                   CallFrontLabeledSlider(slider, values),
-                   CallBackLabeledSlider(slider, master, values))
+    connectControl(
+        master,
+        value,
+        callback,
+        slider.valueChanged[int],
+        CallFrontLabeledSlider(slider, values),
+        CallBackLabeledSlider(slider, master, values),
+    )
 
     miscellanea(slider, sliderBox, widget, **misc)
     return slider
@@ -1502,6 +1755,7 @@ class OrangeComboBox(QtWidgets.QComboBox):
     Prefer to use this class in place of plain QComboBox when the used
     model will possibly contain many items.
     """
+
     def __init__(self, parent=None, maximumContentsLength=-1, **kwargs):
         # Forward-declared for sizeHint()
         self.__maximumContentsLength = maximumContentsLength
@@ -1542,8 +1796,11 @@ class OrangeComboBox(QtWidgets.QComboBox):
         # reimplemented
         sh = super().sizeHint()
         if self.__maximumContentsLength > 0:
-            width = (self.fontMetrics().width("X") * self.__maximumContentsLength
-                     + self.iconSize().width() + 4)
+            width = (
+                self.fontMetrics().width("X") * self.__maximumContentsLength
+                + self.iconSize().width()
+                + 4
+            )
             sh = sh.boundedTo(QtCore.QSize(width, sh.height()))
         return sh
 
@@ -1551,8 +1808,11 @@ class OrangeComboBox(QtWidgets.QComboBox):
         # reimplemented
         sh = super().minimumSizeHint()
         if self.__maximumContentsLength > 0:
-            width = (self.fontMetrics().width("X") * self.__maximumContentsLength
-                     + self.iconSize().width() + 4)
+            width = (
+                self.fontMetrics().width("X") * self.__maximumContentsLength
+                + self.iconSize().width()
+                + 4
+            )
             sh = sh.boundedTo(QtCore.QSize(width, sh.height()))
         return sh
 
@@ -1560,12 +1820,24 @@ class OrangeComboBox(QtWidgets.QComboBox):
 # TODO comboBox looks overly complicated:
 # - can valueType be anything else than str?
 # - sendSelectedValue is not a great name
-def comboBox(widget, master, value, box=None, label=None, labelWidth=None,
-             orientation=Qt.Vertical, items=(), callback=None,
-             sendSelectedValue=False, valueType=str,
-             emptyString=None, editable=False,
-             contentsLength=None, maximumContentsLength=25,
-             **misc):
+def comboBox(
+    widget,
+    master,
+    value,
+    box=None,
+    label=None,
+    labelWidth=None,
+    orientation=Qt.Vertical,
+    items=(),
+    callback=None,
+    sendSelectedValue=False,
+    valueType=str,
+    emptyString=None,
+    editable=False,
+    contentsLength=None,
+    maximumContentsLength=25,
+    **misc
+):
     """
     Construct a combo box.
 
@@ -1626,12 +1898,13 @@ def comboBox(widget, master, value, box=None, label=None, labelWidth=None,
         hb = widget
 
     combo = OrangeComboBox(
-        hb, maximumContentsLength=maximumContentsLength,
-        editable=editable)
+        hb, maximumContentsLength=maximumContentsLength, editable=editable
+    )
 
     if contentsLength is not None:
         combo.setSizeAdjustPolicy(
-            QtWidgets.QComboBox.AdjustToMinimumContentsLengthWithIcon)
+            QtWidgets.QComboBox.AdjustToMinimumContentsLengthWithIcon
+        )
         combo.setMinimumContentsLength(contentsLength)
 
     combo.box = hb
@@ -1661,19 +1934,30 @@ def comboBox(widget, master, value, box=None, label=None, labelWidth=None,
 
         if isinstance(model, VariableListModel):
             connectControl(
-                master, value, callback, combo.activated[int],
+                master,
+                value,
+                callback,
+                combo.activated[int],
                 callfront,
-                ValueCallbackComboModel(master, value, model)
+                ValueCallbackComboModel(master, value, model),
             )
         elif sendSelectedValue:
             connectControl(
-                master, value, callback, combo.activated[str],
+                master,
+                value,
+                callback,
+                combo.activated[str],
                 CallFrontComboBox(combo, valueType, emptyString),
-                ValueCallbackCombo(master, value, valueType, emptyString))
+                ValueCallbackCombo(master, value, valueType, emptyString),
+            )
         else:
             connectControl(
-                master, value, callback, combo.activated[int],
-                CallFrontComboBox(combo, None, emptyString))
+                master,
+                value,
+                callback,
+                combo.activated[int],
+                CallFrontComboBox(combo, None, emptyString),
+            )
     miscellanea(combo, hb, widget, **misc)
     combo.emptyString = emptyString
     return combo
@@ -1715,8 +1999,16 @@ class OrangeListBox(QtWidgets.QListWidget):
 
         The size returned by the `sizeHint` method.
     """
-    def __init__(self, master, enableDragDrop=False, dragDropCallback=None,
-                 dataValidityCallback=None, sizeHint=None, *args):
+
+    def __init__(
+        self,
+        master,
+        enableDragDrop=False,
+        dragDropCallback=None,
+        dataValidityCallback=None,
+        sizeHint=None,
+        *args
+    ):
         """
         :param master: the master widget
         :type master: OWWidget or OWComponent
@@ -1769,9 +2061,11 @@ class OrangeListBox(QtWidgets.QListWidget):
             self.drop_callback()
 
     def update_master(self, exclude=()):
-        control_list = [self.item(i).data(Qt.UserRole)
-                        for i in range(self.count())
-                        if self.item(i).data(Qt.UserRole) not in exclude]
+        control_list = [
+            self.item(i).data(Qt.UserRole)
+            for i in range(self.count())
+            if self.item(i).data(Qt.UserRole) not in exclude
+        ]
         if self.ogLabels:
             master_list = getattr(self.master, self.ogLabels)
 
@@ -1794,9 +2088,17 @@ class OrangeListBox(QtWidgets.QListWidget):
 # TODO: SmallWidgetButton is used only in OWkNNOptimization.py. (Re)Move.
 # eliminated?
 class SmallWidgetButton(QtWidgets.QPushButton):
-    def __init__(self, widget, text="", pixmap=None, box=None,
-                 orientation=Qt.Vertical, autoHideWidget=None, **misc):
-        #self.parent = parent
+    def __init__(
+        self,
+        widget,
+        text="",
+        pixmap=None,
+        box=None,
+        orientation=Qt.Vertical,
+        autoHideWidget=None,
+        **misc
+    ):
+        # self.parent = parent
         if pixmap is not None:
             iconDir = os.path.join(os.path.dirname(__file__), "icons")
             name = ""
@@ -1814,8 +2116,9 @@ class SmallWidgetButton(QtWidgets.QPushButton):
         if widget.layout() is not None:
             widget.layout().addWidget(self)
         # create autohide widget and set a layout
-        self.widget = self.autohideWidget = \
-            (autoHideWidget or AutoHideWidget)(None, Qt.Popup)
+        self.widget = self.autohideWidget = (autoHideWidget or AutoHideWidget)(
+            None, Qt.Popup
+        )
         setLayout(self.widget, orientation)
         if box:
             self.widget = widgetBox(self.widget, box, orientation)
@@ -1827,17 +2130,17 @@ class SmallWidgetButton(QtWidgets.QPushButton):
         if self.autohideWidget.isVisible():
             self.autohideWidget.hide()
         else:
-            self.autohideWidget.move(
-                self.mapToGlobal(QtCore.QPoint(0, self.height())))
+            self.autohideWidget.move(self.mapToGlobal(QtCore.QPoint(0, self.height())))
             self.autohideWidget.show()
 
 
 class SmallWidgetLabel(QLabel):
-    def __init__(self, widget, text="", pixmap=None, box=None,
-                 orientation=Qt.Vertical, **misc):
+    def __init__(
+        self, widget, text="", pixmap=None, box=None, orientation=Qt.Vertical, **misc
+    ):
         super().__init__(widget)
         if text:
-            self.setText("<font color=\"#C10004\">" + text + "</font>")
+            self.setText('<font color="#C10004">' + text + "</font>")
         elif pixmap is not None:
             iconDir = os.path.join(os.path.dirname(__file__), "icons")
             name = ""
@@ -1862,8 +2165,7 @@ class SmallWidgetLabel(QLabel):
         if self.autohideWidget.isVisible():
             self.autohideWidget.hide()
         else:
-            self.autohideWidget.move(
-                self.mapToGlobal(QtCore.QPoint(0, self.height())))
+            self.autohideWidget.move(self.mapToGlobal(QtCore.QPoint(0, self.height())))
             self.autohideWidget.show()
 
 
@@ -1871,12 +2173,20 @@ class AutoHideWidget(QWidget):
     def leaveEvent(self, _):
         self.hide()
 
+
 # creates a widget box with a button in the top right edge that shows/hides all
 # widgets in the box and collapse the box to its minimum height
 # TODO collapsableWidgetBox is used only in OWMosaicDisplay.py; (re)move
 class collapsableWidgetBox(QGroupBox):
-    def __init__(self, widget, box="", master=None, value="",
-                 orientation=Qt.Vertical, callback=None):
+    def __init__(
+        self,
+        widget,
+        box="",
+        master=None,
+        value="",
+        orientation=Qt.Vertical,
+        callback=None,
+    ):
         super().__init__(widget)
         self.setFlat(1)
         setLayout(self, orientation)
@@ -1915,8 +2225,7 @@ class collapsableWidgetBox(QGroupBox):
 # creates an icon that allows you to show/hide the widgets in the widgets list
 # TODO Class widgetHider doesn't seem to be used anywhere; remove?
 class widgetHider(QWidget):
-    def __init__(self, widget, master, value, _=(19, 19), widgets=None,
-                 tooltip=None):
+    def __init__(self, widget, master, value, _=(19, 19), widgets=None, tooltip=None):
         super().__init__(widget)
         if widget.layout() is not None:
             widget.layout().addWidget(self)
@@ -1935,8 +2244,7 @@ class widgetHider(QWidget):
             self.setWidgets(widgets)
 
     def mousePressEvent(self, event):
-        self.master.__setattr__(self.value,
-                                not getdeepattr(self.master, self.value))
+        self.master.__setattr__(self.value, not getdeepattr(self.master, self.value))
         self.makeConsistent()
 
     def setWidgets(self, widgets):
@@ -1955,9 +2263,19 @@ class widgetHider(QWidget):
 # callback handlers
 
 
-def auto_commit(widget, master, value, label, auto_label=None, box=True,
-                checkbox_label=None, orientation=None, commit=None,
-                callback=None, **misc):
+def auto_commit(
+    widget,
+    master,
+    value,
+    label,
+    auto_label=None,
+    box=True,
+    checkbox_label=None,
+    orientation=None,
+    commit=None,
+    callback=None,
+    **misc
+):
     """
     Add a commit button with auto-commit check box.
 
@@ -1995,6 +2313,7 @@ def auto_commit(widget, master, value, label, auto_label=None, box=True,
     :type box: int or str or None
     :return: the box
     """
+
     def checkbox_toggled():
         if getattr(master, value):
             btn.setText(auto_label)
@@ -2024,9 +2343,11 @@ def auto_commit(widget, master, value, label, auto_label=None, box=True,
             QApplication.restoreOverrideCursor()
 
     dirty = False
-    commit = commit or getattr(master, 'commit')
-    commit_name = next(LAMBDA_NAME) if isinstance(commit, LambdaType) else commit.__name__
-    setattr(master, 'unconditional_' + commit_name, commit)
+    commit = commit or getattr(master, "commit")
+    commit_name = (
+        next(LAMBDA_NAME) if isinstance(commit, LambdaType) else commit.__name__
+    )
+    setattr(master, "unconditional_" + commit_name, commit)
 
     if not auto_label:
         if checkbox_label:
@@ -2038,18 +2359,19 @@ def auto_commit(widget, master, value, label, auto_label=None, box=True,
     else:
         if orientation is None:
             orientation = Qt.Vertical if checkbox_label else Qt.Horizontal
-        b = widgetBox(widget, box=box, orientation=orientation,
-                      addToLayout=False)
+        b = widgetBox(widget, box=box, orientation=orientation, addToLayout=False)
         b.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
 
-    b.checkbox = cb = checkBox(b, master, value, checkbox_label,
-                               callback=checkbox_toggled, tooltip=auto_label)
+    b.checkbox = cb = checkBox(
+        b, master, value, checkbox_label, callback=checkbox_toggled, tooltip=auto_label
+    )
     if _is_horizontal(orientation):
         b.layout().addSpacing(10)
     cb.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
 
     b.button = btn = VariableTextPushButton(
-        b, text=label, textChoiceList=[label, auto_label], clicked=do_commit)
+        b, text=label, textChoiceList=[label, auto_label], clicked=do_commit
+    )
     if b.layout() is not None:
         b.layout().addWidget(b.button)
 
@@ -2057,8 +2379,9 @@ def auto_commit(widget, master, value, label, auto_label=None, box=True,
         btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
     checkbox_toggled()
     setattr(master, commit_name, unconditional_commit)
-    misc['addToLayout'] = misc.get('addToLayout', True) and \
-                          not isinstance(box, QtWidgets.QWidget)
+    misc["addToLayout"] = misc.get("addToLayout", True) and not isinstance(
+        box, QtWidgets.QWidget
+    )
     miscellanea(b, widget, widget, **misc)
     return b
 
@@ -2070,6 +2393,7 @@ class ControlledList(list):
     selected in the list box. Changing the list content changes the
     selection in the list box.
     """
+
     def __init__(self, content, listBox=None):
         super().__init__(content if content is not None else [])
         # Controlled list is created behind the back by gui.listBox and
@@ -2085,6 +2409,7 @@ class ControlledList(list):
         # cannot pickle self.listBox, but can't discard it
         # (ControlledList may live on)
         import copyreg
+
         return copyreg._reconstructor, (list, list, ()), None, self.__iter__()
 
     # TODO ControllgedList.item2name is probably never used
@@ -2147,8 +2472,7 @@ class ControlledList(list):
         super().remove(item)
 
 
-def connectControl(master, value, f, signal,
-                   cfront, cback=None, cfunc=None, fvcb=None):
+def connectControl(master, value, f, signal, cfront, cback=None, cfunc=None, fvcb=None):
     cback = cback or value and ValueCallback(master, value, fvcb)
     if cback:
         if signal:
@@ -2193,7 +2517,8 @@ class ControlledCallback:
             return
         if self.func:
             if self.func in (int, float) and (
-                    not value or isinstance(value, str) and value in "+-"):
+                not value or isinstance(value, str) and value in "+-"
+            ):
                 value = self.func(0)
             else:
                 value = self.func(value)
@@ -2278,9 +2603,9 @@ class FunctionCallback:
         if not self.disabled and value is not None:
             kwds = {}
             if self.id is not None:
-                kwds['id'] = self.id
+                kwds["id"] = self.id
             if self.getwidget:
-                kwds['widget'] = self.widget
+                kwds["widget"] = self.widget
             if isinstance(self.func, list):
                 for func in self.func:
                     func(**kwds)
@@ -2298,8 +2623,8 @@ class CallBackListView(ControlledCallback):
     def __call__(self, *_):
         # This must be imported locally to avoid circular imports
         from Orange.widgets.utils.itemmodels import PyListModel
-        values = [i.row()
-                  for i in self.view.selectionModel().selection().indexes()]
+
+        values = [i.row() for i in self.view.selectionModel().selection().indexes()]
         if values:
             # FIXME: irrespective of PyListModel check, this might/should always
             # callback with values!
@@ -2320,11 +2645,13 @@ class CallBackListBox:
         if not self.disabled and self.control.ogValue is not None:
             clist = getdeepattr(self.widget, self.control.ogValue)
             control = self.control
-            selection = [i for i in range(control.count())
-                         if control.item(i).isSelected()]
+            selection = [
+                i for i in range(control.count()) if control.item(i).isSelected()
+            ]
             if isinstance(clist, int):
                 self.widget.__setattr__(
-                    self.control.ogValue, selection[0] if selection else None)
+                    self.control.ogValue, selection[0] if selection else None
+                )
             else:
                 list.__setitem__(clist, slice(0, len(clist)), selection)
                 self.widget.__setattr__(self.control.ogValue, clist)
@@ -2351,8 +2678,9 @@ class CallBackLabeledSlider:
 
     def __call__(self, *_):
         if not self.disabled and self.control.ogValue is not None:
-            self.widget.__setattr__(self.control.ogValue,
-                                    self.lookup[self.control.value()])
+            self.widget.__setattr__(
+                self.control.ogValue, self.lookup[self.control.value()]
+            )
 
 
 ##############################################################################
@@ -2414,7 +2742,7 @@ class CallFrontComboBox(ControlledCallFront):
         self.emptyString = emptyString
 
     def action(self, value):
-        if value in ('', None):
+        if value in ("", None):
             value = self.emptyString
         if self.valType:
             for i in range(self.control.count()):
@@ -2422,10 +2750,14 @@ class CallFrontComboBox(ControlledCallFront):
                     self.control.setCurrentIndex(i)
                     return
             if value:
-                log.warning("Unable to set %s to '%s'. Possible values are: %s",
-                            self.control, value,
-                            ', '.join(self.control.itemText(i)
-                                      for i in range(self.control.count())))
+                log.warning(
+                    "Unable to set %s to '%s'. Possible values are: %s",
+                    self.control,
+                    value,
+                    ", ".join(
+                        self.control.itemText(i) for i in range(self.control.count())
+                    ),
+                )
         else:
             if value < self.control.count():
                 self.control.setCurrentIndex(value)
@@ -2472,8 +2804,9 @@ class CallFrontLogSlider(ControlledCallFront):
     def action(self, value):
         if value is not None:
             if value < 1e-30:
-                print("unable to set %s to %s (value too small)" %
-                      (self.control, value))
+                print(
+                    "unable to set %s to %s (value too small)" % (self.control, value)
+                )
             else:
                 self.control.setValue(math.log10(value))
 
@@ -2527,8 +2860,11 @@ class CallFrontListBox(ControlledCallFront):
                     self.control.item(i).setSelected(i == value)
             else:
                 if not isinstance(value, ControlledList):
-                    setattr(self.control.ogMaster, self.control.ogValue,
-                            ControlledList(value, self.control))
+                    setattr(
+                        self.control.ogMaster,
+                        self.control.ogValue,
+                        ControlledList(value, self.control),
+                    )
                 for i in range(self.control.count()):
                     shouldBe = i in value
                     if shouldBe != self.control.item(i).isSelected():
@@ -2566,6 +2902,7 @@ class CallFrontLabel:
     def __call__(self, *_):
         self.control.setText(self.label % self.master.__dict__)
 
+
 ##############################################################################
 ## Disabler is a call-back class for check box that can disable/enable other
 ## widgets according to state (checked/unchecked, enabled/disable) of the
@@ -2583,8 +2920,7 @@ HIDER = 2
 
 # noinspection PyShadowingBuiltins
 class Disabler:
-    def __init__(self, widget, master, valueName, propagateState=True,
-                 type=DISABLER):
+    def __init__(self, widget, master, valueName, propagateState=True, type=DISABLER):
         self.widget = widget
         self.master = master
         self.valueName = valueName
@@ -2626,22 +2962,33 @@ class Disabler:
                     else:
                         w.show()
 
+
 ##############################################################################
 # some table related widgets
 
 
 # noinspection PyShadowingBuiltins
 class tableItem(QTableWidgetItem):
-    def __init__(self, table, x, y, text, editType=None, backColor=None,
-                 icon=None, type=QTableWidgetItem.Type):
+    def __init__(
+        self,
+        table,
+        x,
+        y,
+        text,
+        editType=None,
+        backColor=None,
+        icon=None,
+        type=QTableWidgetItem.Type,
+    ):
         super().__init__(type)
         if icon:
             self.setIcon(QtGui.QIcon(icon))
         if editType is not None:
             self.setFlags(editType)
         else:
-            self.setFlags(Qt.ItemIsEnabled | Qt.ItemIsUserCheckable |
-                          Qt.ItemIsSelectable)
+            self.setFlags(
+                Qt.ItemIsEnabled | Qt.ItemIsUserCheckable | Qt.ItemIsSelectable
+            )
         if backColor is not None:
             self.setBackground(QtGui.QBrush(backColor))
         # we add it this way so that text can also be int and sorting will be
@@ -2665,8 +3012,9 @@ class TableBarItem(QItemDelegate):
     BarRole = next(OrangeUserRole)
     BarColorRole = next(OrangeUserRole)
 
-    def __init__(self, parent=None, color=QtGui.QColor(255, 170, 127),
-                 color_schema=None):
+    def __init__(
+        self, parent=None, color=QtGui.QColor(255, 170, 127), color_schema=None
+    ):
         """
         :param QObject parent: Parent object.
         :param QColor color: Default color of the distribution bar.
@@ -2692,9 +3040,11 @@ class TableBarItem(QItemDelegate):
         if ratio is not None:
             if self.color_schema is not None:
                 class_ = index.data(TableClassValueRole)
-                if isinstance(class_, Orange.data.Value) and \
-                        class_.variable.is_discrete and \
-                        not math.isnan(class_):
+                if (
+                    isinstance(class_, Orange.data.Value)
+                    and class_.variable.is_discrete
+                    and not math.isnan(class_)
+                ):
                     color = self.color_schema[int(class_)]
             else:
                 color = index.data(self.BarColorRole)
@@ -2710,11 +3060,11 @@ class TableBarItem(QItemDelegate):
             width = (rect.width() - 2 * hmargin) * ratio
             painter.save()
             painter.setRenderHint(QtGui.QPainter.Antialiasing)
-            painter.setPen(QtGui.QPen(QtGui.QBrush(color), pw,
-                                      Qt.SolidLine, Qt.RoundCap))
+            painter.setPen(
+                QtGui.QPen(QtGui.QBrush(color), pw, Qt.SolidLine, Qt.RoundCap)
+            )
             line = QtCore.QLineF(
-                rect.left() + hmargin, baseline,
-                rect.left() + hmargin + width, baseline
+                rect.left() + hmargin, baseline, rect.left() + hmargin + width, baseline
             )
             painter.drawLine(line)
             painter.restore()
@@ -2727,8 +3077,9 @@ class TableBarItem(QItemDelegate):
 
 
 class BarItemDelegate(QtWidgets.QStyledItemDelegate):
-    def __init__(self, parent, brush=QtGui.QBrush(QtGui.QColor(255, 170, 127)),
-                 scale=(0.0, 1.0)):
+    def __init__(
+        self, parent, brush=QtGui.QBrush(QtGui.QColor(255, 170, 127)), scale=(0.0, 1.0)
+    ):
         super().__init__(parent)
         self.brush = brush
         self.scale = scale
@@ -2739,12 +3090,8 @@ class BarItemDelegate(QtWidgets.QStyledItemDelegate):
         else:
             style = QApplication.style()
 
-        style.drawPrimitive(
-            QStyle.PE_PanelItemViewRow, option, painter,
-            option.widget)
-        style.drawPrimitive(
-            QStyle.PE_PanelItemViewItem, option, painter,
-            option.widget)
+        style.drawPrimitive(QStyle.PE_PanelItemViewRow, option, painter, option.widget)
+        style.drawPrimitive(QStyle.PE_PanelItemViewItem, option, painter, option.widget)
 
         rect = option.rect
         val = index.data(Qt.DisplayRole)
@@ -2755,8 +3102,7 @@ class BarItemDelegate(QtWidgets.QStyledItemDelegate):
             if option.state & QStyle.State_Selected:
                 painter.setOpacity(0.75)
             painter.setBrush(self.brush)
-            painter.drawRect(
-                rect.adjusted(1, 1, - rect.width() * (1.0 - val) - 2, -2))
+            painter.drawRect(rect.adjusted(1, 1, -rect.width() * (1.0 - val) - 2, -2))
             painter.restore()
 
 
@@ -2777,8 +3123,7 @@ class IndicatorItemDelegate(QtWidgets.QStyledItemDelegate):
             painter.save()
             painter.setRenderHints(QtGui.QPainter.Antialiasing)
             painter.setBrush(QtGui.QBrush(Qt.black))
-            painter.drawEllipse(rect.center(),
-                                self.indicatorSize, self.indicatorSize)
+            painter.drawEllipse(rect.center(), self.indicatorSize, self.indicatorSize)
             painter.restore()
 
 
@@ -2800,32 +3145,34 @@ class LinkStyledItemDelegate(QStyledItemDelegate):
         else:
             style = QApplication.style()
 
-        text = self.displayText(index.data(Qt.DisplayRole),
-                                QtCore.QLocale.system())
+        text = self.displayText(index.data(Qt.DisplayRole), QtCore.QLocale.system())
         self.initStyleOption(option, index)
         textRect = style.subElementRect(
-            QStyle.SE_ItemViewItemText, option, option.widget)
+            QStyle.SE_ItemViewItemText, option, option.widget
+        )
 
         if not textRect.isValid():
             textRect = option.rect
-        margin = style.pixelMetric(
-            QStyle.PM_FocusFrameHMargin, option, option.widget) + 1
+        margin = (
+            style.pixelMetric(QStyle.PM_FocusFrameHMargin, option, option.widget) + 1
+        )
         textRect = textRect.adjusted(margin, 0, -margin, 0)
         font = index.data(Qt.FontRole)
         if not isinstance(font, QtGui.QFont):
             font = option.font
 
         metrics = QtGui.QFontMetrics(font)
-        elideText = metrics.elidedText(text, option.textElideMode,
-                                       textRect.width())
-        return metrics.boundingRect(textRect, option.displayAlignment,
-                                    elideText)
+        elideText = metrics.elidedText(text, option.textElideMode, textRect.width())
+        return metrics.boundingRect(textRect, option.displayAlignment, elideText)
 
     def editorEvent(self, event, model, option, index):
-        if event.type() == QtCore.QEvent.MouseButtonPress and \
-                self.linkRect(option, index).contains(event.pos()):
-            self.mousePressState = (QtCore.QPersistentModelIndex(index),
-                                    QtCore.QPoint(event.pos()))
+        if event.type() == QtCore.QEvent.MouseButtonPress and self.linkRect(
+            option, index
+        ).contains(event.pos()):
+            self.mousePressState = (
+                QtCore.QPersistentModelIndex(index),
+                QtCore.QPoint(event.pos()),
+            )
 
         elif event.type() == QtCore.QEvent.MouseButtonRelease:
             link = index.data(LinkRole)
@@ -2833,10 +3180,13 @@ class LinkStyledItemDelegate(QStyledItemDelegate):
                 link = None
 
             pressedIndex, pressPos = self.mousePressState
-            if pressedIndex == index and \
-                    (pressPos - event.pos()).manhattanLength() < 5 and \
-                    link is not None:
+            if (
+                pressedIndex == index
+                and (pressPos - event.pos()).manhattanLength() < 5
+                and link is not None
+            ):
                 import webbrowser
+
                 webbrowser.open(link)
             self.mousePressState = QtCore.QModelIndex(), event.pos()
 
@@ -2845,8 +3195,7 @@ class LinkStyledItemDelegate(QStyledItemDelegate):
             if not isinstance(link, str):
                 link = None
 
-            if link is not None and \
-                    self.linkRect(option, index).contains(event.pos()):
+            if link is not None and self.linkRect(option, index).contains(event.pos()):
                 self.parent().viewport().setCursor(Qt.PointingHandCursor)
             else:
                 self.parent().viewport().setCursor(Qt.ArrowCursor)
@@ -2871,23 +3220,26 @@ class LinkStyledItemDelegate(QStyledItemDelegate):
             else:
                 style = QApplication.style()
             style.drawPrimitive(
-                QStyle.PE_PanelItemViewRow, option, painter,
-                option.widget)
+                QStyle.PE_PanelItemViewRow, option, painter, option.widget
+            )
             style.drawPrimitive(
-                QStyle.PE_PanelItemViewItem, option, painter,
-                option.widget)
+                QStyle.PE_PanelItemViewItem, option, painter, option.widget
+            )
 
-            text = self.displayText(index.data(Qt.DisplayRole),
-                                    QtCore.QLocale.system())
+            text = self.displayText(index.data(Qt.DisplayRole), QtCore.QLocale.system())
             textRect = style.subElementRect(
-                QStyle.SE_ItemViewItemText, option, option.widget)
+                QStyle.SE_ItemViewItemText, option, option.widget
+            )
             if not textRect.isValid():
                 textRect = option.rect
-            margin = style.pixelMetric(
-                QStyle.PM_FocusFrameHMargin, option, option.widget) + 1
+            margin = (
+                style.pixelMetric(QStyle.PM_FocusFrameHMargin, option, option.widget)
+                + 1
+            )
             textRect = textRect.adjusted(margin, 0, -margin, 0)
             elideText = QtGui.QFontMetrics(option.font).elidedText(
-                text, option.textElideMode, textRect.width())
+                text, option.textElideMode, textRect.width()
+            )
             painter.save()
             font = index.data(Qt.FontRole)
             if not isinstance(font, QtGui.QFont):
@@ -2910,6 +3262,7 @@ LinkRole = LinkStyledItemDelegate.LinkRole
 class ColoredBarItemDelegate(QtWidgets.QStyledItemDelegate):
     """ Item delegate that can also draws a distribution bar
     """
+
     def __init__(self, parent=None, decimals=3, color=Qt.red):
         super().__init__(parent)
         self.decimals = decimals
@@ -2927,8 +3280,12 @@ class ColoredBarItemDelegate(QtWidgets.QStyledItemDelegate):
         font = self.get_font(option, index)
         metrics = QtGui.QFontMetrics(font)
         height = metrics.lineSpacing() + 8  # 4 pixel margin
-        width = metrics.width(self.displayText(index.data(Qt.DisplayRole),
-                                               QtCore.QLocale())) + 8
+        width = (
+            metrics.width(
+                self.displayText(index.data(Qt.DisplayRole), QtCore.QLocale())
+            )
+            + 8
+        )
         return QtCore.QSize(width, height)
 
     def paint(self, painter, option, index):
@@ -2953,12 +3310,8 @@ class ColoredBarItemDelegate(QtWidgets.QStyledItemDelegate):
         else:
             style = QApplication.style()
 
-        style.drawPrimitive(
-            QStyle.PE_PanelItemViewRow, option, painter,
-            option.widget)
-        style.drawPrimitive(
-            QStyle.PE_PanelItemViewItem, option, painter,
-            option.widget)
+        style.drawPrimitive(QStyle.PE_PanelItemViewRow, option, painter, option.widget)
+        style.drawPrimitive(QStyle.PE_PanelItemViewItem, option, painter, option.widget)
 
         # TODO: Check ForegroundRole.
         if option.state & QStyle.State_Selected:
@@ -2970,8 +3323,7 @@ class ColoredBarItemDelegate(QtWidgets.QStyledItemDelegate):
         align = self.get_text_align(option, index)
 
         metrics = QtGui.QFontMetrics(font)
-        elide_text = metrics.elidedText(
-            text, option.textElideMode, text_rect.width())
+        elide_text = metrics.elidedText(text, option.textElideMode, text_rect.width())
         painter.drawText(text_rect, align, elide_text)
 
         painter.setRenderHint(QtGui.QPainter.Antialiasing, True)
@@ -3031,8 +3383,7 @@ class VerticalLabel(QLabel):
     def sizeHint(self):
         metrics = QtGui.QFontMetrics(self.font())
         rect = metrics.boundingRect(self.text())
-        size = QtCore.QSize(rect.height() + self.margin(),
-                            rect.width() + self.margin())
+        size = QtCore.QSize(rect.height() + self.margin(), rect.width() + self.margin())
         return size
 
     def setGeometry(self, rect):
@@ -3046,9 +3397,12 @@ class VerticalLabel(QLabel):
         painter.translate(text_rect.bottomLeft())
         painter.rotate(-90)
         painter.drawText(
-            QtCore.QRect(QtCore.QPoint(0, 0),
-                         QtCore.QSize(rect.height(), rect.width())),
-            Qt.AlignCenter, self.text())
+            QtCore.QRect(
+                QtCore.QPoint(0, 0), QtCore.QSize(rect.height(), rect.width())
+            ),
+            Qt.AlignCenter,
+            self.text(),
+        )
         painter.end()
 
 
@@ -3071,22 +3425,18 @@ class VerticalItemDelegate(QStyledItemDelegate):
             style = option.widget.style()
         else:
             style = QApplication.style()
-        style.drawPrimitive(
-            QStyle.PE_PanelItemViewRow, option, painter,
-            option.widget)
+        style.drawPrimitive(QStyle.PE_PanelItemViewRow, option, painter, option.widget)
         cell_rect = option.rect
         itemrect = QtCore.QRect(0, 0, cell_rect.height(), cell_rect.width())
         opt = QtWidgets.QStyleOptionViewItem(option)
         opt.rect = itemrect
-        textrect = style.subElementRect(
-            QStyle.SE_ItemViewItemText, opt, opt.widget)
+        textrect = style.subElementRect(QStyle.SE_ItemViewItemText, opt, opt.widget)
 
         painter.save()
         painter.setFont(option.font)
 
         if option.displayAlignment & (Qt.AlignTop | Qt.AlignBottom):
-            brect = painter.boundingRect(
-                textrect, option.displayAlignment, option.text)
+            brect = painter.boundingRect(textrect, option.displayAlignment, option.text)
             diff = textrect.height() - brect.height()
             offset = max(min(diff / 2, self.Margin), 0)
             if option.displayAlignment & Qt.AlignBottom:
@@ -3098,6 +3448,7 @@ class VerticalItemDelegate(QStyledItemDelegate):
         painter.rotate(-90)
         painter.drawText(textrect, option.displayAlignment, option.text)
         painter.restore()
+
 
 ##############################################################################
 # progress bar management
@@ -3125,6 +3476,7 @@ class ProgressBar:
 
 
 ##############################################################################
+
 
 def tabWidget(widget):
     w = QtWidgets.QTabWidget(widget)
@@ -3169,9 +3521,13 @@ class VisibleHeaderSectionContextEventFilter(QtCore.QObject):
             return False
 
         model = view.model()
-        headers = [(view.isSectionHidden(i),
-                    model.headerData(i, view.orientation(), Qt.DisplayRole))
-                   for i in range(view.count())]
+        headers = [
+            (
+                view.isSectionHidden(i),
+                model.headerData(i, view.orientation(), Qt.DisplayRole),
+            )
+            for i in range(view.count())
+        ]
         menu = QtWidgets.QMenu("Visible headers", view)
 
         for i, (checked, name) in enumerate(headers):
@@ -3187,8 +3543,7 @@ class VisibleHeaderSectionContextEventFilter(QtCore.QObject):
                 if self.itemView:
                     self.itemView.resizeColumnToContents(section)
                 else:
-                    view.resizeSection(section,
-                                       max(view.sectionSizeHint(section), 10))
+                    view.resizeSection(section, max(view.sectionSizeHint(section), 10))
 
             action.toggled.connect(toogleHidden)
         menu.exec_(event.globalPos())
@@ -3209,10 +3564,18 @@ def checkButtonOffsetHint(button, style=None):
     space = style.pixelMetric(pm_spacing, option, button)
     width = style.pixelMetric(pm_indicator_width, option, button)
     # TODO: add other styles (Maybe load corrections from .cfg file?)
-    style_correction = {"macintosh (aqua)": -2, "macintosh(aqua)": -2,
-                        "plastique": 1, "cde": 1, "motif": 1}
-    return space + width + \
-        style_correction.get(QApplication.style().objectName().lower(), 0)
+    style_correction = {
+        "macintosh (aqua)": -2,
+        "macintosh(aqua)": -2,
+        "plastique": 1,
+        "cde": 1,
+        "motif": 1,
+    }
+    return (
+        space
+        + width
+        + style_correction.get(QApplication.style().objectName().lower(), 0)
+    )
 
 
 def toolButtonSizeHint(button=None, style=None):
@@ -3221,9 +3584,9 @@ def toolButtonSizeHint(button=None, style=None):
     elif style is None:
         style = button.style()
 
-    button_size = \
-        style.pixelMetric(QStyle.PM_SmallIconSize) + \
-        style.pixelMetric(QStyle.PM_ButtonMargin)
+    button_size = style.pixelMetric(QStyle.PM_SmallIconSize) + style.pixelMetric(
+        QStyle.PM_ButtonMargin
+    )
     return button_size
 
 
@@ -3234,6 +3597,7 @@ class FloatSlider(QSlider):
     The slider is derived from `QtGui.QSlider`, but maps from its discrete
     numbers to the desired continuous interval.
     """
+
     valueChangedFloat = Signal(float)
 
     def __init__(self, orientation, min_value, max_value, step, parent=None):
@@ -3251,8 +3615,7 @@ class FloatSlider(QSlider):
             self.setEnabled(False)
 
     def _send_value(self, slider_value):
-        value = min(max(slider_value * self.step, self.min_value),
-                    self.max_value)
+        value = min(max(slider_value * self.step, self.min_value), self.max_value)
         self.valueChangedFloat.emit(value)
 
     def setValue(self, value):
@@ -3314,6 +3677,7 @@ class ControlGetter:
     For `OWComponents`, it returns its controls so that subsequent
     `__getattr__` will retrieve the control.
     """
+
     def __init__(self, widget):
         self.widget = widget
 
@@ -3327,6 +3691,7 @@ class ControlGetter:
             except AttributeError:
                 raise AttributeError(
                     "'{}' is not an attribute related to a gui element or "
-                    "component".format(name))
+                    "component".format(name)
+                )
         else:
             return callfronts[0].control

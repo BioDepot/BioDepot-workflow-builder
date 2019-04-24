@@ -16,7 +16,7 @@ def load_tests(loader, tests, pattern):
     if loader is None:
         loader = unittest.TestLoader()
     if pattern is None:
-        pattern = 'test*.py'
+        pattern = "test*.py"
 
     load_tests._in_load_tests = True
     try:
@@ -24,7 +24,7 @@ def load_tests(loader, tests, pattern):
             # Widgets in this package are discovered separately to avoid
             # infinite recursion (see the guard above)
             loader.discover(widget_tests_dir, pattern, widget_tests_dir),
-            loader.discover(widgets_dir, pattern, top_level_dir)
+            loader.discover(widgets_dir, pattern, top_level_dir),
         ]
     finally:
         load_tests._in_load_tests = False

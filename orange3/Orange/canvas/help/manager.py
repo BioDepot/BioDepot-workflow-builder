@@ -61,8 +61,10 @@ class HelpManager(QObject):
                 dist = pkg_resources.get_distribution(project)
                 provider = get_help_provider_for_distribution(dist)
             except Exception:
-                log.exception("Error while initializing help "
-                              "provider for %r", desc.project_name)
+                log.exception(
+                    "Error while initializing help " "provider for %r",
+                    desc.project_name,
+                )
 
             if provider:
                 providers.append((project, provider))
@@ -114,11 +116,14 @@ def get_by_id(registry, descriptor_id):
 
 
 if QT_VERSION < 0x50000:
+
     def qurl_query_items(url):
         items = []
         for key, value in url.queryItems():
             items.append((str(key), str(value)))
         return items
+
+
 else:
     # QUrl has no queryItems
     def qurl_query_items(url):
@@ -141,8 +146,9 @@ def is_develop_egg(dist):
     meta_provider = dist._provider
     egg_info_dir = os.path.dirname(meta_provider.egg_info)
     egg_name = pkg_resources.to_filename(dist.project_name)
-    return meta_provider.egg_info.endswith(egg_name + ".egg-info") \
-           and os.path.exists(os.path.join(egg_info_dir, "setup.py"))
+    return meta_provider.egg_info.endswith(egg_name + ".egg-info") and os.path.exists(
+        os.path.join(egg_info_dir, "setup.py")
+    )
 
 
 def left_trim_lines(lines):
@@ -151,8 +157,9 @@ def left_trim_lines(lines):
     """
     lines_striped = list(zip(lines[1:], list(map(str.lstrip, lines[1:]))))
     lines_striped = list(filter(itemgetter(1), lines_striped))
-    indent = min([len(line) - len(striped) \
-                  for line, striped in lines_striped] + [sys.maxsize])
+    indent = min(
+        [len(line) - len(striped) for line, striped in lines_striped] + [sys.maxsize]
+    )
 
     if indent < sys.maxsize:
         return [line[indent:] for line in lines]
@@ -188,13 +195,19 @@ def trim(string):
 
     lines = list(map(str.lstrip, lines[:1])) + left_trim_lines(lines[1:])
 
-    return  "\n".join(trim_leading_lines(trim_trailing_lines(lines)))
+    return "\n".join(trim_leading_lines(trim_trailing_lines(lines)))
 
 
 # Fields allowing multiple use (from PEP-0345)
-MULTIPLE_KEYS = ["Platform", "Supported-Platform", "Classifier",
-                 "Requires-Dist", "Provides-Dist", "Obsoletes-Dist",
-                 "Project-URL"]
+MULTIPLE_KEYS = [
+    "Platform",
+    "Supported-Platform",
+    "Classifier",
+    "Requires-Dist",
+    "Provides-Dist",
+    "Obsoletes-Dist",
+    "Project-URL",
+]
 
 
 def parse_meta(contents):
@@ -247,10 +260,12 @@ def get_dist_meta(dist):
 
 
 def _replacements_for_dist(dist):
-    replacements = {"PROJECT_NAME": dist.project_name,
-                    "PROJECT_NAME_LOWER": dist.project_name.lower(),
-                    "PROJECT_VERSION": dist.version,
-                    "DATA_DIR": get_path("data")}
+    replacements = {
+        "PROJECT_NAME": dist.project_name,
+        "PROJECT_NAME_LOWER": dist.project_name.lower(),
+        "PROJECT_VERSION": dist.version,
+        "DATA_DIR": get_path("data"),
+    }
     try:
         replacements["URL"] = get_dist_url(dist)
     except KeyError:
@@ -279,14 +294,14 @@ def create_intersphinx_provider(entry_point):
         # Extract all format fields
         format_iter = formatter.parse(target)
         if inventory:
-            format_iter = itertools.chain(format_iter,
-                                          formatter.parse(inventory))
+            format_iter = itertools.chain(format_iter, formatter.parse(inventory))
         # Names used in both target and inventory
         fields = {name for _, name, _, _ in format_iter if name}
 
         if not set(fields) <= set(replacements.keys()):
-            log.warning("Invalid replacement fields %s",
-                        set(fields) - set(replacements.keys()))
+            log.warning(
+                "Invalid replacement fields %s", set(fields) - set(replacements.keys())
+            )
             continue
 
         target = formatter.format(target, **replacements)
@@ -299,8 +314,7 @@ def create_intersphinx_provider(entry_point):
 
         if targeturl.isLocalFile():
             if os.path.exists(os.path.join(target, "objects.inv")):
-                inventory = QUrl.fromLocalFile(
-                    os.path.join(target, "objects.inv"))
+                inventory = QUrl.fromLocalFile(os.path.join(target, "objects.inv"))
             else:
                 log.info("Local doc root '%s' does not exist.", target)
                 continue
@@ -311,8 +325,7 @@ def create_intersphinx_provider(entry_point):
                 inventory = targeturl.resolved(QUrl("objects.inv"))
 
         if inventory is not None:
-            return provider.IntersphinxHelpProvider(
-                inventory=inventory, target=target)
+            return provider.IntersphinxHelpProvider(inventory=inventory, target=target)
     return None
 
 
@@ -328,8 +341,9 @@ def create_html_provider(entry_point):
         fields = {name for _, name, _, _ in format_iter if name}
 
         if not set(fields) <= set(replacements.keys()):
-            log.warning("Invalid replacement fields %s",
-                        set(fields) - set(replacements.keys()))
+            log.warning(
+                "Invalid replacement fields %s", set(fields) - set(replacements.keys())
+            )
             continue
         target = formatter.format(target, **replacements)
 
@@ -343,8 +357,7 @@ def create_html_provider(entry_point):
                 continue
 
         if target:
-            return provider.SimpleHelpProvider(
-                baseurl=QUrl.fromLocalFile(target))
+            return provider.SimpleHelpProvider(baseurl=QUrl.fromLocalFile(target))
 
     return None
 
@@ -364,8 +377,9 @@ def create_html_inventory_provider(entry_point):
         fields = {name for _, name, _, _ in format_iter if name}
 
         if not set(fields) <= set(replacements.keys()):
-            log.warning("Invalid replacement fields %s",
-                        set(fields) - set(replacements.keys()))
+            log.warning(
+                "Invalid replacement fields %s", set(fields) - set(replacements.keys())
+            )
             continue
 
         target = formatter.format(target, **replacements)
@@ -383,10 +397,10 @@ def create_html_inventory_provider(entry_point):
         else:
             inventory = QUrl(target)
 
-        return provider.HtmlIndexProvider(
-            inventory=inventory, xpathquery=xpathquery)
+        return provider.HtmlIndexProvider(inventory=inventory, xpathquery=xpathquery)
 
     return None
+
 
 _providers = {
     "intersphinx": create_intersphinx_provider,
@@ -409,8 +423,7 @@ def get_help_provider_for_distribution(dist):
             except Exception as ex:
                 log.exception("Exception {}".format(ex))
             if provider:
-                log.info("Created %s provider for %s",
-                         type(provider), dist)
+                log.info("Created %s provider for %s", type(provider), dist)
                 break
 
     return provider

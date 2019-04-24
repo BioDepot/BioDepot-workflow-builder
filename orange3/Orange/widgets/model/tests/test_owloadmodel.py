@@ -18,10 +18,10 @@ class TestOWLoadModel(WidgetTest):
         self.assertTrue(self.widget.Error.load_error.is_shown())
 
         clsf = ConstantModel([1, 1, 1])
-        fd, fname = mkstemp(suffix='.pkcls')
+        fd, fname = mkstemp(suffix=".pkcls")
         os.close(fd)
         try:
-            with open(fname, 'wb') as f:
+            with open(fname, "wb") as f:
                 pickle.dump(clsf, f)
             self.widget.load(fname)
             self.assertFalse(self.widget.Error.load_error.is_shown())
@@ -32,4 +32,3 @@ class TestOWLoadModel(WidgetTest):
             self.assertTrue(self.widget.Error.load_error.is_shown())
         finally:
             os.remove(fname)
-

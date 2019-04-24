@@ -5,14 +5,29 @@ import enum
 import concurrent.futures
 from concurrent.futures import Future  # pylint: disable=unused-import
 from collections import namedtuple, OrderedDict
-from typing import List, Any, Dict, Tuple, Type, Optional # pylint: disable=unused-import
+from typing import (
+    List,
+    Any,
+    Dict,
+    Tuple,
+    Type,
+    Optional,
+)  # pylint: disable=unused-import
 
 import numpy as np
 
 from AnyQt.QtWidgets import (
-    QGroupBox, QRadioButton, QPushButton, QHBoxLayout,
-    QVBoxLayout, QStackedWidget, QComboBox,
-    QButtonGroup, QStyledItemDelegate, QListView, QDoubleSpinBox
+    QGroupBox,
+    QRadioButton,
+    QPushButton,
+    QHBoxLayout,
+    QVBoxLayout,
+    QStackedWidget,
+    QComboBox,
+    QButtonGroup,
+    QStyledItemDelegate,
+    QListView,
+    QDoubleSpinBox,
 )
 from AnyQt.QtCore import Qt, QThread, QModelIndex  # pylint: disable=unused-import
 from AnyQt.QtCore import pyqtSlot as Slot
@@ -29,7 +44,7 @@ from Orange.classification import SimpleTreeLearner
 
 
 DisplayMethodRole = Qt.UserRole
-StateRole = DisplayMethodRole + 0xf4
+StateRole = DisplayMethodRole + 0xF4
 
 
 class DisplayFormatDelegate(QStyledItemDelegate):
@@ -43,7 +58,7 @@ class DisplayFormatDelegate(QStyledItemDelegate):
             if not method.supports_variable(var):
                 option.palette.setColor(option.palette.Text, Qt.darkRed)
 
-            if isinstance(getattr(method, 'method', method), impute.DoNotImpute):
+            if isinstance(getattr(method, "method", method), impute.DoNotImpute):
                 option.palette.setColor(option.palette.Text, Qt.darkGray)
 
 
@@ -77,8 +92,8 @@ RowMask = namedtuple("RowMask", ["mask"])
 
 
 class Task:
-    futures = []    # type: List[Future]
-    watcher = ...   # type: qconcurrent.FutureSetWatcher
+    futures = []  # type: List[Future]
+    watcher = ...  # type: qconcurrent.FutureSetWatcher
     cancelled = False
 
     def __init__(self, futures, watcher):
@@ -96,16 +111,18 @@ class Method(enum.IntEnum):
     Leave, Average, AsValue, Model, Random, Drop, Default = range(1, 8)
 
 
-METHODS = OrderedDict([
-    (Method.AsAboveSoBelow, AsDefault),
-    (Method.Leave, impute.DoNotImpute),
-    (Method.Average, impute.Average),
-    (Method.AsValue, impute.AsValue),
-    (Method.Model, impute.Model),
-    (Method.Random, impute.Random),
-    (Method.Drop, impute.DropInstances),
-    (Method.Default, impute.Default),
-])  # type: Dict[Method, Type[impute.BaseImputeMethod]]
+METHODS = OrderedDict(
+    [
+        (Method.AsAboveSoBelow, AsDefault),
+        (Method.Leave, impute.DoNotImpute),
+        (Method.Average, impute.Average),
+        (Method.AsValue, impute.AsValue),
+        (Method.Model, impute.Model),
+        (Method.Random, impute.Random),
+        (Method.Drop, impute.DropInstances),
+        (Method.Default, impute.Default),
+    ]
+)  # type: Dict[Method, Type[impute.BaseImputeMethod]]
 
 
 #: variable state type: store effective imputation method and optional
@@ -139,7 +156,9 @@ class OWImpute(OWWidget):
 
     class Error(OWWidget.Error):
         imputation_failed = Msg("Imputation failed for '{}'")
-        model_based_imputer_sparse = Msg("Model based imputer does not work for sparse data")
+        model_based_imputer_sparse = Msg(
+            "Model based imputer does not work for sparse data"
+        )
 
     settingsHandler = settings.DomainContextHandler()
 
@@ -181,16 +200,14 @@ class OWImpute(OWWidget):
 
         self.default_button_group = button_group
 
-        box = QGroupBox(title=self.tr("Individual Attribute Settings"),
-                        flat=False)
+        box = QGroupBox(title=self.tr("Individual Attribute Settings"), flat=False)
         main_layout.addWidget(box)
 
         horizontal_layout = QHBoxLayout(box)
         main_layout.addWidget(box)
 
         self.varview = QListView(
-            selectionMode=QListView.ExtendedSelection,
-            uniformItemSizes=True
+            selectionMode=QListView.ExtendedSelection, uniformItemSizes=True
         )
         self.varview.setItemDelegate(DisplayFormatDelegate())
         self.varmodel = itemmodels.VariableListModel()
@@ -215,35 +232,44 @@ class OWImpute(OWWidget):
         self.value_combo = QComboBox(
             minimumContentsLength=8,
             sizeAdjustPolicy=QComboBox.AdjustToMinimumContentsLength,
-            activated=self._on_value_selected
-            )
+            activated=self._on_value_selected,
+        )
         self.value_double = QDoubleSpinBox(
             editingFinished=self._on_value_selected,
-            minimum=-1000., maximum=1000., singleStep=.1, decimals=3,
-            )
+            minimum=-1000.0,
+            maximum=1000.0,
+            singleStep=0.1,
+            decimals=3,
+        )
         self.value_stack = value_stack = QStackedWidget()
         value_stack.addWidget(self.value_combo)
         value_stack.addWidget(self.value_double)
         method_layout.addWidget(value_stack)
 
-        button_group.buttonClicked[int].connect(
-            self.set_method_for_current_selection
-        )
+        button_group.buttonClicked[int].connect(self.set_method_for_current_selection)
 
         method_layout.addStretch(2)
 
         reset_button = QPushButton(
-                "Restore All to Default", checked=False, checkable=False,
-                clicked=self.reset_variable_state, default=False,
-                autoDefault=False)
+            "Restore All to Default",
+            checked=False,
+            checkable=False,
+            clicked=self.reset_variable_state,
+            default=False,
+            autoDefault=False,
+        )
         method_layout.addWidget(reset_button)
 
         self.variable_button_group = button_group
 
         box = gui.auto_commit(
-            self.controlArea, self, "autocommit", "Apply",
+            self.controlArea,
+            self,
+            "autocommit",
+            "Apply",
             orientation=Qt.Horizontal,
-            checkbox_label="Apply automatically")
+            checkbox_label="Apply automatically",
+        )
         box.button.setFixedWidth(180)
         box.layout().insertStretch(0)
 
@@ -369,8 +395,7 @@ class OWImpute(OWWidget):
 
         futures = []
         for _, var, method in impute_state:
-            f = self.executor.submit(
-                impute_one, copy.deepcopy(method), var, data)
+            f = self.executor.submit(impute_one, copy.deepcopy(method), var, data)
             futures.append(f)
 
         w = qconcurrent.FutureSetWatcher(futures)
@@ -406,8 +431,7 @@ class OWImpute(OWWidget):
                 self.Error.model_based_imputer_sparse()
                 # ?? break
             except VariableNotSupported:
-                self.warning("Default method can not handle '{}'".
-                             format(var.name))
+                self.warning("Default method can not handle '{}'".format(var.name))
             except Exception:  # pylint: disable=broad-except
                 log = logging.getLogger(__name__)
                 log.info("Error for %s", var, exc_info=True)
@@ -432,8 +456,7 @@ class OWImpute(OWWidget):
         if attributes is None:
             data = None
         else:
-            domain = Orange.data.Domain(attributes, class_vars,
-                                        data.domain.metas)
+            domain = Orange.data.Domain(attributes, class_vars, data.domain.metas)
             try:
                 data = self.data.from_table(domain, data[~drop_mask])
             except Exception:  # pylint: disable=broad-except
@@ -449,7 +472,7 @@ class OWImpute(OWWidget):
     def __progress_changed(self, n, d):
         assert QThread.currentThread() is self.thread()
         assert self.__task is not None
-        self.progressBarSet(100. * n / d)
+        self.progressBarSet(100.0 * n / d)
 
     def cancel(self):
         if self.__task is not None:
@@ -475,10 +498,12 @@ class OWImpute(OWWidget):
 
         default = self.create_imputer(Method.AsAboveSoBelow)
         if specific:
-            self.report_items((
-                ("Default method", default.name),
-                ("Specific imputers", ", ".join(specific))
-            ))
+            self.report_items(
+                (
+                    ("Default method", default.name),
+                    ("Specific imputers", ", ".join(specific)),
+                )
+            )
         else:
             self.report_items((("Method", default.name),))
 
@@ -514,8 +539,7 @@ class OWImpute(OWWidget):
         for method in Method:
             # use a default constructed imputer to query support
             imputer = self.create_imputer(method)
-            enabled = all(imputer.supports_variable(var) for var in
-                          selected_vars)
+            enabled = all(imputer.supports_variable(var) for var in selected_vars)
             button = self.variable_button_group.button(method)
             button.setEnabled(enabled)
 
@@ -581,8 +605,8 @@ class OWImpute(OWWidget):
 
         for index in indexes:
             self.varmodel.setData(
-                index, self.get_method_for_column(index.row()),
-                DisplayMethodRole)
+                index, self.get_method_for_column(index.row()), DisplayMethodRole
+            )
 
     def _on_value_selected(self):
         # The fixed 'Value' in the widget has been changed by the user.
@@ -612,12 +636,12 @@ class OWImpute(OWWidget):
         """
         Restore the variable imputation state from the saved state
         """
+
         def check(state):
             # check if state is a proper State
             if isinstance(state, tuple) and len(state) == 2:
                 m, p = state
-                if isinstance(m, int) and isinstance(p, tuple) and \
-                        0 <= m < len(Method):
+                if isinstance(m, int) and isinstance(p, tuple) and 0 <= m < len(Method):
                     return True
             return False
 
@@ -633,6 +657,7 @@ class OWImpute(OWWidget):
 
 def main(argv=None):
     from AnyQt.QtWidgets import QApplication
+
     logging.basicConfig()
     app = QApplication(list(argv) if argv else [])
     argv = app.arguments()

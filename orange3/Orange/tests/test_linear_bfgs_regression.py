@@ -10,9 +10,11 @@ from Orange.regression.linear_bfgs import LinearRegressionLearner
 
 class TestLinearRegressionLearner(unittest.TestCase):
     def test_preprocessors(self):
-        table = Table('housing')
-        learners = [LinearRegressionLearner(preprocessors=[]),
-                    LinearRegressionLearner()]
+        table = Table("housing")
+        learners = [
+            LinearRegressionLearner(preprocessors=[]),
+            LinearRegressionLearner(),
+        ]
         results = CrossValidation(table, learners, k=3)
         rmse = RMSE(results)
         self.assertLess(rmse[0], rmse[1])

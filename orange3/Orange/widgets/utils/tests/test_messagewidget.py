@@ -1,9 +1,7 @@
 from AnyQt.QtCore import Qt, QSize
 
 from Orange.widgets.tests.base import GuiTest
-from Orange.widgets.utils.messagewidget import (
-    MessagesWidget, Message, IconWidget
-)
+from Orange.widgets.utils.messagewidget import MessagesWidget, Message, IconWidget
 
 
 class TestMessageWidget(GuiTest):
@@ -21,16 +19,25 @@ class TestMessageWidget(GuiTest):
         self.assertTrue(w.summarize().text.startswith("#error#"))
         self.assertSequenceEqual(
             w.messages(),
-            [Message(Message.Warning, text="a"),
-             Message(Message.Error, text="#error#")])
-        w.setMessage(2, Message(Message.Information, text="<em>Hello</em>",
-                                textFormat=Qt.RichText))
+            [
+                Message(Message.Warning, text="a"),
+                Message(Message.Error, text="#error#"),
+            ],
+        )
+        w.setMessage(
+            2,
+            Message(Message.Information, text="<em>Hello</em>", textFormat=Qt.RichText),
+        )
         self.assertSequenceEqual(
             w.messages(),
-            [Message(Message.Warning, text="a"),
-             Message(Message.Error, text="#error#"),
-             Message(Message.Information, text="<em>Hello</em>",
-                     textFormat=Qt.RichText)])
+            [
+                Message(Message.Warning, text="a"),
+                Message(Message.Error, text="#error#"),
+                Message(
+                    Message.Information, text="<em>Hello</em>", textFormat=Qt.RichText
+                ),
+            ],
+        )
         w.grab()
         w.removeMessage(2)
         w.clear()

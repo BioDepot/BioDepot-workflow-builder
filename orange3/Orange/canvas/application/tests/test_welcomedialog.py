@@ -16,14 +16,11 @@ class TestDialog(QAppTestCase):
         d = WelcomeDialog()
         loader = icon_loader()
         icon = loader.get("icons/default-widget.svg")
-        action1 = QAction(decorate_welcome_icon(icon, "light-green"),
-                          "one", self.app)
-        action2 = QAction(decorate_welcome_icon(icon, "orange"),
-                          "two", self.app)
+        action1 = QAction(decorate_welcome_icon(icon, "light-green"), "one", self.app)
+        action2 = QAction(decorate_welcome_icon(icon, "orange"), "two", self.app)
         d.addRow([action1, action2])
 
-        action3 = QAction(decorate_welcome_icon(icon, "light-green"),
-                          "three", self.app)
+        action3 = QAction(decorate_welcome_icon(icon, "light-green"), "three", self.app)
         d.addRow([action3])
 
         self.assertTrue(d.buttonAt(1, 0).defaultAction() == action3)

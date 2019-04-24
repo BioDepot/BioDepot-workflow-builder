@@ -20,13 +20,7 @@ _QObjectType = type(QObject)
 log = logging.getLogger(__name__)
 
 
-config_slot = namedtuple(
-    "config_slot",
-    ["key",
-     "value_type",
-     "default_value",
-     "doc"]
-)
+config_slot = namedtuple("config_slot", ["key", "value_type", "default_value", "doc"])
 
 
 class SettingChangedEvent(QEvent):
@@ -37,6 +31,7 @@ class SettingChangedEvent(QEvent):
     a key has changed.
 
     """
+
     SettingChanged = QEvent.registerEventType()
     """Setting was changed"""
 
@@ -173,10 +168,12 @@ class Settings(QObject, MutableMapping, metaclass=QABCMeta):
             if isinstance(value, _pickledvalue):
                 value = value.value
             else:
-                log.warning("value for key %r is not a '_pickledvalue' (%r),"
-                            "possible loss of type information.",
-                            fullkey,
-                            type(value))
+                log.warning(
+                    "value for key %r is not a '_pickledvalue' (%r),"
+                    "possible loss of type information.",
+                    fullkey,
+                    type(value),
+                )
 
         return value
 
@@ -225,10 +222,11 @@ class Settings(QObject, MutableMapping, metaclass=QABCMeta):
             if not isinstance(value, value_type):
                 value = qt_to_mapped_type(value)
                 if not isinstance(value, value_type):
-                    raise TypeError("Expected {0!r} got {1!r}".format(
-                                        value_type.__name__,
-                                        type(value).__name__)
-                                    )
+                    raise TypeError(
+                        "Expected {0!r} got {1!r}".format(
+                            value_type.__name__, type(value).__name__
+                        )
+                    )
 
         if key in self:
             oldValue = self.get(key)
@@ -253,13 +251,12 @@ class Settings(QObject, MutableMapping, metaclass=QABCMeta):
     def __iter__(self):
         """Return an iterator over over all keys.
         """
-        keys = list(map(str, self.__store.allKeys())) + \
-               list(self.__defaults.keys())
+        keys = list(map(str, self.__store.allKeys())) + list(self.__defaults.keys())
 
         if self.__path:
             path = self.__path + "/"
             keys = [key for key in keys if key.startswith(path)]
-            keys = [key[len(path):] for key in keys]
+            keys = [key[len(path) :] for key in keys]
 
         return iter(sorted(set(keys)))
 
@@ -341,8 +338,10 @@ class Settings(QObject, MutableMapping, metaclass=QABCMeta):
             if isinstance(parent, Settings):
                 # Assumption that the parent is a parent setting group.
                 parent.customEvent(
-                    SettingChangedEvent(event.type(),
-                                        "/".join([self.__path, event.key()]),
-                                        event.value(),
-                                        event.oldValue())
+                    SettingChangedEvent(
+                        event.type(),
+                        "/".join([self.__path, event.key()]),
+                        event.value(),
+                        event.oldValue(),
+                    )
                 )

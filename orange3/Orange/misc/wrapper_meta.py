@@ -38,26 +38,31 @@ class WrapperMeta(type):
         '...Here is what ...Bar says about itself:...I am a Bar...'
 
     """
+
     def __new__(cls, name, bases, dict_):
         cls = type.__new__(cls, name, bases, dict_)
         wrapped = getattr(cls, "__wraps__", getattr(cls, "__wrapped__", None))
         if wrapped is not None:
-            doc = cls.__doc__ or """
+            doc = (
+                cls.__doc__
+                or """
 A wrapper for `${sklname}`. The following is its documentation:
 
 ${skldoc}
             """
-            sklname = "{}.{}".format(inspect.getmodule(wrapped).__name__,
-                                     wrapped.__name__)
-            skldoc = inspect.getdoc(wrapped) or ''
+            )
+            sklname = "{}.{}".format(
+                inspect.getmodule(wrapped).__name__, wrapped.__name__
+            )
+            skldoc = inspect.getdoc(wrapped) or ""
             # FIXME: make sure skl-extended classes are API-compatible
             if "Attributes\n---------" in skldoc:
-                skldoc = skldoc[:skldoc.index('Attributes\n---------')]
+                skldoc = skldoc[: skldoc.index("Attributes\n---------")]
             if "Examples\n--------" in skldoc:
-                skldoc = skldoc[:skldoc.index('Examples\n--------')]
+                skldoc = skldoc[: skldoc.index("Examples\n--------")]
             if "Parameters\n---------" in skldoc:
-                skldoc = skldoc[:skldoc.index('Parameters\n---------')]
-            cls.__doc__ = (doc
-                           .replace('${sklname}', sklname)
-                           .replace('${skldoc}', inspect.cleandoc(skldoc)))
+                skldoc = skldoc[: skldoc.index("Parameters\n---------")]
+            cls.__doc__ = doc.replace("${sklname}", sklname).replace(
+                "${skldoc}", inspect.cleandoc(skldoc)
+            )
         return cls

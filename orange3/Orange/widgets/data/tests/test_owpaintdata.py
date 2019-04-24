@@ -15,10 +15,7 @@ from Orange.widgets.tests.base import WidgetTest, datasets
 class TestOWPaintData(WidgetTest):
     def setUp(self):
         self.widget = self.create_widget(
-            OWPaintData,
-            stored_settings={
-                "autocommit": True
-            }
+            OWPaintData, stored_settings={"autocommit": True}
         )  # type: OWPaintData
 
     def test_empty_data(self):
@@ -36,12 +33,8 @@ class TestOWPaintData(WidgetTest):
         self.send_signal(self.widget.Inputs.data, data)
         output1 = self.get_output(self.widget.Outputs.data)
         output1_copy = output1.copy()
-        self.widget._add_command(
-            owpaintdata.SelectRegion(QRectF(0.25, 0.25, 0.5, 0.5))
-        )
-        self.widget._add_command(
-            owpaintdata.MoveSelection(QPointF(0.1, 0.1))
-        )
+        self.widget._add_command(owpaintdata.SelectRegion(QRectF(0.25, 0.25, 0.5, 0.5)))
+        self.widget._add_command(owpaintdata.MoveSelection(QPointF(0.1, 0.1)))
         output2 = self.get_output(self.widget.Outputs.data)
         self.assertIsNot(output1, output2)
 
@@ -52,9 +45,8 @@ class TestOWPaintData(WidgetTest):
 
     def test_20_values_class(self):
         domain = Domain(
-            [ContinuousVariable("A"),
-             ContinuousVariable("B")],
-            DiscreteVariable("C", values=[chr(ord("a") + i) for i in range(20)])
+            [ContinuousVariable("A"), ContinuousVariable("B")],
+            DiscreteVariable("C", values=[chr(ord("a") + i) for i in range(20)]),
         )
         data = Table(domain, [[0.1, 0.2, "a"], [0.4, 0.7, "t"]])
         self.send_signal(self.widget.Inputs.data, data)

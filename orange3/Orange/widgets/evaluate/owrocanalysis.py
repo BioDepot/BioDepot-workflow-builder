@@ -27,51 +27,52 @@ from Orange.widgets import report
 #: Points on a ROC curve
 ROCPoints = namedtuple(
     "ROCPoints",
-    ["fpr",        # (N,) array of false positive rate coordinates (ascending)
-     "tpr",        # (N,) array of true positive rate coordinates
-     "thresholds"  # (N,) array of thresholds (in descending order)
-     ]
+    [
+        "fpr",  # (N,) array of false positive rate coordinates (ascending)
+        "tpr",  # (N,) array of true positive rate coordinates
+        "thresholds",  # (N,) array of thresholds (in descending order)
+    ],
 )
 ROCPoints.is_valid = property(lambda self: self.fpr.size > 0)
 
 #: ROC Curve and it's convex hull
 ROCCurve = namedtuple(
-    "ROCCurve",
-    ["points",  # ROCPoints
-     "hull"     # ROCPoints of the convex hull
-    ]
+    "ROCCurve", ["points", "hull"]  # ROCPoints  # ROCPoints of the convex hull
 )
 ROCCurve.is_valid = property(lambda self: self.points.is_valid)
 
 #: A ROC Curve averaged vertically
 ROCAveragedVert = namedtuple(
     "ROCAveragedVert",
-    ["points",   # ROCPoints sampled by fpr
-     "hull",     # ROCPoints of the convex hull
-     "tpr_std",  # array standard deviation of tpr at each fpr point
-     ]
+    [
+        "points",  # ROCPoints sampled by fpr
+        "hull",  # ROCPoints of the convex hull
+        "tpr_std",  # array standard deviation of tpr at each fpr point
+    ],
 )
 ROCAveragedVert.is_valid = property(lambda self: self.points.is_valid)
 
 #: A ROC Curve averaged by thresholds
 ROCAveragedThresh = namedtuple(
     "ROCAveragedThresh",
-    ["points",   # ROCPoints sampled by threshold
-     "hull",     # ROCPoints of the convex hull
-     "tpr_std",  # array standard deviations of tpr at each threshold
-     "fpr_std"   # array standard deviations of fpr at each threshold
-     ]
+    [
+        "points",  # ROCPoints sampled by threshold
+        "hull",  # ROCPoints of the convex hull
+        "tpr_std",  # array standard deviations of tpr at each threshold
+        "fpr_std",  # array standard deviations of fpr at each threshold
+    ],
 )
 ROCAveragedThresh.is_valid = property(lambda self: self.points.is_valid)
 
 #: Combined data for a ROC curve of a single algorithm
 ROCData = namedtuple(
     "ROCData",
-    ["merged",  # ROCCurve merged over all folds
-     "folds",   # ROCCurve list, one for each fold
-     "avg_vertical",   # ROCAveragedVert
-     "avg_threshold",  # ROCAveragedThresh
-     ]
+    [
+        "merged",  # ROCCurve merged over all folds
+        "folds",  # ROCCurve list, one for each fold
+        "avg_vertical",  # ROCAveragedVert
+        "avg_threshold",  # ROCAveragedThresh
+    ],
 )
 
 
@@ -89,8 +90,9 @@ def ROCData_from_results(results, clf_index, target):
         A instance holding the computed curves.
     """
     merged = roc_curve_for_fold(results, slice(0, -1), clf_index, target)
-    merged_curve = ROCCurve(ROCPoints(*merged),
-                            ROCPoints(*roc_curve_convex_hull(merged)))
+    merged_curve = ROCCurve(
+        ROCPoints(*merged), ROCPoints(*roc_curve_convex_hull(merged))
+    )
 
     folds = results.folds if results.folds is not None else [slice(0, -1)]
     fold_curves = []
@@ -100,43 +102,34 @@ def ROCData_from_results(results, clf_index, target):
         c = ROCCurve(ROCPoints(*points), ROCPoints(*hull))
         fold_curves.append(c)
 
-    curves = [fold.points for fold in fold_curves
-              if fold.is_valid]
+    curves = [fold.points for fold in fold_curves if fold.is_valid]
 
     if curves:
         fpr, tpr, std = roc_curve_vertical_average(curves)
 
         thresh = numpy.zeros_like(fpr) * numpy.nan
         hull = roc_curve_convex_hull((fpr, tpr, thresh))
-        v_avg = ROCAveragedVert(
-            ROCPoints(fpr, tpr, thresh),
-            ROCPoints(*hull),
-            std
-        )
+        v_avg = ROCAveragedVert(ROCPoints(fpr, tpr, thresh), ROCPoints(*hull), std)
     else:
         # return an invalid vertical averaged ROC
         v_avg = ROCAveragedVert(
             ROCPoints(numpy.array([]), numpy.array([]), numpy.array([])),
             ROCPoints(numpy.array([]), numpy.array([]), numpy.array([])),
-            numpy.array([])
+            numpy.array([]),
         )
 
     if curves:
         all_thresh = numpy.hstack([t for _, _, t in curves])
         all_thresh = numpy.clip(all_thresh, 0.0 - 1e-10, 1.0 + 1e-10)
         all_thresh = numpy.unique(all_thresh)[::-1]
-        thresh = all_thresh[::max(all_thresh.size // 10, 1)]
+        thresh = all_thresh[:: max(all_thresh.size // 10, 1)]
 
-        (fpr, fpr_std), (tpr, tpr_std) = \
-            roc_curve_threshold_average(curves, thresh)
+        (fpr, fpr_std), (tpr, tpr_std) = roc_curve_threshold_average(curves, thresh)
 
         hull = roc_curve_convex_hull((fpr, tpr, thresh))
 
         t_avg = ROCAveragedThresh(
-            ROCPoints(fpr, tpr, thresh),
-            ROCPoints(*hull),
-            tpr_std,
-            fpr_std
+            ROCPoints(fpr, tpr, thresh), ROCPoints(*hull), tpr_std, fpr_std
         )
     else:
         # return an invalid threshold averaged ROC
@@ -144,24 +137,25 @@ def ROCData_from_results(results, clf_index, target):
             ROCPoints(numpy.array([]), numpy.array([]), numpy.array([])),
             ROCPoints(numpy.array([]), numpy.array([]), numpy.array([])),
             numpy.array([]),
-            numpy.array([])
+            numpy.array([]),
         )
     return ROCData(merged_curve, fold_curves, v_avg, t_avg)
+
 
 ROCData.from_results = staticmethod(ROCData_from_results)
 
 #: A curve item to be displayed in a plot
 PlotCurve = namedtuple(
     "PlotCurve",
-    ["curve",        # ROCCurve source curve
-     "curve_item",   # pg.PlotDataItem main curve
-     "hull_item"     # pg.PlotDataItem curve's convex hull
-     ]
+    [
+        "curve",  # ROCCurve source curve
+        "curve_item",  # pg.PlotDataItem main curve
+        "hull_item",  # pg.PlotDataItem curve's convex hull
+    ],
 )
 
 
-def plot_curve(curve, pen=None, shadow_pen=None, symbol="+",
-               symbol_size=3, name=None):
+def plot_curve(curve, pen=None, shadow_pen=None, symbol="+", symbol_size=3, name=None):
     """
     Construct a `PlotCurve` for the given `ROCCurve`.
 
@@ -172,49 +166,54 @@ def plot_curve(curve, pen=None, shadow_pen=None, symbol="+",
 
     :rtype: PlotCurve
     """
+
     def extend_to_origin(points):
         "Extend ROCPoints to include coordinate origin if not already present"
         if points.tpr.size and (points.tpr[0] > 0 or points.fpr[0] > 0):
             points = ROCPoints(
-                numpy.r_[0, points.fpr], numpy.r_[0, points.tpr],
-                numpy.r_[points.thresholds[0] + 1, points.thresholds]
+                numpy.r_[0, points.fpr],
+                numpy.r_[0, points.tpr],
+                numpy.r_[points.thresholds[0] + 1, points.thresholds],
             )
         return points
 
     points = extend_to_origin(curve.points)
     item = pg.PlotCurveItem(
-        points.fpr, points.tpr, pen=pen, shadowPen=shadow_pen,
-        name=name, antialias=True
+        points.fpr, points.tpr, pen=pen, shadowPen=shadow_pen, name=name, antialias=True
     )
     sp = pg.ScatterPlotItem(
-        curve.points.fpr, curve.points.tpr, symbol=symbol,
-        size=symbol_size, pen=shadow_pen,
-        name=name
+        curve.points.fpr,
+        curve.points.tpr,
+        symbol=symbol,
+        size=symbol_size,
+        pen=shadow_pen,
+        name=name,
     )
     sp.setParentItem(item)
 
     hull = extend_to_origin(curve.hull)
 
-    hull_item = pg.PlotDataItem(
-        hull.fpr, hull.tpr, pen=pen, antialias=True
-    )
+    hull_item = pg.PlotDataItem(hull.fpr, hull.tpr, pen=pen, antialias=True)
     return PlotCurve(curve, item, hull_item)
+
 
 PlotCurve.from_roc_curve = staticmethod(plot_curve)
 
 #: A curve displayed in a plot with error bars
 PlotAvgCurve = namedtuple(
     "PlotAvgCurve",
-    ["curve",         # ROCCurve
-     "curve_item",    # pg.PlotDataItem
-     "hull_item",     # pg.PlotDataItem
-     "confint_item",  # pg.ErrorBarItem
-     ]
+    [
+        "curve",  # ROCCurve
+        "curve_item",  # pg.PlotDataItem
+        "hull_item",  # pg.PlotDataItem
+        "confint_item",  # pg.ErrorBarItem
+    ],
 )
 
 
-def plot_avg_curve(curve, pen=None, shadow_pen=None, symbol="+",
-                   symbol_size=4, name=None):
+def plot_avg_curve(
+    curve, pen=None, shadow_pen=None, symbol="+", symbol_size=4, name=None
+):
     """
     Construct a `PlotAvgCurve` for the given `curve`.
 
@@ -225,27 +224,39 @@ def plot_avg_curve(curve, pen=None, shadow_pen=None, symbol="+",
 
     :rtype: PlotAvgCurve
     """
-    pc = plot_curve(curve, pen=pen, shadow_pen=shadow_pen, symbol=symbol,
-                    symbol_size=symbol_size, name=name)
+    pc = plot_curve(
+        curve,
+        pen=pen,
+        shadow_pen=shadow_pen,
+        symbol=symbol,
+        symbol_size=symbol_size,
+        name=name,
+    )
 
     points = curve.points
     if isinstance(curve, ROCAveragedVert):
         tpr_std = curve.tpr_std
         error_item = pg.ErrorBarItem(
-            x=points.fpr[1:-1], y=points.tpr[1:-1],
+            x=points.fpr[1:-1],
+            y=points.tpr[1:-1],
             height=2 * tpr_std[1:-1],
-            pen=pen, beam=0.025,
+            pen=pen,
+            beam=0.025,
             antialias=True,
         )
     elif isinstance(curve, ROCAveragedThresh):
         tpr_std, fpr_std = curve.tpr_std, curve.fpr_std
         error_item = pg.ErrorBarItem(
-            x=points.fpr[1:-1], y=points.tpr[1:-1],
-            height=2 * tpr_std[1:-1], width=2 * fpr_std[1:-1],
-            pen=pen, beam=0.025,
+            x=points.fpr[1:-1],
+            y=points.tpr[1:-1],
+            height=2 * tpr_std[1:-1],
+            width=2 * fpr_std[1:-1],
+            pen=pen,
+            beam=0.025,
             antialias=True,
         )
     return PlotAvgCurve(curve, pc.curve_item, pc.hull_item, error_item)
+
 
 PlotAvgCurve.from_roc_curve = staticmethod(plot_avg_curve)
 
@@ -264,24 +275,28 @@ def once(f):
         if cached is None:
             cached = Some(f())
         return cached.val
+
     return wraped
 
 
 plot_curves = namedtuple(
     "plot_curves",
-    ["merge",   # :: () -> PlotCurve
-     "folds",   # :: () -> [PlotCurve]
-     "avg_vertical",   # :: () -> PlotAvgCurve
-     "avg_threshold",  # :: () -> PlotAvgCurve
-     ]
+    [
+        "merge",  # :: () -> PlotCurve
+        "folds",  # :: () -> [PlotCurve]
+        "avg_vertical",  # :: () -> PlotAvgCurve
+        "avg_threshold",  # :: () -> PlotAvgCurve
+    ],
 )
 
 
 class InfiniteLine(pg.InfiniteLine):
     """pyqtgraph.InfiniteLine extended to support antialiasing.
     """
-    def __init__(self, pos=None, angle=90, pen=None, movable=False,
-                 bounds=None, antialias=False):
+
+    def __init__(
+        self, pos=None, angle=90, pen=None, movable=False, bounds=None, antialias=False
+    ):
         super().__init__(pos, angle, pen, movable, bounds)
         self.antialias = antialias
 
@@ -293,8 +308,10 @@ class InfiniteLine(pg.InfiniteLine):
 
 class OWROCAnalysis(widget.OWWidget):
     name = "ROC Analysis"
-    description = "Display the Receiver Operating Characteristics curve " \
-                  "based on the evaluation of classifiers."
+    description = (
+        "Display the Receiver Operating Characteristics curve "
+        "based on the evaluation of classifiers."
+    )
     icon = "icons/ROCAnalysis.svg"
     priority = 1010
 
@@ -303,7 +320,8 @@ class OWROCAnalysis(widget.OWWidget):
 
     class Warning(widget.OWWidget.Warning):
         empty_results = widget.Msg(
-            "Empty results on input. There is nothing to display.")
+            "Empty results on input. There is nothing to display."
+        )
 
     target_index = settings.Setting(0)
     selected_classifiers = []
@@ -341,52 +359,107 @@ class OWROCAnalysis(widget.OWWidget):
         tbox.setFlat(True)
 
         self.target_cb = gui.comboBox(
-            tbox, self, "target_index", callback=self._on_target_changed,
-            contentsLength=8)
+            tbox,
+            self,
+            "target_index",
+            callback=self._on_target_changed,
+            contentsLength=8,
+        )
 
         cbox = gui.vBox(box, "Classifiers")
         cbox.setFlat(True)
         self.classifiers_list_box = gui.listBox(
-            cbox, self, "selected_classifiers", "classifier_names",
+            cbox,
+            self,
+            "selected_classifiers",
+            "classifier_names",
             selectionMode=QListView.MultiSelection,
-            callback=self._on_classifiers_changed)
+            callback=self._on_classifiers_changed,
+        )
 
         abox = gui.vBox(box, "Combine ROC Curves From Folds")
         abox.setFlat(True)
-        gui.comboBox(abox, self, "roc_averaging",
-                     items=["Merge Predictions from Folds", "Mean TP Rate",
-                            "Mean TP and FP at Threshold", "Show Individual Curves"],
-                     callback=self._replot)
+        gui.comboBox(
+            abox,
+            self,
+            "roc_averaging",
+            items=[
+                "Merge Predictions from Folds",
+                "Mean TP Rate",
+                "Mean TP and FP at Threshold",
+                "Show Individual Curves",
+            ],
+            callback=self._replot,
+        )
 
         hbox = gui.vBox(box, "ROC Convex Hull")
         hbox.setFlat(True)
-        gui.checkBox(hbox, self, "display_convex_curve",
-                     "Show convex ROC curves", callback=self._replot)
-        gui.checkBox(hbox, self, "display_convex_hull",
-                     "Show ROC convex hull", callback=self._replot)
+        gui.checkBox(
+            hbox,
+            self,
+            "display_convex_curve",
+            "Show convex ROC curves",
+            callback=self._replot,
+        )
+        gui.checkBox(
+            hbox,
+            self,
+            "display_convex_hull",
+            "Show ROC convex hull",
+            callback=self._replot,
+        )
 
         box = gui.vBox(self.controlArea, "Analysis")
 
-        gui.checkBox(box, self, "display_def_threshold",
-                     "Default threshold (0.5) point",
-                     callback=self._on_display_def_threshold_changed)
+        gui.checkBox(
+            box,
+            self,
+            "display_def_threshold",
+            "Default threshold (0.5) point",
+            callback=self._on_display_def_threshold_changed,
+        )
 
-        gui.checkBox(box, self, "display_perf_line", "Show performance line",
-                     callback=self._on_display_perf_line_changed)
+        gui.checkBox(
+            box,
+            self,
+            "display_perf_line",
+            "Show performance line",
+            callback=self._on_display_perf_line_changed,
+        )
         grid = QGridLayout()
         ibox = gui.indentedBox(box, orientation=grid)
 
-        sp = gui.spin(box, self, "fp_cost", 1, 1000, 10,
-                      callback=self._on_display_perf_line_changed)
+        sp = gui.spin(
+            box,
+            self,
+            "fp_cost",
+            1,
+            1000,
+            10,
+            callback=self._on_display_perf_line_changed,
+        )
         grid.addWidget(QLabel("FP Cost:"), 0, 0)
         grid.addWidget(sp, 0, 1)
 
-        sp = gui.spin(box, self, "fn_cost", 1, 1000, 10,
-                      callback=self._on_display_perf_line_changed)
+        sp = gui.spin(
+            box,
+            self,
+            "fn_cost",
+            1,
+            1000,
+            10,
+            callback=self._on_display_perf_line_changed,
+        )
         grid.addWidget(QLabel("FN Cost:"))
         grid.addWidget(sp, 1, 1)
-        sp = gui.spin(box, self, "target_prior", 1, 99,
-                      callback=self._on_display_perf_line_changed)
+        sp = gui.spin(
+            box,
+            self,
+            "target_prior",
+            1,
+            99,
+            callback=self._on_display_perf_line_changed,
+        )
         sp.setSuffix("%")
         sp.addAction(QAction("Auto", sp))
         grid.addWidget(QLabel("Prior target class probability:"))
@@ -449,8 +522,7 @@ class OWROCAnalysis(widget.OWWidget):
         names = getattr(results, "learner_names", None)
 
         if names is None:
-            names = ["#{}".format(i + 1)
-                     for i in range(len(results.predicted))]
+            names = ["#{}".format(i + 1) for i in range(len(results.predicted))]
 
         scheme = colorbrewer.colorSchemes["qualitative"]["Dark2"]
         if len(names) > len(scheme):
@@ -476,6 +548,7 @@ class OWROCAnalysis(widget.OWWidget):
 
     def plot_curves(self, target, clf_idx):
         """Return a set of functions `plot_curves` generating plot curves."""
+
         def generate_pens(basecolor):
             pen = QPen(basecolor, 1)
             pen.setCosmetic(True)
@@ -489,26 +562,37 @@ class OWROCAnalysis(widget.OWWidget):
         if (target, clf_idx) not in self._plot_curves:
             pen, shadow_pen = generate_pens(self.colors[clf_idx])
             name = self.classifier_names[clf_idx]
+
             @once
             def merged():
                 return plot_curve(
-                    data.merged, pen=pen, shadow_pen=shadow_pen, name=name)
+                    data.merged, pen=pen, shadow_pen=shadow_pen, name=name
+                )
+
             @once
             def folds():
-                return [plot_curve(fold, pen=pen, shadow_pen=shadow_pen)
-                        for fold in data.folds]
+                return [
+                    plot_curve(fold, pen=pen, shadow_pen=shadow_pen)
+                    for fold in data.folds
+                ]
+
             @once
             def avg_vert():
-                return plot_avg_curve(data.avg_vertical, pen=pen,
-                                      shadow_pen=shadow_pen, name=name)
+                return plot_avg_curve(
+                    data.avg_vertical, pen=pen, shadow_pen=shadow_pen, name=name
+                )
+
             @once
             def avg_thres():
-                return plot_avg_curve(data.avg_threshold, pen=pen,
-                                      shadow_pen=shadow_pen, name=name)
+                return plot_avg_curve(
+                    data.avg_threshold, pen=pen, shadow_pen=shadow_pen, name=name
+                )
 
             self._plot_curves[target, clf_idx] = plot_curves(
-                merge=merged, folds=folds,
-                avg_vertical=avg_vert, avg_threshold=avg_thres
+                merge=merged,
+                folds=folds,
+                avg_vertical=avg_vert,
+                avg_threshold=avg_thres,
             )
 
         return self._plot_curves[target, clf_idx]
@@ -532,9 +616,7 @@ class OWROCAnalysis(widget.OWWidget):
                 if self.display_def_threshold and curve.is_valid:
                     points = curve.points
                     ind = numpy.argmin(numpy.abs(points.thresholds - 0.5))
-                    item = pg.TextItem(
-                        text="{:.3f}".format(points.thresholds[ind]),
-                    )
+                    item = pg.TextItem(text="{:.3f}".format(points.thresholds[ind]))
                     item.setPos(points.fpr[ind], points.tpr[ind])
                     self.plot.addItem(item)
 
@@ -579,10 +661,12 @@ class OWROCAnalysis(widget.OWWidget):
             hull_pen = QPen(QColor(200, 200, 200, 100), 2)
             hull_pen.setCosmetic(True)
             item = self.plot.plot(
-                hull.fpr, hull.tpr,
+                hull.fpr,
+                hull.tpr,
                 pen=hull_pen,
                 brush=QBrush(QColor(200, 200, 200, 50)),
-                fillLevel=0)
+                fillLevel=0,
+            )
             item.setZValue(-10000)
 
         pen = QPen(QColor(100, 100, 100, 100), 1, Qt.DashLine)
@@ -631,7 +715,8 @@ class OWROCAnalysis(widget.OWWidget):
         self._perf_line.setVisible(self.display_perf_line)
         if self.display_perf_line:
             m = roc_iso_performance_slope(
-                self.fp_cost, self.fn_cost, self.target_prior / 100.0)
+                self.fp_cost, self.fn_cost, self.target_prior / 100.0
+            )
 
             hull = self._rocch
             if hull.is_valid:
@@ -651,11 +736,11 @@ class OWROCAnalysis(widget.OWWidget):
         items = OrderedDict()
         items["Target class"] = self.target_cb.currentText()
         if self.display_perf_line:
-            items["Costs"] = \
-                "FP = {}, FN = {}".format(self.fp_cost, self.fn_cost)
+            items["Costs"] = "FP = {}, FN = {}".format(self.fp_cost, self.fn_cost)
             items["Target probability"] = "{} %".format(self.target_prior)
-        caption = report.list_legend(self.classifiers_list_box,
-                                     self.selected_classifiers)
+        caption = report.list_legend(
+            self.classifiers_list_box, self.selected_classifiers
+        )
         self.report_items(items)
         self.report_plot()
         self.report_caption(caption)
@@ -706,9 +791,7 @@ def roc_curve_for_fold(res, fold, clf_idx, target):
         return numpy.array([]), numpy.array([]), numpy.array([])
 
     fold_probs = res.probabilities[clf_idx][fold][:, target]
-    return skl_metrics.roc_curve(
-        fold_actual, fold_probs, pos_label=target
-    )
+    return skl_metrics.roc_curve(fold_actual, fold_probs, pos_label=target)
 
 
 def roc_curve_vertical_average(curves, samples=10):
@@ -737,8 +820,10 @@ def roc_curve_threshold_average(curves, thresh_samples):
     fpr_samples = numpy.array(fpr_samples)
     tpr_samples = numpy.array(tpr_samples)
 
-    return ((fpr_samples.mean(axis=0), fpr_samples.std(axis=0)),
-            (tpr_samples.mean(axis=0), fpr_samples.std(axis=0)))
+    return (
+        (fpr_samples.mean(axis=0), fpr_samples.std(axis=0)),
+        (tpr_samples.mean(axis=0), fpr_samples.std(axis=0)),
+    )
 
 
 def roc_curve_threshold_average_interp(curves, thresh_samples):
@@ -753,8 +838,10 @@ def roc_curve_threshold_average_interp(curves, thresh_samples):
     fpr_samples = numpy.array(fpr_samples)
     tpr_samples = numpy.array(tpr_samples)
 
-    return ((fpr_samples.mean(axis=0), fpr_samples.std(axis=0)),
-            (tpr_samples.mean(axis=0), fpr_samples.std(axis=0)))
+    return (
+        (fpr_samples.mean(axis=0), fpr_samples.std(axis=0)),
+        (tpr_samples.mean(axis=0), fpr_samples.std(axis=0)),
+    )
 
 
 roc_point = namedtuple("roc_point", ["fpr", "tpr", "threshold"])
@@ -765,7 +852,7 @@ def roc_curve_convex_hull(curve):
         x1, y1, _ = p1
         x2, y2, _ = p2
         if x1 != x2:
-            return  (y2 - y1) / (x2 - x1)
+            return (y2 - y1) / (x2 - x1)
         else:
             return numpy.inf
 
@@ -784,8 +871,7 @@ def roc_curve_convex_hull(curve):
                 break
             else:
                 last = hull[-1]
-                if point.fpr != last.fpr and \
-                        slope(hull[-2], last) > slope(last, point):
+                if point.fpr != last.fpr and slope(hull[-2], last) > slope(last, point):
                     hull.append(point)
                     break
                 else:
@@ -802,7 +888,7 @@ def convex_hull(curves):
         x1, y1, *_ = p1
         x2, y2, *_ = p2
         if x1 != x2:
-            return  (y2 - y1) / (x2 - x1)
+            return (y2 - y1) / (x2 - x1)
         else:
             return numpy.inf
 
@@ -828,8 +914,7 @@ def convex_hull(curves):
                 break
             else:
                 last = hull[-1]
-                if point[0] != last[0] and \
-                        slope(hull[-2], last) > slope(last, point):
+                if point[0] != last[0] and slope(hull[-2], last) > slope(last, point):
                     hull.append(point)
                     break
                 else:
@@ -870,29 +955,34 @@ def roc_iso_performance_slope(fp_cost, fn_cost, p):
     if fn_cost * p == 0:
         return numpy.inf
     else:
-        return (fp_cost * (1. - p)) / (fn_cost * p)
+        return (fp_cost * (1.0 - p)) / (fn_cost * p)
 
 
 def main():
     import gc
     import sip
     from AnyQt.QtWidgets import QApplication
-    from Orange.classification import (LogisticRegressionLearner, SVMLearner,
-                                       NuSVMLearner)
+    from Orange.classification import (
+        LogisticRegressionLearner,
+        SVMLearner,
+        NuSVMLearner,
+    )
 
     app = QApplication([])
     w = OWROCAnalysis()
     w.show()
     w.raise_()
 
-#     data = Orange.data.Table("iris")
+    #     data = Orange.data.Table("iris")
     data = Orange.data.Table("ionosphere")
     results = Orange.evaluation.CrossValidation(
         data,
-        [LogisticRegressionLearner(),
-         LogisticRegressionLearner(penalty="l1"),
-         SVMLearner(probability=True),
-         NuSVMLearner(probability=True)],
+        [
+            LogisticRegressionLearner(),
+            LogisticRegressionLearner(penalty="l1"),
+            SVMLearner(probability=True),
+            NuSVMLearner(probability=True),
+        ],
         k=5,
         store_data=True,
     )
@@ -909,6 +999,8 @@ def main():
     gc.collect()
     return rval
 
+
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

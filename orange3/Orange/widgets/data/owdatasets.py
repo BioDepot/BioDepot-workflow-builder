@@ -5,21 +5,36 @@ import sys
 import traceback
 
 from xml.sax.saxutils import escape
-from concurrent.futures import ThreadPoolExecutor, Future  # pylint: disable=unused-import
+from concurrent.futures import (
+    ThreadPoolExecutor,
+    Future,
+)  # pylint: disable=unused-import
 
 from types import SimpleNamespace
 from typing import Optional, Dict, Tuple, List  # pylint: disable=unused-import
 from collections import namedtuple
 
 from AnyQt.QtWidgets import (
-    QLabel, QLineEdit, QTextBrowser, QSplitter, QTreeView,
-    QStyleOptionViewItem, QStyledItemDelegate, QApplication
+    QLabel,
+    QLineEdit,
+    QTextBrowser,
+    QSplitter,
+    QTreeView,
+    QStyleOptionViewItem,
+    QStyledItemDelegate,
+    QApplication,
 )
 from AnyQt.QtGui import QStandardItemModel, QStandardItem
 from AnyQt.QtCore import (
-    Qt, QSize, QObject, QThread, QModelIndex, QSortFilterProxyModel,
+    Qt,
+    QSize,
+    QObject,
+    QThread,
+    QModelIndex,
+    QSortFilterProxyModel,
     QItemSelectionModel,
-    pyqtSlot as Slot, pyqtSignal as Signal
+    pyqtSlot as Slot,
+    pyqtSignal as Signal,
 )
 
 from serverfiles import LocalFiles, ServerFiles, sizeformat
@@ -34,19 +49,20 @@ from Orange.widgets.widget import Msg
 log = logging.getLogger(__name__)
 
 
-def ensure_local(index_url, file_path, local_cache_path,
-                 force=False, progress_advance=None):
-    localfiles = LocalFiles(local_cache_path,
-                            serverfiles=ServerFiles(server=index_url))
+def ensure_local(
+    index_url, file_path, local_cache_path, force=False, progress_advance=None
+):
+    localfiles = LocalFiles(local_cache_path, serverfiles=ServerFiles(server=index_url))
     if force:
         localfiles.download(*file_path, callback=progress_advance)
     return localfiles.localpath_download(*file_path, callback=progress_advance)
 
 
 def format_info(n_all, n_cached):
-    plural = lambda x: '' if x == 1 else 's'
+    plural = lambda x: "" if x == 1 else "s"
     return "{} dataset{}\n{} dataset{} cached".format(
-        n_all, plural(n_all), n_cached if n_cached else 'No', plural(n_cached))
+        n_all, plural(n_all), n_cached if n_cached else "No", plural(n_cached)
+    )
 
 
 def format_exception(error):
@@ -119,41 +135,46 @@ class OWDataSets(widget.OWWidget):
     # override HEADER_SCHEMA to define new columns
     # if schema is changed override methods: self.assign_delegates and self.create_model
     HEADER_SCHEMA = [
-        ['islocal', {'label': ''}],
-        ['title', {'label': 'Title'}],
-        ['size', {'label': 'Size'}],
-        ['instances', {'label': 'Instances'}],
-        ['variables', {'label': 'Variables'}],
-        ['target', {'label': 'Target'}],
-        ['tags', {'label': 'Tags'}]
+        ["islocal", {"label": ""}],
+        ["title", {"label": "Title"}],
+        ["size", {"label": "Size"}],
+        ["instances", {"label": "Instances"}],
+        ["variables", {"label": "Variables"}],
+        ["target", {"label": "Target"}],
+        ["tags", {"label": "Tags"}],
     ]  # type: List[str, dict]
 
     class Error(widget.OWWidget.Error):
         no_remote_datasets = Msg("Could not fetch dataset list")
 
     class Warning(widget.OWWidget.Warning):
-        only_local_datasets = Msg("Could not fetch datasets list, only local "
-                                  "cached datasets are shown")
+        only_local_datasets = Msg(
+            "Could not fetch datasets list, only local " "cached datasets are shown"
+        )
 
     class Outputs:
         data = Output("Data", Orange.data.Table)
 
     #: Selected dataset id
-    selected_id = settings.Setting(None)   # type: Optional[str]
+    selected_id = settings.Setting(None)  # type: Optional[str]
 
     auto_commit = settings.Setting(False)  # type: bool
 
     #: main area splitter state
-    splitter_state = settings.Setting(b'')  # type: bytes
-    header_state = settings.Setting(b'')    # type: bytes
+    splitter_state = settings.Setting(b"")  # type: bytes
+    header_state = settings.Setting(b"")  # type: bytes
 
     def __init__(self):
         super().__init__()
         self.local_cache_path = os.path.join(data_dir(), self.DATASET_DIR)
 
-        self._header_labels = [header['label'] for _, header in self.HEADER_SCHEMA]
-        self._header_index = namedtuple('_header_index', [info_tag for info_tag, _ in self.HEADER_SCHEMA])
-        self.Header = self._header_index(*[index for index, _ in enumerate(self._header_labels)])
+        self._header_labels = [header["label"] for _, header in self.HEADER_SCHEMA]
+        self._header_index = namedtuple(
+            "_header_index", [info_tag for info_tag, _ in self.HEADER_SCHEMA]
+        )
+        self.Header = self._header_index(
+            *[index for index, _ in enumerate(self._header_labels)]
+        )
 
         self.__awaiting_state = None  # type: Optional[_FetchState]
 
@@ -163,9 +184,7 @@ class OWDataSets(widget.OWWidget):
         box.layout().addWidget(self.infolabel)
 
         gui.widgetLabel(self.mainArea, "Filter")
-        self.filterLineEdit = QLineEdit(
-            textChanged=self.filter
-        )
+        self.filterLineEdit = QLineEdit(textChanged=self.filter)
         self.mainArea.layout().addWidget(self.filterLineEdit)
 
         self.splitter = QSplitter(orientation=Qt.Vertical)
@@ -179,14 +198,10 @@ class OWDataSets(widget.OWWidget):
         )
 
         box = gui.widgetBox(self.splitter, "Description", addToLayout=False)
-        self.descriptionlabel = QLabel(
-            wordWrap=True,
-            textFormat=Qt.RichText,
-        )
+        self.descriptionlabel = QLabel(wordWrap=True, textFormat=Qt.RichText)
         self.descriptionlabel = QTextBrowser(
             openExternalLinks=True,
-            textInteractionFlags=(Qt.TextSelectableByMouse |
-                                  Qt.LinksAccessibleByMouse)
+            textInteractionFlags=(Qt.TextSelectableByMouse | Qt.LinksAccessibleByMouse),
         )
         self.descriptionlabel.setFrameStyle(QTextBrowser.NoFrame)
         # no (white) text background
@@ -198,8 +213,7 @@ class OWDataSets(widget.OWWidget):
 
         self.splitter.setSizes([300, 200])
         self.splitter.splitterMoved.connect(
-            lambda:
-            setattr(self, "splitter_state", bytes(self.splitter.saveState()))
+            lambda: setattr(self, "splitter_state", bytes(self.splitter.saveState()))
         )
         self.mainArea.layout().addWidget(self.splitter)
         self.controlArea.layout().addStretch(10)
@@ -228,20 +242,19 @@ class OWDataSets(widget.OWWidget):
 
     def assign_delegates(self):
         self.view.setItemDelegateForColumn(
-            self.Header.islocal,
-            gui.IndicatorItemDelegate(self, role=Qt.DisplayRole)
+            self.Header.islocal, gui.IndicatorItemDelegate(self, role=Qt.DisplayRole)
         )
         self.view.setItemDelegateForColumn(
-            self.Header.size,
-            Orange.widgets.data.owdatasets.SizeDelegate(self))
+            self.Header.size, Orange.widgets.data.owdatasets.SizeDelegate(self)
+        )
 
         self.view.setItemDelegateForColumn(
             self.Header.instances,
-            Orange.widgets.data.owdatasets.NumericalDelegate(self)
+            Orange.widgets.data.owdatasets.NumericalDelegate(self),
         )
         self.view.setItemDelegateForColumn(
             self.Header.variables,
-            Orange.widgets.data.owdatasets.NumericalDelegate(self)
+            Orange.widgets.data.owdatasets.NumericalDelegate(self),
         )
 
     def _parse_info(self, file_path):
@@ -253,16 +266,27 @@ class OWDataSets(widget.OWWidget):
         islocal = file_path in self.allinfo_local
         isremote = file_path in self.allinfo_remote
 
-        outdated = islocal and isremote and (
-                self.allinfo_remote[file_path].get('version', '') != self.allinfo_local[file_path].get('version', '')
+        outdated = (
+            islocal
+            and isremote
+            and (
+                self.allinfo_remote[file_path].get("version", "")
+                != self.allinfo_local[file_path].get("version", "")
+            )
         )
         islocal &= not outdated
 
-        prefix = os.path.join('', *file_path[:-1])
+        prefix = os.path.join("", *file_path[:-1])
         filename = file_path[-1]
 
-        return Namespace(file_path=file_path, prefix=prefix, filename=filename,
-                         islocal=islocal, outdated=outdated, **info)
+        return Namespace(
+            file_path=file_path,
+            prefix=prefix,
+            filename=filename,
+            islocal=islocal,
+            outdated=outdated,
+            **info
+        )
 
     def create_model(self):
         allkeys = set(self.allinfo_local)
@@ -293,8 +317,9 @@ class OWDataSets(widget.OWWidget):
             if datainfo.target:
                 item6.setIcon(variable_icon(datainfo.target))
             item7 = QStandardItem()
-            item7.setData(", ".join(datainfo.tags) if datainfo.tags else "",
-                          Qt.DisplayRole)
+            item7.setData(
+                ", ".join(datainfo.tags) if datainfo.tags else "", Qt.DisplayRole
+            )
             row = [item1, item2, item3, item4, item5, item6, item7]
             model.appendRow(row)
 
@@ -326,9 +351,7 @@ class OWDataSets(widget.OWWidget):
         model, current_index = self.create_model()
 
         self.view.model().setSourceModel(model)
-        self.view.selectionModel().selectionChanged.connect(
-            self.__on_selection
-        )
+        self.view.selectionModel().selectionChanged.connect(self.__on_selection)
 
         self.view.resizeColumnToContents(0)
 
@@ -339,7 +362,8 @@ class OWDataSets(widget.OWWidget):
             selmodel = self.view.selectionModel()
             selmodel.select(
                 self.view.model().mapFromSource(model.index(current_index, 0)),
-                QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows)
+                QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows,
+            )
 
     def __update_cached_state(self):
         model = self.view.model().sourceModel()
@@ -353,8 +377,9 @@ class OWDataSets(widget.OWWidget):
             item.setData(" " if info.islocal else "", Qt.DisplayRole)
             allinfo.append(info)
 
-        self.infolabel.setText(format_info(
-            model.rowCount(), sum(info.islocal for info in allinfo)))
+        self.infolabel.setText(
+            format_info(model.rowCount(), sum(info.islocal for info in allinfo))
+        )
 
     def selected_dataset(self):
         """
@@ -411,14 +436,12 @@ class OWDataSets(widget.OWWidget):
 
             if self.__awaiting_state is not None:
                 # disconnect from the __commit_complete
-                self.__awaiting_state.watcher.done.disconnect(
-                    self.__commit_complete)
+                self.__awaiting_state.watcher.done.disconnect(self.__commit_complete)
                 # .. and connect to update_cached_state
                 # self.__awaiting_state.watcher.done.connect(
                 #     self.__update_cached_state)
                 # TODO: There are possible pending __progress_advance queued
-                self.__awaiting_state.pb.advance.disconnect(
-                    self.__progress_advance)
+                self.__awaiting_state.pb.advance.disconnect(self.__progress_advance)
                 self.progressBarFinished(processEvents=None)
                 self.__awaiting_state = None
 
@@ -432,9 +455,13 @@ class OWDataSets(widget.OWWidget):
                 self.setBlocking(True)
 
                 f = self._executor.submit(
-                    ensure_local, self.INDEX_URL, di.file_path,
-                    self.local_cache_path, force=di.outdated,
-                    progress_advance=callback)
+                    ensure_local,
+                    self.INDEX_URL,
+                    di.file_path,
+                    self.local_cache_path,
+                    force=di.outdated,
+                    progress_advance=callback,
+                )
                 w = FutureWatcher(f, parent=self)
                 w.done.connect(self.__commit_complete)
                 self.__awaiting_state = _FetchState(f, w, pr)
@@ -550,13 +577,13 @@ def variable_icon(name):
 
 def make_html_list(items):
     if items is None:
-        return ''
+        return ""
     style = '"margin: 5px; text-indent: -40px; margin-left: 40px;"'
 
     def format_item(i):
-        return '<p style={}><small>{}</small></p>'.format(style, i)
+        return "<p style={}><small>{}</small></p>".format(style, i)
 
-    return '\n'.join([format_item(i) for i in items])
+    return "\n".join([format_item(i) for i in items])
 
 
 def description_html(datainfo):

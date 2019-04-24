@@ -22,8 +22,7 @@ class TestRandomizer(unittest.TestCase):
         self.assertTrue((data.X == data_rand.X).all())
         self.assertTrue((data.metas == data_rand.metas).all())
         self.assertTrue((data.Y != data_rand.Y).any())
-        self.assertTrue((np.sort(data.Y, axis=0) == np.sort(
-            data_rand.Y, axis=0)).all())
+        self.assertTrue((np.sort(data.Y, axis=0) == np.sort(data_rand.Y, axis=0)).all())
 
     def test_randomize_classes(self):
         data = self.zoo
@@ -32,8 +31,7 @@ class TestRandomizer(unittest.TestCase):
         self.assertTrue((data.X == data_rand.X).all())
         self.assertTrue((data.metas == data_rand.metas).all())
         self.assertTrue((data.Y != data_rand.Y).any())
-        self.assertTrue((np.sort(data.Y, axis=0) == np.sort(
-            data_rand.Y, axis=0)).all())
+        self.assertTrue((np.sort(data.Y, axis=0) == np.sort(data_rand.Y, axis=0)).all())
 
     def test_randomize_attributes(self):
         data = self.zoo
@@ -42,8 +40,7 @@ class TestRandomizer(unittest.TestCase):
         self.assertTrue((data.Y == data_rand.Y).all())
         self.assertTrue((data.metas == data_rand.metas).all())
         self.assertTrue((data.X != data_rand.X).any())
-        self.assertTrue((np.sort(data.X, axis=0) == np.sort(
-            data_rand.X, axis=0)).all())
+        self.assertTrue((np.sort(data.X, axis=0) == np.sort(data_rand.X, axis=0)).all())
 
     def test_randomize_metas(self):
         data = self.zoo
@@ -52,24 +49,27 @@ class TestRandomizer(unittest.TestCase):
         self.assertTrue((data.X == data_rand.X).all())
         self.assertTrue((data.Y == data_rand.Y).all())
         self.assertTrue((data.metas != data_rand.metas).any())
-        self.assertTrue((np.sort(data.metas, axis=0) == np.sort(
-            data_rand.metas, axis=0)).all())
+        self.assertTrue(
+            (np.sort(data.metas, axis=0) == np.sort(data_rand.metas, axis=0)).all()
+        )
 
     def test_randomize_all(self):
         data = self.zoo
-        rand_type = Randomize.RandomizeClasses | Randomize.RandomizeAttributes \
-                    | Randomize.RandomizeMetas
+        rand_type = (
+            Randomize.RandomizeClasses
+            | Randomize.RandomizeAttributes
+            | Randomize.RandomizeMetas
+        )
         randomizer = Randomize(rand_type=rand_type)
         data_rand = randomizer(data)
         self.assertTrue((data.Y != data_rand.Y).any())
-        self.assertTrue((np.sort(data.Y, axis=0) == np.sort(
-            data_rand.Y, axis=0)).all())
+        self.assertTrue((np.sort(data.Y, axis=0) == np.sort(data_rand.Y, axis=0)).all())
         self.assertTrue((data.X != data_rand.X).any())
-        self.assertTrue((np.sort(data.X, axis=0) == np.sort(
-            data_rand.X, axis=0)).all())
+        self.assertTrue((np.sort(data.X, axis=0) == np.sort(data_rand.X, axis=0)).all())
         self.assertTrue((data.metas != data_rand.metas).any())
-        self.assertTrue((np.sort(data.metas, axis=0) == np.sort(
-            data_rand.metas, axis=0)).all())
+        self.assertTrue(
+            (np.sort(data.metas, axis=0) == np.sort(data_rand.metas, axis=0)).all()
+        )
 
     def test_randomize_keep_original_data(self):
         data_orig = self.zoo
@@ -103,9 +103,7 @@ class TestRandomizer(unittest.TestCase):
         self.assertFalse(np.all(randomized == x))
 
     def test_randomize_sparse(self):
-        x = np.array([[0, 0, 3, 0],
-                      [1, 0, 2, 0],
-                      [4, 5, 6, 7]])
+        x = np.array([[0, 0, 3, 0], [1, 0, 2, 0], [4, 5, 6, 7]])
         randomize = Randomize().randomize
 
         randomized = randomize(sp.csr_matrix(x), rand_state=1)
@@ -113,19 +111,17 @@ class TestRandomizer(unittest.TestCase):
         # Data is shuffled (rand_seed=1 should always shuffle it)
         self.assertFalse(np.all(x == randomized))
         # Data remains within a column
-        self.assertTrue(all(sorted(x[:, i]) == sorted(randomized[:, i])
-                            for i in range(4)))
+        self.assertTrue(
+            all(sorted(x[:, i]) == sorted(randomized[:, i]) for i in range(4))
+        )
         # Do not shuffle entire rows
         randomized = np.array(sorted(list(map(list, randomized))), dtype=int)
         self.assertFalse(np.all(randomized == x))
 
         # Test that shuffle is not sparse structure dependent
-        x = np.array([[1, 2, 3, 4],
-                      [0, 0, 0, 0],
-                      [0, 0, 0, 0],
-                      [0, 0, 0, 0]])
+        x = np.array([[1, 2, 3, 4], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
 
-        randomized = randomize(sp.csr_matrix(x), rand_state=0x393f)
+        randomized = randomize(sp.csr_matrix(x), rand_state=0x393F)
         self.assertFalse(np.all(x == randomized.todense()))
 
         # Do not just assign some indices. I.e. make sure that the shuffling is

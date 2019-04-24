@@ -9,14 +9,30 @@ from typing import List, Tuple, Dict, Optional  # pylint: disable=unused-import
 import numpy as np
 
 from AnyQt.QtWidgets import (
-    QGraphicsWidget, QGraphicsObject, QGraphicsLinearLayout, QGraphicsPathItem,
-    QGraphicsScene, QGraphicsView, QGridLayout, QFormLayout, QSizePolicy,
+    QGraphicsWidget,
+    QGraphicsObject,
+    QGraphicsLinearLayout,
+    QGraphicsPathItem,
+    QGraphicsScene,
+    QGraphicsView,
+    QGridLayout,
+    QFormLayout,
+    QSizePolicy,
     QGraphicsSimpleTextItem,
-    QGraphicsLayoutItem, QAction,
+    QGraphicsLayoutItem,
+    QAction,
 )
 from AnyQt.QtGui import (
-    QTransform, QPainterPath, QPainterPathStroker, QColor, QBrush, QPen,
-    QFont, QFontMetrics, QPolygonF, QKeySequence
+    QTransform,
+    QPainterPath,
+    QPainterPathStroker,
+    QColor,
+    QBrush,
+    QPen,
+    QFont,
+    QFontMetrics,
+    QPolygonF,
+    QKeySequence,
 )
 from AnyQt.QtCore import Qt, QSize, QSizeF, QPointF, QRectF, QLineF, QEvent
 from AnyQt.QtCore import pyqtSignal as Signal
@@ -27,14 +43,23 @@ import Orange.data
 from Orange.data.domain import filter_visible
 from Orange.data import Domain
 import Orange.misc
-from Orange.clustering.hierarchical import \
-    postorder, preorder, Tree, tree_from_linkage, dist_matrix_linkage, \
-    leaves, prune, top_clusters
+from Orange.clustering.hierarchical import (
+    postorder,
+    preorder,
+    Tree,
+    tree_from_linkage,
+    dist_matrix_linkage,
+    leaves,
+    prune,
+    top_clusters,
+)
 
 from Orange.widgets import widget, gui, settings
 from Orange.widgets.utils import colorpalette, itemmodels
-from Orange.widgets.utils.annotated_data import (create_annotated_table,
-                                                 ANNOTATED_DATA_SIGNAL_NAME)
+from Orange.widgets.utils.annotated_data import (
+    create_annotated_table,
+    ANNOTATED_DATA_SIGNAL_NAME,
+)
 from Orange.widgets.widget import Input, Output, Msg
 
 __all__ = ["OWHierarchicalClustering"]
@@ -122,21 +147,27 @@ def dendrogram_path(tree, orientation=Left):
             paths[node] = Element(anchor, ())
         else:
             left, right = paths[node.left], paths[node.right]
-            lines = (left.anchor,
-                     Point(*transform(start, node.value.height)),
-                     Point(*transform(end, node.value.height)),
-                     right.anchor)
+            lines = (
+                left.anchor,
+                Point(*transform(start, node.value.height)),
+                Point(*transform(end, node.value.height)),
+                right.anchor,
+            )
             anchor = Point(*transform(center, node.value.height))
             paths[node] = Element(anchor, lines)
 
-        T[node] = Tree((node, paths[node]),
-                       tuple(T[ch] for ch in node.branches))
+        T[node] = Tree((node, paths[node]), tuple(T[ch] for ch in node.branches))
     return T[tree]
 
 
-def make_pen(brush=Qt.black, width=1, style=Qt.SolidLine,
-             cap_style=Qt.SquareCap, join_style=Qt.BevelJoin,
-             cosmetic=False):
+def make_pen(
+    brush=Qt.black,
+    width=1,
+    style=Qt.SolidLine,
+    cap_style=Qt.SquareCap,
+    join_style=Qt.BevelJoin,
+    cosmetic=False,
+):
     pen = QPen(brush)
     pen.setWidth(width)
     pen.setStyle(style)
@@ -146,9 +177,15 @@ def make_pen(brush=Qt.black, width=1, style=Qt.SolidLine,
     return pen
 
 
-def update_pen(pen, brush=None, width=None, style=None,
-               cap_style=None, join_style=None,
-               cosmetic=None):
+def update_pen(
+    pen,
+    brush=None,
+    width=None,
+    style=None,
+    cap_style=None,
+    join_style=None,
+    cosmetic=None,
+):
     pen = QPen(pen)
     if brush is not None:
         pen.setBrush(QBrush(brush))
@@ -241,9 +278,15 @@ class DendrogramWidget(QGraphicsWidget):
     selectionChanged = Signal()
     selectionEdited = Signal()
 
-    def __init__(self, parent=None, root=None, orientation=Left,
-                 hoverHighlightEnabled=True, selectionMode=ExtendedSelection,
-                 **kwargs):
+    def __init__(
+        self,
+        parent=None,
+        root=None,
+        orientation=Left,
+        hoverHighlightEnabled=True,
+        selectionMode=ExtendedSelection,
+        **kwargs
+    ):
 
         super().__init__(None, **kwargs)
         self.orientation = orientation
@@ -294,8 +337,7 @@ class DendrogramWidget(QGraphicsWidget):
         self.clear()
         self._root = root
         if root is not None:
-            pen = make_pen(Qt.blue, width=1, cosmetic=True,
-                           join_style=Qt.MiterJoin)
+            pen = make_pen(Qt.blue, width=1, cosmetic=True, join_style=Qt.MiterJoin)
             for node in postorder(root):
                 item = DendrogramWidget.ClusterGraphicsItem(self._itemgroup)
                 item.setAcceptHoverEvents(True)
@@ -432,8 +474,12 @@ class DendrogramWidget(QGraphicsWidget):
         :param bool state: New selection state for item.
 
         """
-        if state is False and item not in self._selection or \
-                state == True and item in self._selection:
+        if (
+            state is False
+            and item not in self._selection
+            or state == True
+            and item in self._selection
+        ):
             return  # State unchanged
 
         if item in self._selection:
@@ -477,12 +523,13 @@ class DendrogramWidget(QGraphicsWidget):
 
         if item.node.is_leaf:
             ppath = QPainterPath()
-            ppath.addRect(path.boundingRect()
-                          .adjusted(-margin, -margin, margin, margin))
+            ppath.addRect(
+                path.boundingRect().adjusted(-margin, -margin, margin, margin)
+            )
         else:
             ppath = QPainterPath()
             ppath.addPolygon(path)
-            ppath = path_outline(ppath, width=margin * 2,)
+            ppath = path_outline(ppath, width=margin * 2)
 
         selection_item.setPath(ppath)
         selection_item.unscaled_path = outline
@@ -502,6 +549,7 @@ class DendrogramWidget(QGraphicsWidget):
 
     def _selected_sub_items(self, item):
         """Return all selected subclusters under item."""
+
         def branches(item):
             return [self._items[ch] for ch in item.node.branches]
 
@@ -513,6 +561,7 @@ class DendrogramWidget(QGraphicsWidget):
 
     def _selected_super_item(self, item):
         """Return the selected super item if it exists."""
+
         def branches(item):
             return [self._items[ch] for ch in item.node.branches]
 
@@ -524,8 +573,9 @@ class DendrogramWidget(QGraphicsWidget):
     def _re_enumerate_selections(self):
         """Re enumerate the selection items and update the colors."""
         # Order the clusters
-        items = sorted(self._selection.items(),
-                       key=lambda item: item[0].node.value.first)
+        items = sorted(
+            self._selection.items(), key=lambda item: item[0].node.value.first
+        )
 
         palette = colorpalette.ColorPaletteGenerator(len(items))
         for i, (item, selection_item) in enumerate(items):
@@ -541,6 +591,7 @@ class DendrogramWidget(QGraphicsWidget):
         """
         Return an selection geometry covering item and all its children.
         """
+
         def left(item):
             return [self._items[ch] for ch in item.node.branches[:1]]
 
@@ -560,11 +611,11 @@ class DendrogramWidget(QGraphicsWidget):
         else:
             vert = []
             for it in itemsleft[1:]:
-                vert.extend([it.element.path[0], it.element.path[1],
-                             it.element.anchor])
+                vert.extend([it.element.path[0], it.element.path[1], it.element.anchor])
             for it in itemsright[:-1]:
-                vert.extend([it.element.anchor,
-                             it.element.path[-2], it.element.path[-1]])
+                vert.extend(
+                    [it.element.anchor, it.element.path[-2], it.element.path[-1]]
+                )
             # close the polygon
             vert.append(vert[0])
 
@@ -572,8 +623,7 @@ class DendrogramWidget(QGraphicsWidget):
                 return abs(a - b) < rel_tol * max(abs(a), abs(b))
 
             def isclose_p(p1, p2, rel_tol=1e-6):
-                return isclose(p1.x, p2.x, rel_tol) and \
-                       isclose(p1.y, p2.y, rel_tol)
+                return isclose(p1.x, p2.x, rel_tol) and isclose(p1.y, p2.y, rel_tol)
 
             # merge consecutive vertices that are (too) close
             acc = [vert[0]]
@@ -593,8 +643,9 @@ class DendrogramWidget(QGraphicsWidget):
             ppath = QPainterPath()
             margin = 4
             if item.node.is_leaf:
-                ppath.addRect(path.boundingRect()
-                              .adjusted(-margin, -margin, margin, margin))
+                ppath.addRect(
+                    path.boundingRect().adjusted(-margin, -margin, margin, margin)
+                )
             else:
                 ppath.addPolygon(path)
                 ppath = path_outline(ppath, width=margin * 2)
@@ -660,8 +711,7 @@ class DendrogramWidget(QGraphicsWidget):
             node, _ = node_geom.value
             item = self._items[node]
             item.setGeometryData(
-                transform.map(item.sourcePath),
-                transform.map(item.sourceAreaShape)
+                transform.map(item.sourcePath), transform.map(item.sourceAreaShape)
             )
         self._selection_items = None
         self._update_selection_items()
@@ -672,8 +722,7 @@ class DendrogramWidget(QGraphicsWidget):
         mleft, mtop, mright, mbottom = self.getContentsMargins()
 
         if self._root and which == Qt.PreferredSize:
-            nleaves = len([node for node in self._items.keys()
-                           if not node.branches])
+            nleaves = len([node for node in self._items.keys() if not node.branches])
             base = max(10, min(spacing * 16, 250))
             if self.orientation in [self.Left, self.Right]:
                 return QSizeF(base, spacing * nleaves + mleft + mright)
@@ -687,13 +736,17 @@ class DendrogramWidget(QGraphicsWidget):
 
     def sceneEventFilter(self, obj, event):
         if isinstance(obj, DendrogramWidget.ClusterGraphicsItem):
-            if event.type() == QEvent.GraphicsSceneHoverEnter and \
-                    self.__hoverHighlightEnabled:
+            if (
+                event.type() == QEvent.GraphicsSceneHoverEnter
+                and self.__hoverHighlightEnabled
+            ):
                 self._set_hover_item(obj)
                 event.accept()
                 return True
-            elif event.type() == QEvent.GraphicsSceneMousePress and \
-                    event.button() == Qt.LeftButton:
+            elif (
+                event.type() == QEvent.GraphicsSceneMousePress
+                and event.button() == Qt.LeftButton
+            ):
 
                 is_selected = self.is_selected(obj)
                 is_included = self.is_included(obj)
@@ -701,8 +754,7 @@ class DendrogramWidget(QGraphicsWidget):
 
                 if self.__selectionMode == DendrogramWidget.SingleSelection:
                     if event.modifiers() & Qt.ControlModifier:
-                        self.set_selected_items(
-                            [obj] if not is_selected else [])
+                        self.set_selected_items([obj] if not is_selected else [])
                     elif event.modifiers() & Qt.AltModifier:
                         self.set_selected_items([])
                     elif event.modifiers() & Qt.ShiftModifier:
@@ -755,8 +807,10 @@ class DendrogramWidget(QGraphicsWidget):
 
 class OWHierarchicalClustering(widget.OWWidget):
     name = "Hierarchical Clustering"
-    description = "Display a dendrogram of a hierarchical clustering " \
-                  "constructed from the input distance matrix."
+    description = (
+        "Display a dendrogram of a hierarchical clustering "
+        "constructed from the input distance matrix."
+    )
     icon = "icons/HierarchicalClustering.svg"
     priority = 2100
 
@@ -819,107 +873,151 @@ class OWHierarchicalClustering(widget.OWWidget):
         self.cutoff_height = 0.0
 
         gui.comboBox(
-            self.controlArea, self, "linkage", items=LINKAGE, box="Linkage",
-            callback=self._invalidate_clustering)
+            self.controlArea,
+            self,
+            "linkage",
+            items=LINKAGE,
+            box="Linkage",
+            callback=self._invalidate_clustering,
+        )
 
         model = itemmodels.VariableListModel()
         model[:] = self.basic_annotations
         self.label_cb = gui.comboBox(
-            self.controlArea, self, "annotation", box="Annotation",
-            model=model, callback=self._update_labels, contentsLength=12)
+            self.controlArea,
+            self,
+            "annotation",
+            box="Annotation",
+            model=model,
+            callback=self._update_labels,
+            contentsLength=12,
+        )
 
         box = gui.radioButtons(
-            self.controlArea, self, "pruning", box="Pruning",
-            callback=self._invalidate_pruning)
+            self.controlArea,
+            self,
+            "pruning",
+            box="Pruning",
+            callback=self._invalidate_pruning,
+        )
         grid = QGridLayout()
         box.layout().addLayout(grid)
-        grid.addWidget(
-            gui.appendRadioButton(box, "None", addToLayout=False),
-            0, 0
-        )
+        grid.addWidget(gui.appendRadioButton(box, "None", addToLayout=False), 0, 0)
         self.max_depth_spin = gui.spin(
-            box, self, "max_depth", minv=1, maxv=100,
+            box,
+            self,
+            "max_depth",
+            minv=1,
+            maxv=100,
             callback=self._invalidate_pruning,
-            keyboardTracking=False
+            keyboardTracking=False,
         )
 
         grid.addWidget(
-            gui.appendRadioButton(box, "Max depth:", addToLayout=False),
-            1, 0)
+            gui.appendRadioButton(box, "Max depth:", addToLayout=False), 1, 0
+        )
         grid.addWidget(self.max_depth_spin, 1, 1)
 
         self.selection_box = gui.radioButtons(
-            self.controlArea, self, "selection_method",
+            self.controlArea,
+            self,
+            "selection_method",
             box="Selection",
-            callback=self._selection_method_changed)
+            callback=self._selection_method_changed,
+        )
 
         grid = QGridLayout()
         self.selection_box.layout().addLayout(grid)
         grid.addWidget(
-            gui.appendRadioButton(
-                self.selection_box, "Manual", addToLayout=False),
-            0, 0
+            gui.appendRadioButton(self.selection_box, "Manual", addToLayout=False), 0, 0
         )
         grid.addWidget(
             gui.appendRadioButton(
-                self.selection_box, "Height ratio:", addToLayout=False),
-            1, 0
+                self.selection_box, "Height ratio:", addToLayout=False
+            ),
+            1,
+            0,
         )
         self.cut_ratio_spin = gui.spin(
-            self.selection_box, self, "cut_ratio", 0, 100, step=1e-1,
-            spinType=float, callback=self._selection_method_changed
+            self.selection_box,
+            self,
+            "cut_ratio",
+            0,
+            100,
+            step=1e-1,
+            spinType=float,
+            callback=self._selection_method_changed,
         )
         self.cut_ratio_spin.setSuffix("%")
 
         grid.addWidget(self.cut_ratio_spin, 1, 1)
 
         grid.addWidget(
-            gui.appendRadioButton(
-                self.selection_box, "Top N:", addToLayout=False),
-            2, 0
+            gui.appendRadioButton(self.selection_box, "Top N:", addToLayout=False), 2, 0
         )
-        self.top_n_spin = gui.spin(self.selection_box, self, "top_n", 1, 20,
-                                   callback=self._selection_method_changed)
+        self.top_n_spin = gui.spin(
+            self.selection_box,
+            self,
+            "top_n",
+            1,
+            20,
+            callback=self._selection_method_changed,
+        )
         grid.addWidget(self.top_n_spin, 2, 1)
 
         self.zoom_slider = gui.hSlider(
-            self.controlArea, self, "zoom_factor", box="Zoom",
-            minValue=-6, maxValue=3, step=1, ticks=True, createLabel=False,
-            callback=self.__update_font_scale)
+            self.controlArea,
+            self,
+            "zoom_factor",
+            box="Zoom",
+            minValue=-6,
+            maxValue=3,
+            step=1,
+            ticks=True,
+            createLabel=False,
+            callback=self.__update_font_scale,
+        )
 
         zoom_in = QAction(
-            "Zoom in", self, shortcut=QKeySequence.ZoomIn,
-            triggered=self.__zoom_in
+            "Zoom in", self, shortcut=QKeySequence.ZoomIn, triggered=self.__zoom_in
         )
         zoom_out = QAction(
-            "Zoom out", self, shortcut=QKeySequence.ZoomOut,
-            triggered=self.__zoom_out
+            "Zoom out", self, shortcut=QKeySequence.ZoomOut, triggered=self.__zoom_out
         )
         zoom_reset = QAction(
-            "Reset zoom", self,
+            "Reset zoom",
+            self,
             shortcut=QKeySequence(Qt.ControlModifier | Qt.Key_0),
-            triggered=self.__zoom_reset
+            triggered=self.__zoom_reset,
         )
         self.addActions([zoom_in, zoom_out, zoom_reset])
 
         self.controlArea.layout().addStretch()
 
         box = gui.vBox(self.controlArea, "Output")
-        gui.checkBox(box, self, "append_clusters", "Append cluster IDs",
-                     callback=self._invalidate_output)
+        gui.checkBox(
+            box,
+            self,
+            "append_clusters",
+            "Append cluster IDs",
+            callback=self._invalidate_output,
+        )
 
         ibox = gui.indentedBox(box)
         name_edit = gui.lineEdit(ibox, self, "cluster_name")
         name_edit.editingFinished.connect(self._invalidate_output)
 
         cb = gui.comboBox(
-            ibox, self, "cluster_role", callback=self._invalidate_output,
-            items=self.cluster_roles
+            ibox,
+            self,
+            "cluster_role",
+            callback=self._invalidate_output,
+            items=self.cluster_roles,
         )
         form = QFormLayout(
             fieldGrowthPolicy=QFormLayout.AllNonFixedFieldsGrow,
             labelAlignment=Qt.AlignLeft,
-            spacing=8
+            spacing=8,
         )
         form.addRow("Name:", name_edit)
         form.addRow("Place:", cb)
@@ -928,15 +1026,16 @@ class OWHierarchicalClustering(widget.OWWidget):
         ibox.layout().addLayout(form)
         ibox.layout().addSpacing(5)
 
-        gui.auto_commit(box, self, "autocommit", "Send Selected", "Send Automatically",
-                        box=False)
+        gui.auto_commit(
+            box, self, "autocommit", "Send Selected", "Send Automatically", box=False
+        )
 
         self.scene = QGraphicsScene()
         self.view = QGraphicsView(
             self.scene,
             horizontalScrollBarPolicy=Qt.ScrollBarAlwaysOff,
             verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn,
-            alignment=Qt.AlignLeft | Qt.AlignVCenter
+            alignment=Qt.AlignLeft | Qt.AlignVCenter,
         )
 
         def axis_view(orientation):
@@ -947,11 +1046,10 @@ class OWHierarchicalClustering(widget.OWWidget):
                 scene,
                 horizontalScrollBarPolicy=Qt.ScrollBarAlwaysOff,
                 verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn,
-                alignment=Qt.AlignLeft | Qt.AlignVCenter
+                alignment=Qt.AlignLeft | Qt.AlignVCenter,
             )
             view.setFixedHeight(ax.size().height())
-            ax.line = SliderLine(orientation=Qt.Horizontal,
-                                 length=ax.size().height())
+            ax.line = SliderLine(orientation=Qt.Horizontal, length=ax.size().height())
             scene.addItem(ax.line)
             return view, ax
 
@@ -970,8 +1068,9 @@ class OWHierarchicalClustering(widget.OWWidget):
         self.scene.addItem(self._main_graphics)
 
         self.dendrogram = DendrogramWidget()
-        self.dendrogram.setSizePolicy(QSizePolicy.MinimumExpanding,
-                                      QSizePolicy.MinimumExpanding)
+        self.dendrogram.setSizePolicy(
+            QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding
+        )
         self.dendrogram.selectionChanged.connect(self._invalidate_output)
         self.dendrogram.selectionEdited.connect(self._selection_edited)
 
@@ -984,18 +1083,15 @@ class OWHierarchicalClustering(widget.OWWidget):
         self._main_layout.addItem(self.dendrogram)
         self._main_layout.addItem(self.labels)
 
-        self._main_layout.setAlignment(
-            self.dendrogram, Qt.AlignLeft | Qt.AlignVCenter)
-        self._main_layout.setAlignment(
-            self.labels, Qt.AlignLeft | Qt.AlignVCenter)
+        self._main_layout.setAlignment(self.dendrogram, Qt.AlignLeft | Qt.AlignVCenter)
+        self._main_layout.setAlignment(self.labels, Qt.AlignLeft | Qt.AlignVCenter)
 
         self.view.viewport().installEventFilter(self)
         self.top_axis_view.viewport().installEventFilter(self)
         self.bottom_axis_view.viewport().installEventFilter(self)
         self._main_graphics.installEventFilter(self)
 
-        self.cut_line = SliderLine(self.dendrogram,
-                                   orientation=Qt.Horizontal)
+        self.cut_line = SliderLine(self.dendrogram, orientation=Qt.Horizontal)
         self.cut_line.valueChanged.connect(self._dendrogram_slider_changed)
         self.cut_line.hide()
 
@@ -1042,9 +1138,11 @@ class OWHierarchicalClustering(widget.OWWidget):
                 [model.Separator],
                 items.domain.class_vars,
                 items.domain.metas,
-                [model.Separator] if (items.domain.class_vars or items.domain.metas) and
-                next(filter_visible(items.domain.attributes), False) else [],
-                filter_visible(items.domain.attributes)
+                [model.Separator]
+                if (items.domain.class_vars or items.domain.metas)
+                and next(filter_visible(items.domain.attributes), False)
+                else [],
+                filter_visible(items.domain.attributes),
             )
             if items.domain.class_vars:
                 self.annotation = items.domain.class_vars[0]
@@ -1053,13 +1151,19 @@ class OWHierarchicalClustering(widget.OWWidget):
             self.openContext(items.domain)
         else:
             name_option = bool(
-                items is not None and (
-                    not axis or
-                    isinstance(items, list) and
-                    all(isinstance(var, Orange.data.Variable) for var in items)))
+                items is not None
+                and (
+                    not axis
+                    or isinstance(items, list)
+                    and all(isinstance(var, Orange.data.Variable) for var in items)
+                )
+            )
             model[:] = self.basic_annotations + ["Name"] * name_option
-            self.annotation = self.annotation_if_names if name_option \
+            self.annotation = (
+                self.annotation_if_names
+                if name_option
                 else self.annotation_if_enumerate
+            )
 
     def _clear_plot(self):
         self.labels.set_labels([])
@@ -1074,7 +1178,7 @@ class OWHierarchicalClustering(widget.OWWidget):
 
         self._main_graphics.resize(
             self._main_graphics.size().width(),
-            self._main_graphics.sizeHint(Qt.PreferredSize).height()
+            self._main_graphics.sizeHint(Qt.PreferredSize).height(),
         )
         self._main_graphics.layout().activate()
 
@@ -1113,7 +1217,7 @@ class OWHierarchicalClustering(widget.OWWidget):
             if self.annotation == "None":
                 labels = []
             elif self.annotation == "Enumeration":
-                labels = [str(i+1) for i in indices]
+                labels = [str(i + 1) for i in indices]
             elif self.annotation == "Name":
                 attr = self.matrix.row_items.domain.attributes
                 labels = [str(attr[i]) for i in indices]
@@ -1126,8 +1230,10 @@ class OWHierarchicalClustering(widget.OWWidget):
 
             if labels and self._displayed_root is not self.root:
                 joined = leaves(self._displayed_root)
-                labels = [", ".join(labels[leaf.value.first: leaf.value.last])
-                          for leaf in joined]
+                labels = [
+                    ", ".join(labels[leaf.value.first : leaf.value.last])
+                    for leaf in joined
+                ]
 
         self.labels.set_labels(labels)
         self.labels.setMinimumWidth(1 if labels else -1)
@@ -1145,12 +1251,14 @@ class OWHierarchicalClustering(widget.OWWidget):
             selection = self.dendrogram.selected_nodes()
             ranges = [node.value.range for node in selection]
             if self.pruning:
-                self._set_displayed_root(
-                    prune(self.root, level=self.max_depth))
+                self._set_displayed_root(prune(self.root, level=self.max_depth))
             else:
                 self._set_displayed_root(self.root)
-            selected = [node for node in preorder(self._displayed_root)
-                        if node.value.range in ranges]
+            selected = [
+                node
+                for node in preorder(self._displayed_root)
+                if node.value.range in ranges
+            ]
 
             self.dendrogram.set_selected_clusters(selected)
 
@@ -1168,17 +1276,20 @@ class OWHierarchicalClustering(widget.OWWidget):
 
         indices = [leaf.value.index for leaf in leaves(self.root)]
 
-        maps = [indices[node.value.first:node.value.last]
-                for node in selection]
+        maps = [indices[node.value.first : node.value.last] for node in selection]
 
         selected_indices = list(chain(*maps))
-        unselected_indices = sorted(set(range(self.root.value.last)) -
-                                    set(selected_indices))
+        unselected_indices = sorted(
+            set(range(self.root.value.last)) - set(selected_indices)
+        )
 
         if not selected_indices:
             self.Outputs.selected_data.send(None)
-            annotated_data = create_annotated_table(items, []) \
-                if self.selection_method == 0 and self.matrix.axis else None
+            annotated_data = (
+                create_annotated_table(items, [])
+                if self.selection_method == 0 and self.matrix.axis
+                else None
+            )
             self.Outputs.annotated_data.send(annotated_data)
             return
 
@@ -1197,9 +1308,7 @@ class OWHierarchicalClustering(widget.OWWidget):
             if self.append_clusters:
                 clust_var = Orange.data.DiscreteVariable(
                     str(self.cluster_name),
-                    values=["C{}".format(i + 1)
-                            for i in range(len(maps))] +
-                    ["Other"]
+                    values=["C{}".format(i + 1) for i in range(len(maps))] + ["Other"],
                 )
                 data, domain = items, items.domain
 
@@ -1223,12 +1332,14 @@ class OWHierarchicalClustering(widget.OWWidget):
             if selected_indices:
                 selected_data = data[mask]
                 if self.append_clusters:
+
                     def remove_other_value(vars_):
                         vars_ = list(vars_)
                         clust_var = vars_[-1].copy()
                         clust_var.values.pop()
                         vars_[-1] = clust_var
                         return vars_
+
                     if self.cluster_role == self.AttributeRole:
                         attrs = remove_other_value(attrs)
                     elif self.cluster_role == self.ClassRole:
@@ -1241,13 +1352,18 @@ class OWHierarchicalClustering(widget.OWWidget):
             # Select columns
             domain = Orange.data.Domain(
                 [items.domain[i] for i in selected_indices],
-                items.domain.class_vars, items.domain.metas)
+                items.domain.class_vars,
+                items.domain.metas,
+            )
             selected_data = items.from_table(domain, items)
             data = None
 
         self.Outputs.selected_data.send(selected_data)
-        annotated_data = create_annotated_table(data, selected_indices) if \
-            self.selection_method == 0 else None
+        annotated_data = (
+            create_annotated_table(data, selected_indices)
+            if self.selection_method == 0
+            else None
+        )
         self.Outputs.annotated_data.send(annotated_data)
 
     def sizeHint(self):
@@ -1262,17 +1378,22 @@ class OWHierarchicalClustering(widget.OWWidget):
             w_frame = self.view.frameWidth()
             margin = self.view.viewportMargins()
             w_scroll = self.view.verticalScrollBar().width()
-            width = (self.view.width() - w_frame * 2 -
-                     margin.left() - margin.right() - w_scroll)
+            width = (
+                self.view.width()
+                - w_frame * 2
+                - margin.left()
+                - margin.right()
+                - w_scroll
+            )
             # layout with new width constraint
             self.__layout_main_graphics(width=width)
-        elif obj is self._main_graphics and \
-                event.type() == QEvent.LayoutRequest:
+        elif obj is self._main_graphics and event.type() == QEvent.LayoutRequest:
             # layout preserving the width (vertical re layout)
             self.__layout_main_graphics()
-        elif event.type() == QEvent.MouseButtonPress and \
-                (obj is self.top_axis_view.viewport() or
-                 obj is self.bottom_axis_view.viewport()):
+        elif event.type() == QEvent.MouseButtonPress and (
+            obj is self.top_axis_view.viewport()
+            or obj is self.bottom_axis_view.viewport()
+        ):
             self.selection_method = 1
             # Map click point to cut line local coordinates
             pos = self.top_axis_view.mapToScene(event.pos())
@@ -1390,17 +1511,19 @@ class OWHierarchicalClustering(widget.OWWidget):
     def __zoom_in(self):
         def clip(minval, maxval, val):
             return min(max(val, minval), maxval)
-        self.zoom_factor = clip(self.zoom_slider.minimum(),
-                                self.zoom_slider.maximum(),
-                                self.zoom_factor + 1)
+
+        self.zoom_factor = clip(
+            self.zoom_slider.minimum(), self.zoom_slider.maximum(), self.zoom_factor + 1
+        )
         self.__update_font_scale()
 
     def __zoom_out(self):
         def clip(minval, maxval, val):
             return min(max(val, minval), maxval)
-        self.zoom_factor = clip(self.zoom_slider.minimum(),
-                                self.zoom_slider.maximum(),
-                                self.zoom_factor - 1)
+
+        self.zoom_factor = clip(
+            self.zoom_slider.minimum(), self.zoom_slider.maximum(), self.zoom_factor - 1
+        )
         self.__update_font_scale()
 
     def __zoom_reset(self):
@@ -1412,14 +1535,15 @@ class OWHierarchicalClustering(widget.OWWidget):
             # Preserve current width.
             width = self._main_graphics.size().width()
         preferred = self._main_graphics.effectiveSizeHint(
-            Qt.PreferredSize, constraint=QSizeF(width, -1))
+            Qt.PreferredSize, constraint=QSizeF(width, -1)
+        )
         self._main_graphics.resize(QSizeF(width, preferred.height()))
         mw = self._main_graphics.minimumWidth() + 4
         self.view.setMinimumWidth(mw + self.view.verticalScrollBar().width())
 
     def __update_font_scale(self):
         font = self.scene.font()
-        factor = (1.25 ** self.zoom_factor)
+        factor = 1.25 ** self.zoom_factor
         font = qfont_scaled(font, factor)
         self._main_graphics.setFont(font)
 
@@ -1433,18 +1557,21 @@ class OWHierarchicalClustering(widget.OWWidget):
             sel = "at {:.1f} of height".format(self.cut_ratio)
         else:
             sel = "top {} clusters".format(self.top_n)
-        self.report_items((
-            ("Linkage", LINKAGE[self.linkage].lower()),
-            ("Annotation", annot),
-            ("Prunning",
-             self.pruning != 0 and "{} levels".format(self.max_depth)),
-            ("Selection", sel),
-            ("Cluster ID in output",
-             self.append_clusters and
-             "{} (as {})".format(
-                 self.cluster_name,
-                 self.cluster_roles[self.cluster_role].lower()))
-        ))
+        self.report_items(
+            (
+                ("Linkage", LINKAGE[self.linkage].lower()),
+                ("Annotation", annot),
+                ("Prunning", self.pruning != 0 and "{} levels".format(self.max_depth)),
+                ("Selection", sel),
+                (
+                    "Cluster ID in output",
+                    self.append_clusters
+                    and "{} (as {})".format(
+                        self.cluster_name, self.cluster_roles[self.cluster_role].lower()
+                    ),
+                ),
+            )
+        )
         self.report_plot()
 
 
@@ -1460,8 +1587,9 @@ def qfont_scaled(font, factor):
 class GraphicsSimpleTextList(QGraphicsWidget):
     """A simple text list widget."""
 
-    def __init__(self, labels=[], orientation=Qt.Vertical,
-                 alignment=Qt.AlignCenter, parent=None):
+    def __init__(
+        self, labels=[], orientation=Qt.Vertical, alignment=Qt.AlignCenter, parent=None
+    ):
         QGraphicsWidget.__init__(self, parent)
         layout = QGraphicsLinearLayout(orientation)
         layout.setContentsMargins(0, 0, 0, 0)
@@ -1538,6 +1666,7 @@ class WrapperLayoutItem(QGraphicsLayoutItem):
     """A Graphics layout item wrapping a QGraphicsItem allowing it
     to be managed by a layout.
     """
+
     def __init__(self, item, orientation=Qt.Horizontal, parent=None):
         QGraphicsLayoutItem.__init__(self, parent)
         self.orientation = orientation
@@ -1579,6 +1708,7 @@ class WrapperLayoutItem(QGraphicsLayoutItem):
 
 class SliderLine(QGraphicsObject):
     """A movable slider line."""
+
     valueChanged = Signal(float)
 
     linePressed = Signal()
@@ -1586,8 +1716,9 @@ class SliderLine(QGraphicsObject):
     lineReleased = Signal()
     rangeChanged = Signal(float, float)
 
-    def __init__(self, parent=None, orientation=Qt.Vertical, value=0.0,
-                 length=10.0, **kwargs):
+    def __init__(
+        self, parent=None, orientation=Qt.Vertical, value=0.0, length=10.0, **kwargs
+    ):
         self._orientation = orientation
         self._value = value
         self._length = length
@@ -1742,6 +1873,7 @@ def main(argv=None):
     del w
     app.processEvents()
     return rval
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -25,8 +25,7 @@ class RemoveNodeCommand(QUndoCommand):
         self.scheme = scheme
         self.node = node
 
-        links = scheme.input_links(node) + \
-                scheme.output_links(node)
+        links = scheme.input_links(node) + scheme.output_links(node)
 
         for link in links:
             RemoveLinkCommand(scheme, link, parent=self)
@@ -170,9 +169,16 @@ class RenameNodeCommand(QUndoCommand):
 
 
 class TextChangeCommand(QUndoCommand):
-    def __init__(self, scheme, annotation,
-                 old_content, old_content_type,
-                 new_content, new_content_type, parent=None):
+    def __init__(
+        self,
+        scheme,
+        annotation,
+        old_content,
+        old_content_type,
+        new_content,
+        new_content_type,
+        parent=None,
+    ):
         QUndoCommand.__init__(self, "Change text", parent)
         self.scheme = scheme
         self.annotation = annotation

@@ -10,6 +10,7 @@ class Transformation(Reprable):
     Base class for simple transformations of individual variables. Derived
     classes are used in continuization, imputation, discretization...
     """
+
     def __init__(self, variable):
         """
         :param variable: The variable whose transformed value is returned.
@@ -46,12 +47,14 @@ class Transformation(Reprable):
         of a vector view.
         """
         raise NotImplementedError(
-            "ColumnTransformations must implement method 'transform'.")
+            "ColumnTransformations must implement method 'transform'."
+        )
 
 
 class Identity(Transformation):
     """Return an untransformed value of `c`.
     """
+
     def transform(self, c):
         return c
 
@@ -61,6 +64,7 @@ class Indicator(Transformation):
     Return an indicator value that equals 1 if the variable has the specified
     value and 0 otherwise.
     """
+
     def __init__(self, variable, value):
         """
         :param variable: The variable whose transformed value is returned.
@@ -81,6 +85,7 @@ class Indicator1(Transformation):
     Return an indicator value that equals 1 if the variable has the specified
     value and -1 otherwise.
     """
+
     def __init__(self, variable, value):
         """
         :param variable: The variable whose transformed value is returned.
@@ -118,8 +123,7 @@ class Normalizer(Transformation):
     def transform(self, c):
         if sp.issparse(c):
             if self.offset != 0:
-                raise ValueError('Non-zero offset in normalization '
-                                 'of sparse data')
+                raise ValueError("Non-zero offset in normalization " "of sparse data")
             return c * self.factor
         else:
             return (c - self.offset) * self.factor
@@ -129,6 +133,7 @@ class Lookup(Transformation):
     """
     Transform a discrete variable according to lookup table (`self.lookup`).
     """
+
     def __init__(self, variable, lookup_table, unknown=np.nan):
         """
         :param variable: The variable whose transformed value is returned.

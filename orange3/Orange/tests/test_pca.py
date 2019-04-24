@@ -13,9 +13,9 @@ from Orange.data import Table
 class TestPCA(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.ionosphere = Table('ionosphere')
-        cls.iris = Table('iris')
-        cls.zoo = Table('zoo')
+        cls.ionosphere = Table("ionosphere")
+        cls.iris = Table("iris")
+        cls.zoo = Table("zoo")
 
     def test_pca(self):
         data = self.ionosphere
@@ -53,7 +53,7 @@ class TestPCA(unittest.TestCase):
         self.__rnd_pca_test_helper(data, n_com=32, min_xpl_var=0.98)
 
     def __rnd_pca_test_helper(self, data, n_com, min_xpl_var):
-        rnd_pca = PCA(n_components=n_com, svd_solver='randomized')
+        rnd_pca = PCA(n_components=n_com, svd_solver="randomized")
         pca_model = rnd_pca(data)
         pca_xpl_var = np.sum(pca_model.explained_variance_ratio_)
         self.assertGreaterEqual(pca_xpl_var, min_xpl_var)
@@ -135,19 +135,24 @@ class TestPCA(unittest.TestCase):
         pca.component = 1
         scores = pca.score_data(data)
         self.assertEqual(scores.shape[1], len(data.domain.attributes))
-        self.assertEqual(['petal length', 'petal width'],
-                         sorted([data.domain.attributes[i].name
-                                 for i in np.argsort(scores[0])[-2:]]))
-        self.assertEqual([round(s, 4) for s in scores[0]],
-                         [0.5224, 0.2634, 0.5813, 0.5656])
+        self.assertEqual(
+            ["petal length", "petal width"],
+            sorted(
+                [data.domain.attributes[i].name for i in np.argsort(scores[0])[-2:]]
+            ),
+        )
+        self.assertEqual(
+            [round(s, 4) for s in scores[0]], [0.5224, 0.2634, 0.5813, 0.5656]
+        )
 
     def test_PCA_scorer_component(self):
         pca = PCA()
         for i in range(1, len(self.zoo.domain.attributes) + 1):
             pca.component = i
             scores = pca.score_data(self.zoo)
-            self.assertEqual(scores.shape,
-                             (pca.component, len(self.zoo.domain.attributes)))
+            self.assertEqual(
+                scores.shape, (pca.component, len(self.zoo.domain.attributes))
+            )
 
     def test_PCA_scorer_all_components(self):
         n_attr = len(self.iris.domain.attributes)

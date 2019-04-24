@@ -3,13 +3,13 @@ class Default(object):
 
 
 class Development(Default):
-    PHASE = 'development'
+    PHASE = "development"
 
 
 class Staging(Default):
-    PHASE = 'staging'
+    PHASE = "staging"
 
 
 class Production(Default):
-    PHASE = 'production'
+    PHASE = "production"
     DEBUG = False

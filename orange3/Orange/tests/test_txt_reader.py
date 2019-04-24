@@ -33,13 +33,13 @@ csv_file_nh = """\
 2.0,      42,        7
 """
 
-noncont_marked_cont = '''\
+noncont_marked_cont = """\
 a,b
 d,c
 ,
 e,1
 f,g
-'''
+"""
 
 
 csv_file_missing = """\
@@ -88,13 +88,13 @@ class TestTabReader(unittest.TestCase):
 
     def test_read_nonutf8_encoding(self):
         with self.assertRaises(ValueError) as cm:
-            data = Table(test_filename('binary-blob.tab'))
-        self.assertIn('NULL byte', cm.exception.args[0])
+            data = Table(test_filename("binary-blob.tab"))
+        self.assertIn("NULL byte", cm.exception.args[0])
 
         with self.assertRaises(ValueError):
             with warnings.catch_warnings():
-                warnings.filterwarnings('error')
-                data = Table(test_filename('invalid_characters.tab'))
+                warnings.filterwarnings("error")
+                data = Table(test_filename("invalid_characters.tab"))
 
     def test_noncontinous_marked_continuous(self):
         file = NamedTemporaryFile("wt", delete=False)
@@ -102,19 +102,21 @@ class TestTabReader(unittest.TestCase):
         file.close()
         with self.assertRaises(ValueError) as cm:
             table = CSVReader(file.name).read()
-        self.assertIn('line 5, column 2', cm.exception.args[0])
+        self.assertIn("line 5, column 2", cm.exception.args[0])
 
     def test_pr1734(self):
-        ContinuousVariable('foo')
+        ContinuousVariable("foo")
         file = NamedTemporaryFile("wt", delete=False)
         filename = file.name
         try:
-            file.write('''\
+            file.write(
+                """\
 foo
 time
 
 123123123
-''')
+"""
+            )
             file.close()
             CSVReader(filename).read()
         finally:
@@ -122,7 +124,7 @@ time
 
     def test_csv_sniffer(self):
         # GH-2785
-        reader = CSVReader(test_filename('test_asn_data_working.csv'))
+        reader = CSVReader(test_filename("test_asn_data_working.csv"))
         data = reader.read()
         self.assertEqual(len(data), 8)
         self.assertEqual(len(data.domain.variables) + len(data.domain.metas), 15)

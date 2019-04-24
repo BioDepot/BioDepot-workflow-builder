@@ -9,17 +9,24 @@ from unittest.mock import patch, Mock
 import warnings
 
 from Orange.tests import named_file
-from Orange.widgets.settings import SettingsHandler, Setting, SettingProvider,\
-    VERSION_KEY, rename_setting, Context, migrate_str_to_variable
+from Orange.widgets.settings import (
+    SettingsHandler,
+    Setting,
+    SettingProvider,
+    VERSION_KEY,
+    rename_setting,
+    Context,
+    migrate_str_to_variable,
+)
 
 
 class SettingHandlerTestCase(unittest.TestCase):
-    @patch('Orange.widgets.settings.SettingProvider', create=True)
+    @patch("Orange.widgets.settings.SettingProvider", create=True)
     def test_create(self, SettingProvider):
         """:type SettingProvider: unittest.mock.Mock"""
 
         mock_read_defaults = Mock()
-        with patch.object(SettingsHandler, 'read_defaults', mock_read_defaults):
+        with patch.object(SettingsHandler, "read_defaults", mock_read_defaults):
             handler = SettingsHandler.create(SimpleWidget)
 
             self.assertEqual(handler.widget_class, SimpleWidget)
@@ -31,42 +38,44 @@ class SettingHandlerTestCase(unittest.TestCase):
 
     def test_create_uses_template_if_provided(self):
         template = SettingsHandler()
-        template.a = 'a'
-        template.b = 'b'
+        template.a = "a"
+        template.b = "b"
         with self.override_default_settings(SimpleWidget):
             handler = SettingsHandler.create(SimpleWidget, template)
-        self.assertEqual(handler.a, 'a')
-        self.assertEqual(handler.b, 'b')
+        self.assertEqual(handler.a, "a")
+        self.assertEqual(handler.b, "b")
 
         # create should copy the template
-        handler.b = 'B'
-        self.assertEqual(template.b, 'b')
+        handler.b = "B"
+        self.assertEqual(template.b, "b")
 
     def test_read_defaults(self):
         handler = SettingsHandler()
         handler.widget_class = SimpleWidget
 
-        defaults = {'a': 5, 'b': {1: 5}}
+        defaults = {"a": 5, "b": {1: 5}}
         with self.override_default_settings(SimpleWidget, defaults):
             handler.read_defaults()
 
         self.assertEqual(handler.defaults, defaults)
 
     def test_write_defaults(self):
-        fd, settings_file = mkstemp(suffix='.ini')
+        fd, settings_file = mkstemp(suffix=".ini")
 
         handler = SettingsHandler()
         handler.widget_class = SimpleWidget
-        handler.defaults = {'a': 5, 'b': {1: 5}}
+        handler.defaults = {"a": 5, "b": {1: 5}}
         handler._get_settings_filename = lambda: settings_file
         handler.write_defaults()
 
-        with open(settings_file, 'rb') as f:
+        with open(settings_file, "rb") as f:
             default_settings = pickle.load(f)
         os.close(fd)
 
-        self.assertEqual(default_settings.pop(VERSION_KEY, -0xBAD),
-                         handler.widget_class.settings_version,)
+        self.assertEqual(
+            default_settings.pop(VERSION_KEY, -0xBAD),
+            handler.widget_class.settings_version,
+        )
         self.assertEqual(default_settings, handler.defaults)
 
         os.remove(settings_file)
@@ -77,7 +86,7 @@ class SettingHandlerTestCase(unittest.TestCase):
         with named_file("") as f:
             handler._get_settings_filename = lambda: f
 
-            with patch('Orange.widgets.settings.open', create=True) as mocked_open:
+            with patch("Orange.widgets.settings.open", create=True) as mocked_open:
                 mocked_open.side_effect = PermissionError()
 
                 handler.write_defaults()
@@ -100,7 +109,7 @@ class SettingHandlerTestCase(unittest.TestCase):
 
     def test_initialize_widget(self):
         handler = SettingsHandler()
-        handler.defaults = {'default': 42, 'setting': 1}
+        handler.defaults = {"default": 42, "setting": 1}
         handler.provider = provider = Mock()
         handler.widget_class = SimpleWidget
         provider.get_provider.return_value = provider
@@ -113,24 +122,27 @@ class SettingHandlerTestCase(unittest.TestCase):
 
         # No data
         handler.initialize(widget)
-        provider.initialize.assert_called_once_with(widget, {'default': 42,
-                                                             'setting': 1})
+        provider.initialize.assert_called_once_with(
+            widget, {"default": 42, "setting": 1}
+        )
 
         # Dictionary data
         reset_provider()
-        handler.initialize(widget, {'setting': 5})
-        provider.initialize.assert_called_once_with(widget, {'default': 42,
-                                                             'setting': 5})
+        handler.initialize(widget, {"setting": 5})
+        provider.initialize.assert_called_once_with(
+            widget, {"default": 42, "setting": 5}
+        )
 
         # Pickled data
         reset_provider()
-        handler.initialize(widget, pickle.dumps({'setting': 5}))
-        provider.initialize.assert_called_once_with(widget, {'default': 42,
-                                                             'setting': 5})
+        handler.initialize(widget, pickle.dumps({"setting": 5}))
+        provider.initialize.assert_called_once_with(
+            widget, {"default": 42, "setting": 5}
+        )
 
     def test_initialize_component(self):
         handler = SettingsHandler()
-        handler.defaults = {'default': 42}
+        handler.defaults = {"default": 42}
         provider = Mock()
         handler.widget_class = SimpleWidget
         handler.provider = Mock(get_provider=Mock(return_value=provider))
@@ -142,15 +154,15 @@ class SettingHandlerTestCase(unittest.TestCase):
 
         # Dictionary data
         provider.reset_mock()
-        handler.initialize(widget, {'setting': 5})
-        provider.initialize.assert_called_once_with(widget, {'setting': 5})
+        handler.initialize(widget, {"setting": 5})
+        provider.initialize.assert_called_once_with(widget, {"setting": 5})
 
         # Pickled data
         provider.reset_mock()
-        handler.initialize(widget, pickle.dumps({'setting': 5}))
-        provider.initialize.assert_called_once_with(widget, {'setting': 5})
+        handler.initialize(widget, pickle.dumps({"setting": 5}))
+        provider.initialize.assert_called_once_with(widget, {"setting": 5})
 
-    @patch('Orange.widgets.settings.SettingProvider', create=True)
+    @patch("Orange.widgets.settings.SettingProvider", create=True)
     def test_initialize_with_no_provider(self, SettingProvider):
         """:type SettingProvider: unittest.mock.Mock"""
         handler = SettingsHandler()
@@ -177,14 +189,13 @@ class SettingHandlerTestCase(unittest.TestCase):
 
         widget = SimpleWidget()
 
-        handler.fast_save(widget, 'component.int_setting', 5)
+        handler.fast_save(widget, "component.int_setting", 5)
 
-        self.assertEqual(
-            handler.known_settings['component.int_setting'].default, 5)
+        self.assertEqual(handler.known_settings["component.int_setting"].default, 5)
 
         self.assertEqual(Component.int_setting.default, 42)
 
-        handler.fast_save(widget, 'non_setting', 4)
+        handler.fast_save(widget, "non_setting", 4)
 
     def test_fast_save_siblings_spill(self):
         handler_mk1 = SettingsHandler()
@@ -196,14 +207,13 @@ class SettingHandlerTestCase(unittest.TestCase):
         handler_mk1.fast_save(widget_mk1, "setting", -1)
         handler_mk1.fast_save(widget_mk1, "component.int_setting", 1)
 
-        self.assertEqual(
-            handler_mk1.known_settings['setting'].default, -1)
-        self.assertEqual(
-            handler_mk1.known_settings['component.int_setting'].default, 1)
+        self.assertEqual(handler_mk1.known_settings["setting"].default, -1)
+        self.assertEqual(handler_mk1.known_settings["component.int_setting"].default, 1)
 
         handler_mk1.initialize(widget_mk1, data=None)
         handler_mk1.provider.providers["component"].initialize(
-            widget_mk1.component, data=None)
+            widget_mk1.component, data=None
+        )
 
         self.assertEqual(widget_mk1.setting, -1)
         self.assertEqual(widget_mk1.component.int_setting, 1)
@@ -216,15 +226,16 @@ class SettingHandlerTestCase(unittest.TestCase):
 
         handler_mk2.initialize(widget_mk2, data=None)
         handler_mk2.provider.providers["component"].initialize(
-            widget_mk2.component, data=None)
+            widget_mk2.component, data=None
+        )
 
-        self.assertEqual(widget_mk2.setting, 42,
-                         "spils defaults into sibling classes")
+        self.assertEqual(widget_mk2.setting, 42, "spils defaults into sibling classes")
 
         self.assertEqual(Component.int_setting.default, 42)
 
-        self.assertEqual(widget_mk2.component.int_setting, 42,
-                         "spils defaults into sibling classes")
+        self.assertEqual(
+            widget_mk2.component.int_setting, 42, "spils defaults into sibling classes"
+        )
 
     def test_schema_only_settings(self):
         handler = SettingsHandler()
@@ -233,28 +244,28 @@ class SettingHandlerTestCase(unittest.TestCase):
 
         # fast_save should not update defaults
         widget = SimpleWidget()
-        handler.fast_save(widget, 'schema_only_setting', 5)
+        handler.fast_save(widget, "schema_only_setting", 5)
+        self.assertEqual(handler.known_settings["schema_only_setting"].default, None)
+        handler.fast_save(widget, "component.schema_only_setting", 5)
         self.assertEqual(
-            handler.known_settings['schema_only_setting'].default, None)
-        handler.fast_save(widget, 'component.schema_only_setting', 5)
-        self.assertEqual(
-            handler.known_settings['component.schema_only_setting'].default, "only")
+            handler.known_settings["component.schema_only_setting"].default, "only"
+        )
 
         # update_defaults should not update defaults
         widget.schema_only_setting = 5
         handler.update_defaults(widget)
-        self.assertEqual(
-            handler.known_settings['schema_only_setting'].default, None)
+        self.assertEqual(handler.known_settings["schema_only_setting"].default, None)
         widget.component.schema_only_setting = 5
         self.assertEqual(
-            handler.known_settings['component.schema_only_setting'].default, "only")
+            handler.known_settings["component.schema_only_setting"].default, "only"
+        )
 
         # pack_data should pack setting
         widget.schema_only_setting = 5
         widget.component.schema_only_setting = 5
         data = handler.pack_data(widget)
-        self.assertEqual(data['schema_only_setting'], 5)
-        self.assertEqual(data['component']['schema_only_setting'], 5)
+        self.assertEqual(data["schema_only_setting"], 5)
+        self.assertEqual(data["component"]["schema_only_setting"], 5)
 
     def test_read_defaults_migrates_settings(self):
         handler = SettingsHandler()
@@ -395,18 +406,21 @@ class MigrationsTestCase(unittest.TestCase):
         migrate_str_to_variable(context)
         self.assertDictEqual(
             context.values,
-            dict(foo=("foo", 101), baz=("baz", 102), qux=("qux", 102), bar=13))
+            dict(foo=("foo", 101), baz=("baz", 102), qux=("qux", 102), bar=13),
+        )
 
         context = Context(values=values.copy())
         migrate_str_to_variable(context, ("foo", "qux"))
         self.assertDictEqual(
             context.values,
-            dict(foo=("foo", 101), baz=("baz", 2), qux=("qux", 102), bar=13))
+            dict(foo=("foo", 101), baz=("baz", 2), qux=("qux", 102), bar=13),
+        )
 
         context = Context(values=values.copy())
         migrate_str_to_variable(context, "foo")
         self.assertDictEqual(
             context.values,
-            dict(foo=("foo", 101), baz=("baz", 2), qux=("qux", 102), bar=13))
+            dict(foo=("foo", 101), baz=("baz", 2), qux=("qux", 102), bar=13),
+        )
 
         self.assertRaises(KeyError, migrate_str_to_variable, context, "quuux")

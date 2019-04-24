@@ -21,13 +21,13 @@ class MyWidget(OWWidget):
 
         self.component = DummyComponent(self)
         self.foo_control = gui.checkBox(self.controlArea, self, "foo", "")
-        self.component_foo_control = \
-            gui.checkBox(self.controlArea, self, "component.foo", "")
+        self.component_foo_control = gui.checkBox(
+            self.controlArea, self, "component.foo", ""
+        )
 
 
 class ControlGetterTests(WidgetTest):
     def test_getter(self):
         widget = self.create_widget(MyWidget)
         self.assertIs(widget.controls.foo, widget.foo_control)
-        self.assertIs(widget.controls.component.foo,
-                      widget.component_foo_control)
+        self.assertIs(widget.controls.component.foo, widget.component_foo_control)

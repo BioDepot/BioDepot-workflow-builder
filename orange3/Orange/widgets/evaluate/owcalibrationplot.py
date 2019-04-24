@@ -19,17 +19,9 @@ from Orange.widgets.widget import Input
 from Orange.widgets import report
 
 
-Curve = namedtuple(
-    "Curve",
-    ["x", "y"]
-)
+Curve = namedtuple("Curve", ["x", "y"])
 
-PlotCurve = namedtuple(
-    "PlotCurve",
-    ["curve",
-     "curve_item",
-     "rug_item"]
-)
+PlotCurve = namedtuple("PlotCurve", ["curve", "curve_item", "rug_item"])
 
 
 class OWCalibrationPlot(widget.OWWidget):
@@ -42,8 +34,7 @@ class OWCalibrationPlot(widget.OWWidget):
         evaluation_results = Input("Evaluation Results", Orange.evaluation.Results)
 
     class Warning(widget.OWWidget.Warning):
-        empty_input = widget.Msg(
-            "Empty result on input. Nothing to display.")
+        empty_input = widget.Msg("Empty result on input. Nothing to display.")
 
     target_index = settings.Setting(0)
     selected_classifiers = settings.Setting([])
@@ -64,19 +55,24 @@ class OWCalibrationPlot(widget.OWWidget):
         tbox.setFlat(True)
 
         self.target_cb = gui.comboBox(
-            tbox, self, "target_index", callback=self._replot,
-            contentsLength=8)
+            tbox, self, "target_index", callback=self._replot, contentsLength=8
+        )
 
         cbox = gui.vBox(box, "Classifier")
         cbox.setFlat(True)
 
         self.classifiers_list_box = gui.listBox(
-            box, self, "selected_classifiers", "classifier_names",
+            box,
+            self,
+            "selected_classifiers",
+            "classifier_names",
             selectionMode=QListWidget.MultiSelection,
-            callback=self._replot)
+            callback=self._replot,
+        )
 
-        gui.checkBox(box, self, "display_rug", "Show rug",
-                     callback=self._on_display_rug_changed)
+        gui.checkBox(
+            box, self, "display_rug", "Show rug", callback=self._on_display_rug_changed
+        )
 
         self.plotview = pg.GraphicsView(background="w")
         self.plot = pg.PlotItem(enableMenu=False)
@@ -155,10 +151,13 @@ class OWCalibrationPlot(widget.OWWidget):
 
         curve = Curve(x, observed)
         curve_item = pg.PlotDataItem(
-            x, observed, pen=pg.mkPen(self.colors[clf_idx], width=1),
+            x,
+            observed,
+            pen=pg.mkPen(self.colors[clf_idx], width=1),
             shadowPen=pg.mkPen(self.colors[clf_idx].lighter(160), width=2),
-            symbol="+", symbolSize=4,
-            antialias=True
+            symbol="+",
+            symbolSize=4,
+            antialias=True,
         )
 
         rh = 0.025
@@ -172,12 +171,18 @@ class OWCalibrationPlot(widget.OWWidget):
         rug_y_false[1::2] = rh
 
         rug1 = pg.PlotDataItem(
-            rug_x_false, rug_y_false, pen=self.colors[clf_idx],
-            connect="pairs", antialias=True
+            rug_x_false,
+            rug_y_false,
+            pen=self.colors[clf_idx],
+            connect="pairs",
+            antialias=True,
         )
         rug2 = pg.PlotDataItem(
-            rug_x_true, rug_y_true, pen=self.colors[clf_idx],
-            connect="pairs", antialias=True
+            rug_x_true,
+            rug_y_true,
+            pen=self.colors[clf_idx],
+            connect="pairs",
+            antialias=True,
         )
         self._curve_data[clf_idx, target] = PlotCurve(curve, curve_item, (rug1, rug2))
         return self._curve_data[clf_idx, target]
@@ -206,8 +211,9 @@ class OWCalibrationPlot(widget.OWWidget):
     def send_report(self):
         if self.results is None:
             return
-        caption = report.list_legend(self.classifiers_list_box,
-                                     self.selected_classifiers)
+        caption = report.list_legend(
+            self.classifiers_list_box, self.selected_classifiers
+        )
         self.report_items((("Target class", self.target_cb.currentText()),))
         self.report_plot()
         self.report_caption(caption)
@@ -217,8 +223,8 @@ def gaussian_smoother(x, y, sigma=1.0):
     x = np.asarray(x)
     y = np.asarray(y)
 
-    gamma = 1. / (2 * sigma ** 2)
-    a = 1. / (sigma * np.sqrt(2 * np.pi))
+    gamma = 1.0 / (2 * sigma ** 2)
+    a = 1.0 / (sigma * np.sqrt(2 * np.pi))
 
     if x.shape != y.shape:
         raise ValueError
@@ -233,8 +239,11 @@ def gaussian_smoother(x, y, sigma=1.0):
 def main():
     import sip
     from AnyQt.QtWidgets import QApplication
-    from Orange.classification import (LogisticRegressionLearner, SVMLearner,
-                                       NuSVMLearner)
+    from Orange.classification import (
+        LogisticRegressionLearner,
+        SVMLearner,
+        NuSVMLearner,
+    )
 
     app = QApplication([])
     w = OWCalibrationPlot()
@@ -244,12 +253,13 @@ def main():
     data = Orange.data.Table("ionosphere")
     results = Orange.evaluation.CrossValidation(
         data,
-        [LogisticRegressionLearner(penalty="l2"),
-         LogisticRegressionLearner(penalty="l1"),
-         SVMLearner(probability=True),
-         NuSVMLearner(probability=True)
+        [
+            LogisticRegressionLearner(penalty="l2"),
+            LogisticRegressionLearner(penalty="l1"),
+            SVMLearner(probability=True),
+            NuSVMLearner(probability=True),
         ],
-        store_data=True
+        store_data=True,
     )
     results.learner_names = ["LR l2", "LR l1", "SVM", "Nu SVM"]
     w.set_results(results)

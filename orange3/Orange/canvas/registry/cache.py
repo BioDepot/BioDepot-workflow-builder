@@ -48,8 +48,9 @@ def save_registry_cache(cache):
 
     """
     filename = registry_cache_filename()
-    log.debug("Saving widget registry cache with %i entries (%r).",
-              len(cache), filename)
+    log.debug(
+        "Saving widget registry cache with %i entries (%r).", len(cache), filename
+    )
     try:
         with open(filename, "wb") as f:
             pickle.dump(cache, f)

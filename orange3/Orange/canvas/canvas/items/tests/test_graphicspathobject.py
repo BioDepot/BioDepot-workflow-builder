@@ -11,7 +11,6 @@ def area(rect):
 
 
 class TestGraphicsPathObject(TestItems):
-
     def test_graphicspathobject(self):
         obj = GraphicsPathObject()
         path = QPainterPath()
@@ -22,8 +21,9 @@ class TestGraphicsPathObject(TestItems):
         obj.setPath(path)
         self.assertEqual(obj.path(), path)
 
-        self.assertTrue(obj.path() is not path,
-                        msg="setPath stores the path not a copy")
+        self.assertTrue(
+            obj.path() is not path, msg="setPath stores the path not a copy"
+        )
 
         brect = obj.boundingRect()
         self.assertTrue(brect.contains(path.boundingRect()))
@@ -36,16 +36,16 @@ class TestGraphicsPathObject(TestItems):
 
         self.assertEqual(obj.brush(), brush)
 
-        self.assertTrue(obj.brush() is not brush,
-                        "setBrush stores the brush not a copy")
+        self.assertTrue(
+            obj.brush() is not brush, "setBrush stores the brush not a copy"
+        )
 
         pen = QPen(QColor("#FFFFFF"), 1.4)
         obj.setPen(pen)
 
         self.assertEqual(obj.pen(), pen)
 
-        self.assertTrue(obj.pen() is not pen,
-                        "setPen stores the pen not a copy")
+        self.assertTrue(obj.pen() is not pen, "setPen stores the pen not a copy")
 
         brect = obj.boundingRect()
         self.assertGreaterEqual(area(brect), (50 + 1.4 * 2) ** 2)
@@ -72,5 +72,4 @@ class TestGraphicsPathObject(TestItems):
         pen = QPen(QColor("#FFF"), 2.0)
         path = shapeFromPath(path, pen)
 
-        self.assertGreaterEqual(area(path.controlPointRect()),
-                                (20 + 2.0) ** 2)
+        self.assertGreaterEqual(area(path.controlPointRect()), (20 + 2.0) ** 2)

@@ -2,8 +2,7 @@ from AnyQt.QtWidgets import QGraphicsScene, QGraphicsView
 from AnyQt.QtCore import Qt
 
 from ...gui import test
-from ..editlinksdialog import EditLinksDialog, EditLinksNode, \
-                              GraphicsTextWidget
+from ..editlinksdialog import EditLinksDialog, EditLinksNode, GraphicsTextWidget
 from ...scheme import SchemeNode
 
 
@@ -14,8 +13,7 @@ class TestLinksEditDialog(test.QAppTestCase):
         dlg = EditLinksDialog()
         reg = small_testing_registry()
         file_desc = reg.widget("Orange.widgets.data.owfile.OWFile")
-        bayes_desc = reg.widget("Orange.widgets.classify.ownaivebayes."
-                                "OWNaiveBayes")
+        bayes_desc = reg.widget("Orange.widgets.classify.ownaivebayes." "OWNaiveBayes")
         source_node = SchemeNode(file_desc, title="This is File")
         sink_node = SchemeNode(bayes_desc)
 
@@ -31,8 +29,7 @@ class TestLinksEditDialog(test.QAppTestCase):
         self.assertSequenceEqual(dlg.links(), links)
         status = dlg.exec_()
 
-        self.assertTrue(dlg.links() == [] or \
-                        dlg.links() == links)
+        self.assertTrue(dlg.links() == [] or dlg.links() == links)
 
     def test_graphicstextwidget(self):
         scene = QGraphicsScene()
@@ -51,8 +48,7 @@ class TestLinksEditDialog(test.QAppTestCase):
 
         reg = small_testing_registry()
         file_desc = reg.widget("Orange.widgets.data.owfile.OWFile")
-        bayes_desc = reg.widget("Orange.widgets.classify.ownaivebayes."
-                                "OWNaiveBayes")
+        bayes_desc = reg.widget("Orange.widgets.classify.ownaivebayes." "OWNaiveBayes")
         source_node = SchemeNode(file_desc, title="This is File")
         sink_node = SchemeNode(bayes_desc)
 

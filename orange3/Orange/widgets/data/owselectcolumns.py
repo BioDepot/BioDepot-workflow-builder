@@ -6,10 +6,13 @@ from AnyQt.QtCore import Qt, QSortFilterProxyModel, QItemSelection, QItemSelecti
 
 from Orange.util import deprecated
 from Orange.widgets import gui, widget
-from Orange.widgets.data.contexthandlers import \
-    SelectAttributesDomainContextHandler
+from Orange.widgets.data.contexthandlers import SelectAttributesDomainContextHandler
 from Orange.widgets.settings import ContextSetting, Setting
-from Orange.widgets.utils.listfilter import VariablesListItemView, slices, variables_filter
+from Orange.widgets.utils.listfilter import (
+    VariablesListItemView,
+    slices,
+    variables_filter,
+)
 from Orange.widgets.widget import Input, Output
 from Orange.data.table import Table
 from Orange.widgets.utils import vartype
@@ -38,7 +41,7 @@ def source_indexes(indexes, view):
 
 
 # owloadcorpus in orange3-text used this
-@deprecated('Orange.widgets.utils.itemmodels.VariableListModel')
+@deprecated("Orange.widgets.utils.itemmodels.VariableListModel")
 def VariablesListItemModel(*args, **kwargs):
     return VariableListModel(*args, enable_dnd=True, **kwargs)
 
@@ -47,13 +50,12 @@ class ClassVarListItemModel(VariableListModel):
     def dropMimeData(self, mime, action, row, column, parent):
         """ Ensure only one variable can be dropped onto the view.
         """
-        vars = mime.property('_items')
+        vars = mime.property("_items")
         if vars is None:
             return False
         if action == Qt.IgnoreAction:
             return True
-        return VariableListModel.dropMimeData(
-            self, mime, action, row, column, parent)
+        return VariableListModel.dropMimeData(self, mime, action, row, column, parent)
 
 
 class ClassVariableItemView(VariablesListItemView):
@@ -69,7 +71,7 @@ class ClassVariableItemView(VariablesListItemView):
         """
         accepts = super().acceptsDropEvent(event)
         mime = event.mimeData()
-        vars = mime.property('_items')
+        vars = mime.property("_items")
         if vars is None:
             return False
 
@@ -78,8 +80,10 @@ class ClassVariableItemView(VariablesListItemView):
 
 class OWSelectAttributes(widget.OWWidget):
     name = "Select Columns"
-    description = "Select columns from the data table and assign them to " \
-                  "data features, classes or meta variables."
+    description = (
+        "Select columns from the data table and assign them to "
+        "data features, classes or meta variables."
+    )
     icon = "icons/SelectColumns.svg"
     priority = 100
 
@@ -104,12 +108,12 @@ class OWSelectAttributes(widget.OWWidget):
         layout = QGridLayout()
         self.controlArea.setLayout(layout)
         layout.setContentsMargins(4, 4, 4, 4)
-        box = gui.vBox(self.controlArea, "Available Variables",
-                       addToLayout=False)
+        box = gui.vBox(self.controlArea, "Available Variables", addToLayout=False)
 
         self.available_attrs = VariableListModel(enable_dnd=True)
         filter_edit, self.available_attrs_view = variables_filter(
-            parent=self, model=self.available_attrs)
+            parent=self, model=self.available_attrs
+        )
         box.layout().addWidget(filter_edit)
 
         def dropcompleted(action):
@@ -117,9 +121,11 @@ class OWSelectAttributes(widget.OWWidget):
                 self.commit()
 
         self.available_attrs_view.selectionModel().selectionChanged.connect(
-            partial(self.update_interface_state, self.available_attrs_view))
+            partial(self.update_interface_state, self.available_attrs_view)
+        )
         self.available_attrs_view.selectionModel().selectionChanged.connect(
-            partial(self.update_interface_state, self.available_attrs_view))
+            partial(self.update_interface_state, self.available_attrs_view)
+        )
         self.available_attrs_view.dragDropActionDidComplete.connect(dropcompleted)
 
         box.layout().addWidget(self.available_attrs_view)
@@ -128,12 +134,13 @@ class OWSelectAttributes(widget.OWWidget):
         box = gui.vBox(self.controlArea, "Features", addToLayout=False)
         self.used_attrs = VariableListModel(enable_dnd=True)
         self.used_attrs_view = VariablesListItemView(
-            acceptedType=(Orange.data.DiscreteVariable,
-                          Orange.data.ContinuousVariable))
+            acceptedType=(Orange.data.DiscreteVariable, Orange.data.ContinuousVariable)
+        )
 
         self.used_attrs_view.setModel(self.used_attrs)
         self.used_attrs_view.selectionModel().selectionChanged.connect(
-            partial(self.update_interface_state, self.used_attrs_view))
+            partial(self.update_interface_state, self.used_attrs_view)
+        )
         self.used_attrs_view.dragDropActionDidComplete.connect(dropcompleted)
         box.layout().addWidget(self.used_attrs_view)
         layout.addWidget(box, 0, 2, 1, 1)
@@ -141,11 +148,12 @@ class OWSelectAttributes(widget.OWWidget):
         box = gui.vBox(self.controlArea, "Target Variable", addToLayout=False)
         self.class_attrs = ClassVarListItemModel(enable_dnd=True)
         self.class_attrs_view = ClassVariableItemView(
-            acceptedType=(Orange.data.DiscreteVariable,
-                          Orange.data.ContinuousVariable))
+            acceptedType=(Orange.data.DiscreteVariable, Orange.data.ContinuousVariable)
+        )
         self.class_attrs_view.setModel(self.class_attrs)
         self.class_attrs_view.selectionModel().selectionChanged.connect(
-            partial(self.update_interface_state, self.class_attrs_view))
+            partial(self.update_interface_state, self.class_attrs_view)
+        )
         self.class_attrs_view.dragDropActionDidComplete.connect(dropcompleted)
         self.class_attrs_view.setMaximumHeight(72)
         box.layout().addWidget(self.class_attrs_view)
@@ -153,11 +161,11 @@ class OWSelectAttributes(widget.OWWidget):
 
         box = gui.vBox(self.controlArea, "Meta Attributes", addToLayout=False)
         self.meta_attrs = VariableListModel(enable_dnd=True)
-        self.meta_attrs_view = VariablesListItemView(
-            acceptedType=Orange.data.Variable)
+        self.meta_attrs_view = VariablesListItemView(acceptedType=Orange.data.Variable)
         self.meta_attrs_view.setModel(self.meta_attrs)
         self.meta_attrs_view.selectionModel().selectionChanged.connect(
-            partial(self.update_interface_state, self.meta_attrs_view))
+            partial(self.update_interface_state, self.meta_attrs_view)
+        )
         self.meta_attrs_view.dragDropActionDidComplete.connect(dropcompleted)
         box.layout().addWidget(self.meta_attrs_view)
         layout.addWidget(box, 2, 2, 1, 1)
@@ -165,38 +173,45 @@ class OWSelectAttributes(widget.OWWidget):
         bbox = gui.vBox(self.controlArea, addToLayout=False, margin=0)
         layout.addWidget(bbox, 0, 1, 1, 1)
 
-        self.up_attr_button = gui.button(bbox, self, "Up",
-                                         callback=partial(self.move_up, self.used_attrs_view))
-        self.move_attr_button = gui.button(bbox, self, ">",
-                                           callback=partial(self.move_selected,
-                                                            self.used_attrs_view)
-                                          )
-        self.down_attr_button = gui.button(bbox, self, "Down",
-                                           callback=partial(self.move_down, self.used_attrs_view))
+        self.up_attr_button = gui.button(
+            bbox, self, "Up", callback=partial(self.move_up, self.used_attrs_view)
+        )
+        self.move_attr_button = gui.button(
+            bbox, self, ">", callback=partial(self.move_selected, self.used_attrs_view)
+        )
+        self.down_attr_button = gui.button(
+            bbox, self, "Down", callback=partial(self.move_down, self.used_attrs_view)
+        )
 
         bbox = gui.vBox(self.controlArea, addToLayout=False, margin=0)
         layout.addWidget(bbox, 1, 1, 1, 1)
 
-        self.up_class_button = gui.button(bbox, self, "Up",
-                                          callback=partial(self.move_up, self.class_attrs_view))
-        self.move_class_button = gui.button(bbox, self, ">",
-                                            callback=partial(self.move_selected,
-                                                             self.class_attrs_view,
-                                                             exclusive=False)
-                                           )
-        self.down_class_button = gui.button(bbox, self, "Down",
-                                            callback=partial(self.move_down, self.class_attrs_view))
+        self.up_class_button = gui.button(
+            bbox, self, "Up", callback=partial(self.move_up, self.class_attrs_view)
+        )
+        self.move_class_button = gui.button(
+            bbox,
+            self,
+            ">",
+            callback=partial(
+                self.move_selected, self.class_attrs_view, exclusive=False
+            ),
+        )
+        self.down_class_button = gui.button(
+            bbox, self, "Down", callback=partial(self.move_down, self.class_attrs_view)
+        )
 
         bbox = gui.vBox(self.controlArea, addToLayout=False, margin=0)
         layout.addWidget(bbox, 2, 1, 1, 1)
-        self.up_meta_button = gui.button(bbox, self, "Up",
-                                         callback=partial(self.move_up, self.meta_attrs_view))
-        self.move_meta_button = gui.button(bbox, self, ">",
-                                           callback=partial(self.move_selected,
-                                                            self.meta_attrs_view)
-                                          )
-        self.down_meta_button = gui.button(bbox, self, "Down",
-                                           callback=partial(self.move_down, self.meta_attrs_view))
+        self.up_meta_button = gui.button(
+            bbox, self, "Up", callback=partial(self.move_up, self.meta_attrs_view)
+        )
+        self.move_meta_button = gui.button(
+            bbox, self, ">", callback=partial(self.move_selected, self.meta_attrs_view)
+        )
+        self.down_meta_button = gui.button(
+            bbox, self, "Down", callback=partial(self.move_down, self.meta_attrs_view)
+        )
 
         autobox = gui.auto_commit(None, self, "auto_commit", "Send")
         layout.addWidget(autobox, 3, 0, 1, 3)
@@ -227,36 +242,52 @@ class OWSelectAttributes(widget.OWWidget):
 
             var_sig = lambda attr: (attr.name, vartype(attr))
 
-            domain_hints = {var_sig(attr): ("attribute", i)
-                            for i, attr in enumerate(data.domain.attributes)}
+            domain_hints = {
+                var_sig(attr): ("attribute", i)
+                for i, attr in enumerate(data.domain.attributes)
+            }
 
-            domain_hints.update({var_sig(attr): ("meta", i)
-                                 for i, attr in enumerate(data.domain.metas)})
+            domain_hints.update(
+                {var_sig(attr): ("meta", i) for i, attr in enumerate(data.domain.metas)}
+            )
 
             if data.domain.class_vars:
                 domain_hints.update(
-                    {var_sig(attr): ("class", i)
-                     for i, attr in enumerate(data.domain.class_vars)})
+                    {
+                        var_sig(attr): ("class", i)
+                        for i, attr in enumerate(data.domain.class_vars)
+                    }
+                )
 
             # update the hints from context settings
             domain_hints.update(self.domain_role_hints)
 
             attrs_for_role = lambda role: [
                 (domain_hints[var_sig(attr)][1], attr)
-                for attr in all_vars if domain_hints[var_sig(attr)][0] == role]
+                for attr in all_vars
+                if domain_hints[var_sig(attr)][0] == role
+            ]
 
             attributes = [
-                attr for place, attr in sorted(attrs_for_role("attribute"),
-                                               key=lambda a: a[0])]
+                attr
+                for place, attr in sorted(
+                    attrs_for_role("attribute"), key=lambda a: a[0]
+                )
+            ]
             classes = [
-                attr for place, attr in sorted(attrs_for_role("class"),
-                                               key=lambda a: a[0])]
+                attr
+                for place, attr in sorted(attrs_for_role("class"), key=lambda a: a[0])
+            ]
             metas = [
-                attr for place, attr in sorted(attrs_for_role("meta"),
-                                               key=lambda a: a[0])]
+                attr
+                for place, attr in sorted(attrs_for_role("meta"), key=lambda a: a[0])
+            ]
             available = [
-                attr for place, attr in sorted(attrs_for_role("available"),
-                                               key=lambda a: a[0])]
+                attr
+                for place, attr in sorted(
+                    attrs_for_role("available"), key=lambda a: a[0]
+                )
+            ]
 
             self.used_attrs[:] = attributes
             self.class_attrs[:] = classes
@@ -274,8 +305,8 @@ class OWSelectAttributes(widget.OWWidget):
         """ Update the domain hints to be stored in the widgets settings.
         """
         hints_from_model = lambda role, model: [
-            ((attr.name, vartype(attr)), (role, i))
-            for i, attr in enumerate(model)]
+            ((attr.name, vartype(attr)), (role, i)) for i, attr in enumerate(model)
+        ]
         hints = dict(hints_from_model("available", self.available_attrs))
         hints.update(hints_from_model("attribute", self.used_attrs))
         hints.update(hints_from_model("class", self.class_attrs))
@@ -302,8 +333,7 @@ class OWSelectAttributes(widget.OWWidget):
         for nrow in newrows:
             index = model.index(nrow, 0)
             selection.select(index, index)
-        view.selectionModel().select(
-            selection, QItemSelectionModel.ClearAndSelect)
+        view.selectionModel().select(selection, QItemSelectionModel.ClearAndSelect)
 
         self.commit()
 
@@ -319,8 +349,7 @@ class OWSelectAttributes(widget.OWWidget):
         if self.selected_rows(view):
             self.move_selected_from_to(view, self.available_attrs_view)
         elif self.selected_rows(self.available_attrs_view):
-            self.move_selected_from_to(self.available_attrs_view, view,
-                                       exclusive)
+            self.move_selected_from_to(self.available_attrs_view, view, exclusive)
 
     def move_selected_from_to(self, src, dst, exclusive=False):
         self.move_from_to(src, dst, self.selected_rows(src), exclusive)
@@ -339,8 +368,12 @@ class OWSelectAttributes(widget.OWWidget):
         self.commit()
 
     def update_interface_state(self, focus=None, selected=None, deselected=None):
-        for view in [self.available_attrs_view, self.used_attrs_view,
-                     self.class_attrs_view, self.meta_attrs_view]:
+        for view in [
+            self.available_attrs_view,
+            self.used_attrs_view,
+            self.class_attrs_view,
+            self.meta_attrs_view,
+        ]:
             if view is not focus and not view.hasFocus() and self.selected_rows(view):
                 view.selectionModel().clear()
 
@@ -354,11 +387,9 @@ class OWSelectAttributes(widget.OWWidget):
         meta_selected = selected_vars(self.meta_attrs_view)
 
         available_types = set(map(type, available_selected))
-        all_primitive = all(var.is_primitive()
-                            for var in available_types)
+        all_primitive = all(var.is_primitive() for var in available_types)
 
-        move_attr_enabled = (available_selected and all_primitive) or \
-                            attrs_selected
+        move_attr_enabled = (available_selected and all_primitive) or attrs_selected
 
         self.move_attr_button.setEnabled(bool(move_attr_enabled))
         if move_attr_enabled:
@@ -407,12 +438,17 @@ class OWSelectAttributes(widget.OWWidget):
         in_domain, out_domain = self.data.domain, self.output_data.domain
         self.report_domain("Input data", self.data.domain)
         if (in_domain.attributes, in_domain.class_vars, in_domain.metas) == (
-                out_domain.attributes, out_domain.class_vars, out_domain.metas):
+            out_domain.attributes,
+            out_domain.class_vars,
+            out_domain.metas,
+        ):
             self.report_paragraph("Output data", "No changes.")
         else:
             self.report_domain("Output data", self.output_data.domain)
-            diff = list(set(in_domain.variables + in_domain.metas) -
-                        set(out_domain.variables + out_domain.metas))
+            diff = list(
+                set(in_domain.variables + in_domain.metas)
+                - set(out_domain.variables + out_domain.metas)
+            )
             if diff:
                 text = "%i (%s)" % (len(diff), ", ".join(x.name for x in diff))
                 self.report_items((("Removed", text),))
@@ -420,6 +456,7 @@ class OWSelectAttributes(widget.OWWidget):
 
 def test_main(argv=None):
     from AnyQt.QtWidgets import QApplication
+
     if argv is None:
         argv = sys.argv
     argv = list(argv)
@@ -439,6 +476,7 @@ def test_main(argv=None):
     w.set_data(None)
     w.saveSettings()
     return rval
+
 
 if __name__ == "__main__":
     sys.exit(test_main())

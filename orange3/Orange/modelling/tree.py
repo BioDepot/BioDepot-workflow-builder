@@ -5,20 +5,24 @@ from Orange.regression import TreeLearner as RegressionTreeLearner
 from Orange.regression.tree import SklTreeRegressionLearner
 from Orange.tree import TreeModel
 
-__all__ = ['SklTreeLearner', 'TreeLearner']
+__all__ = ["SklTreeLearner", "TreeLearner"]
 
 
 class SklTreeLearner(SklFitter):
-    name = 'tree'
+    name = "tree"
 
-    __fits__ = {'classification': SklTreeLearner,
-                'regression': SklTreeRegressionLearner}
+    __fits__ = {
+        "classification": SklTreeLearner,
+        "regression": SklTreeRegressionLearner,
+    }
 
 
 class TreeLearner(Fitter):
-    name = 'tree'
+    name = "tree"
 
-    __fits__ = {'classification': ClassificationTreeLearner,
-                'regression': RegressionTreeLearner}
+    __fits__ = {
+        "classification": ClassificationTreeLearner,
+        "regression": RegressionTreeLearner,
+    }
 
     __returns__ = TreeModel

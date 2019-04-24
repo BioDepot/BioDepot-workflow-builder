@@ -2,15 +2,23 @@
 
 """
 from AnyQt.QtWidgets import (
-    QWidget, QVBoxLayout, QCheckBox, QSpinBox, QLineEdit, QTextEdit
+    QWidget,
+    QVBoxLayout,
+    QCheckBox,
+    QSpinBox,
+    QLineEdit,
+    QTextEdit,
 )
 from AnyQt.QtCore import QObject
 
 from ...gui import test
 
 from ..propertybindings import (
-    BindingManager, DynamicPropertyBinding, PropertyBindingExpr,
-    PropertyBinding, binding_for
+    BindingManager,
+    DynamicPropertyBinding,
+    PropertyBindingExpr,
+    PropertyBinding,
+    binding_for,
 )
 
 
@@ -98,7 +106,8 @@ class Test(test.QAppTestCase):
         textw.setProperty("spin_", 0)
         textw.setProperty("line_", "")
 
-        textexpr = PropertyBindingExpr(r"""
+        textexpr = PropertyBindingExpr(
+            r"""
 ("Check box is {0}\n"
  "Spin has value {1}\n"
  "Line contains {2}").format(
@@ -106,9 +115,11 @@ class Test(test.QAppTestCase):
     spin,
     line)
 """,
-            dict(checked=binding_for(cb, "checked"),
-                 spin=binding_for(sp, "value"),
-                 line=binding_for(le, "text")),
+            dict(
+                checked=binding_for(cb, "checked"),
+                spin=binding_for(sp, "value"),
+                line=binding_for(le, "text"),
+            ),
         )
 
         layout.addWidget(cb)
@@ -118,8 +129,7 @@ class Test(test.QAppTestCase):
 
         manager = BindingManager(submitPolicy=BindingManager.AutoSubmit)
 
-        manager.bind(PropertyBinding(textw, "plainText", "textChanged"),
-                     textexpr)
+        manager.bind(PropertyBinding(textw, "plainText", "textChanged"), textexpr)
 
         w.setLayout(layout)
         w.show()
@@ -136,14 +146,16 @@ class Test(test.QAppTestCase):
         result.bindTo(
             PropertyBindingExpr(
                 "value + other",
-                locals={"value": binding_for(obj1, "value"),
-                        "other": binding_for(obj1, "other")}
-                )
+                locals={
+                    "value": binding_for(obj1, "value"),
+                    "other": binding_for(obj1, "other"),
+                },
             )
+        )
 
         expr = PropertyBindingExpr(
-           "True if value < 3 else False",
-           dict(value=DynamicPropertyBinding(obj1, "result"))
+            "True if value < 3 else False",
+            dict(value=DynamicPropertyBinding(obj1, "result")),
         )
 
         result_values = []
@@ -161,6 +173,7 @@ class Test(test.QAppTestCase):
 
         self.assertEqual(result.get(), 2)
         self.assertEqual(expr.get(), True)
+
 
 #    @test.unittest.skip("Not yet implemented")
 #    def test_decl(self):

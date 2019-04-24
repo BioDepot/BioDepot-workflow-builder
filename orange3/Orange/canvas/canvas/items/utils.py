@@ -76,7 +76,7 @@ def uniform_linear_layout(points):
 
     # invert the indices
     indices = invert_permutation_indices(indices)
-#    assert((numpy.argsort(points) == numpy.argsort(space[indices])).all())
+    #    assert((numpy.argsort(points) == numpy.argsort(space[indices])).all())
     points = space[indices]
 
     return points.tolist()

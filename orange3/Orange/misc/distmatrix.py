@@ -22,6 +22,7 @@ class DistMatrix(np.ndarray):
         If axis=1 we calculate distances between rows,
         if axis=0 we calculate distances between columns.
     """
+
     def __new__(cls, data, row_items=None, col_items=None, axis=1):
         """Construct a new distance matrix containing the given data.
 
@@ -45,9 +46,9 @@ class DistMatrix(np.ndarray):
         """See http://docs.scipy.org/doc/numpy/user/basics.subclassing.html"""
         if obj is None:
             return
-        self.row_items = getattr(obj, 'row_items', None)
-        self.col_items = getattr(obj, 'col_items', None)
-        self.axis = getattr(obj, 'axis', 1)
+        self.row_items = getattr(obj, "row_items", None)
+        self.col_items = getattr(obj, "col_items", None)
+        self.axis = getattr(obj, "axis", 1)
 
     def __array_wrap__(self, out_arr, context=None):
         if out_arr.ndim == 0:  # a single scalar
@@ -57,6 +58,7 @@ class DistMatrix(np.ndarray):
     """
     __reduce__() and __setstate__() ensure DistMatrix is picklable.
     """
+
     def __reduce__(self):
         state = super().__reduce__()
         newstate = state[2] + (self.row_items, self.col_items, self.axis)
@@ -169,11 +171,9 @@ class DistMatrix(np.ndarray):
                     if name == "axis" and value.isdigit():
                         axis = int(value)
                     else:
-                        raise ValueError("invalid flag '{}'".format(
-                            flag, filename))
+                        raise ValueError("invalid flag '{}'".format(flag, filename))
             if col_labels is not None:
-                col_labels = [x.strip()
-                              for x in fle.readline().strip().split("\t")]
+                col_labels = [x.strip() for x in fle.readline().strip().split("\t")]
                 if len(col_labels) != n:
                     raise ValueError("mismatching number of column labels")
 
@@ -185,37 +185,43 @@ class DistMatrix(np.ndarray):
                 if row_labels is not None:
                     row_labels.append(line.pop(0).strip())
                 if len(line) > n:
-                    raise ValueError("too many columns in matrix row {}".
-                                     format("'{}'".format(row_labels[i])
-                                            if row_labels else i + 1))
-                for j, e in enumerate(line[:i + 1 if symmetric else n]):
+                    raise ValueError(
+                        "too many columns in matrix row {}".format(
+                            "'{}'".format(row_labels[i]) if row_labels else i + 1
+                        )
+                    )
+                for j, e in enumerate(line[: i + 1 if symmetric else n]):
                     try:
                         matrix[i, j] = float(e)
                     except ValueError as exc:
                         raise ValueError(
                             "invalid element at row {}, column {}".format(
-                                "'{}'".format(row_labels[i])
-                                if row_labels else i + 1,
-                                "'{}'".format(col_labels[j])
-                                if col_labels else j + 1)) from exc
+                                "'{}'".format(row_labels[i]) if row_labels else i + 1,
+                                "'{}'".format(col_labels[j]) if col_labels else j + 1,
+                            )
+                        ) from exc
                     if symmetric:
                         matrix[j, i] = matrix[i, j]
         if col_labels:
             col_labels = Table.from_list(
                 Domain([], metas=[StringVariable("label")]),
-                [[item] for item in col_labels])
+                [[item] for item in col_labels],
+            )
         if row_labels:
             row_labels = Table.from_list(
                 Domain([], metas=[StringVariable("label")]),
-                [[item] for item in row_labels])
+                [[item] for item in row_labels],
+            )
         return cls(matrix, row_labels, col_labels, axis)
 
     @staticmethod
     def _trivial_labels(items):
-        return items and \
-               isinstance(items, Table) and \
-               len(items.domain.metas) == 1 and \
-               isinstance(items.domain.metas[0], StringVariable)
+        return (
+            items
+            and isinstance(items, Table)
+            and len(items.domain.metas) == 1
+            and isinstance(items.domain.metas[0], StringVariable)
+        )
 
     def has_row_labels(self):
         """
@@ -266,6 +272,6 @@ class DistMatrix(np.ndarray):
                 if row_labels is not None:
                     fle.write(str(row_labels[i].metas[0]) + "\t")
                 if symmetric:
-                    fle.write("\t".join(map(str, row[:i + 1])) + "\n")
+                    fle.write("\t".join(map(str, row[: i + 1])) + "\n")
                 else:
                     fle.write("\t".join(map(str, row)) + "\n")

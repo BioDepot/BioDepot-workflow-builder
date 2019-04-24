@@ -8,12 +8,17 @@ from AnyQt.QtCore import QPoint
 
 from Orange.data import Table, Domain, ContinuousVariable, DiscreteVariable
 from Orange.classification import (
-    NaiveBayesLearner, LogisticRegressionLearner, MajorityLearner
+    NaiveBayesLearner,
+    LogisticRegressionLearner,
+    MajorityLearner,
 )
 from Orange.widgets.tests.base import WidgetTest
 from Orange.widgets.visualize.ownomogram import (
-    OWNomogram, DiscreteFeatureItem, ContinuousFeatureItem, ProbabilitiesDotItem,
-    MovableToolTip
+    OWNomogram,
+    DiscreteFeatureItem,
+    ContinuousFeatureItem,
+    ProbabilitiesDotItem,
+    MovableToolTip,
 )
 
 
@@ -33,23 +38,41 @@ class TestOWNomogram(WidgetTest):
     def test_input_nb_cls(self):
         """Check naive bayes classifier on input"""
         self.send_signal(self.widget.Inputs.classifier, self.nb_cls)
-        self.assertEqual(len([item for item in self.widget.scene.items() if
-                              isinstance(item, DiscreteFeatureItem)]),
-                         min(self.widget.n_attributes,
-                             len(self.data.domain.attributes)))
+        self.assertEqual(
+            len(
+                [
+                    item
+                    for item in self.widget.scene.items()
+                    if isinstance(item, DiscreteFeatureItem)
+                ]
+            ),
+            min(self.widget.n_attributes, len(self.data.domain.attributes)),
+        )
 
     def test_input_lr_cls(self):
         """Check logistic regression classifier on input"""
         self.widget.display_index = 0  # display ALL features
         self.send_signal(self.widget.Inputs.classifier, self.lr_cls)
         self.assertEqual(
-            len([item for item in self.widget.scene.items() if
-                 isinstance(item, DiscreteFeatureItem)]),
-            len([a for a in self.data.domain.attributes if a.is_discrete]))
+            len(
+                [
+                    item
+                    for item in self.widget.scene.items()
+                    if isinstance(item, DiscreteFeatureItem)
+                ]
+            ),
+            len([a for a in self.data.domain.attributes if a.is_discrete]),
+        )
         self.assertEqual(
-            len([item for item in self.widget.scene.items() if
-                 isinstance(item, ContinuousFeatureItem)]),
-            len([a for a in self.data.domain.attributes if a.is_continuous]))
+            len(
+                [
+                    item
+                    for item in self.widget.scene.items()
+                    if isinstance(item, ContinuousFeatureItem)
+                ]
+            ),
+            len([a for a in self.data.domain.attributes if a.is_continuous]),
+        )
 
     def test_input_invalid_cls(self):
         """Check any classifier on input"""
@@ -105,11 +128,15 @@ class TestOWNomogram(WidgetTest):
         self.send_signal(self.widget.Inputs.classifier, cls)
         self.send_signal(self.widget.Inputs.data, data)
         self._check_values(data.domain.attributes, data)
-        self._test_sort([["status", "age", "sex"],
-                         ["age", "sex", "status"],
-                         ["sex", "status", "age"],
-                         ["sex", "status", "age"],
-                         ["sex", "status", "age"]])
+        self._test_sort(
+            [
+                ["status", "age", "sex"],
+                ["age", "sex", "status"],
+                ["sex", "status", "age"],
+                ["sex", "status", "age"],
+                ["sex", "status", "age"],
+            ]
+        )
 
     def test_nomogram_with_instance_lr(self):
         """Check initialized marker values and feature sorting for logistic
@@ -119,17 +146,22 @@ class TestOWNomogram(WidgetTest):
         self.send_signal(self.widget.Inputs.classifier, cls)
         self.send_signal(self.widget.Inputs.data, data)
         self._check_values(data.domain.attributes, data)
-        self._test_sort([["status", "age", "sex"],
-                         ["age", "sex", "status"],
-                         ["sex", "status", "age"],
-                         ["sex", "status", "age"],
-                         ["sex", "status", "age"]])
+        self._test_sort(
+            [
+                ["status", "age", "sex"],
+                ["age", "sex", "status"],
+                ["sex", "status", "age"],
+                ["sex", "status", "age"],
+                ["sex", "status", "age"],
+            ]
+        )
 
     def test_constant_feature_disc(self):
         """Check nomogram for data with constant discrete feature"""
-        domain = Domain([DiscreteVariable("d1", ("a", "c")),
-                         DiscreteVariable("d2", ("b",))],
-                        DiscreteVariable("cls", ("e", "d")))
+        domain = Domain(
+            [DiscreteVariable("d1", ("a", "c")), DiscreteVariable("d2", ("b",))],
+            DiscreteVariable("cls", ("e", "d")),
+        )
         X = np.array([[0, 0], [1, 0], [0, 0], [1, 0]])
         data = Table(domain, X, np.array([0, 1, 1, 0]))
         cls = NaiveBayesLearner()(data)
@@ -139,9 +171,10 @@ class TestOWNomogram(WidgetTest):
 
     def test_constant_feature_cont(self):
         """Check nomogram for data with constant continuous feature"""
-        domain = Domain([DiscreteVariable("d", ("a", "b")),
-                         ContinuousVariable("c")],
-                        DiscreteVariable("cls", ("c", "d")))
+        domain = Domain(
+            [DiscreteVariable("d", ("a", "b")), ContinuousVariable("c")],
+            DiscreteVariable("cls", ("c", "d")),
+        )
         X = np.array([[0, 0], [1, 0], [0, 0], [1, 0]])
         data = Table(domain, X, np.array([0, 1, 1, 0]))
         cls = NaiveBayesLearner()(data)
@@ -167,10 +200,12 @@ class TestOWNomogram(WidgetTest):
             # best ranked
             self.widget.n_attributes = 5
             self.widget.controls.display_index.buttons[1].click()
-            visible_items = [item for item in self.widget.scene.items() if
-                             isinstance(item, (DiscreteFeatureItem,
-                                               ContinuousFeatureItem)) and
-                             item.isVisible()]
+            visible_items = [
+                item
+                for item in self.widget.scene.items()
+                if isinstance(item, (DiscreteFeatureItem, ContinuousFeatureItem))
+                and item.isVisible()
+            ]
             self.assertGreaterEqual(5, len(visible_items))
 
             # 2D curve
@@ -186,31 +221,42 @@ class TestOWNomogram(WidgetTest):
             self.widget.cont_feature_dim_combo.setCurrentIndex(0)
 
     def _test_helper_check_probability(self, value):
-        prob_marker = [item for item in self.widget.scene.items() if
-                       isinstance(item, ProbabilitiesDotItem)][0]
-        self.assertIn("Probability: {}".format(value),
-                      prob_marker.get_tooltip_text())
+        prob_marker = [
+            item
+            for item in self.widget.scene.items()
+            if isinstance(item, ProbabilitiesDotItem)
+        ][0]
+        self.assertIn("Probability: {}".format(value), prob_marker.get_tooltip_text())
 
     def _check_values(self, attributes, data):
         for attr, item in zip(attributes, self.widget.feature_items.values()):
             assert attr.name == item.childItems()[0].toPlainText()
             value = data[0][attr.name].value
-            value = "{}: 100%".format(value) if attr.is_discrete \
+            value = (
+                "{}: 100%".format(value)
+                if attr.is_discrete
                 else "Value: {}".format(value)
+            )
             self.assertIn(value, item.dot.get_tooltip_text())
 
     def _test_sort(self, names):
         for i in range(self.widget.sort_combo.count()):
             self.widget.sort_combo.activated.emit(i)
             self.widget.sort_combo.setCurrentIndex(i)
-            ordered = [self.widget.nomogram_main.layout().itemAt(i).childItems()[0].toPlainText()
-                       for i in range(self.widget.nomogram_main.layout().count())]
+            ordered = [
+                self.widget.nomogram_main.layout()
+                .itemAt(i)
+                .childItems()[0]
+                .toPlainText()
+                for i in range(self.widget.nomogram_main.layout().count())
+            ]
             self.assertListEqual(names[i], ordered)
 
     def test_tooltip(self):
         # had problems on PyQt4
         m = MovableToolTip()
         m.show(QPoint(0, 0), "Some text.")
+
 
 if __name__ == "__main__":
     unittest.main()

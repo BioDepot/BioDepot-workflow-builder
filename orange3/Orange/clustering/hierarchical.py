@@ -11,7 +11,7 @@ import scipy.spatial.distance
 
 from Orange.distance import Euclidean, PearsonR
 
-__all__ = ['HierarchicalClustering']
+__all__ = ["HierarchicalClustering"]
 
 SINGLE = "single"
 AVERAGE = "average"
@@ -20,15 +20,16 @@ WEIGHTED = "weighted"
 WARD = "ward"
 
 # Does scipy implement a O(n**2) NN chain algorithm?
-_HAS_NN_CHAIN = hasattr(scipy.cluster.hierarchy, "_hierarchy") and \
-                hasattr(scipy.cluster.hierarchy._hierarchy, "nn_chain")
+_HAS_NN_CHAIN = hasattr(scipy.cluster.hierarchy, "_hierarchy") and hasattr(
+    scipy.cluster.hierarchy._hierarchy, "nn_chain"
+)
 
 # Prior to 0.18 scipy.cluster.hierarchical's python interface disallowed
 # ward clustering from a precomputed distance matrix even though it's cython
 # implementation allowed it and was documented to support it (scipy issue 5220)
-_HAS_WARD_LINKAGE_FROM_DIST = \
-    _LooseVersion(scipy.__version__) >= _LooseVersion("0.18") and \
-    _HAS_NN_CHAIN
+_HAS_WARD_LINKAGE_FROM_DIST = (
+    _LooseVersion(scipy.__version__) >= _LooseVersion("0.18") and _HAS_NN_CHAIN
+)
 
 
 def condensedform(X, mode="upper"):
@@ -66,8 +67,7 @@ def squareform(X, mode="upper"):
     return matrix
 
 
-def data_clustering(data, distance=Euclidean,
-                    linkage=AVERAGE):
+def data_clustering(data, distance=Euclidean, linkage=AVERAGE):
     """
     Return the hierarchical clustering of the dataset's rows.
 
@@ -79,8 +79,7 @@ def data_clustering(data, distance=Euclidean,
     return dist_matrix_clustering(matrix, linkage=linkage)
 
 
-def feature_clustering(data, distance=PearsonR,
-                       linkage=AVERAGE):
+def feature_clustering(data, distance=PearsonR, linkage=AVERAGE):
     """
     Return the hierarchical clustering of the dataset's columns.
 
@@ -171,8 +170,9 @@ class Tree(object):
         return iter((self.__value, self.__branches))
 
     def __repr__(self):
-        return ("{0.__name__}(value={1!r}, branches={2!r})"
-                .format(type(self), self.value, self.branches))
+        return "{0.__name__}(value={1!r}, branches={2!r})".format(
+            type(self), self.value, self.branches
+        )
 
     @property
     def is_leaf(self):
@@ -195,7 +195,6 @@ SingletonData = namedtuple("Singleton", ["range", "height", "index"])
 
 
 class _Ranged:
-
     @property
     def first(self):
         return self.range[0]
@@ -220,32 +219,38 @@ def tree_from_linkage(linkage):
     .. seealso:: scipy.cluster.hierarchy.linkage
 
     """
-    scipy.cluster.hierarchy.is_valid_linkage(
-        linkage, throw=True, name="linkage")
+    scipy.cluster.hierarchy.is_valid_linkage(linkage, throw=True, name="linkage")
     T = {}
     N, _ = linkage.shape
     N = N + 1
     order = []
     for i, (c1, c2, d, _) in enumerate(linkage):
         if c1 < N:
-            left = Tree(SingletonData(range=(len(order), len(order) + 1),
-                                      height=0.0, index=int(c1)),
-                        ())
+            left = Tree(
+                SingletonData(
+                    range=(len(order), len(order) + 1), height=0.0, index=int(c1)
+                ),
+                (),
+            )
             order.append(c1)
         else:
             left = T[c1]
 
         if c2 < N:
-            right = Tree(SingletonData(range=(len(order), len(order) + 1),
-                                       height=0.0, index=int(c2)),
-                         ())
+            right = Tree(
+                SingletonData(
+                    range=(len(order), len(order) + 1), height=0.0, index=int(c2)
+                ),
+                (),
+            )
             order.append(c2)
         else:
             right = T[c2]
 
-        t = Tree(ClusterData(range=(left.value.first, right.value.last),
-                             height=d),
-                 (left, right))
+        t = Tree(
+            ClusterData(range=(left.value.first, right.value.last), height=d),
+            (left, right),
+        )
         T[N + i] = t
 
     root = T[N + N - 2]
@@ -254,8 +259,7 @@ def tree_from_linkage(linkage):
     leaf_idx = 0
     for node in postorder(root):
         if node.is_leaf:
-            T[node] = Tree(
-                node.value._replace(range=(leaf_idx, leaf_idx + 1)), ())
+            T[node] = Tree(node.value._replace(range=(leaf_idx, leaf_idx + 1)), ())
             leaf_idx += 1
         else:
             left, right = T[node.left].value, T[node.right].value
@@ -263,7 +267,7 @@ def tree_from_linkage(linkage):
 
             t = Tree(
                 node.value._replace(range=(left.range[0], right.range[1])),
-                tuple(T[ch] for ch in node.branches)
+                tuple(T[ch] for ch in node.branches),
             )
             assert t.value.range[0] <= t.value.range[-1]
             assert left.first == t.value.first and right.last == t.value.last
@@ -310,8 +314,7 @@ def leaves(tree, branches=attrgetter("branches")):
     """
     Return an iterator over the leaf nodes in a tree structure.
     """
-    return (node for node in postorder(tree, branches)
-            if node.is_leaf)
+    return (node for node in postorder(tree, branches) if node.is_leaf)
 
 
 def prune(cluster, level=None, height=None, condition=None):
@@ -358,8 +361,7 @@ def prune(cluster, level=None, height=None, condition=None):
             else:
                 T[node] = Tree(node.value, ())
         else:
-            T[node] = Tree(node.value,
-                           tuple(T[ch] for ch in node.branches))
+            T[node] = Tree(node.value, tuple(T[ch] for ch in node.branches))
     return T[cluster]
 
 
@@ -388,6 +390,7 @@ def top_clusters(tree, k):
 
     :rtype: list of :class:`Tree` instances
     """
+
     def item(node):
         return ((node.is_leaf, -node.value.height), node)
 
@@ -427,8 +430,7 @@ def optimal_leaf_ordering(tree, distances, progress_callback=None):
 
     # rearrange distances by order defined by tree's leaves
     indices = numpy.array([leaf.value.index for leaf in leaves(tree)])
-    distances = distances[indices[numpy.newaxis, :],
-                          indices[:, numpy.newaxis]]
+    distances = distances[indices[numpy.newaxis, :], indices[:, numpy.newaxis]]
     distances = numpy.ascontiguousarray(distances)
 
     # This is the 'fast' early termination search described in the paper
@@ -479,8 +481,7 @@ def optimal_leaf_ordering(tree, distances, progress_callback=None):
             if not left.is_leaf:
                 V_ll = range(*left.left.value.range)
                 V_lr = range(*left.right.value.range)
-                u_iter = chain(((u, V_lr) for u in V_ll),
-                               ((u, V_ll) for u in V_lr))
+                u_iter = chain(((u, V_lr) for u in V_ll), ((u, V_ll) for u in V_lr))
             else:
                 V_lr = range(*left.value.range)
                 u_iter = ((u, V_lr) for u in V_lr)
@@ -491,8 +492,7 @@ def optimal_leaf_ordering(tree, distances, progress_callback=None):
             if not right.is_leaf:
                 V_rl = range(*right.left.value.range)
                 V_rr = range(*right.right.value.range)
-                w_iter = chain(((w, V_rr) for w in V_rl),
-                               ((w, V_rl) for w in V_rr))
+                w_iter = chain(((w, V_rr) for w in V_rl), ((w, V_rl) for w in V_rr))
             else:
                 V_rr = range(*right.value.range)
                 w_iter = ((w, V_rr) for w in V_rr)
@@ -503,20 +503,20 @@ def optimal_leaf_ordering(tree, distances, progress_callback=None):
             for u, left_inner in u_iter:
                 left_inner_slice = slice(left_inner.start, left_inner.stop)
                 M_left_inner = M[u, left_inner_slice]
-#                 left_inner_sort = numpy.argsort(M_left_inner)
+                #                 left_inner_sort = numpy.argsort(M_left_inner)
                 for w, right_inner in w_iter:
-                    right_inner_slice = slice(right_inner.start,
-                                              right_inner.stop)
+                    right_inner_slice = slice(right_inner.start, right_inner.stop)
                     M_right_inner = M[w, right_inner_slice]
-#                     right_inner_sort = numpy.argsort(M_right_inner)
-#                     i, j = argmin_ordered_xpypZ(
-#                         M_left_inner, M_right_inner,
-#                         distances[left_inner_slice, right_inner_slice],
-#                         sorter_x=left_inner_sort, sorter_y=right_inner_sort,
-#                     )
+                    #                     right_inner_sort = numpy.argsort(M_right_inner)
+                    #                     i, j = argmin_ordered_xpypZ(
+                    #                         M_left_inner, M_right_inner,
+                    #                         distances[left_inner_slice, right_inner_slice],
+                    #                         sorter_x=left_inner_sort, sorter_y=right_inner_sort,
+                    #                     )
                     i, j = argmin_xpypZ(
-                        M_left_inner, M_right_inner,
-                        distances[left_inner_slice, right_inner_slice]
+                        M_left_inner,
+                        M_right_inner,
+                        distances[left_inner_slice, right_inner_slice],
                     )
                     m, k = left_inner.start + i, right_inner.start + j
                     score = M[u, m] + M[k, w] + distances[m, k]
@@ -526,9 +526,7 @@ def optimal_leaf_ordering(tree, distances, progress_callback=None):
         return M, ordering
 
     subtrees = list(postorder(tree))
-    ordering_dtype = numpy.dtype(
-        [("m", numpy.uint32),
-         ("k", numpy.uint32)])
+    ordering_dtype = numpy.dtype([("m", numpy.uint32), ("k", numpy.uint32)])
 
     ordering = numpy.empty(distances.shape, dtype=ordering_dtype)
 
@@ -612,9 +610,10 @@ def optimal_leaf_ordering(tree, distances, progress_callback=None):
                 assert left.value.first < right.value.last
                 assert left.value.last == right.value.first
 
-                T[tree] = Tree(tree.value._replace(range=(left.value.first,
-                                                          right.value.last)),
-                               (left, right))
+                T[tree] = Tree(
+                    tree.value._replace(range=(left.value.first, right.value.last)),
+                    (left, right),
+                )
         return T[root]
 
     return optimal_swap(tree, M)

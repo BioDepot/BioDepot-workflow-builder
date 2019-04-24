@@ -28,9 +28,7 @@ class TestWidgetToolBox(test.QAppTestCase):
         model = qt_reg.model()
         data_descriptions = qt_reg.widgets("Data")
 
-        file_action = qt_reg.action_for_widget(
-            "Orange.widgets.data.owfile.OWFile"
-        )
+        file_action = qt_reg.action_for_widget("Orange.widgets.data.owfile.OWFile")
 
         actions = list(map(qt_reg.action_for_widget, data_descriptions))
 
@@ -74,9 +72,7 @@ class TestWidgetToolBox(test.QAppTestCase):
 
         model = qt_reg.model()
 
-        file_action = qt_reg.action_for_widget(
-            "Orange.widgets.data.owfile.OWFile"
-        )
+        file_action = qt_reg.action_for_widget("Orange.widgets.data.owfile.OWFile")
 
         box = WidgetToolBox()
         box.setModel(model)

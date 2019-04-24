@@ -4,11 +4,13 @@ import sklearn.decomposition as skl_decomposition
 try:
     from orangecontrib.remote import aborted, save_state
 except ImportError:
+
     def aborted():
         return False
 
     def save_state(_):
         pass
+
 
 import Orange.data
 from Orange.data.util import SharedComputeValue
@@ -27,18 +29,29 @@ class _FeatureScorerMixin(LearnerScorer):
 
     def score(self, data):
         model = self(data)
-        return np.abs(model.components_[:self.component]) \
-            if self.component else np.abs(model.components_)
+        return (
+            np.abs(model.components_[: self.component])
+            if self.component
+            else np.abs(model.components_)
+        )
 
 
 class PCA(SklProjector, _FeatureScorerMixin):
     __wraps__ = skl_decomposition.PCA
-    name = 'PCA'
+    name = "PCA"
     supports_sparse = False
 
-    def __init__(self, n_components=None, copy=True, whiten=False,
-                 svd_solver='auto', tol=0.0, iterated_power='auto',
-                 random_state=None, preprocessors=None):
+    def __init__(
+        self,
+        n_components=None,
+        copy=True,
+        whiten=False,
+        svd_solver="auto",
+        tol=0.0,
+        iterated_power="auto",
+        random_state=None,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
@@ -53,12 +66,24 @@ class PCA(SklProjector, _FeatureScorerMixin):
 
 class SparsePCA(SklProjector):
     __wraps__ = skl_decomposition.SparsePCA
-    name = 'Sparse PCA'
+    name = "Sparse PCA"
     supports_sparse = False
 
-    def __init__(self, n_components=None, alpha=1, ridge_alpha=0.01,
-                 max_iter=1000, tol=1e-8, method='lars', n_jobs=1, U_init=None,
-                 V_init=None, verbose=False, random_state=None, preprocessors=None):
+    def __init__(
+        self,
+        n_components=None,
+        alpha=1,
+        ridge_alpha=0.01,
+        max_iter=1000,
+        tol=1e-8,
+        method="lars",
+        n_jobs=1,
+        U_init=None,
+        V_init=None,
+        verbose=False,
+        random_state=None,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
@@ -81,17 +106,16 @@ class _PCATransformDomain:
 
 
 class PCAModel(Projection, metaclass=WrapperMeta):
-
     def __init__(self, proj, domain):
         pca_transform = _PCATransformDomain(self)
 
         def pca_variable(i):
             v = Orange.data.ContinuousVariable(
-                'PC%d' % (i + 1),
-                compute_value=Projector(self, i, pca_transform))
+                "PC%d" % (i + 1), compute_value=Projector(self, i, pca_transform)
+            )
             v.to_sql = LinearCombinationSql(
-                domain.attributes, self.components_[i, :],
-                getattr(self, 'mean_', None))
+                domain.attributes, self.components_[i, :], getattr(self, "mean_", None)
+            )
             return v
 
         super().__init__(proj=proj)
@@ -99,16 +123,24 @@ class PCAModel(Projection, metaclass=WrapperMeta):
         self.n_components = self.components_.shape[0]
         self.domain = Orange.data.Domain(
             [pca_variable(i) for i in range(self.n_components)],
-            domain.class_vars, domain.metas)
+            domain.class_vars,
+            domain.metas,
+        )
 
 
 class IncrementalPCA(SklProjector):
     __wraps__ = skl_decomposition.IncrementalPCA
-    name = 'Incremental PCA'
+    name = "Incremental PCA"
     supports_sparse = False
 
-    def __init__(self, n_components=None, whiten=False, copy=True,
-                 batch_size=None, preprocessors=None):
+    def __init__(
+        self,
+        n_components=None,
+        whiten=False,
+        copy=True,
+        batch_size=None,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
@@ -135,11 +167,18 @@ class IncrementalPCAModel(PCAModel):
 
 class TruncatedSVD(SklProjector, _FeatureScorerMixin):
     __wraps__ = skl_decomposition.TruncatedSVD
-    name = 'Truncated SVD'
+    name = "Truncated SVD"
     supports_sparse = True
 
-    def __init__(self, n_components=2, algorithm='randomized', n_iter=5,
-                 random_state=None, tol=0.0, preprocessors=None):
+    def __init__(
+        self,
+        n_components=2,
+        algorithm="randomized",
+        n_iter=5,
+        random_state=None,
+        tol=0.0,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
@@ -147,7 +186,7 @@ class TruncatedSVD(SklProjector, _FeatureScorerMixin):
         params = self.params.copy()
         # strict requirement in scikit fit_transform:
         # n_components must be < n_features
-        params["n_components"] = min(min(X.shape)-1, params["n_components"])
+        params["n_components"] = min(min(X.shape) - 1, params["n_components"])
 
         proj = self.__wraps__(**params)
         proj = proj.fit(X, Y)
@@ -180,8 +219,8 @@ class RemotePCA:
                 continue
             data_sample.download_data(1000000)
             data_sample = Orange.data.Table.from_numpy(
-                Orange.data.Domain(data_sample.domain.attributes),
-                data_sample.X)
+                Orange.data.Domain(data_sample.domain.attributes), data_sample.X
+            )
             model = model.partial_fit(data_sample)
             model.iteration = i
             save_state(model)

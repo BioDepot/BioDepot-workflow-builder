@@ -11,7 +11,7 @@ from Orange.evaluation import CrossValidation, CA
 class TestSoftmaxRegressionLearner(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.iris = Table('iris')
+        cls.iris = Table("iris")
 
     def test_SoftmaxRegression(self):
         learner = SoftmaxRegressionLearner()
@@ -24,8 +24,10 @@ class TestSoftmaxRegressionLearner(unittest.TestCase):
         table = self.iris.copy()
         table.X[:, 2] = table.X[:, 2] * 0.001
         table.X[:, 3] = table.X[:, 3] * 0.001
-        learners = [SoftmaxRegressionLearner(preprocessors=[]),
-                    SoftmaxRegressionLearner()]
+        learners = [
+            SoftmaxRegressionLearner(preprocessors=[]),
+            SoftmaxRegressionLearner(),
+        ]
         results = CrossValidation(table, learners, k=10)
         ca = CA(results)
 

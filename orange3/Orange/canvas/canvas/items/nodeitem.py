@@ -9,15 +9,33 @@ import string
 from xml.sax.saxutils import escape
 
 from AnyQt.QtWidgets import (
-    QGraphicsItem, QGraphicsObject, QGraphicsTextItem, QGraphicsWidget,
-    QGraphicsDropShadowEffect, QStyle, QApplication
+    QGraphicsItem,
+    QGraphicsObject,
+    QGraphicsTextItem,
+    QGraphicsWidget,
+    QGraphicsDropShadowEffect,
+    QStyle,
+    QApplication,
 )
 from AnyQt.QtGui import (
-    QPen, QBrush, QColor, QPalette, QIcon, QPainter, QPainterPath,
-    QPainterPathStroker
+    QPen,
+    QBrush,
+    QColor,
+    QPalette,
+    QIcon,
+    QPainter,
+    QPainterPath,
+    QPainterPathStroker,
 )
 from AnyQt.QtCore import (
-    Qt, QEvent, QPointF, QRectF, QRect, QSize, QTimer, QPropertyAnimation
+    Qt,
+    QEvent,
+    QPointF,
+    QRectF,
+    QRect,
+    QSize,
+    QTimer,
+    QPropertyAnimation,
 )
 from AnyQt.QtCore import pyqtSignal as Signal, pyqtProperty as Property
 
@@ -36,19 +54,13 @@ def create_palette(light_color, color):
     """
     palette = QPalette()
 
-    palette.setColor(QPalette.Inactive, QPalette.Light,
-                     saturated(light_color, 50))
-    palette.setColor(QPalette.Inactive, QPalette.Midlight,
-                     saturated(light_color, 90))
-    palette.setColor(QPalette.Inactive, QPalette.Button,
-                     light_color)
+    palette.setColor(QPalette.Inactive, QPalette.Light, saturated(light_color, 50))
+    palette.setColor(QPalette.Inactive, QPalette.Midlight, saturated(light_color, 90))
+    palette.setColor(QPalette.Inactive, QPalette.Button, light_color)
 
-    palette.setColor(QPalette.Active, QPalette.Light,
-                     saturated(color, 50))
-    palette.setColor(QPalette.Active, QPalette.Midlight,
-                     saturated(color, 90))
-    palette.setColor(QPalette.Active, QPalette.Button,
-                     color)
+    palette.setColor(QPalette.Active, QPalette.Light, saturated(color, 50))
+    palette.setColor(QPalette.Active, QPalette.Midlight, saturated(color, 90))
+    palette.setColor(QPalette.Active, QPalette.Button, color)
     palette.setColor(QPalette.ButtonText, QColor("#515151"))
     return palette
 
@@ -57,8 +69,9 @@ def default_palette():
     """
     Create and return a default palette for a node.
     """
-    return create_palette(QColor(NAMED_COLORS["light-yellow"]),
-                          QColor(NAMED_COLORS["yellow"]))
+    return create_palette(
+        QColor(NAMED_COLORS["light-yellow"]), QColor(NAMED_COLORS["yellow"])
+    )
 
 
 def animation_restart(animation):
@@ -75,9 +88,10 @@ class NodeBodyItem(GraphicsPathObject):
     """
     The central part (body) of the `NodeItem`.
     """
+
     def __init__(self, parent=None):
         GraphicsPathObject.__init__(self, parent)
-        assert(isinstance(parent, NodeItem))
+        assert isinstance(parent, NodeItem)
 
         self.__processingState = 0
         self.__progress = -1
@@ -97,9 +111,7 @@ class NodeBodyItem(GraphicsPathObject):
         self.setPalette(default_palette())
 
         self.shadow = QGraphicsDropShadowEffect(
-            blurRadius=3,
-            color=QColor(SHADOW_COLOR),
-            offset=QPointF(0, 0),
+            blurRadius=3, color=QColor(SHADOW_COLOR), offset=QPointF(0, 0)
         )
         self.shadow.setEnabled(True)
 
@@ -113,8 +125,7 @@ class NodeBodyItem(GraphicsPathObject):
         shadowitem.setGraphicsEffect(self.shadow)
         shadowitem.setFlag(QGraphicsItem.ItemStacksBehindParent)
         self.__shadow = shadowitem
-        self.__blurAnimation = QPropertyAnimation(self.shadow, b"blurRadius",
-                                                  self)
+        self.__blurAnimation = QPropertyAnimation(self.shadow, b"blurRadius", self)
         self.__blurAnimation.setDuration(100)
         self.__blurAnimation.finished.connect(self.__on_finished)
 
@@ -341,9 +352,7 @@ class NodeAnchorItem(GraphicsPathObject):
         self.setBrush(self.normalBrush)
 
         self.shadow = QGraphicsDropShadowEffect(
-            blurRadius=10,
-            color=QColor(SHADOW_COLOR),
-            offset=QPointF(0, 0)
+            blurRadius=10, color=QColor(SHADOW_COLOR), offset=QPointF(0, 0)
         )
 
         self.setGraphicsEffect(self.shadow)
@@ -567,6 +576,7 @@ class SourceAnchorItem(NodeAnchorItem):
     """
     A source anchor item
     """
+
     pass
 
 
@@ -574,6 +584,7 @@ class SinkAnchorItem(NodeAnchorItem):
     """
     A sink anchor item.
     """
+
     pass
 
 
@@ -591,6 +602,7 @@ class GraphicsIconItem(QGraphicsItem):
     """
     A graphics item displaying an :class:`QIcon`.
     """
+
     def __init__(self, parent=None, icon=None, iconSize=None, **kwargs):
         QGraphicsItem.__init__(self, parent, **kwargs)
         self.setFlag(QGraphicsItem.ItemUsesExtendedStyleOption, True)
@@ -671,7 +683,7 @@ class GraphicsIconItem(QGraphicsItem):
             target = QRect(0, 0, w, h)
             painter.setRenderHint(
                 QPainter.SmoothPixmapTransform,
-                self.__transformationMode == Qt.SmoothTransformation
+                self.__transformationMode == Qt.SmoothTransformation,
             )
             self.__icon.paint(painter, target, Qt.AlignCenter, mode)
 
@@ -695,8 +707,7 @@ class NameTextItem(QGraphicsTextItem):
             for line in self._lines(doc):
                 rect = line.naturalTextRect()
                 painter.drawRoundedRect(
-                    rect.adjusted(-offset, -offset, offset, offset),
-                    3, 3
+                    rect.adjusted(-offset, -offset, offset, offset), 3, 3
                 )
 
             painter.restore()
@@ -825,7 +836,7 @@ class NodeItem(QGraphicsWidget):
         """
         self = cls()
         self.setWidgetDescription(node.description)
-#        self.setCategoryDescription(node.category)
+        #        self.setCategoryDescription(node.category)
         return self
 
     @classmethod
@@ -860,7 +871,7 @@ class NodeItem(QGraphicsWidget):
         output_path = QPainterPath()
         start_angle = self.ANCHOR_SPAN_ANGLE / 2
         output_path.arcMoveTo(anchor_rect, start_angle)
-        output_path.arcTo(anchor_rect, start_angle, - self.ANCHOR_SPAN_ANGLE)
+        output_path.arcTo(anchor_rect, start_angle, -self.ANCHOR_SPAN_ANGLE)
         self.outputAnchorItem.setAnchorPath(output_path)
 
         self.inputAnchorItem.hide()
@@ -873,8 +884,9 @@ class NodeItem(QGraphicsWidget):
         self.captionTextItem.setPos(0, 33)
 
         def iconItem(standard_pixmap):
-            item = GraphicsIconItem(self, icon=standard_icon(standard_pixmap),
-                                    iconSize=QSize(16, 16))
+            item = GraphicsIconItem(
+                self, icon=standard_icon(standard_pixmap), iconSize=QSize(16, 16)
+            )
             item.hide()
             return item
 
@@ -926,8 +938,9 @@ class NodeItem(QGraphicsWidget):
         Set the node item's icon (:class:`QIcon`).
         """
         if isinstance(icon, QIcon):
-            self.icon_item = GraphicsIconItem(self.shapeItem, icon=icon,
-                                              iconSize=QSize(36, 36))
+            self.icon_item = GraphicsIconItem(
+                self.shapeItem, icon=icon, iconSize=QSize(36, 36)
+            )
             self.icon_item.setPos(-18, -18)
         else:
             raise TypeError
@@ -956,8 +969,7 @@ class NodeItem(QGraphicsWidget):
         """
         return self.__title
 
-    title_ = Property(str, fget=title, fset=setTitle,
-                      doc="Node title text.")
+    title_ = Property(str, fget=title, fset=setTitle, doc="Node title text.")
 
     def setFont(self, font):
         """
@@ -1009,8 +1021,7 @@ class NodeItem(QGraphicsWidget):
         """
         return self.__processingState
 
-    processingState_ = Property(int, fget=processingState,
-                                fset=setProcessingState)
+    processingState_ = Property(int, fget=processingState, fset=setProcessingState)
 
     def setProgress(self, progress):
         """
@@ -1031,8 +1042,9 @@ class NodeItem(QGraphicsWidget):
         """
         return self.__progress
 
-    progress_ = Property(float, fget=progress, fset=setProgress,
-                         doc="Node progress state.")
+    progress_ = Property(
+        float, fget=progress, fset=setProgress, doc="Node progress state."
+    )
 
     def setStatusMessage(self, message):
         """
@@ -1200,10 +1212,12 @@ class NodeItem(QGraphicsWidget):
             status_text.append("%i%%" % int(self.progress()))
 
         if status_text:
-            text += ["<br/>",
-                     '<span style="font-style: italic">',
-                     "<br/>".join(status_text),
-                     "</span>"]
+            text += [
+                "<br/>",
+                '<span style="font-style: italic">',
+                "<br/>".join(status_text),
+                "</span>",
+            ]
         text += ["</div>"]
         text = "".join(text)
 
@@ -1332,13 +1346,13 @@ def NodeItem_toolTipHelper(node, links_in=[], links_out=[]):
         inputs = [channel_fmt.format(inp.name) for inp in desc.inputs]
         inputs = inputs_list_fmt.format(inputs="".join(inputs))
     else:
-        inputs = "No inputs<hr/>" 
+        inputs = "No inputs<hr/>"
 
     if desc.outputs:
         outputs = [channel_fmt.format(out.name) for out in desc.outputs]
         outputs = outputs_list_fmt.format(outputs="".join(outputs))
     else:
-        outputs = "No outputs" 
+        outputs = "No outputs"
 
     tooltip = title + inputs + outputs
     style = "ul { margin-top: 1px; margin-bottom: 1px; }"
@@ -1347,7 +1361,9 @@ def NodeItem_toolTipHelper(node, links_in=[], links_out=[]):
 
 def parse_format_fields(format_str):
     formatter = string.Formatter()
-    format_fields = [(field, (spec, conv))
-                     for _, field, spec, conv in formatter.parse(format_str)
-                     if field is not None]
+    format_fields = [
+        (field, (spec, conv))
+        for _, field, spec, conv in formatter.parse(format_str)
+        if field is not None
+    ]
     return format_fields

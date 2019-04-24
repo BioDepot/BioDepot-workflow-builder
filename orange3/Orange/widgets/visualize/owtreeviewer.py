@@ -2,25 +2,34 @@
 import numpy as np
 
 from AnyQt.QtWidgets import (
-    QGraphicsView, QGraphicsRectItem, QGraphicsTextItem, QSizePolicy, QStyle,
-    QLabel, QComboBox
+    QGraphicsView,
+    QGraphicsRectItem,
+    QGraphicsTextItem,
+    QSizePolicy,
+    QStyle,
+    QLabel,
+    QComboBox,
 )
 from AnyQt.QtGui import QColor, QBrush, QPen, QFontMetrics
 from AnyQt.QtCore import Qt, QPointF, QSizeF, QRectF
 
 from Orange.base import TreeModel, SklModel
 from Orange.widgets.utils.signals import Input, Output
-from Orange.widgets.visualize.owtreeviewer2d import \
-    GraphicsNode, GraphicsEdge, OWTreeViewer2D
+from Orange.widgets.visualize.owtreeviewer2d import (
+    GraphicsNode,
+    GraphicsEdge,
+    OWTreeViewer2D,
+)
 from Orange.widgets.utils import to_html
 from Orange.data import Table
 
-from Orange.widgets.settings import ContextSetting, ClassValuesContextHandler, \
-    Setting
+from Orange.widgets.settings import ContextSetting, ClassValuesContextHandler, Setting
 from Orange.widgets import gui
 from Orange.widgets.utils.colorpalette import ContinuousPaletteGenerator
-from Orange.widgets.utils.annotated_data import (create_annotated_table,
-                                                 ANNOTATED_DATA_SIGNAL_NAME)
+from Orange.widgets.utils.annotated_data import (
+    create_annotated_table,
+    ANNOTATED_DATA_SIGNAL_NAME,
+)
 from Orange.widgets.visualize.utils.tree.skltreeadapter import SklTreeAdapter
 from Orange.widgets.visualize.utils.tree.treeadapter import TreeAdapter
 
@@ -28,6 +37,7 @@ from Orange.widgets.visualize.utils.tree.treeadapter import TreeAdapter
 class PieChart(QGraphicsRectItem):
     """PieChart graphics item added at the corner of classification tree nodes
     """
+
     # Methods are documented in PyQt documentation
     # pylint: disable=missing-docstring
     def __init__(self, dist, r, parent):
@@ -51,13 +61,14 @@ class PieChart(QGraphicsRectItem):
         start_angle = 0
         colors = self.scene().colors
         for i in range(len(self.dist)):
-            angle = self.dist[i] * 16 * 360. / dist_sum
+            angle = self.dist[i] * 16 * 360.0 / dist_sum
             if angle == 0:
                 continue
             painter.setBrush(QBrush(colors[i]))
             painter.setPen(QPen(colors[i]))
-            painter.drawPie(-self.r, -self.r, 2 * self.r, 2 * self.r,
-                            int(start_angle), int(angle))
+            painter.drawPie(
+                -self.r, -self.r, 2 * self.r, 2 * self.r, int(start_angle), int(angle)
+            )
             start_angle += angle
         painter.setPen(QPen(Qt.black))
         painter.setBrush(QBrush())
@@ -66,6 +77,7 @@ class PieChart(QGraphicsRectItem):
 
 class TreeNode(GraphicsNode):
     """TreeNode for trees corresponding to base.Tree models"""
+
     # Methods are documented in PyQt documentation
     # pylint: disable=missing-docstring
 
@@ -83,7 +95,9 @@ class TreeNode(GraphicsNode):
         self._rect = None
 
         if self.model.domain.class_var.is_discrete:
-            self.pie = PieChart(self.tree_adapter.get_distribution(node_inst)[0], 8, self)
+            self.pie = PieChart(
+                self.tree_adapter.get_distribution(node_inst)[0], 8, self
+            )
         else:
             self.pie = None
 
@@ -105,9 +119,9 @@ class TreeNode(GraphicsNode):
         if self._rect and self._rect.isValid():
             return self._rect
         else:
-            return QRectF(QPointF(0, 0), self.document().size()).\
-                adjusted(0, 0, 8, 0) | \
-                (getattr(self, "_rect") or QRectF(0, 0, 1, 1))
+            return QRectF(QPointF(0, 0), self.document().size()).adjusted(
+                0, 0, 8, 0
+            ) | (getattr(self, "_rect") or QRectF(0, 0, 1, 1))
 
     def set_rect(self, rect):
         self.prepareGeometryChange()
@@ -119,8 +133,10 @@ class TreeNode(GraphicsNode):
 
     def boundingRect(self):
         if hasattr(self, "attr"):
-            attr_rect = QRectF(QPointF(0, -self.attr_text_h),
-                               QSizeF(self.attr_text_w, self.attr_text_h))
+            attr_rect = QRectF(
+                QPointF(0, -self.attr_text_h),
+                QSizeF(self.attr_text_w, self.attr_text_h),
+            )
         else:
             attr_rect = QRectF(0, 0, 1, 1)
         rect = self.rect().adjusted(-5, -5, 5, 5)
@@ -163,7 +179,9 @@ class OWTreeGraph(OWTreeViewer2D):
     class Inputs:
         # Had different input names before merging from
         # Classification/Regression tree variants
-        tree = Input("Tree", TreeModel, replaces=["Classification Tree", "Regression Tree"])
+        tree = Input(
+            "Tree", TreeModel, replaces=["Classification Tree", "Regression Tree"]
+        )
 
     class Outputs:
         selected_data = Output("Selected Data", Table, default=True, id="selected-data")
@@ -175,7 +193,7 @@ class OWTreeGraph(OWTreeViewer2D):
 
     replaces = [
         "Orange.widgets.classify.owclassificationtreegraph.OWClassificationTreeGraph",
-        "Orange.widgets.classify.owregressiontreegraph.OWRegressionTreeGraph"
+        "Orange.widgets.classify.owregressiontreegraph.OWRegressionTreeGraph",
     ]
 
     COL_OPTIONS = ["Default", "Number of instances", "Mean value", "Variance"]
@@ -191,8 +209,7 @@ class OWTreeGraph(OWTreeViewer2D):
         self.color_label = QLabel("Target class: ")
         combo = self.color_combo = gui.OrangeComboBox()
         combo.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
-        combo.setSizeAdjustPolicy(
-            QComboBox.AdjustToMinimumContentsLengthWithIcon)
+        combo.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLengthWithIcon)
         combo.setMinimumContentsLength(8)
         combo.activated[int].connect(self.color_changed)
         self.display_box.layout().addRow(self.color_label, combo)
@@ -261,7 +278,7 @@ class OWTreeGraph(OWTreeViewer2D):
         self.model = model
         self.target_class_index = 0
         if model is None:
-            self.info.setText('No tree.')
+            self.info.setText("No tree.")
             self.root_node = None
             self.dataset = None
             self.tree_adapter = None
@@ -281,17 +298,21 @@ class OWTreeGraph(OWTreeViewer2D):
                 self.color_combo.addItems(self.domain.class_vars[0].values)
                 self.color_combo.setCurrentIndex(self.target_class_index)
             else:
-                self.scene.colors = \
-                    ContinuousPaletteGenerator(*model.domain.class_var.colors)
+                self.scene.colors = ContinuousPaletteGenerator(
+                    *model.domain.class_var.colors
+                )
                 self.color_label.setText("Color by: ")
                 self.color_combo.addItems(self.COL_OPTIONS)
                 self.color_combo.setCurrentIndex(self.regression_colors)
             self.openContext(self.domain.class_var)
             # self.root_node = self.walkcreate(model.root, None)
             self.root_node = self.walkcreate(self.tree_adapter.root)
-            self.info.setText('{} nodes, {} leaves'.format(
-                self.tree_adapter.num_nodes,
-                len(self.tree_adapter.leaves(self.tree_adapter.root))))
+            self.info.setText(
+                "{} nodes, {} leaves".format(
+                    self.tree_adapter.num_nodes,
+                    len(self.tree_adapter.leaves(self.tree_adapter.root)),
+                )
+            )
         self.setup_scene()
         self.Outputs.selected_data.send(None)
         self.Outputs.annotated_data.send(create_annotated_table(self.dataset, []))
@@ -310,27 +331,37 @@ class OWTreeGraph(OWTreeViewer2D):
         return node_obj
 
     def node_tooltip(self, node):
-        return "<br>".join(to_html(str(rule))
-                           for rule in self.tree_adapter.rules(node.node_inst))
+        return "<br>".join(
+            to_html(str(rule)) for rule in self.tree_adapter.rules(node.node_inst)
+        )
 
     def update_selection(self):
         if self.model is None:
             return
-        nodes = [item.node_inst for item in self.scene.selectedItems()
-                 if isinstance(item, TreeNode)]
+        nodes = [
+            item.node_inst
+            for item in self.scene.selectedItems()
+            if isinstance(item, TreeNode)
+        ]
         data = self.tree_adapter.get_instances_in_nodes(nodes)
         self.Outputs.selected_data.send(data)
-        self.Outputs.annotated_data.send(create_annotated_table(
-            self.dataset, self.tree_adapter.get_indices(nodes)))
+        self.Outputs.annotated_data.send(
+            create_annotated_table(self.dataset, self.tree_adapter.get_indices(nodes))
+        )
 
     def send_report(self):
         if not self.model:
             return
-        items = [("Tree size", self.info.text()),
-                 ("Edge widths",
-                  ("Fixed", "Relative to root", "Relative to parent")[
-                      # pylint: disable=invalid-sequence-index
-                      self.line_width_method])]
+        items = [
+            ("Tree size", self.info.text()),
+            (
+                "Edge widths",
+                ("Fixed", "Relative to root", "Relative to parent")[
+                    # pylint: disable=invalid-sequence-index
+                    self.line_width_method
+                ],
+            ),
+        ]
         if self.domain.class_var.is_discrete:
             items.append(("Target class", self.color_combo.currentText()))
         elif self.regression_colors != self.COL_DEFAULT:
@@ -360,13 +391,12 @@ class OWTreeGraph(OWTreeViewer2D):
         if tabs > 0.999:
             text += "100%, {}/{}".format(total, total)
         else:
-            text += "{:2.1f}%, {}/{}".format(100 * tabs,
-                                             int(total * tabs), total)
+            text += "{:2.1f}%, {}/{}".format(100 * tabs, int(total * tabs), total)
 
         text = self._update_node_info_attr_name(node, text)
-        node.setHtml('<p style="line-height: 120%; margin-bottom: 0">'
-                     '{}</p>'.
-                     format(text))
+        node.setHtml(
+            '<p style="line-height: 120%; margin-bottom: 0">' "{}</p>".format(text)
+        )
 
     def update_node_info_reg(self, node):
         """Update the printed contents of the node for regression trees"""
@@ -376,8 +406,9 @@ class OWTreeGraph(OWTreeViewer2D):
         text = "{:.1f} ± {:.1f}<br/>".format(mean, var)
         text += "{} instances".format(insts)
         text = self._update_node_info_attr_name(node, text)
-        node.setHtml('<p style="line-height: 120%; margin-bottom: 0">{}</p>'.
-                     format(text))
+        node.setHtml(
+            '<p style="line-height: 120%; margin-bottom: 0">{}</p>'.format(text)
+        )
 
     def toggle_node_color_cls(self):
         """Update the node color for classification trees"""
@@ -387,8 +418,7 @@ class OWTreeGraph(OWTreeViewer2D):
             total = sum(distr)
             if self.target_class_index:
                 p = distr[self.target_class_index - 1] / total
-                color = colors[self.target_class_index - 1].lighter(
-                    200 - 100 * p)
+                color = colors[self.target_class_index - 1].lighter(200 - 100 * p)
             else:
                 modus = np.argmax(distr)
                 p = distr[modus] / (total or 1)
@@ -404,13 +434,16 @@ class OWTreeGraph(OWTreeViewer2D):
             for node in self.scene.nodes():
                 node.backgroundBrush = brush
         elif self.regression_colors == self.COL_INSTANCE:
-            max_insts = len(self.tree_adapter.get_instances_in_nodes(
-                [self.tree_adapter.root]))
+            max_insts = len(
+                self.tree_adapter.get_instances_in_nodes([self.tree_adapter.root])
+            )
             for node in self.scene.nodes():
-                node_insts = len(self.tree_adapter.get_instances_in_nodes(
-                    [node.node_inst]))
-                node.backgroundBrush = QBrush(def_color.lighter(
-                    120 - 20 * node_insts / max_insts))
+                node_insts = len(
+                    self.tree_adapter.get_instances_in_nodes([node.node_inst])
+                )
+                node.backgroundBrush = QBrush(
+                    def_color.lighter(120 - 20 * node_insts / max_insts)
+                )
         elif self.regression_colors == self.COL_MEAN:
             minv = np.nanmin(self.dataset.Y)
             maxv = np.nanmax(self.dataset.Y)
@@ -421,12 +454,15 @@ class OWTreeGraph(OWTreeViewer2D):
                 node.backgroundBrush = QBrush(colors[fact * (node_mean - minv)])
         else:
             nodes = list(self.scene.nodes())
-            variances = [self.tree_adapter.get_distribution(node.node_inst)[0][1]
-                         for node in nodes]
+            variances = [
+                self.tree_adapter.get_distribution(node.node_inst)[0][1]
+                for node in nodes
+            ]
             max_var = max(variances)
             for node, var in zip(nodes, variances):
-                node.backgroundBrush = QBrush(def_color.lighter(
-                    120 - 20 * var / max_var))
+                node.backgroundBrush = QBrush(
+                    def_color.lighter(120 - 20 * var / max_var)
+                )
         self.scene.update()
 
     def _get_tree_adapter(self, model):
@@ -440,6 +476,7 @@ def main():
     import sys
     from AnyQt.QtWidgets import QApplication
     from Orange.modelling.tree import TreeLearner
+
     a = QApplication(sys.argv)
     ow = OWTreeGraph()
     data = Table(sys.argv[1] if len(sys.argv) > 1 else "titanic")
@@ -451,6 +488,7 @@ def main():
     ow.raise_()
     a.exec_()
     ow.saveSettings()
+
 
 if __name__ == "__main__":
     main()

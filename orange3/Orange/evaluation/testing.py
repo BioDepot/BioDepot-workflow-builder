@@ -6,23 +6,32 @@ import sklearn.model_selection as skl
 
 from Orange.data import Table, Domain, ContinuousVariable, DiscreteVariable
 
-__all__ = ["Results", "CrossValidation", "LeaveOneOut", "TestOnTrainingData",
-           "ShuffleSplit", "TestOnTestData", "sample", "CrossValidationFeature"]
+__all__ = [
+    "Results",
+    "CrossValidation",
+    "LeaveOneOut",
+    "TestOnTrainingData",
+    "ShuffleSplit",
+    "TestOnTestData",
+    "sample",
+    "CrossValidationFeature",
+]
 
-_MpResults = namedtuple('_MpResults', ('fold_i', 'learner_i', 'model',
-                                       'failed', 'n_values', 'values', 'probs'))
+_MpResults = namedtuple(
+    "_MpResults",
+    ("fold_i", "learner_i", "model", "failed", "n_values", "values", "probs"),
+)
 
 
 def _identity(x):
     return x
 
 
-def _mp_worker(fold_i, train_data, test_data, learner_i, learner,
-               store_models):
+def _mp_worker(fold_i, train_data, test_data, learner_i, learner, store_models):
     predicted, probs, model, failed = None, None, None, False
     try:
         if len(train_data) == 0 or len(test_data) == 0:
-            raise RuntimeError('Test fold is empty')
+            raise RuntimeError("Test fold is empty")
         model = learner(train_data)
         if train_data.domain.has_discrete_class:
             predicted, probs = model(test_data, model.ValueProbs)
@@ -31,8 +40,15 @@ def _mp_worker(fold_i, train_data, test_data, learner_i, learner,
     # Different models can fail at any time raising any exception
     except Exception as ex:  # pylint: disable=broad-except
         failed = ex
-    return _MpResults(fold_i, learner_i, store_models and model,
-                      failed, len(test_data), predicted, probs)
+    return _MpResults(
+        fold_i,
+        learner_i,
+        store_models and model,
+        failed,
+        len(test_data),
+        predicted,
+        probs,
+    )
 
 
 class Results:
@@ -69,15 +85,30 @@ class Results:
         folds (List[Slice or List[int]]): A list of indices (or slice objects)
             corresponding to rows of each fold.
     """
+
     score_by_folds = True
     # noinspection PyBroadException
     # noinspection PyNoneFunctionAssignment
-    def __init__(self, data=None, nmethods=0, *, learners=None, train_data=None,
-                 nrows=None, nclasses=None,
-                 store_data=False, store_models=False,
-                 domain=None, actual=None, row_indices=None,
-                 predicted=None, probabilities=None,
-                 preprocessor=None, callback=None, n_jobs=1):
+    def __init__(
+        self,
+        data=None,
+        nmethods=0,
+        *,
+        learners=None,
+        train_data=None,
+        nrows=None,
+        nclasses=None,
+        store_data=False,
+        store_models=False,
+        domain=None,
+        actual=None,
+        row_indices=None,
+        predicted=None,
+        probabilities=None,
+        preprocessor=None,
+        callback=None,
+        n_jobs=1
+    ):
         """
         Construct an instance with default values: `None` for :obj:`data` and
         :obj:`models`.
@@ -138,7 +169,7 @@ class Results:
         if data is not None:
             self.data = data if self.store_data else None
             self.domain = data.domain
-            self.dtype = getattr(data.Y, 'dtype', self.dtype)
+            self.dtype = getattr(data.Y, "dtype", self.dtype)
 
         if learners:
             train_data = train_data or data
@@ -156,27 +187,39 @@ class Results:
             return value
 
         domain = self.domain = set_or_raise(
-            domain, [data is not None and data.domain],
-            "mismatching domain")
+            domain, [data is not None and data.domain], "mismatching domain"
+        )
         self.nrows = nrows = set_or_raise(
-            nrows, [data is not None and len(data),
-                    actual is not None and len(actual),
-                    row_indices is not None and len(row_indices),
-                    predicted is not None and predicted.shape[1],
-                    probabilities is not None and probabilities.shape[1]],
-            "mismatching number of rows")
+            nrows,
+            [
+                data is not None and len(data),
+                actual is not None and len(actual),
+                row_indices is not None and len(row_indices),
+                predicted is not None and predicted.shape[1],
+                probabilities is not None and probabilities.shape[1],
+            ],
+            "mismatching number of rows",
+        )
         nclasses = set_or_raise(
-            nclasses, [len(domain.class_var.values)
-                       if domain is not None and domain.has_discrete_class
-                       else None,
-                       probabilities is not None and probabilities.shape[2]],
-            "mismatching number of class values")
+            nclasses,
+            [
+                len(domain.class_var.values)
+                if domain is not None and domain.has_discrete_class
+                else None,
+                probabilities is not None and probabilities.shape[2],
+            ],
+            "mismatching number of class values",
+        )
         if nclasses is not None and probabilities is not None:
             raise ValueError("regression results cannot have 'probabilities'")
         nmethods = set_or_raise(
-            nmethods, [predicted is not None and predicted.shape[0],
-                       probabilities is not None and probabilities.shape[0]],
-            "mismatching number of methods")
+            nmethods,
+            [
+                predicted is not None and predicted.shape[0],
+                probabilities is not None and probabilities.shape[0],
+            ],
+            "mismatching number of methods",
+        )
 
         if actual is not None:
             self.actual = actual
@@ -190,10 +233,8 @@ class Results:
 
         if probabilities is not None:
             self.probabilities = probabilities
-        elif nmethods is not None and nrows is not None and \
-                nclasses is not None:
-            self.probabilities = \
-                np.empty((nmethods, nrows, nclasses), dtype=np.float32)
+        elif nmethods is not None and nrows is not None and nclasses is not None:
+            self.probabilities = np.empty((nmethods, nrows, nclasses), dtype=np.float32)
 
     def _prepare_arrays(self, data):
         """Initialize some mandatory arrays for results"""
@@ -205,8 +246,9 @@ class Results:
         self.predicted = np.empty((nmethods, self.nrows), dtype=self.dtype)
         if data.domain.has_discrete_class:
             nclasses = len(data.domain.class_var.values)
-            self.probabilities = np.empty((nmethods, self.nrows, nclasses),
-                                          dtype=np.float32)
+            self.probabilities = np.empty(
+                (nmethods, self.nrows, nclasses), dtype=np.float32
+            )
 
     def get_fold(self, fold):
         results = Results()
@@ -228,8 +270,13 @@ class Results:
 
         return results
 
-    def get_augmented_data(self, model_names, include_attrs=True, include_predictions=True,
-                           include_probabilities=True):
+    def get_augmented_data(
+        self,
+        model_names,
+        include_attrs=True,
+        include_predictions=True,
+        include_probabilities=True,
+    ):
         """
         Return the data, augmented with predictions, probabilities (if the task is classification)
         and folds info. Predictions, probabilities and folds are inserted as meta attributes.
@@ -256,30 +303,35 @@ class Results:
         if classification:
             # predictions
             if include_predictions:
-                new_meta_attr.extend(DiscreteVariable(name=name, values=class_var.values)
-                                     for name in model_names)
+                new_meta_attr.extend(
+                    DiscreteVariable(name=name, values=class_var.values)
+                    for name in model_names
+                )
                 new_meta_vals = np.hstack((new_meta_vals, self.predicted.T))
 
             # probabilities
             if include_probabilities:
                 for name in model_names:
-                    new_meta_attr.extend(ContinuousVariable(name="%s (%s)" % (name, value))
-                                         for value in class_var.values)
+                    new_meta_attr.extend(
+                        ContinuousVariable(name="%s (%s)" % (name, value))
+                        for value in class_var.values
+                    )
 
                 for i in self.probabilities:
                     new_meta_vals = np.hstack((new_meta_vals, i))
 
         elif include_predictions:
             # regression
-            new_meta_attr.extend(ContinuousVariable(name=name)
-                                 for name in model_names)
+            new_meta_attr.extend(ContinuousVariable(name=name) for name in model_names)
             new_meta_vals = np.hstack((new_meta_vals, self.predicted.T))
 
         # add fold info
         if self.folds is not None:
             new_meta_attr.append(
-                DiscreteVariable(name="Fold",
-                                 values=[str(i+1) for i, _ in enumerate(self.folds)]))
+                DiscreteVariable(
+                    name="Fold", values=[str(i + 1) for i, _ in enumerate(self.folds)]
+                )
+            )
             fold = np.empty((len(data), 1))
             for i, s in enumerate(self.folds):
                 fold[s, 0] = i
@@ -315,15 +367,16 @@ class Results:
 
         data_splits = (
             (fold_i, self.preprocessor(train_data[train_i]), test_data[test_i])
-            for fold_i, (train_i, test_i) in enumerate(self.indices))
+            for fold_i, (train_i, test_i) in enumerate(self.indices)
+        )
         args_iter = (
-            (fold_i, train_data, test_data, learner_i, learner,
-             self.store_models)
+            (fold_i, train_data, test_data, learner_i, learner, self.store_models)
             for (fold_i, train_data, test_data) in data_splits
-            for (learner_i, learner) in enumerate(self.learners))
+            for (learner_i, learner) in enumerate(self.learners)
+        )
 
         results = []
-        parts = np.linspace(.0, .99, n_callbacks + 1)[1:]
+        parts = np.linspace(0.0, 0.99, n_callbacks + 1)[1:]
         for progress, part in zip(parts, args_iter):
             results.append(_mp_worker(*(part + ())))
             self._callback(progress)
@@ -418,9 +471,21 @@ class CrossValidation(Results):
     .. attribute:: random_state
 
     """
-    def __init__(self, data, learners, k=10, stratified=True, random_state=0, store_data=False,
-                 store_models=False, preprocessor=None, callback=None, warnings=None,
-                 n_jobs=1):
+
+    def __init__(
+        self,
+        data,
+        learners,
+        k=10,
+        stratified=True,
+        random_state=0,
+        store_data=False,
+        store_models=False,
+        preprocessor=None,
+        callback=None,
+        warnings=None,
+        n_jobs=1,
+    ):
         self.k = int(k)
         self.stratified = stratified
         self.random_state = random_state
@@ -429,9 +494,15 @@ class CrossValidation(Results):
         else:
             self.warnings = warnings
 
-        super().__init__(data, learners=learners, store_data=store_data,
-                         store_models=store_models, preprocessor=preprocessor,
-                         callback=callback, n_jobs=n_jobs)
+        super().__init__(
+            data,
+            learners=learners,
+            store_data=store_data,
+            store_models=store_models,
+            preprocessor=preprocessor,
+            callback=callback,
+            n_jobs=n_jobs,
+        )
 
     def setup_indices(self, train_data, test_data):
         self.indices = None
@@ -446,9 +517,7 @@ class CrossValidation(Results):
                 self.warnings.append("Using non-stratified sampling.")
                 self.indices = None
         if self.indices is None:
-            splitter = skl.KFold(
-                self.k, shuffle=True, random_state=self.random_state
-            )
+            splitter = skl.KFold(self.k, shuffle=True, random_state=self.random_state)
             splitter.get_n_splits(test_data)
             self.indices = list(splitter.split(test_data))
 
@@ -462,12 +531,28 @@ class CrossValidationFeature(Results):
         The feature defining the folds.
 
     """
-    def __init__(self, data, learners, feature, store_data=False, store_models=False,
-                 preprocessor=None, callback=None, n_jobs=1):
+
+    def __init__(
+        self,
+        data,
+        learners,
+        feature,
+        store_data=False,
+        store_models=False,
+        preprocessor=None,
+        callback=None,
+        n_jobs=1,
+    ):
         self.feature = feature
-        super().__init__(data, learners=learners, store_data=store_data,
-                         store_models=store_models, preprocessor=preprocessor,
-                         callback=callback, n_jobs=n_jobs)
+        super().__init__(
+            data,
+            learners=learners,
+            store_data=store_data,
+            store_models=store_models,
+            preprocessor=preprocessor,
+            callback=callback,
+            n_jobs=n_jobs,
+        )
 
     def setup_indices(self, train_data, test_data):
         data = Table(Domain([self.feature], None), test_data)
@@ -484,13 +569,28 @@ class CrossValidationFeature(Results):
 
 class LeaveOneOut(Results):
     """Leave-one-out testing"""
+
     score_by_folds = False
 
-    def __init__(self, data, learners, store_data=False, store_models=False,
-                 preprocessor=None, callback=None, n_jobs=1):
-        super().__init__(data, learners=learners, store_data=store_data,
-                         store_models=store_models, preprocessor=preprocessor,
-                         callback=callback, n_jobs=n_jobs)
+    def __init__(
+        self,
+        data,
+        learners,
+        store_data=False,
+        store_models=False,
+        preprocessor=None,
+        callback=None,
+        n_jobs=1,
+    ):
+        super().__init__(
+            data,
+            learners=learners,
+            store_data=store_data,
+            store_models=store_models,
+            preprocessor=preprocessor,
+            callback=callback,
+            n_jobs=n_jobs,
+        )
 
     def setup_indices(self, train_data, test_data):
         splitter = skl.LeaveOneOut()
@@ -505,32 +605,54 @@ class LeaveOneOut(Results):
 
 
 class ShuffleSplit(Results):
-    def __init__(self, data, learners, n_resamples=10, train_size=None,
-                 test_size=0.1, stratified=True, random_state=0, store_data=False,
-                 store_models=False, preprocessor=None, callback=None, n_jobs=1):
+    def __init__(
+        self,
+        data,
+        learners,
+        n_resamples=10,
+        train_size=None,
+        test_size=0.1,
+        stratified=True,
+        random_state=0,
+        store_data=False,
+        store_models=False,
+        preprocessor=None,
+        callback=None,
+        n_jobs=1,
+    ):
         self.n_resamples = n_resamples
         self.train_size = train_size
         self.test_size = test_size
         self.stratified = stratified
         self.random_state = random_state
 
-        super().__init__(data, learners=learners, store_data=store_data,
-                         store_models=store_models, preprocessor=preprocessor,
-                         callback=callback, n_jobs=n_jobs)
+        super().__init__(
+            data,
+            learners=learners,
+            store_data=store_data,
+            store_models=store_models,
+            preprocessor=preprocessor,
+            callback=callback,
+            n_jobs=n_jobs,
+        )
 
     def setup_indices(self, train_data, test_data):
         if self.stratified and test_data.domain.has_discrete_class:
             splitter = skl.StratifiedShuffleSplit(
-                n_splits=self.n_resamples, train_size=self.train_size,
-                test_size=self.test_size, random_state=self.random_state
+                n_splits=self.n_resamples,
+                train_size=self.train_size,
+                test_size=self.test_size,
+                random_state=self.random_state,
             )
             splitter.get_n_splits(test_data.X, test_data.Y)
             self.indices = list(splitter.split(test_data.X, test_data.Y))
 
         else:
             splitter = skl.ShuffleSplit(
-                n_splits=self.n_resamples, train_size=self.train_size,
-                test_size=self.test_size, random_state=self.random_state
+                n_splits=self.n_resamples,
+                train_size=self.train_size,
+                test_size=self.test_size,
+                random_state=self.random_state,
             )
             splitter.get_n_splits(test_data)
             self.indices = list(splitter.split(test_data))
@@ -540,19 +662,35 @@ class TestOnTestData(Results):
     """
     Test on a separate test dataset.
     """
-    def __init__(self, train_data, test_data, learners, store_data=False,
-                 store_models=False, preprocessor=None, callback=None, n_jobs=1):
-        super().__init__(test_data, train_data=train_data, learners=learners,
-                         store_data=store_data,
-                         store_models=store_models, preprocessor=preprocessor,
-                         callback=callback, n_jobs=n_jobs)
+
+    def __init__(
+        self,
+        train_data,
+        test_data,
+        learners,
+        store_data=False,
+        store_models=False,
+        preprocessor=None,
+        callback=None,
+        n_jobs=1,
+    ):
+        super().__init__(
+            test_data,
+            train_data=train_data,
+            learners=learners,
+            store_data=store_data,
+            store_models=store_models,
+            preprocessor=preprocessor,
+            callback=callback,
+            n_jobs=n_jobs,
+        )
 
     def setup_indices(self, train_data, test_data):
         self.indices = ((Ellipsis, Ellipsis),)
 
     def prepare_arrays(self, test_data):
         self.row_indices = np.arange(len(test_data))
-        self.folds = (Ellipsis, )
+        self.folds = (Ellipsis,)
         self.actual = test_data.Y.ravel()
 
 
@@ -561,20 +699,34 @@ class TestOnTrainingData(TestOnTestData):
     Trains and test on the same data
     """
 
-    def __init__(self, data, learners, store_data=False, store_models=False,
-                 preprocessor=None, callback=None, n_jobs=1):
+    def __init__(
+        self,
+        data,
+        learners,
+        store_data=False,
+        store_models=False,
+        preprocessor=None,
+        callback=None,
+        n_jobs=1,
+    ):
 
         if preprocessor is not None:
             data = preprocessor(data)
 
-        super().__init__(train_data=data, test_data=data, learners=learners,
-                         store_data=store_data, store_models=store_models,
-                         preprocessor=None, callback=callback, n_jobs=n_jobs)
+        super().__init__(
+            train_data=data,
+            test_data=data,
+            learners=learners,
+            store_data=store_data,
+            store_models=store_models,
+            preprocessor=None,
+            callback=callback,
+            n_jobs=n_jobs,
+        )
         self.preprocessor = preprocessor
 
 
-def sample(table, n=0.7, stratified=False, replace=False,
-           random_state=None):
+def sample(table, n=0.7, stratified=False, replace=False, random_state=None):
     """
     Samples data instances from a data table. Returns the sample and
     a dataset from input data table that are not in the sample. Also
@@ -619,13 +771,15 @@ def sample(table, n=0.7, stratified=False, replace=False,
     if stratified and table.domain.has_discrete_class:
         test_size = max(len(table.domain.class_var.values), n)
         splitter = skl.StratifiedShuffleSplit(
-            n_splits=1, test_size=test_size, train_size=len(table) - test_size,
-            random_state=random_state)
+            n_splits=1,
+            test_size=test_size,
+            train_size=len(table) - test_size,
+            random_state=random_state,
+        )
         splitter.get_n_splits(table.X, table.Y)
         ind = splitter.split(table.X, table.Y)
     else:
-        splitter = skl.ShuffleSplit(
-            n_splits=1, test_size=n, random_state=random_state)
+        splitter = skl.ShuffleSplit(n_splits=1, test_size=n, random_state=random_state)
         splitter.get_n_splits(table)
         ind = splitter.split(table)
     ind = next(ind)

@@ -25,10 +25,10 @@ class OrangeDeprecationWarning(OrangeWarning, DeprecationWarning):
     pass
 
 
-warnings.simplefilter('default', OrangeWarning)
+warnings.simplefilter("default", OrangeWarning)
 
-if os.environ.get('ORANGE_DEPRECATIONS_ERROR'):
-    warnings.simplefilter('error', OrangeDeprecationWarning)
+if os.environ.get("ORANGE_DEPRECATIONS_ERROR"):
+    warnings.simplefilter("error", OrangeDeprecationWarning)
 
 
 def deprecated(obj):
@@ -67,17 +67,23 @@ def deprecated(obj):
       Instead, use C.new() ...
     'old behavior'
     """
-    alternative = ('; Instead, use ' + obj) if isinstance(obj, str) else ''
+    alternative = ("; Instead, use " + obj) if isinstance(obj, str) else ""
 
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            name = '{}.{}'.format(
-                func.__self__.__class__,
-                func.__name__) if hasattr(func, '__self__') else func
-            warnings.warn('Call to deprecated {}{}'.format(name, alternative),
-                          OrangeDeprecationWarning, stacklevel=2)
+            name = (
+                "{}.{}".format(func.__self__.__class__, func.__name__)
+                if hasattr(func, "__self__")
+                else func
+            )
+            warnings.warn(
+                "Call to deprecated {}{}".format(name, alternative),
+                OrangeDeprecationWarning,
+                stacklevel=2,
+            )
             return func(*args, **kwargs)
+
         return wrapper
 
     return decorator if alternative else decorator(obj)
@@ -98,9 +104,10 @@ def flatten(lst):
 
 class Registry(type):
     """Metaclass that registers subtypes."""
+
     def __new__(mcs, name, bases, attrs):
         cls = type.__new__(mcs, name, bases, attrs)
-        if not hasattr(cls, 'registry'):
+        if not hasattr(cls, "registry"):
             cls.registry = OrderedDict()
         else:
             cls.registry[name] = cls
@@ -112,10 +119,10 @@ class Registry(type):
     def __str__(cls):
         if cls in cls.registry.values():
             return cls.__name__
-        return '{}({{{}}})'.format(cls.__name__, ', '.join(cls.registry))
+        return "{}({{{}}})".format(cls.__name__, ", ".join(cls.registry))
 
 
-def namegen(prefix='_', *args, count=count, **kwargs):
+def namegen(prefix="_", *args, count=count, **kwargs):
     """Continually generate names with `prefix`, e.g. '_1', '_2', ..."""
     count = iter(count(*args, **kwargs))
     while True:
@@ -134,11 +141,18 @@ def export_globals(globals, module_name):
     __all__ = export_globals(globals(), __name__)
 
     """
-    return [getattr(v, '__name__', k)
-            for k, v in globals.items()                          # export
-            if ((callable(v) and v.__module__ == module_name     # callables from this module
-                 or k.isupper()) and                             # or CONSTANTS
-                not getattr(v, '__name__', k).startswith('_'))]  # neither marked internal
+    return [
+        getattr(v, "__name__", k)
+        for k, v in globals.items()  # export
+        if (
+            (
+                callable(v)
+                and v.__module__ == module_name  # callables from this module
+                or k.isupper()
+            )
+            and not getattr(v, "__name__", k).startswith("_")  # or CONSTANTS
+        )
+    ]  # neither marked internal
 
 
 _NOTSET = object()
@@ -178,6 +192,7 @@ def inherit_docstrings(cls):
 
 class Enum(_Enum):
     """Enum that represents itself with the qualified name, e.g. Color.red"""
+
     __repr__ = _Enum.__str__
 
 
@@ -213,6 +228,7 @@ def Reprable_repr_pretty(name, itemsiter, printer, cycle):
     if cycle:
         printer.text("{0}(...)".format("name"))
     else:
+
         def printitem(field, value):
             printer.text(field + "=")
             printer.pretty(value)
@@ -232,6 +248,8 @@ def Reprable_repr_pretty(name, itemsiter, printer, cycle):
 class _Undef:
     def __repr__(self):
         return "<?>"
+
+
 _undef = _Undef()
 
 
@@ -278,7 +296,8 @@ class Reprable:
     --------
     https://docs.python.org/3/reference/datamodel.html#object.__repr__
     """
-    _reprable_module = ''
+
+    _reprable_module = ""
 
     def _reprable_fields(self):
         # type: () -> Iterable[Tuple[str, Any]]
@@ -286,9 +305,10 @@ class Reprable:
         sig = inspect.signature(cls.__init__)
         for param in sig.parameters.values():
             # Skip self, *args, **kwargs
-            if (param.name != 'self' and
-                        param.kind not in (param.VAR_POSITIONAL,
-                                           param.VAR_KEYWORD)):
+            if param.name != "self" and param.kind not in (
+                param.VAR_POSITIONAL,
+                param.VAR_KEYWORD,
+            ):
                 yield param.name, param.default
 
     def _reprable_omit_param(self, name, default, value):
@@ -317,23 +337,23 @@ class Reprable:
         if module is True:
             module = self.__class__.__module__
 
-        nameparts = (([str(module)] if module else []) +
-                     [self.__class__.__name__])
+        nameparts = ([str(module)] if module else []) + [self.__class__.__name__]
         name = ".".join(nameparts)
         Reprable_repr_pretty(
-            name, ((f, v) for f, _, v in self._reprable_items()),
-            p, cycle)
+            name, ((f, v) for f, _, v in self._reprable_items()), p, cycle
+        )
 
     def __repr__(self):
         module = self._reprable_module
         if module is True:
             module = self.__class__.__module__
-        nameparts = (([str(module)] if module else []) +
-                     [self.__class__.__name__])
+        nameparts = ([str(module)] if module else []) + [self.__class__.__name__]
         name = ".".join(nameparts)
         return "{}({})".format(
-            name, ", ".join("{}={!r}".format(f, v) for f, _, v in self._reprable_items())
+            name,
+            ", ".join("{}={!r}".format(f, v) for f, _, v in self._reprable_items()),
         )
+
 
 # For best result, keep this at the bottom
 __all__ = export_globals(globals(), __name__)

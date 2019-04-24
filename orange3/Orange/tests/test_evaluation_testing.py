@@ -7,9 +7,17 @@ import numpy as np
 from Orange.classification import NaiveBayesLearner, MajorityLearner
 from Orange.regression import LinearRegressionLearner, MeanLearner
 from Orange.data import Table, Domain, DiscreteVariable
-from Orange.evaluation import (Results, CrossValidation, LeaveOneOut, TestOnTrainingData,
-                               TestOnTestData, ShuffleSplit, sample, RMSE,
-                               CrossValidationFeature)
+from Orange.evaluation import (
+    Results,
+    CrossValidation,
+    LeaveOneOut,
+    TestOnTrainingData,
+    TestOnTestData,
+    ShuffleSplit,
+    sample,
+    RMSE,
+    CrossValidationFeature,
+)
 from Orange.preprocess import discretize, preprocess
 
 
@@ -25,8 +33,7 @@ def random_data(nrows, ncols):
 
 class TestingTestCase(unittest.TestCase):
     def test_no_data(self):
-        self.assertRaises(TypeError, CrossValidation,
-                          learners=[NaiveBayesLearner()])
+        self.assertRaises(TypeError, CrossValidation, learners=[NaiveBayesLearner()])
 
 
 class _ParameterTuningLearner(MajorityLearner):
@@ -40,7 +47,7 @@ class _ParameterTuningLearner(MajorityLearner):
 class TestSampling(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.iris = Table('iris')
+        cls.iris = Table("iris")
         cls.nrows = 200
         cls.ncols = 5
         cls.random_table = random_data(cls.nrows, cls.ncols)
@@ -70,18 +77,26 @@ class TestSampling(unittest.TestCase):
     def run_test_callback(self, method, expected_progresses):
         def record_progress(p):
             progress.append(p)
+
         progress = []
-        method(self.random_table, [MajorityLearner(), MajorityLearner()],
-               callback=record_progress)
+        method(
+            self.random_table,
+            [MajorityLearner(), MajorityLearner()],
+            callback=record_progress,
+        )
         np.testing.assert_almost_equal(np.array(progress), expected_progresses)
 
     def run_test_preprocessor(self, method, expected_sizes):
         def preprocessor(data):
             data_sizes.append(len(data))
             return data
+
         data_sizes = []
-        method(Table('iris'), [MajorityLearner(), MajorityLearner()],
-               preprocessor=preprocessor)
+        method(
+            Table("iris"),
+            [MajorityLearner(), MajorityLearner()],
+            preprocessor=preprocessor,
+        )
         self.assertEqual(data_sizes, expected_sizes)
 
     def check_folds(self, result, folds_count, rows):
@@ -98,28 +113,29 @@ class TestSampling(unittest.TestCase):
                 self.assertIsInstance(model, learner.__returns__)
 
     def _callback_values(self, iterations):
-        return np.hstack((np.linspace(0., .99, iterations + 1)[1:], [1]))
+        return np.hstack((np.linspace(0.0, 0.99, iterations + 1)[1:], [1]))
 
 
 class TestCrossValidation(TestSampling):
     @classmethod
     def setUpClass(cls):
-        cls.iris = Table('iris')
-        cls.housing = Table('housing')
+        cls.iris = Table("iris")
+        cls.housing = Table("housing")
         cls.nrows = 50
         cls.ncols = 5
         cls.random_table = random_data(cls.nrows, cls.ncols)
 
     def test_results(self):
         nrows, ncols = self.random_table.X.shape
-        res = CrossValidation(self.random_table, [NaiveBayesLearner()], k=10,
-                              stratified=False)
+        res = CrossValidation(
+            self.random_table, [NaiveBayesLearner()], k=10, stratified=False
+        )
         y = self.random_table.Y
         np.testing.assert_equal(res.actual, y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(res.predicted[0],
-                                y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(np.argmax(res.probabilities[0], axis=1),
-                                y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(res.predicted[0], y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(
+            np.argmax(res.probabilities[0], axis=1), y[res.row_indices].reshape(nrows)
+        )
         self.check_folds(res, 10, nrows)
 
     def test_continuous(self):
@@ -132,14 +148,15 @@ class TestCrossValidation(TestSampling):
 
     def test_call_5(self):
         nrows, ncols = self.random_table.X.shape
-        res = CrossValidation(self.random_table, [NaiveBayesLearner()], k=5,
-                              stratified=False)
+        res = CrossValidation(
+            self.random_table, [NaiveBayesLearner()], k=5, stratified=False
+        )
         y = self.random_table.Y
         np.testing.assert_equal(res.actual, y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(res.predicted[0],
-                                y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(np.argmax(res.probabilities[0], axis=1),
-                                y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(res.predicted[0], y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(
+            np.argmax(res.probabilities[0], axis=1), y[res.row_indices].reshape(nrows)
+        )
         self.check_folds(res, 5, nrows)
 
     def test_store_data(self):
@@ -198,7 +215,9 @@ class TestCrossValidation(TestSampling):
 
     def test_too_many_folds(self):
         w = []
-        res = CrossValidation(self.iris, [MajorityLearner()], k=len(self.iris)/2, warnings=w)
+        res = CrossValidation(
+            self.iris, [MajorityLearner()], k=len(self.iris) / 2, warnings=w
+        )
         self.assertGreater(len(w), 0)
 
     def test_failed(self):
@@ -214,34 +233,44 @@ class TestCrossValidation(TestSampling):
         data = Table("iris")
         n_classes = len(data.domain.class_var.values)
         res = CrossValidation(data, [NaiveBayesLearner()], store_data=True)
-        table = res.get_augmented_data(['Naive Bayes'])
+        table = res.get_augmented_data(["Naive Bayes"])
 
         self.assertEqual(len(table), len(data))
         self.assertEqual(len(table.domain.attributes), len(data.domain.attributes))
         self.assertEqual(len(table.domain.class_vars), len(data.domain.class_vars))
         # +1 for class, +n_classes for probabilities, +1 for fold
         self.assertEqual(
-            len(table.domain.metas), len(data.domain.metas) + 1 + n_classes + 1)
+            len(table.domain.metas), len(data.domain.metas) + 1 + n_classes + 1
+        )
         self.assertEqual(
-            table.domain.metas[len(data.domain.metas)].values, data.domain.class_var.values)
+            table.domain.metas[len(data.domain.metas)].values,
+            data.domain.class_var.values,
+        )
 
-        res = CrossValidation(data, [NaiveBayesLearner(), MajorityLearner()], store_data=True)
-        table = res.get_augmented_data(['Naive Bayes', 'Majority'])
+        res = CrossValidation(
+            data, [NaiveBayesLearner(), MajorityLearner()], store_data=True
+        )
+        table = res.get_augmented_data(["Naive Bayes", "Majority"])
 
         self.assertEqual(len(table), len(data))
         self.assertEqual(len(table.domain.attributes), len(data.domain.attributes))
         self.assertEqual(len(table.domain.class_vars), len(data.domain.class_vars))
         self.assertEqual(
-            len(table.domain.metas), len(data.domain.metas) + 2*(n_classes+1) + 1)
+            len(table.domain.metas), len(data.domain.metas) + 2 * (n_classes + 1) + 1
+        )
         self.assertEqual(
-            table.domain.metas[len(data.domain.metas)].values, data.domain.class_var.values)
+            table.domain.metas[len(data.domain.metas)].values,
+            data.domain.class_var.values,
+        )
         self.assertEqual(
-            table.domain.metas[len(data.domain.metas)+1].values, data.domain.class_var.values)
+            table.domain.metas[len(data.domain.metas) + 1].values,
+            data.domain.class_var.values,
+        )
 
     def test_augmented_data_regression(self):
         data = Table("housing")
-        res = CrossValidation(data, [LinearRegressionLearner(), ], store_data=True)
-        table = res.get_augmented_data(['Linear Regression'])
+        res = CrossValidation(data, [LinearRegressionLearner()], store_data=True)
+        table = res.get_augmented_data(["Linear Regression"])
 
         self.assertEqual(len(table), len(data))
         self.assertEqual(len(table.domain.attributes), len(data.domain.attributes))
@@ -249,8 +278,10 @@ class TestCrossValidation(TestSampling):
         # +1 for class, +1 for fold
         self.assertEqual(len(table.domain.metas), len(data.domain.metas) + 1 + 1)
 
-        res = CrossValidation(data, [LinearRegressionLearner(), MeanLearner()], store_data=True)
-        table = res.get_augmented_data(['Linear Regression', 'Mean Learner'])
+        res = CrossValidation(
+            data, [LinearRegressionLearner(), MeanLearner()], store_data=True
+        )
+        table = res.get_augmented_data(["Linear Regression", "Mean Learner"])
 
         self.assertEqual(len(table), len(data))
         self.assertEqual(len(table.domain.attributes), len(data.domain.attributes))
@@ -260,12 +291,11 @@ class TestCrossValidation(TestSampling):
 
 
 class TestCrossValidationFeature(TestSampling):
-
     def add_meta_fold(self, data, f):
         fat = DiscreteVariable(name="fold", values=[str(a) for a in range(f)])
         domain = Domain(data.domain.attributes, data.domain.class_var, metas=[fat])
         ndata = Table(domain, data)
-        vals = np.tile(range(f), len(data)//f + 1)[:len(data)]
+        vals = np.tile(range(f), len(data) // f + 1)[: len(data)]
         vals = vals.reshape((-1, 1))
         ndata[:, fat] = vals
         return ndata
@@ -273,13 +303,15 @@ class TestCrossValidationFeature(TestSampling):
     def test_call(self):
         t = self.random_table
         t = self.add_meta_fold(t, 3)
-        res = CrossValidationFeature(t, [NaiveBayesLearner()], feature=t.domain.metas[0])
+        res = CrossValidationFeature(
+            t, [NaiveBayesLearner()], feature=t.domain.metas[0]
+        )
         y = t.Y
         np.testing.assert_equal(res.actual, y[res.row_indices].reshape(len(t)))
-        np.testing.assert_equal(res.predicted[0],
-                                y[res.row_indices].reshape(len(t)))
-        np.testing.assert_equal(np.argmax(res.probabilities[0], axis=1),
-                                y[res.row_indices].reshape(len(t)))
+        np.testing.assert_equal(res.predicted[0], y[res.row_indices].reshape(len(t)))
+        np.testing.assert_equal(
+            np.argmax(res.probabilities[0], axis=1), y[res.row_indices].reshape(len(t))
+        )
 
     def test_unknown(self):
         t = self.random_table
@@ -297,10 +329,10 @@ class TestLeaveOneOut(TestSampling):
         res = LeaveOneOut(t, [NaiveBayesLearner()])
         y = t.Y
         np.testing.assert_equal(res.actual, y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(res.predicted[0],
-                                y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(np.argmax(res.probabilities[0], axis=1),
-                                y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(res.predicted[0], y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(
+            np.argmax(res.probabilities[0], axis=1), y[res.row_indices].reshape(nrows)
+        )
         np.testing.assert_equal(res.row_indices, np.arange(nrows))
 
     def test_call(self):
@@ -309,10 +341,10 @@ class TestLeaveOneOut(TestSampling):
         res = LeaveOneOut(t, [NaiveBayesLearner()])
         y = t.Y
         np.testing.assert_equal(res.actual, y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(res.predicted[0],
-                                y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(np.argmax(res.probabilities[0], axis=1),
-                                y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(res.predicted[0], y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(
+            np.argmax(res.probabilities[0], axis=1), y[res.row_indices].reshape(nrows)
+        )
 
     def test_store_data(self):
         t = self.random_table
@@ -335,7 +367,7 @@ class TestLeaveOneOut(TestSampling):
         self.check_models(res, learners, self.nrows)
 
     def test_probs(self):
-        data = Table('iris')[30:130]
+        data = Table("iris")[30:130]
         learners = [MajorityLearner(), MajorityLearner()]
 
         results = LeaveOneOut(data, learners)
@@ -361,8 +393,7 @@ class TestLeaveOneOut(TestSampling):
         x[25:] = 1
         data = Table(x, y)
         res = LeaveOneOut(data, [MajorityLearner()])
-        np.testing.assert_equal(res.predicted[0],
-                                1 - data.Y[res.row_indices].flatten())
+        np.testing.assert_equal(res.predicted[0], 1 - data.Y[res.row_indices].flatten())
 
     def test_failed(self):
         self.run_test_failed(LeaveOneOut, 100)
@@ -381,10 +412,10 @@ class TestTestOnTrainingData(TestSampling):
         res = TestOnTrainingData(t, [NaiveBayesLearner()])
         y = t.Y
         np.testing.assert_equal(res.actual, y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(res.predicted[0],
-                                y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(np.argmax(res.probabilities[0], axis=1),
-                                y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(res.predicted[0], y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(
+            np.argmax(res.probabilities[0], axis=1), y[res.row_indices].reshape(nrows)
+        )
         np.testing.assert_equal(res.row_indices, np.arange(nrows))
 
     def test_store_data(self):
@@ -451,10 +482,10 @@ class TestTestOnTestData(TestSampling):
         res = TestOnTestData(t, t, [NaiveBayesLearner()])
         y = t.Y
         np.testing.assert_equal(res.actual, y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(res.predicted[0],
-                                y[res.row_indices].reshape(nrows))
-        np.testing.assert_equal(np.argmax(res.probabilities[0], axis=1),
-                                y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(res.predicted[0], y[res.row_indices].reshape(nrows))
+        np.testing.assert_equal(
+            np.argmax(res.probabilities[0], axis=1), y[res.row_indices].reshape(nrows)
+        )
         np.testing.assert_equal(res.row_indices, np.arange(nrows))
 
     def test_probs(self):
@@ -478,8 +509,8 @@ class TestTestOnTestData(TestSampling):
 
     def test_store_data(self):
         data = self.random_table
-        train = data[:int(self.nrows*.75)]
-        test = data[int(self.nrows*.75):]
+        train = data[: int(self.nrows * 0.75)]
+        test = data[int(self.nrows * 0.75) :]
         learners = [MajorityLearner()]
 
         res = TestOnTestData(train, test, learners)
@@ -490,8 +521,8 @@ class TestTestOnTestData(TestSampling):
 
     def test_store_models(self):
         data = self.random_table
-        train = data[:int(self.nrows*.75)]
-        test = data[int(self.nrows*.75):]
+        train = data[: int(self.nrows * 0.75)]
+        test = data[int(self.nrows * 0.75) :]
         learners = [NaiveBayesLearner(), MajorityLearner()]
 
         res = TestOnTestData(train, test, learners)
@@ -547,8 +578,9 @@ class TestTestOnTestData(TestSampling):
 
         progress = []
         data = random_data(50, 4)
-        TestOnTestData(data, data, [MajorityLearner(), MajorityLearner()],
-                       callback=record_progress)
+        TestOnTestData(
+            data, data, [MajorityLearner(), MajorityLearner()], callback=record_progress
+        )
         np.testing.assert_almost_equal(progress, self._callback_values(2))
 
     def test_preprocessor(self):
@@ -558,9 +590,12 @@ class TestTestOnTestData(TestSampling):
 
         data_sizes = []
         data = random_data(50, 5)
-        TestOnTestData(data[:30], data[-20:],
-                       [MajorityLearner(), MajorityLearner()],
-                       preprocessor=preprocessor)
+        TestOnTestData(
+            data[:30],
+            data[-20:],
+            [MajorityLearner(), MajorityLearner()],
+            preprocessor=preprocessor,
+        )
         self.assertEqual(data_sizes, [30])
 
 
@@ -591,21 +626,33 @@ class TestShuffleSplit(TestSampling):
     def test_results(self):
         data = self.random_table
         train_size, n_resamples = 0.6, 10
-        res = ShuffleSplit(data, [NaiveBayesLearner()], train_size=train_size,
-                           test_size=1 - train_size, n_resamples=n_resamples)
-        self.assertEqual(len(res.predicted[0]),
-                         n_resamples * self.nrows * (1 - train_size))
+        res = ShuffleSplit(
+            data,
+            [NaiveBayesLearner()],
+            train_size=train_size,
+            test_size=1 - train_size,
+            n_resamples=n_resamples,
+        )
+        self.assertEqual(
+            len(res.predicted[0]), n_resamples * self.nrows * (1 - train_size)
+        )
 
     def test_stratified(self):
         # strata size
         n = 50
-        res = ShuffleSplit(self.iris, [NaiveBayesLearner()],
-                           train_size=.5, test_size=.5,
-                           n_resamples=3, stratified=True, random_state=0)
+        res = ShuffleSplit(
+            self.iris,
+            [NaiveBayesLearner()],
+            train_size=0.5,
+            test_size=0.5,
+            n_resamples=3,
+            stratified=True,
+            random_state=0,
+        )
 
         strata_samples = []
         for train, test in res.indices:
-            strata_samples.append(np.count_nonzero(train < n) == n/2)
+            strata_samples.append(np.count_nonzero(train < n) == n / 2)
             strata_samples.append(np.count_nonzero(train < 2 * n) == n)
 
         self.assertTrue(all(strata_samples))
@@ -613,13 +660,19 @@ class TestShuffleSplit(TestSampling):
     def test_not_stratified(self):
         # strata size
         n = 50
-        res = ShuffleSplit(self.iris, [NaiveBayesLearner()],
-                           train_size=.5, test_size=.5,
-                           n_resamples=3, stratified=False, random_state=0)
+        res = ShuffleSplit(
+            self.iris,
+            [NaiveBayesLearner()],
+            train_size=0.5,
+            test_size=0.5,
+            n_resamples=3,
+            stratified=False,
+            random_state=0,
+        )
 
         strata_samples = []
         for train, test in res.indices:
-            strata_samples.append(np.count_nonzero(train < n) == n/2)
+            strata_samples.append(np.count_nonzero(train < n) == n / 2)
             strata_samples.append(np.count_nonzero(train < 2 * n) == n)
 
         self.assertTrue(not all(strata_samples))

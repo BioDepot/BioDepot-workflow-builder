@@ -10,8 +10,7 @@ from itertools import islice
 from time import strftime
 
 import numpy as np
-from Orange.data import (
-    Table, Domain, Value, Instance, filter)
+from Orange.data import Table, Domain, Value, Instance, filter
 from Orange.data.sql import filter as sql_filter
 from Orange.data.sql.backend import Backend
 from Orange.data.sql.backend.base import TableDesc, BackendError
@@ -20,7 +19,7 @@ from Orange.misc import import_late_warning
 LARGE_TABLE = 100000
 AUTO_DL_LIMIT = 10000
 DEFAULT_SAMPLE_TIME = 1
-sql_log = logging.getLogger('sql_log')
+sql_log = logging.getLogger("sql_log")
 sql_log.debug("Logging started: {}".format(strftime("%Y-%m-%d %H:%M:%S")))
 
 
@@ -35,8 +34,13 @@ class SqlTable(Table):
         return super().__new__(cls)
 
     def __init__(
-            self, connection_params, table_or_sql, backend=None,
-            type_hints=None, inspect_values=False):
+        self,
+        connection_params,
+        table_or_sql,
+        backend=None,
+        type_hints=None,
+        inspect_values=False,
+    ):
         """
         Create a new proxy for sql table.
 
@@ -108,8 +112,9 @@ class SqlTable(Table):
 
         attrs, class_vars, metas = [], [], []
         for field_name, *field_metadata in self.backend.get_fields(table_name):
-            var = self.backend.create_variable(field_name, field_metadata,
-                                               type_hints, inspect_table)
+            var = self.backend.create_variable(
+                field_name, field_metadata, type_hints, inspect_table
+            )
 
             if var.is_string:
                 metas.append(var)
@@ -148,10 +153,7 @@ class SqlTable(Table):
             try:
                 col_idx = self.domain.index(col_idx)
                 var = self.domain[col_idx]
-                return Value(
-                    var,
-                    next(self._query([var], rows=[row_idx]))[0]
-                )
+                return Value(var, next(self._query([var], rows=[row_idx]))[0])
             except TypeError:
                 pass
 
@@ -177,8 +179,9 @@ class SqlTable(Table):
         rows = [row_index]
         values = list(self._query(attributes, rows=rows))
         if not values:
-            raise IndexError('Could not retrieve row {} from table {}'.format(
-                row_index, self.name))
+            raise IndexError(
+                "Could not retrieve row {} from table {}".format(row_index, self.name)
+            )
         return SqlRowInstance(self.domain, values[0])
 
     def __iter__(self):
@@ -194,8 +197,9 @@ class SqlTable(Table):
         if attributes is not None:
             fields = []
             for attr in attributes:
-                assert hasattr(attr, 'to_sql'), \
-                    "Cannot use ordinary attributes with sql backend"
+                assert hasattr(
+                    attr, "to_sql"
+                ), "Cannot use ordinary attributes with sql backend"
                 field_str = '(%s) AS "%s"' % (attr.to_sql(), attr.name)
                 fields.append(field_str)
             if not fields:
@@ -347,8 +351,9 @@ class SqlTable(Table):
     def has_weights(self):
         return False
 
-    def _compute_basic_stats(self, columns=None,
-                             include_metas=False, compute_var=False):
+    def _compute_basic_stats(
+        self, columns=None, include_metas=False, compute_var=False
+    ):
         if self.approx_len() > LARGE_TABLE:
             self = self.sample_time(DEFAULT_SAMPLE_TIME)
 
@@ -373,10 +378,10 @@ class SqlTable(Table):
         i = 0
         for ci, (field_name, continuous) in enumerate(columns):
             if continuous:
-                stats.append(results[i:i+6])
+                stats.append(results[i : i + 6])
                 i += 6
             else:
-                stats.append((None,) * 4 + results[i:i+2])
+                stats.append((None,) * 4 + results[i : i + 2])
                 i += 2
         return stats
 
@@ -395,10 +400,12 @@ class SqlTable(Table):
         for col in columns:
             field_name = col.to_sql()
             fields = field_name, "COUNT(%s)" % field_name
-            query = self._sql_query(fields,
-                                    filters=['%s IS NOT NULL' % field_name],
-                                    group_by=[field_name],
-                                    order_by=[field_name])
+            query = self._sql_query(
+                fields,
+                filters=["%s IS NOT NULL" % field_name],
+                group_by=[field_name],
+                order_by=[field_name],
+            )
             with self.backend.execute_sql_query(query) as cur:
                 dist = np.array(cur.fetchall())
             if col.is_continuous:
@@ -414,8 +421,9 @@ class SqlTable(Table):
         if col_vars is None:
             col_vars = range(len(self.domain.variables))
         if len(col_vars) != 1:
-            raise NotImplementedError("Contingency for multiple columns "
-                                      "has not yet been implemented.")
+            raise NotImplementedError(
+                "Contingency for multiple columns " "has not yet been implemented."
+            )
         if row_var is None:
             raise NotImplementedError("Defaults have not been implemented yet")
 
@@ -425,10 +433,10 @@ class SqlTable(Table):
 
         columns = [self.domain[var] for var in col_vars]
 
-        if any(not (var.is_continuous or var.is_discrete)
-               for var in columns):
-            raise ValueError("contingency can be computed only for discrete "
-                             "and continuous values")
+        if any(not (var.is_continuous or var.is_discrete) for var in columns):
+            raise ValueError(
+                "contingency can be computed only for discrete " "and continuous values"
+            )
 
         row_field = row.to_sql()
 
@@ -438,18 +446,22 @@ class SqlTable(Table):
             fields = [row_field, column_field, "COUNT(%s)" % column_field]
             group_by = [row_field, column_field]
             order_by = [column_field]
-            filters = ['%s IS NOT NULL' % f
-                       for f in (row_field, column_field)]
-            query = self._sql_query(fields, filters=filters,
-                                    group_by=group_by, order_by=order_by)
+            filters = ["%s IS NOT NULL" % f for f in (row_field, column_field)]
+            query = self._sql_query(
+                fields, filters=filters, group_by=group_by, order_by=order_by
+            )
             with self.backend.execute_sql_query(query) as cur:
                 data = list(cur.fetchall())
                 if column.is_continuous:
-                    all_contingencies[i] = \
-                        (self._continuous_contingencies(data, row), [])
+                    all_contingencies[i] = (
+                        self._continuous_contingencies(data, row),
+                        [],
+                    )
                 else:
-                    all_contingencies[i] =\
-                        (self._discrete_contingencies(data, row, column), [])
+                    all_contingencies[i] = (
+                        self._discrete_contingencies(data, row, column),
+                        [],
+                    )
         return all_contingencies, None
 
     def _continuous_contingencies(self, data, row):
@@ -510,8 +522,7 @@ class SqlTable(Table):
         else:
             pass
         t2 = self.copy()
-        t2.row_filters += \
-            (sql_filter.SameValueSql(var.to_sql(), value, negate),)
+        t2.row_filters += (sql_filter.SameValueSql(var.to_sql(), value, negate),)
         return t2
 
     def _filter_values(self, f):
@@ -522,17 +533,14 @@ class SqlTable(Table):
                 if cond.values is None:
                     values = None
                 else:
-                    values = ["'%s'" % var.repr_val(var.to_val(v))
-                              for v in cond.values]
+                    values = ["'%s'" % var.repr_val(var.to_val(v)) for v in cond.values]
                 new_condition = sql_filter.FilterDiscreteSql(
-                    column=var.to_sql(),
-                    values=values)
+                    column=var.to_sql(), values=values
+                )
             elif isinstance(cond, filter.FilterContinuous):
                 new_condition = sql_filter.FilterContinuousSql(
-                    position=var.to_sql(),
-                    oper=cond.oper,
-                    ref=cond.ref,
-                    max=cond.max)
+                    position=var.to_sql(), oper=cond.oper, ref=cond.ref, max=cond.max
+                )
             elif isinstance(cond, filter.FilterString):
                 new_condition = sql_filter.FilterString(
                     var.to_sql(),
@@ -545,14 +553,17 @@ class SqlTable(Table):
                 new_condition = sql_filter.FilterStringList(
                     column=var.to_sql(),
                     values=cond.values,
-                    case_sensitive=cond.case_sensitive)
+                    case_sensitive=cond.case_sensitive,
+                )
             else:
-                raise ValueError('Invalid condition %s' % type(cond))
+                raise ValueError("Invalid condition %s" % type(cond))
             conditions.append(new_condition)
         t2 = self.copy()
-        t2.row_filters += (sql_filter.ValuesSql(conditions=conditions,
-                                                conjunction=f.conjunction,
-                                                negate=f.negate),)
+        t2.row_filters += (
+            sql_filter.ValuesSql(
+                conditions=conditions, conjunction=f.conjunction, negate=f.negate
+            ),
+        )
         return t2
 
     @classmethod
@@ -564,80 +575,114 @@ class SqlTable(Table):
         return table
 
     # sql queries
-    def _sql_query(self, fields, filters=(),
-                   group_by=None, order_by=None, offset=None, limit=None,
-                   use_time_sample=None):
+    def _sql_query(
+        self,
+        fields,
+        filters=(),
+        group_by=None,
+        order_by=None,
+        offset=None,
+        limit=None,
+        use_time_sample=None,
+    ):
 
         row_filters = [f.to_sql() for f in self.row_filters]
         row_filters.extend(filters)
         return self.backend.create_sql_query(
-            self.table_name, fields, row_filters, group_by, order_by,
-            offset, limit, use_time_sample)
+            self.table_name,
+            fields,
+            row_filters,
+            group_by,
+            order_by,
+            offset,
+            limit,
+            use_time_sample,
+        )
 
-
-    DISCRETE_STATS = "SUM(CASE TRUE WHEN %(field_name)s IS NULL THEN 1 " \
-                     "ELSE 0 END), " \
-                     "SUM(CASE TRUE WHEN %(field_name)s IS NULL THEN 0 " \
-                     "ELSE 1 END)"
-    CONTINUOUS_STATS = "MIN(%(field_name)s)::double precision, " \
-                       "MAX(%(field_name)s)::double precision, " \
-                       "AVG(%(field_name)s)::double precision, " \
-                       "STDDEV(%(field_name)s)::double precision, " \
-                       + DISCRETE_STATS
+    DISCRETE_STATS = (
+        "SUM(CASE TRUE WHEN %(field_name)s IS NULL THEN 1 "
+        "ELSE 0 END), "
+        "SUM(CASE TRUE WHEN %(field_name)s IS NULL THEN 0 "
+        "ELSE 1 END)"
+    )
+    CONTINUOUS_STATS = (
+        "MIN(%(field_name)s)::double precision, "
+        "MAX(%(field_name)s)::double precision, "
+        "AVG(%(field_name)s)::double precision, "
+        "STDDEV(%(field_name)s)::double precision, " + DISCRETE_STATS
+    )
 
     def sample_percentage(self, percentage, no_cache=False):
         if percentage >= 100:
             return self
-        return self._sample('system', percentage,
-                            no_cache=no_cache)
+        return self._sample("system", percentage, no_cache=no_cache)
 
     def sample_time(self, time_in_seconds, no_cache=False):
-        return self._sample('system_time', int(time_in_seconds * 1000),
-                            no_cache=no_cache)
+        return self._sample(
+            "system_time", int(time_in_seconds * 1000), no_cache=no_cache
+        )
 
     def _sample(self, method, parameter, no_cache=False):
         import psycopg2
+
         if "," in self.table_name:
             raise NotImplementedError("Sampling of complex queries is not supported")
 
         parameter = str(parameter)
         if "." in self.table_name:
             schema, name = self.table_name.split(".")
-            sample_name = '__%s_%s_%s' % (
+            sample_name = "__%s_%s_%s" % (
                 self.backend.unquote_identifier(name),
                 method,
-                parameter.replace('.', '_').replace('-', '_'))
-            sample_table_q = ".".join([schema, self.backend.quote_identifier(sample_name)])
+                parameter.replace(".", "_").replace("-", "_"),
+            )
+            sample_table_q = ".".join(
+                [schema, self.backend.quote_identifier(sample_name)]
+            )
         else:
-            sample_table = '__%s_%s_%s' % (
+            sample_table = "__%s_%s_%s" % (
                 self.backend.unquote_identifier(self.table_name),
                 method,
-                parameter.replace('.', '_').replace('-', '_'))
+                parameter.replace(".", "_").replace("-", "_"),
+            )
             sample_table_q = self.backend.quote_identifier(sample_table)
         create = False
         try:
             query = "SELECT * FROM " + sample_table_q + " LIMIT 0;"
-            with self.backend.execute_sql_query(query): pass
+            with self.backend.execute_sql_query(query):
+                pass
 
             if no_cache:
                 query = "DROP TABLE " + sample_table_q
-                with self.backend.execute_sql_query(query): pass
+                with self.backend.execute_sql_query(query):
+                    pass
                 create = True
 
         except BackendError:
             create = True
 
         if create:
-            with self.backend.execute_sql_query(" ".join([
-                    "CREATE TABLE", sample_table_q, "AS",
-                    "SELECT * FROM", self.table_name,
-                    "TABLESAMPLE", method, "(", parameter, ")"])):
+            with self.backend.execute_sql_query(
+                " ".join(
+                    [
+                        "CREATE TABLE",
+                        sample_table_q,
+                        "AS",
+                        "SELECT * FROM",
+                        self.table_name,
+                        "TABLESAMPLE",
+                        method,
+                        "(",
+                        parameter,
+                        ")",
+                    ]
+                )
+            ):
                 pass
 
         sampled_table = self.copy()
         sampled_table.table_name = sample_table_q
-        with sampled_table.backend.execute_sql_query(
-                'ANALYZE' + sample_table_q):
+        with sampled_table.backend.execute_sql_query("ANALYZE" + sample_table_q):
             pass
         return sampled_table
 

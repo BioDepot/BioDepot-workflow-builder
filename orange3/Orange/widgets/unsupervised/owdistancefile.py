@@ -36,28 +36,29 @@ class OWDistanceFile(widget.OWWidget, RecentPathsWComboMixin):
         box.layout().addWidget(self.file_combo)
         self.file_combo.activated[int].connect(self.select_file)
 
-        button = gui.button(box, self, '...', callback=self.browse_file)
+        button = gui.button(box, self, "...", callback=self.browse_file)
         button.setIcon(self.style().standardIcon(QStyle.SP_DirOpenIcon))
-        button.setSizePolicy(
-            QSizePolicy.Maximum, QSizePolicy.Fixed)
+        button.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
 
-        button = gui.button(
-            box, self, "Reload", callback=self.reload, default=True)
+        button = gui.button(box, self, "Reload", callback=self.reload, default=True)
         button.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
         button.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
         box = gui.vBox(self.controlArea, "Info", addSpace=True)
-        self.infoa = gui.widgetLabel(box, 'No data loaded.')
-        self.warnings = gui.widgetLabel(box, ' ')
-        #Set word wrap, so long warnings won't expand the widget
+        self.infoa = gui.widgetLabel(box, "No data loaded.")
+        self.warnings = gui.widgetLabel(box, " ")
+        # Set word wrap, so long warnings won't expand the widget
         self.warnings.setWordWrap(True)
-        self.warnings.setSizePolicy(
-            QSizePolicy.Ignored, QSizePolicy.MinimumExpanding)
+        self.warnings.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.MinimumExpanding)
 
         box = gui.hBox(self.controlArea)
         gui.button(
-            box, self, "Browse documentation datasets",
-            callback=lambda: self.browse_file(True), autoDefault=False)
+            box,
+            self,
+            "Browse documentation datasets",
+            callback=lambda: self.browse_file(True),
+            autoDefault=False,
+        )
         box.layout().addSpacing(200)
 
         self.set_file_list()
@@ -79,14 +80,17 @@ class OWDistanceFile(widget.OWWidget, RecentPathsWComboMixin):
             start_file = get_sample_datasets_dir()
             if not os.path.exists(start_file):
                 QMessageBox.information(
-                    None, "File",
-                    "Cannot find the directory with documentation datasets")
+                    None,
+                    "File",
+                    "Cannot find the directory with documentation datasets",
+                )
                 return
         else:
             start_file = self.last_path() or os.path.expanduser("~/")
 
         filename, _ = QFileDialog.getOpenFileName(
-            self, 'Open Distance File', start_file, "(*.dst)")
+            self, "Open Distance File", start_file, "(*.dst)"
+        )
         if not filename:
             return
         self.add_path(filename)
@@ -102,8 +106,9 @@ class OWDistanceFile(widget.OWWidget, RecentPathsWComboMixin):
             dir_name, basename = os.path.split(fn)
             if os.path.exists(os.path.join(".", basename)):
                 fn = os.path.join(".", basename)
-                self.information("Loading '{}' from the current directory."
-                                 .format(basename))
+                self.information(
+                    "Loading '{}' from the current directory.".format(basename)
+                )
         if fn == "(none)":
             self.Outputs.distances.send(None)
             self.infoa.setText("No data loaded")
@@ -119,18 +124,19 @@ class OWDistanceFile(widget.OWWidget, RecentPathsWComboMixin):
         except Exception as exc:
             err_value = str(exc)
             self.error("Invalid file format")
-            self.infoa.setText('Data was not loaded due to an error.')
+            self.infoa.setText("Data was not loaded due to an error.")
             self.warnings.setText(err_value)
             distances = None
 
         if distances is not None:
             self.infoa.setText(
-                "{} points(s), ".format(len(distances)) +
-                (["unlabelled", "labelled"][distances.row_items is not None]))
+                "{} points(s), ".format(len(distances))
+                + (["unlabelled", "labelled"][distances.row_items is not None])
+            )
             self.warnings.setText("")
             file_name = os.path.split(fn)[1]
             if "." in file_name:
-                distances.name = file_name[:file_name.rfind('.')]
+                distances.name = file_name[: file_name.rfind(".")]
             else:
                 distances.name = file_name
 
@@ -142,8 +148,10 @@ class OWDistanceFile(widget.OWWidget, RecentPathsWComboMixin):
         else:
             self.report_items([("File name", self.loaded_file)])
 
+
 if __name__ == "__main__":
     from AnyQt.QtWidgets import QApplication
+
     a = QApplication(sys.argv)
     ow = OWDistanceFile()
     ow.show()

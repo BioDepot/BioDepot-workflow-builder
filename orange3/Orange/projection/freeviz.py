@@ -1,4 +1,3 @@
-
 import numpy as np
 import scipy.spatial
 
@@ -43,25 +42,39 @@ class FreeVizModel(Projection):
         def freeviz_variable(i):
             v = ContinuousVariable(
                 "FreeViz Component {}".format(i + 1),
-                compute_value=FreeVizProjector(self, i, freeviz_transform))
+                compute_value=FreeVizProjector(self, i, freeviz_transform),
+            )
             v.to_sql = LinearCombinationSql(
-                domain.attributes, self.components_[i, :],
-                getattr(self, 'mean_', None))
+                domain.attributes, self.components_[i, :], getattr(self, "mean_", None)
+            )
             return v
 
         super().__init__(proj=proj)
         self.orig_domain = domain
         self.domain = Domain(
             [freeviz_variable(i) for i in range(proj.dim)],
-            domain.class_vars, domain.metas)
+            domain.class_vars,
+            domain.metas,
+        )
 
 
 class FreeViz(Projector):
-    name = 'FreeViz'
+    name = "FreeViz"
     supports_sparse = False
 
-    def __init__(self, weights=None, center=True, scale=True, dim=2, p=1,
-                 initial=None, maxiter=500, alpha=0.1, atol=1e-5, preprocessors=None):
+    def __init__(
+        self,
+        weights=None,
+        center=True,
+        scale=True,
+        dim=2,
+        p=1,
+        initial=None,
+        maxiter=500,
+        alpha=0.1,
+        atol=1e-5,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.weights = weights
         self.center = center
@@ -82,10 +95,20 @@ class FreeViz(Projector):
     def fit(self, X, Y=None):
         X, Y, _ = self.prepare_freeviz_data(X=X, Y=Y)
         if X is not None:
-            _, a, _, _ = self.freeviz(X, Y, weights=self.weights, center=self.center,
-                                      scale=self.scale, dim=self.dim, p=self.p,
-                                      initial=self.initial, maxiter=self.maxiter, alpha=self.alpha,
-                                      atol=self.atol, is_class_discrete=self.is_class_discrete)
+            _, a, _, _ = self.freeviz(
+                X,
+                Y,
+                weights=self.weights,
+                center=self.center,
+                scale=self.scale,
+                dim=self.dim,
+                p=self.p,
+                initial=self.initial,
+                maxiter=self.maxiter,
+                alpha=self.alpha,
+                atol=self.atol,
+                is_class_discrete=self.is_class_discrete,
+            )
             self.components_ = a
             return FreeVizModel(self, self.domain)
 
@@ -109,7 +132,7 @@ class FreeViz(Projector):
         if not len(X):
             return None, None, None
 
-        X = (X - np.mean(X, axis=0))
+        X = X - np.mean(X, axis=0)
         span = np.ptp(X, axis=0)
         X[:, span > 0] /= span[span > 0].reshape(1, -1)
 
@@ -176,8 +199,7 @@ class FreeViz(Projector):
             F = -(distances ** p)
 
         # handle repulsive force
-        mask = (diffclass &
-                (distances > np.finfo(distances.dtype).eps * 100))
+        mask = diffclass & (distances > np.finfo(distances.dtype).eps * 100)
         assert mask.shape == F.shape and mask.dtype == np.bool
         if p == 1:
             F[mask] = 1 / distances[mask]
@@ -199,16 +221,21 @@ class FreeViz(Projector):
         _, dim = embeddings.shape
 
         if not N == embeddings.shape[0]:
-            raise ValueError("X and embeddings must have the same length ({}!={})"
-                             .format(X.shape[0], embeddings.shape[0]))
+            raise ValueError(
+                "X and embeddings must have the same length ({}!={})".format(
+                    X.shape[0], embeddings.shape[0]
+                )
+            )
 
         if weights is not None and X.shape[0] != weights.shape[0]:
-            raise ValueError("X.shape[0] != weights.shape[0] ({}!={})"
-                             .format(X.shape[0], weights.shape[0]))
+            raise ValueError(
+                "X.shape[0] != weights.shape[0] ({}!={})".format(
+                    X.shape[0], weights.shape[0]
+                )
+            )
 
         # all pairwise vector differences between embeddings
-        embedding_diff = (embeddings[:, np.newaxis, :] -
-                          embeddings[np.newaxis, :, :])
+        embedding_diff = embeddings[:, np.newaxis, :] - embeddings[np.newaxis, :, :]
         assert embedding_diff.shape == (N, N, dim)
         assert cls.allclose(embedding_diff[0, 1], embeddings[0] - embeddings[1])
         assert cls.allclose(embedding_diff[1, 0], -embedding_diff[0, 1])
@@ -243,7 +270,9 @@ class FreeViz(Projector):
         return G
 
     @classmethod
-    def freeviz_gradient(cls, X, y, embedding, p=1, weights=None, is_class_discrete=False):
+    def freeviz_gradient(
+        cls, X, y, embedding, p=1, weights=None, is_class_discrete=False
+    ):
         """
         Return the gradient for the FreeViz [1]_ projection.
 
@@ -291,13 +320,25 @@ class FreeViz(Projector):
         """
         assert A.ndim == 2 and A.shape[1] == 2
         phi = np.arctan2(A[0, 1], A[0, 0])
-        R = [[np.cos(-phi), np.sin(-phi)],
-             [-np.sin(-phi), np.cos(-phi)]]
+        R = [[np.cos(-phi), np.sin(-phi)], [-np.sin(-phi), np.cos(-phi)]]
         return np.dot(A, R)
 
     @classmethod
-    def freeviz(cls, X, y, weights=None, center=True, scale=True, dim=2, p=1,
-                initial=None, maxiter=500, alpha=0.1, atol=1e-5, is_class_discrete=False):
+    def freeviz(
+        cls,
+        X,
+        y,
+        weights=None,
+        center=True,
+        scale=True,
+        dim=2,
+        p=1,
+        initial=None,
+        maxiter=500,
+        alpha=0.1,
+        atol=1e-5,
+        is_class_discrete=False,
+    ):
         """
         FreeViz
 
@@ -367,9 +408,12 @@ class FreeViz(Projector):
                 center = None
         else:
             center = np.asarray(center, dtype=X.dtype)
-            if center.shape != (P, ):
-                raise ValueError("center.shape != (X.shape[1], ) ({} != {})"
-                                 .format(center.shape, (X.shape[1], )))
+            if center.shape != (P,):
+                raise ValueError(
+                    "center.shape != (X.shape[1], ) ({} != {})".format(
+                        center.shape, (X.shape[1],)
+                    )
+                )
 
         if isinstance(scale, bool):
             if scale:
@@ -378,9 +422,10 @@ class FreeViz(Projector):
                 scale = None
         else:
             scale = np.asarray(scale, dtype=X.dtype)
-            if scale.shape != (P, ):
-                raise ValueError("scale.shape != (X.shape[1],) ({} != {}))"
-                                 .format(scale.shape, (P, )))
+            if scale.shape != (P,):
+                raise ValueError(
+                    "scale.shape != (X.shape[1],) ({} != {}))".format(scale.shape, (P,))
+                )
 
         if initial is not None:
             initial = np.asarray(initial)
@@ -403,8 +448,14 @@ class FreeViz(Projector):
 
         step_i = 0
         while step_i < maxiter:
-            G = cls.freeviz_gradient(X, y, embeddings, p=p, weights=weights,
-                                     is_class_discrete=is_class_discrete)
+            G = cls.freeviz_gradient(
+                X,
+                y,
+                embeddings,
+                p=p,
+                weights=weights,
+                is_class_discrete=is_class_discrete,
+            )
 
             # Scale the changes (the largest anchor move is alpha * radius)
             step = np.min(np.linalg.norm(A, axis=1) / np.linalg.norm(G, axis=1))

@@ -1,10 +1,12 @@
 # Pull members from modules to Orange.classification namespace
 # pylint: disable=wildcard-import
 
-from .base_classification import (ModelClassification as Model,
-                                  LearnerClassification as Learner,
-                                  SklModelClassification as SklModel,
-                                  SklLearnerClassification as SklLearner)
+from .base_classification import (
+    ModelClassification as Model,
+    LearnerClassification as Learner,
+    SklModelClassification as SklModel,
+    SklLearnerClassification as SklLearner,
+)
 from .knn import *
 from .logistic_regression import *
 from .majority import *

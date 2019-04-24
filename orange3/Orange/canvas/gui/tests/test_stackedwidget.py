@@ -43,15 +43,13 @@ class TestStackedWidget(test.QAppTestCase):
         def widgets():
             return [stack.widget(i) for i in range(stack.count())]
 
-        self.assertSequenceEqual([widget1, widget2, widget3],
-                                 widgets())
+        self.assertSequenceEqual([widget1, widget2, widget3], widgets())
         stack.show()
 
         stack.removeWidget(widget2)
         self.assertEqual(stack.count(), 2)
         self.assertEqual(stack.currentIndex(), 0)
-        self.assertSequenceEqual([widget1, widget3],
-                                 widgets())
+        self.assertSequenceEqual([widget1, widget3], widgets())
 
         stack.setCurrentIndex(1)
         # wait until animation finished
@@ -63,8 +61,7 @@ class TestStackedWidget(test.QAppTestCase):
         stack.insertWidget(1, widget2)
         self.assertEqual(stack.count(), 3)
         self.assertEqual(stack.currentIndex(), 2)
-        self.assertSequenceEqual([widget1, widget2, widget3],
-                                 widgets())
+        self.assertSequenceEqual([widget1, widget2, widget3], widgets())
 
         stack.transitionFinished.disconnect(self.app.exit)
 

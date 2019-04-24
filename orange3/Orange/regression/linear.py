@@ -9,10 +9,15 @@ from Orange.preprocess.score import LearnerScorer
 from Orange.regression import Learner, Model, SklLearner, SklModel
 
 
-__all__ = ["LinearRegressionLearner", "RidgeRegressionLearner",
-           "LassoRegressionLearner", "SGDRegressionLearner",
-           "ElasticNetLearner", "ElasticNetCVLearner",
-           "PolynomialLearner"]
+__all__ = [
+    "LinearRegressionLearner",
+    "RidgeRegressionLearner",
+    "LassoRegressionLearner",
+    "SGDRegressionLearner",
+    "ElasticNetLearner",
+    "ElasticNetCVLearner",
+    "PolynomialLearner",
+]
 
 
 class _FeatureScorerMixin(LearnerScorer):
@@ -39,9 +44,17 @@ class LinearRegressionLearner(SklLearner, _FeatureScorerMixin):
 class RidgeRegressionLearner(LinearRegressionLearner):
     __wraps__ = skl_linear_model.Ridge
 
-    def __init__(self, alpha=1.0, fit_intercept=True,
-                 normalize=False, copy_X=True, max_iter=None,
-                 tol=0.001, solver='auto', preprocessors=None):
+    def __init__(
+        self,
+        alpha=1.0,
+        fit_intercept=True,
+        normalize=False,
+        copy_X=True,
+        max_iter=None,
+        tol=0.001,
+        solver="auto",
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
@@ -49,10 +62,19 @@ class RidgeRegressionLearner(LinearRegressionLearner):
 class LassoRegressionLearner(LinearRegressionLearner):
     __wraps__ = skl_linear_model.Lasso
 
-    def __init__(self, alpha=1.0, fit_intercept=True, normalize=False,
-                 precompute=False, copy_X=True, max_iter=1000,
-                 tol=0.0001, warm_start=False, positive=False,
-                 preprocessors=None):
+    def __init__(
+        self,
+        alpha=1.0,
+        fit_intercept=True,
+        normalize=False,
+        precompute=False,
+        copy_X=True,
+        max_iter=1000,
+        tol=0.0001,
+        warm_start=False,
+        positive=False,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
@@ -60,10 +82,20 @@ class LassoRegressionLearner(LinearRegressionLearner):
 class ElasticNetLearner(LinearRegressionLearner):
     __wraps__ = skl_linear_model.ElasticNet
 
-    def __init__(self, alpha=1.0, l1_ratio=0.5, fit_intercept=True,
-                 normalize=False, precompute=False, max_iter=1000,
-                 copy_X=True, tol=0.0001, warm_start=False, positive=False,
-                 preprocessors=None):
+    def __init__(
+        self,
+        alpha=1.0,
+        l1_ratio=0.5,
+        fit_intercept=True,
+        normalize=False,
+        precompute=False,
+        max_iter=1000,
+        copy_X=True,
+        tol=0.0001,
+        warm_start=False,
+        positive=False,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
@@ -71,10 +103,24 @@ class ElasticNetLearner(LinearRegressionLearner):
 class ElasticNetCVLearner(LinearRegressionLearner):
     __wraps__ = skl_linear_model.ElasticNetCV
 
-    def __init__(self, l1_ratio=0.5, eps=0.001, n_alphas=100, alphas=None,
-                 fit_intercept=True, normalize=False, precompute='auto',
-                 max_iter=1000, tol=0.0001, cv=None, copy_X=True,
-                 verbose=0, n_jobs=1, positive=False, preprocessors=None):
+    def __init__(
+        self,
+        l1_ratio=0.5,
+        eps=0.001,
+        n_alphas=100,
+        alphas=None,
+        fit_intercept=True,
+        normalize=False,
+        precompute="auto",
+        max_iter=1000,
+        tol=0.0001,
+        cv=None,
+        copy_X=True,
+        verbose=0,
+        n_jobs=1,
+        positive=False,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
@@ -83,12 +129,27 @@ class SGDRegressionLearner(LinearRegressionLearner):
     __wraps__ = skl_linear_model.SGDRegressor
     preprocessors = SklLearner.preprocessors + [Normalize()]
 
-    def __init__(self, loss='squared_loss', penalty='l2', alpha=0.0001,
-                 l1_ratio=0.15, fit_intercept=True, max_iter=5, tol=None,
-                 shuffle=True, epsilon=0.1, n_jobs=1, random_state=None,
-                 learning_rate='invscaling', eta0=0.01, power_t=0.25,
-                 class_weight=None, warm_start=False, average=False,
-                 preprocessors=None):
+    def __init__(
+        self,
+        loss="squared_loss",
+        penalty="l2",
+        alpha=0.0001,
+        l1_ratio=0.15,
+        fit_intercept=True,
+        max_iter=5,
+        tol=None,
+        shuffle=True,
+        epsilon=0.1,
+        n_jobs=1,
+        random_state=None,
+        learning_rate="invscaling",
+        eta0=0.01,
+        power_t=0.25,
+        class_weight=None,
+        warm_start=False,
+        average=False,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
@@ -105,11 +166,11 @@ class PolynomialLearner(Learner):
     preprocessors : List[Preprocessor]
         preprocessors to be applied on the data before learning
     """
-    name = 'poly learner'
+
+    name = "poly learner"
     preprocessors = SklLearner.preprocessors
 
-    def __init__(self, learner=LinearRegressionLearner(), degree=2,
-                 preprocessors=None):
+    def __init__(self, learner=LinearRegressionLearner(), degree=2, preprocessors=None):
         super().__init__(preprocessors=preprocessors)
         self.degree = degree
         self.learner = learner
@@ -145,7 +206,7 @@ class LinearModel(SklModel):
             return vals
 
     def __str__(self):
-        return 'LinearModel {}'.format(self.skl_model)
+        return "LinearModel {}".format(self.skl_model)
 
 
 class PolynomialModel(Model):
@@ -158,7 +219,7 @@ class PolynomialModel(Model):
         return self.model.predict(X)
 
     def __str__(self):
-        return 'PolynomialModel {}'.format(self.model)
+        return "PolynomialModel {}".format(self.model)
 
 
 PolynomialLearner.__returns__ = PolynomialModel

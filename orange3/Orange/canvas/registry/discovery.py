@@ -19,8 +19,10 @@ from collections import namedtuple
 import pkg_resources
 
 from .description import (
-    WidgetDescription, CategoryDescription,
-    WidgetSpecificationError, CategorySpecificationError
+    WidgetDescription,
+    CategoryDescription,
+    WidgetSpecificationError,
+    CategorySpecificationError,
 )
 
 from . import VERSION_HEX
@@ -30,19 +32,19 @@ import collections
 log = logging.getLogger(__name__)
 
 
-_CacheEntry = \
-    namedtuple(
-        "_CacheEntry",
-        ["mod_path",         # Module path (filename)
-         "name",             # Module qualified import name
-         "mtime",            # Modified time
-         "project_name",     # distribution name (if available)
-         "project_version",  # distribution version (if available)
-         "exc_type",         # exception type when last trying to import
-         "exc_val",          # exception value (str of value)
-         "description"       # WidgetDescription instance
-         ]
-    )
+_CacheEntry = namedtuple(
+    "_CacheEntry",
+    [
+        "mod_path",  # Module path (filename)
+        "name",  # Module qualified import name
+        "mtime",  # Modified time
+        "project_name",  # distribution name (if available)
+        "project_version",  # distribution version (if available)
+        "exc_type",  # exception type when last trying to import
+        "exc_val",  # exception value (str of value)
+        "description",  # WidgetDescription instance
+    ],
+)
 
 
 def default_category_for_module(module):
@@ -66,7 +68,7 @@ class WidgetDiscovery(object):
     def __init__(self, registry=None, cached_descriptions=None):
         self.registry = registry
         self.cached_descriptions = cached_descriptions or {}
-        version = (VERSION_HEX, )
+        version = (VERSION_HEX,)
         if self.cached_descriptions.get("!VERSION") != version:
             self.cached_descriptions.clear()
             self.cached_descriptions["!VERSION"] = version
@@ -81,23 +83,31 @@ class WidgetDiscovery(object):
 
         """
         if isinstance(entry_points_iter, str):
-            entry_points_iter = \
-                pkg_resources.iter_entry_points(entry_points_iter)
+            entry_points_iter = pkg_resources.iter_entry_points(entry_points_iter)
 
         for entry_point in entry_points_iter:
             try:
                 point = entry_point.resolve()
             except pkg_resources.DistributionNotFound:
-                log.error("Could not load '%s' (unsatisfied dependencies).",
-                          entry_point, exc_info=True)
+                log.error(
+                    "Could not load '%s' (unsatisfied dependencies).",
+                    entry_point,
+                    exc_info=True,
+                )
                 continue
             except ImportError:
-                log.error("An ImportError occurred while loading "
-                          "entry point '%s'", entry_point, exc_info=True)
+                log.error(
+                    "An ImportError occurred while loading " "entry point '%s'",
+                    entry_point,
+                    exc_info=True,
+                )
                 continue
             except Exception:
-                log.error("An exception occurred while loading "
-                          "entry point '%s'", entry_point, exc_info=True)
+                log.error(
+                    "An exception occurred while loading " "entry point '%s'",
+                    entry_point,
+                    exc_info=True,
+                )
                 continue
 
             try:
@@ -105,16 +115,12 @@ class WidgetDiscovery(object):
                     if hasattr(point, "__path__"):
                         # Entry point is a package (a widget category)
                         self.process_category_package(
-                            point,
-                            name=entry_point.name,
-                            distribution=entry_point.dist
+                            point, name=entry_point.name, distribution=entry_point.dist
                         )
                     else:
                         # Entry point is a module (a single widget)
                         self.process_widget_module(
-                            point,
-                            name=entry_point.name,
-                            distribution=entry_point.dist
+                            point, name=entry_point.name, distribution=entry_point.dist
                         )
                 elif isinstance(point, (types.FunctionType, types.MethodType)):
                     # Entry point is a callable loader function
@@ -125,17 +131,22 @@ class WidgetDiscovery(object):
                 else:
                     log.error("Cannot handle entry point %r", point)
             except Exception:
-                log.error("An exception occurred while processing %r.",
-                          entry_point, exc_info=True)
+                log.error(
+                    "An exception occurred while processing %r.",
+                    entry_point,
+                    exc_info=True,
+                )
 
-    def process_widget_module(self, module, name=None, category_name=None,
-                              distribution=None):
+    def process_widget_module(
+        self, module, name=None, category_name=None, distribution=None
+    ):
         """
         Process a widget module.
         """
         try:
-            desc = self.widget_description(module, widget_name=name,
-                                           distribution=distribution)
+            desc = self.widget_description(
+                module, widget_name=name, distribution=distribution
+            )
         except (WidgetSpecificationError, Exception) as ex:
             log.info("Invalid widget specification.", exc_info=True)
             return
@@ -158,15 +169,19 @@ class WidgetDiscovery(object):
             try:
                 cat_desc = category_description()
             except Exception:
-                log.error("Error calling 'category_description' in %r.",
-                          category, exc_info=True)
+                log.error(
+                    "Error calling 'category_description' in %r.",
+                    category,
+                    exc_info=True,
+                )
                 cat_desc = default_category_for_module(category)
         else:
             try:
                 cat_desc = CategoryDescription.from_package(category)
             except (CategorySpecificationError, Exception) as ex:
-                log.info("Package %r does not describe a category.", category,
-                         exc_info=True)
+                log.info(
+                    "Package %r does not describe a category.", category, exc_info=True
+                )
                 cat_desc = default_category_for_module(category)
 
         if name is not None:
@@ -178,10 +193,8 @@ class WidgetDiscovery(object):
         self.handle_category(cat_desc)
 
         desc_iter = self.iter_widget_descriptions(
-                        category,
-                        category_name=cat_desc.name,
-                        distribution=distribution
-                        )
+            category, category_name=cat_desc.name, distribution=distribution
+        )
 
         for desc in desc_iter:
             self.handle_widget(desc)
@@ -204,8 +217,9 @@ class WidgetDiscovery(object):
             elif isinstance(desc, WidgetDescription):
                 self.handle_widget(desc)
             else:
-                log.error("Category or Widget Description instance "
-                          "expected. Got %r.", desc)
+                log.error(
+                    "Category or Widget Description instance " "expected. Got %r.", desc
+                )
 
     def handle_widget(self, desc):
         """
@@ -229,8 +243,7 @@ class WidgetDiscovery(object):
         if self.registry:
             self.registry.register_category(desc)
 
-    def iter_widget_descriptions(self, package, category_name=None,
-                                 distribution=None):
+    def iter_widget_descriptions(self, package, category_name=None, distribution=None):
         """
         Return an iterator over widget descriptions accessible from
         `package`.
@@ -260,33 +273,37 @@ class WidgetDiscovery(object):
                     try:
                         module = asmodule(name)
                     except Exception:
-                        log.error("Error while importing %r. "
-                                  "The widget will not be shown.", name,
-                                  exc_info=True)
+                        log.error(
+                            "Error while importing %r. "
+                            "The widget will not be shown.",
+                            name,
+                            exc_info=True,
+                        )
                         continue
 
                     try:
                         desc = self.widget_description(
-                                 module,
-                                 category_name=category_name,
-                                 distribution=distribution
-                                 )
+                            module,
+                            category_name=category_name,
+                            distribution=distribution,
+                        )
                     except WidgetSpecificationError:
                         self.cache_log_error(
-                                 source_path, WidgetSpecificationError,
-                                 distribution
-                                 )
+                            source_path, WidgetSpecificationError, distribution
+                        )
 
                         continue
                     except Exception:
                         log.warning("Problem parsing %r", name, exc_info=True)
                         continue
                 yield desc
-                self.cache_insert(source_path, os.stat(source_path).st_mtime,
-                                  desc, distribution)
+                self.cache_insert(
+                    source_path, os.stat(source_path).st_mtime, desc, distribution
+                )
 
-    def widget_description(self, module, widget_name=None,
-                           category_name=None, distribution=None):
+    def widget_description(
+        self, module, widget_name=None, category_name=None, distribution=None
+    ):
         """
         Return a widget description from a module.
         """
@@ -306,8 +323,7 @@ class WidgetDiscovery(object):
 
         return desc
 
-    def cache_insert(self, module, mtime, description, distribution=None,
-                     error=None):
+    def cache_insert(self, module, mtime, description, distribution=None, error=None):
         """
         Insert the description into the cache.
         """
@@ -335,10 +351,16 @@ class WidgetDiscovery(object):
                 exc_type = type(error)
                 exc_val = repr(error.args)
 
-        self.cached_descriptions[mod_path] = \
-                _CacheEntry(mod_path, mod_name, mtime, project_name,
-                            project_version, exc_type, exc_val,
-                            description)
+        self.cached_descriptions[mod_path] = _CacheEntry(
+            mod_path,
+            mod_name,
+            mtime,
+            project_name,
+            project_version,
+            exc_type,
+            exc_val,
+            description,
+        )
 
     def cache_get(self, mod_path, distribution=None):
         """
@@ -365,8 +387,10 @@ class WidgetDiscovery(object):
                 return False
 
             if distribution is not None:
-                if entry.project_name != distribution.project_name or \
-                        entry.project_version != distribution.version:
+                if (
+                    entry.project_name != distribution.project_name
+                    or entry.project_version != distribution.version
+                ):
                     return False
 
             if entry.exc_type == WidgetSpecificationError:
@@ -393,8 +417,7 @@ class WidgetDiscovery(object):
         mtime = os.stat(mod_path).st_mtime
         if mod_path in self.cached_descriptions:
             entry = self.cached_descriptions[mod_path]
-            return entry.mtime == mtime and \
-                    entry.exc_type == WidgetSpecificationError
+            return entry.mtime == mtime and entry.exc_type == WidgetSpecificationError
         else:
             return False
 
@@ -428,7 +451,8 @@ def widget_descriptions_from_package(package):
 
     desciptions = []
     for _, name, ispkg in pkgutil.iter_modules(
-            package.__path__, package.__name__ + "."):
+        package.__path__, package.__name__ + "."
+    ):
         if ispkg:
             continue
         try:

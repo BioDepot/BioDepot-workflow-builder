@@ -5,9 +5,16 @@ from itertools import chain
 import numpy as np
 
 from AnyQt.QtWidgets import (
-    QGraphicsView, QGraphicsScene, QGraphicsItem, QGraphicsSimpleTextItem,
-    QGraphicsTextItem, QGraphicsItemGroup, QGraphicsLineItem,
-    QGraphicsPathItem, QGraphicsRectItem, QSizePolicy
+    QGraphicsView,
+    QGraphicsScene,
+    QGraphicsItem,
+    QGraphicsSimpleTextItem,
+    QGraphicsTextItem,
+    QGraphicsItemGroup,
+    QGraphicsLineItem,
+    QGraphicsPathItem,
+    QGraphicsRectItem,
+    QSizePolicy,
 )
 from AnyQt.QtGui import QPen, QColor, QBrush, QPainterPath, QPainter, QFont
 from AnyQt.QtCore import Qt, QEvent, QRectF, QSize
@@ -20,11 +27,12 @@ from Orange.data.filter import FilterDiscrete, FilterContinuous, Values
 from Orange.statistics import contingency, distribution
 
 from Orange.widgets import widget, gui
-from Orange.widgets.settings import (Setting, DomainContextHandler,
-                                     ContextSetting)
+from Orange.widgets.settings import Setting, DomainContextHandler, ContextSetting
 from Orange.widgets.utils.itemmodels import DomainModel, VariableListModel
-from Orange.widgets.utils.annotated_data import (create_annotated_table,
-                                                 ANNOTATED_DATA_SIGNAL_NAME)
+from Orange.widgets.utils.annotated_data import (
+    create_annotated_table,
+    ANNOTATED_DATA_SIGNAL_NAME,
+)
 from Orange.widgets.widget import Input, Output
 
 
@@ -73,8 +81,9 @@ class BoxData:
         else:
             self.q25 = self.q75 = None
             self.median = q[1] if len(q) == 2 else None
-        self.conditions = [FilterContinuous(attr, FilterContinuous.Between,
-                                            self.q25, self.q75)]
+        self.conditions = [
+            FilterContinuous(attr, FilterContinuous.Between, self.q25, self.q75)
+        ]
         if group_val_index is not None:
             self.conditions.append(FilterDiscrete(group_var, [group_val_index]))
 
@@ -113,6 +122,7 @@ class OWBoxPlot(widget.OWWidget):
     constructed in advance (by layout_changed). Instead, layout_changed and
     display_changed call display_changed_disc that draws everything.
     """
+
     name = "Box Plot"
     description = "Visualize the distribution of feature values in a box plot."
     icon = "icons/BoxPlot.svg"
@@ -143,31 +153,40 @@ class OWBoxPlot(widget.OWWidget):
     auto_commit = Setting(True)
 
     _sorting_criteria_attrs = {
-        CompareNone: "", CompareMedians: "median", CompareMeans: "mean"
+        CompareNone: "",
+        CompareMedians: "median",
+        CompareMeans: "mean",
     }
 
     _pen_axis_tick = QPen(Qt.white, 5)
     _pen_axis = QPen(Qt.darkGray, 3)
-    _pen_median = QPen(QBrush(QColor(0xff, 0xff, 0x00)), 2)
-    _pen_paramet = QPen(QBrush(QColor(0x33, 0x00, 0xff)), 2)
-    _pen_dotted = QPen(QBrush(QColor(0x33, 0x00, 0xff)), 1)
+    _pen_median = QPen(QBrush(QColor(0xFF, 0xFF, 0x00)), 2)
+    _pen_paramet = QPen(QBrush(QColor(0x33, 0x00, 0xFF)), 2)
+    _pen_dotted = QPen(QBrush(QColor(0x33, 0x00, 0xFF)), 1)
     _pen_dotted.setStyle(Qt.DotLine)
     _post_line_pen = QPen(Qt.lightGray, 2)
     _post_grp_pen = QPen(Qt.lightGray, 4)
-    for pen in (_pen_paramet, _pen_median, _pen_dotted,
-                _pen_axis, _pen_axis_tick, _post_line_pen, _post_grp_pen):
+    for pen in (
+        _pen_paramet,
+        _pen_median,
+        _pen_dotted,
+        _pen_axis,
+        _pen_axis_tick,
+        _post_line_pen,
+        _post_grp_pen,
+    ):
         pen.setCosmetic(True)
         pen.setCapStyle(Qt.RoundCap)
         pen.setJoinStyle(Qt.RoundJoin)
     _pen_axis_tick.setCapStyle(Qt.FlatCap)
 
-    _box_brush = QBrush(QColor(0x33, 0x88, 0xff, 0xc0))
+    _box_brush = QBrush(QColor(0x33, 0x88, 0xFF, 0xC0))
 
     _axis_font = QFont()
     _axis_font.setPixelSize(12)
     _label_font = QFont()
     _label_font.setPixelSize(11)
-    _attr_brush = QBrush(QColor(0x33, 0x00, 0xff))
+    _attr_brush = QBrush(QColor(0x33, 0x00, 0xFF))
 
     graph_name = "box_scene"
 
@@ -177,16 +196,24 @@ class OWBoxPlot(widget.OWWidget):
         self.dataset = None
         self.posthoc_lines = []
 
-        self.label_txts = self.mean_labels = self.boxes = self.labels = \
-            self.label_txts_all = self.attr_labels = self.order = []
+        self.label_txts = (
+            self.mean_labels
+        ) = (
+            self.boxes
+        ) = self.labels = self.label_txts_all = self.attr_labels = self.order = []
         self.p = -1.0
         self.scale_x = self.scene_min_x = self.scene_width = 0
         self.label_width = 0
 
         self.attrs = VariableListModel()
         view = gui.listView(
-            self.controlArea, self, "attribute", box="Variable",
-            model=self.attrs, callback=self.attr_changed)
+            self.controlArea,
+            self,
+            "attribute",
+            box="Variable",
+            model=self.attrs,
+            callback=self.attr_changed,
+        )
         view.setMinimumSize(QSize(30, 30))
         # Any other policy than Ignored will let the QListBox's scrollbar
         # set the minimal height (see the penultimate paragraph of
@@ -194,16 +221,26 @@ class OWBoxPlot(widget.OWWidget):
         view.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Ignored)
         gui.separator(view.box, 6, 6)
         self.cb_order = gui.checkBox(
-            view.box, self, "order_by_importance",
+            view.box,
+            self,
+            "order_by_importance",
             "Order by relevance",
             tooltip="Order by 𝜒² or ANOVA over the subgroups",
-            callback=self.apply_sorting)
+            callback=self.apply_sorting,
+        )
         self.group_vars = DomainModel(
-            placeholder="None", separators=False,
-            valid_types=Orange.data.DiscreteVariable)
+            placeholder="None",
+            separators=False,
+            valid_types=Orange.data.DiscreteVariable,
+        )
         self.group_view = view = gui.listView(
-            self.controlArea, self, "group_var", box="Subgroups",
-            model=self.group_vars, callback=self.grouping_changed)
+            self.controlArea,
+            self,
+            "group_var",
+            box="Subgroups",
+            model=self.group_vars,
+            callback=self.grouping_changed,
+        )
         view.setEnabled(False)
         view.setMinimumSize(QSize(30, 30))
         # See the comment above
@@ -212,40 +249,59 @@ class OWBoxPlot(widget.OWWidget):
         # TODO: move Compare median/mean to grouping box
         # The vertical size policy is needed to let only the list views expand
         self.display_box = gui.vBox(
-            self.controlArea, "Display",
+            self.controlArea,
+            "Display",
             sizePolicy=(QSizePolicy.Minimum, QSizePolicy.Maximum),
-            addSpace=False)
+            addSpace=False,
+        )
 
-        gui.checkBox(self.display_box, self, "show_annotations", "Annotate",
-                     callback=self.display_changed)
+        gui.checkBox(
+            self.display_box,
+            self,
+            "show_annotations",
+            "Annotate",
+            callback=self.display_changed,
+        )
         self.compare_rb = gui.radioButtonsInBox(
-            self.display_box, self, 'compare',
+            self.display_box,
+            self,
+            "compare",
             btnLabels=["No comparison", "Compare medians", "Compare means"],
-            callback=self.layout_changed)
+            callback=self.layout_changed,
+        )
 
         # The vertical size policy is needed to let only the list views expand
         self.stretching_box = box = gui.vBox(
-            self.controlArea, box="Display",
-            sizePolicy=(QSizePolicy.Minimum, QSizePolicy.Fixed))
+            self.controlArea,
+            box="Display",
+            sizePolicy=(QSizePolicy.Minimum, QSizePolicy.Fixed),
+        )
         self.stretching_box.sizeHint = self.display_box.sizeHint
         gui.checkBox(
-            box, self, 'stretched', "Stretch bars",
-            callback=self.display_changed)
+            box, self, "stretched", "Stretch bars", callback=self.display_changed
+        )
         gui.checkBox(
-            box, self, 'show_labels', "Show box labels",
-            callback=self.display_changed)
+            box, self, "show_labels", "Show box labels", callback=self.display_changed
+        )
         gui.rubber(box)
 
-        gui.auto_commit(self.controlArea, self, "auto_commit",
-                        "Send Selection", "Send Automatically")
+        gui.auto_commit(
+            self.controlArea,
+            self,
+            "auto_commit",
+            "Send Selection",
+            "Send Automatically",
+        )
 
         gui.vBox(self.mainArea, addSpace=True)
         self.box_scene = QGraphicsScene()
         self.box_scene.selectionChanged.connect(self.commit)
         self.box_view = QGraphicsView(self.box_scene)
-        self.box_view.setRenderHints(QPainter.Antialiasing |
-                                     QPainter.TextAntialiasing |
-                                     QPainter.SmoothPixmapTransform)
+        self.box_view.setRenderHints(
+            QPainter.Antialiasing
+            | QPainter.TextAntialiasing
+            | QPainter.SmoothPixmapTransform
+        )
         self.box_view.viewport().installEventFilter(self)
 
         self.mainArea.layout().addWidget(self.box_view)
@@ -263,23 +319,22 @@ class OWBoxPlot(widget.OWWidget):
         return QSize(100, 500)  # Vertical size is regulated by mainArea
 
     def eventFilter(self, obj, event):
-        if obj is self.box_view.viewport() and \
-                event.type() == QEvent.Resize:
+        if obj is self.box_view.viewport() and event.type() == QEvent.Resize:
             self.layout_changed()
 
         return super().eventFilter(obj, event)
 
     def reset_attrs(self, domain):
         self.attrs[:] = [
-            var for var in chain(
-                domain.class_vars, domain.metas, domain.attributes)
-            if var.is_primitive()]
+            var
+            for var in chain(domain.class_vars, domain.metas, domain.attributes)
+            if var.is_primitive()
+        ]
 
     # noinspection PyTypeChecker
     @Inputs.data
     def set_data(self, dataset):
-        if dataset is not None and (
-                not bool(dataset) or not len(dataset.domain)):
+        if dataset is not None and (not bool(dataset) or not len(dataset.domain)):
             dataset = None
         self.closeContext()
         self.dataset = dataset
@@ -326,17 +381,17 @@ class OWBoxPlot(widget.OWWidget):
                 # (see degrees of freedom in computation of the p-value)
                 if not attr.values or not group_var.values:
                     return 2
-                observed = np.array(
-                    contingency.get_contingency(data, group_var, attr))
+                observed = np.array(contingency.get_contingency(data, group_var, attr))
                 observed = observed[observed.sum(axis=1) != 0, :]
                 observed = observed[:, observed.sum(axis=0) != 0]
                 if min(observed.shape) < 2:
                     return 2
-                expected = \
-                    np.outer(observed.sum(axis=1), observed.sum(axis=0)) / \
-                    np.sum(observed)
-                p = chisquare(observed.ravel(), f_exp=expected.ravel(),
-                              ddof=n_groups - 1)[1]
+                expected = np.outer(
+                    observed.sum(axis=1), observed.sum(axis=0)
+                ) / np.sum(observed)
+                p = chisquare(
+                    observed.ravel(), f_exp=expected.ravel(), ddof=n_groups - 1
+                )[1]
             if math.isnan(p):
                 return 2
             return p
@@ -349,9 +404,13 @@ class OWBoxPlot(widget.OWWidget):
         group_var = self.group_var
         if self.order_by_importance and group_var is not None:
             n_groups = len(group_var.values)
-            group_col = data.get_column_view(group_var)[0] if \
-                domain.has_continuous_attributes(
-                    include_class=True, include_metas=True) else None
+            group_col = (
+                data.get_column_view(group_var)[0]
+                if domain.has_continuous_attributes(
+                    include_class=True, include_metas=True
+                )
+                else None
+            )
             self.attrs.sort(key=compute_score)
         else:
             self.reset_attrs(domain)
@@ -375,8 +434,9 @@ class OWBoxPlot(widget.OWWidget):
         temp_cond = self.conditions.copy()
         for box in self.box_scene.items():
             if isinstance(box, FilterGraphicsRectItem):
-                box.setSelected(box.filter.conditions in
-                                [c.conditions for c in temp_cond])
+                box.setSelected(
+                    box.filter.conditions in [c.conditions for c in temp_cond]
+                )
 
     def attr_changed(self):
         self.compute_box_data()
@@ -385,11 +445,14 @@ class OWBoxPlot(widget.OWWidget):
 
         if self.is_continuous:
             heights = 90 if self.show_annotations else 60
-            self.box_view.centerOn(self.scene_min_x + self.scene_width / 2,
-                                   -30 - len(self.stats) * heights / 2 + 45)
+            self.box_view.centerOn(
+                self.scene_min_x + self.scene_width / 2,
+                -30 - len(self.stats) * heights / 2 + 45,
+            )
         else:
-            self.box_view.centerOn(self.scene_width / 2,
-                                   -30 - len(self.boxes) * 40 / 2 + 45)
+            self.box_view.centerOn(
+                self.scene_width / 2, -30 - len(self.boxes) * 40 / 2 + 45
+            )
 
     def compute_box_data(self):
         attr = self.attribute
@@ -397,17 +460,23 @@ class OWBoxPlot(widget.OWWidget):
             return
         dataset = self.dataset
         self.is_continuous = attr.is_continuous
-        if dataset is None or not self.is_continuous and not attr.values or \
-                        self.group_var and not self.group_var.values:
+        if (
+            dataset is None
+            or not self.is_continuous
+            and not attr.values
+            or self.group_var
+            and not self.group_var.values
+        ):
             self.stats = self.dist = self.conts = []
             return
         if self.group_var:
             self.dist = []
-            self.conts = contingency.get_contingency(
-                dataset, attr, self.group_var)
+            self.conts = contingency.get_contingency(dataset, attr, self.group_var)
             if self.is_continuous:
-                self.stats = [BoxData(cont, attr, i, self.group_var)
-                              for i, cont in enumerate(self.conts)]
+                self.stats = [
+                    BoxData(cont, attr, i, self.group_var)
+                    for i, cont in enumerate(self.conts)
+                ]
             self.label_txts_all = self.group_var.values
         else:
             self.dist = distribution.get_distribution(dataset, attr)
@@ -415,9 +484,9 @@ class OWBoxPlot(widget.OWWidget):
             if self.is_continuous:
                 self.stats = [BoxData(self.dist, attr, None)]
             self.label_txts_all = [""]
-        self.label_txts = [txts for stat, txts in zip(self.stats,
-                                                      self.label_txts_all)
-                           if stat.n > 0]
+        self.label_txts = [
+            txts for stat, txts in zip(self.stats, self.label_txts_all) if stat.n > 0
+        ]
         self.stats = [stat for stat in self.stats if stat.n > 0]
 
     def update_display_box(self):
@@ -451,14 +520,17 @@ class OWBoxPlot(widget.OWWidget):
         if not self.is_continuous:
             return self.display_changed_disc()
 
-        self.mean_labels = [self.mean_label(stat, attr, lab)
-                            for stat, lab in zip(self.stats, self.label_txts)]
+        self.mean_labels = [
+            self.mean_label(stat, attr, lab)
+            for stat, lab in zip(self.stats, self.label_txts)
+        ]
         self.draw_axis()
         self.boxes = [self.box_group(stat) for stat in self.stats]
-        self.labels = [self.label_group(stat, attr, mean_lab)
-                       for stat, mean_lab in zip(self.stats, self.mean_labels)]
-        self.attr_labels = [QGraphicsSimpleTextItem(lab)
-                            for lab in self.label_txts]
+        self.labels = [
+            self.label_group(stat, attr, mean_lab)
+            for stat, mean_lab in zip(self.stats, self.mean_labels)
+        ]
+        self.attr_labels = [QGraphicsSimpleTextItem(lab) for lab in self.label_txts]
         for it in chain(self.labels, self.attr_labels):
             self.box_scene.addItem(it)
         self.display_changed()
@@ -474,8 +546,7 @@ class OWBoxPlot(widget.OWWidget):
         criterion = self._sorting_criteria_attrs[self.compare]
         if criterion:
             vals = [getattr(stat, criterion) for stat in self.stats]
-            overmax = max((val for val in vals if val is not None), default=0) \
-                      + 1
+            overmax = max((val for val in vals if val is not None), default=0) + 1
             vals = [val if val is not None else overmax for val in vals]
             self.order = sorted(self.order, key=vals.__getitem__)
 
@@ -501,8 +572,7 @@ class OWBoxPlot(widget.OWWidget):
             else:
                 stat = self.stats[box_index]
 
-                if self.compare == OWBoxPlot.CompareMedians and \
-                        stat.median is not None:
+                if self.compare == OWBoxPlot.CompareMedians and stat.median is not None:
                     pos = stat.median + 5 / self.scale_x
                 elif self.compare == OWBoxPlot.CompareMeans or stat.q25 is None:
                     pos = stat.mean + 5 / self.scale_x
@@ -511,8 +581,12 @@ class OWBoxPlot(widget.OWWidget):
                 label.setX(pos * self.scale_x)
                 label.show()
 
-        r = QRectF(self.scene_min_x, -30 - len(self.stats) * heights,
-                   self.scene_width, len(self.stats) * heights + 90)
+        r = QRectF(
+            self.scene_min_x,
+            -30 - len(self.stats) * heights,
+            self.scene_width,
+            len(self.stats) * heights + 90,
+        )
         self.box_scene.setSceneRect(r)
 
         self.compute_tests()
@@ -521,17 +595,16 @@ class OWBoxPlot(widget.OWWidget):
 
     def display_changed_disc(self):
         self.clear_scene()
-        self.attr_labels = [QGraphicsSimpleTextItem(lab)
-                            for lab in self.label_txts_all]
+        self.attr_labels = [QGraphicsSimpleTextItem(lab) for lab in self.label_txts_all]
 
         if not self.stretched:
             if self.group_var:
                 self.labels = [
                     QGraphicsTextItem("{}".format(int(sum(cont))))
-                    for cont in self.conts]
+                    for cont in self.conts
+                ]
             else:
-                self.labels = [
-                    QGraphicsTextItem(str(int(sum(self.dist))))]
+                self.labels = [QGraphicsTextItem(str(int(sum(self.dist))))]
 
         self.draw_axis_disc()
         if self.group_var:
@@ -558,19 +631,23 @@ class OWBoxPlot(widget.OWWidget):
 
             if self.show_labels and self.attribute is not self.group_var:
                 for text_item, bar_part in zip(box[1::2], box[::2]):
-                    label = QGraphicsSimpleTextItem(
-                        text_item.toPlainText())
-                    label.setPos(bar_part.boundingRect().x(),
-                                 y - label.boundingRect().height() - 8)
+                    label = QGraphicsSimpleTextItem(text_item.toPlainText())
+                    label.setPos(
+                        bar_part.boundingRect().x(),
+                        y - label.boundingRect().height() - 8,
+                    )
                     self.box_scene.addItem(label)
             for item in box:
                 if isinstance(item, QGraphicsTextItem):
                     continue
                 self.box_scene.addItem(item)
                 item.setPos(0, y)
-        self.box_scene.setSceneRect(-self.label_width - 5,
-                                    -30 - len(self.boxes) * 40,
-                                    self.scene_width, len(self.boxes * 40) + 90)
+        self.box_scene.setSceneRect(
+            -self.label_width - 5,
+            -30 - len(self.boxes) * 40,
+            self.scene_width,
+            len(self.boxes * 40) + 90,
+        )
         self.infot1.setText("")
         self.select_box_items()
 
@@ -584,9 +661,9 @@ class OWBoxPlot(widget.OWWidget):
             if d1.n == 0 or d2.n == 0:
                 return np.nan, np.nan
             pooled_var = d1.var / d1.n + d2.var / d2.n
-            df = pooled_var ** 2 / \
-                ((d1.var / d1.n) ** 2 / (d1.n - 1) +
-                 (d2.var / d2.n) ** 2 / (d2.n - 1))
+            df = pooled_var ** 2 / (
+                (d1.var / d1.n) ** 2 / (d1.n - 1) + (d2.var / d2.n) ** 2 / (d2.n - 1)
+            )
             if pooled_var == 0:
                 return np.nan, np.nan
             t = abs(d1.mean - d2.mean) / math.sqrt(pooled_var)
@@ -600,8 +677,9 @@ class OWBoxPlot(widget.OWWidget):
                 return np.nan, np.nan
             n = sum(stat.n for stat in self.stats)
             grand_avg = sum(stat.n * stat.mean for stat in self.stats) / n
-            var_between = sum(stat.n * (stat.mean - grand_avg) ** 2
-                              for stat in self.stats)
+            var_between = sum(
+                stat.n * (stat.mean - grand_avg) ** 2 for stat in self.stats
+            )
             df_between = len(self.stats) - 1
 
             var_within = sum(stat.n * stat.var for stat in self.stats)
@@ -613,8 +691,10 @@ class OWBoxPlot(widget.OWWidget):
         if self.compare == OWBoxPlot.CompareNone or len(self.stats) < 2:
             t = ""
         elif any(s.n <= 1 for s in self.stats):
-            t = "At least one group has just one instance, " \
+            t = (
+                "At least one group has just one instance, "
                 "cannot compute significance"
+            )
         elif len(self.stats) == 2:
             if self.compare == OWBoxPlot.CompareMedians:
                 t = ""
@@ -637,14 +717,15 @@ class OWBoxPlot(widget.OWWidget):
     def mean_label(self, stat, attr, val_name):
         label = QGraphicsItemGroup()
         t = QGraphicsSimpleTextItem(
-            "%.*f" % (attr.number_of_decimals + 1, stat.mean), label)
+            "%.*f" % (attr.number_of_decimals + 1, stat.mean), label
+        )
         t.setFont(self._label_font)
         bbox = t.boundingRect()
         w2, h = bbox.width() / 2, bbox.height()
         t.setPos(-w2, -h)
         tpm = QGraphicsSimpleTextItem(
-            " \u00b1 " + "%.*f" % (attr.number_of_decimals + 1, stat.dev),
-            label)
+            " \u00b1 " + "%.*f" % (attr.number_of_decimals + 1, stat.dev), label
+        )
         tpm.setFont(self._label_font)
         tpm.setPos(w2, -h)
         if val_name:
@@ -661,8 +742,10 @@ class OWBoxPlot(widget.OWWidget):
     def draw_axis(self):
         """Draw the horizontal axis and sets self.scale_x"""
         misssing_stats = not self.stats
-        stats = self.stats or [BoxData(np.array([[0.], [1.]]), self.attribute)]
-        mean_labels = self.mean_labels or [self.mean_label(stats[0], self.attribute, "")]
+        stats = self.stats or [BoxData(np.array([[0.0], [1.0]]), self.attribute)]
+        mean_labels = self.mean_labels or [
+            self.mean_label(stats[0], self.attribute, "")
+        ]
         bottom = min(stat.a_min for stat in stats)
         top = max(stat.a_max for stat in stats)
 
@@ -682,8 +765,10 @@ class OWBoxPlot(widget.OWWidget):
 
         # In principle we should repeat this until convergence since the new
         # scaling is too conservative. (No chance am I doing this.)
-        mlb = min(stat.mean + mean_lab.min_x / scale_x
-                  for stat, mean_lab in zip(stats, mean_labels))
+        mlb = min(
+            stat.mean + mean_lab.min_x / scale_x
+            for stat, mean_lab in zip(stats, mean_labels)
+        )
         if mlb < gbottom:
             gbottom = mlb
             self.scale_x = scale_x = viewrect.width() / (gtop - gbottom)
@@ -693,22 +778,24 @@ class OWBoxPlot(widget.OWWidget):
 
         val = first_val
         while True:
-            l = self.box_scene.addLine(val * scale_x, -1, val * scale_x, 1,
-                                       self._pen_axis_tick)
+            l = self.box_scene.addLine(
+                val * scale_x, -1, val * scale_x, 1, self._pen_axis_tick
+            )
             l.setZValue(100)
 
             t = self.box_scene.addSimpleText(
                 self.attribute.repr_val(val) if not misssing_stats else "?",
-                self._axis_font)
-            t.setFlags(
-                t.flags() | QGraphicsItem.ItemIgnoresTransformations)
+                self._axis_font,
+            )
+            t.setFlags(t.flags() | QGraphicsItem.ItemIgnoresTransformations)
             r = t.boundingRect()
             t.setPos(val * scale_x - r.width() / 2, 8)
             if val >= top:
                 break
             val += step
         self.box_scene.addLine(
-            bottom * scale_x - 4, 0, top * scale_x + 4, 0, self._pen_axis)
+            bottom * scale_x - 4, 0, top * scale_x + 4, 0, self._pen_axis
+        )
 
     def draw_axis_disc(self):
         """
@@ -747,18 +834,21 @@ class OWBoxPlot(widget.OWWidget):
             # available space left of the 'group labels'
             available = self.scene_width - lab_width - 10
             scale_x = (available - right_offset) / max_box
-            max_right = max(sum(dist) * scale_x + 10 +
-                            lbl.boundingRect().width()
-                            for dist, lbl in rows)
+            max_right = max(
+                sum(dist) * scale_x + 10 + lbl.boundingRect().width()
+                for dist, lbl in rows
+            )
             right_offset = max(0, max_right - max_box * scale_x)
 
-        self.scale_x = scale_x = \
-            (self.scene_width - lab_width - 10 - right_offset) / max_box
+        self.scale_x = scale_x = (
+            self.scene_width - lab_width - 10 - right_offset
+        ) / max_box
 
         self.box_scene.addLine(0, 0, max_box * scale_x, 0, self._pen_axis)
         for val in range(0, step * steps + 1, step):
-            l = self.box_scene.addLine(val * scale_x, -1, val * scale_x, 1,
-                                       self._pen_axis_tick)
+            l = self.box_scene.addLine(
+                val * scale_x, -1, val * scale_x, 1, self._pen_axis_tick
+            )
             l.setZValue(100)
             t = self.box_scene.addSimpleText(str(val), self._axis_font)
             t.setPos(val * scale_x - t.boundingRect().width() / 2, 8)
@@ -768,7 +858,8 @@ class OWBoxPlot(widget.OWWidget):
     def label_group(self, stat, attr, mean_lab):
         def centered_text(val, pos):
             t = QGraphicsSimpleTextItem(
-                "%.*f" % (attr.number_of_decimals + 1, val), labels)
+                "%.*f" % (attr.number_of_decimals + 1, val), labels
+            )
             t.setFont(self._label_font)
             bbox = t.boundingRect()
             t.setPos(pos - bbox.width() / 2, 22)
@@ -841,16 +932,19 @@ class OWBoxPlot(widget.OWWidget):
         box.extend([whisker1, whisker2, vert_line, mean_line, var_line])
         if stat.q25 is not None and stat.q75 is not None:
             mbox = FilterGraphicsRectItem(
-                stat.conditions, stat.q25 * scale_x, -height / 2,
-                (stat.q75 - stat.q25) * scale_x, height)
+                stat.conditions,
+                stat.q25 * scale_x,
+                -height / 2,
+                (stat.q75 - stat.q25) * scale_x,
+                height,
+            )
             mbox.setBrush(self._box_brush)
             mbox.setPen(QPen(Qt.NoPen))
             mbox.setZValue(-200)
             box.append(mbox)
 
         if stat.median is not None:
-            median_line = line(stat.median, -height / 2,
-                               stat.median, height / 2)
+            median_line = line(stat.median, -height / 2, stat.median, height / 2)
             median_line.setPen(self._pen_median)
             median_line.setZValue(-150)
             box.append(median_line)
@@ -880,8 +974,9 @@ class OWBoxPlot(widget.OWWidget):
             rect.setBrush(QBrush(QColor(*attr.colors[i])))
             rect.setPen(QPen(Qt.NoPen))
             if self.stretched:
-                tooltip = "{}: {:.2f}%".format(attr.values[i],
-                                               100 * dist[i] / sum(dist))
+                tooltip = "{}: {:.2f}%".format(
+                    attr.values[i], 100 * dist[i] / sum(dist)
+                )
             else:
                 tooltip = "{}: {}".format(attr.values[i], int(dist[i]))
             rect.setToolTip(tooltip)
@@ -892,16 +987,19 @@ class OWBoxPlot(widget.OWWidget):
         return box
 
     def commit(self):
-        self.conditions = [item.filter for item in
-                           self.box_scene.selectedItems() if item.filter]
+        self.conditions = [
+            item.filter for item in self.box_scene.selectedItems() if item.filter
+        ]
         selected, selection = None, []
         if self.conditions:
             selected = Values(self.conditions, conjunction=False)(self.dataset)
             selection = np.in1d(
-                self.dataset.ids, selected.ids, assume_unique=True).nonzero()[0]
+                self.dataset.ids, selected.ids, assume_unique=True
+            ).nonzero()[0]
         self.Outputs.selected_data.send(selected)
         self.Outputs.annotated_data.send(
-            create_annotated_table(self.dataset, selection))
+            create_annotated_table(self.dataset, selection)
+        )
 
     def show_posthoc(self):
         def line(y0, y1):
@@ -952,9 +1050,8 @@ class OWBoxPlot(widget.OWWidget):
             else:
                 rowi = len(used_to)
                 used_to.append(to)
-            y = - 6 - rowi * 6
-            it = self.box_scene.addLine(frm_x - 2, y, xs[to] + 2, y,
-                                        self._post_grp_pen)
+            y = -6 - rowi * 6
+            it = self.box_scene.addLine(frm_x - 2, y, xs[to] + 2, y, self._post_grp_pen)
             self.posthoc_lines.append(it)
             last_to = to
 
@@ -975,6 +1072,7 @@ class OWBoxPlot(widget.OWWidget):
 
 def main(argv=None):
     from AnyQt.QtWidgets import QApplication
+
     if argv is None:
         argv = sys.argv
     argv = list(argv)
@@ -995,6 +1093,7 @@ def main(argv=None):
     w.handleNewSignals()
     w.saveSettings()
     return rval
+
 
 if __name__ == "__main__":
     sys.exit(main())

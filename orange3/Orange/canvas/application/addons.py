@@ -24,25 +24,48 @@ except ImportError:
     docutils = None
 
 from AnyQt.QtWidgets import (
-    QWidget, QDialog, QLabel, QLineEdit, QTreeView, QHeaderView,
-    QTextBrowser, QDialogButtonBox, QProgressDialog,
-    QVBoxLayout, QStyle, QStyledItemDelegate, QStyleOptionViewItem,
-    QApplication, QHBoxLayout,  QPushButton, QFormLayout
+    QWidget,
+    QDialog,
+    QLabel,
+    QLineEdit,
+    QTreeView,
+    QHeaderView,
+    QTextBrowser,
+    QDialogButtonBox,
+    QProgressDialog,
+    QVBoxLayout,
+    QStyle,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
+    QApplication,
+    QHBoxLayout,
+    QPushButton,
+    QFormLayout,
 )
 
-from AnyQt.QtGui import (
-    QStandardItemModel, QStandardItem, QPalette, QTextOption
-)
+from AnyQt.QtGui import QStandardItemModel, QStandardItem, QPalette, QTextOption
 
 from AnyQt.QtCore import (
-    QSortFilterProxyModel, QItemSelectionModel,
-    Qt, QObject, QMetaObject, QEvent, QSize, QTimer, QThread, Q_ARG,
-    QSettings)
+    QSortFilterProxyModel,
+    QItemSelectionModel,
+    Qt,
+    QObject,
+    QMetaObject,
+    QEvent,
+    QSize,
+    QTimer,
+    QThread,
+    Q_ARG,
+    QSettings,
+)
 from AnyQt.QtCore import pyqtSignal as Signal, pyqtSlot as Slot
 
-from ..gui.utils import message_warning, message_information, \
-                        message_critical as message_error, \
-                        OSX_NSURL_toLocalFile
+from ..gui.utils import (
+    message_warning,
+    message_information,
+    message_critical as message_error,
+    OSX_NSURL_toLocalFile,
+)
 from ..help.manager import get_dist_meta, trim, parse_meta
 
 
@@ -54,34 +77,16 @@ log = logging.getLogger(__name__)
 
 Installable = namedtuple(
     "Installable",
-    ["name",
-     "version",
-     "summary",
-     "description",
-     "package_url",
-     "release_urls"]
+    ["name", "version", "summary", "description", "package_url", "release_urls"],
 )
 
 ReleaseUrl = namedtuple(
-    "ReleaseUrl",
-    ["filename",
-     "url",
-     "size",
-     "python_version",
-     "package_type"
-    ]
+    "ReleaseUrl", ["filename", "url", "size", "python_version", "package_type"]
 )
 
-Available = namedtuple(
-    "Available",
-    ["installable"]
-)
+Available = namedtuple("Available", ["installable"])
 
-Installed = namedtuple(
-    "Installed",
-    ["installable",
-     "local"]
-)
+Installed = namedtuple("Installed", ["installable", "local"])
 
 
 def is_updatable(item):
@@ -99,8 +104,7 @@ def is_updatable(item):
         else:
             return v1 < v2
 
-        return (version.LooseVersion(dist.version) <
-                version.LooseVersion(inst.version))
+        return version.LooseVersion(dist.version) < version.LooseVersion(inst.version)
 
 
 class TristateCheckItemDelegate(QStyledItemDelegate):
@@ -108,11 +112,14 @@ class TristateCheckItemDelegate(QStyledItemDelegate):
     A QStyledItemDelegate which properly toggles Qt.ItemIsTristate check
     state transitions on user interaction.
     """
+
     def editorEvent(self, event, model, option, index):
         flags = model.flags(index)
-        if not flags & Qt.ItemIsUserCheckable or \
-                not option.state & QStyle.State_Enabled or \
-                not flags & Qt.ItemIsEnabled:
+        if (
+            not flags & Qt.ItemIsUserCheckable
+            or not option.state & QStyle.State_Enabled
+            or not flags & Qt.ItemIsEnabled
+        ):
             return False
 
         checkstate = model.data(index, Qt.CheckStateRole)
@@ -121,19 +128,22 @@ class TristateCheckItemDelegate(QStyledItemDelegate):
 
         widget = option.widget
         style = widget.style() if widget else QApplication.style()
-        if event.type() in {QEvent.MouseButtonPress, QEvent.MouseButtonRelease,
-                            QEvent.MouseButtonDblClick}:
+        if event.type() in {
+            QEvent.MouseButtonPress,
+            QEvent.MouseButtonRelease,
+            QEvent.MouseButtonDblClick,
+        }:
             pos = event.pos()
             opt = QStyleOptionViewItem(option)
             self.initStyleOption(opt, index)
             rect = style.subElementRect(
-                QStyle.SE_ItemViewItemCheckIndicator, opt, widget)
+                QStyle.SE_ItemViewItemCheckIndicator, opt, widget
+            )
 
             if event.button() != Qt.LeftButton or not rect.contains(pos):
                 return False
 
-            if event.type() in {QEvent.MouseButtonPress,
-                                QEvent.MouseButtonDblClick}:
+            if event.type() in {QEvent.MouseButtonPress, QEvent.MouseButtonDblClick}:
                 return True
 
         elif event.type() == QEvent.KeyPress:
@@ -145,8 +155,7 @@ class TristateCheckItemDelegate(QStyledItemDelegate):
         if model.flags(index) & Qt.ItemIsTristate:
             checkstate = (checkstate + 1) % 3
         else:
-            checkstate = \
-                Qt.Unchecked if checkstate == Qt.Checked else Qt.Checked
+            checkstate = Qt.Unchecked if checkstate == Qt.Checked else Qt.Checked
 
         return model.setData(index, checkstate, Qt.CheckStateRole)
 
@@ -157,25 +166,28 @@ def get_meta_from_archive(path):
     can't be found."""
 
     def is_metadata(fname):
-        return fname.endswith(('PKG-INFO', 'METADATA'))
+        return fname.endswith(("PKG-INFO", "METADATA"))
 
     meta = None
-    if path.endswith(('.zip', '.whl')):
+    if path.endswith((".zip", ".whl")):
         from zipfile import ZipFile
+
         with ZipFile(path) as archive:
             meta = next(filter(is_metadata, archive.namelist()), None)
             if meta:
-                meta = archive.read(meta).decode('utf-8')
-    elif path.endswith(('.tar.gz', '.tgz')):
+                meta = archive.read(meta).decode("utf-8")
+    elif path.endswith((".tar.gz", ".tgz")):
         import tarfile
+
         with tarfile.open(path) as archive:
             meta = next(filter(is_metadata, archive.getnames()), None)
             if meta:
-                meta = archive.extractfile(meta).read().decode('utf-8')
+                meta = archive.extractfile(meta).read().decode("utf-8")
     if meta:
         meta = parse_meta(meta)
-        return [meta.get(key, '')
-                for key in ('Name', 'Version', 'Description', 'Summary')]
+        return [
+            meta.get(key, "") for key in ("Name", "Version", "Description", "Summary")
+        ]
 
 
 def cleanup(name, sep="-"):
@@ -196,13 +208,8 @@ class AddonManagerWidget(QWidget):
         self.__items = []
         self.setLayout(QVBoxLayout())
 
-        self.__header = QLabel(
-            wordWrap=True,
-            textFormat=Qt.RichText
-        )
-        self.__search = QLineEdit(
-            placeholderText=self.tr("Filter")
-        )
+        self.__header = QLabel(wordWrap=True, textFormat=Qt.RichText)
+        self.__search = QLineEdit(placeholderText=self.tr("Filter"))
 
         self.tophlayout = topline = QHBoxLayout()
         topline.addWidget(self.__search)
@@ -212,7 +219,7 @@ class AddonManagerWidget(QWidget):
             rootIsDecorated=False,
             editTriggers=QTreeView.NoEditTriggers,
             selectionMode=QTreeView.SingleSelection,
-            alternatingRowColors=True
+            alternatingRowColors=True,
         )
         self.__view.setItemDelegateForColumn(0, TristateCheckItemDelegate())
         self.layout().addWidget(view)
@@ -221,16 +228,13 @@ class AddonManagerWidget(QWidget):
         model.setHorizontalHeaderLabels(["", "Name", "Version", "Action"])
         model.dataChanged.connect(self.__data_changed)
         self.__proxy = proxy = QSortFilterProxyModel(
-            filterKeyColumn=1,
-            filterCaseSensitivity=Qt.CaseInsensitive
+            filterKeyColumn=1, filterCaseSensitivity=Qt.CaseInsensitive
         )
         proxy.setSourceModel(model)
         self.__search.textChanged.connect(proxy.setFilterFixedString)
 
         view.setModel(proxy)
-        view.selectionModel().selectionChanged.connect(
-            self.__update_details
-        )
+        view.selectionModel().selectionChanged.connect(self.__update_details)
         header = self.__view.header()
         header.setSectionResizeMode(0, QHeaderView.Fixed)
         header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
@@ -272,9 +276,12 @@ class AddonManagerWidget(QWidget):
             updatable = is_updatable(item)
 
             item1 = QStandardItem()
-            item1.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable |
-                           Qt.ItemIsUserCheckable |
-                           (Qt.ItemIsTristate if updatable else 0))
+            item1.setFlags(
+                Qt.ItemIsEnabled
+                | Qt.ItemIsSelectable
+                | Qt.ItemIsUserCheckable
+                | (Qt.ItemIsTristate if updatable else 0)
+            )
 
             if installed and updatable:
                 item1.setCheckState(Qt.PartiallyChecked)
@@ -301,15 +308,13 @@ class AddonManagerWidget(QWidget):
             model.appendRow([item1, item2, item3, item4])
 
         self.__view.resizeColumnToContents(0)
-        self.__view.setColumnWidth(
-            1, max(150, self.__view.sizeHintForColumn(1)))
-        self.__view.setColumnWidth(
-            2, max(150, self.__view.sizeHintForColumn(2)))
+        self.__view.setColumnWidth(1, max(150, self.__view.sizeHintForColumn(1)))
+        self.__view.setColumnWidth(2, max(150, self.__view.sizeHintForColumn(2)))
 
         if self.__items:
             self.__view.selectionModel().select(
                 self.__view.model().index(0, 0),
-                QItemSelectionModel.Select | QItemSelectionModel.Rows
+                QItemSelectionModel.Select | QItemSelectionModel.Rows,
             )
 
     def item_state(self):
@@ -379,7 +384,7 @@ class AddonManagerWidget(QWidget):
             remote, dist = item
             if remote is None:
                 meta = get_dist_meta(dist)
-                description = meta.get("Description") or meta.get('Summary')
+                description = meta.get("Description") or meta.get("Summary")
             else:
                 description = remote.description
         else:
@@ -395,7 +400,7 @@ class AddonManagerWidget(QWidget):
                         # "embed-stylesheet": False,
                         # "stylesheet": [],
                         # "stylesheet_path": []
-                    }
+                    },
                 ).decode("utf-8")
 
             except docutils.utils.SystemMessage:
@@ -443,8 +448,7 @@ class AddonManagerDialog(QDialog):
             standardButtons=QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
         )
         addmore = QPushButton(
-            "Add more...", toolTip="Add an add-on not listed below",
-            autoDefault=False
+            "Add more...", toolTip="Add an add-on not listed below", autoDefault=False
         )
         self.addonwidget.tophlayout.addWidget(addmore)
         addmore.clicked.connect(self.__run_add_package_dialog)
@@ -482,7 +486,8 @@ class AddonManagerDialog(QDialog):
         nameentry = QLineEdit(
             placeholderText="Package name",
             toolTip="Enter a package name as displayed on "
-                    "PyPI (capitalization is not important)")
+            "PyPI (capitalization is not important)",
+        )
         nameentry.setMinimumWidth(250)
         form.addRow("Name:", nameentry)
         vlayout.addLayout(form)
@@ -495,6 +500,7 @@ class AddonManagerDialog(QDialog):
 
         def changed(name):
             okb.setEnabled(bool(name))
+
         nameentry.textChanged.connect(changed)
         vlayout.addWidget(buttons)
         vlayout.setSizeConstraint(QVBoxLayout.SetFixedSize)
@@ -525,8 +531,9 @@ class AddonManagerDialog(QDialog):
                     method_queued(self.add_package, (object,))(pkg)
                     method_queued(dlg.accept, ())()
                 else:
-                    method_queued(self.__show_error_for_query, (str, str)) \
-                        (error_text, error_details)
+                    method_queued(self.__show_error_for_query, (str, str))(
+                        error_text, error_details
+                    )
                     method_queued(dlg.reject, ())()
 
             f.add_done_callback(ondone)
@@ -552,7 +559,8 @@ class AddonManagerDialog(QDialog):
         if self.__progress is None:
             self.__progress = QProgressDialog(
                 self,
-                minimum=0, maximum=0,
+                minimum=0,
+                maximum=0,
                 labelText=self.tr("Retrieving package list"),
                 sizeGripEnabled=False,
                 windowTitle="Progress",
@@ -577,7 +585,7 @@ class AddonManagerDialog(QDialog):
                 "Could not retrieve package list",
                 title="Error",
                 informative_text=str(err),
-                parent=self
+                parent=self,
             )
             log.error(str(err), exc_info=True)
             packages = []
@@ -610,9 +618,7 @@ class AddonManagerDialog(QDialog):
                 if d is not None:
                     dists[d.project_name] = d
 
-        project_names = unique(
-            itertools.chain(packages.keys(), dists.keys())
-        )
+        project_names = unique(itertools.chain(packages.keys(), dists.keys()))
 
         items = []
         for name in project_names:
@@ -653,12 +659,16 @@ class AddonManagerDialog(QDialog):
             self.__thread.quit()
             self.__thread.wait(1000)
 
-    ADDON_EXTENSIONS = ('.zip', '.whl', '.tar.gz')
+    ADDON_EXTENSIONS = (".zip", ".whl", ".tar.gz")
 
     def dragEnterEvent(self, event):
         urls = event.mimeData().urls()
-        if any((OSX_NSURL_toLocalFile(url) or url.toLocalFile())
-               .endswith(self.ADDON_EXTENSIONS) for url in urls):
+        if any(
+            (OSX_NSURL_toLocalFile(url) or url.toLocalFile()).endswith(
+                self.ADDON_EXTENSIONS
+            )
+            for url in urls
+        ):
             event.acceptProposedAction()
 
     def dropEvent(self, event):
@@ -669,12 +679,16 @@ class AddonManagerDialog(QDialog):
         for url in event.mimeData().urls():
             path = OSX_NSURL_toLocalFile(url) or url.toLocalFile()
             if path.endswith(self.ADDON_EXTENSIONS):
-                name, vers, summary, descr = (get_meta_from_archive(path) or
-                                              (os.path.basename(path), '', '', ''))
+                name, vers, summary, descr = get_meta_from_archive(path) or (
+                    os.path.basename(path),
+                    "",
+                    "",
+                    "",
+                )
                 names.append(cleanup(name))
                 packages.append(
-                    Installable(name, vers, summary,
-                                descr or summary, path, [path]))
+                    Installable(name, vers, summary, descr or summary, path, [path])
+                )
         future = concurrent.futures.Future()
         future.set_result((AddonManagerDialog._packages or []) + packages)
         self._set_packages(future)
@@ -685,9 +699,7 @@ class AddonManagerDialog(QDialog):
 
         if steps:
             # Move all uninstall steps to the front
-            steps = sorted(
-                steps, key=lambda step: 0 if step[0] == Uninstall else 1
-            )
+            steps = sorted(steps, key=lambda step: 0 if step[0] == Uninstall else 1)
             self.__installer = Installer(steps=steps)
             self.__thread = QThread(self)
             self.__thread.start()
@@ -708,10 +720,11 @@ class AddonManagerDialog(QDialog):
 
     def __on_installer_error(self, command, pkg, retcode, output):
         message_error(
-            "An error occurred while running a subprocess", title="Error",
+            "An error occurred while running a subprocess",
+            title="Error",
             informative_text="{} exited with non zero status.".format(command),
             details="".join(output),
-            parent=self
+            parent=self,
         )
         self.reject()
 
@@ -729,8 +742,9 @@ def list_available_versions():
 
     # query pypi.org for installed add-ons that are not in our list
     installed = list_installed_addons()
-    missing = set(dist.project_name for dist in installed) - \
-              set(a.get("info", {}).get("name", "") for a in addons)
+    missing = set(dist.project_name for dist in installed) - set(
+        a.get("info", {}).get("name", "") for a in addons
+    )
     for p in missing:
         response = requests.get(PYPI_API_JSON.format(name=p))
         if response.status_code != 200:
@@ -742,10 +756,14 @@ def list_available_versions():
         try:
             info = addon["info"]
             packages.append(
-                Installable(info["name"], info["version"],
-                            info["summary"], info["description"],
-                            info["package_url"],
-                            info["package_url"])
+                Installable(
+                    info["name"],
+                    info["version"],
+                    info["summary"],
+                    info["description"],
+                    info["package_url"],
+                    info["package_url"],
+                )
             )
         except (TypeError, KeyError):
             continue  # skip invalid packages
@@ -809,9 +827,9 @@ def installable_from_json_response(meta):
 
 def list_installed_addons():
     from ..config import ADDON_ENTRY
+
     workingset = pkg_resources.WorkingSet(sys.path)
-    return [ep.dist for ep in
-            workingset.iter_entry_points(ADDON_ENTRY)]
+    return [ep.dist for ep in workingset.iter_entry_points(ADDON_ENTRY)]
 
 
 def unique(iterable):
@@ -829,7 +847,9 @@ def have_install_permissions():
     """Check if we can create a file in the site-packages folder.
     This works on a Win7 miniconda install, where os.access did not. """
     try:
-        fn = os.path.join(sysconfig.get_path("purelib"), "test_write_" + str(os.getpid()))
+        fn = os.path.join(
+            sysconfig.get_path("purelib"), "test_write_" + str(os.getpid())
+        )
         with open(fn, "w"):
             pass
         os.remove(fn)
@@ -879,19 +899,22 @@ class Installer(QObject):
         try:
             if command == Install:
                 self.setStatusMessage(
-                    "Installing {}".format(cleanup(pkg.installable.name)))
+                    "Installing {}".format(cleanup(pkg.installable.name))
+                )
                 if self.conda:
                     self.conda.install(pkg.installable, raise_on_fail=False)
                 self.pip.install(pkg.installable)
             elif command == Upgrade:
                 self.setStatusMessage(
-                    "Upgrading {}".format(cleanup(pkg.installable.name)))
+                    "Upgrading {}".format(cleanup(pkg.installable.name))
+                )
                 if self.conda:
                     self.conda.upgrade(pkg.installable, raise_on_fail=False)
                 self.pip.upgrade(pkg.installable)
             elif command == Uninstall:
                 self.setStatusMessage(
-                    "Uninstalling {}".format(cleanup(pkg.local.project_name)))
+                    "Uninstalling {}".format(cleanup(pkg.local.project_name))
+                )
                 if self.conda:
                     try:
                         self.conda.uninstall(pkg.local, raise_on_fail=True)
@@ -901,8 +924,7 @@ class Installer(QObject):
                     self.pip.uninstall(pkg.local)
         except CommandFailed as ex:
             self.error.emit(
-                "Command failed: python {}".format(ex.cmd),
-                pkg, ex.retcode, ex.output
+                "Command failed: python {}".format(ex.cmd), pkg, ex.retcode, ex.output
             )
             return
 
@@ -913,15 +935,16 @@ class Installer(QObject):
 
 
 class PipInstaller:
-
     def __init__(self):
-        arguments = QSettings().value('add-ons/pip-install-arguments', '', type=str)
+        arguments = QSettings().value("add-ons/pip-install-arguments", "", type=str)
         self.arguments = shlex.split(arguments)
 
     def install(self, pkg):
         cmd = ["python", "-m", "pip", "install"]
         cmd.extend(self.arguments)
-        if pkg.package_url.startswith("http://") or pkg.package_url.startswith("https://"):
+        if pkg.package_url.startswith("http://") or pkg.package_url.startswith(
+            "https://"
+        ):
             cmd.append(pkg.name)
         else:
             # Package url is path to the (local) wheel
@@ -949,8 +972,7 @@ class PipInstaller:
 
 class CondaInstaller:
     def __init__(self):
-        enabled = QSettings().value('add-ons/allow-conda',
-                                    True, type=bool)
+        enabled = QSettings().value("add-ons/allow-conda", True, type=bool)
         if enabled:
             self.conda = self._find_conda()
         else:
@@ -974,18 +996,15 @@ class CondaInstaller:
             return conda
 
     def install(self, pkg, raise_on_fail=False):
-        cmd = [self.conda, "install", "--yes", "--quiet",
-               self._normalize(pkg.name)]
+        cmd = [self.conda, "install", "--yes", "--quiet", self._normalize(pkg.name)]
         run_command(cmd, raise_on_fail=raise_on_fail)
 
     def upgrade(self, pkg, raise_on_fail=False):
-        cmd = [self.conda, "upgrade", "--yes", "--quiet",
-               self._normalize(pkg.name)]
+        cmd = [self.conda, "upgrade", "--yes", "--quiet", self._normalize(pkg.name)]
         run_command(cmd, raise_on_fail=raise_on_fail)
 
     def uninstall(self, dist, raise_on_fail=False):
-        cmd = [self.conda, "uninstall", "--yes",
-               self._normalize(dist.project_name)]
+        cmd = [self.conda, "uninstall", "--yes", self._normalize(dist.project_name)]
         run_command(cmd, raise_on_fail=raise_on_fail)
 
     def _normalize(self, name):
@@ -1027,8 +1046,7 @@ def run_command(command, raise_on_fail=True):
         print(line, end="")
 
     if process.returncode != 0:
-        log.info("Command %s failed with %s",
-                 " ".join(command), process.returncode)
+        log.info("Command %s failed with %s", " ".join(command), process.returncode)
         log.debug("Output:\n%s", "\n".join(output))
         if raise_on_fail:
             raise CommandFailed(command, process.returncode, output)
@@ -1051,10 +1069,7 @@ def python_process(args, script_name=None, **kwargs):
     else:
         script = executable
 
-    return create_process(
-        [script] + args,
-        executable=executable
-    )
+    return create_process([script] + args, executable=executable)
 
 
 def create_process(cmd, executable=None, **kwargs):

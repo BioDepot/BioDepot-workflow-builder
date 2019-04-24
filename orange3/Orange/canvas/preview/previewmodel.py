@@ -6,9 +6,15 @@ import logging
 
 from AnyQt.QtWidgets import QApplication, QStyleOption
 from AnyQt.QtGui import (
-    QStandardItemModel, QStandardItem, QIcon, QIconEngine, QPainter, QPixmap
+    QStandardItemModel,
+    QStandardItem,
+    QIcon,
+    QIconEngine,
+    QPainter,
+    QPixmap,
 )
 from AnyQt.QtSvg import QSvgRenderer
+
 # pylint: disable=unused-import
 from AnyQt.QtCore import Qt, QTimer, QRectF, QRect, QSize
 
@@ -33,8 +39,7 @@ PathRole = Qt.UserRole + 2
 ThumbnailSVGRole = Qt.UserRole + 3
 
 
-UNKNOWN_SVG = \
-"""<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+UNKNOWN_SVG = """<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg width="161.8mm" height="100.0mm"
  xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
  version="1.2" baseProfile="tiny">
@@ -57,14 +62,17 @@ class PreviewModel(QStandardItemModel):
     def delayedScanUpdate(self, delay=10):
         """Run a delayed preview item scan update.
         """
+
         def iter_update(items):
             for item in items:
                 try:
                     scanner.scan_update(item)
                 except Exception:
-                    log.error("An unexpected error occurred while "
-                              "scanning %r.", str(item.text()),
-                              exc_info=True)
+                    log.error(
+                        "An unexpected error occurred while " "scanning %r.",
+                        str(item.text()),
+                        exc_info=True,
+                    )
                     item.setEnabled(False)
                 yield
 
@@ -86,8 +94,10 @@ class PreviewModel(QStandardItemModel):
 class PreviewItem(QStandardItem):
     """A preview item.
     """
-    def __init__(self, name=None, description=None, thumbnail=None,
-                 icon=None, path=None):
+
+    def __init__(
+        self, name=None, description=None, thumbnail=None, icon=None, path=None
+    ):
         QStandardItem.__init__(self)
 
         self.__name = ""
@@ -217,8 +227,7 @@ class SvgIconEngine(QIconEngine):
         pm.fill(Qt.transparent)
         painter = QPainter(pm)
         try:
-            self.__generator.render(
-                painter, QRectF(0, 0, size.width(), size.height()))
+            self.__generator.render(painter, QRectF(0, 0, size.width(), size.height()))
         finally:
             painter.end()
         style = QApplication.style()

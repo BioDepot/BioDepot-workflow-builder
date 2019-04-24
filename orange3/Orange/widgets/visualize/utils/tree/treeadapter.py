@@ -313,10 +313,12 @@ class TreeAdapter(BaseTreeAdapter):
     def leaves(self, node):
         def _leaves(node):
             return reduce(add, map(_leaves, self.children(node)), []) or [node]
+
         return _leaves(node)
 
     def get_instances_in_nodes(self, nodes):
         from Orange import tree
+
         if isinstance(nodes, tree.Node):
             nodes = [nodes]
         return self.model.get_instances(nodes)

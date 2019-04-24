@@ -8,12 +8,30 @@ from unittest.mock import Mock
 import numpy as np
 
 from Orange.data import Table
-from Orange.preprocess import EntropyMDL, DoNotImpute, Default, Average, \
-    SelectRandomFeatures, EqualFreq, RemoveNaNColumns, DropInstances
+from Orange.preprocess import (
+    EntropyMDL,
+    DoNotImpute,
+    Default,
+    Average,
+    SelectRandomFeatures,
+    EqualFreq,
+    RemoveNaNColumns,
+    DropInstances,
+)
 from Orange.preprocess import EqualWidth, SelectBestFeatures
-from Orange.preprocess.preprocess import Preprocess, Scale, Randomize, \
-    Continuize, Discretize, Impute, SklImpute, Normalize, ProjectCUR, \
-    ProjectPCA, RemoveConstant
+from Orange.preprocess.preprocess import (
+    Preprocess,
+    Scale,
+    Randomize,
+    Continuize,
+    Discretize,
+    Impute,
+    SklImpute,
+    Normalize,
+    ProjectCUR,
+    ProjectPCA,
+    RemoveConstant,
+)
 from Orange.util import OrangeDeprecationWarning
 
 
@@ -22,6 +40,7 @@ class TestPreprocess(unittest.TestCase):
         class MockPreprocessor(Preprocess):
             __init__ = Mock(return_value=None)
             __call__ = Mock()
+
             @classmethod
             def reset(cls):
                 cls.__init__.reset_mock()
@@ -47,13 +66,13 @@ class TestPreprocess(unittest.TestCase):
 
     def test_refuse_data_in_constructor(self):
         # We force deprecations as exceptions as part of CI
-        is_CI = os.environ.get('CI') or os.environ.get('ORANGE_DEPRECATIONS_ERROR')
+        is_CI = os.environ.get("CI") or os.environ.get("ORANGE_DEPRECATIONS_ERROR")
         if is_CI:
-            self.assertTrue(os.environ.get('ORANGE_DEPRECATIONS_ERROR'))
+            self.assertTrue(os.environ.get("ORANGE_DEPRECATIONS_ERROR"))
         expected = self.assertRaises if is_CI else self.assertWarns
         with expected(OrangeDeprecationWarning):
             try:
-                Preprocess(Table('iris'))
+                Preprocess(Table("iris"))
             except NotImplementedError:
                 # Expected from default Preprocess.__call__
                 pass
@@ -62,7 +81,7 @@ class TestPreprocess(unittest.TestCase):
 class TestRemoveConstant(unittest.TestCase):
     def test_remove_columns(self):
         X = np.random.rand(6, 4)
-        X[:, (1,3)] = 5
+        X[:, (1, 3)] = 5
         X[3, 1] = np.nan
         X[1, 1] = np.nan
         data = Table(X)
@@ -82,10 +101,7 @@ class TestRemoveConstant(unittest.TestCase):
 class TestScaling(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.table = Table([[1, 2, 3],
-                           [2, 3, 4],
-                           [3, 4, 5],
-                           [4, 5, 6]])
+        cls.table = Table([[1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6]])
 
     def test_scaling_mean_span(self):
         table = Scale(center=Scale.Mean, scale=Scale.Span)(self.table)
@@ -101,11 +117,27 @@ class TestScaling(unittest.TestCase):
 
 class TestReprs(unittest.TestCase):
     def test_reprs(self):
-        preprocs = [Continuize, Discretize, Impute, SklImpute, Normalize,
-                    Randomize, ProjectPCA, ProjectCUR, Scale,
-                    EqualFreq, EqualWidth, EntropyMDL, SelectBestFeatures,
-                    SelectRandomFeatures, RemoveNaNColumns, DoNotImpute, DropInstances,
-                    Average, Default]
+        preprocs = [
+            Continuize,
+            Discretize,
+            Impute,
+            SklImpute,
+            Normalize,
+            Randomize,
+            ProjectPCA,
+            ProjectCUR,
+            Scale,
+            EqualFreq,
+            EqualWidth,
+            EntropyMDL,
+            SelectBestFeatures,
+            SelectRandomFeatures,
+            RemoveNaNColumns,
+            DoNotImpute,
+            DropInstances,
+            Average,
+            Default,
+        ]
 
         for preproc in preprocs:
             repr_str = repr(preproc())

@@ -73,8 +73,7 @@ class OWCorrespondenceAnalysis(widget.OWWidget):
         box = gui.vBox(self.controlArea, "Variables")
         self.varlist = itemmodels.VariableListModel()
         self.varview = view = QListView(
-            selectionMode=QListView.MultiSelection,
-            uniformItemSizes=True
+            selectionMode=QListView.MultiSelection, uniformItemSizes=True
         )
         view.setModel(self.varlist)
         view.selectionModel().selectionChanged.connect(self._var_changed)
@@ -85,12 +84,14 @@ class OWCorrespondenceAnalysis(widget.OWWidget):
         box = gui.vBox(axes_box, "Axis X", margin=0)
         box.setFlat(True)
         self.axis_x_cb = gui.comboBox(
-            box, self, "component_x", callback=self._component_changed)
+            box, self, "component_x", callback=self._component_changed
+        )
 
         box = gui.vBox(axes_box, "Axis Y", margin=0)
         box.setFlat(True)
         self.axis_y_cb = gui.comboBox(
-            box, self, "component_y", callback=self._component_changed)
+            box, self, "component_y", callback=self._component_changed
+        )
 
         self.infotext = gui.widgetLabel(
             gui.vBox(self.controlArea, "Contribution to Inertia"), "\n"
@@ -114,15 +115,16 @@ class OWCorrespondenceAnalysis(widget.OWWidget):
 
         self.data = data
         if data is not None:
-            self.varlist[:] = [var for var in data.domain.variables
-                               if var.is_discrete]
+            self.varlist[:] = [var for var in data.domain.variables if var.is_discrete]
             if not len(self.varlist[:]):
                 self.Error.no_disc_vars()
                 self.data = None
             else:
-                self.selected_var_indices = [0, 1][:len(self.varlist)]
+                self.selected_var_indices = [0, 1][: len(self.varlist)]
                 self.component_x = 0
-                self.component_y = int(len(self.varlist[self.selected_var_indices[-1]].values) > 1)
+                self.component_y = int(
+                    len(self.varlist[self.selected_var_indices[-1]].values) > 1
+                )
                 self.openContext(data)
                 self._restore_selection()
         self._update_CA()
@@ -134,29 +136,30 @@ class OWCorrespondenceAnalysis(widget.OWWidget):
         self.varlist[:] = []
 
     def selected_vars(self):
-        rows = sorted(
-            ind.row() for ind in self.varview.selectionModel().selectedRows())
+        rows = sorted(ind.row() for ind in self.varview.selectionModel().selectedRows())
         return [self.varlist[i] for i in rows]
 
     def _restore_selection(self):
         def restore(view, indices):
             with itemmodels.signal_blocking(view.selectionModel()):
                 select_rows(view, indices)
+
         restore(self.varview, self.selected_var_indices)
 
     def _p_axes(self):
-#         return (0, 1)
+        #         return (0, 1)
         return (self.component_x, self.component_y)
 
     def _var_changed(self):
         self.selected_var_indices = sorted(
-            ind.row() for ind in self.varview.selectionModel().selectedRows())
+            ind.row() for ind in self.varview.selectionModel().selectedRows()
+        )
         rfs = self.update_XY()
         if rfs is not None:
             if self.component_x >= rfs:
-                self.component_x = rfs-1
+                self.component_x = rfs - 1
             if self.component_y >= rfs:
-                self.component_y = rfs-1
+                self.component_y = rfs - 1
         self._invalidate()
 
     def _component_changed(self):
@@ -196,20 +199,16 @@ class OWCorrespondenceAnalysis(widget.OWWidget):
         else:
             ctable = contingency.get_contingency(self.data, *ca_vars[::-1])
 
-        self.ca = correspondence(ctable, )
+        self.ca = correspondence(ctable)
         rfs = self.ca.row_factors.shape[1]
-        axes = ["{}".format(i + 1)
-                for i in range(rfs)]
+        axes = ["{}".format(i + 1) for i in range(rfs)]
         self.axis_x_cb.addItems(axes)
         self.axis_y_cb.addItems(axes)
         return rfs
 
     def _setup_plot(self):
         def get_minmax(points):
-            minmax = [float('inf'),
-                      float('-inf'),
-                      float('inf'),
-                      float('-inf')]
+            minmax = [float("inf"), float("-inf"), float("inf"), float("-inf")]
             for pp in points:
                 for p in pp:
                     minmax[0] = min(p[0], minmax[0])
@@ -254,7 +253,9 @@ class OWCorrespondenceAnalysis(widget.OWWidget):
             color = QColor(color_outline)
             color.setAlpha(120)
             item = ScatterPlotItem(
-                x=points[:, 0], y=points[:, 1], brush=QBrush(color),
+                x=points[:, 0],
+                y=points[:, 1],
+                brush=QBrush(color),
                 pen=pg.mkPen(color_outline.darker(120), width=1.5),
                 size=np.full((points.shape[0],), 10.1),
             )
@@ -272,18 +273,15 @@ class OWCorrespondenceAnalysis(widget.OWWidget):
             inertia = 100 * inertia / np.sum(inertia)
 
         ax = self.plot.getAxis("bottom")
-        ax.setLabel("Component {} ({:.1f}%)"
-                    .format(p_axes[0] + 1, inertia[p_axes[0]]))
+        ax.setLabel("Component {} ({:.1f}%)".format(p_axes[0] + 1, inertia[p_axes[0]]))
         ax = self.plot.getAxis("left")
-        ax.setLabel("Component {} ({:.1f}%)"
-                    .format(p_axes[1] + 1, inertia[p_axes[1]]))
+        ax.setLabel("Component {} ({:.1f}%)".format(p_axes[1] + 1, inertia[p_axes[1]]))
 
     def _update_info(self):
         if self.ca is None:
             self.infotext.setText("\n\n")
         else:
-            fmt = ("Axis 1: {:.2f}\n"
-                   "Axis 2: {:.2f}")
+            fmt = "Axis 1: {:.2f}\n" "Axis 2: {:.2f}"
             inertia = self.ca.inertia_of_axis()
             if np.sum(inertia) == 0:
                 inertia = 100 * inertia
@@ -307,7 +305,8 @@ class OWCorrespondenceAnalysis(widget.OWWidget):
             items["Selected variable"] = vars[0]
         else:
             items["Selected variables"] = "{} and {}".format(
-                ", ".join(var.name for var in vars[:-1]), vars[-1].name)
+                ", ".join(var.name for var in vars[:-1]), vars[-1].name
+            )
         self.report_items(items)
 
         self.report_plot()
@@ -341,9 +340,9 @@ def burt_table(data, variables):
             start1, end1 = offsets[i], offsets[i] + counts[i]
             start2, end2 = offsets[j], offsets[j] + counts[j]
 
-            table[start1: end1, start2: end2] += cm
+            table[start1:end1, start2:end2] += cm
             if i != j:
-                table[start2: end2, start1: end1] += cm.T
+                table[start2:end2, start1:end1] += cm.T
 
     return values, table
 
@@ -389,8 +388,10 @@ def correspondence(A):
 
     return CA(U, D, V, F, G, row_sum, col_sum)
 
-CA = namedtuple("CA", ["U", "D", "V", "row_factors", "col_factors",
-                       "row_sums", "column_sums"])
+
+CA = namedtuple(
+    "CA", ["U", "D", "V", "row_factors", "col_factors", "row_sums", "column_sums"]
+)
 
 
 class CA(CA):
@@ -406,6 +407,7 @@ class CA(CA):
 
 def main(argv=None):
     import sip
+
     if argv is None:
         argv = sys.argv[1:]
 
@@ -425,6 +427,7 @@ def main(argv=None):
     sip.delete(w)
     del w
     return rval
+
 
 if __name__ == "__main__":
     sys.exit(main())

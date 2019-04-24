@@ -42,8 +42,9 @@ class TestSQLDecorator(WidgetTest):
         self.assertIs(self.widget.pop_called_with(), d)
 
         a_table = object()
-        with patch("Orange.widgets.utils.sql.Table",
-                   MagicMock(return_value=a_table)) as table_mock:
+        with patch(
+            "Orange.widgets.utils.sql.Table", MagicMock(return_value=a_table)
+        ) as table_mock:
             d = SqlTable(None, None, MagicMock())
 
             d.approx_len = MagicMock(return_value=AUTO_DL_LIMIT - 1)

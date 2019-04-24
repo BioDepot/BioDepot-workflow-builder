@@ -13,8 +13,8 @@ from Orange.tests import test_filename
 class RandomForestTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.iris = Table('iris')
-        cls.housing = Table('housing')
+        cls.iris = Table("iris")
+        cls.housing = Table("housing")
 
     def test_RandomForest(self):
         forest = RandomForestLearner()
@@ -73,20 +73,32 @@ class RandomForestTest(unittest.TestCase):
         scores = learner.score_data(self.iris)
         self.assertEqual(scores.shape[1], len(self.iris.domain.attributes))
         self.assertNotEqual(sum(scores[0]), 0)
-        self.assertEqual(['petal length', 'petal width'],
-                         sorted([self.iris.domain.attributes[i].name
-                                 for i in np.argsort(scores[0])[-2:]]))
+        self.assertEqual(
+            ["petal length", "petal width"],
+            sorted(
+                [
+                    self.iris.domain.attributes[i].name
+                    for i in np.argsort(scores[0])[-2:]
+                ]
+            ),
+        )
 
     def test_regression_scorer(self):
         learner = RandomForestRegressionLearner()
         scores = learner.score_data(self.housing)
-        self.assertEqual(['LSTAT', 'RM'],
-                         sorted([self.housing.domain.attributes[i].name
-                                 for i in np.argsort(scores[0])[-2:]]))
+        self.assertEqual(
+            ["LSTAT", "RM"],
+            sorted(
+                [
+                    self.housing.domain.attributes[i].name
+                    for i in np.argsort(scores[0])[-2:]
+                ]
+            ),
+        )
 
     def test_scorer_feature(self):
         np.random.seed(42)
-        data = Table(test_filename('test4.tab'))
+        data = Table(test_filename("test4.tab"))
         learner = RandomForestLearner()
         scores = learner.score_data(data)
         for i, attr in enumerate(data.domain.attributes):

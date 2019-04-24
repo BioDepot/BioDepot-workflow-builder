@@ -59,8 +59,8 @@ class ValueFromStringSubstring(Transformation):
         match_beginning (bool, optional): if set to `True`, the pattern must
             appear at the beginning of the string
     """
-    def __init__(self, variable, patterns,
-                 case_sensitive=False, match_beginning=False):
+
+    def __init__(self, variable, patterns, case_sensitive=False, match_beginning=False):
         super().__init__(variable)
         self.patterns = patterns
         self.case_sensitive = case_sensitive
@@ -80,7 +80,8 @@ class ValueFromStringSubstring(Transformation):
         c = c.astype(str)
         c[nans] = ""
         res = map_by_substring(
-            c, self.patterns, self.case_sensitive, self.match_beginning)
+            c, self.patterns, self.case_sensitive, self.match_beginning
+        )
         res[nans] = np.nan
         return res
 
@@ -103,8 +104,8 @@ class ValueFromDiscreteSubstring(Lookup):
         match_beginning (bool, optional): if set to `True`, the pattern must
             appear at the beginning of the string
     """
-    def __init__(self, variable, patterns,
-                 case_sensitive=False, match_beginning=False):
+
+    def __init__(self, variable, patterns, case_sensitive=False, match_beginning=False):
         super().__init__(variable, [])
         self.case_sensitive = case_sensitive
         self.match_beginning = match_beginning
@@ -114,12 +115,18 @@ class ValueFromDiscreteSubstring(Lookup):
         """__setattr__ is overloaded to recompute the lookup table when the
         patterns, the original attribute or the flags change."""
         super().__setattr__(key, value)
-        if hasattr(self, "patterns") and \
-                key in ("case_sensitive", "match_beginning", "patterns",
-                        "variable"):
+        if hasattr(self, "patterns") and key in (
+            "case_sensitive",
+            "match_beginning",
+            "patterns",
+            "variable",
+        ):
             self.lookup_table = map_by_substring(
-                self.variable.values, self.patterns,
-                self.case_sensitive, self.match_beginning)
+                self.variable.values,
+                self.patterns,
+                self.case_sensitive,
+                self.match_beginning,
+            )
 
 
 class OWCreateClass(widget.OWWidget):
@@ -144,8 +151,10 @@ class OWCreateClass(widget.OWWidget):
     match_beginning = ContextSetting(False)
     case_sensitive = ContextSetting(False)
 
-    TRANSFORMERS = {StringVariable: ValueFromStringSubstring,
-                    DiscreteVariable: ValueFromDiscreteSubstring}
+    TRANSFORMERS = {
+        StringVariable: ValueFromStringSubstring,
+        DiscreteVariable: ValueFromDiscreteSubstring,
+    }
 
     class Warning(widget.OWWidget.Warning):
         no_nonnumeric_vars = Msg("Data contains only numeric variables.")
@@ -173,9 +182,15 @@ class OWCreateClass(widget.OWWidget):
         self.counts = []
 
         combo = gui.comboBox(
-            self.controlArea, self, "attribute", label="From column: ",
-            box=True, orientation=Qt.Horizontal, callback=self.update_rules,
-            model=DomainModel(valid_types=(StringVariable, DiscreteVariable)))
+            self.controlArea,
+            self,
+            "attribute",
+            label="From column: ",
+            box=True,
+            orientation=Qt.Horizontal,
+            callback=self.update_rules,
+            model=DomainModel(valid_types=(StringVariable, DiscreteVariable)),
+        )
         # Don't use setSizePolicy keyword argument here: it applies to box,
         # not the combo
         combo.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
@@ -187,8 +202,14 @@ class OWCreateClass(widget.OWWidget):
         patternbox.layout().addLayout(self.rules_box)
         box = gui.hBox(patternbox)
         gui.button(
-            box, self, "+", callback=self.add_row, autoDefault=False, flat=True,
-            minimumSize=(QSize(20, 20)))
+            box,
+            self,
+            "+",
+            callback=self.add_row,
+            autoDefault=False,
+            flat=True,
+            minimumSize=(QSize(20, 20)),
+        )
         gui.rubber(box)
         self.rules_box.setColumnMinimumWidth(1, 70)
         self.rules_box.setColumnMinimumWidth(0, 10)
@@ -201,22 +222,35 @@ class OWCreateClass(widget.OWWidget):
         self.update_rules()
 
         gui.lineEdit(
-            self.controlArea, self, "class_name",
+            self.controlArea,
+            self,
+            "class_name",
             label="Name for the new class:",
-            box=True, orientation=Qt.Horizontal)
+            box=True,
+            orientation=Qt.Horizontal,
+        )
 
         optionsbox = gui.vBox(self.controlArea, box=True)
         gui.checkBox(
-            optionsbox, self, "match_beginning", "Match only at the beginning",
-            callback=self.options_changed)
+            optionsbox,
+            self,
+            "match_beginning",
+            "Match only at the beginning",
+            callback=self.options_changed,
+        )
         gui.checkBox(
-            optionsbox, self, "case_sensitive", "Case sensitive",
-            callback=self.options_changed)
+            optionsbox,
+            self,
+            "case_sensitive",
+            "Case sensitive",
+            callback=self.options_changed,
+        )
 
         box = gui.hBox(self.controlArea)
         gui.rubber(box)
-        gui.button(box, self, "Apply", autoDefault=False, width=180,
-                   callback=self.apply)
+        gui.button(
+            box, self, "Apply", autoDefault=False, width=180, callback=self.apply
+        )
 
         # TODO: Resizing upon changing the number of rules does not work
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
@@ -228,8 +262,9 @@ class OWCreateClass(widget.OWWidget):
             selected attribute. If the attribute is not yet in the dictionary,
             set the default.
         """
-        return self.rules.setdefault(self.attribute and self.attribute.name,
-                                     [["", ""], ["", ""]])
+        return self.rules.setdefault(
+            self.attribute and self.attribute.name, [["", ""], ["", ""]]
+        )
 
     def rules_to_edits(self):
         """Fill the line edites with the rules from the current settings."""
@@ -269,6 +304,7 @@ class OWCreateClass(widget.OWWidget):
 
     def adjust_n_rule_rows(self):
         """Add or remove lines if needed and fix the tab order."""
+
         def _add_line():
             self.line_edits.append([])
             n_lines = len(self.line_edits)
@@ -278,17 +314,26 @@ class OWCreateClass(widget.OWWidget):
                 self.rules_box.addWidget(edit, n_lines, coli)
                 edit.textChanged.connect(self.sync_edit)
             button = gui.button(
-                None, self, label='×', flat=True, height=20,
-                styleSheet='* {font-size: 16pt; color: silver}'
-                           '*:hover {color: black}',
-                autoDefault=False, callback=self.remove_row)
+                None,
+                self,
+                label="×",
+                flat=True,
+                height=20,
+                styleSheet="* {font-size: 16pt; color: silver}"
+                "*:hover {color: black}",
+                autoDefault=False,
+                callback=self.remove_row,
+            )
             button.setMinimumSize(QSize(12, 20))
             self.remove_buttons.append(button)
             self.rules_box.addWidget(button, n_lines, 0)
             self.counts.append([])
             for coli, kwargs in enumerate(
-                    (dict(alignment=Qt.AlignRight),
-                     dict(alignment=Qt.AlignLeft, styleSheet="color: gray"))):
+                (
+                    dict(alignment=Qt.AlignRight),
+                    dict(alignment=Qt.AlignLeft, styleSheet="color: gray"),
+                )
+            ):
                 label = QLabel(**kwargs)
                 self.counts[-1].append(label)
                 self.rules_box.addWidget(label, n_lines, 3 + coli)
@@ -340,15 +385,23 @@ class OWCreateClass(widget.OWWidget):
         C1, C2, C3. If C<n> already appears in the list of values given by
         the user, the labels start at C<n+1> instead.
         """
-        largest_c = max((int(label[1:]) for label, _ in self.active_rules
-                         if re.match("^C\\d+", label)),
-                        default=0)
+        largest_c = max(
+            (
+                int(label[1:])
+                for label, _ in self.active_rules
+                if re.match("^C\\d+", label)
+            ),
+            default=0,
+        )
         class_count = count(largest_c + 1)
-        return [label_edit.text() or "C{}".format(next(class_count))
-                for label_edit, _ in self.line_edits]
+        return [
+            label_edit.text() or "C{}".format(next(class_count))
+            for label_edit, _ in self.line_edits
+        ]
 
     def update_counts(self):
         """Recompute and update the counts of matches."""
+
         def _matcher(strings, pattern):
             """Return indices of strings into patterns; consider case
             sensitivity and matching at the beginning. The given strings are
@@ -409,15 +462,18 @@ class OWCreateClass(widget.OWWidget):
 
         def _set_labels():
             """Set the labels to show the counts"""
-            for (n_matched, n_total), (lab_matched, lab_total), (lab, patt) in \
-                    zip(self.match_counts, self.counts, self.active_rules):
+            for (n_matched, n_total), (lab_matched, lab_total), (lab, patt) in zip(
+                self.match_counts, self.counts, self.active_rules
+            ):
                 n_before = n_total - n_matched
                 lab_matched.setText("{}".format(n_matched))
                 if n_before and (lab or patt):
                     lab_total.setText("+ {}".format(n_before))
                     if n_matched:
-                        tip = "{} of the {} matching instances are already " \
-                              "covered above".format(n_before, n_total)
+                        tip = (
+                            "{} of the {} matching instances are already "
+                            "covered above".format(n_before, n_total)
+                        )
                     else:
                         tip = "All matching instances are already covered above"
                     lab_total.setToolTip(tip)
@@ -425,12 +481,12 @@ class OWCreateClass(widget.OWWidget):
 
         def _set_placeholders():
             """Set placeholders for empty edit lines"""
-            matches = [n for n, _ in self.match_counts] + \
-                      [0] * len(self.line_edits)
+            matches = [n for n, _ in self.match_counts] + [0] * len(self.line_edits)
             for n_matched, (_, patt) in zip(matches, self.line_edits):
                 if not patt.text():
                     patt.setPlaceholderText(
-                        "(remaining instances)" if n_matched else "(unused)")
+                        "(remaining instances)" if n_matched else "(unused)"
+                    )
 
             labels = self.class_labels()
             for label, (lab_edit, _) in zip(labels, self.line_edits):
@@ -441,11 +497,11 @@ class OWCreateClass(widget.OWWidget):
         attr = self.attribute
         if attr is None:
             return
-        counters = {StringVariable: _string_counts,
-                    DiscreteVariable: _discrete_counts}
+        counters = {StringVariable: _string_counts, DiscreteVariable: _discrete_counts}
         data = self.data.get_column_view(attr)[0]
-        self.match_counts = [[int(np.sum(x)) for x in matches]
-                             for matches in counters[type(attr)]()]
+        self.match_counts = [
+            [int(np.sum(x)) for x in matches] for matches in counters[type(attr)]()
+        ]
         _set_labels()
         _set_placeholders()
 
@@ -466,21 +522,22 @@ class OWCreateClass(widget.OWWidget):
             return
         rules = self.active_rules
         # Transposition + stripping
-        valid_rules = [label or pattern or n_matches
-                       for (label, pattern), n_matches in
-                       zip(rules, self.match_counts)]
-        patterns = [pattern
-                    for (_, pattern), valid in zip(rules, valid_rules)
-                    if valid]
-        names = [name for name, valid in zip(self.class_labels(), valid_rules)
-                 if valid]
+        valid_rules = [
+            label or pattern or n_matches
+            for (label, pattern), n_matches in zip(rules, self.match_counts)
+        ]
+        patterns = [pattern for (_, pattern), valid in zip(rules, valid_rules) if valid]
+        names = [name for name, valid in zip(self.class_labels(), valid_rules) if valid]
         transformer = self.TRANSFORMERS[type(self.attribute)]
         compute_value = transformer(
-            self.attribute, patterns, self.case_sensitive, self.match_beginning)
+            self.attribute, patterns, self.case_sensitive, self.match_beginning
+        )
         new_class = DiscreteVariable(
-            self.class_name, names, compute_value=compute_value)
+            self.class_name, names, compute_value=compute_value
+        )
         new_domain = Domain(
-            domain.attributes, new_class, domain.metas + domain.class_vars)
+            domain.attributes, new_class, domain.metas + domain.class_vars
+        )
         new_data = self.data.transform(new_domain)
         self.Outputs.data.send(new_data)
 
@@ -489,18 +546,22 @@ class OWCreateClass(widget.OWWidget):
             rule = "<b>{}</b> ".format(class_name)
             if patt:
                 rule += "if <b>{}</b> contains <b>{}</b>".format(
-                    self.attribute.name, patt)
+                    self.attribute.name, patt
+                )
             else:
                 rule += "otherwise"
             return rule
 
         def _count_part():
             if not n_matched:
-                return "all {} matching instances are already covered " \
-                       "above".format(n_total)
+                return "all {} matching instances are already covered " "above".format(
+                    n_total
+                )
             elif n_matched < n_total and patt:
-                return "{} matching instances (+ {} that are already " \
-                       "covered above".format(n_matched, n_total - n_matched)
+                return (
+                    "{} matching instances (+ {} that are already "
+                    "covered above".format(n_matched, n_total - n_matched)
+                )
             else:
                 return "{} matching instances".format(n_matched)
 
@@ -509,8 +570,9 @@ class OWCreateClass(widget.OWWidget):
         self.report_items("Input", [("Source attribute", self.attribute.name)])
         output = ""
         names = self.class_labels()
-        for (n_matched, n_total), class_name, (lab, patt) in \
-                zip(self.match_counts, names, self.active_rules):
+        for (n_matched, n_total), class_name, (lab, patt) in zip(
+            self.match_counts, names, self.active_rules
+        ):
             if lab or patt or n_total:
                 output += "<li>{}; {}</li>".format(_cond_part(), _count_part())
         if output:
@@ -530,6 +592,7 @@ def main():  # pragma: no cover
     ow.set_data(table)
     a.exec()
     ow.saveSettings()
+
 
 if __name__ == "__main__":  # pragma: no cover
     main()

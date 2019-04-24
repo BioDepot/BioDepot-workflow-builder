@@ -1,8 +1,13 @@
 from AnyQt.QtWidgets import QListView, QLineEdit, QCompleter
 from AnyQt.QtGui import QDrag
 from AnyQt.QtCore import (
-    Qt, QObject, QEvent, QModelIndex,
-    QAbstractItemModel, QSortFilterProxyModel, QStringListModel,
+    Qt,
+    QObject,
+    QEvent,
+    QModelIndex,
+    QAbstractItemModel,
+    QSortFilterProxyModel,
+    QStringListModel,
 )
 from AnyQt.QtCore import pyqtSignal as Signal
 
@@ -40,6 +45,7 @@ class VariablesListItemView(QListView):
     """ A Simple QListView subclass initialized for displaying
     variables.
     """
+
     #: Emitted with a Qt.DropAction when a drag/drop (originating from this
     #: view) completed successfully
     dragDropActionDidComplete = Signal(int)
@@ -71,11 +77,15 @@ class VariablesListItemView(QListView):
             drag.setMimeData(data)
 
             default_action = Qt.IgnoreAction
-            if self.defaultDropAction() != Qt.IgnoreAction and \
-                    supported_actions & self.defaultDropAction():
+            if (
+                self.defaultDropAction() != Qt.IgnoreAction
+                and supported_actions & self.defaultDropAction()
+            ):
                 default_action = self.defaultDropAction()
-            elif (supported_actions & Qt.CopyAction and
-                  self.dragDropMode() != self.InternalMove):
+            elif (
+                supported_actions & Qt.CopyAction
+                and self.dragDropMode() != self.InternalMove
+            ):
                 default_action = Qt.CopyAction
             res = drag.exec_(supported_actions, default_action)
             if res == Qt.MoveAction:
@@ -99,12 +109,11 @@ class VariablesListItemView(QListView):
         Should the drop event be accepted?
         """
         # disallow drag/drops between windows
-        if event.source() is not None and \
-                event.source().window() is not self.window():
+        if event.source() is not None and event.source().window() is not self.window():
             return False
 
         mime = event.mimeData()
-        vars = mime.property('_items')
+        vars = mime.property("_items")
         if vars is None:
             return False
 
@@ -120,6 +129,7 @@ class VariableFilterProxyModel(QSortFilterProxyModel):
     their names and labels.
 
     """
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._filter_string = ""
@@ -129,8 +139,9 @@ class VariableFilterProxyModel(QSortFilterProxyModel):
         self.invalidateFilter()
 
     def filter_accepts_variable(self, var):
-        row_str = var.name + " ".join(("%s=%s" % item)
-                                      for item in var.attributes.items())
+        row_str = var.name + " ".join(
+            ("%s=%s" % item) for item in var.attributes.items()
+        )
         row_str = row_str.lower()
         filters = self._filter_string.split()
 
@@ -149,9 +160,9 @@ class CompleterNavigator(QObject):
     """ An event filter to be installed on a QLineEdit, to enable
     Key up/ down to navigate between posible completions.
     """
+
     def eventFilter(self, obj, event):
-        if (event.type() == QEvent.KeyPress and
-                isinstance(obj, QLineEdit)):
+        if event.type() == QEvent.KeyPress and isinstance(obj, QLineEdit):
             if event.key() == Qt.Key_Down:
                 diff = 1
             elif event.key() == Qt.Key_Up:
@@ -174,6 +185,7 @@ def variables_filter(model, parent=None):
     GUI components: ListView with a lineedit which works as a filter. One can write
     a variable name in a edit box and possible matches are then shown in a listview.
     """
+
     def update_completer_model():
         """ This gets called when the model for available attributes changes
         through either drag/drop or the left/right button actions.
@@ -196,8 +208,7 @@ def variables_filter(model, parent=None):
         prefix = str(completer.completionPrefix())
         if not prefix.endswith(" ") and " " in prefix:
             prefix, _ = prefix.rsplit(" ", 1)
-            items = [prefix + " " + item
-                     for item in original_completer_items]
+            items = [prefix + " " + item for item in original_completer_items]
         else:
             items = original_completer_items
         old = list(map(str, completer_model.stringList()))

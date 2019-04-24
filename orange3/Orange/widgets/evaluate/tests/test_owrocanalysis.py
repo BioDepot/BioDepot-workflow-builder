@@ -20,7 +20,7 @@ class TestROC(unittest.TestCase):
         learners = [
             Orange.classification.MajorityLearner(),
             Orange.classification.LogisticRegressionLearner(),
-            Orange.classification.TreeLearner()
+            Orange.classification.TreeLearner(),
         ]
         res = Orange.evaluation.CrossValidation(data, learners, k=10)
 
@@ -66,15 +66,17 @@ class TestROC(unittest.TestCase):
 
 
 class TestOWROCAnalysis(WidgetTest, EvaluateTest):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
         cls.lenses = data = Orange.data.Table("lenses")
         cls.res = Orange.evaluation.TestOnTestData(
-            train_data=data[::2], test_data=data[1::2],
-            learners=[Orange.classification.MajorityLearner(),
-                      Orange.classification.KNNLearner()],
+            train_data=data[::2],
+            test_data=data[1::2],
+            learners=[
+                Orange.classification.MajorityLearner(),
+                Orange.classification.KNNLearner(),
+            ],
             store_data=True,
         )
 
@@ -86,8 +88,8 @@ class TestOWROCAnalysis(WidgetTest, EvaluateTest):
                 "display_perf_line": True,
                 "display_def_threshold": True,
                 "display_convex_hull": True,
-                "display_convex_curve": True
-            }
+                "display_convex_curve": True,
+            },
         )  # type: OWROCAnalysis
 
     def tearDown(self):
@@ -111,7 +113,8 @@ class TestOWROCAnalysis(WidgetTest, EvaluateTest):
 
     def test_empty_input(self):
         res = Orange.evaluation.Results(
-            data=self.lenses[:0], nmethods=2, store_data=True)
+            data=self.lenses[:0], nmethods=2, store_data=True
+        )
         res.row_indices = np.array([], dtype=int)
         res.actual = np.array([])
         res.predicted = np.zeros((2, 0))

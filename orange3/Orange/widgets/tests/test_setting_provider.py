@@ -25,18 +25,15 @@ class SettingProviderTestCase(unittest.TestCase):
         default_provider.providers[ZOOM_TOOLBAR].settings[ALLOW_ZOOMING].default = True
 
     def test_registers_all_settings(self):
-        self.assertDefaultSettingsEqual(default_provider, {
-            GRAPH: {
-                SHOW_LABELS: True,
-                SHOW_X_AXIS: True,
-                SHOW_Y_AXIS: True,
+        self.assertDefaultSettingsEqual(
+            default_provider,
+            {
+                GRAPH: {SHOW_LABELS: True, SHOW_X_AXIS: True, SHOW_Y_AXIS: True},
+                ZOOM_TOOLBAR: {ALLOW_ZOOMING: True},
+                SHOW_ZOOM_TOOLBAR: True,
+                SHOW_GRAPH: True,
             },
-            ZOOM_TOOLBAR: {
-                ALLOW_ZOOMING: True,
-            },
-            SHOW_ZOOM_TOOLBAR: True,
-            SHOW_GRAPH: True,
-        })
+        )
 
     def test_initialize_sets_defaults(self):
         widget = Widget()
@@ -50,12 +47,9 @@ class SettingProviderTestCase(unittest.TestCase):
 
     def test_initialize_with_data_sets_values_from_data(self):
         widget = Widget()
-        default_provider.initialize(widget, {
-            SHOW_GRAPH: False,
-            GRAPH: {
-                SHOW_Y_AXIS: False
-            }
-        })
+        default_provider.initialize(
+            widget, {SHOW_GRAPH: False, GRAPH: {SHOW_Y_AXIS: False}}
+        )
 
         self.assertEqual(widget.show_graph, False)
         self.assertEqual(widget.show_zoom_toolbar, True)
@@ -64,15 +58,14 @@ class SettingProviderTestCase(unittest.TestCase):
         self.assertEqual(widget.graph.show_y_axis, False)
         self.assertEqual(widget.zoom_toolbar.allow_zooming, True)
 
-    def test_initialize_with_data_stores_initial_values_until_instance_is_connected(self):
+    def test_initialize_with_data_stores_initial_values_until_instance_is_connected(
+        self
+    ):
         widget = Widget.__new__(Widget)
 
-        default_provider.initialize(widget, {
-            SHOW_GRAPH: False,
-            GRAPH: {
-                SHOW_Y_AXIS: False
-            }
-        })
+        default_provider.initialize(
+            widget, {SHOW_GRAPH: False, GRAPH: {SHOW_Y_AXIS: False}}
+        )
 
         self.assertFalse(hasattr(widget.graph, SHOW_Y_AXIS))
         widget.graph = Graph()
@@ -80,15 +73,19 @@ class SettingProviderTestCase(unittest.TestCase):
 
     def test_get_provider(self):
         self.assertEqual(default_provider.get_provider(BaseWidget), None)
-        self.assertEqual(default_provider.get_provider(Widget),
-                         default_provider)
+        self.assertEqual(default_provider.get_provider(Widget), default_provider)
         self.assertEqual(default_provider.get_provider(BaseGraph), None)
-        self.assertEqual(default_provider.get_provider(Graph),
-                         default_provider.providers[GRAPH])
-        self.assertEqual(default_provider.get_provider(ExtendedGraph),
-                         default_provider.providers[GRAPH])
-        self.assertEqual(default_provider.get_provider(ZoomToolbar),
-                         default_provider.providers[ZOOM_TOOLBAR])
+        self.assertEqual(
+            default_provider.get_provider(Graph), default_provider.providers[GRAPH]
+        )
+        self.assertEqual(
+            default_provider.get_provider(ExtendedGraph),
+            default_provider.providers[GRAPH],
+        )
+        self.assertEqual(
+            default_provider.get_provider(ZoomToolbar),
+            default_provider.providers[ZOOM_TOOLBAR],
+        )
 
     def test_pack_settings(self):
         widget = Widget()
@@ -98,28 +95,21 @@ class SettingProviderTestCase(unittest.TestCase):
 
         packed_settings = default_provider.pack(widget)
 
-        self.assertEqual(packed_settings, {
-            SHOW_GRAPH: False,
-            SHOW_ZOOM_TOOLBAR: True,
-            GRAPH: {
-                SHOW_LABELS: True,
-                SHOW_X_AXIS: True,
-                SHOW_Y_AXIS: False,
+        self.assertEqual(
+            packed_settings,
+            {
+                SHOW_GRAPH: False,
+                SHOW_ZOOM_TOOLBAR: True,
+                GRAPH: {SHOW_LABELS: True, SHOW_X_AXIS: True, SHOW_Y_AXIS: False},
+                ZOOM_TOOLBAR: {ALLOW_ZOOMING: True},
             },
-            ZOOM_TOOLBAR: {
-                ALLOW_ZOOMING: True,
-            },
-        })
+        )
 
     def test_unpack_settings(self):
         widget = Widget()
-        default_provider.unpack(widget, {
-            SHOW_GRAPH: False,
-            GRAPH: {
-                SHOW_Y_AXIS: False,
-            },
-
-        })
+        default_provider.unpack(
+            widget, {SHOW_GRAPH: False, GRAPH: {SHOW_Y_AXIS: False}}
+        )
 
         self.assertEqual(widget.show_graph, False)
         self.assertEqual(widget.show_zoom_toolbar, True)
@@ -134,17 +124,28 @@ class SettingProviderTestCase(unittest.TestCase):
         for setting, data, instance in default_provider.traverse_settings():
             settings.add(setting.name)
 
-        self.assertEqual(settings, {
-            SHOW_ZOOM_TOOLBAR, SHOW_GRAPH,
-            SHOW_LABELS, SHOW_X_AXIS, SHOW_Y_AXIS,
-            ALLOW_ZOOMING})
+        self.assertEqual(
+            settings,
+            {
+                SHOW_ZOOM_TOOLBAR,
+                SHOW_GRAPH,
+                SHOW_LABELS,
+                SHOW_X_AXIS,
+                SHOW_Y_AXIS,
+                ALLOW_ZOOMING,
+            },
+        )
 
     def test_traverse_settings_selects_correct_data(self):
         settings = {}
         graph_data = {SHOW_LABELS: 3, SHOW_X_AXIS: 4, SHOW_Y_AXIS: 5}
         zoom_data = {ALLOW_ZOOMING: 6}
-        all_data = {SHOW_GRAPH: 1, SHOW_ZOOM_TOOLBAR: 2,
-                GRAPH: graph_data, ZOOM_TOOLBAR: zoom_data}
+        all_data = {
+            SHOW_GRAPH: 1,
+            SHOW_ZOOM_TOOLBAR: 2,
+            GRAPH: graph_data,
+            ZOOM_TOOLBAR: zoom_data,
+        }
 
         for setting, data, instance in default_provider.traverse_settings(all_data):
             settings[setting.name] = data
@@ -158,7 +159,7 @@ class SettingProviderTestCase(unittest.TestCase):
                 SHOW_X_AXIS: graph_data,
                 SHOW_Y_AXIS: graph_data,
                 ALLOW_ZOOMING: zoom_data,
-            }
+            },
         )
 
     def test_traverse_settings_with_partial_data(self):
@@ -178,14 +179,16 @@ class SettingProviderTestCase(unittest.TestCase):
                 SHOW_X_AXIS: graph_data,
                 SHOW_Y_AXIS: graph_data,
                 ALLOW_ZOOMING: {},
-            }
+            },
         )
 
     def test_traverse_settings_selects_correct_instance(self):
         settings = {}
         widget = Widget()
 
-        for setting, data, instance in default_provider.traverse_settings(instance=widget):
+        for setting, data, instance in default_provider.traverse_settings(
+            instance=widget
+        ):
             settings[setting.name] = instance
 
         self.assertEqual(
@@ -197,7 +200,7 @@ class SettingProviderTestCase(unittest.TestCase):
                 SHOW_Y_AXIS: widget.graph,
                 ALLOW_ZOOMING: widget.zoom_toolbar,
             },
-            settings
+            settings,
         )
 
     def test_traverse_settings_with_partial_instance(self):
@@ -205,7 +208,9 @@ class SettingProviderTestCase(unittest.TestCase):
         widget = Widget()
         widget.graph = None
 
-        for setting, data, instance in default_provider.traverse_settings(instance=widget):
+        for setting, data, instance in default_provider.traverse_settings(
+            instance=widget
+        ):
             settings[setting.name] = instance
 
         self.assertEqual(
@@ -217,7 +222,7 @@ class SettingProviderTestCase(unittest.TestCase):
                 SHOW_X_AXIS: None,
                 SHOW_Y_AXIS: None,
                 ALLOW_ZOOMING: widget.zoom_toolbar,
-            }
+            },
         )
 
     def assertDefaultSettingsEqual(self, provider, defaults):
@@ -235,6 +240,8 @@ def initialize_settings(instance):
     provider = default_provider.get_provider(instance.__class__)
     if provider:
         provider.initialize(instance)
+
+
 default_provider = None
 """:type: SettingProvider"""
 
@@ -290,5 +297,5 @@ class Widget(BaseWidget):
         self.zoom_toolbar = ZoomToolbar()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(verbosity=2)

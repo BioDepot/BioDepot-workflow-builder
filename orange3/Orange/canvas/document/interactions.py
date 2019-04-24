@@ -18,7 +18,14 @@ import logging
 from AnyQt.QtWidgets import QApplication, QGraphicsRectItem, QUndoCommand
 from AnyQt.QtGui import QPen, QBrush, QColor, QFontMetrics
 from AnyQt.QtCore import (
-    Qt, QObject, QCoreApplication, QSizeF, QPointF, QRect, QRectF, QLineF
+    Qt,
+    QObject,
+    QCoreApplication,
+    QSizeF,
+    QPointF,
+    QRect,
+    QRectF,
+    QLineF,
 )
 from AnyQt.QtCore import pyqtSignal as Signal
 
@@ -50,6 +57,7 @@ class UserInteraction(QObject):
         by default).
 
     """
+
     # Cancel reason flags
 
     #: No specified reason
@@ -207,8 +215,10 @@ def reversed_arguments(func):
     """
     Return a function with reversed argument order.
     """
+
     def wrapped(*args):
         return func(*reversed(args))
+
     return wrapped
 
 
@@ -220,6 +230,7 @@ class NewLinkAction(UserInteraction):
     is presented to the user.
 
     """
+
     # direction of the drag
     FROM_SOURCE = 1
     FROM_SINK = 2
@@ -258,7 +269,7 @@ class NewLinkAction(UserInteraction):
         """
         Create a new tmp anchor at the `item` (:class:`NodeItem`).
         """
-        assert(self.tmp_anchor_point is None)
+        assert self.tmp_anchor_point is None
         if self.direction == self.FROM_SOURCE:
             self.tmp_anchor_point = item.newInputAnchor()
         else:
@@ -307,9 +318,9 @@ class NewLinkAction(UserInteraction):
         return item
 
     def mousePressEvent(self, event):
-        anchor_item = self.scene.item_at(event.scenePos(),
-                                         items.NodeAnchorItem,
-                                         buttons=Qt.LeftButton)
+        anchor_item = self.scene.item_at(
+            event.scenePos(), items.NodeAnchorItem, buttons=Qt.LeftButton
+        )
         if anchor_item and event.button() == Qt.LeftButton:
             # Start a new link starting at item
             self.from_item = anchor_item.parentNodeItem()
@@ -324,14 +335,15 @@ class NewLinkAction(UserInteraction):
 
             helpevent = QuickHelpTipEvent(
                 self.tr("Create a new link"),
-                self.tr('<h3>Create new link</h3>'
-                        '<p>Drag a link to an existing node or release on '
-                        'an empty spot to create a new node.</p>'
-                        '<p>Hold Shift when releasing the mouse button to '
-                        'edit connections.</p>'
-#                        '<a href="help://orange-canvas/create-new-links">'
-#                        'More ...</a>'
-                        )
+                self.tr(
+                    "<h3>Create new link</h3>"
+                    "<p>Drag a link to an existing node or release on "
+                    "an empty spot to create a new node.</p>"
+                    "<p>Hold Shift when releasing the mouse button to "
+                    "edit connections.</p>"
+                    #                        '<a href="help://orange-canvas/create-new-links">'
+                    #                        'More ...</a>'
+                ),
             )
             QCoreApplication.postEvent(self.document, helpevent)
 
@@ -362,8 +374,9 @@ class NewLinkAction(UserInteraction):
         # `NodeItem` at the cursor position
         item = self.target_node_item_at(event.scenePos())
 
-        if self.current_target_item is not None and \
-                (item is None or item is not self.current_target_item):
+        if self.current_target_item is not None and (
+            item is None or item is not self.current_target_item
+        ):
             # `current_target_item` is no longer under the mouse cursor
             # (was replaced by another item or the the cursor was moved over
             # an empty scene spot.
@@ -413,13 +426,11 @@ class NewLinkAction(UserInteraction):
                 try:
                     node = self.create_new(event)
                 except Exception:
-                    log.error("Failed to create a new node, ending.",
-                              exc_info=True)
+                    log.error("Failed to create a new node, ending.", exc_info=True)
                     node = None
 
                 if node is not None:
-                    commands.AddNodeCommand(self.scheme, node,
-                                            parent=self.macro)
+                    commands.AddNodeCommand(self.scheme, node, parent=self.macro)
 
             if node is not None:
                 if self.direction == self.FROM_SOURCE:
@@ -430,8 +441,11 @@ class NewLinkAction(UserInteraction):
                     sink_node = self.scene.node_for_item(self.sink_item)
                 self.connect_nodes(source_node, sink_node)
 
-                if not self.isCanceled() or not self.isFinished() and \
-                        self.macro is not None:
+                if (
+                    not self.isCanceled()
+                    or not self.isFinished()
+                    and self.macro is not None
+                ):
                     # Push (commit) the add link/node action on the stack.
                     stack.push(self.macro)
 
@@ -451,9 +465,11 @@ class NewLinkAction(UserInteraction):
         from_desc = node.description
 
         def is_compatible(source, sink):
-            return any(scheme.compatible_channels(output, input) \
-                       for output in source.outputs \
-                       for input in sink.inputs)
+            return any(
+                scheme.compatible_channels(output, input)
+                for output in source.outputs
+                for input in sink.inputs
+            )
 
         if self.direction == self.FROM_SINK:
             # Reverse the argument order.
@@ -478,11 +494,16 @@ class NewLinkAction(UserInteraction):
             pos = event.scenePos()
             # a new widget should be placed so that the connection
             # stays as it was
-            offset = 31 * (-1 if self.direction == self.FROM_SINK else
-                           1 if self.direction == self.FROM_SOURCE else 0)
-            node = self.document.newNodeHelper(desc,
-                                               position=(pos.x() + offset,
-                                                         pos.y()))
+            offset = 31 * (
+                -1
+                if self.direction == self.FROM_SINK
+                else 1
+                if self.direction == self.FROM_SOURCE
+                else 0
+            )
+            node = self.document.newNodeHelper(
+                desc, position=(pos.x() + offset, pos.y())
+            )
             return node
 
     def connect_nodes(self, source_node, sink_node):
@@ -495,8 +516,10 @@ class NewLinkAction(UserInteraction):
         try:
             possible = self.scheme.propose_links(source_node, sink_node)
 
-            log.debug("proposed (weighted) links: %r",
-                      [(s1.name, s2.name, w) for s1, s2, w in possible])
+            log.debug(
+                "proposed (weighted) links: %r",
+                [(s1.name, s2.name, w) for s1, s2, w in possible],
+            )
 
             if not possible:
                 raise NoPossibleLinksError
@@ -518,13 +541,15 @@ class NewLinkAction(UserInteraction):
 
                 # Check for destructive action (i.e. would the new link
                 # replace a previous link)
-                if sink.single and self.scheme.find_links(sink_node=sink_node,
-                                                          sink_channel=sink):
+                if sink.single and self.scheme.find_links(
+                    sink_node=sink_node, sink_channel=sink
+                ):
                     show_link_dialog = True
 
             if show_link_dialog:
-                existing = self.scheme.find_links(source_node=source_node,
-                                                  sink_node=sink_node)
+                existing = self.scheme.find_links(
+                    source_node=source_node, sink_node=sink_node
+                )
 
                 if existing:
                     # edit_links will populate the view with existing links
@@ -537,40 +562,41 @@ class NewLinkAction(UserInteraction):
                         source_node, sink_node, initial_links
                     )
                 except Exception:
-                    log.error("Failed to edit the links",
-                              exc_info=True)
+                    log.error("Failed to edit the links", exc_info=True)
                     raise
                 if rstatus == EditLinksDialog.Rejected:
                     raise UserCanceledError
             else:
                 # links_to_add now needs to be a list of actual SchemeLinks
-                links_to_add = [scheme.SchemeLink(
-                                    source_node, source_channel,
-                                    sink_node, sink_channel)
-                                for source_channel, sink_channel
-                                in links_to_add]
+                links_to_add = [
+                    scheme.SchemeLink(
+                        source_node, source_channel, sink_node, sink_channel
+                    )
+                    for source_channel, sink_channel in links_to_add
+                ]
 
-                links_to_add, links_to_remove = \
-                    add_links_plan(self.scheme, links_to_add)
+                links_to_add, links_to_remove = add_links_plan(
+                    self.scheme, links_to_add
+                )
 
             # Remove temp items before creating any new links
             self.cleanup()
 
             for link in links_to_remove:
-                commands.RemoveLinkCommand(self.scheme, link,
-                                           parent=self.macro)
+                commands.RemoveLinkCommand(self.scheme, link, parent=self.macro)
 
             for link in links_to_add:
                 # Check if the new requested link is a duplicate of an
                 # existing link
                 duplicate = self.scheme.find_links(
-                    link.source_node, link.source_channel,
-                    link.sink_node, link.sink_channel
+                    link.source_node,
+                    link.source_channel,
+                    link.sink_node,
+                    link.sink_channel,
                 )
 
                 if not duplicate:
-                    commands.AddLinkCommand(self.scheme, link,
-                                            parent=self.macro)
+                    commands.AddLinkCommand(self.scheme, link, parent=self.macro)
 
         except scheme.IncompatibleChannelTypeError:
             log.info("Cannot connect: invalid channel types.")
@@ -585,8 +611,9 @@ class NewLinkAction(UserInteraction):
             log.info("User canceled a new link action.")
             self.cancel(UserInteraction.UserCancelReason)
         except Exception:
-            log.error("An error occurred during the creation of a new link.",
-                      exc_info=True)
+            log.error(
+                "An error occurred during the creation of a new link.", exc_info=True
+            )
             self.cancel()
         finally:
             self.force_link_dialog = False
@@ -600,27 +627,31 @@ class NewLinkAction(UserInteraction):
         an empty list will disable all initial links).
 
         """
-        status, links_to_add, links_to_remove = \
-            edit_links(
-                self.scheme, source_node, sink_node, initial_links,
-                parent=self.document
-            )
+        status, links_to_add, links_to_remove = edit_links(
+            self.scheme, source_node, sink_node, initial_links, parent=self.document
+        )
 
         if status == EditLinksDialog.Accepted:
-            links_to_add = [scheme.SchemeLink(
-                                source_node, source_channel,
-                                sink_node, sink_channel)
-                            for source_channel, sink_channel in links_to_add]
+            links_to_add = [
+                scheme.SchemeLink(source_node, source_channel, sink_node, sink_channel)
+                for source_channel, sink_channel in links_to_add
+            ]
 
-            links_to_remove = [self.scheme.find_links(
-                                   source_node, source_channel,
-                                   sink_node, sink_channel)
-                               for source_channel, sink_channel
-                               in links_to_remove]
+            links_to_remove = [
+                self.scheme.find_links(
+                    source_node, source_channel, sink_node, sink_channel
+                )
+                for source_channel, sink_channel in links_to_remove
+            ]
 
             links_to_remove = reduce(list.__add__, links_to_remove, [])
-            conflicting = [_f for _f in [conflicting_single_link(self.scheme, link)
-                                  for link in links_to_add] if _f]
+            conflicting = [
+                _f
+                for _f in [
+                    conflicting_single_link(self.scheme, link) for link in links_to_add
+                ]
+                if _f
+            ]
             for link in conflicting:
                 if link not in links_to_remove:
                     links_to_remove.append(link)
@@ -663,8 +694,7 @@ class NewLinkAction(UserInteraction):
             self.cursor_anchor_point = None
 
 
-def edit_links(scheme, source_node, sink_node, initial_links=None,
-               parent=None):
+def edit_links(scheme, source_node, sink_node, initial_links=None, parent=None):
     """
     Show and execute the `EditLinksDialog`.
     Optional `initial_links` list can provide a list of initial
@@ -679,8 +709,7 @@ def edit_links(scheme, source_node, sink_node, initial_links=None,
 
     # all SchemeLinks between the two nodes.
     links = scheme.find_links(source_node=source_node, sink_node=sink_node)
-    existing_links = [(link.source_channel, link.sink_channel)
-                      for link in links]
+    existing_links = [(link.source_channel, link.sink_channel) for link in links]
 
     if initial_links is None:
         initial_links = list(existing_links)
@@ -707,13 +736,11 @@ def add_links_plan(scheme, links, force_replace=False):
     Return a plan for adding a list of links to the scheme.
     """
     links_to_add = list(links)
-    links_to_remove = [conflicting_single_link(scheme, link)
-                       for link in links]
+    links_to_remove = [conflicting_single_link(scheme, link) for link in links]
     links_to_remove = [_f for _f in links_to_remove if _f]
 
     if not force_replace:
-        links_to_add, links_to_remove = remove_duplicates(links_to_add,
-                                                          links_to_remove)
+        links_to_add, links_to_remove = remove_duplicates(links_to_add, links_to_remove)
     return links_to_add, links_to_remove
 
 
@@ -728,8 +755,7 @@ def conflicting_single_link(scheme, link):
 
     if link.sink_channel.single:
         existing = scheme.find_links(
-            sink_node=link.sink_node,
-            sink_channel=link.sink_channel
+            sink_node=link.sink_node, sink_channel=link.sink_channel
         )
 
         if existing:
@@ -740,8 +766,12 @@ def conflicting_single_link(scheme, link):
 
 def remove_duplicates(links_to_add, links_to_remove):
     def link_key(link):
-        return (link.source_node, link.source_channel,
-                link.sink_node, link.sink_channel)
+        return (
+            link.source_node,
+            link.source_channel,
+            link.sink_node,
+            link.sink_channel,
+        )
 
     add_keys = list(map(link_key, links_to_add))
     remove_keys = list(map(link_key, links_to_remove))
@@ -784,8 +814,7 @@ class NewNodeAction(UserInteraction):
             view = self.document.view()
             pos = view.mapToScene(view.mapFromGlobal(pos))
 
-            node = self.document.newNodeHelper(desc,
-                                               position=(pos.x(), pos.y()))
+            node = self.document.newNodeHelper(desc, position=(pos.x(), pos.y()))
             self.document.addNode(node)
             return node
 
@@ -794,6 +823,7 @@ class RectangleSelectionAction(UserInteraction):
     """
     Select items in the scene using a Rectangle selection
     """
+
     def __init__(self, document, *args, **kwargs):
         UserInteraction.__init__(self, document, *args, **kwargs)
         # The initial selection at drag start
@@ -811,18 +841,13 @@ class RectangleSelectionAction(UserInteraction):
         if not any_item and event.button() & Qt.LeftButton:
             self.modifiers = event.modifiers()
             self.selection_rect = QRectF(pos, QSizeF(0, 0))
-            self.rect_item = QGraphicsRectItem(
-                self.selection_rect.normalized()
-            )
+            self.rect_item = QGraphicsRectItem(self.selection_rect.normalized())
 
             self.rect_item.setPen(
-                QPen(QBrush(QColor(51, 153, 255, 192)),
-                     0.4, Qt.SolidLine, Qt.RoundCap)
+                QPen(QBrush(QColor(51, 153, 255, 192)), 0.4, Qt.SolidLine, Qt.RoundCap)
             )
 
-            self.rect_item.setBrush(
-                QBrush(QColor(168, 202, 236, 192))
-            )
+            self.rect_item.setBrush(QBrush(QColor(168, 202, 236, 192)))
 
             self.rect_item.setZValue(-100)
 
@@ -878,19 +903,17 @@ class RectangleSelectionAction(UserInteraction):
 
         self.rect_item.setRect(rect.adjusted(pw, pw, -pw, -pw))
 
-        selected = self.scene.items(self.selection_rect.normalized(),
-                                    Qt.IntersectsItemShape,
-                                    Qt.AscendingOrder)
+        selected = self.scene.items(
+            self.selection_rect.normalized(), Qt.IntersectsItemShape, Qt.AscendingOrder
+        )
 
-        selected = set([item for item in selected if \
-                        item.flags() & Qt.ItemIsSelectable])
+        selected = set(
+            [item for item in selected if item.flags() & Qt.ItemIsSelectable]
+        )
 
         if self.modifiers & Qt.ControlModifier:
-            for item in selected | self.last_selection | \
-                    self.initial_selection:
-                item.setSelected(
-                    (item in selected) ^ (item in self.initial_selection)
-                )
+            for item in selected | self.last_selection | self.initial_selection:
+                item.setSelected((item in selected) ^ (item in self.initial_selection))
         else:
             for item in selected.union(self.last_selection):
                 item.setSelected(item in selected)
@@ -941,6 +964,7 @@ class EditNodeLinksAction(UserInteraction):
         The sink (link end) node for the link editor.
 
     """
+
     def __init__(self, document, source_node, sink_node, *args, **kwargs):
         UserInteraction.__init__(self, document, *args, **kwargs)
         self.source_node = source_node
@@ -959,10 +983,10 @@ class EditNodeLinksAction(UserInteraction):
 
         dlg = EditLinksDialog(self.document, windowTitle="Edit Links")
 
-        links = self.scheme.find_links(source_node=self.source_node,
-                                       sink_node=self.sink_node)
-        existing_links = [(link.source_channel, link.sink_channel)
-                          for link in links]
+        links = self.scheme.find_links(
+            source_node=self.source_node, sink_node=self.sink_node
+        )
+        existing_links = [(link.source_channel, link.sink_channel) for link in links]
 
         if initial_links is None:
             initial_links = list(existing_links)
@@ -988,28 +1012,33 @@ class EditNodeLinksAction(UserInteraction):
             for _, sink_channel in links_to_add:
                 if sink_channel.single:
                     existing = self.scheme.find_links(
-                        sink_node=self.sink_node,
-                        sink_channel=sink_channel
+                        sink_node=self.sink_node, sink_channel=sink_channel
                     )
 
-                    existing = [link for link in existing
-                                if link.source_node is not self.source_node]
+                    existing = [
+                        link
+                        for link in existing
+                        if link.source_node is not self.source_node
+                    ]
 
                     if existing:
                         assert len(existing) == 1
                         self.document.removeLink(existing[0])
 
             for source_channel, sink_channel in links_to_remove:
-                links = self.scheme.find_links(source_node=self.source_node,
-                                               source_channel=source_channel,
-                                               sink_node=self.sink_node,
-                                               sink_channel=sink_channel)
+                links = self.scheme.find_links(
+                    source_node=self.source_node,
+                    source_channel=source_channel,
+                    sink_node=self.sink_node,
+                    sink_channel=sink_channel,
+                )
                 assert len(links) == 1
                 self.document.removeLink(links[0])
 
             for source_channel, sink_channel in links_to_add:
-                link = scheme.SchemeLink(self.source_node, source_channel,
-                                         self.sink_node, sink_channel)
+                link = scheme.SchemeLink(
+                    self.source_node, source_channel, self.sink_node, sink_channel
+                )
 
                 self.document.addLink(link)
 
@@ -1027,6 +1056,7 @@ class NewArrowAnnotation(UserInteraction):
     """
     Create a new arrow annotation handler.
     """
+
     def __init__(self, document, *args, **kwargs):
         UserInteraction.__init__(self, document, *args, **kwargs)
         self.down_pos = None
@@ -1039,11 +1069,12 @@ class NewArrowAnnotation(UserInteraction):
 
         helpevent = QuickHelpTipEvent(
             self.tr("Click and drag to create a new arrow"),
-            self.tr('<h3>New arrow annotation</h3>'
-                    '<p>Click and drag to create a new arrow annotation.</p>'
-#                    '<a href="help://orange-canvas/arrow-annotations>'
-#                    'More ...</a>'
-                    )
+            self.tr(
+                "<h3>New arrow annotation</h3>"
+                "<p>Click and drag to create a new arrow annotation.</p>"
+                #                    '<a href="help://orange-canvas/arrow-annotations>'
+                #                    'More ...</a>'
+            ),
         )
         QCoreApplication.postEvent(self.document, helpevent)
 
@@ -1063,13 +1094,14 @@ class NewArrowAnnotation(UserInteraction):
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton:
-            if self.arrow_item is None and \
-                    (self.down_pos - event.scenePos()).manhattanLength() > \
-                    QApplication.instance().startDragDistance():
+            if (
+                self.arrow_item is None
+                and (self.down_pos - event.scenePos()).manhattanLength()
+                > QApplication.instance().startDragDistance()
+            ):
 
                 annot = scheme.SchemeArrowAnnotation(
-                    point_to_tuple(self.down_pos),
-                    point_to_tuple(event.scenePos())
+                    point_to_tuple(self.down_pos), point_to_tuple(event.scenePos())
                 )
                 annot.set_color(self.color)
                 item = self.scene.add_annotation(annot)
@@ -1078,8 +1110,9 @@ class NewArrowAnnotation(UserInteraction):
                 self.annotation = annot
 
             if self.arrow_item is not None:
-                p1, p2 = map(self.arrow_item.mapFromScene,
-                             (self.down_pos, event.scenePos()))
+                p1, p2 = map(
+                    self.arrow_item.mapFromScene, (self.down_pos, event.scenePos())
+                )
                 self.arrow_item.setLine(QLineF(p1, p2))
 
             event.accept()
@@ -1091,8 +1124,7 @@ class NewArrowAnnotation(UserInteraction):
                 p1, p2 = self.down_pos, event.scenePos()
 
                 # Commit the annotation to the scheme
-                self.annotation.set_line(point_to_tuple(p1),
-                                         point_to_tuple(p2))
+                self.annotation.set_line(point_to_tuple(p1), point_to_tuple(p2))
 
                 self.document.addAnnotation(self.annotation)
 
@@ -1126,6 +1158,7 @@ class NewTextAnnotation(UserInteraction):
     """
     A New Text Annotation interaction handler
     """
+
     def __init__(self, document, *args, **kwargs):
         UserInteraction.__init__(self, document, *args, **kwargs)
         self.down_pos = None
@@ -1142,12 +1175,13 @@ class NewTextAnnotation(UserInteraction):
 
         helpevent = QuickHelpTipEvent(
             self.tr("Click to create a new text annotation"),
-            self.tr('<h3>New text annotation</h3>'
-                    '<p>Click (and drag to resize) on the canvas to create '
-                    'a new text annotation item.</p>'
-#                    '<a href="help://orange-canvas/text-annotations">'
-#                    'More ...</a>'
-                    )
+            self.tr(
+                "<h3>New text annotation</h3>"
+                "<p>Click (and drag to resize) on the canvas to create "
+                "a new text annotation item.</p>"
+                #                    '<a href="help://orange-canvas/text-annotations">'
+                #                    'More ...</a>'
+            ),
         )
         QCoreApplication.postEvent(self.document, helpevent)
 
@@ -1158,8 +1192,7 @@ class NewTextAnnotation(UserInteraction):
         Create a new TextAnnotation at with `rect` as the geometry.
         """
         annot = scheme.SchemeTextAnnotation(rect_to_tuple(rect))
-        font = {"family": str(self.font.family()),
-                "size": self.font.pixelSize()}
+        font = {"family": str(self.font.family()), "size": self.font.pixelSize()}
         annot.set_font(font)
 
         item = self.scene.add_annotation(annot)
@@ -1169,9 +1202,7 @@ class NewTextAnnotation(UserInteraction):
         self.annotation_item = item
         self.annotation = annot
         self.control = controlpoints.ControlPointRect()
-        self.control.rectChanged.connect(
-            self.annotation_item.setGeometry
-        )
+        self.control.rectChanged.connect(self.annotation_item.setGeometry)
         self.scene.addItem(self.control)
 
     def mousePressEvent(self, event):
@@ -1181,9 +1212,11 @@ class NewTextAnnotation(UserInteraction):
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton:
-            if self.annotation_item is None and \
-                    (self.down_pos - event.scenePos()).manhattanLength() > \
-                    QApplication.instance().startDragDistance():
+            if (
+                self.annotation_item is None
+                and (self.down_pos - event.scenePos()).manhattanLength()
+                > QApplication.instance().startDragDistance()
+            ):
                 rect = QRectF(self.down_pos, event.scenePos()).normalized()
                 self.createNewAnnotation(rect)
 
@@ -1196,8 +1229,7 @@ class NewTextAnnotation(UserInteraction):
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton:
             if self.annotation_item is None:
-                self.createNewAnnotation(QRectF(event.scenePos(),
-                                                event.scenePos()))
+                self.createNewAnnotation(QRectF(event.scenePos(), event.scenePos()))
                 rect = self.defaultTextGeometry(event.scenePos())
 
             else:
@@ -1210,9 +1242,7 @@ class NewTextAnnotation(UserInteraction):
 
             self.annotation_item.setGeometry(rect)
 
-            self.control.rectChanged.disconnect(
-                self.annotation_item.setGeometry
-            )
+            self.control.rectChanged.disconnect(self.annotation_item.setGeometry)
             self.control.hide()
 
             # Move the focus to the editor.
@@ -1233,8 +1263,10 @@ class NewTextAnnotation(UserInteraction):
         spacing = metrics.lineSpacing()
         margin = self.annotation_item.document().documentMargin()
 
-        rect = QRectF(QPointF(point.x(), point.y() - spacing - margin),
-                      QSizeF(150, spacing + 2 * margin))
+        rect = QRectF(
+            QPointF(point.x(), point.y() - spacing - margin),
+            QSizeF(150, spacing + 2 * margin),
+        )
         return rect
 
     def end(self):
@@ -1258,6 +1290,7 @@ class ResizeTextAnnotation(UserInteraction):
     """
     Resize a Text Annotation interaction handler.
     """
+
     def __init__(self, document, *args, **kwargs):
         UserInteraction.__init__(self, document, *args, **kwargs)
         self.item = None
@@ -1303,9 +1336,10 @@ class ResizeTextAnnotation(UserInteraction):
         rect = self.item.geometry()
         if self.savedRect != rect:
             command = commands.SetAttrCommand(
-                self.annotation, "rect",
+                self.annotation,
+                "rect",
                 (rect.x(), rect.y(), rect.width(), rect.height()),
-                name="Edit text geometry"
+                name="Edit text geometry",
             )
             self.document.undoStack().push(command)
             self.savedRect = rect
@@ -1347,6 +1381,7 @@ class ResizeArrowAnnotation(UserInteraction):
     """
     Resize an Arrow Annotation interaction handler.
     """
+
     def __init__(self, document, *args, **kwargs):
         UserInteraction.__init__(self, document, *args, **kwargs)
         self.item = None

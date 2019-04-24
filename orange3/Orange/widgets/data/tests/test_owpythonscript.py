@@ -16,10 +16,12 @@ class TestOWPythonScript(WidgetTest):
 
     def test_inputs(self):
         """Check widget's inputs"""
-        for input, data in (("Data", self.iris),
-                            ("Learner", self.learner),
-                            ("Classifier", self.model),
-                            ("Object", "object")):
+        for input, data in (
+            ("Data", self.iris),
+            ("Learner", self.learner),
+            ("Classifier", self.model),
+            ("Object", "object"),
+        ):
             self.assertEqual(getattr(self.widget, input.lower()), {})
             self.send_signal(input, data, (1,))
             self.assertEqual(getattr(self.widget, input.lower()), {1: data})
@@ -29,9 +31,10 @@ class TestOWPythonScript(WidgetTest):
     def test_outputs(self):
         """Check widget's outputs"""
         for signal, data in (
-                ("Data", self.iris),
-                ("Learner", self.learner),
-                ("Classifier", self.model)):
+            ("Data", self.iris),
+            ("Learner", self.learner),
+            ("Classifier", self.model),
+        ):
             lsignal = signal.lower()
             self.widget.text.setPlainText("out_{0} = in_{0}".format(lsignal))
             self.send_signal(signal, data, (1,))
@@ -49,8 +52,9 @@ class TestOWPythonScript(WidgetTest):
         self.assertIn("42", self.widget.console.toPlainText())
         self.widget.text.setPlainText("print(temp)")
         self.widget.execute_button.click()
-        self.assertNotIn("NameError: name 'temp' is not defined",
-                         self.widget.console.toPlainText())
+        self.assertNotIn(
+            "NameError: name 'temp' is not defined", self.widget.console.toPlainText()
+        )
 
     def test_wrong_outputs(self):
         """
@@ -60,11 +64,12 @@ class TestOWPythonScript(WidgetTest):
         self.widget.autobox.setCheckState(False)
         self.assertEqual(len(self.widget.Error.active), 0)
         for signal, data in (
-                ("Data", self.iris),
-                ("Learner", self.learner),
-                ("Classifier", self.model)):
+            ("Data", self.iris),
+            ("Learner", self.learner),
+            ("Classifier", self.model),
+        ):
             lsignal = signal.lower()
-            self.send_signal(signal, data, (1, ))
+            self.send_signal(signal, data, (1,))
             self.widget.text.setPlainText("out_{} = 42".format(lsignal))
             self.widget.execute_button.click()
             self.assertEqual(self.get_output(signal), None)
@@ -90,27 +95,29 @@ class TestOWPythonScript(WidgetTest):
         self.assertIsNone(console_locals["in_data"])
         self.assertEqual(console_locals["in_datas"], [])
 
-        self.send_signal("Data", self.iris, (1, ))
+        self.send_signal("Data", self.iris, (1,))
         click()
         self.assertIs(console_locals["in_data"], self.iris)
         datas = console_locals["in_datas"]
         self.assertEqual(len(datas), 1)
         self.assertIs(datas[0], self.iris)
 
-        self.send_signal("Data", titanic, (2, ))
+        self.send_signal("Data", titanic, (2,))
         click()
         self.assertIsNone(console_locals["in_data"])
-        self.assertEqual({id(obj) for obj in console_locals["in_datas"]},
-                         {id(self.iris), id(titanic)})
+        self.assertEqual(
+            {id(obj) for obj in console_locals["in_datas"]},
+            {id(self.iris), id(titanic)},
+        )
 
-        self.send_signal("Data", None, (2, ))
+        self.send_signal("Data", None, (2,))
         click()
         self.assertIs(console_locals["in_data"], self.iris)
         datas = console_locals["in_datas"]
         self.assertEqual(len(datas), 1)
         self.assertIs(datas[0], self.iris)
 
-        self.send_signal("Data", None, (1, ))
+        self.send_signal("Data", None, (1,))
         click()
         self.assertIsNone(console_locals["in_data"])
         self.assertEqual(console_locals["in_datas"], [])

@@ -1,16 +1,26 @@
 from collections import OrderedDict
 
-from AnyQt.QtGui import (
-    QBrush, QPen, QColor, QPainter, QPainterPath, QTransform
-)
+from AnyQt.QtGui import QBrush, QPen, QColor, QPainter, QPainterPath, QTransform
 from AnyQt.QtWidgets import (
-    QGraphicsItem, QGraphicsEllipseItem, QGraphicsTextItem,
-    QGraphicsLineItem, QGraphicsScene, QGraphicsView, QStyle, QSizePolicy,
-    QFormLayout
+    QGraphicsItem,
+    QGraphicsEllipseItem,
+    QGraphicsTextItem,
+    QGraphicsLineItem,
+    QGraphicsScene,
+    QGraphicsView,
+    QStyle,
+    QSizePolicy,
+    QFormLayout,
 )
 from AnyQt.QtCore import (
-    Qt, QRectF, QSize, QPointF, QLineF, QTimer,
-    pyqtSignal, pyqtProperty
+    Qt,
+    QRectF,
+    QSize,
+    QPointF,
+    QLineF,
+    QTimer,
+    pyqtSignal,
+    pyqtProperty,
 )
 
 from Orange.widgets import gui
@@ -99,8 +109,8 @@ class TextTreeNode(QGraphicsTextItem, GraphNode):
         return QBrush(brush)
 
     backgroundBrush = pyqtProperty(
-        "QBrush", fget=backgroundBrush, fset=setBackgroundBrush,
-        doc="Background brush")
+        "QBrush", fget=backgroundBrush, fset=setBackgroundBrush, doc="Background brush"
+    )
 
     def __init__(self, parent, *args, **kwargs):
         QGraphicsTextItem.__init__(self, *args)
@@ -143,12 +153,16 @@ class TextTreeNode(QGraphicsTextItem, GraphNode):
         if getattr(self, "_rect", QRectF()).isValid():
             return self._rect
         else:
-            return QRectF(QPointF(0, 0), self.document().size()) | \
-                   getattr(self, "_rect", QRectF(0, 0, 1, 1))
+            return QRectF(QPointF(0, 0), self.document().size()) | getattr(
+                self, "_rect", QRectF(0, 0, 1, 1)
+            )
 
     def boundingRect(self):
-        return self._rect if getattr(self, "_rect", QRectF()).isValid() \
+        return (
+            self._rect
+            if getattr(self, "_rect", QRectF()).isValid()
             else super().boundingRect()
+        )
 
     @property
     def branches(self):
@@ -184,8 +198,10 @@ class GraphicsNode(TextTreeNode):
                 node.setVisible(do_open)
 
     def itemChange(self, change, value):
-        if change in [QGraphicsItem.ItemPositionHasChanged,
-                      QGraphicsItem.ItemVisibleHasChanged]:
+        if change in [
+            QGraphicsItem.ItemPositionHasChanged,
+            QGraphicsItem.ItemVisibleHasChanged,
+        ]:
             self.update_edge()
         return super().itemChange(change, value)
 
@@ -199,7 +215,8 @@ class GraphicsNode(TextTreeNode):
 
     def edge_in_point(self, edge):
         return edge.mapFromItem(
-            self, QPointF(self.rect().center().x(), self.rect().y()))
+            self, QPointF(self.rect().center().x(), self.rect().y())
+        )
 
     def edge_out_point(self, edge):
         return edge.mapFromItem(self.droplet, self.droplet.rect().center())
@@ -231,8 +248,9 @@ class GraphicsEdge(QGraphicsLineItem, GraphEdge):
     def update_ends(self):
         try:
             self.prepareGeometryChange()
-            self.setLine(QLineF(self.node1.edge_out_point(self),
-                                self.node2.edge_in_point(self)))
+            self.setLine(
+                QLineF(self.node1.edge_out_point(self), self.node2.edge_in_point(self))
+            )
         except RuntimeError:  # this gets called through QTimer.singleShot
             # and might already be deleted by Qt
             pass
@@ -280,6 +298,7 @@ class TreeGraphicsScene(QGraphicsScene):
 
     def _fix_pos(self, node, x, y):
         """Fix the position of the tree stemming from the given node."""
+
         def brect(node):
             """Get the bounding box of the parent rect and all its children."""
             return node.boundingRect() | node.childrenBoundingRect()
@@ -358,7 +377,8 @@ class TreeNavigator(QGraphicsView):
     # noinspection PyPep8Naming
     def viewPolygon(self):
         return self.mapFromScene(
-            self.master_view.mapToScene(self.master_view.viewport().rect()))
+            self.master_view.mapToScene(self.master_view.viewport().rect())
+        )
 
 
 class OWTreeViewer2D(OWWidget):
@@ -382,43 +402,77 @@ class OWTreeViewer2D(OWWidget):
         self.model = None
 
         box = gui.vBox(
-            self.controlArea, 'Tree', addSpace=20,
-            sizePolicy=QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed))
-        self.info = gui.widgetLabel(box, 'No tree.')
+            self.controlArea,
+            "Tree",
+            addSpace=20,
+            sizePolicy=QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed),
+        )
+        self.info = gui.widgetLabel(box, "No tree.")
 
         layout = QFormLayout()
         layout.setVerticalSpacing(20)
         layout.setFieldGrowthPolicy(layout.ExpandingFieldsGrow)
-        box = self.display_box = \
-            gui.widgetBox(self.controlArea, "Display", addSpace=True,
-                          orientation=layout)
+        box = self.display_box = gui.widgetBox(
+            self.controlArea, "Display", addSpace=True, orientation=layout
+        )
         layout.addRow(
             "Zoom: ",
-            gui.hSlider(box, self, 'zoom',
-                        minValue=1, maxValue=10, step=1, ticks=False,
-                        callback=self.toggle_zoom_slider,
-                        createLabel=False, addToLayout=False, addSpace=False))
+            gui.hSlider(
+                box,
+                self,
+                "zoom",
+                minValue=1,
+                maxValue=10,
+                step=1,
+                ticks=False,
+                callback=self.toggle_zoom_slider,
+                createLabel=False,
+                addToLayout=False,
+                addSpace=False,
+            ),
+        )
         layout.addRow(
             "Width: ",
-            gui.hSlider(box, self, 'max_node_width',
-                        minValue=50, maxValue=200, step=1, ticks=False,
-                        callback=self.toggle_node_size,
-                        createLabel=False, addToLayout=False, addSpace=False))
+            gui.hSlider(
+                box,
+                self,
+                "max_node_width",
+                minValue=50,
+                maxValue=200,
+                step=1,
+                ticks=False,
+                callback=self.toggle_node_size,
+                createLabel=False,
+                addToLayout=False,
+                addSpace=False,
+            ),
+        )
         policy = QSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
         layout.addRow(
             "Depth: ",
-            gui.comboBox(box, self, 'max_tree_depth',
-                         items=["Unlimited"] + [
-                             "{} levels".format(x) for x in range(2, 10)],
-                         addToLayout=False, sendSelectedValue=False,
-                         callback=self.toggle_tree_depth, sizePolicy=policy))
+            gui.comboBox(
+                box,
+                self,
+                "max_tree_depth",
+                items=["Unlimited"] + ["{} levels".format(x) for x in range(2, 10)],
+                addToLayout=False,
+                sendSelectedValue=False,
+                callback=self.toggle_tree_depth,
+                sizePolicy=policy,
+            ),
+        )
         layout.addRow(
             "Edge width: ",
-            gui.comboBox(box, self, 'line_width_method',
-                         items=['Fixed', 'Relative to root',
-                                'Relative to parent'],
-                         addToLayout=False,
-                         callback=self.toggle_line_width, sizePolicy=policy))
+            gui.comboBox(
+                box,
+                self,
+                "line_width_method",
+                items=["Fixed", "Relative to root", "Relative to parent"],
+                addToLayout=False,
+                callback=self.toggle_line_width,
+                sizePolicy=policy,
+            ),
+        )
         gui.rubber(self.controlArea)
         self.resize(800, 500)
 
@@ -469,8 +523,10 @@ class OWTreeViewer2D(OWWidget):
             if self.line_width_method == 1:
                 width = 8 * num_inst / root_instances + OFFSET
             elif self.line_width_method == 2:
-                width = 8 * num_inst / tree_adapter.num_samples(
-                    edge.node1.node_inst) + OFFSET
+                width = (
+                    8 * num_inst / tree_adapter.num_samples(edge.node1.node_inst)
+                    + OFFSET
+                )
             edge.setPen(QPen(Qt.gray, width, Qt.SolidLine, Qt.RoundCap))
         self.scene.update()
 
@@ -516,8 +572,7 @@ class OWTreeViewer2D(OWWidget):
 
     def update_node_tooltips(self):
         for node in self.scene.nodes():
-            node.setToolTip(self.node_tooltip(node) if self._TOOLTIPS_ENABLED
-                            else "")
+            node.setToolTip(self.node_tooltip(node) if self._TOOLTIPS_ENABLED else "")
 
     def node_tooltip(self, tree):
         return "tree node"

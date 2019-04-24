@@ -20,7 +20,8 @@ def _preprocess(table, impute=True):
     new_domain = Domain(
         [a for a in table.domain.attributes if a.is_continuous],
         table.domain.class_vars,
-        table.domain.metas)
+        table.domain.metas,
+    )
     new_data = table.transform(new_domain)
     if impute:
         new_data = SklImpute()(new_data)
@@ -34,7 +35,8 @@ def remove_discrete_features(data):
     new_domain = Domain(
         [a for a in data.domain.attributes if a.is_continuous],
         data.domain.class_vars,
-        data.domain.metas)
+        data.domain.metas,
+    )
     return data.transform(new_domain)
 
 
@@ -135,6 +137,7 @@ class Distance:
     SKL metrics. These, however, do not support discrete data and missing
     values, and will fail silently.
     """
+
     supports_sparse = False
     supports_discrete = False
     supports_normalization = False
@@ -154,8 +157,7 @@ class Distance:
         # Fallbacks for sparse data and numpy tables. Remove when subclasses
         # no longer use fallbacks for sparse data, and handling numpy tables
         # becomes obsolete (or handled elsewhere)
-        if (not hasattr(e1, "domain")
-                or hasattr(e1, "is_sparse") and e1.is_sparse()):
+        if not hasattr(e1, "domain") or hasattr(e1, "is_sparse") and e1.is_sparse():
             fallback = getattr(self, "fallback", None)
             if fallback is not None:
                 # pylint disable=not-callable
@@ -196,6 +198,7 @@ class DistanceModel:
             are replaced with zeros, and infs with very large numbers
 
     """
+
     def __init__(self, axis, impute=False):
         self._axis = axis
         self.impute = impute
@@ -258,13 +261,17 @@ class FittedDistanceModel(DistanceModel):
         discrete (np.ndarray): bool array indicating discrete attributes
         continuous (np.ndarray): bool array indicating continuous attributes
     """
+
     def __init__(self, attributes, axis=1, impute=False):
         super().__init__(axis, impute)
         self.attributes = attributes
 
     def __call__(self, e1, e2=None):
-        if e1.domain.attributes != self.attributes or \
-                    e2 is not None and e2.domain.attributes != self.attributes:
+        if (
+            e1.domain.attributes != self.attributes
+            or e2 is not None
+            and e2.domain.attributes != self.attributes
+        ):
             raise ValueError("mismatching domains")
         return super().__call__(e1, e2)
 
@@ -331,6 +338,7 @@ class FittedDistance(Distance):
     Class attribute `rows_model_type` contains the type of the model returned by
     `fit_rows`.
     """
+
     rows_model_type = None  #: Option[FittedDistanceModel]
 
     def fit(self, data):
@@ -341,9 +349,10 @@ class FittedDistance(Distance):
         attributes = data.domain.attributes
         x = _orange_to_numpy(data)
         n_vals = np.fromiter(
-            (len(attr.values) if attr.is_discrete else 0
-             for attr in attributes),
-            dtype=np.int32, count=len(attributes))
+            (len(attr.values) if attr.is_discrete else 0 for attr in attributes),
+            dtype=np.int32,
+            count=len(attributes),
+        )
         return [self.fit_cols, self.fit_rows][self.axis](attributes, x, n_vals)
 
     def fit_cols(self, attributes, x, n_vals):
@@ -404,24 +413,32 @@ class FittedDistance(Distance):
             elif discrete[col]:
                 discrete_stats = self.get_discrete_stats(column, n_bins)
                 if discrete_stats is not None:
-                    dist_missing_disc[curr_disc], \
-                    dist_missing2_disc[curr_disc] = discrete_stats
+                    dist_missing_disc[curr_disc], dist_missing2_disc[
+                        curr_disc
+                    ] = discrete_stats
                     curr_disc += 1
             else:
                 continuous_stats = self.get_continuous_stats(column)
                 if continuous_stats is not None:
-                    offsets[curr_cont], scales[curr_cont],\
-                    dist_missing2_cont[curr_cont] = continuous_stats
+                    offsets[curr_cont], scales[curr_cont], dist_missing2_cont[
+                        curr_cont
+                    ] = continuous_stats
                     curr_cont += 1
                 else:
                     continuous[col] = False
         # pylint: disable=not-callable
         return self.rows_model_type(
-            attributes, impute, getattr(self, "normalize", False),
-            continuous, discrete,
-            offsets[:curr_cont], scales[:curr_cont],
+            attributes,
+            impute,
+            getattr(self, "normalize", False),
+            continuous,
+            discrete,
+            offsets[:curr_cont],
+            scales[:curr_cont],
             dist_missing2_cont[:curr_cont],
-            dist_missing_disc, dist_missing2_disc)
+            dist_missing_disc,
+            dist_missing2_disc,
+        )
 
     def get_discrete_stats(self, column, n_bins):
         """
@@ -463,6 +480,7 @@ class FittedDistance(Distance):
 # Fallbacks for distances in sparse data
 # To be removed as the corresponding functionality is implemented properly
 
+
 class SklDistance:
     """
     Wrapper for functions sklearn's metrics. Used only as temporary fallbacks
@@ -470,6 +488,7 @@ class SklDistance:
     or raw numpy arrays. These classes can't handle discrete or missing data
     and normalization. Do not use for wrapping new classes.
     """
+
     def __init__(self, metric):
         self.metric = metric
 
@@ -480,8 +499,7 @@ class SklDistance:
             x1 = x1.T
             if x2 is not None:
                 x2 = x2.T
-        dist = skl_metrics.pairwise.pairwise_distances(
-            x1, x2, metric=self.metric)
+        dist = skl_metrics.pairwise.pairwise_distances(x1, x2, metric=self.metric)
         if impute and np.isnan(dist).any():
             dist = np.nan_to_num(dist)
         if isinstance(e1, (Table, RowInstance)):

@@ -77,12 +77,13 @@ class Remove(Preprocess):
             return None
 
         domain = data.domain
-        attrs_state = [purge_var_M(var, data, self.attr_flags)
-                       for var in domain.attributes]
-        class_state = [purge_var_M(var, data, self.class_flags)
-                       for var in domain.class_vars]
-        metas_state = [purge_var_M(var, data, self.meta_flags)
-                       for var in domain.metas]
+        attrs_state = [
+            purge_var_M(var, data, self.attr_flags) for var in domain.attributes
+        ]
+        class_state = [
+            purge_var_M(var, data, self.class_flags) for var in domain.class_vars
+        ]
+        metas_state = [purge_var_M(var, data, self.meta_flags) for var in domain.metas]
 
         att_vars, self.attr_results = self.get_vars_and_results(attrs_state)
         cls_vars, self.class_results = self.get_vars_and_results(class_state)
@@ -100,7 +101,7 @@ class Remove(Preprocess):
             sorted += not is_removed(st) and is_sorted(st)
             if not is_removed(st):
                 vars.append(merge_transforms(st).var)
-        res = {'removed': removed, 'reduced': reduced, 'sorted': sorted}
+        res = {"removed": removed, "reduced": reduced, "sorted": sorted}
         return vars, res
 
 
@@ -234,10 +235,7 @@ def remove_constant(var, data):
 
 
 def remove_unused_values(var, data):
-    column_data = Table.from_table(
-        Domain([var]),
-        data
-    )
+    column_data = Table.from_table(Domain([var]), data)
     unique = nanunique(column_data.X).astype(int)
     if len(unique) == len(var.values):
         return var
@@ -252,12 +250,13 @@ def remove_unused_values(var, data):
         if np.isfinite(base):
             base_value = int(base)
 
-    return DiscreteVariable("{}".format(var.name),
-                            values=used_values,
-                            base_value=base_value,
-                            compute_value=Lookup(var, translation_table),
-                            sparse=var.sparse,
-                            )
+    return DiscreteVariable(
+        "{}".format(var.name),
+        values=used_values,
+        base_value=base_value,
+        compute_value=Lookup(var, translation_table),
+        sparse=var.sparse,
+    )
 
 
 def sort_var_values(var):
@@ -270,9 +269,12 @@ def sort_var_values(var):
         [float(newvalues.index(value)) for value in var.values]
     )
 
-    return DiscreteVariable(var.name, values=newvalues,
-                            compute_value=Lookup(var, translation_table),
-                            sparse=var.sparse)
+    return DiscreteVariable(
+        var.name,
+        values=newvalues,
+        compute_value=Lookup(var, translation_table),
+        sparse=var.sparse,
+    )
 
 
 def merge_lookup(A, B):

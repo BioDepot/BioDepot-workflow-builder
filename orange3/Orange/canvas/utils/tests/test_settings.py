@@ -17,12 +17,17 @@ class TestUserSettings(test.QAppTestCase):
         test.QAppTestCase.setUp(self)
 
     def test_settings(self):
-        spec = [config_slot("foo", bool, True, "foo doc"),
-                config_slot("bar", int, 0, "bar doc"),
-                ]
+        spec = [
+            config_slot("foo", bool, True, "foo doc"),
+            config_slot("bar", int, 0, "bar doc"),
+        ]
 
-        store = QSettings(QSettings.IniFormat, QSettings.UserScope,
-                          "biolab.si", "Orange Canvas Unit Tests")
+        store = QSettings(
+            QSettings.IniFormat,
+            QSettings.UserScope,
+            "biolab.si",
+            "Orange Canvas Unit Tests",
+        )
         store.clear()
         settings = Settings(defaults=spec, store=store)
 
@@ -32,8 +37,7 @@ class TestUserSettings(test.QAppTestCase):
         self.assertEqual(settings.get("bar", 3), 0, "Defaults")
         self.assertEqual(settings.get("bar"), settings["bar"])
 
-        self.assertEqual(settings.get("does not exist", "^&"), "^&",
-                         "get with default")
+        self.assertEqual(settings.get("does not exist", "^&"), "^&", "get with default")
 
         self.assertIs(settings.get("does not exist"), None)
 
@@ -44,9 +48,7 @@ class TestUserSettings(test.QAppTestCase):
 
         changed = []
 
-        settings.valueChanged.connect(
-            lambda key, value: changed.append((key, value))
-        )
+        settings.valueChanged.connect(lambda key, value: changed.append((key, value)))
 
         settings["foo"] = False
         self.assertEqual(changed[-1], ("foo", False), "valueChanged signal")
@@ -99,15 +101,13 @@ class TestUserSettings(test.QAppTestCase):
         self.assertEqual(changed[-1], ("foobar/bar/barval", 5))
 
         settings.clear()
-        self.assertSetEqual(set(settings.keys()),
-                            set(["foo", "bar", "foobar/foo"]))
+        self.assertSetEqual(set(settings.keys()), set(["foo", "bar", "foobar/foo"]))
 
     def test_qsettings_type(self):
         """
         Test if QSettings as exported by qtcompat has the 'type' parameter.
         """
-        with tempfile.NamedTemporaryFile("w+b", suffix=".ini",
-                                         delete=False) as f:
+        with tempfile.NamedTemporaryFile("w+b", suffix=".ini", delete=False) as f:
             settings = QSettings(f.name, QSettings.IniFormat)
             settings.setValue("bar", "foo")
 

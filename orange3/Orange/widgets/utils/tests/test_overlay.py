@@ -1,13 +1,11 @@
-
 import unittest.mock
 from AnyQt.QtCore import Qt, QEvent
 from AnyQt.QtTest import QTest
 from AnyQt.QtWidgets import QWidget, QHBoxLayout, QStyle, QApplication
 
 from Orange.widgets.tests.base import GuiTest
-from Orange.widgets.utils.overlay import (
-    OverlayWidget, MessageOverlayWidget
-)
+from Orange.widgets.utils.overlay import OverlayWidget, MessageOverlayWidget
+
 
 class TestOverlay(GuiTest):
     def test_overlay_message(self):
@@ -33,11 +31,9 @@ class TestOverlay(GuiTest):
         self.assertIs(overlay.button(MessageOverlayWidget.Close), button_close)
         self.assertIs(overlay.button(MessageOverlayWidget.Help), button_help)
 
-        button = overlay.addButton("Click Me!",
-                                   MessageOverlayWidget.AcceptRole)
+        button = overlay.addButton("Click Me!", MessageOverlayWidget.AcceptRole)
         self.assertIsNot(button, None)
-        self.assertTrue(overlay.buttonRole(button),
-                        MessageOverlayWidget.AcceptRole)
+        self.assertTrue(overlay.buttonRole(button), MessageOverlayWidget.AcceptRole)
 
         mock = unittest.mock.MagicMock()
         overlay.accepted.connect(mock)

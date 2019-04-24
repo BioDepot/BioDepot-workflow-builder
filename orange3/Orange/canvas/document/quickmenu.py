@@ -16,16 +16,40 @@ from collections import namedtuple, Callable
 import numpy
 
 from AnyQt.QtWidgets import (
-    QWidget, QFrame, QToolButton, QAbstractButton, QAction, QTreeView,
-    QButtonGroup, QStackedWidget, QHBoxLayout, QVBoxLayout, QSizePolicy,
-    QStyleOptionToolButton, QStylePainter, QStyle, QApplication,
-    QStyledItemDelegate, QStyleOptionViewItem, QSizeGrip,
+    QWidget,
+    QFrame,
+    QToolButton,
+    QAbstractButton,
+    QAction,
+    QTreeView,
+    QButtonGroup,
+    QStackedWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QSizePolicy,
+    QStyleOptionToolButton,
+    QStylePainter,
+    QStyle,
+    QApplication,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
+    QSizeGrip,
 )
 
 from AnyQt.QtGui import QIcon, QStandardItemModel, QPolygon, QRegion, QBrush
 from AnyQt.QtCore import (
-    Qt, QObject, QPoint, QSize, QRect, QEventLoop, QEvent, QModelIndex,
-    QTimer, QRegExp, QSortFilterProxyModel, QItemSelectionModel
+    Qt,
+    QObject,
+    QPoint,
+    QSize,
+    QRect,
+    QEventLoop,
+    QEvent,
+    QModelIndex,
+    QTimer,
+    QRegExp,
+    QSortFilterProxyModel,
+    QItemSelectionModel,
 )
 from AnyQt.QtCore import pyqtSignal as Signal, pyqtProperty as Property
 
@@ -62,6 +86,7 @@ class MenuPage(ToolTree):
     :func:`setFilterFunc`.
 
     """
+
     def __init__(self, parent=None, title=None, icon=None, **kwargs):
         ToolTree.__init__(self, parent, **kwargs)
 
@@ -96,8 +121,7 @@ class MenuPage(ToolTree):
         """
         return self.__title
 
-    title_ = Property(str, fget=title, fset=setTitle,
-                      doc="Title of the page.")
+    title_ = Property(str, fget=title, fset=setTitle, doc="Title of the page.")
 
     def setIcon(self, icon):
         """
@@ -113,8 +137,7 @@ class MenuPage(ToolTree):
         """
         return self.__icon
 
-    icon_ = Property(QIcon, fget=icon, fset=setIcon,
-                     doc="Page icon")
+    icon_ = Property(QIcon, fget=icon, fset=setIcon, doc="Page icon")
 
     def setFilterFunc(self, func):
         """
@@ -194,8 +217,7 @@ class MenuPage(ToolTree):
 
         if index.flags() & Qt.ItemIsEnabled:
             self.view().selectionModel().setCurrentIndex(
-                index,
-                QItemSelectionModel.ClearAndSelect
+                index, QItemSelectionModel.ClearAndSelect
             )
 
 
@@ -205,6 +227,7 @@ class ItemDisableFilter(QSortFilterProxyModel):
     a filtering function.
 
     """
+
     def __init__(self, parent=None):
         QSortFilterProxyModel.__init__(self, parent)
 
@@ -220,8 +243,7 @@ class ItemDisableFilter(QSortFilterProxyModel):
         if self.__filterFunc != func:
             self.__filterFunc = func
             # Mark the whole model as changed.
-            self.dataChanged.emit(self.index(0, 0),
-                                  self.index(self.rowCount(), 0))
+            self.dataChanged.emit(self.index(0, 0), self.index(self.rowCount(), 0))
 
     def flags(self, index):
         """
@@ -244,6 +266,7 @@ class SuggestMenuPage(MenuPage):
     (searching).
 
     """
+
     def __init__(self, *args, **kwargs):
         MenuPage.__init__(self, *args, **kwargs)
 
@@ -303,6 +326,7 @@ class SortFilterProxyModel(QSortFilterProxyModel):
     function.
 
     """
+
     def __init__(self, parent=None):
         QSortFilterProxyModel.__init__(self, parent)
 
@@ -399,8 +423,7 @@ class TabButton(QToolButton):
     def flat(self):
         return self.__flat
 
-    flat_ = Property(bool, fget=flat, fset=setFlat,
-                     designable=True)
+    flat_ = Property(bool, fget=flat, fset=setFlat, designable=True)
 
     def setShownMenuIndicator(self, show):
         if self.__showMenuIndicator != show:
@@ -410,9 +433,9 @@ class TabButton(QToolButton):
     def showMenuIndicator(self):
         return self.__showMenuIndicator
 
-    showMenuIndicator_ = Property(bool, fget=showMenuIndicator,
-                                  fset=setShownMenuIndicator,
-                                  designable=True)
+    showMenuIndicator_ = Property(
+        bool, fget=showMenuIndicator, fset=setShownMenuIndicator, designable=True
+    )
 
     def paintEvent(self, event):
         opt = QStyleOptionToolButton()
@@ -436,25 +459,18 @@ class TabButton(QToolButton):
             opt.features |= QStyleOptionToolButton.HasMenu
         style = self.style()
 
-        hint = style.sizeFromContents(QStyle.CT_ToolButton, opt,
-                                      opt.iconSize, self)
+        hint = style.sizeFromContents(QStyle.CT_ToolButton, opt, opt.iconSize, self)
         return hint
 
-_Tab = \
-    namedtuple(
-        "_Tab",
-        ["text",
-         "icon",
-         "toolTip",
-         "button",
-         "data",
-         "palette"])
+
+_Tab = namedtuple("_Tab", ["text", "icon", "toolTip", "button", "data", "palette"])
 
 
 class TabBarWidget(QWidget):
     """
     A tab bar widget using tool buttons as tabs.
     """
+
     # TODO: A uniform size box layout.
 
     currentChanged = Signal(int)
@@ -466,8 +482,7 @@ class TabBarWidget(QWidget):
         layout.setSpacing(0)
         self.setLayout(layout)
 
-        self.setSizePolicy(QSizePolicy.Fixed,
-                           QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.__tabs = []
 
         self.__currentIndex = -1
@@ -476,9 +491,7 @@ class TabBarWidget(QWidget):
         self.__iconSize = QSize(26, 26)
 
         self.__group = QButtonGroup(self, exclusive=True)
-        self.__group.buttonPressed[QAbstractButton].connect(
-            self.__onButtonPressed
-        )
+        self.__group.buttonPressed[QAbstractButton].connect(self.__onButtonPressed)
         self.setMouseTracking(True)
 
         self.__sloppyButton = None
@@ -518,8 +531,7 @@ class TabBarWidget(QWidget):
         Insert a tab at `index`
         """
         button = TabButton(self, objectName="tab-button")
-        button.setSizePolicy(QSizePolicy.Expanding,
-                             QSizePolicy.Expanding)
+        button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         button.setIconSize(self.__iconSize)
         button.setMouseTracking(True)
 
@@ -652,8 +664,8 @@ class TabBarWidget(QWidget):
         """
         p1 = current + QPoint(0, 2)
         p2 = current + QPoint(0, -2)
-        p3 = self.pos() + QPoint(self.width()+10, 0)
-        p4 = self.pos() + QPoint(self.width()+10, self.height())
+        p3 = self.pos() + QPoint(self.width() + 10, 0)
+        p4 = self.pos() + QPoint(self.width() + 10, self.height())
         return QRegion(QPolygon([p1, p2, p3, p4]))
 
     def __setSloppyButton(self, button):
@@ -679,8 +691,7 @@ class TabBarWidget(QWidget):
                 self.setCurrentIndex(index)
 
     def eventFilter(self, receiver, event):
-        if event.type() == QEvent.MouseMove and \
-                isinstance(receiver, TabButton):
+        if event.type() == QEvent.MouseMove and isinstance(receiver, TabButton):
             pos = receiver.mapTo(self, event.pos())
             if self.__sloppyRegion.contains(pos):
                 self.__setSloppyButton(receiver)
@@ -688,7 +699,7 @@ class TabBarWidget(QWidget):
                 if not receiver.isChecked():
                     index = [tab.button for tab in self.__tabs].index(receiver)
                     self.setCurrentIndex(index)
-                #also update sloppy region if mouse is moved on the same icon
+                # also update sloppy region if mouse is moved on the same icon
                 self.__sloppyRegion = self.__calcSloppyRegion(pos)
 
         return QWidget.eventFilter(self, receiver, event)
@@ -704,6 +715,7 @@ class PagedMenu(QWidget):
     """
     Tabbed container for :class:`MenuPage` instances.
     """
+
     triggered = Signal(QAction)
     hovered = Signal(QAction)
 
@@ -885,8 +897,7 @@ class QuickMenu(FramelessWindow):
 
         self.__frame.layout().addWidget(self.__pages)
 
-        self.setSizePolicy(QSizePolicy.Fixed,
-                           QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
         self.__suggestPage = SuggestMenuPage(self, objectName="suggest-page")
         self.__suggestPage.setActionRole(QtWidgetRegistry.WIDGET_ACTION_ROLE)
@@ -902,10 +913,8 @@ class QuickMenu(FramelessWindow):
         button = self.__pages.tabButton(i)
         button.setObjectName("search-tab-button")
         button.setStyleSheet(
-            "TabButton {\n"
-            "    qproperty-flat_: false;\n"
-            "    border: none;"
-            "}\n")
+            "TabButton {\n" "    qproperty-flat_: false;\n" "    border: none;" "}\n"
+        )
 
         self.__search.textEdited.connect(self.__on_textEdited)
 
@@ -1006,9 +1015,11 @@ class QuickMenu(FramelessWindow):
                 base_color = brush.color()
                 button = self.__pages.tabButton(i)
                 button.setStyleSheet(
-                    TAB_BUTTON_STYLE_TEMPLATE %
-                    (create_css_gradient(base_color),
-                     create_css_gradient(base_color.darker(120)))
+                    TAB_BUTTON_STYLE_TEMPLATE
+                    % (
+                        create_css_gradient(base_color),
+                        create_css_gradient(base_color.darker(120)),
+                    )
                 )
 
         self.__model = model
@@ -1035,7 +1046,7 @@ class QuickMenu(FramelessWindow):
         self.__clearCurrentItems()
 
         self.__search.setText(searchText)
-        patt = QRegExp("(^|\W)"+searchText)
+        patt = QRegExp("(^|\W)" + searchText)
         patt.setCaseSensitivity(False)
         self.__suggestPage.setFilterRegExp(patt)
 
@@ -1179,8 +1190,7 @@ class QuickMenu(FramelessWindow):
             etype = event.type()
             if etype == QEvent.KeyPress:
                 # ignore modifiers non printable characters, Enter, ...
-                if event.text() and event.key() not in \
-                        [Qt.Key_Enter, Qt.Key_Return]:
+                if event.text() and event.key() not in [Qt.Key_Enter, Qt.Key_Return]:
                     self.__search.setFocus(Qt.ShortcutFocusReason)
                     self.setCurrentIndex(0)
                     self.__search.keyPressEvent(event)
@@ -1195,6 +1205,7 @@ class ItemViewKeyNavigator(QObject):
     by moving 'currentItem` on a :class:`QListView`.
 
     """
+
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
         self.__view = None
@@ -1224,7 +1235,7 @@ class ItemViewKeyNavigator(QObject):
                 return True
             elif key == Qt.Key_Tab:
                 self.moveCurrent(0, 1)
-                return  True
+                return True
             elif key == Qt.Key_Enter or key == Qt.Key_Return:
                 self.activateCurrent()
                 return True
@@ -1288,6 +1299,7 @@ class WindowSizeGrip(QSizeGrip):
     corner during resize events.
 
     """
+
     def __init__(self, parent):
         QSizeGrip.__init__(self, parent)
         self.__corner = Qt.BottomRightCorner
@@ -1302,8 +1314,12 @@ class WindowSizeGrip(QSizeGrip):
         position itself.
 
         """
-        if corner not in [Qt.TopLeftCorner, Qt.TopRightCorner,
-                          Qt.BottomLeftCorner, Qt.BottomRightCorner]:
+        if corner not in [
+            Qt.TopLeftCorner,
+            Qt.TopRightCorner,
+            Qt.BottomLeftCorner,
+            Qt.BottomRightCorner,
+        ]:
             raise ValueError("Qt.Corner flag expected")
 
         if self.__corner != corner:
@@ -1325,8 +1341,7 @@ class WindowSizeGrip(QSizeGrip):
 
     def showEvent(self, event):
         if self.window() != self.parent():
-            log.error("%s: Can only show on a top level window.",
-                      type(self).__name__)
+            log.error("%s: Can only show on a top level window.", type(self).__name__)
 
         return QSizeGrip.showEvent(self, event)
 

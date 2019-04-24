@@ -7,10 +7,17 @@ from Orange.data import Variable, Domain
 class PickleTest(TestCase):
     def setUp(self):
         """ Override __eq__ for Orange objects that do not implement it"""
-        self.add_comparator(Domain,
-                            compare_members=("attributes", "class_vars",
-                                             "class_var", "variables",
-                                             "metas", "anonymous"))
+        self.add_comparator(
+            Domain,
+            compare_members=(
+                "attributes",
+                "class_vars",
+                "class_var",
+                "variables",
+                "metas",
+                "anonymous",
+            ),
+        )
         Variable._clear_all_caches()
 
     old_comparators = {}
@@ -23,8 +30,7 @@ class PickleTest(TestCase):
             return True
 
         def hash(self):
-            return "".join(
-                [str(getattr(self, m)) for m in compare_members]).__hash__()
+            return "".join([str(getattr(self, m)) for m in compare_members]).__hash__()
 
         self.old_comparators[class_] = (class_.__eq__, class_.__hash__)
         class_.__eq__ = compare
@@ -54,5 +60,6 @@ def create_pickling_tests(classname, *objs):
 
     tests = dict(map(create_test, objs))
     return type(classname, (PickleTest,), tests)
+
 
 create_pickling_tests.__test__ = False  # Tell nose this is not a test.

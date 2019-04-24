@@ -25,6 +25,7 @@ class QtWidgetDiscovery(QObject, WidgetDiscovery):
     """
     Qt interface class for widget discovery.
     """
+
     # Discovery has started
     discovery_start = Signal()
     # Discovery has finished
@@ -150,13 +151,13 @@ class QtWidgetRegistry(QObject, WidgetRegistry):
         whatsThis = item.whatsThis()
         icon = item.icon()
         if icon:
-            action = QAction(icon, name, self, toolTip=tooltip,
-                             whatsThis=whatsThis,
-                             statusTip=name)
+            action = QAction(
+                icon, name, self, toolTip=tooltip, whatsThis=whatsThis, statusTip=name
+            )
         else:
-            action = QAction(name, self, toolTip=tooltip,
-                             whatsThis=whatsThis,
-                             statusTip=name)
+            action = QAction(
+                name, self, toolTip=tooltip, whatsThis=whatsThis, statusTip=name
+            )
 
         widget_desc = item.data(self.WIDGET_DESC_ROLE)
         action.setData(widget_desc)
@@ -182,7 +183,7 @@ class QtWidgetRegistry(QObject, WidgetRegistry):
         """
         Override to update the item model and emit the signals.
         """
-        assert(isinstance(category, CategoryDescription))
+        assert isinstance(category, CategoryDescription)
         categories = self.categories()
         cat_i = categories.index(category)
         _, widgets = self._categories_dict[category.name]
@@ -298,21 +299,18 @@ def tooltip_helper(desc):
         tooltip[0] += " (from {0})".format(desc.project_name)
 
     if desc.description:
-        tooltip.append("{0}".format(
-                            escape(desc.description)))
+        tooltip.append("{0}".format(escape(desc.description)))
 
     inputs_fmt = "<li>{name}</li>"
 
     if desc.inputs:
-        inputs = "".join(inputs_fmt.format(name=inp.name)
-                         for inp in desc.inputs)
+        inputs = "".join(inputs_fmt.format(name=inp.name) for inp in desc.inputs)
         tooltip.append("Inputs:<ul>{0}</ul>".format(inputs))
     else:
         tooltip.append("No inputs")
 
     if desc.outputs:
-        outputs = "".join(inputs_fmt.format(name=out.name)
-                          for out in desc.outputs)
+        outputs = "".join(inputs_fmt.format(name=out.name) for out in desc.outputs)
         tooltip.append("Outputs:<ul>{0}</ul>".format(outputs))
     else:
         tooltip.append("No outputs")

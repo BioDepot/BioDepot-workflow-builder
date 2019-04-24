@@ -23,7 +23,9 @@ def app_thread(app):
 class DockerLocalAgent:
     API_VERSION = "1.0.0"
 
-    def __init__(self, argv, api_url, hostport, hostname=None, cpu_count=None, mem_limit=None):
+    def __init__(
+        self, argv, api_url, hostport, hostname=None, cpu_count=None, mem_limit=None
+    ):
         parser = argparse.ArgumentParser(description="local-agent extra arguments")
         parser.add_argument("--redis_host", type=str, required=True)
         parser.add_argument("--redis_port", type=int, required=True)
@@ -31,8 +33,10 @@ class DockerLocalAgent:
         self.__redis_host__ = parsed_args.redis_host
         self.__redis_port__ = parsed_args.redis_port
 
-        app = FlaskAppWrapper(hostname=hostname, hostport=hostport, run_command_fnc=self.run_command)
-        self.__t__ = Thread(target=app_thread, kwargs={'app': app})
+        app = FlaskAppWrapper(
+            hostname=hostname, hostport=hostport, run_command_fnc=self.run_command
+        )
+        self.__t__ = Thread(target=app_thread, kwargs={"app": app})
 
         self.__api_url__ = api_url
         self.__hostname__ = hostname or socket.gethostbyname(socket.gethostname())
@@ -42,26 +46,31 @@ class DockerLocalAgent:
 
     @staticmethod
     def __execute_command__(command):
-        image = command['image']
-        args = " ".join(command.get('args', []))
+        image = command["image"]
+        args = " ".join(command.get("args", []))
 
         volume_params = []
-        volumes = command.get('volumes', [])
+        volumes = command.get("volumes", [])
         for volume in volumes:
-            host_dir = volume['host_dir']
-            mount_dir = volume['mount_dir']
-            mode = volume['mode']
+            host_dir = volume["host_dir"]
+            mount_dir = volume["mount_dir"]
+            mode = volume["mode"]
             volume_params.append("-v %s:%s:%s" % (host_dir, mount_dir, mode))
         volume_param = " ".join(volume_params)
 
         env_params = []
-        env_vars = command.get('env', [])
+        env_vars = command.get("env", [])
         for env_var in env_vars:
-            key = env_var['key']
-            val = env_var['val']
+            key = env_var["key"]
+            val = env_var["val"]
             env_params.append("-e %s=%s" % (key, val))
         env_param = " ".join(env_params)
-        docker_command = "docker run -i --rm %s %s %s %s" % (env_param, volume_param, image, args)
+        docker_command = "docker run -i --rm %s %s %s %s" % (
+            env_param,
+            volume_param,
+            image,
+            args,
+        )
         output = os.popen(docker_command).read()
         return output
 
@@ -83,17 +92,29 @@ class DockerLocalAgent:
     def run_command(self, redis_host, redis_port, queue_id, max_workers=None):
         if not max_workers:
             max_workers = self.__cpu_count__
-        with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=max_workers
+        ) as executor:
             for _ in range(max_workers):
-                executor.submit(DockerLocalAgent.run_docker, redis_host, redis_port, queue_id)
+                executor.submit(
+                    DockerLocalAgent.run_docker, redis_host, redis_port, queue_id
+                )
         return "Commands fed"
 
     def register_agent(self):
         endpoint = "/%s/%s" % (self.API_VERSION, "register-host")
         uri = parse.urljoin(self.__api_url__, endpoint)
-        r = requests.post(uri, params={'host_name': self.__hostname__, 'host_port': self.__hostport__,
-                                       'core_count': self.__cpu_count__, 'memory': self.__mem_limit__,
-                                       'redis_host': self.__redis_host__, 'redis_port': self.__redis_port__})
+        r = requests.post(
+            uri,
+            params={
+                "host_name": self.__hostname__,
+                "host_port": self.__hostport__,
+                "core_count": self.__cpu_count__,
+                "memory": self.__mem_limit__,
+                "redis_host": self.__redis_host__,
+                "redis_port": self.__redis_port__,
+            },
+        )
         if r.status_code != 200:
             raise RuntimeError("Failed to register agent", r.content)
 

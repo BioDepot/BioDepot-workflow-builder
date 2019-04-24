@@ -27,7 +27,9 @@ from Orange.widgets.evaluate.owtestlearners import OWTestLearners
 from Orange.widgets.unsupervised.owcorrespondence import OWCorrespondenceAnalysis
 from Orange.widgets.unsupervised.owdistancemap import OWDistanceMap
 from Orange.widgets.unsupervised.owdistances import OWDistances
-from Orange.widgets.unsupervised.owhierarchicalclustering import OWHierarchicalClustering
+from Orange.widgets.unsupervised.owhierarchicalclustering import (
+    OWHierarchicalClustering,
+)
 from Orange.widgets.unsupervised.owkmeans import OWKMeans
 from Orange.widgets.unsupervised.owmds import OWMDS
 from Orange.widgets.unsupervised.owpca import OWPCA
@@ -38,31 +40,35 @@ def get_owwidgets(top_module_name):
     top_module = import_module(top_module_name)
     widgets = []
     for root, _, files in os.walk(top_module.__path__[0]):
-        root = root[len(top_module.__path__[0]):].lstrip(os.path.sep)
+        root = root[len(top_module.__path__[0]) :].lstrip(os.path.sep)
         for file in files:
-            if file.lower().startswith('ow') and file.lower().endswith('.py'):
+            if file.lower().startswith("ow") and file.lower().endswith(".py"):
                 module_name = "{}.{}".format(
                     top_module_name,
-                    os.path.join(root, file).replace(os.path.sep, '.')[:-len('.py')])
+                    os.path.join(root, file).replace(os.path.sep, ".")[: -len(".py")],
+                )
                 try:
-                    module = import_module(module_name,
-                                           top_module_name[:top_module_name.index('.')])
+                    module = import_module(
+                        module_name, top_module_name[: top_module_name.index(".")]
+                    )
                 except (ImportError, RuntimeError):
-                    warnings.warn('Failed to import module: ' + module_name)
+                    warnings.warn("Failed to import module: " + module_name)
                     continue
                 for name, value in module.__dict__.items():
-                    if (name.upper().startswith('OW') and
-                            isinstance(value, type) and
-                            issubclass(value, OWWidget) and
-                            getattr(value, 'name', None) and
-                            getattr(value, 'send_report', None)):
+                    if (
+                        name.upper().startswith("OW")
+                        and isinstance(value, type)
+                        and issubclass(value, OWWidget)
+                        and getattr(value, "name", None)
+                        and getattr(value, "send_report", None)
+                    ):
                         widgets.append(value)
     return list(set(widgets))
 
 
-DATA_WIDGETS = get_owwidgets('Orange.widgets.data')
-VISUALIZATION_WIDGETS = get_owwidgets('Orange.widgets.visualize')
-MODEL_WIDGETS = get_owwidgets('Orange.widgets.model')
+DATA_WIDGETS = get_owwidgets("Orange.widgets.data")
+VISUALIZATION_WIDGETS = get_owwidgets("Orange.widgets.visualize")
+MODEL_WIDGETS = get_owwidgets("Orange.widgets.model")
 
 
 class TestReport(WidgetTest):
@@ -77,46 +83,48 @@ class TestReport(WidgetTest):
 
     def test_report_table(self):
         rep = OWReport.get_instance()
-        model = PyTableModel([['x', 1, 2],
-                              ['y', 2, 2]])
-        model.setHorizontalHeaderLabels(['a', 'b', 'c'])
+        model = PyTableModel([["x", 1, 2], ["y", 2, 2]])
+        model.setHorizontalHeaderLabels(["a", "b", "c"])
 
-        model.setData(model.index(0, 0), Qt.AlignHCenter | Qt.AlignTop, Qt.TextAlignmentRole)
-        model.setData(model.index(1, 0), QFont('', -1, QFont.Bold), Qt.FontRole)
+        model.setData(
+            model.index(0, 0), Qt.AlignHCenter | Qt.AlignTop, Qt.TextAlignmentRole
+        )
+        model.setData(model.index(1, 0), QFont("", -1, QFont.Bold), Qt.FontRole)
         model.setData(model.index(1, 2), QBrush(Qt.red), Qt.BackgroundRole)
 
         view = gui.TableView()
         view.show()
         view.setModel(model)
-        rep.report_table('Name', view)
+        rep.report_table("Name", view)
         self.maxDiff = None
         self.assertEqual(
             rep.report_html,
-            '<h2>Name</h2><table>\n'
-            '<tr>'
+            "<h2>Name</h2><table>\n"
+            "<tr>"
             '<th style="color:black;border:0;background:transparent;'
             'text-align:left;vertical-align:middle;">a</th>'
             '<th style="color:black;border:0;background:transparent;'
             'text-align:left;vertical-align:middle;">b</th>'
             '<th style="color:black;border:0;background:transparent;'
             'text-align:left;vertical-align:middle;">c</th>'
-            '</tr>'
-            '<tr>'
+            "</tr>"
+            "<tr>"
             '<td style="color:black;border:0;background:transparent;'
             'text-align:center;vertical-align:top;">x</td>'
             '<td style="color:black;border:0;background:transparent;'
             'text-align:right;vertical-align:middle;">1</td>'
             '<td style="color:black;border:0;background:transparent;'
             'text-align:right;vertical-align:middle;">2</td>'
-            '</tr>'
-            '<tr>'
+            "</tr>"
+            "<tr>"
             '<td style="color:black;border:0;background:transparent;'
             'font-weight: bold;text-align:left;vertical-align:middle;">y</td>'
             '<td style="color:black;border:0;background:transparent;'
             'text-align:right;vertical-align:middle;">2</td>'
             '<td style="color:black;border:0;background:#ff0000;'
             'text-align:right;vertical-align:middle;">2</td>'
-            '</tr></table>')
+            "</tr></table>",
+        )
 
     def test_save_report_permission(self):
         """
@@ -129,9 +137,13 @@ class TestReport(WidgetTest):
         patch_target_3 = "AnyQt.QtWidgets.QMessageBox.exec_"
         filenames = ["f.report", "f.html"]
         for filename in filenames:
-            with unittest.mock.patch(patch_target_1, create=True, side_effect=PermissionError),\
-                    unittest.mock.patch(patch_target_2, return_value=(filename, 'HTML (*.html)')),\
-                    unittest.mock.patch(patch_target_3, return_value=True):
+            with unittest.mock.patch(
+                patch_target_1, create=True, side_effect=PermissionError
+            ), unittest.mock.patch(
+                patch_target_2, return_value=(filename, "HTML (*.html)")
+            ), unittest.mock.patch(
+                patch_target_3, return_value=True
+            ):
                 rep.save_report()
 
     def test_save_report(self):
@@ -142,10 +154,10 @@ class TestReport(WidgetTest):
         temp_dir = tempfile.mkdtemp()
         temp_name = os.path.join(temp_dir, "f.report")
         try:
-            with mock.patch("AnyQt.QtWidgets.QFileDialog.getSaveFileName",
-                            return_value=(temp_name, 'Report (*.report)')), \
-                    mock.patch("AnyQt.QtWidgets.QMessageBox.exec_",
-                               return_value=True):
+            with mock.patch(
+                "AnyQt.QtWidgets.QFileDialog.getSaveFileName",
+                return_value=(temp_name, "Report (*.report)"),
+            ), mock.patch("AnyQt.QtWidgets.QMessageBox.exec_", return_value=True):
                 rep.save_report()
         finally:
             os.remove(temp_name)
@@ -156,8 +168,7 @@ class TestReportWidgets(WidgetTest):
     model_widgets = MODEL_WIDGETS
     data_widgets = DATA_WIDGETS
     eval_widgets = [OWCalibrationPlot, OWLiftCurve, OWROCAnalysis]
-    unsu_widgets = [OWCorrespondenceAnalysis, OWDistances, OWKMeans,
-                    OWMDS, OWPCA]
+    unsu_widgets = [OWCorrespondenceAnalysis, OWDistances, OWKMeans, OWMDS, OWPCA]
     dist_widgets = [OWDistanceMap, OWHierarchicalClustering]
     visu_widgets = VISUALIZATION_WIDGETS
     spec_widgets = [OWTestLearners, OWTreeGraph]
@@ -196,9 +207,7 @@ class TestReportWidgets(WidgetTest):
         rep = OWReport.get_instance()
         data = Table("zoo")
         widgets = self.eval_widgets
-        results = CrossValidation(data,
-                                  [LogisticRegressionLearner()],
-                                  store_data=True)
+        results = CrossValidation(data, [LogisticRegressionLearner()], store_data=True)
         results.learner_names = ["LR l2"]
 
         w = self.create_widget(OWTestLearners)
@@ -235,9 +244,15 @@ class TestReportWidgets(WidgetTest):
     @unittest.skipIf(AnyQt.USED_API == "pyqt5", "Segfaults on PyQt5")
     def test_report_widgets_all(self):
         rep = OWReport.get_instance()
-        widgets = self.model_widgets + self.data_widgets + self.eval_widgets + \
-                  self.unsu_widgets + self.dist_widgets + self.visu_widgets + \
-                  self.spec_widgets
+        widgets = (
+            self.model_widgets
+            + self.data_widgets
+            + self.eval_widgets
+            + self.unsu_widgets
+            + self.dist_widgets
+            + self.visu_widgets
+            + self.spec_widgets
+        )
         self._create_report(widgets, rep, None)
 
 

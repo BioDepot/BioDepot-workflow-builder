@@ -16,17 +16,20 @@ class TestAgentController(BaseTestCase):
 
         Register Agent
         """
-        query_string = [('host_name', 'host_name_example'),
-                        ('cpu_count', 2),
-                        ('memory', 1)]
+        query_string = [
+            ("host_name", "host_name_example"),
+            ("cpu_count", 2),
+            ("memory", 1),
+        ]
         response = self.client.open(
-            '/NLPCORE/test2/1.0.0/register-host',
-            method='POST',
-            query_string=query_string)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
+            "/NLPCORE/test2/1.0.0/register-host",
+            method="POST",
+            query_string=query_string,
+        )
+        self.assert200(response, "Response body is : " + response.data.decode("utf-8"))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import unittest
+
     unittest.main()

@@ -2,6 +2,7 @@ import math
 import numpy as np
 import scipy
 
+
 def wilcoxon_rank_sum(d1, d2):
     # TODO Check this function!!!
     N1, N2 = np.sum(d1[1, :]), np.sum(d2[1, :])
@@ -32,4 +33,3 @@ def wilcoxon_rank_sum(d1, d2):
     z = abs(U - m) / math.sqrt(var)
     p = 2 * (1 - scipy.special.ndtr(z))
     return z, p
-

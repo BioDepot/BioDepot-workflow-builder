@@ -5,15 +5,15 @@ Widget for assigning colors to variables
 import numpy as np
 from AnyQt.QtCore import Qt, QSize, QAbstractTableModel
 from AnyQt.QtGui import QColor, QFont, QImage, QBrush, qRgb
-from AnyQt.QtWidgets import (
-    QHeaderView, QColorDialog, QTableView, QApplication
-)
+from AnyQt.QtWidgets import QHeaderView, QColorDialog, QTableView, QApplication
 
 import Orange
 from Orange.widgets import widget, settings, gui
 from Orange.widgets.gui import HorizontalGridDelegate
-from Orange.widgets.utils.colorpalette import \
-    ContinuousPaletteGenerator, ColorPaletteDlg
+from Orange.widgets.utils.colorpalette import (
+    ContinuousPaletteGenerator,
+    ColorPaletteDlg,
+)
 from Orange.widgets.widget import Input, Output
 
 ColorRole = next(gui.OrangeUserRole)
@@ -81,8 +81,9 @@ class DiscColorTableModel(ColorTableModel):
     # The class only overloads the methods from the base class
     # pylint: disable=missing-docstring
     def n_columns(self):
-        return bool(self.variables) and \
-               1 + max(len(var.values) for var in self.variables)
+        return bool(self.variables) and 1 + max(
+            len(var.values) for var in self.variables
+        )
 
     def data(self, index, role=Qt.DisplayRole):
         # pylint: disable=too-many-return-statements
@@ -139,17 +140,16 @@ class ContColorTableModel(ColorTableModel):
             if role == Qt.DecorationRole:
                 continuous_palette = ContinuousPaletteGenerator(*var.colors)
                 line = continuous_palette.getRGB(np.arange(0, 1, 1 / 256))
-                data = np.arange(0, 256, dtype=np.int8). \
-                    reshape((1, 256)). \
-                    repeat(16, 0)
+                data = np.arange(0, 256, dtype=np.int8).reshape((1, 256)).repeat(16, 0)
                 img = QImage(data, 256, 16, QImage.Format_Indexed8)
                 img.setColorCount(256)
                 img.setColorTable([qRgb(*x) for x in line])
                 img.data = data
                 return img
             if role == Qt.ToolTipRole:
-                return "{} - {}".format(self._encode_color(var.colors[0]),
-                                        self._encode_color(var.colors[1]))
+                return "{} - {}".format(
+                    self._encode_color(var.colors[0]), self._encode_color(var.colors[1])
+                )
             if role == ColorRole:
                 return var.colors
 
@@ -183,7 +183,6 @@ class ContColorTableModel(ColorTableModel):
         for row in range(self.n_rows()):
             self.variables[row].colors = colors
         self.dataChanged.emit(self.index(0, 1), self.index(self.n_rows(), 1))
-
 
 
 class ColorTable(QTableView):
@@ -267,15 +266,20 @@ class ContinuousTable(ColorTable):
         from_c, to_c, black = self.model().data(index, ColorRole)
         master = self.master
         dlg = ColorPaletteDlg(master)
-        dlg.createContinuousPalette("", "Gradient palette", black,
-                                    QColor(*from_c), QColor(*to_c))
+        dlg.createContinuousPalette(
+            "", "Gradient palette", black, QColor(*from_c), QColor(*to_c)
+        )
         dlg.setColorSchemas(master.color_settings, master.selected_schema_index)
         if dlg.exec():
-            self.model().setData(index,
-                                 (dlg.contLeft.getColor().getRgb(),
-                                  dlg.contRight.getColor().getRgb(),
-                                  dlg.contpassThroughBlack),
-                                 ColorRole)
+            self.model().setData(
+                index,
+                (
+                    dlg.contLeft.getColor().getRgb(),
+                    dlg.contRight.getColor().getRgb(),
+                    dlg.contpassThroughBlack,
+                ),
+                ColorRole,
+            )
             master.color_settings = dlg.getColorSchemas()
             master.selected_schema_index = dlg.selectedSchemaIndex
 
@@ -292,7 +296,8 @@ class OWColor(widget.OWWidget):
         data = Output("Data", Orange.data.Table)
 
     settingsHandler = settings.PerfectDomainContextHandler(
-        match_values=settings.PerfectDomainContextHandler.MATCH_VALUES_ALL)
+        match_values=settings.PerfectDomainContextHandler.MATCH_VALUES_ALL
+    )
     disc_data = settings.ContextSetting([])
     cont_data = settings.ContextSetting([])
     color_settings = settings.Setting(None)
@@ -311,8 +316,7 @@ class OWColor(widget.OWWidget):
         box = gui.hBox(self.controlArea, "Discrete Variables")
         self.disc_model = DiscColorTableModel()
         disc_view = self.disc_view = DiscreteTable(self.disc_model)
-        disc_view.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeToContents)
+        disc_view.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.disc_model.dataChanged.connect(self._on_data_changed)
         box.layout().addWidget(disc_view)
 
@@ -324,8 +328,13 @@ class OWColor(widget.OWWidget):
         box.layout().addWidget(cont_view)
 
         box = gui.auto_commit(
-            self.controlArea, self, "auto_apply", "Apply",
-            orientation=Qt.Horizontal, checkbox_label="Apply automatically")
+            self.controlArea,
+            self,
+            "auto_apply",
+            "Apply",
+            orientation=Qt.Horizontal,
+            checkbox_label="Apply automatically",
+        )
         box.button.setFixedWidth(180)
         box.layout().insertStretch(0)
 
@@ -355,9 +364,11 @@ class OWColor(widget.OWWidget):
             self.data = self.domain = None
         else:
             domain = self.orig_domain = data.domain
-            domain = Orange.data.Domain(self._create_proxies(domain.attributes),
-                                        self._create_proxies(domain.class_vars),
-                                        self._create_proxies(domain.metas))
+            domain = Orange.data.Domain(
+                self._create_proxies(domain.attributes),
+                self._create_proxies(domain.class_vars),
+                self._create_proxies(domain.metas),
+            )
             self.openContext(data)
             self.data = data.transform(domain)
             self.disc_model.set_data(self.disc_colors)
@@ -368,12 +379,14 @@ class OWColor(widget.OWWidget):
 
     def storeSpecificSettings(self):
         # Store the colors that were changed -- but not others
-        self.current_context.disc_data = \
-            [(var.name, var.values, "colors" in var.attributes and var.colors)
-             for var in self.disc_colors]
-        self.current_context.cont_data = \
-            [(var.name, "colors" in var.attributes and var.colors)
-             for var in self.cont_colors]
+        self.current_context.disc_data = [
+            (var.name, var.values, "colors" in var.attributes and var.colors)
+            for var in self.disc_colors
+        ]
+        self.current_context.cont_data = [
+            (var.name, "colors" in var.attributes and var.colors)
+            for var in self.cont_colors
+        ]
 
     def retrieveSpecificSettings(self):
         disc_data = getattr(self.current_context, "disc_data", ())
@@ -396,6 +409,7 @@ class OWColor(widget.OWWidget):
 
     def send_report(self):
         """Send report"""
+
         def _report_variables(variables, orig_variables):
             from Orange.widgets.report import colored_square as square
 
@@ -405,36 +419,46 @@ class OWColor(widget.OWWidget):
             # definition of td element for continuous gradient
             # with support for pre-standard css (needed at least for Qt 4.8)
             max_values = max(
-                (len(var.values) for var in variables if var.is_discrete),
-                default=1)
+                (len(var.values) for var in variables if var.is_discrete), default=1
+            )
             defs = ("-webkit-", "-o-", "-moz-", "")
-            cont_tpl = '<td colspan="{}">' \
-                       '<span class="legend-square" style="width: 100px; '.\
-                format(max_values) + \
-                " ".join(map(
-                    "background: {}linear-gradient("
-                    "left, rgb({{}}, {{}}, {{}}), {{}}rgb({{}}, {{}}, {{}}));"
-                    .format, defs)) + \
-                '"></span></td>'
+            cont_tpl = (
+                '<td colspan="{}">'
+                '<span class="legend-square" style="width: 100px; '.format(max_values)
+                + " ".join(
+                    map(
+                        "background: {}linear-gradient("
+                        "left, rgb({{}}, {{}}, {{}}), {{}}rgb({{}}, {{}}, {{}}));".format,
+                        defs,
+                    )
+                )
+                + '"></span></td>'
+            )
 
             rows = ""
             for var, ovar in zip(variables, orig_variables):
                 if var.is_discrete:
                     values = "    \n".join(
-                        "<td>{} {}</td>".
-                        format(square(*var.colors[i]), was(value, ovalue))
-                        for i, (value, ovalue) in
-                        enumerate(zip(var.values, ovar.values)))
+                        "<td>{} {}</td>".format(
+                            square(*var.colors[i]), was(value, ovalue)
+                        )
+                        for i, (value, ovalue) in enumerate(
+                            zip(var.values, ovar.values)
+                        )
+                    )
                 elif var.is_continuous:
                     col = var.colors
-                    colors = col[0][:3] + ("black, " * col[2], ) + col[1][:3]
+                    colors = col[0][:3] + ("black, " * col[2],) + col[1][:3]
                     values = cont_tpl.format(*colors * len(defs))
                 else:
                     continue
                 name = was(var.name, ovar.name)
-                rows += '<tr style="height: 2em">\n' \
-                        '  <th style="text-align: right">{}</th>{}\n</tr>\n'. \
-                    format(name, values)
+                rows += (
+                    '<tr style="height: 2em">\n'
+                    '  <th style="text-align: right">{}</th>{}\n</tr>\n'.format(
+                        name, values
+                    )
+                )
             return rows
 
         if not self.data:
@@ -445,11 +469,19 @@ class OWColor(widget.OWWidget):
             (name, _report_variables(vars, ovars))
             for name, vars, ovars in (
                 ("Features", domain.attributes, orig_domain.attributes),
-                ("Outcome" + "s" * (len(domain.class_vars) > 1),
-                 domain.class_vars, orig_domain.class_vars),
-                ("Meta attributes", domain.metas, orig_domain.metas)))
-        table = "".join("<tr><th>{}</th></tr>{}".format(name, rows)
-                        for name, rows in sections if rows)
+                (
+                    "Outcome" + "s" * (len(domain.class_vars) > 1),
+                    domain.class_vars,
+                    orig_domain.class_vars,
+                ),
+                ("Meta attributes", domain.metas, orig_domain.metas),
+            )
+        )
+        table = "".join(
+            "<tr><th>{}</th></tr>{}".format(name, rows)
+            for name, rows in sections
+            if rows
+        )
         if table:
             self.report_raw("<table>{}</table>".format(table))
 

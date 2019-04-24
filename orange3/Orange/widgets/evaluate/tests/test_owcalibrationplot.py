@@ -17,9 +17,12 @@ class TestOWCalibrationPlot(WidgetTest, EvaluateTest):
         super().setUpClass()
         cls.lenses = data = Orange.data.Table("lenses")
         cls.res = Orange.evaluation.TestOnTestData(
-            train_data=data[::2], test_data=data[1::2],
-            learners=[Orange.classification.MajorityLearner(),
-                      Orange.classification.KNNLearner()],
+            train_data=data[::2],
+            test_data=data[1::2],
+            learners=[
+                Orange.classification.MajorityLearner(),
+                Orange.classification.KNNLearner(),
+            ],
             store_data=True,
         )
 

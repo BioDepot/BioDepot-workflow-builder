@@ -25,6 +25,7 @@ class UserMessage(object):
         A dictionary with optional extra data.
 
     """
+
     #: Severity flags
     Info, Warning, Error = 1, 2, 3
 
@@ -54,8 +55,9 @@ class SchemeNode(QObject):
 
     """
 
-    def __init__(self, description, title=None, position=None,
-                 properties=None, parent=None):
+    def __init__(
+        self, description, title=None, position=None, properties=None, parent=None
+    ):
         QObject.__init__(self, parent)
         self.description = description
 
@@ -91,8 +93,10 @@ class SchemeNode(QObject):
         for channel in self.input_channels():
             if channel.name == name:
                 return channel
-        raise ValueError("%r is not a valid input channel name for %r." % \
-                         (name, self.description.name))
+        raise ValueError(
+            "%r is not a valid input channel name for %r."
+            % (name, self.description.name)
+        )
 
     def output_channel(self, name):
         """
@@ -103,8 +107,10 @@ class SchemeNode(QObject):
         for channel in self.output_channels():
             if channel.name == name:
                 return channel
-        raise ValueError("%r is not a valid output channel name for %r." % \
-                         (name, self.description.name))
+        raise ValueError(
+            "%r is not a valid output channel name for %r."
+            % (name, self.description.name)
+        )
 
     #: The title of the node has changed
     title_changed = Signal(str)
@@ -180,8 +186,7 @@ class SchemeNode(QObject):
         """
         return self.__processing_state
 
-    processing_state = Property(int, fset=set_processing_state,
-                                fget=processing_state)
+    processing_state = Property(int, fset=set_processing_state, fget=processing_state)
 
     def set_tool_tip(self, tool_tip):
         if self.__tool_tip != tool_tip:
@@ -190,8 +195,7 @@ class SchemeNode(QObject):
     def tool_tip(self):
         return self.__tool_tip
 
-    tool_tip = Property(str, fset=set_tool_tip,
-                        fget=tool_tip)
+    tool_tip = Property(str, fset=set_tool_tip, fget=tool_tip)
 
     #: The node's status tip has changes
     status_message_changed = Signal(str)
@@ -211,8 +215,7 @@ class SchemeNode(QObject):
         """
         Set a message to be displayed by a scheme view for this node.
         """
-        if message.message_id in self.__state_messages and \
-                not message.contents:
+        if message.message_id in self.__state_messages and not message.contents:
             del self.__state_messages[message.message_id]
 
         self.__state_messages[message.message_id] = message
@@ -225,8 +228,10 @@ class SchemeNode(QObject):
         return self.__state_messages.values()
 
     def __str__(self):
-        return "SchemeNode(description_id=%s, title=%r, ...)" % \
-                (str(self.description.id), self.title)
+        return "SchemeNode(description_id=%s, title=%r, ...)" % (
+            str(self.description.id),
+            self.title,
+        )
 
     def __repr__(self):
         return str(self)

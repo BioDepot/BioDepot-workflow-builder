@@ -3,26 +3,23 @@ from Orange.data import filter
 
 class IsDefinedSql(filter.IsDefined):
     def to_sql(self):
-        sql = " AND ".join([
-            '%s IS NOT NULL' % column
-            for column in self.columns
-        ])
+        sql = " AND ".join(["%s IS NOT NULL" % column for column in self.columns])
         if self.negate:
-            sql = 'NOT (%s)' % sql
+            sql = "NOT (%s)" % sql
         return sql
 
 
 class SameValueSql(filter.SameValue):
     def to_sql(self):
         if self.value is None:
-            sql = '%s IS NULL' % self.column
+            sql = "%s IS NULL" % self.column
         else:
             sql = "%s = %s" % (self.column, self.value)
         if self.negate:
             if self.value is None:
-                sql = 'NOT (%s)' % sql
+                sql = "NOT (%s)" % sql
             else:
-                sql = '(NOT (%s) OR %s is NULL)' % (sql, self.column)
+                sql = "(NOT (%s) OR %s is NULL)" % (sql, self.column)
         return sql
 
 
@@ -31,14 +28,14 @@ class ValuesSql(filter.Values):
         aggregator = " AND " if self.conjunction else " OR "
         sql = aggregator.join(c.to_sql() for c in self.conditions)
         if self.negate:
-            sql = 'NOT (%s)' % sql
-        return sql if self.conjunction else '({})'.format(sql)
+            sql = "NOT (%s)" % sql
+        return sql if self.conjunction else "({})".format(sql)
 
 
 class FilterDiscreteSql(filter.FilterDiscrete):
     def to_sql(self):
         if self.values is not None:
-            return "%s IN (%s)" % (self.column, ','.join(self.values))
+            return "%s IN (%s)" % (self.column, ",".join(self.values))
         else:
             return "%s IS NOT NULL" % self.column
 
@@ -58,11 +55,19 @@ class FilterContinuousSql(filter.FilterContinuous):
         elif self.oper == self.GreaterEqual:
             return "%s >= %s" % (self.column, self.ref)
         elif self.oper == self.Between:
-            return "%s >= %s AND %s <= %s" % (self.column, self.ref,
-                                              self.column, self.max)
+            return "%s >= %s AND %s <= %s" % (
+                self.column,
+                self.ref,
+                self.column,
+                self.max,
+            )
         elif self.oper == self.Outside:
-            return "(%s < %s OR %s > %s)" % (self.column, self.ref,
-                                           self.column, self.max)
+            return "(%s < %s OR %s > %s)" % (
+                self.column,
+                self.ref,
+                self.column,
+                self.max,
+            )
         elif self.oper == self.IsDefined:
             return "%s IS NOT NULL" % self.column
         else:
@@ -77,7 +82,7 @@ class FilterString(filter.FilterString):
             field = self.column
             value = self.ref
         else:
-            field = 'LOWER(%s)' % self.column
+            field = "LOWER(%s)" % self.column
             value = self.ref.lower()
         if self.oper == self.Equal:
             return "%s = %s" % (field, quote(value))

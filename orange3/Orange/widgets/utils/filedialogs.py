@@ -2,8 +2,7 @@ import os
 
 from AnyQt.QtCore import QFileInfo, Qt
 from AnyQt.QtGui import QBrush
-from AnyQt.QtWidgets import \
-    QMessageBox, QFileDialog, QFileIconProvider, QComboBox
+from AnyQt.QtWidgets import QMessageBox, QFileDialog, QFileIconProvider, QComboBox
 
 from Orange.data.io import FileFormat
 from Orange.widgets.settings import Setting
@@ -15,14 +14,15 @@ def fix_extension(ext, format, suggested_ext, suggested_format):
         QMessageBox.Warning,
         "Mismatching extension",
         "Extension '{}' does not match the chosen file format, {}.\n\n"
-        "Would you like to fix this?".format(ext, format))
+        "Would you like to fix this?".format(ext, format),
+    )
     role = QMessageBox.AcceptRole
-    change_ext = \
-        suggested_ext and \
-        dlg.addButton("Change extension to " + suggested_ext, role)
-    change_format =\
-        suggested_format and \
-        dlg.addButton("Save as " + suggested_format, role)
+    change_ext = suggested_ext and dlg.addButton(
+        "Change extension to " + suggested_ext, role
+    )
+    change_format = suggested_format and dlg.addButton(
+        "Save as " + suggested_format, role
+    )
     cancel = dlg.addButton("Back", role)
     dlg.setEscapeButton(cancel)
     dlg.exec()
@@ -33,13 +33,14 @@ def fix_extension(ext, format, suggested_ext, suggested_format):
     elif dlg.clickedButton() == change_format:
         return fix_extension.CHANGE_FORMAT
 
+
 fix_extension.CHANGE_EXT = 0
 fix_extension.CHANGE_FORMAT = 1
 fix_extension.CANCEL = 2
 
 
 def format_filter(writer):
-    return '{} (*{})'.format(writer.DESCRIPTION, ' *'.join(writer.EXTENSIONS))
+    return "{} (*{})".format(writer.DESCRIPTION, " *".join(writer.EXTENSIONS))
 
 
 @deprecated
@@ -47,16 +48,23 @@ def dialog_formats():
     """
     Return readable file types for QFileDialogs.
     """
-    return ("All readable files ({});;".format(
-        '*' + ' *'.join(FileFormat.readers.keys())) +
-            ";;".join("{} (*{})".format(f.DESCRIPTION, ' *'.join(f.EXTENSIONS))
-                      for f in sorted(set(FileFormat.readers.values()),
-                                      key=list(FileFormat.readers.values()).index)))
+    return "All readable files ({});;".format(
+        "*" + " *".join(FileFormat.readers.keys())
+    ) + ";;".join(
+        "{} (*{})".format(f.DESCRIPTION, " *".join(f.EXTENSIONS))
+        for f in sorted(
+            set(FileFormat.readers.values()),
+            key=list(FileFormat.readers.values()).index,
+        )
+    )
 
 
 def get_file_name(start_dir, start_filter, file_formats):
-    return open_filename_dialog_save(start_dir, start_filter,
-                                     sorted(set(file_formats.values()), key=lambda x: x.PRIORITY))
+    return open_filename_dialog_save(
+        start_dir,
+        start_filter,
+        sorted(set(file_formats.values()), key=lambda x: x.PRIORITY),
+    )
 
 
 def open_filename_dialog_save(start_dir, start_filter, file_formats):
@@ -75,9 +83,14 @@ def open_filename_dialog_save(start_dir, start_filter, file_formats):
     """
     while True:
         dialog = QFileDialog.getSaveFileName
-        filename, format, filter = \
-            open_filename_dialog(start_dir, start_filter, file_formats,
-                                 add_all=False, title="Save as...", dialog=dialog)
+        filename, format, filter = open_filename_dialog(
+            start_dir,
+            start_filter,
+            file_formats,
+            add_all=False,
+            title="Save as...",
+            dialog=dialog,
+        )
         if not filename:
             return None, None, None
 
@@ -91,8 +104,12 @@ def open_filename_dialog_save(start_dir, start_filter, file_formats):
                 if ext in f.EXTENSIONS:
                     suggested_format = f
                     break
-            res = fix_extension(ext, format.DESCRIPTION, suggested_ext,
-                                suggested_format.DESCRIPTION if suggested_format else False)
+            res = fix_extension(
+                ext,
+                format.DESCRIPTION,
+                suggested_ext,
+                suggested_format.DESCRIPTION if suggested_format else False,
+            )
             if res == fix_extension.CANCEL:
                 continue
             if res == fix_extension.CHANGE_EXT:
@@ -103,8 +120,9 @@ def open_filename_dialog_save(start_dir, start_filter, file_formats):
         return filename, format, filter
 
 
-def open_filename_dialog(start_dir, start_filter, file_formats,
-                         add_all=True, title="Open...", dialog=None):
+def open_filename_dialog(
+    start_dir, start_filter, file_formats, add_all=True, title="Open...", dialog=None
+):
     """
     Open file dialog with file formats.
 
@@ -130,16 +148,16 @@ def open_filename_dialog(start_dir, start_filter, file_formats,
         for f in file_formats:
             all_extensions.update(f.EXTENSIONS)
         file_formats.insert(0, None)
-        filters.insert(0, "All readable files (*{})".format(
-            ' *'.join(sorted(all_extensions))))
+        filters.insert(
+            0, "All readable files (*{})".format(" *".join(sorted(all_extensions)))
+        )
 
     if start_filter not in filters:
         start_filter = filters[0]
 
     if dialog is None:
         dialog = QFileDialog.getOpenFileName
-    filename, filter = dialog(
-        None, title, start_dir, ';;'.join(filters), start_filter)
+    filename, filter = dialog(None, title, start_dir, ";;".join(filters), start_filter)
     if not filename:
         return None, None, None
 
@@ -148,14 +166,14 @@ def open_filename_dialog(start_dir, start_filter, file_formats,
 
 
 class RecentPath:
-    abspath = ''
-    prefix = None   #: Option[str]  # BASEDIR | SAMPLE-DATASETS | ...
-    relpath = ''  #: Option[str]  # path relative to `prefix`
-    title = ''    #: Option[str]  # title of filename (e.g. from URL)
-    sheet = ''    #: Option[str]  # sheet
+    abspath = ""
+    prefix = None  #: Option[str]  # BASEDIR | SAMPLE-DATASETS | ...
+    relpath = ""  #: Option[str]  # path relative to `prefix`
+    title = ""  #: Option[str]  # title of filename (e.g. from URL)
+    sheet = ""  #: Option[str]  # sheet
     file_format = None  #: Option[str]  # file format as a string
 
-    def __init__(self, abspath, prefix, relpath, title='', sheet='', file_format=None):
+    def __init__(self, abspath, prefix, relpath, title="", sheet="", file_format=None):
         if os.name == "nt":
             # always use a cross-platform pathname component separator
             abspath = abspath.replace(os.path.sep, "/")
@@ -169,10 +187,12 @@ class RecentPath:
         self.file_format = file_format
 
     def __eq__(self, other):
-        return (self.abspath == other.abspath or
-                (self.prefix is not None and self.relpath is not None and
-                 self.prefix == other.prefix and
-                 self.relpath == other.relpath))
+        return self.abspath == other.abspath or (
+            self.prefix is not None
+            and self.relpath is not None
+            and self.prefix == other.prefix
+            and self.relpath == other.relpath
+        )
 
     @staticmethod
     def create(path, searchpaths, **kwargs):
@@ -190,6 +210,7 @@ class RecentPath:
             (note: the first matching prefixed path is chosen).
 
         """
+
         def isprefixed(prefix, path):
             """
             Is `path` contained within the directory `prefix`.
@@ -246,8 +267,11 @@ class RecentPath:
                     path = os.path.join(base, self.relpath)
                     if os.path.exists(path):
                         return RecentPath(
-                            os.path.normpath(path), self.prefix, self.relpath,
-                            file_format=self.file_format)
+                            os.path.normpath(path),
+                            self.prefix,
+                            self.relpath,
+                            file_format=self.file_format,
+                        )
         return None
 
     @property
@@ -264,9 +288,11 @@ class RecentPath:
         return os.path.dirname(self.abspath)
 
     def __repr__(self):
-        return ("{0.__class__.__name__}(abspath={0.abspath!r}, "
-                "prefix={0.prefix!r}, relpath={0.relpath!r}, "
-                "title={0.title!r})").format(self)
+        return (
+            "{0.__class__.__name__}(abspath={0.abspath!r}, "
+            "prefix={0.prefix!r}, relpath={0.relpath!r}, "
+            "title={0.title!r})"
+        ).format(self)
 
     __str__ = __repr__
 
@@ -329,14 +355,17 @@ class RecentPathsWidgetMixin:
         search_paths = self._search_paths()
         rec = []
         for recent in self.recent_paths:
-            kwargs = dict(title=recent.title, sheet=recent.sheet, file_format=recent.file_format)
+            kwargs = dict(
+                title=recent.title, sheet=recent.sheet, file_format=recent.file_format
+            )
             resolved = recent.resolve(search_paths)
             if resolved is not None:
-                rec.append(
-                    RecentPath.create(resolved.abspath, search_paths, **kwargs))
+                rec.append(RecentPath.create(resolved.abspath, search_paths, **kwargs))
             elif recent.search(search_paths) is not None:
                 rec.append(
-                    RecentPath.create(recent.search(search_paths), search_paths, **kwargs)
+                    RecentPath.create(
+                        recent.search(search_paths), search_paths, **kwargs
+                    )
                 )
             else:
                 rec.append(recent)
@@ -384,8 +413,7 @@ class RecentPathsWComboMixin(RecentPathsWidgetMixin):
 
     def __init__(self):
         super().__init__()
-        self.file_combo = \
-            QComboBox(self, sizeAdjustPolicy=QComboBox.AdjustToContents)
+        self.file_combo = QComboBox(self, sizeAdjustPolicy=QComboBox.AdjustToContents)
 
     def add_path(self, filename):
         """Add (or move) a file name to the top of recent paths"""
@@ -411,8 +439,7 @@ class RecentPathsWComboMixin(RecentPathsWidgetMixin):
                 self.file_combo.addItem(recent.basename)
                 self.file_combo.model().item(i).setToolTip(recent.abspath)
                 if not os.path.exists(recent.abspath):
-                    self.file_combo.setItemData(i, QBrush(Qt.red),
-                                                Qt.TextColorRole)
+                    self.file_combo.setItemData(i, QBrush(Qt.red), Qt.TextColorRole)
 
     def workflowEnvChanged(self, key, value, oldvalue):
         super().workflowEnvChanged(key, value, oldvalue)

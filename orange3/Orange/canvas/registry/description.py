@@ -72,8 +72,17 @@ class InputSignal(object):
     replaces : List[str]
         A list of names this input replaces.
     """
-    def __init__(self, name, type, handler, flags=Single + NonDefault,
-                 id=None, doc=None, replaces=()):
+
+    def __init__(
+        self,
+        name,
+        type,
+        handler,
+        flags=Single + NonDefault,
+        id=None,
+        doc=None,
+        replaces=(),
+    ):
         self.name = name
         self.type = type
         self.handler = handler
@@ -93,8 +102,7 @@ class InputSignal(object):
         self.flags = flags
 
     def __str__(self):
-        fmt = ("{0.__name__}(name={name!r}, type={type!s}, "
-               "handler={handler}, ...)")
+        fmt = "{0.__name__}(name={name!r}, type={type!s}, " "handler={handler}, ...)"
         return fmt.format(type(self), **self.__dict__)
 
     __repr__ = __str__
@@ -119,8 +127,10 @@ class OutputSignal(object):
     replaces : List[str]
         A list of names this output replaces.
     """
-    def __init__(self, name, type, flags=Single + NonDefault,
-                 id=None, doc=None, replaces=()):
+
+    def __init__(
+        self, name, type, flags=Single + NonDefault, id=None, doc=None, replaces=()
+    ):
         self.name = name
         self.type = type
         self.id = id
@@ -142,11 +152,10 @@ class OutputSignal(object):
         if self.dynamic and not self.single:
             raise SignalSpecificationError(
                 "Output signal can not be 'Multiple' and 'Dynamic'."
-                )
+            )
 
     def __str__(self):
-        fmt = ("{0.__name__}(name={name!r}, type={type!s}, "
-               "...)")
+        fmt = "{0.__name__}(name={name!r}, type={type!s}, " "...)"
         return fmt.format(type(self), **self.__dict__)
 
     __repr__ = __str__
@@ -197,14 +206,28 @@ class WidgetDescription(object):
         A list of `id`s this widget replaces (optional).
 
     """
-    def __init__(self, name, id, category=None, version=None,
-                 description=None,
-                 qualified_name=None, package=None, project_name=None,
-                 inputs=(), outputs=(),
-                 help=None, help_ref=None, url=None, keywords=None,
-                 priority=sys.maxsize,
-                 icon=None, background=None,
-                 replaces=None):
+
+    def __init__(
+        self,
+        name,
+        id,
+        category=None,
+        version=None,
+        description=None,
+        qualified_name=None,
+        package=None,
+        project_name=None,
+        inputs=(),
+        outputs=(),
+        help=None,
+        help_ref=None,
+        url=None,
+        keywords=None,
+        priority=sys.maxsize,
+        icon=None,
+        background=None,
+        replaces=None,
+    ):
 
         if not qualified_name:
             # TODO: Should also check that the name is real.
@@ -230,8 +253,10 @@ class WidgetDescription(object):
         self.replaces = replaces
 
     def __str__(self):
-        return ("WidgetDescription(name=%(name)r, id=%(id)r), "
-                "category=%(category)r, ...)") % self.__dict__
+        return (
+            "WidgetDescription(name=%(name)r, id=%(id)r), "
+            "category=%(category)r, ...)"
+        ) % self.__dict__
 
     def __repr__(self):
         return self.__str__()
@@ -287,6 +312,7 @@ class WidgetDescription(object):
 
         raise WidgetSpecificationError
 
+
 class CategoryDescription(object):
     """
     Description of a widget category.
@@ -315,13 +341,24 @@ class CategoryDescription(object):
         An background color for widgets in this category.
 
     """
-    def __init__(self, name=None, version=None,
-                 description=None, long_description=None,
-                 qualified_name=None, package=None,
-                 project_name=None,
-                 url=None, help=None, keywords=None,
-                 widgets=None, priority=sys.maxsize,
-                 icon=None, background=None):
+
+    def __init__(
+        self,
+        name=None,
+        version=None,
+        description=None,
+        long_description=None,
+        qualified_name=None,
+        package=None,
+        project_name=None,
+        url=None,
+        help=None,
+        keywords=None,
+        widgets=None,
+        priority=sys.maxsize,
+        icon=None,
+        background=None,
+    ):
 
         self.name = name
         self.version = version
@@ -386,4 +423,5 @@ class CategoryDescription(object):
             widgets=widgets,
             priority=priority,
             icon=icon,
-            background=background)
+            background=background,
+        )

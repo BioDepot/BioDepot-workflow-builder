@@ -37,21 +37,21 @@ def _count_nans_per_row_sparse(X, weights, dtype=None):
 def sparse_count_implicit_zeros(x):
     """ Count the number of implicit zeros in a sparse matrix. """
     if not sp.issparse(x):
-        raise TypeError('The matrix provided was not sparse.')
+        raise TypeError("The matrix provided was not sparse.")
     return np.prod(x.shape) - x.nnz
 
 
 def sparse_has_implicit_zeros(x):
     """ Check if sparse matrix contains any implicit zeros. """
     if not sp.issparse(x):
-        raise TypeError('The matrix provided was not sparse.')
+        raise TypeError("The matrix provided was not sparse.")
     return np.prod(x.shape) != x.nnz
 
 
 def sparse_implicit_zero_weights(x, weights):
     """ Extract the weight values of all zeros in a sparse matrix. """
     if not sp.issparse(x):
-        raise TypeError('The matrix provided was not sparse.')
+        raise TypeError("The matrix provided was not sparse.")
 
     if weights.ndim == 1:
         # Match weights and x axis so `indices` will be set appropriately
@@ -65,7 +65,7 @@ def sparse_implicit_zero_weights(x, weights):
     else:
         # Can easily be implemented using a coo_matrix
         raise NotImplementedError(
-            'Computing zero weights on ndimensinal weight matrix is not implemented'
+            "Computing zero weights on ndimensinal weight matrix is not implemented"
         )
 
 
@@ -123,7 +123,7 @@ def bincount(x, weights=None, max_val=None, minlength=None):
         x = x.data
 
     x = np.asanyarray(x)
-    if x.dtype.kind == 'f' and bn.anynan(x):
+    if x.dtype.kind == "f" and bn.anynan(x):
         nonnan = ~np.isnan(x)
         x = x[nonnan]
         if weights is not None:
@@ -132,7 +132,7 @@ def bincount(x, weights=None, max_val=None, minlength=None):
         else:
             nans = (~nonnan).sum(axis=0)
     else:
-        nans = 0. if x.ndim == 1 else np.zeros(x.shape[1], dtype=float)
+        nans = 0.0 if x.ndim == 1 else np.zeros(x.shape[1], dtype=float)
 
     if minlength is None and max_val is not None:
         minlength = max_val + 1
@@ -185,11 +185,11 @@ def countnans(x, weights=None, axis=None, dtype=None, keepdims=False):
         if weights is not None and weights.shape != x.shape:
             counts = counts * weights
     else:
-        assert axis in [None, 0, 1], 'Only axis 0 and 1 are currently supported'
+        assert axis in [None, 0, 1], "Only axis 0 and 1 are currently supported"
         # To have consistent behaviour with dense matrices, raise error when
         # `axis=1` and the array is 1d (e.g. [[1 2 3]])
         if x.shape[0] == 1 and axis == 1:
-            raise ValueError('Axis %d is out of bounds' % axis)
+            raise ValueError("Axis %d is out of bounds" % axis)
 
         arr = x if axis == 1 else x.T
 
@@ -268,11 +268,11 @@ def contingency(X, y, max_X=None, max_y=None, weights=None, mask=None):
         if sp.issparse(col):
             col = np.ravel(col.todense())
         contingencies.append(
-            bincount(y + ny * col,
-                     minlength=ny * nx,
-                     weights=weights)[0].reshape(nx, ny).T)
-        nans.append(
-            bincount(y[np.isnan(col)], minlength=ny)[0])
+            bincount(y + ny * col, minlength=ny * nx, weights=weights)[0]
+            .reshape(nx, ny)
+            .T
+        )
+        nans.append(bincount(y[np.isnan(col)], minlength=ny)[0])
     if was_1d:
         return contingencies[0], nans[0]
     return np.array(contingencies), np.array(nans)
@@ -323,42 +323,51 @@ def stats(X, weights=None, compute_variance=False):
 
     if X.size and is_numeric and not is_sparse:
         nans = np.isnan(X).sum(axis=0)
-        return np.column_stack((
-            np.nanmin(X, axis=0),
-            np.nanmax(X, axis=0),
-            np.nanmean(X, axis=0) if not weighted else weighted_mean(),
-            np.nanvar(X, axis=0) if compute_variance else np.zeros(X.shape[1]),
-            nans,
-            X.shape[0] - nans))
+        return np.column_stack(
+            (
+                np.nanmin(X, axis=0),
+                np.nanmax(X, axis=0),
+                np.nanmean(X, axis=0) if not weighted else weighted_mean(),
+                np.nanvar(X, axis=0) if compute_variance else np.zeros(X.shape[1]),
+                nans,
+                X.shape[0] - nans,
+            )
+        )
     elif is_sparse and X.size:
         if compute_variance:
             raise NotImplementedError
 
         non_zero = np.bincount(X.nonzero()[1], minlength=X.shape[1])
         X = X.tocsc()
-        return np.column_stack((
-            nanmin(X, axis=0),
-            nanmax(X, axis=0),
-            nanmean(X, axis=0) if not weighted else weighted_mean(),
-            np.zeros(X.shape[1]),      # variance not supported
-            X.shape[0] - non_zero,
-            non_zero))
+        return np.column_stack(
+            (
+                nanmin(X, axis=0),
+                nanmax(X, axis=0),
+                nanmean(X, axis=0) if not weighted else weighted_mean(),
+                np.zeros(X.shape[1]),  # variance not supported
+                X.shape[0] - non_zero,
+                non_zero,
+            )
+        )
     else:
         nans = (~X.astype(bool)).sum(axis=0) if X.size else np.zeros(X.shape[1])
-        return np.column_stack((
-            np.tile(np.inf, X.shape[1]),
-            np.tile(-np.inf, X.shape[1]),
-            np.zeros(X.shape[1]),
-            np.zeros(X.shape[1]),
-            nans,
-            X.shape[0] - nans))
+        return np.column_stack(
+            (
+                np.tile(np.inf, X.shape[1]),
+                np.tile(-np.inf, X.shape[1]),
+                np.zeros(X.shape[1]),
+                np.zeros(X.shape[1]),
+                nans,
+                X.shape[0] - nans,
+            )
+        )
 
 
 def _nan_min_max(x, func, axis=0):
     if not sp.issparse(x):
         return func(x, axis=axis)
     if axis is None:
-        extreme = func(x.data, axis=axis) if x.nnz else float('nan')
+        extreme = func(x.data, axis=axis) if x.nnz else float("nan")
         if sparse_has_implicit_zeros(x):
             extreme = func([0, extreme])
         return extreme
@@ -371,7 +380,7 @@ def _nan_min_max(x, func, axis=0):
     r = []
     for row in x:
         values = row.data
-        extreme = func(values) if values.size else float('nan')
+        extreme = func(values) if values.size else float("nan")
         if sparse_has_implicit_zeros(row):
             extreme = func([0, extreme])
         r.append(extreme)
@@ -390,12 +399,13 @@ def nanmax(x, axis=None):
 
 def mean(x):
     """ Equivalent of np.mean that supports sparse or dense matrices. """
-    m = (np.sum(x.data) / np.prod(x.shape)
-         if sp.issparse(x) else
-         np.mean(x))
+    m = np.sum(x.data) / np.prod(x.shape) if sp.issparse(x) else np.mean(x)
     if np.isnan(m):
-        warn('mean() resulted in nan. If input can contain nan values, perhaps '
-             'you meant nanmean?', stacklevel=2)
+        warn(
+            "mean() resulted in nan. If input can contain nan values, perhaps "
+            "you meant nanmean?",
+            stacklevel=2,
+        )
     return m
 
 
@@ -408,14 +418,16 @@ def _apply_func(x, dense_func, sparse_func, axis=None):
     if axis in [0, 1]:
         arr = x if axis == 1 else x.T
         arr = arr.tocsr()
-        return np.fromiter((sparse_func(row) for row in arr),
-                           dtype=np.double, count=arr.shape[0])
+        return np.fromiter(
+            (sparse_func(row) for row in arr), dtype=np.double, count=arr.shape[0]
+        )
     else:
         raise NotImplementedError
 
 
 def nansum(x, axis=None):
     """ Equivalent of np.nansum that supports sparse or dense matrices. """
+
     def nansum_sparse(x):
         return np.nansum(x.data)
 
@@ -424,6 +436,7 @@ def nansum(x, axis=None):
 
 def nanmean(x, axis=None):
     """ Equivalent of np.nanmean that supports sparse or dense matrices. """
+
     def nanmean_sparse(x):
         n_values = np.prod(x.shape) - np.sum(np.isnan(x.data))
         return np.nansum(x.data) / n_values
@@ -433,6 +446,7 @@ def nanmean(x, axis=None):
 
 def nanvar(x, axis=None):
     """ Equivalent of np.nanvar that supports sparse or dense matrices. """
+
     def nanvar_sparse(x):
         n_values = np.prod(x.shape) - np.sum(np.isnan(x.data))
         mean = np.nansum(x.data) / n_values
@@ -443,6 +457,7 @@ def nanvar(x, axis=None):
 
 def nanmedian(x, axis=None):
     """ Equivalent of np.nanmedian that supports sparse or dense matrices. """
+
     def nanmedian_sparse(x):
         nz = np.logical_not(np.isnan(x.data))
         n_nan = sum(np.isnan(x.data))
@@ -473,9 +488,12 @@ def unique(x, return_counts=False):
     if return_counts:
         zero_index = np.searchsorted(r[0], 0)
         if explicit_zeros:
-            r[1][r[0] == 0.] += implicit_zeros
+            r[1][r[0] == 0.0] += implicit_zeros
             return r
-        return np.insert(r[0], zero_index, 0), np.insert(r[1], zero_index, implicit_zeros)
+        return (
+            np.insert(r[0], zero_index, 0),
+            np.insert(r[1], zero_index, implicit_zeros),
+        )
     else:
         if explicit_zeros:
             return r
@@ -532,7 +550,7 @@ def digitize(x, bins, right=False):
         return result
 
     # Find the bin where zeros belong, depending on the `right` parameter
-    zero_bin = np.searchsorted(bins, 0, side=['right', 'left'][right])
+    zero_bin = np.searchsorted(bins, 0, side=["right", "left"][right])
 
     if zero_bin == 0:
         r = sp.lil_matrix(x.shape, dtype=np.int64)

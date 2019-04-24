@@ -5,9 +5,13 @@ import unittest
 
 import numpy as np
 
-from Orange.classification import (SVMLearner, LinearSVMLearner,
-                                   NuSVMLearner, OneClassSVMLearner)
-from Orange.regression import (SVRLearner, NuSVRLearner)
+from Orange.classification import (
+    SVMLearner,
+    LinearSVMLearner,
+    NuSVMLearner,
+    OneClassSVMLearner,
+)
+from Orange.regression import SVRLearner, NuSVRLearner
 from Orange.data import Table, Domain, ContinuousVariable
 from Orange.evaluation import CrossValidation, CA, RMSE
 
@@ -15,7 +19,7 @@ from Orange.evaluation import CrossValidation, CA, RMSE
 class TestSVMLearner(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.data = Table('ionosphere')
+        cls.data = Table("ionosphere")
         cls.data.shuffle()
 
     def test_SVM(self):
@@ -39,7 +43,7 @@ class TestSVMLearner(unittest.TestCase):
         X = np.random.rand(nrows, ncols)
         y = X.dot(np.random.rand(ncols))
         data = Table(X, y)
-        learn = SVRLearner(kernel='rbf', gamma=0.1)
+        learn = SVRLearner(kernel="rbf", gamma=0.1)
         res = CrossValidation(data, [learn], k=2)
         self.assertLess(RMSE(res)[0], 0.15)
 
@@ -57,7 +61,7 @@ class TestSVMLearner(unittest.TestCase):
         X = np.random.rand(nrows, ncols)
         y = X.dot(np.random.rand(ncols))
         data = Table(X, y)
-        learn = NuSVRLearner(kernel='rbf', gamma=0.1)
+        learn = NuSVRLearner(kernel="rbf", gamma=0.1)
         res = CrossValidation(data, [learn], k=2)
         self.assertLess(RMSE(res)[0], 0.1)
 
@@ -76,7 +80,7 @@ class TestSVMLearner(unittest.TestCase):
         y_pred = cls(X_all)
         n_pred_out_all = np.sum(y_pred == -1)
         n_pred_in_true_in = np.sum(y_pred[:n_true_in] == 1)
-        n_pred_out_true_out = np.sum(y_pred[- n_true_out:] == -1)
+        n_pred_out_true_out = np.sum(y_pred[-n_true_out:] == -1)
 
         self.assertEqual(np.absolute(y_pred).all(), 1)
         self.assertLessEqual(n_pred_out_all, len(X_all) * nu)

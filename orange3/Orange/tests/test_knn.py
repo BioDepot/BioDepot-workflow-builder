@@ -14,8 +14,8 @@ from Orange.evaluation import CA, CrossValidation, MSE
 class TestKNNLearner(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.iris = Table('iris')
-        cls.housing = Table('housing')
+        cls.iris = Table("iris")
+        cls.housing = Table("housing")
 
     def test_KNN(self):
         results = CrossValidation(self.iris, [KNNLearner()], k=3)
@@ -36,18 +36,20 @@ class TestKNNLearner(unittest.TestCase):
         y = np.random.randint(-2, 3, (nrows, 1))
         x1, x2 = np.split(x, 2)
         y1, y2 = np.split(y, 2)
-        attr = (ContinuousVariable('Feature 1'),
-                ContinuousVariable('Feature 2'),
-                ContinuousVariable('Feature 3'),
-                ContinuousVariable('Feature 4'),
-                ContinuousVariable('Feature 5'))
-        class_vars = (DiscreteVariable('Target 1'),)
+        attr = (
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+            ContinuousVariable("Feature 5"),
+        )
+        class_vars = (DiscreteVariable("Target 1"),)
         domain = Domain(attr, class_vars)
         t = Table(domain, x1, y1)
         lrn = KNNLearner()
         clf = lrn(t)
         z = clf(x2)
-        correct = (z == y2.flatten())
+        correct = z == y2.flatten()
         ca = sum(correct) / len(correct)
         self.assertGreater(ca, 0.1)
         self.assertLess(ca, 0.3)
@@ -59,8 +61,7 @@ class TestKNNLearner(unittest.TestCase):
         self.assertGreater(ca, 0.8)
 
     def test_KNN_regression(self):
-        learners = [KNNRegressionLearner(),
-                    KNNRegressionLearner(metric="mahalanobis")]
+        learners = [KNNRegressionLearner(), KNNRegressionLearner(metric="mahalanobis")]
         results = CrossValidation(self.housing, learners, k=3)
         mse = MSE(results)
         self.assertLess(mse[1], mse[0])

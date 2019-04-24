@@ -13,8 +13,8 @@ from Orange.evaluation import CA, CrossValidation, MSE
 class TestNNLearner(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.iris = Table('iris')
-        cls.housing = Table('housing')
+        cls.iris = Table("iris")
+        cls.housing = Table("housing")
         cls.learner = NNLearner()
 
     def test_NN_classification(self):
@@ -25,8 +25,7 @@ class TestNNLearner(unittest.TestCase):
 
     def test_NN_regression(self):
         const = ConstantLearner()
-        results = CrossValidation(self.housing, [NNRegressionLearner(), const],
-                                  k=3)
+        results = CrossValidation(self.housing, [NNRegressionLearner(), const], k=3)
         mse = MSE()
         res = mse(results)
         self.assertLess(res[0], 35)

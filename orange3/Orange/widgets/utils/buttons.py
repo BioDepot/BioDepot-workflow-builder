@@ -1,6 +1,10 @@
 from AnyQt.QtWidgets import (
-    QPushButton, QAbstractButton, QFocusFrame, QStyle, QStylePainter,
-    QStyleOptionButton
+    QPushButton,
+    QAbstractButton,
+    QFocusFrame,
+    QStyle,
+    QStylePainter,
+    QStyleOptionButton,
 )
 from AnyQt.QtGui import QPalette, QIcon
 from AnyQt.QtCore import Qt, QSize
@@ -14,6 +18,7 @@ class VariableTextPushButton(QPushButton):
     Use this class instead of the QPushButton when the button will
     switch the text dynamically while displayed.
     """
+
     def __init__(self, *args, textChoiceList=[], **kwargs):
         super().__init__(*args, **kwargs)
         self.__textChoiceList = list(textChoiceList)
@@ -60,8 +65,8 @@ class VariableTextPushButton(QPushButton):
                 size.setHeight(max(size.height(), icsize.height()))
 
             sh = sh.expandedTo(
-                style.sizeFromContents(QStyle.CT_PushButton, option,
-                                       size, self))
+                style.sizeFromContents(QStyle.CT_PushButton, option, size, self)
+            )
         return sh
 
 
@@ -69,6 +74,7 @@ class SimpleButton(QAbstractButton):
     """
     A simple icon button widget.
     """
+
     def __init__(self, parent=None, **kwargs):
         super().__init__(parent, **kwargs)
         self.__focusframe = None
@@ -80,8 +86,7 @@ class SimpleButton(QAbstractButton):
             self.__focusframe = QFocusFrame(self)
             self.__focusframe.setWidget(self)
             palette = self.palette()
-            palette.setColor(QPalette.Foreground,
-                             palette.color(QPalette.Highlight))
+            palette.setColor(QPalette.Foreground, palette.color(QPalette.Highlight))
             self.__focusframe.setPalette(palette)
 
     def focusOutEvent(self, event):
@@ -119,8 +124,11 @@ class SimpleButton(QAbstractButton):
 
         if not option.icon.isNull():
             if option.state & QStyle.State_Active:
-                mode = (QIcon.Normal if option.state & QStyle.State_MouseOver
-                        else QIcon.Active)
+                mode = (
+                    QIcon.Normal
+                    if option.state & QStyle.State_MouseOver
+                    else QIcon.Active
+                )
             else:
                 mode = QIcon.Disabled
             if self.isChecked():

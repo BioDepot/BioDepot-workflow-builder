@@ -16,6 +16,7 @@ __all__ = ["EqualFreq", "EqualWidth", "EntropyMDL", "DomainDiscretizer"]
 class Discretizer(Transformation):
     """Value transformer that returns an index of the bin for the given value.
     """
+
     def __init__(self, variable, points):
         super().__init__(variable)
         self.points = points
@@ -29,7 +30,7 @@ class Discretizer(Transformation):
                 x = sp.csr_matrix(x.shape)
             return x
         else:
-            return np.digitize(x, bins) if len(bins) else [0]*len(x)
+            return np.digitize(x, bins) if len(bins) else [0] * len(x)
 
     def transform(self, c):
         if sp.issparse(c):
@@ -66,15 +67,19 @@ class Discretizer(Transformation):
         if lpoints:
             values = [
                 cls._fmt_interval(low, high, var.number_of_decimals)
-                for low, high in zip([-np.inf] + lpoints, lpoints + [np.inf])]
+                for low, high in zip([-np.inf] + lpoints, lpoints + [np.inf])
+            ]
             to_sql = BinSql(var, lpoints)
         else:
             values = ["single_value"]
             to_sql = SingleValueSql(values[0])
 
-        dvar = DiscreteVariable(name=var.name, values=values,
-                                compute_value=cls(var, points),
-                                sparse=var.sparse)
+        dvar = DiscreteVariable(
+            name=var.name,
+            values=values,
+            compute_value=cls(var, points),
+            sparse=var.sparse,
+        )
         dvar.source_variable = var
         dvar.to_sql = to_sql
         return dvar
@@ -86,8 +91,10 @@ class BinSql:
         self.points = points
 
     def __call__(self):
-        return 'width_bucket(%s, ARRAY%s::double precision[])' % (
-            self.var.to_sql(), str(self.points))
+        return "width_bucket(%s, ARRAY%s::double precision[])" % (
+            self.var.to_sql(),
+            str(self.points),
+        )
 
 
 class SingleValueSql:
@@ -100,6 +107,7 @@ class SingleValueSql:
 
 class Discretization(Reprable):
     """Abstract base class for discretization classes."""
+
     def __call__(self, data, variable):
         """
         Compute discretization of the given variable on the given data.
@@ -108,8 +116,8 @@ class Discretization(Reprable):
         (:obj:`Orange.data.Variable.compute_value`).
         """
         raise NotImplementedError(
-            "Subclasses of 'Discretization' need to implement "
-            "the call operator")
+            "Subclasses of 'Discretization' need to implement " "the call operator"
+        )
 
 
 class EqualFreq(Discretization):
@@ -121,6 +129,7 @@ class EqualFreq(Discretization):
         Number of bins (default: 4). The actual number may be lower if the
         variable has less than n distinct values.
     """
+
     def __init__(self, n=4):
         self.n = n
 
@@ -130,15 +139,15 @@ class EqualFreq(Discretization):
             att = attribute.to_sql()
             quantiles = [(i + 1) / self.n for i in range(self.n - 1)]
             query = data._sql_query(
-                ['quantile(%s, ARRAY%s)' % (att, str(quantiles))],
-                use_time_sample=1000)
+                ["quantile(%s, ARRAY%s)" % (att, str(quantiles))], use_time_sample=1000
+            )
             with data._execute_sql_query(query) as cur:
                 points = sorted(set(cur.fetchone()[0]))
         else:
             d = distribution.get_distribution(data, attribute)
             points = _discretize.split_eq_freq(d, self.n)
-        return Discretizer.create_discretized_var(
-            data.domain[attribute], points)
+        return Discretizer.create_discretized_var(data.domain[attribute], points)
+
 
 class EqualWidth(Discretization):
     """Discretization into a fixed number of bins with equal widths.
@@ -147,6 +156,7 @@ class EqualWidth(Discretization):
 
         Number of bins (default: 4).
     """
+
     def __init__(self, n=4):
         self.n = n
 
@@ -164,8 +174,7 @@ class EqualWidth(Discretization):
                 values = values.X if values.X.size else values.Y
                 min, max = np.nanmin(values), np.nanmax(values)
                 points = self._split_eq_width(min, max)
-        return Discretizer.create_discretized_var(
-            data.domain[attribute], points)
+        return Discretizer.create_discretized_var(data.domain[attribute], points)
 
     def _split_eq_width(self, min, max):
         if np.isnan(min) or np.isnan(max) or min == max:
@@ -191,6 +200,7 @@ class EntropyMDL(Discretization):
         gain is lower than MDL (default: False).
 
     """
+
     def __init__(self, force=False):
         self.force = force
 
@@ -200,11 +210,10 @@ class EntropyMDL(Discretization):
         cut_ind = np.array(self._entropy_discretize_sorted(I, self.force))
         if len(cut_ind) > 0:
             # "the midpoint between each successive pair of examples" (FI p.1)
-            points = (values[cut_ind] + values[cut_ind - 1]) / 2.
+            points = (values[cut_ind] + values[cut_ind - 1]) / 2.0
         else:
             points = []
-        return Discretizer.create_discretized_var(
-            data.domain[attribute], points)
+        return Discretizer.create_discretized_var(data.domain[attribute], points)
 
     @classmethod
     def _normalize(cls, X, axis=None, out=None):
@@ -252,7 +261,7 @@ class EntropyMDL(Discretization):
 
         D = np.asarray(D)
         Dc = np.clip(D, np.finfo(D.dtype).eps, 1.0)
-        return - np.sum(D * np.log2(Dc), axis=axis)
+        return -np.sum(D * np.log2(Dc), axis=axis)
 
     @classmethod
     def _entropy(cls, D, axis=None):
@@ -398,8 +407,8 @@ class DomainDiscretizer(_RefuseDataInConstructor, Reprable):
         Determines whether a target is also discretized if it is continuous.
         (default: `False`)
     """
-    def __init__(self, discretize_class=False, method=None, clean=True,
-                 fixed=None):
+
+    def __init__(self, discretize_class=False, method=None, clean=True, fixed=None):
         self.discretize_class = discretize_class
         self.method = method
         self.clean = clean
@@ -425,6 +434,7 @@ class DomainDiscretizer(_RefuseDataInConstructor, Reprable):
                 else:
                     new_vars.append(var)
             return new_vars
+
         if self.method is None:
             method = EqualFreq(n=4)
         else:

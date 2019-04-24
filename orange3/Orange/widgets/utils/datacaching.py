@@ -1,6 +1,7 @@
 from collections import defaultdict
 from operator import itemgetter
 
+
 def getCached(data, funct, params=(), **kwparams):
     # pylint: disable=protected-access
     if data is None:
@@ -23,6 +24,7 @@ def setCached(data, name, value):
         data.__data_cache = {}
     data.__data_cache[name] = value
 
+
 def delCached(data, name):
     info = data is not None and getattr(data, "__data_cache")
     if info and name in info:
@@ -30,14 +32,14 @@ def delCached(data, name):
 
 
 class DataHintsCache(object):
-    def __init__(self, ):
+    def __init__(self,):
         self._hints = defaultdict(lambda: defaultdict(list))
         pass
 
     def set_hint(self, data, key, value, weight=1.0):
         attrs = data.domain.variables + data.domain.metas
         for attr in attrs:
-            self._hints[key][attr].append((value, weight/len(attrs)))
+            self._hints[key][attr].append((value, weight / len(attrs)))
 
     def get_weighted_hints(self, data, key):
         attrs = data.domain.variables + data.domain.metas
@@ -53,5 +55,6 @@ class DataHintsCache(object):
             return hints[0][0]
         else:
             return default
+
 
 data_hints = DataHintsCache()

@@ -2,9 +2,7 @@ import os
 
 import pickle
 
-from AnyQt.QtWidgets import (
-    QComboBox, QStyle, QSizePolicy, QFileDialog, QApplication
-)
+from AnyQt.QtWidgets import QComboBox, QStyle, QSizePolicy, QFileDialog, QApplication
 
 from Orange.base import Model
 from Orange.widgets import widget, gui
@@ -28,7 +26,7 @@ class OWSaveModel(widget.OWWidget):
     #: A list of recent filenames.
     history = Setting([])
 
-    FILE_EXT = '.pkcls'
+    FILE_EXT = ".pkcls"
     FILTER = "Pickled model (*" + FILE_EXT + ");;All Files (*)"
 
     want_main_area = False
@@ -41,23 +39,18 @@ class OWSaveModel(widget.OWWidget):
         self.model = None
 
         box = gui.hBox(self.controlArea, self.tr("File"))
-        self.filesCB = gui.comboBox(box, self, "selectedIndex",
-                                    callback=self._on_recent)
+        self.filesCB = gui.comboBox(
+            box, self, "selectedIndex", callback=self._on_recent
+        )
         self.filesCB.setMinimumContentsLength(20)
-        self.filesCB.setSizeAdjustPolicy(
-            QComboBox.AdjustToMinimumContentsLength)
+        self.filesCB.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLength)
 
-        button = gui.button(
-            box, self, "...", callback=self.browse, default=True
-        )
-        button.setIcon(
-            self.style().standardIcon(QStyle.SP_DirOpenIcon)
-        )
+        button = gui.button(box, self, "...", callback=self.browse, default=True)
+        button.setIcon(self.style().standardIcon(QStyle.SP_DirOpenIcon))
         button.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
 
         self.savebutton = gui.button(
-            self.controlArea, self, "Save", callback=self.savecurrent,
-            default=True
+            self.controlArea, self, "Save", callback=self.savecurrent, default=True
         )
         self.savebutton.setEnabled(False)
 
@@ -78,8 +71,7 @@ class OWSaveModel(widget.OWWidget):
     def setModel(self, model):
         """Set input model."""
         self.model = model
-        self.savebutton.setEnabled(
-            not (model is None or self.filename is None))
+        self.savebutton.setEnabled(not (model is None or self.filename is None))
 
     def save(self, filename):
         """Save the model to filename (model must not be None)."""
@@ -133,13 +125,11 @@ class OWSaveModel(widget.OWWidget):
             self.filesCB.removeItem(index)
 
         self.history.insert(0, filename)
-        self.filesCB.insertItem(0, os.path.basename(filename),
-                                userData=filename)
+        self.filesCB.insertItem(0, os.path.basename(filename), userData=filename)
 
         self.filename = filename
         self.selectedIndex = 0
-        self.savebutton.setEnabled(
-            not (self.model is None or self.filename is None))
+        self.savebutton.setEnabled(not (self.model is None or self.filename is None))
 
 
 def main():
@@ -148,7 +138,8 @@ def main():
     w.show()
     return app.exec_()
 
+
 if __name__ == "__main__":
     import sys
-    sys.exit(main())
 
+    sys.exit(main())

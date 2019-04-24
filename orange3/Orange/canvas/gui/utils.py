@@ -8,17 +8,13 @@ import traceback
 
 from contextlib import contextmanager
 
-from AnyQt.QtWidgets import (
-    QWidget, QMessageBox, QStyleOption, QStyle
-)
-from AnyQt.QtGui import (
-    QGradient, QLinearGradient, QRadialGradient, QBrush, QPainter
-)
+from AnyQt.QtWidgets import QWidget, QMessageBox, QStyleOption, QStyle
+from AnyQt.QtGui import QGradient, QLinearGradient, QRadialGradient, QBrush, QPainter
 from AnyQt.QtCore import QPointF, QUrl
 
 import sip
 
-QWIDGETSIZE_MAX = ((1 << 24) - 1)
+QWIDGETSIZE_MAX = (1 << 24) - 1
 
 
 @contextmanager
@@ -72,6 +68,7 @@ def StyledWidget_paintEvent(self, event):
 class StyledWidget(QWidget):
     """
     """
+
     paintEvent = StyledWidget_paintEvent
 
 
@@ -106,6 +103,7 @@ def has_x11():
     """
     try:
         from AnyQt.QtX11Extras import QX11Info
+
         return True
     except ImportError:
         return False
@@ -157,8 +155,7 @@ def gradient_darker(grad, factor):
     if isinstance(grad, QLinearGradient):
         new_grad = QLinearGradient(grad.start(), grad.finalStop())
     elif isinstance(grad, QRadialGradient):
-        new_grad = QRadialGradient(grad.center(), grad.radius(),
-                                   grad.focalPoint())
+        new_grad = QRadialGradient(grad.center(), grad.radius(), grad.focalPoint())
     else:
         raise TypeError
 
@@ -182,24 +179,25 @@ def brush_darker(brush, factor):
         return brush
 
 
-def create_gradient(base_color, stop=QPointF(0, 0),
-                    finalStop=QPointF(0, 1)):
+def create_gradient(base_color, stop=QPointF(0, 0), finalStop=QPointF(0, 1)):
     """
     Create a default linear gradient using `base_color` .
 
     """
     grad = QLinearGradient(stop, finalStop)
-    grad.setStops([(0.0, base_color),
-                   (0.5, base_color),
-                   (0.8, base_color.darker(105)),
-                   (1.0, base_color.darker(110)),
-                   ])
+    grad.setStops(
+        [
+            (0.0, base_color),
+            (0.5, base_color),
+            (0.8, base_color.darker(105)),
+            (1.0, base_color.darker(110)),
+        ]
+    )
     grad.setCoordinateMode(QLinearGradient.ObjectBoundingMode)
     return grad
 
 
-def create_css_gradient(base_color, stop=QPointF(0, 0),
-                        finalStop=QPointF(0, 1)):
+def create_css_gradient(base_color, stop=QPointF(0, 0), finalStop=QPointF(0, 1)):
     """
     Create a Qt css linear gradient fragment based on the `base_color`.
     """
@@ -216,16 +214,24 @@ def css_gradient(gradient):
     stop, finalStop = gradient.start(), gradient.finalStop()
     x1, y1, x2, y2 = stop.x(), stop.y(), finalStop.x(), finalStop.y()
     stops = gradient.stops()
-    stops = "\n".join("    stop: {0:f} {1}".format(stop, color.name())
-                      for stop, color in stops)
-    return ("qlineargradient(\n"
-            "    x1: {x1}, y1: {y1}, x2: {x1}, y2: {y2},\n"
-            "{stops})").format(x1=x1, y1=y1, x2=x2, y2=y2, stops=stops)
+    stops = "\n".join(
+        "    stop: {0:f} {1}".format(stop, color.name()) for stop, color in stops
+    )
+    return (
+        "qlineargradient(\n" "    x1: {x1}, y1: {y1}, x2: {x1}, y2: {y2},\n" "{stops})"
+    ).format(x1=x1, y1=y1, x2=x2, y2=y2, stops=stops)
 
 
-def message_critical(text, title=None, informative_text=None, details=None,
-                     buttons=None, default_button=None, exc_info=False,
-                     parent=None):
+def message_critical(
+    text,
+    title=None,
+    informative_text=None,
+    details=None,
+    buttons=None,
+    default_button=None,
+    exc_info=False,
+    parent=None,
+):
     """Show a critical message.
     """
     if not text:
@@ -234,32 +240,66 @@ def message_critical(text, title=None, informative_text=None, details=None,
     if title is None:
         title = "Error"
 
-    return message(QMessageBox.Critical, text, title, informative_text,
-                   details, buttons, default_button, exc_info, parent)
+    return message(
+        QMessageBox.Critical,
+        text,
+        title,
+        informative_text,
+        details,
+        buttons,
+        default_button,
+        exc_info,
+        parent,
+    )
 
 
-def message_warning(text, title=None, informative_text=None, details=None,
-                    buttons=None, default_button=None, exc_info=False,
-                    parent=None):
+def message_warning(
+    text,
+    title=None,
+    informative_text=None,
+    details=None,
+    buttons=None,
+    default_button=None,
+    exc_info=False,
+    parent=None,
+):
     """Show a warning message.
     """
     if not text:
         import random
-        text_candidates = ["Death could come at any moment.",
-                           "Murphy lurks about. Remember to save frequently."
-                           ]
+
+        text_candidates = [
+            "Death could come at any moment.",
+            "Murphy lurks about. Remember to save frequently.",
+        ]
         text = random.choice(text_candidates)
 
     if title is not None:
         title = "Warning"
 
-    return message(QMessageBox.Warning, text, title, informative_text,
-                   details, buttons, default_button, exc_info, parent)
+    return message(
+        QMessageBox.Warning,
+        text,
+        title,
+        informative_text,
+        details,
+        buttons,
+        default_button,
+        exc_info,
+        parent,
+    )
 
 
-def message_information(text, title=None, informative_text=None, details=None,
-                        buttons=None, default_button=None, exc_info=False,
-                        parent=None):
+def message_information(
+    text,
+    title=None,
+    informative_text=None,
+    details=None,
+    buttons=None,
+    default_button=None,
+    exc_info=False,
+    parent=None,
+):
     """Show an information message box.
     """
     if title is None:
@@ -267,23 +307,57 @@ def message_information(text, title=None, informative_text=None, details=None,
     if not text:
         text = "I am not a number."
 
-    return message(QMessageBox.Information, text, title, informative_text,
-                   details, buttons, default_button, exc_info, parent)
+    return message(
+        QMessageBox.Information,
+        text,
+        title,
+        informative_text,
+        details,
+        buttons,
+        default_button,
+        exc_info,
+        parent,
+    )
 
 
-def message_question(text, title, informative_text=None, details=None,
-                     buttons=None, default_button=None, exc_info=False,
-                     parent=None):
+def message_question(
+    text,
+    title,
+    informative_text=None,
+    details=None,
+    buttons=None,
+    default_button=None,
+    exc_info=False,
+    parent=None,
+):
     """Show an message box asking the user to select some
     predefined course of action (set by buttons argument).
 
     """
-    return message(QMessageBox.Question, text, title, informative_text,
-                   details, buttons, default_button, exc_info, parent)
+    return message(
+        QMessageBox.Question,
+        text,
+        title,
+        informative_text,
+        details,
+        buttons,
+        default_button,
+        exc_info,
+        parent,
+    )
 
 
-def message(icon, text, title=None, informative_text=None, details=None,
-            buttons=None, default_button=None, exc_info=False, parent=None):
+def message(
+    icon,
+    text,
+    title=None,
+    informative_text=None,
+    details=None,
+    buttons=None,
+    default_button=None,
+    exc_info=False,
+    parent=None,
+):
     """Show a message helper function.
     """
     if title is None:
@@ -315,9 +389,10 @@ def OSX_NSURL_toLocalFile(url):
     """Return OS X NSURL file reference as local file path or '' if not NSURL"""
     if isinstance(url, QUrl):
         url = url.toString()
-    if not url.startswith('file:///.file/id='):
-        return ''
+    if not url.startswith("file:///.file/id="):
+        return ""
     from subprocess import Popen, PIPE, DEVNULL
-    cmd = ['osascript', '-e', 'get POSIX path of POSIX file "{}"'.format(url)]
+
+    cmd = ["osascript", "-e", 'get POSIX path of POSIX file "{}"'.format(url)]
     with Popen(cmd, stdout=PIPE, stderr=DEVNULL) as p:
         return p.stdout.read().strip().decode()

@@ -13,8 +13,16 @@ import numpy as np
 import scipy.sparse as sp
 
 from Orange import data
-from Orange.data import (filter, Unknown, Variable, Table, DiscreteVariable,
-                         ContinuousVariable, Domain, StringVariable)
+from Orange.data import (
+    filter,
+    Unknown,
+    Variable,
+    Table,
+    DiscreteVariable,
+    ContinuousVariable,
+    Domain,
+    StringVariable,
+)
 from Orange.tests import test_dirname, assert_array_nanequal
 from Orange.data.table import _optimize_indices
 
@@ -326,14 +334,17 @@ class TableTestCase(unittest.TestCase):
             warnings.simplefilter("ignore")
             d = data.Table("test2")
             d[2:5, 0] = 42
-            self.assertEqual([e[0] for e in d],
-                             [0, 1.1, 42, 42, 42, 2.25, 2.26, 3.333, Unknown])
+            self.assertEqual(
+                [e[0] for e in d], [0, 1.1, 42, 42, 42, 2.25, 2.26, 3.333, Unknown]
+            )
             d[:3, "b"] = 43
-            self.assertEqual([e[0] for e in d],
-                             [43, 43, 43, 42, 42, 2.25, 2.26, 3.333, None])
+            self.assertEqual(
+                [e[0] for e in d], [43, 43, 43, 42, 42, 2.25, 2.26, 3.333, None]
+            )
             d[-2:, d.domain[0]] = 44
-            self.assertEqual([e[0] for e in d],
-                             [43, 43, 43, 42, 42, 2.25, 2.26, 44, 44])
+            self.assertEqual(
+                [e[0] for e in d], [43, 43, 43, 42, 42, 2.25, 2.26, 44, 44]
+            )
 
             d[2:5, "a"] = "A"
             self.assertEqual([e["a"] for e in d], list("ABAAACCDE"))
@@ -375,14 +386,14 @@ class TableTestCase(unittest.TestCase):
             self.assertEqual(d[1, 0], 42)
 
             d[5:2:-1] = [3, None, None]
-            self.assertEqual([e[0] for e in d],
-                             [42, 42, 42, 3, 3, 3, 2.26, 3.333, None])
+            self.assertEqual(
+                [e[0] for e in d], [42, 42, 42, 3, 3, 3, 2.26, 3.333, None]
+            )
             self.assertTrue(isnan(d[3, 2]))
 
             d[2:5] = 42
             self.assertTrue(np.all(d.X[2:5] == 42))
             self.assertEqual(d.Y[2], 0)
-
 
     def test_multiple_indices(self):
         import warnings
@@ -408,12 +419,15 @@ class TableTestCase(unittest.TestCase):
             d = data.Table("test2")
 
             d[1:4, "b"] = 42
-            self.assertEqual([e[0] for e in d],
-                             [0, 42, 42, 42, 2.24, 2.25, 2.26, 3.333, None])
+            self.assertEqual(
+                [e[0] for e in d], [0, 42, 42, 42, 2.24, 2.25, 2.26, 3.333, None]
+            )
 
             d[range(5, 2, -1), "b"] = None
-            self.assertEqual([e[d.domain[0]] for e in d],
-                             [0, 42, 42, None, "?", "", 2.26, 3.333, None])
+            self.assertEqual(
+                [e[d.domain[0]] for e in d],
+                [0, 42, 42, None, "?", "", 2.26, 3.333, None],
+            )
 
     def test_del_multiple_indices_example(self):
         import warnings
@@ -582,9 +596,8 @@ class TableTestCase(unittest.TestCase):
         self.assertEqual(d[1], [42, "0", None])
 
         assert_array_nanequal(
-            d.metas,
-            np.array([[v.Unknown for v in d.domain.metas]] * 2,
-                     dtype=object))
+            d.metas, np.array([[v.Unknown for v in d.domain.metas]] * 2, dtype=object)
+        )
 
     def test_append2(self):
         d = data.Table("iris")
@@ -621,12 +634,10 @@ class TableTestCase(unittest.TestCase):
 
     def test_extend2(self):
         d = data.Table("test3")
-        d.extend([[None] * 3,
-                  [None] * 3])
+        d.extend([[None] * 3, [None] * 3])
         assert_array_nanequal(
-            d.metas,
-            np.array([[v.Unknown for v in d.domain.metas]] * 2,
-                     dtype=object))
+            d.metas, np.array([[v.Unknown for v in d.domain.metas]] * 2, dtype=object)
+        )
 
     def test_copy(self):
         t = data.Table(np.zeros((5, 3)), np.arange(5), np.zeros((5, 3)))
@@ -641,10 +652,10 @@ class TableTestCase(unittest.TestCase):
         self.assertFalse(np.all(t.metas == copy.metas))
 
     def test_copy_sparse(self):
-        t = data.Table('iris').to_sparse()
+        t = data.Table("iris").to_sparse()
         copy = t.copy()
 
-        self.assertEqual((t.X != copy.X).nnz, 0)      # sparse matrices match by content
+        self.assertEqual((t.X != copy.X).nnz, 0)  # sparse matrices match by content
         np.testing.assert_equal(t.Y, copy.Y)
         np.testing.assert_equal(t.metas, copy.metas)
 
@@ -653,34 +664,26 @@ class TableTestCase(unittest.TestCase):
         self.assertNotEqual(id(t.metas), id(copy.metas))
 
     def test_concatenate(self):
-        d1 = data.Domain([data.ContinuousVariable('a1')])
-        t1 = data.Table.from_numpy(d1, [[1],
-                                        [2]])
-        d2 = data.Domain([data.ContinuousVariable('a2')],
-                         metas=[data.StringVariable('s')])
-        t2 = data.Table.from_numpy(d2, [[3],
-                                        [4]], metas=[['foo'],
-                                                     ['fuu']])
-        self.assertRaises(ValueError,
-                          lambda: data.Table.concatenate((t1, t2), axis=5))
+        d1 = data.Domain([data.ContinuousVariable("a1")])
+        t1 = data.Table.from_numpy(d1, [[1], [2]])
+        d2 = data.Domain(
+            [data.ContinuousVariable("a2")], metas=[data.StringVariable("s")]
+        )
+        t2 = data.Table.from_numpy(d2, [[3], [4]], metas=[["foo"], ["fuu"]])
+        self.assertRaises(ValueError, lambda: data.Table.concatenate((t1, t2), axis=5))
 
         t3 = data.Table.concatenate((t1, t2))
-        self.assertEqual(t3.domain.attributes,
-                         t1.domain.attributes + t2.domain.attributes)
+        self.assertEqual(
+            t3.domain.attributes, t1.domain.attributes + t2.domain.attributes
+        )
         self.assertEqual(len(t3.domain.metas), 1)
         self.assertEqual(t3.X.shape, (2, 2))
         self.assertRaises(ValueError, lambda: data.Table.concatenate((t3, t1)))
 
         t4 = data.Table.concatenate((t3, t3), axis=0)
-        np.testing.assert_equal(t4.X, [[1, 3],
-                                       [2, 4],
-                                       [1, 3],
-                                       [2, 4]])
+        np.testing.assert_equal(t4.X, [[1, 3], [2, 4], [1, 3], [2, 4]])
         t4 = data.Table.concatenate((t3, t1), axis=0)
-        np.testing.assert_equal(t4.X, [[1, 3],
-                                       [2, 4],
-                                       [1, np.nan],
-                                       [2, np.nan]])
+        np.testing.assert_equal(t4.X, [[1, 3], [2, 4], [1, np.nan], [2, np.nan]])
 
     def test_sparse_concatenate_rows(self):
         iris = Table("iris")
@@ -713,20 +716,21 @@ class TableTestCase(unittest.TestCase):
         d2 = pickle.loads(s)
         self.assertEqual(d[0], d2[0])
 
-        self.assertEqual(d.checksum(include_metas=False),
-                         d2.checksum(include_metas=False))
+        self.assertEqual(
+            d.checksum(include_metas=False), d2.checksum(include_metas=False)
+        )
 
         d = data.Table("iris")
         s = pickle.dumps(d)
         d2 = pickle.loads(s)
         self.assertEqual(d[0], d2[0])
-        self.assertEqual(d.checksum(include_metas=False),
-                         d2.checksum(include_metas=False))
+        self.assertEqual(
+            d.checksum(include_metas=False), d2.checksum(include_metas=False)
+        )
 
     def test_translate_through_slice(self):
         d = data.Table("iris")
-        dom = data.Domain(["petal length", "sepal length", "iris"],
-                          source=d.domain)
+        dom = data.Domain(["petal length", "sepal length", "iris"], source=d.domain)
         d_ref = d[:10, dom.variables]
         self.assertEqual(d_ref.domain.class_var, d.domain.class_var)
         self.assertEqual(d_ref[0, "petal length"], d[0, "petal length"])
@@ -774,13 +778,14 @@ class TableTestCase(unittest.TestCase):
         d.save("test-zoo.tab")
         dd = data.Table("test-zoo")
         try:
-            self.assertTupleEqual(d.domain.metas, dd.domain.metas,
-                                  msg="Meta attributes don't match.")
-            self.assertTupleEqual(d.domain.variables, dd.domain.variables,
-                                  msg="Attributes don't match.")
+            self.assertTupleEqual(
+                d.domain.metas, dd.domain.metas, msg="Meta attributes don't match."
+            )
+            self.assertTupleEqual(
+                d.domain.variables, dd.domain.variables, msg="Attributes don't match."
+            )
 
-            np.testing.assert_almost_equal(d.W, dd.W,
-                                           err_msg="Weights don't match.")
+            np.testing.assert_almost_equal(d.W, dd.W, err_msg="Weights don't match.")
             for i in range(10):
                 for j in d.domain.variables:
                     self.assertEqual(d[i][j], dd[i][j])
@@ -792,13 +797,14 @@ class TableTestCase(unittest.TestCase):
         d.save("test-zoo-weights.tab")
         dd = data.Table("test-zoo-weights")
         try:
-            self.assertTupleEqual(d.domain.metas, dd.domain.metas,
-                                  msg="Meta attributes don't match.")
-            self.assertTupleEqual(d.domain.variables, dd.domain.variables,
-                                  msg="Attributes don't match.")
+            self.assertTupleEqual(
+                d.domain.metas, dd.domain.metas, msg="Meta attributes don't match."
+            )
+            self.assertTupleEqual(
+                d.domain.variables, dd.domain.variables, msg="Attributes don't match."
+            )
 
-            np.testing.assert_almost_equal(d.W, dd.W,
-                                           err_msg="Weights don't match.")
+            np.testing.assert_almost_equal(d.W, dd.W, err_msg="Weights don't match.")
             for i in range(10):
                 for j in d.domain.variables:
                     self.assertEqual(d[i][j], dd[i][j])
@@ -821,8 +827,10 @@ class TableTestCase(unittest.TestCase):
 
         a = np.arange(20, dtype="d").reshape((4, 5))
         a[:, -1] = [0, 0, 0, 1]
-        dom = data.Domain([data.ContinuousVariable(x) for x in "abcd"],
-                          data.DiscreteVariable("e", values=["no", "yes"]))
+        dom = data.Domain(
+            [data.ContinuousVariable(x) for x in "abcd"],
+            data.DiscreteVariable("e", values=["no", "yes"]),
+        )
         table = data.Table(dom, a)
         for i in range(4):
             self.assertEqual(table[i].get_class(), "no" if i < 3 else "yes")
@@ -878,12 +886,12 @@ class TableTestCase(unittest.TestCase):
 
     def test_filter_values_nested(self):
         d = data.Table("iris")
-        f1 = filter.FilterContinuous(d.columns.sepal_length,
-                                     filter.FilterContinuous.Between,
-                                     min=4.5, max=5.0)
-        f2 = filter.FilterContinuous(d.columns.sepal_width,
-                                     filter.FilterContinuous.Between,
-                                     min=3.1, max=3.4)
+        f1 = filter.FilterContinuous(
+            d.columns.sepal_length, filter.FilterContinuous.Between, min=4.5, max=5.0
+        )
+        f2 = filter.FilterContinuous(
+            d.columns.sepal_width, filter.FilterContinuous.Between, min=3.1, max=3.4
+        )
         f3 = filter.FilterDiscrete(d.columns.iris, [0, 1])
         f = filter.Values([filter.Values([f1, f2], conjunction=False), f3])
         self.assertEqual(41, len(f(d)))
@@ -906,17 +914,20 @@ class TableTestCase(unittest.TestCase):
         for args, expected in filters:
             f = fs(var, *args)
             filtered_data = filter.Values([f])(data)
-            self.assertEqual(len(filtered_data), expected["rows"],
-                             "{} returned wrong number of rows".format(args))
+            self.assertEqual(
+                len(filtered_data),
+                expected["rows"],
+                "{} returned wrong number of rows".format(args),
+            )
 
     def test_filter_value_continuous(self):
         d = data.Table("iris")
         col = d.X[:, 2]
 
         v = d.columns
-        f = filter.FilterContinuous(v.petal_length,
-                                    filter.FilterContinuous.Between,
-                                    min=4.5, max=5.1)
+        f = filter.FilterContinuous(
+            v.petal_length, filter.FilterContinuous.Between, min=4.5, max=5.1
+        )
 
         x = filter.Values([f])(d)
         self.assertTrue(np.all(x.X[:, 2] >= 4.5))
@@ -975,43 +986,48 @@ class TableTestCase(unittest.TestCase):
         col = d.X[:, 2]
         v = d.columns
 
-        f = filter.FilterContinuous(v.petal_length,
-                                    filter.FilterContinuous.Equal, ref=5.1)
+        f = filter.FilterContinuous(
+            v.petal_length, filter.FilterContinuous.Equal, ref=5.1
+        )
         x = filter.Values([f])(d)
         self.assertTrue(np.all(x.X[:, 2] == 5.1))
         self.assertEqual(sum(col == 5.1), len(x))
 
-        f = filter.FilterContinuous(2,
-                                    filter.FilterContinuous.Equal, ref=5.1)
+        f = filter.FilterContinuous(2, filter.FilterContinuous.Equal, ref=5.1)
         self.assertTrue(np.all(x.X[:, 2] == 5.1))
         self.assertEqual(sum(col == 5.1), len(x))
 
-        f = filter.FilterContinuous("petal length",
-                                    filter.FilterContinuous.Equal, ref=5.1)
+        f = filter.FilterContinuous(
+            "petal length", filter.FilterContinuous.Equal, ref=5.1
+        )
         self.assertTrue(np.all(x.X[:, 2] == 5.1))
         self.assertEqual(sum(col == 5.1), len(x))
 
-        f = filter.FilterContinuous("sepal length",
-                                    filter.FilterContinuous.Equal, ref=5.1)
+        f = filter.FilterContinuous(
+            "sepal length", filter.FilterContinuous.Equal, ref=5.1
+        )
         f.column = 2
         self.assertTrue(np.all(x.X[:, 2] == 5.1))
         self.assertEqual(sum(col == 5.1), len(x))
 
-        f = filter.FilterContinuous("sepal length",
-                                    filter.FilterContinuous.Equal, ref=5.1)
+        f = filter.FilterContinuous(
+            "sepal length", filter.FilterContinuous.Equal, ref=5.1
+        )
         f.column = v.petal_length
         self.assertTrue(np.all(x.X[:, 2] == 5.1))
         self.assertEqual(sum(col == 5.1), len(x))
 
-        f = filter.FilterContinuous(v.petal_length,
-                                    filter.FilterContinuous.Equal, ref=18)
+        f = filter.FilterContinuous(
+            v.petal_length, filter.FilterContinuous.Equal, ref=18
+        )
         f.ref = 5.1
         x = filter.Values([f])(d)
         self.assertTrue(np.all(x.X[:, 2] == 5.1))
         self.assertEqual(sum(col == 5.1), len(x))
 
-        f = filter.FilterContinuous(v.petal_length,
-                                    filter.FilterContinuous.Equal, ref=18)
+        f = filter.FilterContinuous(
+            v.petal_length, filter.FilterContinuous.Equal, ref=18
+        )
         f.ref = 5.1
         x = filter.Values([f])(d)
         self.assertTrue(np.all(x.X[:, 2] == 5.1))
@@ -1061,8 +1077,7 @@ class TableTestCase(unittest.TestCase):
         d = data.Table("zoo")
         col = d[:, "name"].metas[:, 0]
 
-        f = filter.FilterString("name",
-                                filter.FilterString.Equal, "girl")
+        f = filter.FilterString("name", filter.FilterString.Equal, "girl")
         x = filter.Values([f])(d)
         self.assertEqual(len(x), 1)
         self.assertEqual(x[0, "name"], "girl")
@@ -1132,8 +1147,7 @@ class TableTestCase(unittest.TestCase):
 
         col = d[:, "name"].metas[:, 0]
 
-        f = filter.FilterString("name",
-                                filter.FilterString.Equal, "giRL")
+        f = filter.FilterString("name", filter.FilterString.Equal, "giRL")
         f.case_sensitive = False
         x = filter.Values([f])(d)
         self.assertEqual(len(x), 1)
@@ -1192,8 +1206,7 @@ class TableTestCase(unittest.TestCase):
         x = filter.Values([f])(d)
         for e in x:
             self.assertTrue(str(e["name"]).lower().startswith("gi"))
-        self.assertEqual(len(x),
-                         len([e for e in col if e.lower().startswith("gi")]))
+        self.assertEqual(len(x), len([e for e in col if e.lower().startswith("gi")]))
 
         f.oper = f.EndsWith
         f.ref = "ion"
@@ -1205,7 +1218,7 @@ class TableTestCase(unittest.TestCase):
 
     def test_valueFilter_regex(self):
         d = data.Table("zoo")
-        f = filter.FilterRegex(d.domain['name'], '^c...$')
+        f = filter.FilterRegex(d.domain["name"], "^c...$")
         x = filter.Values([f])(d)
         self.assertEqual(len(x), 7)
 
@@ -1224,21 +1237,28 @@ class TableTestCase(unittest.TestCase):
         for args, expected in filters:
             f = fs(var, *args)
             filtered_data = filter.Values([f])(data)
-            self.assertEqual(len(filtered_data), expected["rows"],
-                             "{} returned wrong number of rows".format(args))
+            self.assertEqual(
+                len(filtered_data),
+                expected["rows"],
+                "{} returned wrong number of rows".format(args),
+            )
 
     def test_table_dtypes(self):
         table = data.Table("iris")
         metas = np.hstack((table.metas, table.Y.reshape(len(table), 1)))
         attributes_metas = table.domain.metas + table.domain.class_vars
-        domain_metas = data.Domain(table.domain.attributes,
-                                   table.domain.class_vars,
-                                   attributes_metas)
+        domain_metas = data.Domain(
+            table.domain.attributes, table.domain.class_vars, attributes_metas
+        )
         table_metas = data.Table(domain_metas, table.X, table.Y, metas)
-        new_table = data.Table(data.Domain(table_metas.domain.metas,
-                                           table_metas.domain.metas,
-                                           table_metas.domain.metas),
-                               table_metas)
+        new_table = data.Table(
+            data.Domain(
+                table_metas.domain.metas,
+                table_metas.domain.metas,
+                table_metas.domain.metas,
+            ),
+            table_metas,
+        )
         self.assertEqual(new_table.X.dtype, np.float64)
         self.assertEqual(new_table.Y.dtype, np.float64)
         self.assertEqual(new_table.metas.dtype, np.float64)
@@ -1263,13 +1283,15 @@ class TableTestCase(unittest.TestCase):
     def test_repr_sparse_with_one_row(self):
         table = data.Table("iris")[:1]
         table.X = sp.csr_matrix(table.X)
-        repr(table)     # make sure repr does not crash
+        repr(table)  # make sure repr does not crash
 
 
 def column_sizes(table):
-    return (len(table.domain.attributes),
-            len(table.domain.class_vars),
-            len(table.domain.metas))
+    return (
+        len(table.domain.attributes),
+        len(table.domain.class_vars),
+        len(table.domain.metas),
+    )
 
 
 class TableTests(unittest.TestCase):
@@ -1289,8 +1311,9 @@ class TableTests(unittest.TestCase):
         self.class_data = np.random.random((self.nrows, len(self.class_vars)))
         if len(self.class_vars) == 1:
             self.class_data = self.class_data.flatten()
-        self.meta_data = np.random.randint(0, 5, (self.nrows, len(self.metas))
-                                          ).astype(object)
+        self.meta_data = np.random.randint(0, 5, (self.nrows, len(self.metas))).astype(
+            object
+        )
         self.weight_data = np.random.random((self.nrows, 1))
 
     def mock_domain(self, with_classes=False, with_metas=False):
@@ -1298,19 +1321,29 @@ class TableTests(unittest.TestCase):
         class_vars = self.class_vars if with_classes else []
         metas = self.metas if with_metas else []
         variables = attributes + class_vars
-        return MagicMock(data.Domain,
-                         attributes=attributes,
-                         class_vars=class_vars,
-                         metas=metas,
-                         variables=variables)
+        return MagicMock(
+            data.Domain,
+            attributes=attributes,
+            class_vars=class_vars,
+            metas=metas,
+            variables=variables,
+        )
 
     def create_domain(self, attributes=(), classes=(), metas=()):
-        attr_vars = [data.ContinuousVariable(name=a) if isinstance(a, str)
-                     else a for a in attributes]
-        class_vars = [data.ContinuousVariable(name=c) if isinstance(c, str)
-                      else c for c in classes]
-        meta_vars = [data.DiscreteVariable(name=m, values=map(str, range(5)))
-                     if isinstance(m, str) else m for m in metas]
+        attr_vars = [
+            data.ContinuousVariable(name=a) if isinstance(a, str) else a
+            for a in attributes
+        ]
+        class_vars = [
+            data.ContinuousVariable(name=c) if isinstance(c, str) else c
+            for c in classes
+        ]
+        meta_vars = [
+            data.DiscreteVariable(name=m, values=map(str, range(5)))
+            if isinstance(m, str)
+            else m
+            for m in metas
+        ]
 
         domain = data.Domain(attr_vars, class_vars, meta_vars)
         return domain
@@ -1335,8 +1368,7 @@ class CreateTableWithFilename(TableTests):
         reader_instance = Mock(read=Mock(return_value=table_mock))
         reader_mock = Mock(return_value=reader_instance)
 
-        with patch.dict(data.io.FileFormat.readers,
-                        {'.xlsx': reader_mock}):
+        with patch.dict(data.io.FileFormat.readers, {".xlsx": reader_mock}):
             table = data.Table.from_file("test.xlsx")
 
         reader_mock.assert_called_with("test.xlsx")
@@ -1361,7 +1393,8 @@ class CreateTableWithFilename(TableTests):
 
     @patch("Orange.data.table.Table.from_file")
     def test_calling_new_with_keyword_argument_filename_calls_read_data(
-            self, read_data):
+        self, read_data
+    ):
         data.Table(filename=self.filename)
 
         read_data.assert_called_with(self.filename)
@@ -1369,46 +1402,54 @@ class CreateTableWithFilename(TableTests):
 
 class CreateTableWithUrl(TableTests):
     def test_url_no_scheme(self):
-
         class SkipRest(Exception):
             pass
 
         mock_urlopen = Mock(side_effect=SkipRest())
-        url = 'www.foo.bar/xx.csv'
+        url = "www.foo.bar/xx.csv"
 
-        with patch('Orange.data.io.UrlReader.urlopen', mock_urlopen):
+        with patch("Orange.data.io.UrlReader.urlopen", mock_urlopen):
             try:
                 Table.from_url(url)
             except SkipRest:
                 pass
 
-        mock_urlopen.assert_called_once_with('http://' + url)
+        mock_urlopen.assert_called_once_with("http://" + url)
 
     class _MockUrlOpen(MagicMock):
-        headers = {'content-disposition': 'attachment; filename="Something-FormResponses.tsv"; '
-                                          'filename*=UTF-8''Something%20%28Responses%29.tsv'}
-        def __enter__(self): return self
+        headers = {
+            "content-disposition": 'attachment; filename="Something-FormResponses.tsv"; '
+            "filename*=UTF-8"
+            "Something%20%28Responses%29.tsv"
+        }
 
-        def __exit__(self, *args, **kwargs): pass
+        def __enter__(self):
+            return self
 
-        def read(self): return b'''\
+        def __exit__(self, *args, **kwargs):
+            pass
+
+        def read(self):
+            return b"""\
 a\tb\tc
 1\t2\t3
-2\t3\t4'''
+2\t3\t4"""
 
     urlopen = _MockUrlOpen()
 
-    @patch('Orange.data.io.urlopen', urlopen)
+    @patch("Orange.data.io.urlopen", urlopen)
     def test_trimmed_urls(self):
-        for url in ('https://docs.google.com/spreadsheets/d/ABCD/edit',
-                    'https://www.dropbox.com/s/ABCD/filename.csv'):
+        for url in (
+            "https://docs.google.com/spreadsheets/d/ABCD/edit",
+            "https://www.dropbox.com/s/ABCD/filename.csv",
+        ):
             self._MockUrlOpen.url = url
             d = data.Table(url)
             request = self.urlopen.call_args[0][0]
             self.assertNotEqual(url, request.full_url)
-            self.assertIn('Mozilla/5.0', request.headers.get('User-agent', ''))
+            self.assertIn("Mozilla/5.0", request.headers.get("User-agent", ""))
             self.assertEqual(len(d), 2)
-            self.assertEqual(d.name, 'Something-FormResponses')
+            self.assertEqual(d.name, "Something-FormResponses")
 
 
 class CreateTableWithDomain(TableTests):
@@ -1430,8 +1471,7 @@ class CreateTableWithDomain(TableTests):
         table = data.Table.from_domain(domain, self.nrows)
 
         if len(domain.class_vars) != 1:
-            self.assertEqual(table.Y.shape,
-                             (self.nrows, len(domain.class_vars)))
+            self.assertEqual(table.Y.shape, (self.nrows, len(domain.class_vars)))
         else:
             self.assertEqual(table.Y.shape, (self.nrows,))
         self.assertFalse(table.Y.any())
@@ -1447,7 +1487,7 @@ class CreateTableWithDomain(TableTests):
         domain = self.mock_domain()
         table = data.Table.from_domain(domain, self.nrows, True)
 
-        self.assertEqual(table.W.shape, (self.nrows, ))
+        self.assertEqual(table.W.shape, (self.nrows,))
 
     def test_does_not_create_weights_if_weights_are_false(self):
         domain = self.mock_domain()
@@ -1456,8 +1496,7 @@ class CreateTableWithDomain(TableTests):
         self.assertEqual(table.W.shape, (self.nrows, 0))
 
     @patch("Orange.data.table.Table.from_domain")
-    def test_calling_new_with_domain_calls_new_from_domain(
-            self, new_from_domain):
+    def test_calling_new_with_domain_calls_new_from_domain(self, new_from_domain):
         domain = self.mock_domain()
         data.Table(domain)
 
@@ -1482,57 +1521,80 @@ class CreateTableWithData(TableTests):
         np.testing.assert_almost_equal(table.X, self.data)
 
     def test_creates_a_table_from_domain_and_list(self):
-        domain = data.Domain([data.DiscreteVariable(name="a", values="mf"),
-                              data.ContinuousVariable(name="b")],
-                             data.DiscreteVariable(name="y", values="abc"))
-        table = data.Table(domain, [[0, 1, 2],
-                                    [1, 2, "?"],
-                                    ["m", 3, "a"],
-                                    ["?", "?", "c"]])
+        domain = data.Domain(
+            [
+                data.DiscreteVariable(name="a", values="mf"),
+                data.ContinuousVariable(name="b"),
+            ],
+            data.DiscreteVariable(name="y", values="abc"),
+        )
+        table = data.Table(
+            domain, [[0, 1, 2], [1, 2, "?"], ["m", 3, "a"], ["?", "?", "c"]]
+        )
         self.assertIs(table.domain, domain)
         np.testing.assert_almost_equal(
-            table.X, np.array([[0, 1], [1, 2], [0, 3], [np.nan, np.nan]]))
+            table.X, np.array([[0, 1], [1, 2], [0, 3], [np.nan, np.nan]])
+        )
         np.testing.assert_almost_equal(table.Y, np.array([2, np.nan, 0, 2]))
 
     def test_creates_a_table_from_domain_and_list_and_weights(self):
-        domain = data.Domain([data.DiscreteVariable(name="a", values="mf"),
-                              data.ContinuousVariable(name="b")],
-                             data.DiscreteVariable(name="y", values="abc"))
-        table = data.Table(domain, [[0, 1, 2],
-                                    [1, 2, "?"],
-                                    ["m", 3, "a"],
-                                    ["?", "?", "c"]], [1, 2, 3, 4])
+        domain = data.Domain(
+            [
+                data.DiscreteVariable(name="a", values="mf"),
+                data.ContinuousVariable(name="b"),
+            ],
+            data.DiscreteVariable(name="y", values="abc"),
+        )
+        table = data.Table(
+            domain,
+            [[0, 1, 2], [1, 2, "?"], ["m", 3, "a"], ["?", "?", "c"]],
+            [1, 2, 3, 4],
+        )
         self.assertIs(table.domain, domain)
         np.testing.assert_almost_equal(
-            table.X, np.array([[0, 1], [1, 2], [0, 3], [np.nan, np.nan]]))
+            table.X, np.array([[0, 1], [1, 2], [0, 3], [np.nan, np.nan]])
+        )
         np.testing.assert_almost_equal(table.Y, np.array([2, np.nan, 0, 2]))
         np.testing.assert_almost_equal(table.W, np.array([1, 2, 3, 4]))
 
     def test_creates_a_table_from_domain_and_list_and_metas(self):
-        metas = [data.DiscreteVariable("Meta 1", values="XYZ"),
-                 data.ContinuousVariable("Meta 2"),
-                 data.StringVariable("Meta 3")]
-        domain = data.Domain([data.DiscreteVariable(name="a", values="mf"),
-                              data.ContinuousVariable(name="b")],
-                             data.DiscreteVariable(name="y", values="abc"),
-                             metas=metas)
-        table = data.Table(domain, [[0, 1, 2, "X", 2, "bb"],
-                                    [1, 2, "?", "Y", 1, "aa"],
-                                    ["m", 3, "a", "Z", 3, "bb"],
-                                    ["?", "?", "c", "X", 1, "aa"]])
+        metas = [
+            data.DiscreteVariable("Meta 1", values="XYZ"),
+            data.ContinuousVariable("Meta 2"),
+            data.StringVariable("Meta 3"),
+        ]
+        domain = data.Domain(
+            [
+                data.DiscreteVariable(name="a", values="mf"),
+                data.ContinuousVariable(name="b"),
+            ],
+            data.DiscreteVariable(name="y", values="abc"),
+            metas=metas,
+        )
+        table = data.Table(
+            domain,
+            [
+                [0, 1, 2, "X", 2, "bb"],
+                [1, 2, "?", "Y", 1, "aa"],
+                ["m", 3, "a", "Z", 3, "bb"],
+                ["?", "?", "c", "X", 1, "aa"],
+            ],
+        )
         self.assertIs(table.domain, domain)
         np.testing.assert_almost_equal(
-            table.X, np.array([[0, 1], [1, 2], [0, 3], [np.nan, np.nan]]))
+            table.X, np.array([[0, 1], [1, 2], [0, 3], [np.nan, np.nan]])
+        )
         np.testing.assert_almost_equal(table.Y, np.array([2, np.nan, 0, 2]))
-        np.testing.assert_array_equal(table.metas,
-                                      np.array([[0, 2., "bb"],
-                                                [1, 1., "aa"],
-                                                [2, 3., "bb"],
-                                                [0, 1., "aa"]],
-                                               dtype=object))
+        np.testing.assert_array_equal(
+            table.metas,
+            np.array(
+                [[0, 2.0, "bb"], [1, 1.0, "aa"], [2, 3.0, "bb"], [0, 1.0, "aa"]],
+                dtype=object,
+            ),
+        )
 
     def test_creates_a_table_from_list_of_instances(self):
-        table = data.Table('iris')
+        table = data.Table("iris")
         new_table = data.Table(table.domain, [d for d in table])
         self.assertIs(table.domain, new_table.domain)
         np.testing.assert_almost_equal(table.X, new_table.X)
@@ -1542,7 +1604,7 @@ class CreateTableWithData(TableTests):
         np.testing.assert_array_equal(table.metas, new_table.metas)
 
     def test_creates_a_table_from_list_of_instances_with_metas(self):
-        table = data.Table('zoo')
+        table = data.Table("zoo")
         new_table = data.Table(table.domain, [d for d in table])
         self.assertIs(table.domain, new_table.domain)
         np.testing.assert_almost_equal(table.X, new_table.X)
@@ -1579,8 +1641,7 @@ class CreateTableWithData(TableTests):
         table = data.Table(self.data, Y, self.meta_data)
 
         np.testing.assert_almost_equal(table.Y, Y)
-        self.assertIsInstance(table.domain.class_vars[0],
-                              data.DiscreteVariable)
+        self.assertIsInstance(table.domain.class_vars[0], data.DiscreteVariable)
         self.assertEqual(table.domain.class_vars[0].values, ["v1", "v2"])
 
     def test_creates_a_table_with_given_domain(self):
@@ -1605,9 +1666,8 @@ class CreateTableWithData(TableTests):
         domain = self.mock_domain()
         table = data.Table.from_numpy(domain, self.data, W=self.weight_data)
 
-        np.testing.assert_equal(table.W.shape, (len(self.data), ))
-        np.testing.assert_almost_equal(table.W.flatten(),
-                                       self.weight_data.flatten())
+        np.testing.assert_equal(table.W.shape, (len(self.data),))
+        np.testing.assert_almost_equal(table.W.flatten(), self.weight_data.flatten())
 
     def test_splits_X_and_Y_if_given_in_same_array(self):
         joined_data = np.column_stack((self.data, self.class_data))
@@ -1631,18 +1691,15 @@ class CreateTableWithData(TableTests):
 
         with self.assertRaises(ValueError):
             data_ = np.hstack((self.data, ones))
-            data.Table.from_numpy(domain, data_, self.class_data,
-                                  self.meta_data)
+            data.Table.from_numpy(domain, data_, self.class_data, self.meta_data)
 
         with self.assertRaises(ValueError):
             classes_ = np.hstack((self.class_data, ones))
-            data.Table.from_numpy(domain, self.data, classes_,
-                                  self.meta_data)
+            data.Table.from_numpy(domain, self.data, classes_, self.meta_data)
 
         with self.assertRaises(ValueError):
             metas_ = np.hstack((self.meta_data, ones))
-            data.Table.from_numpy(domain, self.data, self.class_data,
-                                  metas_)
+            data.Table.from_numpy(domain, self.data, self.class_data, metas_)
 
     def test_raises_error_if_lengths_of_data_do_not_match(self):
         domain = self.mock_domain(with_classes=True, with_metas=True)
@@ -1652,18 +1709,19 @@ class CreateTableWithData(TableTests):
             data.Table(domain, data_, self.class_data, self.meta_data)
 
         with self.assertRaises(ValueError):
-            class_data_ = np.vstack((self.class_data,
-                                     np.zeros((1, len(self.class_vars)))))
+            class_data_ = np.vstack(
+                (self.class_data, np.zeros((1, len(self.class_vars))))
+            )
             data.Table(domain, self.data, class_data_, self.meta_data)
 
         with self.assertRaises(ValueError):
-            meta_data_ = np.vstack((self.meta_data,
-                                    np.zeros((1, len(self.metas)))))
+            meta_data_ = np.vstack((self.meta_data, np.zeros((1, len(self.metas)))))
             data.Table(domain, self.data, self.class_data, meta_data_)
 
     @patch("Orange.data.table.Table.from_numpy")
     def test_calling_new_with_domain_and_numpy_arrays_calls_new_from_numpy(
-            self, new_from_numpy):
+        self, new_from_numpy
+    ):
         domain = self.mock_domain()
         data.Table(domain, self.data)
         new_from_numpy.assert_called_with(domain, self.data)
@@ -1675,12 +1733,13 @@ class CreateTableWithData(TableTests):
         domain = self.mock_domain(with_classes=True, with_metas=True)
         data.Table(domain, self.data, self.class_data, self.meta_data)
         new_from_numpy.assert_called_with(
-            domain, self.data, self.class_data, self.meta_data)
+            domain, self.data, self.class_data, self.meta_data
+        )
 
-        data.Table(domain, self.data, self.class_data,
-                   self.meta_data, self.weight_data)
-        new_from_numpy.assert_called_with(domain, self.data, self.class_data,
-                                          self.meta_data, self.weight_data)
+        data.Table(domain, self.data, self.class_data, self.meta_data, self.weight_data)
+        new_from_numpy.assert_called_with(
+            domain, self.data, self.class_data, self.meta_data, self.weight_data
+        )
 
     def test_from_numpy_reconstructable(self):
         def assert_equal(T1, T2):
@@ -1693,22 +1752,19 @@ class CreateTableWithData(TableTests):
         domain = self.create_domain(self.attributes)
         table = data.Table(domain, self.data)
 
-        table_1 = data.Table.from_numpy(
-            domain, table.X, table.Y, table.metas, table.W)
+        table_1 = data.Table.from_numpy(domain, table.X, table.Y, table.metas, table.W)
         assert_equal(table, table_1)
 
         domain = self.create_domain(classes=self.class_vars)
         table = data.Table(domain, nullcol, self.class_data)
 
-        table_1 = data.Table.from_numpy(
-            domain, table.X, table.Y, table.metas, table.W)
+        table_1 = data.Table.from_numpy(domain, table.X, table.Y, table.metas, table.W)
         assert_equal(table, table_1)
 
         domain = self.create_domain(metas=self.metas)
         table = data.Table(domain, nullcol, nullcol, self.meta_data)
 
-        table_1 = data.Table.from_numpy(
-            domain, table.X, table.Y, table.metas, table.W)
+        table_1 = data.Table.from_numpy(domain, table.X, table.Y, table.metas, table.W)
         assert_equal(table, table_1)
 
 
@@ -1727,10 +1783,8 @@ class CreateTableWithDomainAndTable(TableTests):
     row_indices = [1, 5, 6, 7]
 
     def setUp(self):
-        self.domain = self.create_domain(
-            self.attributes, self.class_vars, self.metas)
-        self.table = data.Table(
-            self.domain, self.data, self.class_data, self.meta_data)
+        self.domain = self.create_domain(self.attributes, self.class_vars, self.metas)
+        self.table = data.Table(self.domain, self.data, self.class_data, self.meta_data)
 
     def test_creates_table_with_given_domain(self):
         new_table = data.Table.from_table(self.table.domain, self.table)
@@ -1766,27 +1820,27 @@ class CreateTableWithDomainAndTable(TableTests):
     def test_can_filter_rows_with_list(self):
         for indices in ([0], [1, 5, 6, 7]):
             new_table = data.Table.from_table(
-                self.domain, self.table, row_indices=indices)
-            self.assert_table_with_filter_matches(
-                new_table, self.table, rows=indices)
+                self.domain, self.table, row_indices=indices
+            )
+            self.assert_table_with_filter_matches(new_table, self.table, rows=indices)
 
     def test_can_filter_row_with_slice(self):
         for slice_ in self.interesting_slices:
             new_table = data.Table.from_table(
-                self.domain, self.table, row_indices=slice_)
-            self.assert_table_with_filter_matches(
-                new_table, self.table, rows=slice_)
+                self.domain, self.table, row_indices=slice_
+            )
+            self.assert_table_with_filter_matches(new_table, self.table, rows=slice_)
 
     def test_can_use_attributes_as_new_columns(self):
         a, _, _ = column_sizes(self.table)
         order = [random.randrange(a) for _ in self.domain.attributes]
         new_attributes = [self.domain.attributes[i] for i in order]
-        new_domain = self.create_domain(
-            new_attributes, new_attributes, new_attributes)
+        new_domain = self.create_domain(new_attributes, new_attributes, new_attributes)
         new_table = data.Table.from_table(new_domain, self.table)
 
         self.assert_table_with_filter_matches(
-            new_table, self.table, xcols=order, ycols=order, mcols=order)
+            new_table, self.table, xcols=order, ycols=order, mcols=order
+        )
 
     def test_can_use_class_vars_as_new_columns(self):
         a, c, _ = column_sizes(self.table)
@@ -1796,7 +1850,8 @@ class CreateTableWithDomainAndTable(TableTests):
         new_table = data.Table.from_table(new_domain, self.table)
 
         self.assert_table_with_filter_matches(
-            new_table, self.table, xcols=order, ycols=order, mcols=order)
+            new_table, self.table, xcols=order, ycols=order, mcols=order
+        )
 
     def test_can_use_metas_as_new_columns(self):
         _, _, m = column_sizes(self.table)
@@ -1806,13 +1861,16 @@ class CreateTableWithDomainAndTable(TableTests):
         new_table = data.Table.from_table(new_domain, self.table)
 
         self.assert_table_with_filter_matches(
-            new_table, self.table, xcols=order, ycols=order, mcols=order)
+            new_table, self.table, xcols=order, ycols=order, mcols=order
+        )
 
     def test_can_use_combination_of_all_as_new_columns(self):
         a, c, m = column_sizes(self.table)
-        order = ([random.randrange(a) for _ in self.domain.attributes] +
-                 [random.randrange(a, a + c) for _ in self.domain.class_vars] +
-                 [random.randrange(-m + 1, 0) for _ in self.domain.metas])
+        order = (
+            [random.randrange(a) for _ in self.domain.attributes]
+            + [random.randrange(a, a + c) for _ in self.domain.class_vars]
+            + [random.randrange(-m + 1, 0) for _ in self.domain.metas]
+        )
         random.shuffle(order)
         vars = list(self.domain.variables) + list(self.domain.metas[::-1])
         vars = [vars[i] for i in order]
@@ -1820,13 +1878,16 @@ class CreateTableWithDomainAndTable(TableTests):
         new_domain = self.create_domain(vars, vars, vars)
         new_table = data.Table.from_table(new_domain, self.table)
         self.assert_table_with_filter_matches(
-            new_table, self.table, xcols=order, ycols=order, mcols=order)
+            new_table, self.table, xcols=order, ycols=order, mcols=order
+        )
 
     def test_creates_table_with_given_domain_and_row_filter(self):
         a, c, m = column_sizes(self.table)
-        order = ([random.randrange(a) for _ in self.domain.attributes] +
-                 [random.randrange(a, a + c) for _ in self.domain.class_vars] +
-                 [random.randrange(-m + 1, 0) for _ in self.domain.metas])
+        order = (
+            [random.randrange(a) for _ in self.domain.attributes]
+            + [random.randrange(a, a + c) for _ in self.domain.class_vars]
+            + [random.randrange(-m + 1, 0) for _ in self.domain.metas]
+        )
         random.shuffle(order)
         vars = list(self.domain.variables) + list(self.domain.metas[::-1])
         vars = [vars[i] for i in order]
@@ -1834,21 +1895,27 @@ class CreateTableWithDomainAndTable(TableTests):
         new_domain = self.create_domain(vars, vars, vars)
         new_table = data.Table.from_table(new_domain, self.table, [0])
         self.assert_table_with_filter_matches(
-            new_table, self.table[:1], xcols=order, ycols=order, mcols=order)
+            new_table, self.table[:1], xcols=order, ycols=order, mcols=order
+        )
 
         new_table = data.Table.from_table(new_domain, self.table, [2, 1, 0])
         self.assert_table_with_filter_matches(
-            new_table, self.table[2::-1], xcols=order, ycols=order, mcols=order)
+            new_table, self.table[2::-1], xcols=order, ycols=order, mcols=order
+        )
 
         new_table = data.Table.from_table(new_domain, self.table, [])
         self.assert_table_with_filter_matches(
-            new_table, self.table[:0], xcols=order, ycols=order, mcols=order)
+            new_table, self.table[:0], xcols=order, ycols=order, mcols=order
+        )
 
     def test_from_table_sparse_move_some_to_empty_metas(self):
         iris = data.Table("iris").to_sparse()
         new_domain = data.domain.Domain(
-            iris.domain.attributes[:2], iris.domain.class_vars,
-            iris.domain.attributes[2:], source=iris.domain)
+            iris.domain.attributes[:2],
+            iris.domain.class_vars,
+            iris.domain.attributes[2:],
+            source=iris.domain,
+        )
         new_iris = iris.transform(new_domain)
 
         self.assertTrue(sp.issparse(new_iris.X))
@@ -1867,8 +1934,8 @@ class CreateTableWithDomainAndTable(TableTests):
     def test_from_table_sparse_move_all_to_empty_metas(self):
         iris = data.Table("iris").to_sparse()
         new_domain = data.domain.Domain(
-            [], iris.domain.class_vars, iris.domain.attributes,
-            source=iris.domain)
+            [], iris.domain.class_vars, iris.domain.attributes, source=iris.domain
+        )
         new_iris = iris.transform(new_domain)
 
         self.assertFalse(sp.issparse(new_iris.X))
@@ -1892,13 +1959,14 @@ class CreateTableWithDomainAndTable(TableTests):
             brown.domain.attributes[:-10],
             brown.domain.class_vars,
             brown.domain.attributes[-10:] + brown.domain.metas,
-            source=brown.domain)
+            source=brown.domain,
+        )
         new_brown = data.Table.from_table(new_domain, brown)
 
         self.assertTrue(sp.issparse(new_brown.X))
         self.assertFalse(sp.issparse(new_brown.metas))
-        self.assertEqual(new_brown.X.shape, (len(new_brown), n_attr-10))
-        self.assertEqual(new_brown.metas.shape, (len(new_brown), n_metas+10))
+        self.assertEqual(new_brown.X.shape, (len(new_brown), n_attr - 10))
+        self.assertEqual(new_brown.metas.shape, (len(new_brown), n_metas + 10))
 
         # move back
         back_brown = data.Table.from_table(brown.domain, new_brown)
@@ -1909,8 +1977,8 @@ class CreateTableWithDomainAndTable(TableTests):
         self.assertEqual(back_brown.metas.shape, brown.metas.shape)
 
     def assert_table_with_filter_matches(
-            self, new_table, old_table,
-            rows=..., xcols=..., ycols=..., mcols=...):
+        self, new_table, old_table, rows=..., xcols=..., ycols=..., mcols=...
+    ):
         a, c, m = column_sizes(old_table)
         xcols = slice(a) if xcols is Ellipsis else xcols
         ycols = slice(a, a + c) if ycols is Ellipsis else ycols
@@ -1920,8 +1988,7 @@ class CreateTableWithDomainAndTable(TableTests):
         # and classes (classes come after attributes) and negative indices for
         # meta features. This is equivalent to ordinary indexing in a magic
         # table below.
-        magic = np.hstack((old_table.X, old_table.Y[:, None],
-                           old_table.metas[:, ::-1]))
+        magic = np.hstack((old_table.X, old_table.Y[:, None], old_table.metas[:, ::-1]))
         np.testing.assert_almost_equal(new_table.X, magic[rows, xcols])
         Y = magic[rows, ycols]
         if Y.shape[1] == 1:
@@ -1944,12 +2011,13 @@ def split_columns(indices, t):
     elif not isinstance(indices, list) and not isinstance(indices, tuple):
         indices = [indices]
     return (
-        [t.domain.index(x)
-         for x in indices if 0 <= t.domain.index(x) < a] or slice(0, 0),
-        [t.domain.index(x) - a
-         for x in indices if t.domain.index(x) >= a] or slice(0, 0),
-        [-t.domain.index(x) - 1
-         for x in indices if t.domain.index(x) < 0] or slice(0, 0))
+        [t.domain.index(x) for x in indices if 0 <= t.domain.index(x) < a]
+        or slice(0, 0),
+        [t.domain.index(x) - a for x in indices if t.domain.index(x) >= a]
+        or slice(0, 0),
+        [-t.domain.index(x) - 1 for x in indices if t.domain.index(x) < 0]
+        or slice(0, 0),
+    )
 
 
 def getname(variable):
@@ -1959,26 +2027,29 @@ def getname(variable):
 class TableIndexingTests(TableTests):
     def setUp(self):
         super().setUp()
-        d = self.domain = \
-            self.create_domain(self.attributes, self.class_vars, self.metas)
-        t = self.table = \
-            data.Table(self.domain, self.data, self.class_data, self.meta_data)
-        self.magic_table = \
-            np.column_stack((self.table.X, self.table.Y,
-                             self.table.metas[:, ::-1]))
+        d = self.domain = self.create_domain(
+            self.attributes, self.class_vars, self.metas
+        )
+        t = self.table = data.Table(
+            self.domain, self.data, self.class_data, self.meta_data
+        )
+        self.magic_table = np.column_stack(
+            (self.table.X, self.table.Y, self.table.metas[:, ::-1])
+        )
 
         self.rows = [0, -1]
         self.multiple_rows = [slice(0, 0), ..., slice(1, -1, -1)]
         a, c, m = column_sizes(t)
         columns = [0, a - 1, a, a + c - 1, -1, -m]
-        self.columns = chain(columns,
-                             map(lambda x: d[x], columns),
-                             map(lambda x: d[x].name, columns))
+        self.columns = chain(
+            columns, map(lambda x: d[x], columns), map(lambda x: d[x].name, columns)
+        )
         self.multiple_columns = chain(
             self.multiple_rows,
             [d.attributes, d.class_vars, d.metas, [0, a, -1]],
             [self.attributes, self.class_vars, self.metas],
-            [self.attributes + self.class_vars + self.metas])
+            [self.attributes + self.class_vars + self.metas],
+        )
 
         # TODO: indexing with [[0,1], [0,1]] produces weird results
         # TODO: what should be the results of table[1, :]
@@ -1987,22 +2058,16 @@ class TableIndexingTests(TableTests):
         for r in self.rows:
             for c in self.columns:
                 value = self.table[r, c]
-                self.assertAlmostEqual(
-                    value, self.magic_table[r, self.domain.index(c)])
+                self.assertAlmostEqual(value, self.magic_table[r, self.domain.index(c)])
 
                 value = self.table[r][c]
-                self.assertAlmostEqual(
-                    value, self.magic_table[r, self.domain.index(c)])
+                self.assertAlmostEqual(value, self.magic_table[r, self.domain.index(c)])
 
     def test_can_select_a_single_row(self):
         for r in self.rows:
             row = self.table[r]
-            new_row = np.hstack(
-                (self.data[r, :],
-                 self.class_data[r, None]))
-            np.testing.assert_almost_equal(
-                np.array(list(row)), new_row)
-
+            new_row = np.hstack((self.data[r, :], self.class_data[r, None]))
+            np.testing.assert_almost_equal(np.array(list(row)), new_row)
 
     def test_can_select_a_subset_of_rows_and_columns(self):
         for r in self.rows:
@@ -2033,9 +2098,7 @@ class TableIndexingTests(TableTests):
                 if len(Y.shape) > 1 and Y.shape[1] == 1:
                     Y = Y.flatten()
                 np.testing.assert_almost_equal(table.Y, Y)
-                np.testing.assert_almost_equal(table.metas,
-                                               self.table.metas[r, metas])
-
+                np.testing.assert_almost_equal(table.metas, self.table.metas[r, metas])
 
     def test_optimize_indices(self):
         # ordinary conversion
@@ -2048,13 +2111,17 @@ class TableIndexingTests(TableTests):
         np.testing.assert_equal(_optimize_indices((1, 2, 4), 5), [1, 2, 4])
 
         # leave boolean arrays
-        np.testing.assert_equal(_optimize_indices([True, False, True], 3), [True, False, True])
+        np.testing.assert_equal(
+            _optimize_indices([True, False, True], 3), [True, False, True]
+        )
 
         # do not convert if step is negative
         np.testing.assert_equal(_optimize_indices([4, 2, 0], 5), [4, 2, 0])
 
         # try range
-        np.testing.assert_equal(_optimize_indices([3, 4, 5], 5), [3, 4, 5])  # out of range
+        np.testing.assert_equal(
+            _optimize_indices([3, 4, 5], 5), [3, 4, 5]
+        )  # out of range
         self.assertEqual(_optimize_indices((3, 4, 5), 6), slice(3, 6, 1))
 
         # negative elements
@@ -2068,48 +2135,40 @@ class TableIndexingTests(TableTests):
 class TableElementAssignmentTest(TableTests):
     def setUp(self):
         super().setUp()
-        self.domain = \
-            self.create_domain(self.attributes, self.class_vars, self.metas)
-        self.table = \
-            data.Table(self.domain, self.data, self.class_data, self.meta_data)
+        self.domain = self.create_domain(self.attributes, self.class_vars, self.metas)
+        self.table = data.Table(self.domain, self.data, self.class_data, self.meta_data)
 
     def test_can_assign_values(self):
-        self.table[0, 0] = 42.
-        self.assertAlmostEqual(self.table.X[0, 0], 42.)
+        self.table[0, 0] = 42.0
+        self.assertAlmostEqual(self.table.X[0, 0], 42.0)
 
     def test_can_assign_values_to_classes(self):
         a, _, _ = column_sizes(self.table)
-        self.table[0, a] = 42.
-        self.assertAlmostEqual(self.table.Y[0], 42.)
+        self.table[0, a] = 42.0
+        self.assertAlmostEqual(self.table.Y[0], 42.0)
 
     def test_can_assign_values_to_metas(self):
-        self.table[0, -1] = 42.
-        self.assertAlmostEqual(self.table.metas[0, 0], 42.)
+        self.table[0, -1] = 42.0
+        self.assertAlmostEqual(self.table.metas[0, 0], 42.0)
 
     def test_can_assign_rows_to_rows(self):
         self.table[0] = self.table[1]
-        np.testing.assert_almost_equal(
-            self.table.X[0], self.table.X[1])
-        np.testing.assert_almost_equal(
-            self.table.Y[0], self.table.Y[1])
-        np.testing.assert_almost_equal(
-            self.table.metas[0], self.table.metas[1])
+        np.testing.assert_almost_equal(self.table.X[0], self.table.X[1])
+        np.testing.assert_almost_equal(self.table.Y[0], self.table.Y[1])
+        np.testing.assert_almost_equal(self.table.metas[0], self.table.metas[1])
 
     def test_can_assign_lists(self):
         a, _, _ = column_sizes(self.table)
-        new_example = [float(i)
-                       for i in range(len(self.attributes + self.class_vars))]
+        new_example = [float(i) for i in range(len(self.attributes + self.class_vars))]
         self.table[0] = new_example
-        np.testing.assert_almost_equal(
-            self.table.X[0], np.array(new_example[:a]))
-        np.testing.assert_almost_equal(
-            self.table.Y[0], np.array(new_example[a:]))
+        np.testing.assert_almost_equal(self.table.X[0], np.array(new_example[:a]))
+        np.testing.assert_almost_equal(self.table.Y[0], np.array(new_example[a:]))
 
     def test_can_assign_np_array(self):
         a, _, _ = column_sizes(self.table)
-        new_example = \
-            np.array([float(i)
-                      for i in range(len(self.attributes + self.class_vars))])
+        new_example = np.array(
+            [float(i) for i in range(len(self.attributes + self.class_vars))]
+        )
         self.table[0] = new_example
         np.testing.assert_almost_equal(self.table.X[0], new_example[:a])
         np.testing.assert_almost_equal(self.table.Y[0], new_example[a:])
@@ -2122,40 +2181,26 @@ class InterfaceTest(unittest.TestCase):
         data.ContinuousVariable(name="Continuous Feature 1"),
         data.ContinuousVariable(name="Continuous Feature 2"),
         data.DiscreteVariable(name="Discrete Feature 1", values=["0", "1"]),
-        data.DiscreteVariable(name="Discrete Feature 2",
-                              values=["value1", "value2"]),
+        data.DiscreteVariable(name="Discrete Feature 2", values=["value1", "value2"]),
     )
 
     class_vars = (
         data.ContinuousVariable(name="Continuous Class"),
-        data.DiscreteVariable(name="Discrete Class", values=["m", "f"])
+        data.DiscreteVariable(name="Discrete Class", values=["m", "f"]),
     )
 
-    feature_data = (
-        (1, 0, 0, 0),
-        (0, 1, 0, 0),
-        (0, 0, 1, 0),
-        (0, 0, 0, 1),
-    )
+    feature_data = ((1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 0, 1))
 
-    class_data = (
-        (1, 0),
-        (0, 1),
-        (1, 0),
-        (0, 1)
-    )
+    class_data = ((1, 0), (0, 1), (1, 0), (0, 1))
 
     data = tuple(a + c for a, c in zip(feature_data, class_data))
 
     nrows = 4
 
     def setUp(self):
-        self.domain = data.Domain(attributes=self.features,
-                                  class_vars=self.class_vars)
+        self.domain = data.Domain(attributes=self.features, class_vars=self.class_vars)
         self.table = data.Table.from_numpy(
-            self.domain,
-            np.array(self.feature_data),
-            np.array(self.class_data),
+            self.domain, np.array(self.feature_data), np.array(self.class_data)
         )
 
     def test_len(self):
@@ -2183,14 +2228,14 @@ class InterfaceTest(unittest.TestCase):
                 self.assertEqual(self.table[i, j], self.data[i][j])
 
     def test_row_assignment(self):
-        new_value = 2.
+        new_value = 2.0
         for i in range(self.nrows):
             new_row = [new_value] * len(self.data[i])
             self.table[i] = np.array(new_row)
             self.assertEqual(list(self.table[i]), new_row)
 
     def test_value_assignment(self):
-        new_value = 0.
+        new_value = 0.0
         for i in range(self.nrows):
             for j in range(len(self.table[i])):
                 self.table[i, j] = new_value
@@ -2237,9 +2282,10 @@ class InterfaceTest(unittest.TestCase):
         class _ExtendedTable(data.Table):
             pass
 
-        data_file = _ExtendedTable('iris')
+        data_file = _ExtendedTable("iris")
         data_url = _ExtendedTable.from_url(
-            Path(os.path.dirname(__file__), 'test1.tab').as_uri())
+            Path(os.path.dirname(__file__), "test1.tab").as_uri()
+        )
 
         self.assertIsInstance(data_file, _ExtendedTable)
         self.assertIsInstance(data_url, _ExtendedTable)
@@ -2298,11 +2344,18 @@ class TestTableTranspose(unittest.TestCase):
         attrs = [ContinuousVariable("c1"), ContinuousVariable("c2")]
         data = Table(Domain(attrs), np.arange(8).reshape((4, 2)))
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         domain = Domain(att, metas=[StringVariable("Feature name")])
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array(["c1", "c2"])[:, None])
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array(["c1", "c2"])[:, None],
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2317,18 +2370,24 @@ class TestTableTranspose(unittest.TestCase):
     def test_transpose_discrete_class(self):
         attrs = [ContinuousVariable("c1"), ContinuousVariable("c2")]
         domain = Domain(attrs, [DiscreteVariable("cls", values=["a", "b"])])
-        data = Table(domain, np.arange(8).reshape((4, 2)),
-                     np.array([1, 1, 0, 0]))
+        data = Table(domain, np.arange(8).reshape((4, 2)), np.array([1, 1, 0, 0]))
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         att[0].attributes = {"cls": "b"}
         att[1].attributes = {"cls": "b"}
         att[2].attributes = {"cls": "a"}
         att[3].attributes = {"cls": "a"}
         domain = Domain(att, metas=[StringVariable("Feature name")])
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array(["c1", "c2"])[:, None])
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array(["c1", "c2"])[:, None],
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2345,15 +2404,22 @@ class TestTableTranspose(unittest.TestCase):
         domain = Domain(attrs, [ContinuousVariable("cls")])
         data = Table(domain, np.arange(8).reshape((4, 2)), np.arange(4, 0, -1))
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         att[0].attributes = {"cls": "4.000"}
         att[1].attributes = {"cls": "3.000"}
         att[2].attributes = {"cls": "2.000"}
         att[3].attributes = {"cls": "1.000"}
         domain = Domain(att, metas=[StringVariable("Feature name")])
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array(["c1", "c2"])[:, None])
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array(["c1", "c2"])[:, None],
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2368,17 +2434,23 @@ class TestTableTranspose(unittest.TestCase):
     def test_transpose_missing_class(self):
         attrs = [ContinuousVariable("c1"), ContinuousVariable("c2")]
         domain = Domain(attrs, [ContinuousVariable("cls")])
-        data = Table(domain, np.arange(8).reshape((4, 2)),
-                     np.array([np.nan, 3, 2, 1]))
+        data = Table(domain, np.arange(8).reshape((4, 2)), np.array([np.nan, 3, 2, 1]))
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         att[1].attributes = {"cls": "3.000"}
         att[2].attributes = {"cls": "2.000"}
         att[3].attributes = {"cls": "1.000"}
         domain = Domain(att, metas=[StringVariable("Feature name")])
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array(["c1", "c2"])[:, None])
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array(["c1", "c2"])[:, None],
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2394,18 +2466,24 @@ class TestTableTranspose(unittest.TestCase):
         attrs = [ContinuousVariable("c1"), ContinuousVariable("c2")]
         class_vars = [ContinuousVariable("cls1"), ContinuousVariable("cls2")]
         domain = Domain(attrs, class_vars)
-        data = Table(domain, np.arange(8).reshape((4, 2)),
-                     np.arange(8).reshape((4, 2)))
+        data = Table(domain, np.arange(8).reshape((4, 2)), np.arange(8).reshape((4, 2)))
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         att[0].attributes = {"cls1": "0.000", "cls2": "1.000"}
         att[1].attributes = {"cls1": "2.000", "cls2": "3.000"}
         att[2].attributes = {"cls1": "4.000", "cls2": "5.000"}
         att[3].attributes = {"cls1": "6.000", "cls2": "7.000"}
         domain = Domain(att, metas=[StringVariable("Feature name")])
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array(["c1", "c2"])[:, None])
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array(["c1", "c2"])[:, None],
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2425,15 +2503,22 @@ class TestTableTranspose(unittest.TestCase):
         M = np.array(["aa", "bb", "cc", "dd"])[:, None]
         data = Table(domain, X, metas=M)
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         att[0].attributes = {"m1": "aa"}
         att[1].attributes = {"m1": "bb"}
         att[2].attributes = {"m1": "cc"}
         att[3].attributes = {"m1": "dd"}
         domain = Domain(att, metas=[StringVariable("Feature name")])
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array(["c1", "c2"])[:, None])
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array(["c1", "c2"])[:, None],
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2453,15 +2538,22 @@ class TestTableTranspose(unittest.TestCase):
         M = np.array([0, 1, 0, 1])[:, None]
         data = Table(domain, X, metas=M)
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         att[0].attributes = {"m1": "aa"}
         att[1].attributes = {"m1": "bb"}
         att[2].attributes = {"m1": "aa"}
         att[3].attributes = {"m1": "bb"}
         domain = Domain(att, metas=[StringVariable("Feature name")])
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array(["c1", "c2"])[:, None])
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array(["c1", "c2"])[:, None],
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2481,15 +2573,22 @@ class TestTableTranspose(unittest.TestCase):
         M = np.array([0.0, 1.0, 0.0, 1.0])[:, None]
         data = Table(domain, X, metas=M)
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         att[0].attributes = {"m1": "0.000"}
         att[1].attributes = {"m1": "1.000"}
         att[2].attributes = {"m1": "0.000"}
         att[3].attributes = {"m1": "1.000"}
         domain = Domain(att, metas=[StringVariable("Feature name")])
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array(["c1", "c2"])[:, None])
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array(["c1", "c2"])[:, None],
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2509,14 +2608,21 @@ class TestTableTranspose(unittest.TestCase):
         M = np.array(["aa", "bb", "", "dd"])[:, None]
         data = Table(domain, X, metas=M)
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         att[0].attributes = {"m1": "aa"}
         att[1].attributes = {"m1": "bb"}
         att[3].attributes = {"m1": "dd"}
         domain = Domain(att, metas=[StringVariable("Feature name")])
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array(["c1", "c2"])[:, None])
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array(["c1", "c2"])[:, None],
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2533,19 +2639,25 @@ class TestTableTranspose(unittest.TestCase):
         metas = [StringVariable("m1"), StringVariable("m2")]
         domain = Domain(attrs, metas=metas)
         X = np.arange(8).reshape((4, 2))
-        M = np.array([["aa", "aaa"], ["bb", "bbb"],
-                      ["cc", "ccc"], ["dd", "ddd"]])
+        M = np.array([["aa", "aaa"], ["bb", "bbb"], ["cc", "ccc"], ["dd", "ddd"]])
         data = Table(domain, X, metas=M)
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         att[0].attributes = {"m1": "aa", "m2": "aaa"}
         att[1].attributes = {"m1": "bb", "m2": "bbb"}
         att[2].attributes = {"m1": "cc", "m2": "ccc"}
         att[3].attributes = {"m1": "dd", "m2": "ddd"}
         domain = Domain(att, metas=[StringVariable("Feature name")])
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array(["c1", "c2"])[:, None])
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array(["c1", "c2"])[:, None],
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2561,19 +2673,25 @@ class TestTableTranspose(unittest.TestCase):
         attrs = [ContinuousVariable("c1"), ContinuousVariable("c2")]
         metas = [StringVariable("m1"), StringVariable("m2")]
         domain = Domain(attrs, [ContinuousVariable("cls")], metas)
-        M = np.array([["aa", "aaa"], ["bb", "bbb"],
-                      ["cc", "ccc"], ["dd", "ddd"]])
+        M = np.array([["aa", "aaa"], ["bb", "bbb"], ["cc", "ccc"], ["dd", "ddd"]])
         data = Table(domain, np.arange(8).reshape((4, 2)), np.arange(1, 5), M)
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         att[0].attributes = {"cls": "1.000", "m1": "aa", "m2": "aaa"}
         att[1].attributes = {"cls": "2.000", "m1": "bb", "m2": "bbb"}
         att[2].attributes = {"cls": "3.000", "m1": "cc", "m2": "ccc"}
         att[3].attributes = {"cls": "4.000", "m1": "dd", "m2": "ddd"}
         domain = Domain(att, metas=[StringVariable("Feature name")])
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array(["c1", "c2"])[:, None])
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array(["c1", "c2"])[:, None],
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2592,11 +2710,17 @@ class TestTableTranspose(unittest.TestCase):
         domain = Domain(attrs)
         data = Table(domain, np.arange(8).reshape((4, 2)))
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
-        metas = [StringVariable("Feature name"),
-                 DiscreteVariable("attr1", values=("a", "b")),
-                 DiscreteVariable("attr2", values=("aa", "bb"))]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
+        metas = [
+            StringVariable("Feature name"),
+            DiscreteVariable("attr1", values=("a", "b")),
+            DiscreteVariable("attr2", values=("aa", "bb")),
+        ]
         domain = Domain(att, metas=metas)
         M = np.array([["c1", 0.0, 0.0], ["c2", 1.0, 1.0]], dtype=object)
         result = Table(domain, np.arange(8).reshape((4, 2)).T, metas=M)
@@ -2609,8 +2733,9 @@ class TestTableTranspose(unittest.TestCase):
         self._compare_tables(data, t)
 
         # original should not change
-        self.assertDictEqual(data.domain.attributes[0].attributes,
-                             {"attr1": "a", "attr2": "aa"})
+        self.assertDictEqual(
+            data.domain.attributes[0].attributes, {"attr1": "a", "attr2": "aa"}
+        )
 
     def test_transpose_attributes_of_attributes_continuous(self):
         attrs = [ContinuousVariable("c1"), ContinuousVariable("c2")]
@@ -2619,14 +2744,23 @@ class TestTableTranspose(unittest.TestCase):
         domain = Domain(attrs)
         data = Table(domain, np.arange(8).reshape((4, 2)))
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
-        metas = [StringVariable("Feature name"), ContinuousVariable("attr1"),
-                 ContinuousVariable("attr2")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
+        metas = [
+            StringVariable("Feature name"),
+            ContinuousVariable("attr1"),
+            ContinuousVariable("attr2"),
+        ]
         domain = Domain(att, metas=metas)
-        result = Table(domain, np.arange(8).reshape((4, 2)).T,
-                       metas=np.array([["c1", 1.1, 1.3],
-                                       ["c2", 2.2, 2.3]], dtype=object))
+        result = Table(
+            domain,
+            np.arange(8).reshape((4, 2)).T,
+            metas=np.array([["c1", 1.1, 1.3], ["c2", 2.2, 2.3]], dtype=object),
+        )
 
         # transpose and compare
         self._compare_tables(result, Table.transpose(data))
@@ -2636,8 +2770,9 @@ class TestTableTranspose(unittest.TestCase):
         self._compare_tables(data, t)
 
         # original should not change
-        self.assertDictEqual(data.domain.attributes[0].attributes,
-                             {"attr1": "1.100", "attr2": "1.300"})
+        self.assertDictEqual(
+            data.domain.attributes[0].attributes, {"attr1": "1.100", "attr2": "1.300"}
+        )
 
     def test_transpose_attributes_of_attributes_missings(self):
         attrs = [ContinuousVariable("c1"), ContinuousVariable("c2")]
@@ -2646,11 +2781,17 @@ class TestTableTranspose(unittest.TestCase):
         domain = Domain(attrs)
         data = Table(domain, np.arange(8).reshape((4, 2)))
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
-        metas = [StringVariable("Feature name"),
-                 DiscreteVariable("attr1", values=("a", "b")),
-                 DiscreteVariable("attr2", values=("aa",))]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
+        metas = [
+            StringVariable("Feature name"),
+            DiscreteVariable("attr1", values=("a", "b")),
+            DiscreteVariable("attr2", values=("aa",)),
+        ]
         domain = Domain(att, metas=metas)
         M = np.array([["c1", 0.0, 0.0], ["c2", 1.0, np.nan]], dtype=object)
         result = Table(domain, np.arange(8).reshape((4, 2)).T, metas=M)
@@ -2663,8 +2804,9 @@ class TestTableTranspose(unittest.TestCase):
         self._compare_tables(data, t)
 
         # original should not change
-        self.assertDictEqual(data.domain.attributes[0].attributes,
-                             {"attr1": "a", "attr2": "aa"})
+        self.assertDictEqual(
+            data.domain.attributes[0].attributes, {"attr1": "a", "attr2": "aa"}
+        )
 
     def test_transpose_class_metas_attributes(self):
         attrs = [ContinuousVariable("c1"), ContinuousVariable("c2")]
@@ -2672,19 +2814,24 @@ class TestTableTranspose(unittest.TestCase):
         attrs[1].attributes = {"attr1": "b1", "attr2": "bb1"}
         metas = [StringVariable("m1"), StringVariable("m2")]
         domain = Domain(attrs, [ContinuousVariable("cls")], metas)
-        M = np.array([["aa", "aaa"], ["bb", "bbb"],
-                      ["cc", "ccc"], ["dd", "ddd"]])
+        M = np.array([["aa", "aaa"], ["bb", "bbb"], ["cc", "ccc"], ["dd", "ddd"]])
         data = Table(domain, np.arange(8).reshape((4, 2)), np.arange(1, 5), M)
 
-        att = [ContinuousVariable("Feature 1"), ContinuousVariable("Feature 2"),
-               ContinuousVariable("Feature 3"), ContinuousVariable("Feature 4")]
+        att = [
+            ContinuousVariable("Feature 1"),
+            ContinuousVariable("Feature 2"),
+            ContinuousVariable("Feature 3"),
+            ContinuousVariable("Feature 4"),
+        ]
         att[0].attributes = {"cls": "1.000", "m1": "aa", "m2": "aaa"}
         att[1].attributes = {"cls": "2.000", "m1": "bb", "m2": "bbb"}
         att[2].attributes = {"cls": "3.000", "m1": "cc", "m2": "ccc"}
         att[3].attributes = {"cls": "4.000", "m1": "dd", "m2": "ddd"}
-        metas = [StringVariable("Feature name"),
-                 DiscreteVariable("attr1", values=("a1", "b1")),
-                 DiscreteVariable("attr2", values=("aa1", "bb1"))]
+        metas = [
+            StringVariable("Feature name"),
+            DiscreteVariable("attr1", values=("a1", "b1")),
+            DiscreteVariable("attr2", values=("aa1", "bb1")),
+        ]
         domain = Domain(att, metas=metas)
         M = np.array([["c1", 0.0, 0.0], ["c2", 1.0, 1.0]], dtype=object)
         result = Table(domain, np.arange(8).reshape((4, 2)).T, metas=M)
@@ -2697,8 +2844,9 @@ class TestTableTranspose(unittest.TestCase):
         self._compare_tables(data, t)
 
         # original should not change
-        self.assertDictEqual(data.domain.attributes[0].attributes,
-                             {"attr1": "a1", "attr2": "aa1"})
+        self.assertDictEqual(
+            data.domain.attributes[0].attributes, {"attr1": "a1", "attr2": "aa1"}
+        )
 
     def test_transpose(self):
         zoo = Table("zoo")
@@ -2712,22 +2860,23 @@ class TestTableTranspose(unittest.TestCase):
         self.assertEqual(table1.n_rows, table2.n_rows)
         np.testing.assert_array_equal(table1.X, table2.X)
         np.testing.assert_array_equal(table1.Y, table2.Y)
-        np.testing.assert_array_equal(table1.metas.astype(str),
-                                      table2.metas.astype(str))
+        np.testing.assert_array_equal(
+            table1.metas.astype(str), table2.metas.astype(str)
+        )
         np.testing.assert_array_equal(table1.W, table2.W)
 
-        self.assertEqual([(type(x), x.name, x.attributes)
-                          for x in table1.domain.attributes],
-                         [(type(x), x.name, x.attributes)
-                          for x in table2.domain.attributes])
-        self.assertEqual([(type(x), x.name, x.attributes)
-                          for x in table1.domain.class_vars],
-                         [(type(x), x.name, x.attributes)
-                          for x in table2.domain.class_vars])
-        self.assertEqual([(type(x), x.name, x.attributes)
-                          for x in table1.domain.metas],
-                         [(type(x), x.name, x.attributes)
-                          for x in table2.domain.metas])
+        self.assertEqual(
+            [(type(x), x.name, x.attributes) for x in table1.domain.attributes],
+            [(type(x), x.name, x.attributes) for x in table2.domain.attributes],
+        )
+        self.assertEqual(
+            [(type(x), x.name, x.attributes) for x in table1.domain.class_vars],
+            [(type(x), x.name, x.attributes) for x in table2.domain.class_vars],
+        )
+        self.assertEqual(
+            [(type(x), x.name, x.attributes) for x in table1.domain.metas],
+            [(type(x), x.name, x.attributes) for x in table2.domain.metas],
+        )
 
 
 class SparseCV:
@@ -2737,10 +2886,10 @@ class SparseCV:
 
 class TestTableSparseDense(unittest.TestCase):
     def setUp(self):
-        self.iris = Table('iris')
+        self.iris = Table("iris")
 
     def test_sparse_dense_transformation(self):
-        iris = Table('iris')
+        iris = Table("iris")
         iris_sparse = iris.to_sparse(sparse_attributes=True)
         self.assertTrue(sp.issparse(iris_sparse.X))
         self.assertFalse(sp.issparse(iris_sparse.Y))
@@ -2760,7 +2909,7 @@ class TestTableSparseDense(unittest.TestCase):
         # add one sparse feature, should remain dense
         domain = self.iris.domain.copy()
         domain.attributes += (
-            ContinuousVariable('S1', compute_value=SparseCV(), sparse=True),
+            ContinuousVariable("S1", compute_value=SparseCV(), sparse=True),
         )
         d = self.iris.transform(domain)
         self.assertFalse(sp.issparse(d.X))
@@ -2771,8 +2920,8 @@ class TestTableSparseDense(unittest.TestCase):
         # add 2*n_attrs+1 sparse feature, should became sparse
         domain = self.iris.domain.copy()
         domain.attributes += tuple(
-            ContinuousVariable('S' + str(i), compute_value=SparseCV(), sparse=True)
-            for i in range(2*n_attrs + 1)
+            ContinuousVariable("S" + str(i), compute_value=SparseCV(), sparse=True)
+            for i in range(2 * n_attrs + 1)
         )
         d = self.iris.transform(domain)
         self.assertTrue(sp.issparse(d.X))
@@ -2781,7 +2930,7 @@ class TestTableSparseDense(unittest.TestCase):
         # replace attrs with a sparse feature, should became sparse
         domain = self.iris.domain.copy()
         domain.attributes = (
-            ContinuousVariable('S1', compute_value=SparseCV(), sparse=True),
+            ContinuousVariable("S1", compute_value=SparseCV(), sparse=True),
         )
         d = self.iris.transform(domain)
         self.assertTrue(sp.issparse(d.X))
@@ -2790,7 +2939,7 @@ class TestTableSparseDense(unittest.TestCase):
         # replace metas with a sparse feature, should became sparse
         domain = self.iris.domain.copy()
         domain._metas = (
-            ContinuousVariable('S1', compute_value=SparseCV(), sparse=True),
+            ContinuousVariable("S1", compute_value=SparseCV(), sparse=True),
         )
         d = self.iris.transform(domain)
         self.assertTrue(sp.issparse(d.metas))
@@ -2798,13 +2947,13 @@ class TestTableSparseDense(unittest.TestCase):
     def test_from_table_sparse_metas_with_strings(self):
         # replace metas with text and 100 sparse features, should be dense
         domain = self.iris.domain.copy()
-        domain._metas = (StringVariable('text'),) + tuple(
-            ContinuousVariable('S' + str(i), compute_value=SparseCV(), sparse=True)
+        domain._metas = (StringVariable("text"),) + tuple(
+            ContinuousVariable("S" + str(i), compute_value=SparseCV(), sparse=True)
             for i in range(100)
         )
         d = self.iris.transform(domain)
         self.assertFalse(sp.issparse(d.metas))
 
+
 if __name__ == "__main__":
     unittest.main()
-

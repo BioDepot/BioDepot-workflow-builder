@@ -15,8 +15,7 @@ class TestEllipticEnvelopeLearner(unittest.TestCase):
         domain = Domain((ContinuousVariable("c1"), ContinuousVariable("c2")))
         cls.n_true_in, cls.n_true_out = 80, 20
         cls.X_in = 0.3 * np.random.randn(cls.n_true_in, 2)
-        cls.X_out = np.random.uniform(low=-4, high=4,
-                                      size=(cls.n_true_out, 2))
+        cls.X_out = np.random.uniform(low=-4, high=4, size=(cls.n_true_out, 2))
         cls.X_all = Table(domain, np.r_[cls.X_in, cls.X_out])
         cls.cont = cls.n_true_out / (cls.n_true_in + cls.n_true_out)
         cls.learner = EllipticEnvelopeLearner(contamination=cls.cont)
@@ -25,8 +24,8 @@ class TestEllipticEnvelopeLearner(unittest.TestCase):
     def test_EllipticEnvelope(self):
         y_pred = self.model(self.X_all)
         n_pred_out_all = np.sum(y_pred == -1)
-        n_pred_in_true_in = np.sum(y_pred[:self.n_true_in] == 1)
-        n_pred_out_true_o = np.sum(y_pred[- self.n_true_out:] == -1)
+        n_pred_in_true_in = np.sum(y_pred[: self.n_true_in] == 1)
+        n_pred_out_true_o = np.sum(y_pred[-self.n_true_out :] == -1)
 
         self.assertTrue(all(np.absolute(y_pred) == 1))
         self.assertGreaterEqual(len(self.X_all) * self.cont, n_pred_out_all)
@@ -39,5 +38,5 @@ class TestEllipticEnvelopeLearner(unittest.TestCase):
         y_pred = self.model(self.X_all)
         y_mahal = self.model.mahalanobis(self.X_all)
         y_mahal, y_pred = zip(*sorted(zip(y_mahal, y_pred), reverse=True))
-        self.assertTrue(all(i == -1 for i in y_pred[:int(self.cont * n)]))
-        self.assertTrue(all(i == 1 for i in y_pred[int(self.cont * n):]))
+        self.assertTrue(all(i == -1 for i in y_pred[: int(self.cont * n)]))
+        self.assertTrue(all(i == 1 for i in y_pred[int(self.cont * n) :]))

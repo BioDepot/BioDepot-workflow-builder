@@ -17,15 +17,19 @@ class LinearCombinationSql:
 
     def __call__(self):
         if self.mean is None:
-            return ' + '.join('{} * {}'.format(w, a.to_sql())
-                              for a, w in zip(self.attrs, self.weights))
-        return ' + '.join('{} * ({} - {})'.format(w, a.to_sql(), m, w)
-                          for a, m, w in zip(self.attrs, self.mean, self.weights))
+            return " + ".join(
+                "{} * {}".format(w, a.to_sql())
+                for a, w in zip(self.attrs, self.weights)
+            )
+        return " + ".join(
+            "{} * ({} - {})".format(w, a.to_sql(), m, w)
+            for a, m, w in zip(self.attrs, self.mean, self.weights)
+        )
 
 
 class Projector(_ReprableWithPreprocessors):
     #: A sequence of data preprocessors to apply on data prior to projecting
-    name = 'projection'
+    name = "projection"
     preprocessors = ()
 
     def __init__(self, preprocessors=None):
@@ -36,7 +40,8 @@ class Projector(_ReprableWithPreprocessors):
 
     def fit(self, X, Y=None):
         raise NotImplementedError(
-            "Classes derived from Projector must overload method fit")
+            "Classes derived from Projector must overload method fit"
+        )
 
     def __call__(self, data):
         data = self.preprocess(data)
@@ -95,11 +100,10 @@ class Projection:
 class SklProjector(Projector, metaclass=WrapperMeta):
     __wraps__ = None
     _params = {}
-    name = 'skl projection'
+    name = "skl projection"
     supports_sparse = False
 
-    preprocessors = [Orange.preprocess.Continuize(),
-                     Orange.preprocess.SklImpute()]
+    preprocessors = [Orange.preprocess.Continuize(), Orange.preprocess.SklImpute()]
 
     @property
     def params(self):
@@ -115,18 +119,17 @@ class SklProjector(Projector, metaclass=WrapperMeta):
             spec = inspect.getargs(sklprojection.__init__.__code__)
             # first argument is 'self'
             assert spec.args[0] == "self"
-            params = {name: values[name] for name in spec.args[1:]
-                      if name in values}
+            params = {name: values[name] for name in spec.args[1:] if name in values}
         else:
             raise TypeError("Wrapper does not define '__wraps__'")
         return params
 
     def preprocess(self, data):
         data = super().preprocess(data)
-        if any(v.is_discrete and len(v.values) > 2
-               for v in data.domain.attributes):
-            raise ValueError("Wrapped scikit-learn methods do not support "
-                             "multinomial variables.")
+        if any(v.is_discrete and len(v.values) > 2 for v in data.domain.attributes):
+            raise ValueError(
+                "Wrapped scikit-learn methods do not support " "multinomial variables."
+            )
         return data
 
     def fit(self, X, Y=None):

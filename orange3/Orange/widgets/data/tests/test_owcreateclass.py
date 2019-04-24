@@ -8,7 +8,10 @@ import numpy as np
 from Orange.data import Table, StringVariable, DiscreteVariable
 from Orange.widgets.data.owcreateclass import (
     OWCreateClass,
-    map_by_substring, ValueFromStringSubstring, ValueFromDiscreteSubstring)
+    map_by_substring,
+    ValueFromStringSubstring,
+    ValueFromDiscreteSubstring,
+)
 from Orange.widgets.tests.base import WidgetTest
 
 
@@ -20,36 +23,49 @@ class TestHelpers(unittest.TestCase):
 
     def test_map_by_substring(self):
         np.testing.assert_equal(
-            map_by_substring(self.arr,
-                             ["abc", "a", "bc", ""],
-                             case_sensitive=True, match_beginning=False),
-            [0, 1, 2, 0, 3])
+            map_by_substring(
+                self.arr,
+                ["abc", "a", "bc", ""],
+                case_sensitive=True,
+                match_beginning=False,
+            ),
+            [0, 1, 2, 0, 3],
+        )
         np.testing.assert_equal(
-            map_by_substring(self.arr,
-                             ["abc", "a", "Bc", ""],
-                             case_sensitive=True, match_beginning=False),
-            [0, 1, 3, 0, 3])
+            map_by_substring(
+                self.arr,
+                ["abc", "a", "Bc", ""],
+                case_sensitive=True,
+                match_beginning=False,
+            ),
+            [0, 1, 3, 0, 3],
+        )
         np.testing.assert_equal(
-            map_by_substring(self.arr,
-                             ["abc", "a", "Bc", ""],
-                             case_sensitive=False, match_beginning=False),
-            [0, 1, 2, 0, 3])
+            map_by_substring(
+                self.arr,
+                ["abc", "a", "Bc", ""],
+                case_sensitive=False,
+                match_beginning=False,
+            ),
+            [0, 1, 2, 0, 3],
+        )
         np.testing.assert_equal(
-            map_by_substring(self.arr,
-                             ["abc", "a", "bc", ""],
-                             case_sensitive=False, match_beginning=True),
-            [0, 1, 2, 3, 3])
-        np.testing.assert_equal(
-            map_by_substring(self.arr, ["", ""], False, False),
-            0)
-        self.assertTrue(np.all(np.isnan(
-            map_by_substring(self.arr, [], False, False))))
+            map_by_substring(
+                self.arr,
+                ["abc", "a", "bc", ""],
+                case_sensitive=False,
+                match_beginning=True,
+            ),
+            [0, 1, 2, 3, 3],
+        )
+        np.testing.assert_equal(map_by_substring(self.arr, ["", ""], False, False), 0)
+        self.assertTrue(np.all(np.isnan(map_by_substring(self.arr, [], False, False))))
 
     def test_value_from_string_substring(self):
         trans = ValueFromStringSubstring(StringVariable(), self.patterns)
         arr2 = np.hstack((self.arr.astype(object), [None]))
 
-        with patch('Orange.widgets.data.owcreateclass.map_by_substring') as mbs:
+        with patch("Orange.widgets.data.owcreateclass.map_by_substring") as mbs:
             trans.transform(self.arr)
             a, patterns, case_sensitive, match_beginning = mbs.call_args[0]
             np.testing.assert_equal(a, self.arr)
@@ -59,15 +75,13 @@ class TestHelpers(unittest.TestCase):
 
             trans.transform(arr2)
             a, patterns, *_ = mbs.call_args[0]
-            np.testing.assert_equal(a,
-                                    np.hstack((self.arr.astype(str), "")))
+            np.testing.assert_equal(a, np.hstack((self.arr.astype(str), "")))
 
-        np.testing.assert_equal(trans.transform(arr2),
-                                [0, 1, 2, 0, 3, np.nan])
+        np.testing.assert_equal(trans.transform(arr2), [0, 1, 2, 0, 3, np.nan])
 
     def test_value_string_substring_flags(self):
         trans = ValueFromStringSubstring(StringVariable(), self.patterns)
-        with patch('Orange.widgets.data.owcreateclass.map_by_substring') as mbs:
+        with patch("Orange.widgets.data.owcreateclass.map_by_substring") as mbs:
             trans.case_sensitive = True
             trans.transform(self.arr)
             case_sensitive, match_beginning = mbs.call_args[0][-2:]
@@ -83,13 +97,15 @@ class TestHelpers(unittest.TestCase):
 
     def test_value_from_discrete_substring(self):
         trans = ValueFromDiscreteSubstring(
-            DiscreteVariable(values=self.arr), self.patterns)
+            DiscreteVariable(values=self.arr), self.patterns
+        )
         np.testing.assert_equal(trans.lookup_table, [0, 1, 2, 0, 3])
 
     def test_value_from_discrete_substring_flags(self):
         trans = ValueFromDiscreteSubstring(
-            DiscreteVariable(values=self.arr), self.patterns)
-        with patch('Orange.widgets.data.owcreateclass.map_by_substring') as mbs:
+            DiscreteVariable(values=self.arr), self.patterns
+        )
+        with patch("Orange.widgets.data.owcreateclass.map_by_substring") as mbs:
             trans.case_sensitive = True
             a, patterns, case_sensitive, match_beginning = mbs.call_args[0]
             np.testing.assert_equal(a, self.arr)
@@ -302,22 +318,23 @@ class TestOWCreateClass(WidgetTest):
         widget.apply()
         outdata = self.get_output(self.widget.Outputs.data)
         # Ignore classes without labels
-        self._check_counts([["117", ""], ["18", "+ 117"], ["166", "+ 117"],
-                            ["", ""], ["", ""]])
-        self.assertEqual(outdata.domain.class_var.values,
-                         ["Cls1", "Cls2", "Cls3"])
+        self._check_counts(
+            [["117", ""], ["18", "+ 117"], ["166", "+ 117"], ["", ""], ["", ""]]
+        )
+        self.assertEqual(outdata.domain.class_var.values, ["Cls1", "Cls2", "Cls3"])
 
         widget.remove_buttons[1].click()
-        self._check_counts([["117", ""], ["166", "+ 117"], ["18", "+ 117"],
-                            ["", ""], ["", ""]])
-        self.assertEqual([lab.text() for _, lab in widget.line_edits],
-                         ["eversa", "a", "c", "b"])
+        self._check_counts(
+            [["117", ""], ["166", "+ 117"], ["18", "+ 117"], ["", ""], ["", ""]]
+        )
+        self.assertEqual(
+            [lab.text() for _, lab in widget.line_edits], ["eversa", "a", "c", "b"]
+        )
 
         # Removal preserves integrity of connections
         widget.line_edits[1][1].setText("efect")
         widget.line_edits[2][1].setText("a")
-        self._check_counts([["117", ""], ["18", "+ 117"], ["166", "+ 117"],
-                            ["", ""]])
+        self._check_counts([["117", ""], ["18", "+ 117"], ["166", "+ 117"], ["", ""]])
 
         while widget.remove_buttons:
             widget.remove_buttons[0].click()
@@ -365,12 +382,15 @@ class TestOWCreateClass(WidgetTest):
         Error shown if class name is duplicated or empty and no data on output.
         GH-2440
         """
+
         def assertError(class_name, class_name_empty, class_name_duplicated, is_out):
             widget.class_name = class_name
             widget.apply()
             output = self.get_output("Data")
             self.assertEqual(widget.Error.class_name_empty.is_shown(), class_name_empty)
-            self.assertEqual(widget.Error.class_name_duplicated.is_shown(), class_name_duplicated)
+            self.assertEqual(
+                widget.Error.class_name_duplicated.is_shown(), class_name_duplicated
+            )
             self.assertEqual(output is not None, is_out)
 
         widget = self.widget

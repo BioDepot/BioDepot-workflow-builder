@@ -33,7 +33,8 @@ class TestOWDistances(WidgetTest):
                 expected = metric(self.iris)
 
             np.testing.assert_array_equal(
-                expected, self.get_output(self.widget.Outputs.distances))
+                expected, self.get_output(self.widget.Outputs.distances)
+            )
 
     def test_error_message(self):
         """Check if error message appears and then disappears when

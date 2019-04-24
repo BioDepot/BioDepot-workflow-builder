@@ -26,8 +26,9 @@ def find_meta_property(obj, name):
     meta = obj.metaObject()
     index = meta.indexOfProperty(name)
     if index == -1:
-        raise AttributeError("%s does no have a property named %r." %
-                             (meta.className(), name))
+        raise AttributeError(
+            "%s does no have a property named %r." % (meta.className(), name)
+        )
 
     return meta.property(index)
 
@@ -42,8 +43,7 @@ def find_notifier(obj, name):
     """
     prop_meta = find_meta_property(obj, name)
     if not prop_meta.hasNotifySignal():
-        raise TypeError("%s does not have a notifier signal." %
-                        name)
+        raise TypeError("%s does not have a notifier signal." % name)
 
     notifier = prop_meta.notifySignal()
     if QT_VERSION < 0x50000:
@@ -167,8 +167,9 @@ class PropertyBindingExpr(AbstractBoundProperty):
 
     def get(self):
         locals = dict(self.locals)
-        locals.update(dict((name, source.get())
-                           for name, source in self._sources.items()))
+        locals.update(
+            dict((name, source.get()) for name, source in self._sources.items())
+        )
         try:
             value = eval(self.code, self.globals, locals)
         except Exception:
@@ -189,6 +190,7 @@ class PropertyBinding(AbstractBoundProperty):
     meta class object system.
 
     """
+
     def __init__(self, obj, propertyName, notifier=None, parent=None):
         AbstractBoundProperty.__init__(self, obj, propertyName, parent)
 
@@ -220,6 +222,7 @@ class DynamicPropertyBinding(AbstractBoundProperty):
     """
     A Property binding of a QObject's dynamic property.
     """
+
     def __init__(self, obj, propertyName, parent=None):
         AbstractBoundProperty.__init__(self, obj, propertyName, parent)
 
@@ -257,7 +260,7 @@ class BindingManager(QObject):
 
     def bind(self, target, source):
         if isinstance(target, tuple):
-            target = binding_for(*target + (self, ))
+            target = binding_for(*target + (self,))
 
         if source is None:
             return UnboundBindingWrapper(target, self)

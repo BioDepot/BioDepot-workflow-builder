@@ -19,8 +19,10 @@ from functools import reduce
 def composition(f, g):
     """Return a composition of two functions
     """
+
     def fg(arg):
         return g(f(arg))
+
     return fg
 
 
@@ -71,11 +73,13 @@ class AnchorLayout(QGraphicsObject):
             others = [to_other[point] for point in points]
 
             if isinstance(anchor_item, SourceAnchorItem):
-                others_angle = [-angle(anchor_pos, other.anchorScenePos())
-                                for other in others]
+                others_angle = [
+                    -angle(anchor_pos, other.anchorScenePos()) for other in others
+                ]
             else:
-                others_angle = [angle(other.anchorScenePos(), anchor_pos)
-                                for other in others]
+                others_angle = [
+                    angle(other.anchorScenePos(), anchor_pos) for other in others
+                ]
 
             indices = list(numpy.argsort(others_angle))
             # Invert the indices.
@@ -91,10 +95,9 @@ class AnchorLayout(QGraphicsObject):
     def invalidate(self):
         items = self.scene().items()
         nodes = [item for item in items is isinstance(item, NodeItem)]
-        anchors = reduce(add,
-                         [[node.outputAnchorItem, node.inputAnchorItem]
-                          for node in nodes],
-                         [])
+        anchors = reduce(
+            add, [[node.outputAnchorItem, node.inputAnchorItem] for node in nodes], []
+        )
         self.__invalidatedAnchors.extend(anchors)
         self.scheduleDelayedActivate()
 
@@ -116,12 +119,12 @@ class AnchorLayout(QGraphicsObject):
         scene = self.scene()
         if isinstance(anchor, SourceAnchorItem):
             links = scene.node_output_links(anchor.parentNodeItem())
-            getter = composition(attrgetter("sinkItem"),
-                                 attrgetter("inputAnchorItem"))
+            getter = composition(attrgetter("sinkItem"), attrgetter("inputAnchorItem"))
         elif isinstance(anchor, SinkAnchorItem):
             links = scene.node_input_links(anchor.parentNodeItem())
-            getter = composition(attrgetter("sourceItem"),
-                                 attrgetter("outputAnchorItem"))
+            getter = composition(
+                attrgetter("sourceItem"), attrgetter("outputAnchorItem")
+            )
         else:
             raise TypeError(type(anchor))
 

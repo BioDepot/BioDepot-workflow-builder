@@ -22,8 +22,10 @@ from .annotations import BaseSchemeAnnotation
 from ..utils import check_arg, check_type, name_lookup
 
 from .errors import (
-    SchemeCycleError, IncompatibleChannelTypeError, SinkChannelError,
-    DuplicatedLinkError
+    SchemeCycleError,
+    IncompatibleChannelTypeError,
+    SinkChannelError,
+    DuplicatedLinkError,
 )
 
 from . import readwrite
@@ -174,16 +176,14 @@ class Scheme(QObject):
             Node instance to add to the scheme.
 
         """
-        check_arg(node not in self.__nodes,
-                  "Node already in scheme.")
+        check_arg(node not in self.__nodes, "Node already in scheme.")
         check_type(node, SchemeNode)
 
         self.__nodes.append(node)
         log.info("Added node %r to scheme %r." % (node.title, self.title))
         self.node_added.emit(node)
 
-    def new_node(self, description, title=None, position=None,
-                 properties=None):
+    def new_node(self, description, title=None, position=None, properties=None):
         """
         Create a new :class:`.SchemeNode` and add it to the scheme.
 
@@ -209,11 +209,13 @@ class Scheme(QObject):
 
         """
         if isinstance(description, WidgetDescription):
-            node = SchemeNode(description, title=title, position=position,
-                              properties=properties)
+            node = SchemeNode(
+                description, title=title, position=position, properties=properties
+            )
         else:
-            raise TypeError("Expected %r, got %r." % \
-                            (WidgetDescription, type(description)))
+            raise TypeError(
+                "Expected %r, got %r." % (WidgetDescription, type(description))
+            )
 
         self.add_node(node)
         return node
@@ -230,8 +232,7 @@ class Scheme(QObject):
             Node instance to remove.
 
         """
-        check_arg(node in self.__nodes,
-                  "Node is not in the scheme.")
+        check_arg(node in self.__nodes, "Node is not in the scheme.")
 
         self.__remove_node_links(node)
         self.__nodes.remove(node)
@@ -268,16 +269,20 @@ class Scheme(QObject):
         self.check_connect(link)
         self.__links.append(link)
 
-        log.info("Added link %r (%r) -> %r (%r) to scheme %r." % \
-                 (link.source_node.title, link.source_channel.name,
-                  link.sink_node.title, link.sink_channel.name,
-                  self.title)
-                 )
+        log.info(
+            "Added link %r (%r) -> %r (%r) to scheme %r."
+            % (
+                link.source_node.title,
+                link.source_channel.name,
+                link.sink_node.title,
+                link.sink_channel.name,
+                self.title,
+            )
+        )
 
         self.link_added.emit(link)
 
-    def new_link(self, source_node, source_channel,
-                 sink_node, sink_channel):
+    def new_link(self, source_node, source_channel, sink_node, sink_channel):
         """
         Create a new :class:`.SchemeLink` from arguments and add it to
         the scheme. The new link is returned.
@@ -300,8 +305,7 @@ class Scheme(QObject):
         .SchemeLink, Scheme.add_link
 
         """
-        link = SchemeLink(source_node, source_channel,
-                          sink_node, sink_channel)
+        link = SchemeLink(source_node, source_channel, sink_node, sink_channel)
         self.add_link(link)
         return link
 
@@ -315,15 +319,19 @@ class Scheme(QObject):
             Link instance to remove.
 
         """
-        check_arg(link in self.__links,
-                  "Link is not in the scheme.")
+        check_arg(link in self.__links, "Link is not in the scheme.")
 
         self.__links.remove(link)
-        log.info("Removed link %r (%r) -> %r (%r) from scheme %r." % \
-                 (link.source_node.title, link.source_channel.name,
-                  link.sink_node.title, link.sink_channel.name,
-                  self.title)
-                 )
+        log.info(
+            "Removed link %r (%r) -> %r (%r) from scheme %r."
+            % (
+                link.source_node.title,
+                link.source_channel.name,
+                link.sink_node.title,
+                link.sink_channel.name,
+                self.title,
+            )
+        )
         self.link_removed.emit(link)
 
     def check_connect(self, link):
@@ -350,29 +358,36 @@ class Scheme(QObject):
 
         if not self.compatible_channels(link):
             raise IncompatibleChannelTypeError(
-                    "Cannot connect %r to %r." \
-                    % (link.source_channel.type, link.sink_channel.type)
-                )
+                "Cannot connect %r to %r."
+                % (link.source_channel.type, link.sink_channel.type)
+            )
 
-        links = self.find_links(source_node=link.source_node,
-                                source_channel=link.source_channel,
-                                sink_node=link.sink_node,
-                                sink_channel=link.sink_channel)
+        links = self.find_links(
+            source_node=link.source_node,
+            source_channel=link.source_channel,
+            sink_node=link.sink_node,
+            sink_channel=link.sink_channel,
+        )
 
         if links:
             raise DuplicatedLinkError(
-                    "A link from %r (%r) -> %r (%r) already exists" \
-                    % (link.source_node.title, link.source_channel.name,
-                       link.sink_node.title, link.sink_channel.name)
+                "A link from %r (%r) -> %r (%r) already exists"
+                % (
+                    link.source_node.title,
+                    link.source_channel.name,
+                    link.sink_node.title,
+                    link.sink_channel.name,
                 )
+            )
 
         if link.sink_channel.single:
-            links = self.find_links(sink_node=link.sink_node,
-                                    sink_channel=link.sink_channel)
+            links = self.find_links(
+                sink_node=link.sink_node, sink_channel=link.sink_channel
+            )
             if links:
                 raise SinkChannelError(
-                        "%r is already connected." % link.sink_channel.name
-                    )
+                    "%r is already connected." % link.sink_channel.name
+                )
 
     def creates_cycle(self, link):
         """
@@ -414,8 +429,12 @@ class Scheme(QObject):
         try:
             self.check_connect(link)
             return True
-        except (SchemeCycleError, IncompatibleChannelTypeError,
-                SinkChannelError, DuplicatedLinkError):
+        except (
+            SchemeCycleError,
+            IncompatibleChannelTypeError,
+            SinkChannelError,
+            DuplicatedLinkError,
+        ):
             return False
 
     def upstream_nodes(self, start_node):
@@ -504,16 +523,19 @@ class Scheme(QObject):
         """
         return self.find_links(source_node=node)
 
-    def find_links(self, source_node=None, source_channel=None,
-                   sink_node=None, sink_channel=None):
+    def find_links(
+        self, source_node=None, source_channel=None, sink_node=None, sink_channel=None
+    ):
         # TODO: Speedup - keep index of links by nodes and channels
         result = []
         match = lambda query, value: (query is None or value == query)
         for link in self.__links:
-            if match(source_node, link.source_node) and \
-                    match(sink_node, link.sink_node) and \
-                    match(source_channel, link.source_channel) and \
-                    match(sink_channel, link.sink_channel):
+            if (
+                match(source_node, link.source_node)
+                and match(sink_node, link.sink_node)
+                and match(source_channel, link.source_channel)
+                and match(sink_channel, link.sink_channel)
+            ):
                 result.append(link)
 
         return result
@@ -527,8 +549,7 @@ class Scheme(QObject):
         .. note:: This can depend on the links already in the scheme.
 
         """
-        if source_node is sink_node or \
-                self.is_ancestor(sink_node, source_node):
+        if source_node is sink_node or self.is_ancestor(sink_node, source_node):
             # Cyclic connections are not possible.
             return []
 
@@ -537,8 +558,9 @@ class Scheme(QObject):
 
         # Get existing links to sink channels that are Single.
         links = self.find_links(None, None, sink_node)
-        already_connected_sinks = [link.sink_channel for link in links \
-                                   if link.sink_channel.single]
+        already_connected_sinks = [
+            link.sink_channel for link in links if link.sink_channel.single
+        ]
 
         def weight(out_c, in_c):
             # type: (OutputSignal, InputSignal) -> int
@@ -548,17 +570,18 @@ class Scheme(QObject):
             else:
                 # Does the connection type check (can only ever be False for
                 # dynamic signals)
-                #type_checks = issubclass(name_lookup(out_c.type),
+                # type_checks = issubclass(name_lookup(out_c.type),
                 #                         name_lookup(in_c.type))
-                type_checks=True
-                #assert type_checks or out_c.dynamic
+                type_checks = True
+                # assert type_checks or out_c.dynamic
                 # Dynamic signals that require runtime instance type check
                 # are considered last.
-                check = [type_checks,
-                         in_c not in already_connected_sinks,
-                         bool(in_c.default),
-                         bool(out_c.default)
-                         ]
+                check = [
+                    type_checks,
+                    in_c not in already_connected_sinks,
+                    bool(in_c.default),
+                    bool(out_c.default),
+                ]
                 weights = [2 ** i for i in range(len(check), 0, -1)]
                 weight = sum([w for w, c in zip(weights, check) if c])
             return weight
@@ -577,8 +600,10 @@ class Scheme(QObject):
         to the scheme.
 
         """
-        check_arg(annotation not in self.__annotations,
-                  "Cannot add the same annotation multiple times.")
+        check_arg(
+            annotation not in self.__annotations,
+            "Cannot add the same annotation multiple times.",
+        )
         check_type(annotation, BaseSchemeAnnotation)
 
         self.__annotations.append(annotation)
@@ -588,8 +613,7 @@ class Scheme(QObject):
         """
         Remove the `annotation` instance from the scheme.
         """
-        check_arg(annotation in self.__annotations,
-                  "Annotation is not in the scheme.")
+        check_arg(annotation in self.__annotations, "Annotation is not in the scheme.")
         self.__annotations.remove(annotation)
         self.annotation_removed.emit(annotation)
 
@@ -597,6 +621,7 @@ class Scheme(QObject):
         """
         Remove all nodes, links, and annotation items from the scheme.
         """
+
         def is_terminal(node):
             return not bool(self.find_links(source_node=node))
 
@@ -608,7 +633,7 @@ class Scheme(QObject):
         for annotation in self.annotations:
             self.remove_annotation(annotation)
 
-        assert(not (self.nodes or self.links or self.annotations))
+        assert not (self.nodes or self.links or self.annotations)
 
     def sync_node_properties(self):
         """
@@ -633,8 +658,9 @@ class Scheme(QObject):
 
         self.sync_node_properties()
 
-        readwrite.scheme_to_ows_stream(self, stream, pretty,
-                                       pickle_fallback=pickle_fallback)
+        readwrite.scheme_to_ows_stream(
+            self, stream, pretty, pickle_fallback=pickle_fallback
+        )
 
     def load_from(self, stream):
         """
@@ -647,7 +673,8 @@ class Scheme(QObject):
         if isinstance(stream, str):
             stream = open(stream, "rb")
         readwrite.scheme_load(self, stream)
-#         parse_scheme(self, stream)
+
+    #         parse_scheme(self, stream)
 
     def set_runtime_env(self, key, value):
         """

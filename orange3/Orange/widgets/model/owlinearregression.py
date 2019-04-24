@@ -5,8 +5,10 @@ from AnyQt.QtWidgets import QLayout, QSizePolicy
 
 from Orange.data import Table, Domain, ContinuousVariable, StringVariable
 from Orange.regression.linear import (
-    LassoRegressionLearner, LinearRegressionLearner,
-    RidgeRegressionLearner, ElasticNetLearner
+    LassoRegressionLearner,
+    LinearRegressionLearner,
+    RidgeRegressionLearner,
+    ElasticNetLearner,
 )
 from Orange.widgets import settings, gui
 from Orange.widgets.utils.owlearnerwidget import OWBaseLearner
@@ -15,12 +17,12 @@ from Orange.widgets.widget import Output
 
 class OWLinearRegression(OWBaseLearner):
     name = "Linear Regression"
-    description = "A linear regression algorithm with optional L1 (LASSO), " \
-                  "L2 (ridge) or L1L2 (elastic net) regularization."
+    description = (
+        "A linear regression algorithm with optional L1 (LASSO), "
+        "L2 (ridge) or L1L2 (elastic net) regularization."
+    )
     icon = "icons/LinearRegression.svg"
-    replaces = [
-        "Orange.widgets.regression.owlinearregression.OWLinearRegression",
-    ]
+    replaces = ["Orange.widgets.regression.owlinearregression.OWLinearRegression"]
     priority = 60
 
     LEARNER = LinearRegressionLearner
@@ -29,8 +31,12 @@ class OWLinearRegression(OWBaseLearner):
         coefficients = Output("Coefficients", Table, explicit=True)
 
     #: Types
-    REGULARIZATION_TYPES = ["No regularization", "Ridge regression (L2)",
-                            "Lasso regression (L1)", "Elastic net regression"]
+    REGULARIZATION_TYPES = [
+        "No regularization",
+        "Ridge regression (L2)",
+        "Lasso regression (L1)",
+        "Elastic net regression",
+    ]
     OLS, Ridge, Lasso, Elastic = 0, 1, 2, 3
 
     ridge = settings.Setting(False)
@@ -41,27 +47,40 @@ class OWLinearRegression(OWBaseLearner):
 
     want_main_area = False
 
-    alphas = list(chain([x / 10000 for x in range(1, 10)],
-                        [x / 1000 for x in range(1, 20)],
-                        [x / 100 for x in range(2, 20)],
-                        [x / 10 for x in range(2, 9)],
-                        range(1, 20),
-                        range(20, 100, 5),
-                        range(100, 1001, 100)))
+    alphas = list(
+        chain(
+            [x / 10000 for x in range(1, 10)],
+            [x / 1000 for x in range(1, 20)],
+            [x / 100 for x in range(2, 20)],
+            [x / 10 for x in range(2, 9)],
+            range(1, 20),
+            range(20, 100, 5),
+            range(100, 1001, 100),
+        )
+    )
 
     def add_main_layout(self):
         box = gui.hBox(self.controlArea, "Regularization")
-        gui.radioButtons(box, self, "reg_type",
-                         btnLabels=self.REGULARIZATION_TYPES,
-                         callback=self._reg_type_changed)
+        gui.radioButtons(
+            box,
+            self,
+            "reg_type",
+            btnLabels=self.REGULARIZATION_TYPES,
+            callback=self._reg_type_changed,
+        )
 
         gui.separator(box, 20, 20)
         self.alpha_box = box2 = gui.vBox(box, margin=10)
         gui.widgetLabel(box2, "Regularization strength:")
         gui.hSlider(
-            box2, self, "alpha_index",
-            minValue=0, maxValue=len(self.alphas) - 1,
-            callback=self._alpha_changed, createLabel=False)
+            box2,
+            self,
+            "alpha_index",
+            minValue=0,
+            maxValue=len(self.alphas) - 1,
+            callback=self._alpha_changed,
+            createLabel=False,
+        )
         box3 = gui.hBox(box2)
         box3.layout().setAlignment(Qt.AlignCenter)
         self.alpha_label = gui.widgetLabel(box3, "")
@@ -73,13 +92,22 @@ class OWLinearRegression(OWBaseLearner):
         box5 = gui.hBox(box4)
         gui.widgetLabel(box5, "L1")
         self.l2_ratio_slider = gui.hSlider(
-            box5, self, "l2_ratio", minValue=0.01, maxValue=0.99,
-            intOnly=False, ticks=0.1, createLabel=False, width=120,
-            step=0.01, callback=self._l2_ratio_changed)
+            box5,
+            self,
+            "l2_ratio",
+            minValue=0.01,
+            maxValue=0.99,
+            intOnly=False,
+            ticks=0.1,
+            createLabel=False,
+            width=120,
+            step=0.01,
+            callback=self._l2_ratio_changed,
+        )
         gui.widgetLabel(box5, "L2")
         self.l2_ratio_label = gui.widgetLabel(
-            box4, "",
-            sizePolicy=(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed))
+            box4, "", sizePolicy=(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
+        )
         self.l2_ratio_label.setAlignment(Qt.AlignCenter)
 
         box5 = gui.hBox(self.controlArea)
@@ -106,7 +134,8 @@ class OWLinearRegression(OWBaseLearner):
 
     def _set_l2_ratio_label(self):
         self.l2_ratio_label.setText(
-            "{:.{}f} : {:.{}f}".format(1 - self.l2_ratio, 2, self.l2_ratio, 2))
+            "{:.{}f} : {:.{}f}".format(1 - self.l2_ratio, 2, self.l2_ratio, 2)
+        )
 
     def _l2_ratio_changed(self):
         self._set_l2_ratio_label()
@@ -123,8 +152,7 @@ class OWLinearRegression(OWBaseLearner):
         elif self.reg_type == OWLinearRegression.Lasso:
             learner = LassoRegressionLearner(alpha=alpha, **args)
         elif self.reg_type == OWLinearRegression.Elastic:
-            learner = ElasticNetLearner(alpha=alpha,
-                                        l1_ratio=1 - self.l2_ratio, **args)
+            learner = ElasticNetLearner(alpha=alpha, l1_ratio=1 - self.l2_ratio, **args)
         return learner
 
     def update_model(self):
@@ -132,11 +160,11 @@ class OWLinearRegression(OWBaseLearner):
         coef_table = None
         if self.model is not None:
             domain = Domain(
-                    [ContinuousVariable("coef", number_of_decimals=7)],
-                    metas=[StringVariable("name")])
+                [ContinuousVariable("coef", number_of_decimals=7)],
+                metas=[StringVariable("name")],
+            )
             coefs = [self.model.intercept] + list(self.model.coefficients)
-            names = ["intercept"] + \
-                    [attr.name for attr in self.model.domain.attributes]
+            names = ["intercept"] + [attr.name for attr in self.model.domain.attributes]
             coef_table = Table(domain, list(zip(coefs, names)))
             coef_table.name = "coefficients"
         self.Outputs.coefficients.send(coef_table)
@@ -144,18 +172,21 @@ class OWLinearRegression(OWBaseLearner):
     def get_learner_parameters(self):
         regularization = "No Regularization"
         if self.reg_type == OWLinearRegression.Ridge:
-            regularization = ("Ridge Regression (L2) with α={}"
-                              .format(self.alphas[self.alpha_index]))
+            regularization = "Ridge Regression (L2) with α={}".format(
+                self.alphas[self.alpha_index]
+            )
         elif self.reg_type == OWLinearRegression.Lasso:
-            regularization = ("Lasso Regression (L1) with α={}"
-                              .format(self.alphas[self.alpha_index]))
+            regularization = "Lasso Regression (L1) with α={}".format(
+                self.alphas[self.alpha_index]
+            )
         elif self.reg_type == OWLinearRegression.Elastic:
-            regularization = ("Elastic Net Regression with α={}"
-                              " and L1:L2 ratio of {}:{}"
-                              .format(self.alphas[self.alpha_index],
-                                      self.l2_ratio,
-                                      1 - self.l2_ratio))
-        return ("Regularization", regularization),
+            regularization = (
+                "Elastic Net Regression with α={}"
+                " and L1:L2 ratio of {}:{}".format(
+                    self.alphas[self.alpha_index], self.l2_ratio, 1 - self.l2_ratio
+                )
+            )
+        return (("Regularization", regularization),)
 
 
 if __name__ == "__main__":
@@ -164,7 +195,7 @@ if __name__ == "__main__":
 
     a = QApplication(sys.argv)
     ow = OWLinearRegression()
-    d = Table('housing')
+    d = Table("housing")
     ow.set_data(d)
     ow.show()
     a.exec_()

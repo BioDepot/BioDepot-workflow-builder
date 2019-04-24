@@ -2,8 +2,14 @@ from concurrent.futures import Future  # pylint: disable=unused-import
 from typing import Optional, List, Dict  # pylint: disable=unused-import
 
 import numpy as np
-from AnyQt.QtCore import Qt, QTimer, QAbstractTableModel, QModelIndex, QThread, \
-    pyqtSlot as Slot
+from AnyQt.QtCore import (
+    Qt,
+    QTimer,
+    QAbstractTableModel,
+    QModelIndex,
+    QThread,
+    pyqtSlot as Slot,
+)
 from AnyQt.QtGui import QIntValidator
 from AnyQt.QtWidgets import QGridLayout, QTableView
 
@@ -12,8 +18,11 @@ from Orange.clustering.kmeans import KMeansModel  # pylint: disable=unused-impor
 from Orange.data import Table, Domain, DiscreteVariable, ContinuousVariable
 from Orange.widgets import widget, gui
 from Orange.widgets.settings import Setting
-from Orange.widgets.utils.annotated_data import get_next_name, \
-    ANNOTATED_DATA_SIGNAL_NAME, add_columns
+from Orange.widgets.utils.annotated_data import (
+    get_next_name,
+    ANNOTATED_DATA_SIGNAL_NAME,
+    add_columns,
+)
 from Orange.widgets.utils.concurrent import ThreadExecutor, FutureSetWatcher
 from Orange.widgets.utils.sql import check_sql_input
 from Orange.widgets.widget import Input, Output
@@ -66,8 +75,8 @@ class ClusterTableModel(QAbstractTableModel):
 
 
 class Task:
-    futures = []    # type: List[Future]
-    watcher = ...   # type: FutureSetWatcher
+    futures = []  # type: List[Future]
+    watcher = ...  # type: FutureSetWatcher
     cancelled = False
 
     def __init__(self, futures, watcher):
@@ -86,8 +95,9 @@ class NotEnoughData(ValueError):
 
 class OWKMeans(widget.OWWidget):
     name = "k-Means"
-    description = "k-Means clustering algorithm with silhouette-based " \
-                  "quality estimation."
+    description = (
+        "k-Means clustering algorithm with silhouette-based " "quality estimation."
+    )
     icon = "icons/KMeans.svg"
     priority = 2100
 
@@ -96,8 +106,7 @@ class OWKMeans(widget.OWWidget):
 
     class Outputs:
         annotated_data = Output(
-            ANNOTATED_DATA_SIGNAL_NAME, Table, default=True,
-            replaces=["Annotated Data"]
+            ANNOTATED_DATA_SIGNAL_NAME, Table, default=True, replaces=["Annotated Data"]
         )
         centroids = Output("Centroids", Table)
 
@@ -135,9 +144,9 @@ class OWKMeans(widget.OWWidget):
     def migrate_settings(cls, settings, version):
         # type: (Dict, int) -> None
         if version < 2:
-            if 'auto_apply' in settings:
-                settings['auto_commit'] = settings.get('auto_apply', True)
-                settings.pop('auto_apply', None)
+            if "auto_apply" in settings:
+                settings["auto_commit"] = settings.get("auto_apply", True)
+                settings.pop("auto_apply", None)
 
     def __init__(self):
         super().__init__()
@@ -150,39 +159,60 @@ class OWKMeans(widget.OWWidget):
 
         layout = QGridLayout()
         bg = gui.radioButtonsInBox(
-            self.controlArea, self, "optimize_k", orientation=layout,
-            box="Number of Clusters", callback=self.update_method,
+            self.controlArea,
+            self,
+            "optimize_k",
+            orientation=layout,
+            box="Number of Clusters",
+            callback=self.update_method,
         )
 
-        layout.addWidget(
-            gui.appendRadioButton(bg, "Fixed:", addToLayout=False), 1, 1)
+        layout.addWidget(gui.appendRadioButton(bg, "Fixed:", addToLayout=False), 1, 1)
         sb = gui.hBox(None, margin=0)
         gui.spin(
-            sb, self, "k", minv=2, maxv=30,
-            controlWidth=60, alignment=Qt.AlignRight, callback=self.update_k)
+            sb,
+            self,
+            "k",
+            minv=2,
+            maxv=30,
+            controlWidth=60,
+            alignment=Qt.AlignRight,
+            callback=self.update_k,
+        )
         gui.rubber(sb)
         layout.addWidget(sb, 1, 2)
 
-        layout.addWidget(
-            gui.appendRadioButton(bg, "From", addToLayout=False), 2, 1)
+        layout.addWidget(gui.appendRadioButton(bg, "From", addToLayout=False), 2, 1)
         ftobox = gui.hBox(None)
         ftobox.layout().setContentsMargins(0, 0, 0, 0)
         layout.addWidget(ftobox, 2, 2)
         gui.spin(
-            ftobox, self, "k_from", minv=2, maxv=29,
-            controlWidth=60, alignment=Qt.AlignRight,
-            callback=self.update_from)
+            ftobox,
+            self,
+            "k_from",
+            minv=2,
+            maxv=29,
+            controlWidth=60,
+            alignment=Qt.AlignRight,
+            callback=self.update_from,
+        )
         gui.widgetLabel(ftobox, "to")
         gui.spin(
-            ftobox, self, "k_to", minv=3, maxv=30,
-            controlWidth=60, alignment=Qt.AlignRight,
-            callback=self.update_to)
+            ftobox,
+            self,
+            "k_to",
+            minv=3,
+            maxv=30,
+            controlWidth=60,
+            alignment=Qt.AlignRight,
+            callback=self.update_to,
+        )
         gui.rubber(ftobox)
 
         box = gui.vBox(self.controlArea, "Initialization")
         gui.comboBox(
-            box, self, "smart_init", items=self.INIT_METHODS,
-            callback=self.invalidate)
+            box, self, "smart_init", items=self.INIT_METHODS, callback=self.invalidate
+        )
 
         layout = QGridLayout()
         gui.widgetBox(box, orientation=layout)
@@ -190,19 +220,32 @@ class OWKMeans(widget.OWWidget):
         sb = gui.hBox(None, margin=0)
         layout.addWidget(sb, 0, 1)
         gui.lineEdit(
-            sb, self, "n_init", controlWidth=60,
-            valueType=int, validator=QIntValidator(), callback=self.invalidate)
+            sb,
+            self,
+            "n_init",
+            controlWidth=60,
+            valueType=int,
+            validator=QIntValidator(),
+            callback=self.invalidate,
+        )
         layout.addWidget(
-            gui.widgetLabel(None, "Maximum iterations: "), 1, 0, Qt.AlignLeft)
+            gui.widgetLabel(None, "Maximum iterations: "), 1, 0, Qt.AlignLeft
+        )
         sb = gui.hBox(None, margin=0)
         layout.addWidget(sb, 1, 1)
         gui.lineEdit(
-            sb, self, "max_iterations", controlWidth=60, valueType=int,
-            validator=QIntValidator(), callback=self.invalidate)
+            sb,
+            self,
+            "max_iterations",
+            controlWidth=60,
+            valueType=int,
+            validator=QIntValidator(),
+            callback=self.invalidate,
+        )
 
         self.apply_button = gui.auto_commit(
-            self.buttonsArea, self, "auto_commit", "Apply", box=None,
-            commit=self.commit)
+            self.buttonsArea, self, "auto_commit", "Apply", box=None, commit=self.commit
+        )
         gui.rubber(self.controlArea)
 
         box = gui.vBox(self.mainArea, box="Silhouette Scores")
@@ -257,7 +300,10 @@ class OWKMeans(widget.OWWidget):
             raise NotEnoughData()
 
         return KMeans(
-            n_clusters=k, init=init, n_init=n_init, max_iter=max_iter,
+            n_clusters=k,
+            init=init,
+            n_init=n_init,
+            max_iter=max_iter,
             compute_silhouette_score=silhouette,
         )(data)
 
@@ -302,8 +348,10 @@ class OWKMeans(widget.OWWidget):
         if self.optimize_k:
             self.update_results()
 
-        if self.optimize_k and all(isinstance(self.clusterings[i], str)
-                                   for i in range(self.k_from, self.k_to + 1)):
+        if self.optimize_k and all(
+            isinstance(self.clusterings[i], str)
+            for i in range(self.k_from, self.k_to + 1)
+        ):
             # Show the error of the last clustering
             self.Error.failed(self.clusterings[self.k_to])
 
@@ -312,15 +360,18 @@ class OWKMeans(widget.OWWidget):
     def __launch_tasks(self, ks):
         # type: (List[int]) -> None
         """Execute clustering in separate threads for all given ks."""
-        futures = [self.__executor.submit(
-            self._compute_clustering,
-            data=self.data,
-            k=k,
-            init=['random', 'k-means++'][self.smart_init],
-            n_init=self.n_init,
-            max_iter=self.max_iterations,
-            silhouette=True,
-        ) for k in ks]
+        futures = [
+            self.__executor.submit(
+                self._compute_clustering,
+                data=self.data,
+                k=k,
+                init=["random", "k-means++"][self.smart_init],
+                n_init=self.n_init,
+                max_iter=self.max_iterations,
+                silhouette=True,
+            )
+            for k in ks
+        ]
         watcher = FutureSetWatcher(futures)
         watcher.resultReadyAt.connect(self.__clustering_complete)
         watcher.progressChanged.connect(self.__progress_changed)
@@ -353,8 +404,9 @@ class OWKMeans(widget.OWWidget):
             self.Warning.not_enough_data(len(self.data), self.k_to)
             return
 
-        needed_ks = [k for k in range(self.k_from, self.k_to + 1)
-                     if k not in self.clusterings]
+        needed_ks = [
+            k for k in range(self.k_from, self.k_to + 1) if k not in self.clusterings
+        ]
 
         if needed_ks:
             self.__launch_tasks(needed_ks)
@@ -409,12 +461,13 @@ class OWKMeans(widget.OWWidget):
 
     def update_results(self):
         scores = [
-            mk if isinstance(mk, str) else mk.silhouette for mk in (
-                self.clusterings[k] for k in range(self.k_from, self.k_to + 1))
+            mk if isinstance(mk, str) else mk.silhouette
+            for mk in (self.clusterings[k] for k in range(self.k_from, self.k_to + 1))
         ]
         best_row = max(
-            range(len(scores)), default=0,
-            key=lambda x: 0 if isinstance(scores[x], str) else scores[x]
+            range(len(scores)),
+            default=0,
+            key=lambda x: 0 if isinstance(scores[x], str) else scores[x],
         )
         self.table_model.set_scores(scores, self.k_from)
         self.table_view.selectRow(best_row)
@@ -445,7 +498,7 @@ class OWKMeans(widget.OWWidget):
         domain = self.data.domain
         cluster_var = DiscreteVariable(
             get_next_name(domain, "Cluster"),
-            values=["C%d" % (x + 1) for x in range(km.k)]
+            values=["C%d" % (x + 1) for x in range(km.k)],
         )
         clust_ids = km(self.data)
         silhouette_var = ContinuousVariable(get_next_name(domain, "Silhouette"))
@@ -487,16 +540,24 @@ class OWKMeans(widget.OWWidget):
             k_clusters = self.k
         init_method = self.INIT_METHODS[self.smart_init]
         init_method = init_method[0].lower() + init_method[1:]
-        self.report_items((
-            ("Number of clusters", k_clusters),
-            ("Optimization", "{}, {} re-runs limited to {} steps".format(
-                init_method, self.n_init, self.max_iterations))))
+        self.report_items(
+            (
+                ("Number of clusters", k_clusters),
+                (
+                    "Optimization",
+                    "{}, {} re-runs limited to {} steps".format(
+                        init_method, self.n_init, self.max_iterations
+                    ),
+                ),
+            )
+        )
         if self.data is not None:
             self.report_data("Data", self.data)
             if self.optimize_k:
                 self.report_table(
                     "Silhouette scores for different numbers of clusters",
-                    self.table_view)
+                    self.table_view,
+                )
 
     def onDeleteWidget(self):
         self.cancel()

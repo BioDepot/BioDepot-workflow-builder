@@ -6,13 +6,13 @@ from Orange.widgets.credentials import CredentialManager
 
 class TestCredentialManager(unittest.TestCase):
     def setUp(self):
-        self.cm = CredentialManager('Orange')
+        self.cm = CredentialManager("Orange")
         self.cm.key = "Foo"
 
     def test_credential_manager(self):
-        cm = CredentialManager('Orange')
-        cm.key = 'Foo'
-        self.assertEqual(cm.key, 'Foo')
+        cm = CredentialManager("Orange")
+        cm.key = "Foo"
+        self.assertEqual(cm.key, "Foo")
         del cm.key
         self.assertEqual(cm.key, None)
 

@@ -17,9 +17,8 @@ from Orange.evaluation.testing import Results
 
 # [start-snippet-1]
 import concurrent.futures
-from Orange.widgets.utils.concurrent import (
-    ThreadExecutor, FutureWatcher, methodinvoke
-)
+from Orange.widgets.utils.concurrent import ThreadExecutor, FutureWatcher, methodinvoke
+
 # [end-snippet-1]
 
 
@@ -28,12 +27,13 @@ class Task:
     """
     A class that will hold the state for an learner evaluation.
     """
+
     #: A concurrent.futures.Future with our (eventual) results.
     #: The OWLearningCurveC class must fill this field
-    future = ...       # type: concurrent.futures.Future
+    future = ...  # type: concurrent.futures.Future
 
     #: FutureWatcher. Likewise this will be filled by OWLearningCurveC
-    watcher = ...      # type: FutureWatcher
+    watcher = ...  # type: FutureWatcher
 
     #: True if this evaluation has been cancelled. The OWLearningCurveC
     #: will setup the task execution environment in such a way that this
@@ -56,20 +56,29 @@ class Task:
         self.future.cancel()
         # ... and wait until computation finishes
         concurrent.futures.wait([self.future])
+
+
 # [end-snippet-2]
 
 
 class OWLearningCurveC(widget.OWWidget):
     name = "Learning Curve (C)"
-    description = ("Takes a dataset and a set of learners and shows a "
-                   "learning curve in a table")
+    description = (
+        "Takes a dataset and a set of learners and shows a " "learning curve in a table"
+    )
     icon = "icons/LearningCurve.svg"
     priority = 1010
 
-    inputs = [("Data", Orange.data.Table, "set_dataset", widget.Default),
-              ("Test Data", Orange.data.Table, "set_testdataset"),
-              ("Learner", Orange.classification.Learner, "set_learner",
-               widget.Multiple + widget.Default)]
+    inputs = [
+        ("Data", Orange.data.Table, "set_dataset", widget.Default),
+        ("Test Data", Orange.data.Table, "set_testdataset"),
+        (
+            "Learner",
+            Orange.classification.Learner,
+            "set_learner",
+            widget.Multiple + widget.Default,
+        ),
+    ]
 
     #: cross validation folds
     folds = settings.Setting(5)
@@ -91,7 +100,7 @@ class OWLearningCurveC(widget.OWWidget):
             ("Classification Accuracy", Orange.evaluation.scoring.CA),
             ("AUC", Orange.evaluation.scoring.AUC),
             ("Precision", Orange.evaluation.scoring.Precision),
-            ("Recall", Orange.evaluation.scoring.Recall)
+            ("Recall", Orange.evaluation.scoring.Recall),
         ]
         #: input data on which to construct the learning curve
         self.data = None
@@ -108,45 +117,66 @@ class OWLearningCurveC(widget.OWWidget):
 
         # [start-snippet-3]
         #: The current evaluating task (if any)
-        self._task = None   # type: Optional[Task]
+        self._task = None  # type: Optional[Task]
         #: An executor we use to submit learner evaluations into a thread pool
         self._executor = ThreadExecutor()
         # [end-snippet-3]
 
         # GUI
         box = gui.widgetBox(self.controlArea, "Info")
-        self.infoa = gui.widgetLabel(box, 'No data on input.')
-        self.infob = gui.widgetLabel(box, 'No learners.')
+        self.infoa = gui.widgetLabel(box, "No data on input.")
+        self.infob = gui.widgetLabel(box, "No learners.")
 
         gui.separator(self.controlArea)
 
         box = gui.widgetBox(self.controlArea, "Evaluation Scores")
-        gui.comboBox(box, self, "scoringF",
-                     items=[x[0] for x in self.scoring],
-                     callback=self._invalidate_curves)
+        gui.comboBox(
+            box,
+            self,
+            "scoringF",
+            items=[x[0] for x in self.scoring],
+            callback=self._invalidate_curves,
+        )
 
         gui.separator(self.controlArea)
 
         box = gui.widgetBox(self.controlArea, "Options")
-        gui.spin(box, self, 'folds', 2, 100, step=1,
-                 label='Cross validation folds:  ', keyboardTracking=False,
-                 callback=lambda:
-                    self._invalidate_results() if self.commitOnChange else None
+        gui.spin(
+            box,
+            self,
+            "folds",
+            2,
+            100,
+            step=1,
+            label="Cross validation folds:  ",
+            keyboardTracking=False,
+            callback=lambda: self._invalidate_results()
+            if self.commitOnChange
+            else None,
         )
-        gui.spin(box, self, 'steps', 2, 100, step=1,
-                 label='Learning curve points:  ', keyboardTracking=False,
-                 callback=[self.updateCurvePoints,
-                           lambda: self._invalidate_results() if self.commitOnChange else None])
-        gui.checkBox(box, self, 'commitOnChange', 'Apply setting on any change')
-        self.commitBtn = gui.button(box, self, "Apply Setting",
-                                    callback=self._invalidate_results,
-                                    disabled=True)
+        gui.spin(
+            box,
+            self,
+            "steps",
+            2,
+            100,
+            step=1,
+            label="Learning curve points:  ",
+            keyboardTracking=False,
+            callback=[
+                self.updateCurvePoints,
+                lambda: self._invalidate_results() if self.commitOnChange else None,
+            ],
+        )
+        gui.checkBox(box, self, "commitOnChange", "Apply setting on any change")
+        self.commitBtn = gui.button(
+            box, self, "Apply Setting", callback=self._invalidate_results, disabled=True
+        )
 
         gui.rubber(self.controlArea)
 
         # table widget
-        self.table = gui.table(self.mainArea,
-                               selectionMode=QTableWidget.NoSelection)
+        self.table = gui.table(self.mainArea, selectionMode=QTableWidget.NoSelection)
 
     ##########################################################################
     # slots: handle input signals
@@ -162,9 +192,9 @@ class OWLearningCurveC(widget.OWWidget):
         self.data = data
 
         if data is not None:
-            self.infoa.setText('%d instances in input dataset' % len(data))
+            self.infoa.setText("%d instances in input dataset" % len(data))
         else:
-            self.infoa.setText('No data on input.')
+            self.infoa.setText("No data on input.")
 
         self.commitBtn.setEnabled(self.data is not None)
 
@@ -208,10 +238,11 @@ class OWLearningCurveC(widget.OWWidget):
 
         self.commitBtn.setEnabled(len(self.learners))
 
-# [start-snippet-4]
+    # [start-snippet-4]
     def handleNewSignals(self):
         self._update()
-# [end-snippet-4]
+
+    # [end-snippet-4]
 
     def _invalidate_curves(self):
         if self.data is not None:
@@ -224,7 +255,7 @@ class OWLearningCurveC(widget.OWWidget):
             self.results[id] = None
         self._update()
 
-# [start-snippet-5]
+    # [start-snippet-5]
     def _update(self):
         if self._task is not None:
             # First make sure any pending tasks are cancelled.
@@ -234,29 +265,37 @@ class OWLearningCurveC(widget.OWWidget):
         if self.data is None:
             return
         # collect all learners for which results have not yet been computed
-        need_update = [(id, learner) for id, learner in self.learners.items()
-                       if self.results[id] is None]
+        need_update = [
+            (id, learner)
+            for id, learner in self.learners.items()
+            if self.results[id] is None
+        ]
         if not need_update:
             return
-# [end-snippet-5]
-# [start-snippet-6]
+        # [end-snippet-5]
+        # [start-snippet-6]
         learners = [learner for _, learner in need_update]
         # setup the learner evaluations as partial function capturing
         # the necessary arguments.
         if self.testdata is None:
             learning_curve_func = partial(
                 learning_curve,
-                learners, self.data, folds=self.folds,
+                learners,
+                self.data,
+                folds=self.folds,
                 proportions=self.curvePoints,
             )
         else:
             learning_curve_func = partial(
                 learning_curve_with_test_data,
-                learners, self.data, self.testdata, times=self.folds,
+                learners,
+                self.data,
+                self.testdata,
+                times=self.folds,
                 proportions=self.curvePoints,
             )
-# [end-snippet-6]
-# [start-snippet-7]
+        # [end-snippet-6]
+        # [start-snippet-7]
         # setup the task state
         self._task = task = Task()
         # The learning_curve[_with_test_data] also takes a callback function
@@ -276,8 +315,8 @@ class OWLearningCurveC(widget.OWWidget):
 
         # capture the callback in the partial function
         learning_curve_func = partial(learning_curve_func, callback=callback)
-# [end-snippet-7]
-# [start-snippet-8]
+        # [end-snippet-7]
+        # [start-snippet-8]
         self.progressBarInit()
         # Submit the evaluation function to the executor and fill in the
         # task with the resultant Future.
@@ -287,14 +326,15 @@ class OWLearningCurveC(widget.OWWidget):
         # by using FutureWatcher we ensure `_task_finished` slot will be
         # called from the main GUI thread by the Qt's event loop
         task.watcher.done.connect(self._task_finished)
-# [end-snippet-8]
+
+    # [end-snippet-8]
 
     @pyqtSlot(float)
     def setProgressValue(self, value):
         assert self.thread() is QThread.currentThread()
         self.progressBarSet(value)
 
-# [start-snippet-9]
+    # [start-snippet-9]
     @pyqtSlot(concurrent.futures.Future)
     def _task_finished(self, f):
         """
@@ -317,15 +357,15 @@ class OWLearningCurveC(widget.OWWidget):
             # Log the exception with a traceback
             log = logging.getLogger()
             log.exception(__name__, exc_info=True)
-            self.error("Exception occurred during evaluation: {!r}"
-                       .format(ex))
+            self.error("Exception occurred during evaluation: {!r}".format(ex))
             # clear all results
             for key in self.results.keys():
                 self.results[key] = None
         else:
             # split the combined result into per learner/model results ...
-            results = [list(Results.split_by_model(p_results))
-                       for p_results in results]  # type: List[List[Results]]
+            results = [
+                list(Results.split_by_model(p_results)) for p_results in results
+            ]  # type: List[List[Results]]
             assert all(len(r.learners) == 1 for r1 in results for r in r1)
             assert len(results) == len(self.curvePoints)
 
@@ -336,13 +376,14 @@ class OWLearningCurveC(widget.OWWidget):
             for i, learner in enumerate(learners):
                 id_ = learner_id[learner]
                 self.results[id_] = [p_results[i] for p_results in results]
-# [end-snippet-9]
+        # [end-snippet-9]
         # update the display
         self._update_curve_points()
         self._update_table()
-# [end-snippet-9]
 
-# [start-snippet-10]
+    # [end-snippet-9]
+
+    # [start-snippet-10]
     def cancel(self):
         """
         Cancel the current task (if any).
@@ -353,18 +394,19 @@ class OWLearningCurveC(widget.OWWidget):
             # disconnect the `_task_finished` slot
             self._task.watcher.done.disconnect(self._task_finished)
             self._task = None
-# [end-snippet-10]
 
-# [start-snippet-11]
+    # [end-snippet-10]
+
+    # [start-snippet-11]
     def onDeleteWidget(self):
         self.cancel()
         super().onDeleteWidget()
-# [end-snippet-11]
+
+    # [end-snippet-11]
 
     def _update_curve_points(self):
         for id in self.learners:
-            curve = [self.scoring[self.scoringF][1](x)[0]
-                     for x in self.results[id]]
+            curve = [self.scoring[self.scoringF][1](x)[0] for x in self.results[id]]
             self.curves[id] = curve
 
     def _update_table(self):
@@ -373,9 +415,11 @@ class OWLearningCurveC(widget.OWWidget):
         self.table.setColumnCount(len(self.learners))
 
         self.table.setHorizontalHeaderLabels(
-            [learner.name for _, learner in self.learners.items()])
+            [learner.name for _, learner in self.learners.items()]
+        )
         self.table.setVerticalHeaderLabels(
-            ["{:.2f}".format(p) for p in self.curvePoints])
+            ["{:.2f}".format(p) for p in self.curvePoints]
+        )
 
         if self.data is None:
             return
@@ -383,7 +427,8 @@ class OWLearningCurveC(widget.OWWidget):
         for column, curve in enumerate(self.curves.values()):
             for row, point in enumerate(curve):
                 self.table.setItem(
-                    row, column, QTableWidgetItem("{:.5f}".format(point)))
+                    row, column, QTableWidgetItem("{:.5f}".format(point))
+                )
 
         for i in range(len(self.learners)):
             sh = self.table.sizeHintForColumn(i)
@@ -391,11 +436,12 @@ class OWLearningCurveC(widget.OWWidget):
             self.table.setColumnWidth(i, max(sh, cwidth))
 
     def updateCurvePoints(self):
-        self.curvePoints = [(x + 1.)/self.steps for x in range(self.steps)]
+        self.curvePoints = [(x + 1.0) / self.steps for x in range(self.steps)]
 
 
-def learning_curve(learners, data, folds=10, proportions=None,
-                   random_state=None, callback=None):
+def learning_curve(
+    learners, data, folds=10, proportions=None, random_state=None, callback=None
+):
 
     if proportions is None:
         proportions = numpy.linspace(0.0, 1.0, 10 + 1, endpoint=True)[1:]
@@ -409,26 +455,34 @@ def learning_curve(learners, data, folds=10, proportions=None,
 
     if callback is not None:
         parts_count = len(proportions)
-        callback_wrapped = lambda part: \
-            lambda value: callback(value / parts_count + part / parts_count)
+        callback_wrapped = lambda part: lambda value: callback(
+            value / parts_count + part / parts_count
+        )
     else:
         callback_wrapped = lambda part: None
 
     results = [
         Orange.evaluation.CrossValidation(
-            data, learners, k=folds,
-            preprocessor=lambda data, p=p:
-                select_proportion_preproc(data, p),
-            callback=callback_wrapped(i)
+            data,
+            learners,
+            k=folds,
+            preprocessor=lambda data, p=p: select_proportion_preproc(data, p),
+            callback=callback_wrapped(i),
         )
         for i, p in enumerate(proportions)
     ]
     return results
 
 
-def learning_curve_with_test_data(learners, traindata, testdata, times=10,
-                                  proportions=None, random_state=None,
-                                  callback=None):
+def learning_curve_with_test_data(
+    learners,
+    traindata,
+    testdata,
+    times=10,
+    proportions=None,
+    random_state=None,
+    callback=None,
+):
     if proportions is None:
         proportions = numpy.linspace(0.0, 1.0, 10 + 1, endpoint=True)[1:]
 
@@ -441,29 +495,35 @@ def learning_curve_with_test_data(learners, traindata, testdata, times=10,
 
     if callback is not None:
         parts_count = len(proportions) * times
-        callback_wrapped = lambda part: \
-            lambda value: callback(value / parts_count + part / parts_count)
+        callback_wrapped = lambda part: lambda value: callback(
+            value / parts_count + part / parts_count
+        )
     else:
         callback_wrapped = lambda part: None
 
     results = [
-        [Orange.evaluation.TestOnTestData(
-             traindata, testdata, learners,
-             preprocessor=lambda data, p=p:
-                 select_proportion_preproc(data, p),
-             callback=callback_wrapped(i * times + t))
-         for t in range(times)]
+        [
+            Orange.evaluation.TestOnTestData(
+                traindata,
+                testdata,
+                learners,
+                preprocessor=lambda data, p=p: select_proportion_preproc(data, p),
+                callback=callback_wrapped(i * times + t),
+            )
+            for t in range(times)
+        ]
         for i, p in enumerate(proportions)
     ]
-    results = [reduce(results_add, res, Orange.evaluation.Results())
-               for res in results]
+    results = [reduce(results_add, res, Orange.evaluation.Results()) for res in results]
     return results
 
 
 def results_add(x, y):
     def is_empty(res):
-        return (getattr(res, "models", None) is None
-                and getattr(res, "row_indices", None) is None)
+        return (
+            getattr(res, "models", None) is None
+            and getattr(res, "row_indices", None) is None
+        )
 
     if is_empty(x):
         return y
@@ -516,6 +576,7 @@ def results_add(x, y):
 
 def main(argv=None):
     from AnyQt.QtWidgets import QApplication
+
     logging.basicConfig()
     app = QApplication(list(argv) if argv else [])
     argv = app.arguments()
@@ -538,11 +599,11 @@ def main(argv=None):
     ow.set_testdataset(testdata)
 
     l1 = Orange.classification.NaiveBayesLearner()
-    l1.name = 'Naive Bayes'
+    l1.name = "Naive Bayes"
     ow.set_learner(l1, 1)
 
     l2 = Orange.classification.LogisticRegressionLearner()
-    l2.name = 'Logistic Regression'
+    l2.name = "Logistic Regression"
     ow.set_learner(l2, 2)
 
     l4 = Orange.classification.SklTreeLearner()
@@ -561,6 +622,7 @@ def main(argv=None):
     ow.handleNewSignals()
     ow.onDeleteWidget()
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))

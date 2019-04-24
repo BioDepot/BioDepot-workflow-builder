@@ -1,18 +1,23 @@
 import numpy as np
 
 from AnyQt.QtCore import (
-    Qt, QLineF, QSize, QAbstractTableModel, QModelIndex, QSortFilterProxyModel
+    Qt,
+    QLineF,
+    QSize,
+    QAbstractTableModel,
+    QModelIndex,
+    QSortFilterProxyModel,
 )
 from AnyQt.QtGui import QPainter, QPen, QBrush, QColor
-from AnyQt.QtWidgets import (
-    QItemDelegate, QHeaderView, QPushButton, QApplication
-)
+from AnyQt.QtWidgets import QItemDelegate, QHeaderView, QPushButton, QApplication
 
 from Orange.data import Table
 from Orange.classification.rules import _RuleClassifier
 from Orange.widgets import widget, gui, settings
-from Orange.widgets.utils.annotated_data import (create_annotated_table,
-                                                 ANNOTATED_DATA_SIGNAL_NAME)
+from Orange.widgets.utils.annotated_data import (
+    create_annotated_table,
+    ANNOTATED_DATA_SIGNAL_NAME,
+)
 from Orange.widgets.widget import Input, Output
 
 
@@ -43,8 +48,16 @@ class OWRuleViewer(widget.OWWidget):
 
         self.model = CustomRuleViewerTableModel(parent=self)
         self.model.set_horizontal_header_labels(
-            ["IF conditions", "", "THEN class", "Distribution",
-             "Probabilities [%]", "Quality", "Length"])
+            [
+                "IF conditions",
+                "",
+                "THEN class",
+                "Distribution",
+                "Probabilities [%]",
+                "Quality",
+                "Length",
+            ]
+        )
 
         self.proxy_model = QSortFilterProxyModel(parent=self)
         self.proxy_model.setSourceModel(self.model)
@@ -61,18 +74,21 @@ class OWRuleViewer(widget.OWWidget):
 
         self.mainArea.layout().setContentsMargins(0, 0, 0, 0)
         self.mainArea.layout().addWidget(self.view)
-        bottom_box = gui.hBox(widget=self.mainArea, box=None,
-                              margin=0, spacing=0)
+        bottom_box = gui.hBox(widget=self.mainArea, box=None, margin=0, spacing=0)
 
-        original_order_button = QPushButton(
-            "Restore original order", autoDefault=False)
+        original_order_button = QPushButton("Restore original order", autoDefault=False)
         original_order_button.setFixedWidth(180)
         bottom_box.layout().addWidget(original_order_button)
         original_order_button.clicked.connect(self.restore_original_order)
 
         gui.separator(bottom_box, width=5, height=0)
-        gui.checkBox(widget=bottom_box, master=self, value="compact_view",
-                     label="Compact view", callback=self.on_update)
+        gui.checkBox(
+            widget=bottom_box,
+            master=self,
+            value="compact_view",
+            label="Compact view",
+            callback=self.on_update,
+        )
 
     @Inputs.data
     def set_data(self, data):
@@ -87,10 +103,12 @@ class OWRuleViewer(widget.OWWidget):
 
         if classifier is not None and hasattr(classifier, "rule_list"):
             self.model.set_vertical_header_labels(
-                list(range(len(classifier.rule_list))))
+                list(range(len(classifier.rule_list)))
+            )
 
-            self.dist_item_delegate.color_schema = \
-                [QColor(*c) for c in classifier.domain.class_var.colors]
+            self.dist_item_delegate.color_schema = [
+                QColor(*c) for c in classifier.domain.class_var.colors
+            ]
 
             self.model.wrap(self.classifier.domain, self.classifier.rule_list)
 
@@ -103,10 +121,12 @@ class OWRuleViewer(widget.OWWidget):
         self.model.set_compact_view(self.compact_view)
         if self.compact_view:
             self.view.horizontalHeader().setSectionResizeMode(
-                0, QHeaderView.Interactive)  # QHeaderView.Stretch
+                0, QHeaderView.Interactive
+            )  # QHeaderView.Stretch
         else:
             self.view.horizontalHeader().setSectionResizeMode(
-                QHeaderView.ResizeToContents)
+                QHeaderView.ResizeToContents
+            )
         self.view.resizeColumnsToContents()
         self.view.resizeRowsToContents()
 
@@ -116,20 +136,22 @@ class OWRuleViewer(widget.OWWidget):
         self.selected = None
         selection_model = self.view.selectionModel()
         if selection_model.hasSelection():
-            selection = (selection_model.selection() if not actual
-                         else self.proxy_model.mapSelectionToSource(
-                                selection_model.selection()))
+            selection = (
+                selection_model.selection()
+                if not actual
+                else self.proxy_model.mapSelectionToSource(selection_model.selection())
+            )
 
-            self.selected = sorted(set(index.row() for index
-                                       in selection.indexes()))
+            self.selected = sorted(set(index.row() for index in selection.indexes()))
 
     def _restore_selected(self):
         if self.selected is not None:
             selection_model = self.view.selectionModel()
             for row in self.selected:
-                selection_model.select(self.proxy_model.index(row, 0),
-                                       selection_model.Select |
-                                       selection_model.Rows)
+                selection_model.select(
+                    self.proxy_model.index(row, 0),
+                    selection_model.Select | selection_model.Rows,
+                )
 
     def restore_original_order(self):
         self.proxy_model.sort(-1)
@@ -137,8 +159,9 @@ class OWRuleViewer(widget.OWWidget):
     def copy_to_clipboard(self):
         self._save_selected(actual=True)
         if self.selected is not None:
-            output = "\n".join([str(self.classifier.rule_list[i])
-                                for i in self.selected])
+            output = "\n".join(
+                [str(self.classifier.rule_list[i]) for i in self.selected]
+            )
             QApplication.clipboard().setText(output)
 
     def commit(self):
@@ -147,11 +170,12 @@ class OWRuleViewer(widget.OWWidget):
         selected_indices = []
 
         data = self.data or self.classifier and self.classifier.instances
-        if (self.selected is not None and
-                data is not None and
-                self.classifier is not None and
-                data.domain.attributes ==
-                self.classifier.original_domain.attributes):
+        if (
+            self.selected is not None
+            and data is not None
+            and self.classifier is not None
+            and data.domain.attributes == self.classifier.original_domain.attributes
+        ):
 
             status = np.ones(data.X.shape[0], dtype=bool)
             for i in self.selected:
@@ -159,8 +183,11 @@ class OWRuleViewer(widget.OWWidget):
                 status &= rule.evaluate_data(data.X)
 
             selected_indices = status.nonzero()[0]
-            data_output = data.from_table_rows(data, selected_indices) \
-                if len(selected_indices) else None
+            data_output = (
+                data.from_table_rows(data, selected_indices)
+                if len(selected_indices)
+                else None
+            )
 
         self.Outputs.selected_data.send(data_output)
         self.Outputs.annotated_data.send(create_annotated_table(data, selected_indices))
@@ -179,12 +206,7 @@ class CustomRuleViewerTableModel(QAbstractTableModel):
     SortRole = Qt.UserRole + 1
 
     # ascii operators
-    OPERATORS = {
-        '==': '=',
-        '!=': '≠',
-        '<=': '≤',
-        '>=': '≥'
-    }
+    OPERATORS = {"==": "=", "!=": "≠", "<=": "≤", ">=": "≥"}
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -196,8 +218,9 @@ class CustomRuleViewerTableModel(QAbstractTableModel):
     def headerData(self, section, orientation, role=Qt.DisplayRole):
         if role == Qt.DisplayRole:
             headers = self._headers.get(orientation)
-            return (headers[section] if headers and section < len(headers)
-                    else str(section))
+            return (
+                headers[section] if headers and section < len(headers) else str(section)
+            )
 
     def set_horizontal_header_labels(self, labels):
         self._headers[Qt.Horizontal] = labels
@@ -235,37 +258,52 @@ class CustomRuleViewerTableModel(QAbstractTableModel):
         def _display_role():
             if column == 0:
                 delim = " AND " if self._compact_view else " AND\n"
-                return "TRUE" if not rule.selectors else delim.join(
-                    [attributes[s.column].name + self.OPERATORS[s.op] +
-                     (attributes[s.column].values[int(s.value)]
-                      if attributes[s.column].is_discrete
-                      else str(s.value)) for s in rule.selectors])
+                return (
+                    "TRUE"
+                    if not rule.selectors
+                    else delim.join(
+                        [
+                            attributes[s.column].name
+                            + self.OPERATORS[s.op]
+                            + (
+                                attributes[s.column].values[int(s.value)]
+                                if attributes[s.column].is_discrete
+                                else str(s.value)
+                            )
+                            for s in rule.selectors
+                        ]
+                    )
+                )
             if column == 1:
-                return '→'
+                return "→"
             if column == 2:
                 return class_var.name + "=" + class_var.values[rule.prediction]
             if column == 3:
                 # type(curr_class_dist) = ndarray
-                return ([float(format(x, '.1f')) for x in rule.curr_class_dist]
-                        if rule.curr_class_dist.dtype == float
-                        else rule.curr_class_dist.tolist())
+                return (
+                    [float(format(x, ".1f")) for x in rule.curr_class_dist]
+                    if rule.curr_class_dist.dtype == float
+                    else rule.curr_class_dist.tolist()
+                )
             if column == 4:
-                return " : ".join(str(int(round(100 * x)))
-                                  for x in rule.probabilities)
+                return " : ".join(str(int(round(100 * x))) for x in rule.probabilities)
             if column == 5:
                 value = rule.quality
                 absval = abs(value)
                 strlen = len(str(int(absval)))
-                return '{:.{}{}}'.format(value,
-                                         2 if absval < .001 else
-                                         3 if strlen < 2 else
-                                         1 if strlen < 5 else
-                                         0 if strlen < 6 else
-                                         3,
-                                         'f' if (absval == 0 or
-                                                 absval >= .001 and
-                                                 strlen < 6)
-                                         else 'e')
+                return "{:.{}{}}".format(
+                    value,
+                    2
+                    if absval < 0.001
+                    else 3
+                    if strlen < 2
+                    else 1
+                    if strlen < 5
+                    else 0
+                    if strlen < 6
+                    else 3,
+                    "f" if (absval == 0 or absval >= 0.001 and strlen < 6) else "e",
+                )
             if column == 6:
                 return rule.length
 
@@ -277,14 +315,28 @@ class CustomRuleViewerTableModel(QAbstractTableModel):
             if column == 3:
                 # list of int, float
                 curr_class_dist = _display_role()
-                return class_var.name + "\n" + "\n".join(
-                    (str(curr_class) + ": " + str(curr_class_dist[i])
-                     for i, curr_class in enumerate(class_var.values)))
+                return (
+                    class_var.name
+                    + "\n"
+                    + "\n".join(
+                        (
+                            str(curr_class) + ": " + str(curr_class_dist[i])
+                            for i, curr_class in enumerate(class_var.values)
+                        )
+                    )
+                )
             if column == 4:
-                return class_var.name + "\n" + "\n".join(
-                    str(curr_class) + ": " +
-                    '{:.1f}'.format(rule.probabilities[i] * 100) + "%"
-                    for i, curr_class in enumerate(class_var.values))
+                return (
+                    class_var.name
+                    + "\n"
+                    + "\n".join(
+                        str(curr_class)
+                        + ": "
+                        + "{:.1f}".format(rule.probabilities[i] * 100)
+                        + "%"
+                        for i, curr_class in enumerate(class_var.values)
+                    )
+                )
             return _display_role()
 
         def _sort_role():
@@ -307,11 +359,18 @@ class CustomRuleViewerTableModel(QAbstractTableModel):
         if role == self.SortRole:
             return _sort_role()
         if role == Qt.TextAlignmentRole:
-            return (Qt.AlignVCenter | [(Qt.AlignRight if self._compact_view
-                                        else Qt.AlignLeft), Qt.AlignCenter,
-                                       Qt.AlignLeft, Qt.AlignCenter,
-                                       Qt.AlignCenter, Qt.AlignRight,
-                                       Qt.AlignRight][column])
+            return (
+                Qt.AlignVCenter
+                | [
+                    (Qt.AlignRight if self._compact_view else Qt.AlignLeft),
+                    Qt.AlignCenter,
+                    Qt.AlignLeft,
+                    Qt.AlignCenter,
+                    Qt.AlignCenter,
+                    Qt.AlignRight,
+                    Qt.AlignRight,
+                ][column]
+            )
 
     def __len__(self):
         return len(self._rule_list)
@@ -355,7 +414,7 @@ class DistributionItemDelegate(QItemDelegate):
 
             text = str(index.data(Qt.DisplayRole))
             option.displayAlignment = Qt.AlignCenter
-            text_rect = rect.adjusted(0, 0, 0, -textoffset*0)
+            text_rect = rect.adjusted(0, 0, 0, -textoffset * 0)
             self.drawDisplay(painter, option, text_rect, text)
 
             painter.setRenderHint(QPainter.Antialiasing)
@@ -370,6 +429,7 @@ class DistributionItemDelegate(QItemDelegate):
             painter.restore()
 
         painter.restore()
+
 
 if __name__ == "__main__":
     from PyQt4.QtGui import QApplication

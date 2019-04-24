@@ -20,6 +20,7 @@ class TestOWBaseLearner(WidgetTest):
 
         class FailingLearner(Learner):
             """A learner that fails when given data"""
+
             __returns__ = Model
 
             def __call__(self, data, *_):
@@ -29,6 +30,7 @@ class TestOWBaseLearner(WidgetTest):
 
         class OWFailingLearner(OWBaseLearner):
             """Widget for the above learner"""
+
             name = learner_name = "foo"
             LEARNER = FailingLearner
             auto_apply = True

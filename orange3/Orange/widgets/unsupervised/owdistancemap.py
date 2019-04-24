@@ -6,12 +6,22 @@ from operator import iadd
 import numpy
 
 from AnyQt.QtWidgets import (
-    QFormLayout, QGraphicsRectItem, QGraphicsGridLayout, QGraphicsWidget,
-    QApplication
+    QFormLayout,
+    QGraphicsRectItem,
+    QGraphicsGridLayout,
+    QGraphicsWidget,
+    QApplication,
 )
 from AnyQt.QtGui import (
-    QFontMetrics, QPen, QIcon, QPixmap, QLinearGradient, QPainter, QColor,
-    QBrush, QTransform
+    QFontMetrics,
+    QPen,
+    QIcon,
+    QPixmap,
+    QLinearGradient,
+    QPainter,
+    QColor,
+    QBrush,
+    QTransform,
 )
 from AnyQt.QtCore import Qt, QRect, QRectF, QSize, QPointF
 from AnyQt.QtCore import pyqtSignal as Signal
@@ -25,10 +35,13 @@ from Orange.data.domain import filter_visible
 
 from Orange.widgets import widget, gui, settings
 from Orange.widgets.utils import itemmodels, colorbrewer
-from Orange.widgets.utils.annotated_data import (create_annotated_table,
-                                                 ANNOTATED_DATA_SIGNAL_NAME)
+from Orange.widgets.utils.annotated_data import (
+    create_annotated_table,
+    ANNOTATED_DATA_SIGNAL_NAME,
+)
 from Orange.widgets.widget import Input, Output
 from .owhierarchicalclustering import DendrogramWidget, GraphicsSimpleTextList
+
 
 def _remove_item(item):
     item.setParentItem(None)
@@ -40,6 +53,7 @@ def _remove_item(item):
 class DistanceMapItem(pg.ImageItem):
     """A distance matrix image with user selectable regions.
     """
+
     class SelectionRect(QGraphicsRectItem):
         def boundingRect(self):
             return super().boundingRect().adjusted(-1, -1, 1, 1)
@@ -75,13 +89,11 @@ class DistanceMapItem(pg.ImageItem):
 
         if command & self.Select:
             area = area.normalized()
-            intersects = [rect.intersects(area)
-                          for item, rect in self.__selections]
+            intersects = [rect.intersects(area) for item, rect in self.__selections]
 
             def partition(predicate, iterable):
                 t1, t2 = itertools.tee(iterable)
-                return (itertools.filterfalse(predicate, t1),
-                        filter(predicate, t2))
+                return (itertools.filterfalse(predicate, t1), filter(predicate, t2))
 
             def intersects(selection):
                 _, selarea = selection
@@ -92,8 +104,7 @@ class DistanceMapItem(pg.ImageItem):
             intersection = list(intersection)
 
             # merge intersecting selections into a single area
-            area = reduce(QRect.united, (area for _, area in intersection),
-                          area)
+            area = reduce(QRect.united, (area for _, area in intersection), area)
 
             visualarea = self.__visualRectForSelection(area)
             item = DistanceMapItem.SelectionRect(visualarea, self)
@@ -122,12 +133,13 @@ class DistanceMapItem(pg.ImageItem):
                 item.setPen(QPen(Qt.red, 0))
 
             # intersection with existing regions
-            intersection = [(item, selarea)
-                            for item, selarea in self.__selections
-                            if area.intersects(selarea)]
+            intersection = [
+                (item, selarea)
+                for item, selarea in self.__selections
+                if area.intersects(selarea)
+            ]
             fullarea = reduce(
-                QRect.united, (selarea for _, selarea in intersection),
-                area
+                QRect.united, (selarea for _, selarea in intersection), area
             )
             visualarea = self.__visualRectForSelection(fullarea)
             item.setRect(visualarea)
@@ -219,11 +231,11 @@ class DistanceMapItem(pg.ImageItem):
         return selarea.normalized()
 
     def selections(self):
-        selections = [self.__selectionForArea(area)
-                      for _, area in self.__selections]
-        return [(range(r.top(), r.bottom() + 1),
-                 range(r.left(), r.right() + 1))
-                for r in selections]
+        selections = [self.__selectionForArea(area) for _, area in self.__selections]
+        return [
+            (range(r.top(), r.bottom() + 1), range(r.left(), r.right() + 1))
+            for r in selections
+        ]
 
     def hoverMoveEvent(self, event):
         super().hoverMoveEvent(event)
@@ -235,8 +247,9 @@ class DistanceMapItem(pg.ImageItem):
             self.setToolTip("")
 
 
-_color_palettes = sorted(colorbrewer.colorSchemes["sequential"].items()) + \
-                  [("Blue-Yellow", {2: [(0, 0, 255), (255, 255, 0)]})]
+_color_palettes = sorted(colorbrewer.colorSchemes["sequential"].items()) + [
+    ("Blue-Yellow", {2: [(0, 0, 255), (255, 255, 0)]})
+]
 _default_colormap_index = len(_color_palettes) - 1
 
 
@@ -292,13 +305,18 @@ class OWDistanceMap(widget.OWWidget):
         self._selection = None
 
         self.sorting_cb = gui.comboBox(
-            self.controlArea, self, "sorting", box="Element Sorting",
+            self.controlArea,
+            self,
+            "sorting",
+            box="Element Sorting",
             items=["None", "Clustering", "Clustering with ordered leaves"],
-            callback=self._invalidate_ordering)
+            callback=self._invalidate_ordering,
+        )
 
         box = gui.vBox(self.controlArea, "Colors")
         self.colormap_cb = gui.comboBox(
-            box, self, "colormap", callback=self._update_color)
+            box, self, "colormap", callback=self._update_color
+        )
         self.colormap_cb.setIconSize(QSize(64, 16))
         self.palettes = list(_color_palettes)
 
@@ -308,37 +326,59 @@ class OWDistanceMap(widget.OWWidget):
         form = QFormLayout(
             formAlignment=Qt.AlignLeft,
             labelAlignment=Qt.AlignLeft,
-            fieldGrowthPolicy=QFormLayout.AllNonFixedFieldsGrow
+            fieldGrowthPolicy=QFormLayout.AllNonFixedFieldsGrow,
         )
-#         form.addRow(
-#             "Gamma",
-#             gui.hSlider(box, self, "color_gamma", minValue=0.0, maxValue=1.0,
-#                         step=0.05, ticks=True, intOnly=False,
-#                         createLabel=False, callback=self._update_color)
-#         )
+        #         form.addRow(
+        #             "Gamma",
+        #             gui.hSlider(box, self, "color_gamma", minValue=0.0, maxValue=1.0,
+        #                         step=0.05, ticks=True, intOnly=False,
+        #                         createLabel=False, callback=self._update_color)
+        #         )
         form.addRow(
             "Low:",
-            gui.hSlider(box, self, "color_low", minValue=0.0, maxValue=1.0,
-                        step=0.05, ticks=True, intOnly=False,
-                        createLabel=False, callback=self._update_color)
+            gui.hSlider(
+                box,
+                self,
+                "color_low",
+                minValue=0.0,
+                maxValue=1.0,
+                step=0.05,
+                ticks=True,
+                intOnly=False,
+                createLabel=False,
+                callback=self._update_color,
+            ),
         )
         form.addRow(
             "High:",
-            gui.hSlider(box, self, "color_high", minValue=0.0, maxValue=1.0,
-                        step=0.05, ticks=True, intOnly=False,
-                        createLabel=False, callback=self._update_color)
+            gui.hSlider(
+                box,
+                self,
+                "color_high",
+                minValue=0.0,
+                maxValue=1.0,
+                step=0.05,
+                ticks=True,
+                intOnly=False,
+                createLabel=False,
+                callback=self._update_color,
+            ),
         )
         box.layout().addLayout(form)
 
         self.annot_combo = gui.comboBox(
-            self.controlArea, self, "annotation_idx", box="Annotations",
-            callback=self._invalidate_annotations, contentsLength=12)
+            self.controlArea,
+            self,
+            "annotation_idx",
+            box="Annotations",
+            callback=self._invalidate_annotations,
+            contentsLength=12,
+        )
         self.annot_combo.setModel(itemmodels.VariableListModel())
         self.annot_combo.model()[:] = ["None", "Enumeration"]
         self.controlArea.layout().addStretch()
 
-        gui.auto_commit(self.controlArea, self, "autocommit",
-                        "Send Selected")
+        gui.auto_commit(self.controlArea, self, "autocommit", "Send Selected")
 
         self.view = pg.GraphicsView(background="w")
         self.mainArea.layout().addWidget(self.view)
@@ -353,17 +393,19 @@ class OWDistanceMap(widget.OWWidget):
         self.grid.addItem(self.viewbox, 1, 1)
 
         self.left_dendrogram = DendrogramWidget(
-            self.grid_widget, orientation=DendrogramWidget.Left,
+            self.grid_widget,
+            orientation=DendrogramWidget.Left,
             selectionMode=DendrogramWidget.NoSelection,
-            hoverHighlightEnabled=False
+            hoverHighlightEnabled=False,
         )
         self.left_dendrogram.setAcceptedMouseButtons(Qt.NoButton)
         self.left_dendrogram.setAcceptHoverEvents(False)
 
         self.top_dendrogram = DendrogramWidget(
-            self.grid_widget, orientation=DendrogramWidget.Top,
+            self.grid_widget,
+            orientation=DendrogramWidget.Top,
             selectionMode=DendrogramWidget.NoSelection,
-            hoverHighlightEnabled=False
+            hoverHighlightEnabled=False,
         )
         self.top_dendrogram.setAcceptedMouseButtons(Qt.NoButton)
         self.top_dendrogram.setAcceptHoverEvents(False)
@@ -371,11 +413,11 @@ class OWDistanceMap(widget.OWWidget):
         self.grid.addItem(self.left_dendrogram, 1, 0)
         self.grid.addItem(self.top_dendrogram, 0, 1)
 
-        self.right_labels = TextList(
-            alignment=Qt.AlignLeft)
+        self.right_labels = TextList(alignment=Qt.AlignLeft)
 
         self.bottom_labels = TextList(
-            orientation=Qt.Horizontal, alignment=Qt.AlignRight)
+            orientation=Qt.Horizontal, alignment=Qt.AlignRight
+        )
 
         self.grid.addItem(self.right_labels, 1, 2)
         self.grid.addItem(self.bottom_labels, 2, 1)
@@ -422,8 +464,10 @@ class OWDistanceMap(widget.OWWidget):
             item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
             if self.sorting == OWDistanceMap.OrderedClustering:
                 self.sorting = OWDistanceMap.Clustering
-                msg = "Cluster ordering was disabled due to the input " \
-                      "matrix being to big"
+                msg = (
+                    "Cluster ordering was disabled due to the input "
+                    "matrix being to big"
+                )
         else:
             item.setFlags(item.flags() | Qt.ItemIsEnabled)
 
@@ -432,8 +476,7 @@ class OWDistanceMap(widget.OWWidget):
             item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
             if self.sorting == OWDistanceMap.Clustering:
                 self.sorting = OWDistanceMap.NoOrdering
-            msg = "Clustering was disabled due to the input " \
-                  "matrix being to big"
+            msg = "Clustering was disabled due to the input " "matrix being to big"
         else:
             item.setFlags(item.flags() | Qt.ItemIsEnabled)
 
@@ -447,12 +490,15 @@ class OWDistanceMap(widget.OWWidget):
         elif not axis:
             model[:] = ["None", "Enumeration", "Attribute names"]
         elif isinstance(items, Orange.data.Table):
-            annot_vars = list(filter_visible(items.domain.variables)) + list(items.domain.metas)
+            annot_vars = list(filter_visible(items.domain.variables)) + list(
+                items.domain.metas
+            )
             model[:] = ["None", "Enumeration"] + annot_vars
             self.annotation_idx = 0
             self.openContext(items.domain)
-        elif isinstance(items, list) and \
-                all(isinstance(item, Orange.data.Variable) for item in items):
+        elif isinstance(items, list) and all(
+            isinstance(item, Orange.data.Variable) for item in items
+        ):
             model[:] = ["None", "Enumeration", "Name"]
         else:
             model[:] = ["None", "Enumeration"]
@@ -480,8 +526,7 @@ class OWDistanceMap(widget.OWWidget):
             item.scene().removeItem(item)
 
         if self.matrix_item is not None:
-            self.matrix_item.selectionChanged.disconnect(
-                self._invalidate_selection)
+            self.matrix_item.selectionChanged.disconnect(self._invalidate_selection)
             remove(self.matrix_item)
             self.matrix_item = None
 
@@ -496,15 +541,14 @@ class OWDistanceMap(widget.OWWidget):
     def _ordered_cluster_tree(self):
         if self._ordered_tree is None:
             tree = self._cluster_tree()
-            self._ordered_tree = \
-                hierarchical.optimal_leaf_ordering(tree, self.matrix)
+            self._ordered_tree = hierarchical.optimal_leaf_ordering(tree, self.matrix)
         return self._ordered_tree
 
     def _setup_scene(self):
         self._clear_plot()
         self.matrix_item = DistanceMapItem(self._sorted_matrix)
         # Scale the y axis to compensate for pg.ViewBox's y axis invert
-        self.matrix_item.setTransform(QTransform.fromScale(1, -1), )
+        self.matrix_item.setTransform(QTransform.fromScale(1, -1))
         self.viewbox.addItem(self.matrix_item)
         # Set fixed view box range.
         h, w = self._sorted_matrix.shape
@@ -554,24 +598,24 @@ class OWDistanceMap(widget.OWWidget):
             leaves = hierarchical.leaves(tree)
             indices = numpy.array([leaf.value.index for leaf in leaves])
             X = self.matrix
-            self._sorted_matrix = X[indices[:, numpy.newaxis],
-                                    indices[numpy.newaxis, :]]
+            self._sorted_matrix = X[
+                indices[:, numpy.newaxis], indices[numpy.newaxis, :]
+            ]
             self._sort_indices = indices
 
     def _invalidate_annotations(self):
         if self.matrix is not None:
             self._update_labels()
 
-    def _update_labels(self, ):
+    def _update_labels(self,):
         if self.annotation_idx == 0:  # None
             labels = None
         elif self.annotation_idx == 1:  # Enumeration
             labels = [str(i + 1) for i in range(self.matrix.shape[0])]
         elif self.annot_combo.model()[self.annotation_idx] == "Attribute names":
-                attr = self.matrix.row_items.domain.attributes
-                labels = [str(attr[i]) for i in range(self.matrix.shape[0])]
-        elif self.annotation_idx == 2 and \
-                isinstance(self.items, widget.AttributeList):
+            attr = self.matrix.row_items.domain.attributes
+            labels = [str(attr[i]) for i in range(self.matrix.shape[0])]
+        elif self.annotation_idx == 2 and isinstance(self.items, widget.AttributeList):
             labels = [v.name for v in self.items]
         elif isinstance(self.items, Orange.data.Table):
             var = self.annot_combo.model()[self.annotation_idx]
@@ -634,14 +678,17 @@ class OWDistanceMap(widget.OWWidget):
                 domain = Orange.data.Domain(
                     [self.items.domain[i] for i in indices],
                     self.items.domain.class_vars,
-                    self.items.domain.metas)
+                    self.items.domain.metas,
+                )
                 datasubset = self.items.transform(domain)
         elif isinstance(self.items, widget.AttributeList):
             subset = [self.items[i] for i in self._selection]
             featuresubset = widget.AttributeList(subset)
 
         self.Outputs.selected_data.send(datasubset)
-        self.Outputs.annotated_data.send(create_annotated_table(self.items, self._selection))
+        self.Outputs.annotated_data.send(
+            create_annotated_table(self.items, self._selection)
+        )
         self.Outputs.features.send(featuresubset)
 
     def onDeleteWidget(self):
@@ -652,10 +699,9 @@ class OWDistanceMap(widget.OWWidget):
         annot = self.annot_combo.currentText()
         if self.annotation_idx <= 1:
             annot = annot.lower()
-        self.report_items((
-            ("Sorting", self.sorting_cb.currentText().lower()),
-            ("Annotations", annot)
-        ))
+        self.report_items(
+            (("Sorting", self.sorting_cb.currentText().lower()), ("Annotations", annot))
+        )
         if self.matrix is not None:
             self.report_plot()
 
@@ -735,8 +781,7 @@ def init_color_combo(cb, palettes, iconsize):
     for name, palette in palettes:
         n, colors = max(palette.items())
         colors = [QColor(*c) for c in colors]
-        cb.addItem(QIcon(palette_pixmap(colors, iconsize)), name,
-                   palette)
+        cb.addItem(QIcon(palette_pixmap(colors, iconsize)), name, palette)
 
 
 def test(argv=sys.argv):
@@ -765,6 +810,7 @@ def test(argv=sys.argv):
     sip.delete(w)
     del w
     return rval
+
 
 # run widget by python -m Orange.widgets.unsupervised.owdistancemap
 if __name__ == "__main__":

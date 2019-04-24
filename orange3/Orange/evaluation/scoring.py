@@ -18,8 +18,21 @@ import sklearn.metrics as skl_metrics
 from Orange.data import DiscreteVariable, ContinuousVariable
 from Orange.misc.wrapper_meta import WrapperMeta
 
-__all__ = ["CA", "Precision", "Recall", "F1", "PrecisionRecallFSupport", "AUC",
-           "MSE", "RMSE", "MAE", "R2", "compute_CD", "graph_ranks", "LogLoss"]
+__all__ = [
+    "CA",
+    "Precision",
+    "Recall",
+    "F1",
+    "PrecisionRecallFSupport",
+    "AUC",
+    "MSE",
+    "RMSE",
+    "MAE",
+    "R2",
+    "compute_CD",
+    "graph_ranks",
+    "LogLoss",
+]
 
 
 class ScoreMetaType(WrapperMeta):
@@ -29,6 +42,7 @@ class ScoreMetaType(WrapperMeta):
 
     The existing meta class Registry cannot be used since a meta class cannot
     have multiple inherited __new__ methods."""
+
     def __new__(mcs, name, bases, dict_, **kwargs):
         cls = WrapperMeta.__new__(mcs, name, bases, dict_)
         # Essentially `if cls is not Score`, except that Score may not exist yet
@@ -53,6 +67,7 @@ class Score(metaclass=ScoreMetaType):
     results : Orange.evaluation.Results
         Stored predictions and actual data in model testing.
     """
+
     __wraps__ = None
 
     separate_folds = False
@@ -107,17 +122,21 @@ class Score(metaclass=ScoreMetaType):
     @staticmethod
     def from_predicted(results, score_function, **kwargs):
         return np.fromiter(
-            (score_function(results.actual, predicted, **kwargs)
-             for predicted in results.predicted),
-            dtype=np.float64, count=len(results.predicted))
+            (
+                score_function(results.actual, predicted, **kwargs)
+                for predicted in results.predicted
+            ),
+            dtype=np.float64,
+            count=len(results.predicted),
+        )
 
 
 class ClassificationScore(Score, abstract=True):
-    class_types = (DiscreteVariable, )
+    class_types = (DiscreteVariable,)
 
 
 class RegressionScore(Score, abstract=True):
-    class_types = (ContinuousVariable, )
+    class_types = (ContinuousVariable,)
 
 
 # pylint: disable=invalid-name
@@ -152,22 +171,25 @@ class TargetScore(ClassificationScore):
         Options: 'weighted', 'macro', 'micro', None
 
     """
+
     is_binary = True
     abstract = True
     __wraps__ = None  # Subclasses should set the scoring function
 
-    def compute_score(self, results, target=None, average='binary'):
-        if average == 'binary':
+    def compute_score(self, results, target=None, average="binary"):
+        if average == "binary":
             if target is None:
                 if len(results.domain.class_var.values) > 2:
                     raise ValueError(
                         "Multiclass data: specify target class or select "
-                        "averaging ('weighted', 'macro', 'micro')")
+                        "averaging ('weighted', 'macro', 'micro')"
+                    )
                 target = 1  # Default: use 1 as "positive" class
             average = None
         labels = None if target is None else [target]
         return self.from_predicted(
-            results, type(self).__wraps__, labels=labels, average=average)
+            results, type(self).__wraps__, labels=labels, average=average
+        )
 
 
 class Precision(TargetScore):
@@ -194,6 +216,7 @@ class AUC(ClassificationScore):
     target : int, optional (default=None)
         Value of class to report.
     """
+
     __wraps__ = skl_metrics.roc_auc_score
     separate_folds = True
     is_binary = True
@@ -201,8 +224,7 @@ class AUC(ClassificationScore):
 
     def calculate_weights(self, results):
         classes = np.unique(results.actual)
-        class_cases = [sum(results.actual == class_)
-                       for class_ in classes]
+        class_cases = [sum(results.actual == class_) for class_ in classes]
         N = results.actual.shape[0]
         weights = np.array([c * (N - c) for c in class_cases])
         wsum = np.sum(weights)
@@ -214,16 +236,20 @@ class AUC(ClassificationScore):
     def single_class_auc(self, results, target):
         y = np.array(results.actual == target, dtype=int)
         return np.fromiter(
-            (skl_metrics.roc_auc_score(y, probabilities[:, int(target)])
-             for probabilities in results.probabilities),
-            dtype=np.float64, count=len(results.predicted))
-
+            (
+                skl_metrics.roc_auc_score(y, probabilities[:, int(target)])
+                for probabilities in results.probabilities
+            ),
+            dtype=np.float64,
+            count=len(results.predicted),
+        )
 
     def multi_class_auc(self, results):
         classes = np.unique(results.actual)
         weights = self.calculate_weights(results)
-        auc_array = np.array([self.single_class_auc(results, class_)
-                              for class_ in classes])
+        auc_array = np.array(
+            [self.single_class_auc(results, class_) for class_ in classes]
+        )
         return np.sum(auc_array.T * weights, axis=1)
 
     def compute_score(self, results, target=None, average=None):
@@ -267,21 +293,28 @@ class LogLoss(ClassificationScore):
     array([ 0.3...])
 
     """
+
     __wraps__ = skl_metrics.log_loss
 
-    def compute_score(self, results, eps=1e-15, normalize=True,
-                      sample_weight=None):
+    def compute_score(self, results, eps=1e-15, normalize=True, sample_weight=None):
         return np.fromiter(
-            (skl_metrics.log_loss(results.actual,
-                                  probabilities,
-                                  eps=eps,
-                                  normalize=normalize,
-                                  sample_weight=sample_weight)
-             for probabilities in results.probabilities),
-            dtype=np.float64, count=len(results.probabilities))
+            (
+                skl_metrics.log_loss(
+                    results.actual,
+                    probabilities,
+                    eps=eps,
+                    normalize=normalize,
+                    sample_weight=sample_weight,
+                )
+                for probabilities in results.probabilities
+            ),
+            dtype=np.float64,
+            count=len(results.probabilities),
+        )
 
 
 # Regression scores
+
 
 class MSE(RegressionScore):
     __wraps__ = skl_metrics.mean_squared_error
@@ -318,6 +351,7 @@ class CVRMSE(RegressionScore):
 
 # CD scores and plot
 
+
 def compute_CD(avranks, n, alpha="0.05", test="nemenyi"):
     """
     Returns critical difference for Nemenyi or Bonferroni-Dunn test
@@ -326,26 +360,98 @@ def compute_CD(avranks, n, alpha="0.05", test="nemenyi"):
     for Nemenyi two tailed test or "bonferroni-dunn" for Bonferroni-Dunn test.
     """
     k = len(avranks)
-    d = {("nemenyi", "0.05"): [0, 0, 1.959964, 2.343701, 2.569032, 2.727774,
-                               2.849705, 2.94832, 3.030879, 3.101730, 3.163684,
-                               3.218654, 3.268004, 3.312739, 3.353618, 3.39123,
-                               3.426041, 3.458425, 3.488685, 3.517073,
-                               3.543799],
-         ("nemenyi", "0.1"): [0, 0, 1.644854, 2.052293, 2.291341, 2.459516,
-                              2.588521, 2.692732, 2.779884, 2.854606, 2.919889,
-                              2.977768, 3.029694, 3.076733, 3.119693, 3.159199,
-                              3.195743, 3.229723, 3.261461, 3.291224, 3.319233],
-         ("bonferroni-dunn", "0.05"): [0, 0, 1.960, 2.241, 2.394, 2.498, 2.576,
-                                       2.638, 2.690, 2.724, 2.773],
-         ("bonferroni-dunn", "0.1"): [0, 0, 1.645, 1.960, 2.128, 2.241, 2.326,
-                                      2.394, 2.450, 2.498, 2.539]}
+    d = {
+        ("nemenyi", "0.05"): [
+            0,
+            0,
+            1.959964,
+            2.343701,
+            2.569032,
+            2.727774,
+            2.849705,
+            2.94832,
+            3.030879,
+            3.101730,
+            3.163684,
+            3.218654,
+            3.268004,
+            3.312739,
+            3.353618,
+            3.39123,
+            3.426041,
+            3.458425,
+            3.488685,
+            3.517073,
+            3.543799,
+        ],
+        ("nemenyi", "0.1"): [
+            0,
+            0,
+            1.644854,
+            2.052293,
+            2.291341,
+            2.459516,
+            2.588521,
+            2.692732,
+            2.779884,
+            2.854606,
+            2.919889,
+            2.977768,
+            3.029694,
+            3.076733,
+            3.119693,
+            3.159199,
+            3.195743,
+            3.229723,
+            3.261461,
+            3.291224,
+            3.319233,
+        ],
+        ("bonferroni-dunn", "0.05"): [
+            0,
+            0,
+            1.960,
+            2.241,
+            2.394,
+            2.498,
+            2.576,
+            2.638,
+            2.690,
+            2.724,
+            2.773,
+        ],
+        ("bonferroni-dunn", "0.1"): [
+            0,
+            0,
+            1.645,
+            1.960,
+            2.128,
+            2.241,
+            2.326,
+            2.394,
+            2.450,
+            2.498,
+            2.539,
+        ],
+    }
     q = d[(test, alpha)]
     cd = q[k] * (k * (k + 1) / (6.0 * n)) ** 0.5
     return cd
 
 
-def graph_ranks(avranks, names, cd=None, cdmethod=None, lowv=None, highv=None,
-                width=6, textspace=1, reverse=False, filename=None, **kwargs):
+def graph_ranks(
+    avranks,
+    names,
+    cd=None,
+    cdmethod=None,
+    lowv=None,
+    highv=None,
+    width=6,
+    textspace=1,
+    reverse=False,
+    filename=None,
+    **kwargs
+):
     """
     Draws a CD graph, which is used to display  the differences in methods'
     performance. See Janez Demsar, Statistical Comparisons of Classifiers over
@@ -467,8 +573,7 @@ def graph_ranks(avranks, names, cd=None, cdmethod=None, lowv=None, highv=None,
             lsums = len(sums)
             allpairs = [(i, j) for i, j in mxrange([[lsums], [lsums]]) if j > i]
             # remove not significant
-            notSig = [(i, j) for i, j in allpairs
-                      if abs(sums[i] - sums[j]) <= hsd]
+            notSig = [(i, j) for i, j in allpairs if abs(sums[i] - sums[j]) <= hsd]
             # keep only longest
 
             def no_longer(ij_tuple, notSig):
@@ -494,12 +599,12 @@ def graph_ranks(avranks, names, cd=None, cdmethod=None, lowv=None, highv=None,
     height = cline + ((k + 1) / 2) * 0.2 + minnotsignificant
 
     fig = plt.figure(figsize=(width, height))
-    fig.set_facecolor('white')
+    fig.set_facecolor("white")
     ax = fig.add_axes([0, 0, 1, 1])  # reverse y axis
     ax.set_axis_off()
 
-    hf = 1. / height  # height factor
-    wf = 1. / width
+    hf = 1.0 / height  # height factor
+    wf = 1.0 / width
 
     def hfl(l):
         return [a * hf for a in l]
@@ -507,13 +612,12 @@ def graph_ranks(avranks, names, cd=None, cdmethod=None, lowv=None, highv=None,
     def wfl(l):
         return [a * wf for a in l]
 
-
     # Upper left corner is (0,0).
     ax.plot([0, 1], [0, 1], c="w")
     ax.set_xlim(0, 1)
     ax.set_ylim(1, 0)
 
-    def line(l, color='k', **kwargs):
+    def line(l, color="k", **kwargs):
         """
         Input is a list of pairs of points.
         """
@@ -532,32 +636,36 @@ def graph_ranks(avranks, names, cd=None, cdmethod=None, lowv=None, highv=None,
         tick = smalltick
         if a == int(a):
             tick = bigtick
-        line([(rankpos(a), cline - tick / 2),
-              (rankpos(a), cline)],
-             linewidth=0.7)
+        line([(rankpos(a), cline - tick / 2), (rankpos(a), cline)], linewidth=0.7)
 
     for a in range(lowv, highv + 1):
-        text(rankpos(a), cline - tick / 2 - 0.05, str(a),
-             ha="center", va="bottom")
+        text(rankpos(a), cline - tick / 2 - 0.05, str(a), ha="center", va="bottom")
 
     k = len(ssums)
 
     for i in range(math.ceil(k / 2)):
         chei = cline + minnotsignificant + i * 0.2
-        line([(rankpos(ssums[i]), cline),
-              (rankpos(ssums[i]), chei),
-              (textspace - 0.1, chei)],
-             linewidth=0.7)
+        line(
+            [
+                (rankpos(ssums[i]), cline),
+                (rankpos(ssums[i]), chei),
+                (textspace - 0.1, chei),
+            ],
+            linewidth=0.7,
+        )
         text(textspace - 0.2, chei, nnames[i], ha="right", va="center")
 
     for i in range(math.ceil(k / 2), k):
         chei = cline + minnotsignificant + (k - i - 1) * 0.2
-        line([(rankpos(ssums[i]), cline),
-              (rankpos(ssums[i]), chei),
-              (textspace + scalewidth + 0.1, chei)],
-             linewidth=0.7)
-        text(textspace + scalewidth + 0.2, chei, nnames[i],
-             ha="left", va="center")
+        line(
+            [
+                (rankpos(ssums[i]), cline),
+                (rankpos(ssums[i]), chei),
+                (textspace + scalewidth + 0.1, chei),
+            ],
+            linewidth=0.7,
+        )
+        text(textspace + scalewidth + 0.2, chei, nnames[i], ha="left", va="center")
 
     if cd and cdmethod is None:
         # upper scale
@@ -567,22 +675,27 @@ def graph_ranks(avranks, names, cd=None, cdmethod=None, lowv=None, highv=None,
             begin, end = rankpos(highv), rankpos(highv - cd)
 
         line([(begin, distanceh), (end, distanceh)], linewidth=0.7)
-        line([(begin, distanceh + bigtick / 2),
-              (begin, distanceh - bigtick / 2)],
-             linewidth=0.7)
-        line([(end, distanceh + bigtick / 2),
-              (end, distanceh - bigtick / 2)],
-             linewidth=0.7)
-        text((begin + end) / 2, distanceh - 0.05, "CD",
-             ha="center", va="bottom")
+        line(
+            [(begin, distanceh + bigtick / 2), (begin, distanceh - bigtick / 2)],
+            linewidth=0.7,
+        )
+        line(
+            [(end, distanceh + bigtick / 2), (end, distanceh - bigtick / 2)],
+            linewidth=0.7,
+        )
+        text((begin + end) / 2, distanceh - 0.05, "CD", ha="center", va="bottom")
 
         # no-significance lines
         def draw_lines(lines, side=0.05, height=0.1):
             start = cline + 0.2
             for l, r in lines:
-                line([(rankpos(ssums[l]) - side, start),
-                      (rankpos(ssums[r]) + side, start)],
-                     linewidth=2.5)
+                line(
+                    [
+                        (rankpos(ssums[l]) - side, start),
+                        (rankpos(ssums[r]) + side, start),
+                    ],
+                    linewidth=2.5,
+                )
                 start += height
 
         draw_lines(lines)
@@ -590,14 +703,11 @@ def graph_ranks(avranks, names, cd=None, cdmethod=None, lowv=None, highv=None,
     elif cd:
         begin = rankpos(avranks[cdmethod] - cd)
         end = rankpos(avranks[cdmethod] + cd)
-        line([(begin, cline), (end, cline)],
-             linewidth=2.5)
-        line([(begin, cline + bigtick / 2),
-              (begin, cline - bigtick / 2)],
-             linewidth=2.5)
-        line([(end, cline + bigtick / 2),
-              (end, cline - bigtick / 2)],
-             linewidth=2.5)
+        line([(begin, cline), (end, cline)], linewidth=2.5)
+        line(
+            [(begin, cline + bigtick / 2), (begin, cline - bigtick / 2)], linewidth=2.5
+        )
+        line([(end, cline + bigtick / 2), (end, cline - bigtick / 2)], linewidth=2.5)
 
     if filename:
         print_figure(fig, filename, **kwargs)

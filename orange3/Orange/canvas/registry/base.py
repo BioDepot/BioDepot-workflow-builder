@@ -54,8 +54,9 @@ class WidgetRegistry(object):
 
         if other is not None:
             if not isinstance(other, WidgetRegistry):
-                raise TypeError("Expected a 'WidgetRegistry' got %r." \
-                                % type(other).__name__)
+                raise TypeError(
+                    "Expected a 'WidgetRegistry' got %r." % type(other).__name__
+                )
 
             self.registry = list(other.registry)
             self._categories_dict = dict(other._categories_dict)
@@ -119,8 +120,7 @@ class WidgetRegistry(object):
             if isinstance(cat, str):
                 cat = self.category(cat)
             cat_widgets = self._categories_dict[cat.name][1]
-            widgets.extend(sorted(cat_widgets,
-                                  key=attrgetter("priority")))
+            widgets.extend(sorted(cat_widgets, key=attrgetter("priority")))
         return widgets
 
     def widget(self, qualified_name):
@@ -150,12 +150,12 @@ class WidgetRegistry(object):
         Register a :class:`WidgetDescription` instance.
         """
         if not isinstance(desc, description.WidgetDescription):
-            raise TypeError("Expected a 'WidgetDescription' got %r." \
-                            % type(desc).__name__)
+            raise TypeError(
+                "Expected a 'WidgetDescription' got %r." % type(desc).__name__
+            )
 
         if self.has_widget(desc.qualified_name):
-            raise ValueError("%r already exists in the registry." \
-                             % desc.qualified_name)
+            raise ValueError("%r already exists in the registry." % desc.qualified_name)
 
         category = desc.category
         if category is None:
@@ -179,8 +179,9 @@ class WidgetRegistry(object):
 
         """
         if not isinstance(desc, description.CategoryDescription):
-            raise TypeError("Expected a 'CategoryDescription' got %r." \
-                            % type(desc).__name__)
+            raise TypeError(
+                "Expected a 'CategoryDescription' got %r." % type(desc).__name__
+            )
 
         name = desc.name
         if not name:
@@ -209,7 +210,7 @@ class WidgetRegistry(object):
         """
         Insert widget description `desc` into `category`.
         """
-        assert(isinstance(category, description.CategoryDescription))
+        assert isinstance(category, description.CategoryDescription)
         _, widgets = self._categories_dict[category.name]
 
         priority = desc.priority

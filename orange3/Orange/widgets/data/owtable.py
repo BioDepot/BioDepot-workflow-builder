@@ -14,15 +14,32 @@ import numpy
 from scipy.sparse import issparse
 
 from AnyQt.QtWidgets import (
-    QTableView, QHeaderView, QAbstractButton, QAction, QApplication,
-    QStyleOptionHeader, QStyle, QStylePainter, QStyledItemDelegate
+    QTableView,
+    QHeaderView,
+    QAbstractButton,
+    QAction,
+    QApplication,
+    QStyleOptionHeader,
+    QStyle,
+    QStylePainter,
+    QStyledItemDelegate,
 )
 from AnyQt.QtGui import QColor, QKeySequence, QClipboard
 from AnyQt.QtCore import (
-    Qt, QSize, QEvent, QByteArray, QMimeData, QObject, QMetaObject,
-    QAbstractProxyModel, QIdentityProxyModel, QModelIndex,
-    QItemSelectionModel, QItemSelection, QItemSelectionRange,
-    QT_VERSION
+    Qt,
+    QSize,
+    QEvent,
+    QByteArray,
+    QMimeData,
+    QObject,
+    QMetaObject,
+    QAbstractProxyModel,
+    QIdentityProxyModel,
+    QModelIndex,
+    QItemSelectionModel,
+    QItemSelection,
+    QItemSelectionRange,
+    QT_VERSION,
 )
 from AnyQt.QtCore import pyqtSlot as Slot
 
@@ -33,12 +50,13 @@ from Orange.data.sql.table import SqlTable
 from Orange.statistics import basic_stats
 
 from Orange.widgets import widget, gui
-from Orange.widgets.settings import (Setting, ContextSetting,
-                                     DomainContextHandler)
+from Orange.widgets.settings import Setting, ContextSetting, DomainContextHandler
 from Orange.widgets.widget import Input, Output
 from Orange.widgets.utils import datacaching
-from Orange.widgets.utils.annotated_data import (create_annotated_table,
-                                                 ANNOTATED_DATA_SIGNAL_NAME)
+from Orange.widgets.utils.annotated_data import (
+    create_annotated_table,
+    ANNOTATED_DATA_SIGNAL_NAME,
+)
 from Orange.widgets.utils.itemmodels import TableModel
 
 
@@ -48,6 +66,7 @@ class RichTableModel(TableModel):
     (adds support for gui.BarRole, include variable labels and icons
     in the header)
     """
+
     #: Rich header data flags.
     Name, Labels, Icon = 1, 2, 4
 
@@ -60,12 +79,17 @@ class RichTableModel(TableModel):
         for var in self.vars:
             if isinstance(var, Orange.data.Variable):
                 labels.extend(var.attributes.keys())
-        self._labels = list(sorted(
-            {label for label in labels if not label.startswith("_")}))
+        self._labels = list(
+            sorted({label for label in labels if not label.startswith("_")})
+        )
 
-    def data(self, index, role=Qt.DisplayRole,
-             # for faster local lookup
-             _BarRole=gui.TableBarItem.BarRole):
+    def data(
+        self,
+        index,
+        role=Qt.DisplayRole,
+        # for faster local lookup
+        _BarRole=gui.TableBarItem.BarRole,
+    ):
         if role == _BarRole and self._continuous[index.column()]:
             val = super().data(index, TableModel.ValueRole)
             if val is None or isnan(val):
@@ -83,23 +107,24 @@ class RichTableModel(TableModel):
 
     def headerData(self, section, orientation, role):
         if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            var = super().headerData(
-                section, orientation, TableModel.VariableRole)
+            var = super().headerData(section, orientation, TableModel.VariableRole)
             if var is None:
-                return super().headerData(
-                    section, orientation, Qt.DisplayRole)
+                return super().headerData(section, orientation, Qt.DisplayRole)
 
             lines = []
             if self._header_flags & RichTableModel.Name:
                 lines.append(var.name)
             if self._header_flags & RichTableModel.Labels:
-                lines.extend(str(var.attributes.get(label, ""))
-                             for label in self._labels)
+                lines.extend(
+                    str(var.attributes.get(label, "")) for label in self._labels
+                )
             return "\n".join(lines)
-        elif orientation == Qt.Horizontal and role == Qt.DecorationRole and \
-                self._header_flags & RichTableModel.Icon:
-            var = super().headerData(
-                section, orientation, TableModel.VariableRole)
+        elif (
+            orientation == Qt.Horizontal
+            and role == Qt.DecorationRole
+            and self._header_flags & RichTableModel.Icon
+        ):
+            var = super().headerData(section, orientation, TableModel.VariableRole)
             if var is not None:
                 return gui.attributeIconDict[var]
             else:
@@ -110,8 +135,7 @@ class RichTableModel(TableModel):
     def setRichHeaderFlags(self, flags):
         if flags != self._header_flags:
             self._header_flags = flags
-            self.headerDataChanged.emit(
-                Qt.Horizontal, 0, self.columnCount() - 1)
+            self.headerDataChanged.emit(Qt.Horizontal, 0, self.columnCount() - 1)
 
     def richHeaderFlags(self):
         return self._header_flags
@@ -180,6 +204,7 @@ class BlockSelectionModel(QItemSelectionModel):
     I.e. select the Cartesian product of row and column indices.
 
     """
+
     def __init__(self, model, parent=None, selectBlocks=True, **kwargs):
         super().__init__(model, parent, **kwargs)
         self.__selectBlocks = selectBlocks
@@ -209,31 +234,33 @@ class BlockSelectionModel(QItemSelectionModel):
             sel_rows = selection_rows(selection)
             sel_cols = selection_columns(selection)
             selection = QItemSelection()
-            for row_range, col_range in \
-                    itertools.product(to_ranges(sel_rows), to_ranges(sel_cols)):
+            for row_range, col_range in itertools.product(
+                to_ranges(sel_rows), to_ranges(sel_cols)
+            ):
                 selection.select(
                     model.index(row_range.start, col_range.start),
-                    model.index(row_range.stop - 1, col_range.stop - 1)
+                    model.index(row_range.stop - 1, col_range.stop - 1),
                 )
-        elif flags & (QItemSelectionModel.Select |
-                      QItemSelectionModel.Deselect):
+        elif flags & (QItemSelectionModel.Select | QItemSelectionModel.Deselect):
             # extend all selection ranges in `selection` with the full current
             # row/col spans
             rows, cols = selection_blocks(self.selection())
             sel_rows = selection_rows(selection)
             sel_cols = selection_columns(selection)
             ext_selection = QItemSelection()
-            for row_range, col_range in \
-                    itertools.product(to_ranges(rows), to_ranges(sel_cols)):
+            for row_range, col_range in itertools.product(
+                to_ranges(rows), to_ranges(sel_cols)
+            ):
                 ext_selection.select(
                     model.index(row_range.start, col_range.start),
-                    model.index(row_range.stop - 1, col_range.stop - 1)
+                    model.index(row_range.stop - 1, col_range.stop - 1),
                 )
-            for row_range, col_range in \
-                    itertools.product(to_ranges(sel_rows), to_ranges(cols)):
+            for row_range, col_range in itertools.product(
+                to_ranges(sel_rows), to_ranges(cols)
+            ):
                 ext_selection.select(
                     model.index(row_range.start, col_range.start),
-                    model.index(row_range.stop - 1, col_range.stop - 1)
+                    model.index(row_range.stop - 1, col_range.stop - 1),
                 )
             selection.merge(ext_selection, QItemSelectionModel.Select)
         super().select(selection, flags)
@@ -291,10 +318,8 @@ def selection_columns(selection):
 def selection_blocks(selection):
     # type: (QItemSelection) -> Tuple[List[Tuple[int, int]], List[Tuple[int, int]]]
     if selection.count() > 0:
-        rowranges = {range(span.top(), span.bottom() + 1)
-                     for span in selection}
-        colranges = {range(span.left(), span.right() + 1)
-                     for span in selection}
+        rowranges = {range(span.top(), span.bottom() + 1) for span in selection}
+        colranges = {range(span.left(), span.right() + 1) for span in selection}
     else:
         return [], []
 
@@ -312,8 +337,7 @@ def ranges(indices):
     >>> [(1, 4), (5, 6), (3, 5)]
 
     """
-    g = itertools.groupby(enumerate(indices),
-                          key=lambda t: t[1] - t[0])
+    g = itertools.groupby(enumerate(indices), key=lambda t: t[1] - t[0])
     for _, range_ind in g:
         range_ind = list(range_ind)
         _, start = range_ind[0]
@@ -388,7 +412,8 @@ class OWDataTable(widget.OWWidget):
 
     color_by_class = Setting(True)
     settingsHandler = DomainContextHandler(
-        match_values=DomainContextHandler.MATCH_VALUES_ALL)
+        match_values=DomainContextHandler.MATCH_VALUES_ALL
+    )
     selected_rows = ContextSetting([])
     selected_cols = ContextSetting([])
 
@@ -400,42 +425,69 @@ class OWDataTable(widget.OWWidget):
         self.dist_color = QColor(*self.dist_color_RGB)
 
         info_box = gui.vBox(self.controlArea, "Info")
-        self.info_ex = gui.widgetLabel(info_box, 'No data on input.', )
+        self.info_ex = gui.widgetLabel(info_box, "No data on input.")
         self.info_ex.setWordWrap(True)
-        self.info_attr = gui.widgetLabel(info_box, ' ')
+        self.info_attr = gui.widgetLabel(info_box, " ")
         self.info_attr.setWordWrap(True)
-        self.info_class = gui.widgetLabel(info_box, ' ')
+        self.info_class = gui.widgetLabel(info_box, " ")
         self.info_class.setWordWrap(True)
-        self.info_meta = gui.widgetLabel(info_box, ' ')
+        self.info_meta = gui.widgetLabel(info_box, " ")
         self.info_meta.setWordWrap(True)
         info_box.setMinimumWidth(200)
         gui.separator(self.controlArea)
 
         box = gui.vBox(self.controlArea, "Variables")
         self.c_show_attribute_labels = gui.checkBox(
-            box, self, "show_attribute_labels",
+            box,
+            self,
+            "show_attribute_labels",
             "Show variable labels (if present)",
-            callback=self._on_show_variable_labels_changed)
+            callback=self._on_show_variable_labels_changed,
+        )
 
-        gui.checkBox(box, self, "show_distributions",
-                     'Visualize numeric values',
-                     callback=self._on_distribution_color_changed)
-        gui.checkBox(box, self, "color_by_class", 'Color by instance classes',
-                     callback=self._on_distribution_color_changed)
+        gui.checkBox(
+            box,
+            self,
+            "show_distributions",
+            "Visualize numeric values",
+            callback=self._on_distribution_color_changed,
+        )
+        gui.checkBox(
+            box,
+            self,
+            "color_by_class",
+            "Color by instance classes",
+            callback=self._on_distribution_color_changed,
+        )
 
         box = gui.vBox(self.controlArea, "Selection")
 
-        gui.checkBox(box, self, "select_rows", "Select full rows",
-                     callback=self._on_select_rows_changed)
+        gui.checkBox(
+            box,
+            self,
+            "select_rows",
+            "Select full rows",
+            callback=self._on_select_rows_changed,
+        )
 
         gui.rubber(self.controlArea)
 
         reset = gui.button(
-            None, self, "Restore Original Order", callback=self.restore_order,
-            tooltip="Show rows in the original order", autoDefault=False)
+            None,
+            self,
+            "Restore Original Order",
+            callback=self.restore_order,
+            tooltip="Show rows in the original order",
+            autoDefault=False,
+        )
         self.buttonsArea.layout().insertWidget(0, reset)
-        gui.auto_commit(self.buttonsArea, self, "auto_commit",
-                        "Send Selected Rows", "Send Automatically")
+        gui.auto_commit(
+            self.buttonsArea,
+            self,
+            "auto_commit",
+            "Send Selected Rows",
+            "Send Automatically",
+        )
 
         # GUI with tabs
         self.tabs = gui.tabWidget(self.mainArea)
@@ -495,9 +547,9 @@ class OWDataTable(widget.OWWidget):
             self.set_info(slot.summary)
 
             if isinstance(slot.summary.len, concurrent.futures.Future):
+
                 def update(f):
-                    QMetaObject.invokeMethod(
-                        self, "_update_info", Qt.QueuedConnection)
+                    QMetaObject.invokeMethod(self, "_update_info", Qt.QueuedConnection)
 
                 slot.summary.len.add_done_callback(update)
 
@@ -531,14 +583,12 @@ class OWDataTable(widget.OWWidget):
         rowcount = data.approx_len()
 
         if self.color_by_class and data.domain.has_discrete_class:
-            color_schema = [
-                QColor(*c) for c in data.domain.class_var.colors]
+            color_schema = [QColor(*c) for c in data.domain.class_var.colors]
         else:
             color_schema = None
         if self.show_distributions:
             view.setItemDelegate(
-                gui.TableBarItem(
-                    self, color=self.dist_color, color_schema=color_schema)
+                gui.TableBarItem(self, color=self.dist_color, color_schema=color_schema)
             )
         else:
             view.setItemDelegate(QStyledItemDelegate(self))
@@ -554,8 +604,8 @@ class OWDataTable(widget.OWWidget):
         vheader = view.verticalHeader()
         option = view.viewOptions()
         size = view.style().sizeFromContents(
-            QStyle.CT_ItemViewItem, option,
-            QSize(20, 20), view)
+            QStyle.CT_ItemViewItem, option, QSize(20, 20), view
+        )
 
         vheader.setDefaultSectionSize(size.height() + 2)
         vheader.setMinimumSectionSize(5)
@@ -565,8 +615,7 @@ class OWDataTable(widget.OWWidget):
         # (workaround for QTBUG-18490 / QTBUG-28631)
         maxrows = (2 ** 31 - 1) // (vheader.defaultSectionSize() + 2)
         if rowcount > maxrows:
-            sliceproxy = TableSliceProxy(
-                parent=view, rowSlice=slice(0, maxrows))
+            sliceproxy = TableSliceProxy(parent=view, rowSlice=slice(0, maxrows))
             sliceproxy.setSourceModel(datamodel)
             # First reset the view (without this the header view retains
             # it's state - at this point invalid/broken)
@@ -580,11 +629,12 @@ class OWDataTable(widget.OWWidget):
         self._update_variable_labels(view)
 
         selmodel = BlockSelectionModel(
-            view.model(), parent=view, selectBlocks=not self.select_rows)
+            view.model(), parent=view, selectBlocks=not self.select_rows
+        )
         view.setSelectionModel(selmodel)
         view.selectionModel().selectionChanged.connect(self.update_selection)
 
-    #noinspection PyBroadException
+    # noinspection PyBroadException
     def set_corner_text(self, table, text):
         """Set table corner text."""
         # As this is an ugly hack, do everything in
@@ -596,8 +646,7 @@ class OWDataTable(widget.OWWidget):
 
                 class efc(QObject):
                     def eventFilter(self, o, e):
-                        if (isinstance(o, QAbstractButton) and
-                                e.type() == QEvent.Paint):
+                        if isinstance(o, QAbstractButton) and e.type() == QEvent.Paint:
                             # paint by hand (borrowed from QTableCornerButton)
                             btn = o
                             opt = QStyleOptionHeader()
@@ -615,8 +664,9 @@ class OWDataTable(widget.OWWidget):
                             opt.position = QStyleOptionHeader.OnlyOneSection
                             painter = QStylePainter(btn)
                             painter.drawControl(QStyle.CE_Header, opt)
-                            return True     # eat event
+                            return True  # eat event
                         return False
+
                 table.efc = efc()
                 btn.installEventFilter(table.efc)
                 table.btn = btn
@@ -633,10 +683,11 @@ class OWDataTable(widget.OWWidget):
                 btn.setText(text)
                 opt = QStyleOptionHeader()
                 opt.text = btn.text()
-                s = btn.style().sizeFromContents(
-                    QStyle.CT_HeaderSection,
-                    opt, QSize(),
-                    btn).expandedTo(QApplication.globalStrut())
+                s = (
+                    btn.style()
+                    .sizeFromContents(QStyle.CT_HeaderSection, opt, QSize(), btn)
+                    .expandedTo(QApplication.globalStrut())
+                )
                 if s.isValid():
                     table.verticalHeader().setMinimumWidth(s.width())
             except Exception:
@@ -657,14 +708,14 @@ class OWDataTable(widget.OWWidget):
             model = model.sourceModel()
 
         if self.show_attribute_labels:
-            model.setRichHeaderFlags(
-                RichTableModel.Labels | RichTableModel.Name)
+            model.setRichHeaderFlags(RichTableModel.Labels | RichTableModel.Name)
 
             labelnames = set()
             for a in model.source.domain.variables:
                 labelnames.update(a.attributes.keys())
             labelnames = sorted(
-                [label for label in labelnames if not label.startswith("_")])
+                [label for label in labelnames if not label.startswith("_")]
+            )
             self.set_corner_text(view, "\n".join([""] + labelnames))
         else:
             model.setRichHeaderFlags(RichTableModel.Name)
@@ -688,8 +739,9 @@ class OWDataTable(widget.OWWidget):
             else:
                 color_schema = None
             if self.show_distributions:
-                delegate = gui.TableBarItem(self, color=self.dist_color,
-                                            color_schema=color_schema)
+                delegate = gui.TableBarItem(
+                    self, color=self.dist_color, color_schema=color_schema
+                )
             else:
                 delegate = QStyledItemDelegate(self)
             widget.setItemDelegate(delegate)
@@ -706,7 +758,7 @@ class OWDataTable(widget.OWWidget):
                 # Expand the current selection to full row selection.
                 selection_model.select(
                     selection_model.selection(),
-                    QItemSelectionModel.Select | QItemSelectionModel.Rows
+                    QItemSelectionModel.Select | QItemSelectionModel.Rows,
                 )
             else:
                 slot.view.setSelectionBehavior(QTableView.SelectItems)
@@ -724,8 +776,7 @@ class OWDataTable(widget.OWWidget):
             self.info_class.setText("")
             self.info_meta.setText("")
         else:
-            info_len, info_attr, info_class, info_meta = \
-                format_summary(summary)
+            info_len, info_attr, info_class, info_meta = format_summary(summary)
 
             self.info_ex.setText(info_len)
             self.info_attr.setText(info_attr)
@@ -745,8 +796,10 @@ class OWDataTable(widget.OWWidget):
         if len(self.selected_rows) and len(self.selected_cols):
             view = self.tabs.currentWidget()
             model = view.model()
-            if model.rowCount() <= self.selected_rows[-1] or \
-                    model.columnCount() <= self.selected_cols[-1]:
+            if (
+                model.rowCount() <= self.selected_rows[-1]
+                or model.columnCount() <= self.selected_cols[-1]
+            ):
                 return
 
             selection = QItemSelection()
@@ -758,11 +811,10 @@ class OWDataTable(widget.OWWidget):
                     selection.append(
                         QItemSelectionRange(
                             view.model().index(rowstart, colstart),
-                            view.model().index(rowend - 1, colend - 1)
+                            view.model().index(rowend - 1, colend - 1),
                         )
                     )
-            view.selectionModel().select(
-                selection, QItemSelectionModel.ClearAndSelect)
+            view.selectionModel().select(selection, QItemSelectionModel.ClearAndSelect)
 
     def get_selection(self, view):
         """
@@ -837,9 +889,10 @@ class OWDataTable(widget.OWWidget):
             if len(colsel) < len(domain) + len(domain.metas):
                 # only a subset of the columns is selected
                 allvars = domain.class_vars + domain.metas + domain.attributes
-                columns = [(c, model.headerData(c, Qt.Horizontal,
-                                                TableModel.DomainRole))
-                           for c in colsel]
+                columns = [
+                    (c, model.headerData(c, Qt.Horizontal, TableModel.DomainRole))
+                    for c in colsel
+                ]
                 assert all(role is not None for _, role in columns)
 
                 def select_vars(role):
@@ -872,9 +925,7 @@ class OWDataTable(widget.OWWidget):
         view = self.tabs.currentWidget()
         if view is not None:
             mime = table_selection_to_mime_data(view)
-            QApplication.clipboard().setMimeData(
-                mime, QClipboard.Clipboard
-            )
+            QApplication.clipboard().setMimeData(mime, QClipboard.Clipboard)
 
     def send_report(self):
         view = self.tabs.currentWidget()
@@ -884,26 +935,22 @@ class OWDataTable(widget.OWWidget):
         self.report_data_brief(model.source)
         self.report_table(view)
 
+
 # Table Summary
 
 # Basic statistics for X/Y/metas arrays
-DenseArray = namedtuple(
-    "DenseArray", ["nans", "non_nans", "stats"])
-SparseArray = namedtuple(
-    "SparseArray", ["nans", "non_nans", "stats"])
-SparseBoolArray = namedtuple(
-    "SparseBoolArray", ["nans", "non_nans", "stats"])
+DenseArray = namedtuple("DenseArray", ["nans", "non_nans", "stats"])
+SparseArray = namedtuple("SparseArray", ["nans", "non_nans", "stats"])
+SparseBoolArray = namedtuple("SparseBoolArray", ["nans", "non_nans", "stats"])
 NotAvailable = namedtuple("NotAvailable", [])
 
 #: Orange.data.Table summary
-Summary = namedtuple(
-    "Summary",
-    ["len", "domain", "X", "Y", "M"])
+Summary = namedtuple("Summary", ["len", "domain", "X", "Y", "M"])
 
 #: Orange.data.sql.table.SqlTable summary
 ApproxSummary = namedtuple(
-    "ApproxSummary",
-    ["approx_len", "len", "domain", "X", "Y", "M"])
+    "ApproxSummary", ["approx_len", "len", "domain", "X", "Y", "M"]
+)
 
 
 def table_summary(table):
@@ -913,10 +960,17 @@ def table_summary(table):
 
         def _len():
             len_future.set_result(len(table))
+
         threading.Thread(target=_len).start()  # KILL ME !!!
 
-        return ApproxSummary(approx_len, len_future, table.domain,
-                             NotAvailable(), NotAvailable(), NotAvailable())
+        return ApproxSummary(
+            approx_len,
+            len_future,
+            table.domain,
+            NotAvailable(),
+            NotAvailable(),
+            NotAvailable(),
+        )
     else:
         domain = table.domain
         n_instances = len(table)
@@ -927,8 +981,8 @@ def table_summary(table):
 
         dist = bstats.stats
         X_dist, Y_dist, M_dist = numpy.split(
-            dist, numpy.cumsum([len(domain.attributes),
-                                len(domain.class_vars)]))
+            dist, numpy.cumsum([len(domain.attributes), len(domain.class_vars)])
+        )
 
         def parts(array, density, col_dist):
             array = numpy.atleast_2d(array)
@@ -973,8 +1027,7 @@ def format_summary(summary):
 
         if isinstance(part, DenseArray):
             total = part.nans + part.non_nans
-            miss = ("%.1f%%" % (100 * part.nans / total) if part.nans > 0
-                    else "no")
+            miss = "%.1f%%" % (100 * part.nans / total) if part.nans > 0 else "no"
             return " (%s missing values)" % miss
         elif isinstance(part, (SparseArray, SparseBoolArray)):
             text = " ({}, density {:.2f}%)"
@@ -989,12 +1042,13 @@ def format_summary(summary):
         if n == 0:
             return "No", "s"
         elif n == 1:
-            return str(n), ''
+            return str(n), ""
         else:
-            return str(n), 's'
+            return str(n), "s"
 
-    text += [("%s feature%s" % sp(len(summary.domain.attributes)))
-             + format_part(summary.X)]
+    text += [
+        ("%s feature%s" % sp(len(summary.domain.attributes))) + format_part(summary.X)
+    ]
 
     if not summary.domain.class_vars:
         text += ["No target variable."]
@@ -1005,12 +1059,14 @@ def format_summary(summary):
             c_text = "Continuous target variable"
         else:
             c_text = "Discrete class with %s value%s" % sp(
-                len(summary.domain.class_var.values))
+                len(summary.domain.class_var.values)
+            )
         c_text += format_part(summary.Y)
         text += [c_text]
 
-    text += [("%s meta attribute%s" % sp(len(summary.domain.metas)))
-             + format_part(summary.M)]
+    text += [
+        ("%s meta attribute%s" % sp(len(summary.domain.metas))) + format_part(summary.M)
+    ]
 
     return text
 
@@ -1039,15 +1095,13 @@ def test_main():
     ow.set_dataset(housing, housing.name)
 
     rval = a.exec()
-#     ow.saveSettings()
+    #     ow.saveSettings()
     return rval
 
 
 def test_model():
     app = QApplication([])
-    view = QTableView(
-        sortingEnabled=True
-    )
+    view = QTableView(sortingEnabled=True)
     data = Orange.data.Table("lenses")
     model = TableModel(data)
 
@@ -1056,6 +1110,7 @@ def test_model():
     view.show()
     view.raise_()
     return app.exec()
+
 
 if __name__ == "__main__":
     sys.exit(test_main())

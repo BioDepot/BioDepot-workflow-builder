@@ -6,8 +6,13 @@ from io import BytesIO
 from ...gui import test
 from ...registry import global_registry, WidgetRegistry, WidgetDescription
 
-from .. import Scheme, SchemeNode, SchemeLink, \
-               SchemeArrowAnnotation, SchemeTextAnnotation
+from .. import (
+    Scheme,
+    SchemeNode,
+    SchemeLink,
+    SchemeArrowAnnotation,
+    SchemeTextAnnotation,
+)
 
 from .. import readwrite
 from ..readwrite import scheme_to_ows_stream, parse_scheme, scheme_load
@@ -31,11 +36,9 @@ class TestReadWrite(test.QAppTestCase):
         scheme.add_node(discretize_node)
         scheme.add_node(bayes_node)
 
-        scheme.add_link(SchemeLink(file_node, "Data",
-                                   discretize_node, "Data"))
+        scheme.add_link(SchemeLink(file_node, "Data", discretize_node, "Data"))
 
-        scheme.add_link(SchemeLink(discretize_node, "Data",
-                                   bayes_node, "Data"))
+        scheme.add_link(SchemeLink(discretize_node, "Data", bayes_node, "Data"))
 
         scheme.add_annotation(SchemeArrowAnnotation((0, 0), (10, 10)))
         scheme.add_annotation(SchemeTextAnnotation((0, 100, 200, 200), "$$"))
@@ -59,11 +62,9 @@ class TestReadWrite(test.QAppTestCase):
             self.assertEqual(link1.source_type(), link2.source_type())
             self.assertEqual(link1.sink_type(), link2.sink_type())
 
-            self.assertEqual(link1.source_channel.name,
-                             link2.source_channel.name)
+            self.assertEqual(link1.source_channel.name, link2.source_channel.name)
 
-            self.assertEqual(link1.sink_channel.name,
-                             link2.sink_channel.name)
+            self.assertEqual(link1.sink_channel.name, link2.sink_channel.name)
 
             self.assertEqual(link1.enabled, link2.enabled)
 
@@ -93,11 +94,9 @@ class TestReadWrite(test.QAppTestCase):
         scheme.add_node(discretize_node)
         scheme.add_node(bayes_node)
 
-        scheme.add_link(SchemeLink(file_node, "Data",
-                                   discretize_node, "Data"))
+        scheme.add_link(SchemeLink(file_node, "Data", discretize_node, "Data"))
 
-        scheme.add_link(SchemeLink(discretize_node, "Data",
-                                   bayes_node, "Data"))
+        scheme.add_link(SchemeLink(discretize_node, "Data", bayes_node, "Data"))
 
         scheme.add_annotation(SchemeArrowAnnotation((0, 0), (10, 10)))
         scheme.add_annotation(SchemeTextAnnotation((0, 100, 200, 200), "$$"))
@@ -121,11 +120,9 @@ class TestReadWrite(test.QAppTestCase):
             self.assertEqual(link1.source_type(), link2.source_type())
             self.assertEqual(link1.sink_type(), link2.sink_type())
 
-            self.assertEqual(link1.source_channel.name,
-                             link2.source_channel.name)
+            self.assertEqual(link1.source_channel.name, link2.source_channel.name)
 
-            self.assertEqual(link1.sink_channel.name,
-                             link2.sink_channel.name)
+            self.assertEqual(link1.sink_channel.name, link2.sink_channel.name)
 
             self.assertEqual(link1.enabled, link2.enabled)
 
@@ -146,7 +143,7 @@ class TestReadWrite(test.QAppTestCase):
             readwrite.string_eval("[1, 2]")
 
         t = readwrite.tuple_eval("(1, 2.0, 'a')")
-        self.assertEqual(t, (1, 2.0, 'a'))
+        self.assertEqual(t, (1, 2.0, "a"))
 
         with self.assertRaises(ValueError):
             readwrite.tuple_eval("u'string'")
@@ -159,12 +156,10 @@ class TestReadWrite(test.QAppTestCase):
         self.assertIs(readwrite.terminal_eval("None"), None)
 
         self.assertEqual(readwrite.terminal_eval("42"), 42)
-        self.assertEqual(readwrite.terminal_eval("'42'"), '42')
+        self.assertEqual(readwrite.terminal_eval("'42'"), "42")
 
     def test_literal_dump(self):
-        struct = {1: [{(1, 2): ""}],
-                  True: 1.0,
-                  None: None}
+        struct = {1: [{(1, 2): ""}], True: 1.0, None: None}
 
         s = readwrite.literal_dumps(struct)
         self.assertEqual(readwrite.literal_loads(s), struct)
@@ -193,8 +188,7 @@ class TestReadWrite(test.QAppTestCase):
         parsed = readwrite.resolve_1_0(parsed, reg)
 
         qnames = [node.qualified_name for node in parsed.nodes]
-        self.assertSetEqual(set(qnames),
-                            set(["package.foo", "frob.bar"]))
+        self.assertSetEqual(set(qnames), set(["package.foo", "frob.bar"]))
         projects = [node.project_name for node in parsed.nodes]
         self.assertSetEqual(set(projects), set(["Foo", "Bar"]))
 
@@ -215,8 +209,7 @@ class TestReadWrite(test.QAppTestCase):
         parsed = readwrite.resolve_replaced(parsed, reg)
 
         qnames = [node.qualified_name for node in parsed.nodes]
-        self.assertSetEqual(set(qnames),
-                            set(["package.foo", "frob.bar"]))
+        self.assertSetEqual(set(qnames), set(["package.foo", "frob.bar"]))
         projects = [node.project_name for node in parsed.nodes]
         self.assertSetEqual(set(projects), set(["Foo", "Bar"]))
 
@@ -225,10 +218,7 @@ def foo_registry():
     reg = WidgetRegistry()
     reg.register_widget(
         WidgetDescription(
-            name="Foo",
-            id="foooo",
-            qualified_name="package.foo",
-            project_name="Foo"
+            name="Foo", id="foooo", qualified_name="package.foo", project_name="Foo"
         )
     )
     reg.register_widget(
@@ -237,8 +227,7 @@ def foo_registry():
             id="barrr",
             qualified_name="frob.bar",
             project_name="Bar",
-            replaces=["package.bar"]
-
+            replaces=["package.bar"],
         )
     )
     return reg

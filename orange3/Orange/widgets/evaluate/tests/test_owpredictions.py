@@ -13,7 +13,6 @@ from Orange.widgets.tests.utils import excepthook_catch
 
 
 class TestOWPredictions(WidgetTest):
-
     def setUp(self):
         self.widget = self.create_widget(OWPredictions)  # type: OWPredictions
         self.iris = Table("iris")
@@ -33,7 +32,8 @@ class TestOWPredictions(WidgetTest):
         pred = self.get_output(self.widget.Outputs.predictions)
         self.assertIsInstance(pred, Table)
         np.testing.assert_array_equal(
-            yvec, pred.get_column_view(data.domain.class_var)[0])
+            yvec, pred.get_column_view(data.domain.class_var)[0]
+        )
 
         evres = self.get_output(self.widget.Outputs.evaluation_results)
         self.assertIsInstance(evres, Results)

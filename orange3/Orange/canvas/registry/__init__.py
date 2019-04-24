@@ -17,26 +17,26 @@ import logging
 
 # Color names that can be used in widget/category descriptions
 # as background color.
-NAMED_COLORS = \
-    {"light-orange": "#FFD39F",
-     "orange": "#FFA840",
-     "light-red": "#FFB7B1",
-     "red": "#FF7063",
-     "light-pink": "#FAC1D9",
-     "pink": "#F584B4",
-     "light-purple": "#E5BBFB",
-     "purple": "#CB77F7",
-     "light-blue": "#CAE1FC",
-     "blue": "#95C3F9",
-     "light-turquoise": "#C3F3F3",
-     "turquoise": "#87E8E8",
-     "light-green": "#ACE3CE",
-     "green": "#5AC79E",
-     "light-grass": "#DFECB0",
-     "grass": "#C0D962",
-     "light-yellow": "#F7F5A7",
-     "yellow": "#F0EC4F",
-     }
+NAMED_COLORS = {
+    "light-orange": "#FFD39F",
+    "orange": "#FFA840",
+    "light-red": "#FFB7B1",
+    "red": "#FF7063",
+    "light-pink": "#FAC1D9",
+    "pink": "#F584B4",
+    "light-purple": "#E5BBFB",
+    "purple": "#CB77F7",
+    "light-blue": "#CAE1FC",
+    "blue": "#95C3F9",
+    "light-turquoise": "#C3F3F3",
+    "turquoise": "#87E8E8",
+    "light-green": "#ACE3CE",
+    "green": "#5AC79E",
+    "light-grass": "#DFECB0",
+    "grass": "#C0D962",
+    "light-yellow": "#F7F5A7",
+    "yellow": "#F0EC4F",
+}
 
 
 # default color when the category does not provide it
@@ -44,8 +44,10 @@ DEFAULT_COLOR = "light-yellow"
 
 
 from .description import (
-    WidgetDescription, CategoryDescription,
-    InputSignal, OutputSignal
+    WidgetDescription,
+    CategoryDescription,
+    InputSignal,
+    OutputSignal,
 )
 
 from .base import WidgetRegistry, VERSION_HEX
@@ -73,6 +75,7 @@ def global_registry(entry_point_group="_default"):
         log.debug("'global_registry()' - running widget discovery.")
         if entry_point_group == "_default":
             from ..config import widgets_entry_points
+
             entry_points_iter = widgets_entry_points()
         else:
             entry_points_iter = entry_point_group

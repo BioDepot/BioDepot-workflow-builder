@@ -51,12 +51,15 @@ class LinearRegressionLearner(Learner):
         c = m(data) # fit
         print(c(data)) # predict
     '''
-    name = 'linear_bfgs'
-    preprocessors = [HasClass(),
-                     Normalize(),
-                     Continuize(),
-                     Impute(),
-                     RemoveNaNColumns()]
+
+    name = "linear_bfgs"
+    preprocessors = [
+        HasClass(),
+        Normalize(),
+        Continuize(),
+        Impute(),
+        RemoveNaNColumns(),
+    ]
 
     def __init__(self, lambda_=1.0, preprocessors=None, **fmin_args):
 
@@ -79,16 +82,17 @@ class LinearRegressionLearner(Learner):
 
     def fit(self, X, Y, W):
         if len(Y.shape) > 1 and Y.shape[1] > 1:
-            raise ValueError('Linear regression does not support '
-                             'multi-target classification')
+            raise ValueError(
+                "Linear regression does not support " "multi-target classification"
+            )
 
         if np.isnan(np.sum(X)) or np.isnan(np.sum(Y)):
-            raise ValueError('Linear regression does not support '
-                             'unknown values')
+            raise ValueError("Linear regression does not support " "unknown values")
 
         theta = np.zeros(X.shape[1])
-        theta, cost, ret = fmin_l_bfgs_b(self.cost_grad, theta,
-                                         args=(X, Y.ravel()), **self.fmin_args)
+        theta, cost, ret = fmin_l_bfgs_b(
+            self.cost_grad, theta, args=(X, Y.ravel()), **self.fmin_args
+        )
 
         return LinearRegressionModel(theta)
 
@@ -101,7 +105,7 @@ class LinearRegressionModel(Model):
         return X.dot(self.theta)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import Orange.data
     from Orange.evaluation import CrossValidation
 
@@ -118,31 +122,31 @@ if __name__ == '__main__':
             perturb[i] = 0
         return grad
 
-    d = Orange.data.Table('housing')
+    d = Orange.data.Table("housing")
     d.X = np.hstack((d.X, np.ones((d.X.shape[0], 1))))
     d.shuffle()
 
-#    m = LinearRegressionLearner(lambda_=1.0)
-#    print(m(d)(d))
+    #    m = LinearRegressionLearner(lambda_=1.0)
+    #    print(m(d)(d))
 
-#    # gradient check
-#    m = LinearRegressionLearner(lambda_=1.0)
-#    theta = np.random.randn(d.X.shape[1])
-#
-#    ga = m.cost_grad(theta, d.X, d.Y.ravel())[1]
-#    gm = numerical_grad(lambda t: m.cost_grad(t, d.X, d.Y.ravel())[0], theta)
-#
-#    print(np.sum((ga - gm)**2))
+    #    # gradient check
+    #    m = LinearRegressionLearner(lambda_=1.0)
+    #    theta = np.random.randn(d.X.shape[1])
+    #
+    #    ga = m.cost_grad(theta, d.X, d.Y.ravel())[1]
+    #    gm = numerical_grad(lambda t: m.cost_grad(t, d.X, d.Y.ravel())[0], theta)
+    #
+    #    print(np.sum((ga - gm)**2))
 
     for lambda_ in (0.01, 0.03, 0.1, 0.3, 1, 3):
         m = LinearRegressionLearner(lambda_=lambda_)
         scores = []
         res = CrossValidation(d, [m], 3, False)
         for tr_ind, te_ind in res.indices:
-            s = np.mean((m(d[tr_ind])(d[te_ind]) - d[te_ind].Y.ravel())**2)
+            s = np.mean((m(d[tr_ind])(d[te_ind]) - d[te_ind].Y.ravel()) ** 2)
             scores.append(s)
-        print('{:5.2f} {}'.format(lambda_, np.mean(scores)))
+        print("{:5.2f} {}".format(lambda_, np.mean(scores)))
 
     m = LinearRegressionLearner(lambda_=0)
-    print('test data', np.mean((m(d)(d) - d.Y.ravel())**2))
-    print('majority', np.mean((np.mean(d.Y.ravel()) - d.Y.ravel())**2))
+    print("test data", np.mean((m(d)(d) - d.Y.ravel()) ** 2))
+    print("majority", np.mean((np.mean(d.Y.ravel()) - d.Y.ravel()) ** 2))

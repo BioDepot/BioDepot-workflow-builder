@@ -11,19 +11,22 @@ from Orange.widgets.tests.base import WidgetTest
 
 def discover_workflows(tests_dir):
     ows_path = join(tests_dir, "workflows")
-    ows_files = [f for f in listdir(ows_path)
-                 if isfile(join(ows_path, f)) and f.endswith(".ows")]
+    ows_files = [
+        f for f in listdir(ows_path) if isfile(join(ows_path, f)) and f.endswith(".ows")
+    ]
     for ows_file in ows_files:
         yield join(ows_path, ows_file)
 
+
 TEST_WORKFLOWS = chain(
     [t.abspath() for t in workflows.example_workflows()],
-    discover_workflows(dirname(__file__))
+    discover_workflows(dirname(__file__)),
 )
 
 
-@unittest.skipIf(environ.get("SKIP_EXAMPLE_WORKFLOWS", False),
-                 "Example workflows inflate coverage")
+@unittest.skipIf(
+    environ.get("SKIP_EXAMPLE_WORKFLOWS", False), "Example workflows inflate coverage"
+)
 class TestWorkflows(WidgetTest):
     def test_scheme_examples(self):
         """
@@ -37,5 +40,8 @@ class TestWorkflows(WidgetTest):
                 try:
                     scheme_load(new_scheme, f)
                 except Exception as e:
-                    self.fail("Old workflow '{}' could not be loaded\n'{}'".
-                              format(ows_file, str(e)))
+                    self.fail(
+                        "Old workflow '{}' could not be loaded\n'{}'".format(
+                            ows_file, str(e)
+                        )
+                    )

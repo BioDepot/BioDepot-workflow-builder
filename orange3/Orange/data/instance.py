@@ -29,8 +29,7 @@ class Instance:
         if data is None:
             self._x = np.repeat(Unknown, len(domain.attributes))
             self._y = np.repeat(Unknown, len(domain.class_vars))
-            self._metas = np.array([var.Unknown for var in domain.metas],
-                                   dtype=object)
+            self._metas = np.array([var.Unknown for var in domain.metas], dtype=object)
             self._weight = 1
         elif isinstance(data, Instance) and data.domain == domain:
             self._x = np.array(data._x)
@@ -45,6 +44,7 @@ class Instance:
             self.id = id
         else:
             from Orange.data import Table
+
             self.id = Table.new_id()
 
     @property
@@ -84,8 +84,10 @@ class Instance:
         + len(self.domain.class_vars) + len(self.domain.metas)`.
         """
         n_self, n_metas = len(self), len(self._metas)
-        return [self[i].value if i < n_self else self[n_self - i - 1].value
-                for i in range(n_self + n_metas)]
+        return [
+            self[i].value if i < n_self else self[n_self - i - 1].value
+            for i in range(n_self + n_metas)
+        ]
 
     @property
     def weight(self):
@@ -101,8 +103,7 @@ class Instance:
             key = self._domain.index(key)
         value = self._domain[key].to_val(value)
         if key >= 0 and not isinstance(value, (int, float)):
-            raise TypeError("Expected primitive value, got '%s'" %
-                            type(value).__name__)
+            raise TypeError("Expected primitive value, got '%s'" % type(value).__name__)
 
         if 0 <= key < len(self._domain.attributes):
             self._x[key] = value
@@ -122,7 +123,7 @@ class Instance:
             value = self._metas[-1 - key]
         return Value(self._domain[key], value)
 
-    #TODO Should we return an instance of `object` if we have a meta attribute
+    # TODO Should we return an instance of `object` if we have a meta attribute
     #     that is not Discrete or Continuous? E.g. when we have strings, we'd
     #     like to be able to use startswith, lower etc...
     #     Or should we even return Continuous as floats and use Value only
@@ -132,25 +133,20 @@ class Instance:
     @staticmethod
     def str_values(data, variables, limit=True):
         if limit:
-            s = ", ".join(var.str_val(val)
-                          for var, val in zip(variables, data[:5]))
+            s = ", ".join(var.str_val(val) for var, val in zip(variables, data[:5]))
             if len(data) > 5:
                 s += ", ..."
             return s
         else:
-            return ", ".join(var.str_val(val)
-                             for var, val in zip(variables, data))
+            return ", ".join(var.str_val(val) for var, val in zip(variables, data))
 
     def _str(self, limit):
         s = "[" + self.str_values(self._x, self._domain.attributes, limit)
         if self._domain.class_vars:
-            s += " | " + \
-                 self.str_values(self._y, self._domain.class_vars, limit)
+            s += " | " + self.str_values(self._y, self._domain.class_vars, limit)
         s += "]"
         if self._domain.metas:
-            s += " {" + \
-                 self.str_values(self._metas, self._domain.metas, limit) + \
-                 "}"
+            s += " {" + self.str_values(self._metas, self._domain.metas, limit) + "}"
         return s
 
     def __str__(self):
@@ -166,20 +162,22 @@ class Instance:
         def same(x1, x2):
             nan1 = np.isnan(x1)
             nan2 = np.isnan(x2)
-            return np.array_equal(nan1, nan2) and \
-                   np.array_equal(x1[~nan1], x2[~nan2])
+            return np.array_equal(nan1, nan2) and np.array_equal(x1[~nan1], x2[~nan2])
 
-        return same(self._x, other._x) and same(self._y, other._y) \
-               and all(m1 == m2 or
-                       type(m1) == type(m2) == float and isnan(m1) and isnan(m2)
-                       for m1, m2 in zip(self._metas, other._metas))
+        return (
+            same(self._x, other._x)
+            and same(self._y, other._y)
+            and all(
+                m1 == m2 or type(m1) == type(m2) == float and isnan(m1) and isnan(m2)
+                for m1, m2 in zip(self._metas, other._metas)
+            )
+        )
 
     def __iter__(self):
         return chain(iter(self._x), iter(self._y))
 
     def values(self):
-        return (Value(var, val)
-                for var, val in zip(self.domain.variables, self))
+        return (Value(var, val) for var, val in zip(self.domain.variables, self))
 
     def __len__(self):
         return len(self._x) + len(self._y)
@@ -212,8 +210,9 @@ class Instance:
         Return the class value as a list of instances of
         :obj:`Orange.data.Value`.
         """
-        return (Value(var, value)
-                for var, value in zip(self._domain.class_vars, self._y))
+        return (
+            Value(var, value) for var, value in zip(self._domain.class_vars, self._y)
+        )
 
     def set_class(self, value):
         """

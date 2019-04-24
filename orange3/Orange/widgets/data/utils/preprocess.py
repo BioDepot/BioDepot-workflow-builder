@@ -5,19 +5,30 @@ import contextlib
 import warnings
 
 from AnyQt.QtWidgets import (
-    QWidget, QVBoxLayout, QSpacerItem, QSizePolicy,
-    QStyle, QAction, QApplication,
-    QStylePainter, QStyleOptionFrame, QDockWidget,
-    QFocusFrame
+    QWidget,
+    QVBoxLayout,
+    QSpacerItem,
+    QSizePolicy,
+    QStyle,
+    QAction,
+    QApplication,
+    QStylePainter,
+    QStyleOptionFrame,
+    QDockWidget,
+    QFocusFrame,
 )
 
-from AnyQt.QtCore import (
-    Qt, QObject, QEvent, QSize, QModelIndex, QMimeData
-)
+from AnyQt.QtCore import Qt, QObject, QEvent, QSize, QModelIndex, QMimeData
 
 from AnyQt.QtGui import (
-    QCursor, QIcon, QPainter, QPixmap, QStandardItemModel, QStandardItem,
-    QDrag, QKeySequence
+    QCursor,
+    QIcon,
+    QPainter,
+    QPixmap,
+    QStandardItemModel,
+    QStandardItem,
+    QDrag,
+    QKeySequence,
 )
 
 from AnyQt.QtCore import pyqtSignal as Signal, pyqtSlot as Slot
@@ -37,6 +48,7 @@ class BaseEditor(QWidget):
     """
     Base widget for editing preprocessor's parameters.
     """
+
     #: Emitted when parameters have changed.
     changed = Signal()
     #: Emitted when parameters were edited/changed  as a result of
@@ -93,8 +105,7 @@ def list_model_move_row_helper(model, parent, src, dst):
 
 def list_model_move_rows_helper(model, parent, src, count, dst):
     assert not (src <= dst < src + count + 1)
-    rowdata = [model.itemData(model.index(src + i, 0, parent))
-               for i in range(count)]
+    rowdata = [model.itemData(model.index(src + i, 0, parent)) for i in range(count)]
     removed = model.removeRows(src, count, parent)
     if not removed:
         return False
@@ -140,8 +151,9 @@ class StandardItemModel(QStandardItemModel):
         if not sourceParent == destParent:
             return False
 
-        if not self.beginMoveRows(sourceParent, sourceRow, sourceRow,
-                                  destParent, destRow):
+        if not self.beginMoveRows(
+            sourceParent, sourceRow, sourceRow, destParent, destRow
+        ):
             return False
 
         # block so rowsRemoved/Inserted and dataChanged signals
@@ -151,19 +163,18 @@ class StandardItemModel(QStandardItemModel):
         # base class itself would connect to the rowsInserted, ... to monitor
         # ensure internal invariants)
         with blocked(self):
-            didmove = list_model_move_row_helper(
-                self, sourceParent, sourceRow, destRow)
+            didmove = list_model_move_row_helper(self, sourceParent, sourceRow, destRow)
         self.endMoveRows()
 
         if not didmove:
             warnings.warn(
                 "`moveRow` did not succeed! Data model might be "
                 "in an inconsistent state.",
-                RuntimeWarning)
+                RuntimeWarning,
+            )
         return didmove
 
-    def moveRows(self, sourceParent, sourceRow, count,
-                 destParent, destRow):
+    def moveRows(self, sourceParent, sourceRow, count, destParent, destRow):
         """
         Move count rows starting with the given sourceRow under parent
         sourceParent to row destRow under parent destParent.
@@ -174,8 +185,9 @@ class StandardItemModel(QStandardItemModel):
         .. note:: Only moves within the same parent are currently supported
 
         """
-        if not self.beginMoveRows(sourceParent, sourceRow, sourceRow + count,
-                                  destParent, destRow):
+        if not self.beginMoveRows(
+            sourceParent, sourceRow, sourceRow + count, destParent, destRow
+        ):
             return False
 
         # block so rowsRemoved/Inserted and dataChanged signals
@@ -183,14 +195,16 @@ class StandardItemModel(QStandardItemModel):
         # signal will be emitted from self.endMoveRows().
         with blocked(self):
             didmove = list_model_move_rows_helper(
-                self, sourceParent, sourceRow, count, destRow)
+                self, sourceParent, sourceRow, count, destRow
+            )
         self.endMoveRows()
 
         if not didmove:
             warnings.warn(
                 "`moveRows` did not succeed! Data model might be "
                 "in an inconsistent state.",
-                RuntimeWarning)
+                RuntimeWarning,
+            )
         return didmove
 
 
@@ -217,6 +231,7 @@ class Controller(QObject):
     parent : QObject
         The controller's parent.
     """
+
     MimeType = "application/x-qwidget-ref"
 
     def __init__(self, view, model=None, parent=None):
@@ -279,8 +294,7 @@ class Controller(QObject):
         self.view.clear()
 
     def dragEnterEvent(self, event):
-        if event.mimeData().hasFormat(self.MimeType) and \
-                self.model() is not None:
+        if event.mimeData().hasFormat(self.MimeType) and self.model() is not None:
             event.setDropAction(Qt.CopyAction)
             event.accept()
             return True
@@ -288,8 +302,7 @@ class Controller(QObject):
             return False
 
     def dragMoveEvent(self, event):
-        if event.mimeData().hasFormat(self.MimeType) and \
-                self.model() is not None:
+        if event.mimeData().hasFormat(self.MimeType) and self.model() is not None:
             event.accept()
             self._setDropIndicatorAt(event.pos())
             return True
@@ -300,24 +313,25 @@ class Controller(QObject):
         return False
         # TODO: Remember if we have seen enter with the proper data
         # (leave event does not have mimeData)
-#         if event.mimeData().hasFormat(self.MimeType) and \
-#                 event.proposedAction() == Qt.CopyAction:
-#             event.accept()
-#             self._setDropIndicatorAt(None)
-#             return True
-#         else:
-#             return False
+
+    #         if event.mimeData().hasFormat(self.MimeType) and \
+    #                 event.proposedAction() == Qt.CopyAction:
+    #             event.accept()
+    #             self._setDropIndicatorAt(None)
+    #             return True
+    #         else:
+    #             return False
 
     def dropEvent(self, event):
-        if event.mimeData().hasFormat(self.MimeType) and \
-                self.model() is not None:
+        if event.mimeData().hasFormat(self.MimeType) and self.model() is not None:
             # Create and insert appropriate widget.
             self._setDropIndicatorAt(None)
             row = self._insertIndexAt(event.pos())
             model = self.model()
 
             diddrop = model.dropMimeData(
-                event.mimeData(), Qt.CopyAction, row, 0, QModelIndex())
+                event.mimeData(), Qt.CopyAction, row, 0, QModelIndex()
+            )
 
             if diddrop:
                 event.accept()
@@ -361,8 +375,7 @@ class Controller(QObject):
         for row in reversed(range(start, end + 1)):
             self._removeWidgetFor(row, None)
 
-    def _rowsMoved(self, srcparetn, srcstart, srcend,
-                   dstparent, dststart, dstend):
+    def _rowsMoved(self, srcparetn, srcstart, srcend, dstparent, dststart, dstend):
         raise NotImplementedError
 
     def _closeRequested(self, row):
@@ -444,6 +457,7 @@ class SequenceFlow(QWidget):
     """
     A re-orderable list of widgets.
     """
+
     #: Emitted when the user clicks the Close button in the header
     widgetCloseRequested = Signal(int)
     #: Emitted when the user moves/drags a widget to a new location.
@@ -453,6 +467,7 @@ class SequenceFlow(QWidget):
         """
         Widget frame with a handle.
         """
+
         closeRequested = Signal()
 
         def __init__(self, parent=None, widget=None, title=None, **kwargs):
@@ -466,8 +481,11 @@ class SequenceFlow(QWidget):
             self.__focusframe = None
 
             self.__deleteaction = QAction(
-                "Remove", self, shortcut=QKeySequence.Delete,
-                enabled=False, triggered=self.closeRequested
+                "Remove",
+                self,
+                shortcut=QKeySequence.Delete,
+                enabled=False,
+                triggered=self.closeRequested,
             )
             self.addAction(self.__deleteaction)
 
@@ -532,7 +550,8 @@ class SequenceFlow(QWidget):
         self.__flowlayout = QVBoxLayout()
         layout.addLayout(self.__flowlayout)
         layout.addSpacerItem(
-            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Expanding))
+            QSpacerItem(1, 1, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        )
 
         self.setLayout(layout)
         self.setAcceptDrops(True)
@@ -575,8 +594,7 @@ class SequenceFlow(QWidget):
 
         layout = self.__flowlayout
 
-        frames = [item.widget() for item in self.layout_iter(layout)
-                  if item.widget()]
+        frames = [item.widget() for item in self.layout_iter(layout) if item.widget()]
 
         if 0 < index < len(frames):
             # find the layout index of a widget occupying the current
@@ -622,8 +640,7 @@ class SequenceFlow(QWidget):
         """
         layout = self.__flowlayout
         items = (layout.itemAt(i) for i in range(layout.count()))
-        return [item.widget().widget()
-                for item in items if item.widget() is not None]
+        return [item.widget().widget() for item in items if item.widget() is not None]
 
     def indexOf(self, widget):
         """Return the index (logical position) of `widget`
@@ -648,8 +665,10 @@ class SequenceFlow(QWidget):
         layout = self.__flowlayout
         index = self.__insertIndexAt(self.mapFromGlobal(QCursor.pos()))
 
-        if event.mimeData().hasFormat("application/x-internal-move") and \
-                event.source() is self:
+        if (
+            event.mimeData().hasFormat("application/x-internal-move")
+            and event.source() is self
+        ):
             # Complete the internal move
             frame, oldindex, _ = self.__dragstart
             # Remove the drop indicator spacer item before re-inserting
@@ -670,8 +689,10 @@ class SequenceFlow(QWidget):
 
     def dragEnterEvent(self, event):
         """Reimplemented."""
-        if event.mimeData().hasFormat("application/x-internal-move") and \
-                event.source() is self:
+        if (
+            event.mimeData().hasFormat("application/x-internal-move")
+            and event.source() is self
+        ):
             assert self.__dragstart[0] is not None
             event.acceptProposedAction()
 
@@ -688,26 +709,30 @@ class SequenceFlow(QWidget):
         """Reimplemented."""
         if isinstance(obj, SequenceFlow.Frame) and obj.parent() is self:
             etype = event.type()
-            if etype == QEvent.MouseButtonPress and \
-                    event.button() == Qt.LeftButton:
+            if etype == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
                 # Is the mouse press on the dock title bar
                 # (assume everything above obj.widget is a title bar)
                 # TODO: Get the proper title bar geometry.
                 if event.pos().y() < obj.widget().y():
                     index = self.indexOf(obj.widget())
                     self.__dragstart = (obj, index, event.pos())
-            elif etype == QEvent.MouseMove and \
-                    event.buttons() & Qt.LeftButton and \
-                    obj is self.__dragstart[0]:
+            elif (
+                etype == QEvent.MouseMove
+                and event.buttons() & Qt.LeftButton
+                and obj is self.__dragstart[0]
+            ):
                 _, _, down = self.__dragstart
-                if (down - event.pos()).manhattanLength() >= \
-                        QApplication.startDragDistance():
+                if (
+                    down - event.pos()
+                ).manhattanLength() >= QApplication.startDragDistance():
                     self.__startInternalDrag(obj, event.pos())
                     self.__dragstart = None, None, None
                     return True
-            elif etype == QEvent.MouseButtonRelease and \
-                    event.button() == Qt.LeftButton and \
-                    self.__dragstart[0] is obj:
+            elif (
+                etype == QEvent.MouseButtonRelease
+                and event.button() == Qt.LeftButton
+                and self.__dragstart[0] is obj
+            ):
                 self.__dragstart = None, None, None
 
         return super().eventFilter(obj, event)
@@ -732,9 +757,11 @@ class SequenceFlow(QWidget):
 
     def __insertIndexAt(self, pos):
         y = pos.y()
-        midpoints = [item.widget().geometry().center().y()
-                     for item in self.layout_iter(self.__flowlayout)
-                     if item.widget() is not None]
+        midpoints = [
+            item.widget().geometry().center().y()
+            for item in self.layout_iter(self.__flowlayout)
+            if item.widget() is not None
+        ]
         index = bisect.bisect_left(midpoints, y)
         return index
 
@@ -761,9 +788,11 @@ class SequenceFlow(QWidget):
     def __widgetFrame(self, widget):
         layout = self.__flowlayout
         for item in self.layout_iter(layout):
-            if item.widget() is not None and \
-                    isinstance(item.widget(), SequenceFlow.Frame) and \
-                    item.widget().widget() is widget:
+            if (
+                item.widget() is not None
+                and isinstance(item.widget(), SequenceFlow.Frame)
+                and item.widget().widget() is widget
+            ):
                 return item.widget()
         else:
             return None

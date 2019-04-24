@@ -54,8 +54,9 @@ class CanvasView(QGraphicsView):
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.LeftButton:
-            if not self.__autoScrollTimer.isActive() and \
-                    self.__shouldAutoScroll(event.pos()):
+            if not self.__autoScrollTimer.isActive() and self.__shouldAutoScroll(
+                event.pos()
+            ):
                 self.__startAutoScroll()
 
         QGraphicsView.mouseMoveEvent(self, event)
@@ -81,12 +82,13 @@ class CanvasView(QGraphicsView):
     def wheelEvent(self, event: QWheelEvent):
         # use mouse position as anchor while zooming
         self.setTransformationAnchor(2)
-        if event.modifiers() & Qt.ControlModifier \
-                and event.buttons() == Qt.NoButton:
+        if event.modifiers() & Qt.ControlModifier and event.buttons() == Qt.NoButton:
             delta = event.angleDelta().y()
-            if QT_VERSION >= 0x050500 \
-                    and event.source() != Qt.MouseEventNotSynthesized \
-                    and abs(delta) < 50:
+            if (
+                QT_VERSION >= 0x050500
+                and event.source() != Qt.MouseEventNotSynthesized
+                and abs(delta) < 50
+            ):
                 self.change_zoom(delta / 10)
             else:
                 self.change_zoom(copysign(1, delta))
@@ -138,8 +140,10 @@ class CanvasView(QGraphicsView):
             if pos.y() > vrect.bottom() - margin:
                 self.verticalScrollBar().setValue(vvalue + advance)
 
-            if self.verticalScrollBar().value() == vvalue and \
-                    self.horizontalScrollBar().value() == hvalue:
+            if (
+                self.verticalScrollBar().value() == vvalue
+                and self.horizontalScrollBar().value() == hvalue
+            ):
                 self.__stopAutoScroll()
         else:
             self.__stopAutoScroll()

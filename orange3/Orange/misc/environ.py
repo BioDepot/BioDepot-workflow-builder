@@ -39,7 +39,7 @@ def data_dir_base():
     elif sys.platform == "win32":
         base = os.getenv("APPDATA", os.path.expanduser("~/AppData/Local"))
     elif os.name == "posix":
-        base = os.getenv('XDG_DATA_HOME', os.path.expanduser("~/.local/share"))
+        base = os.getenv("XDG_DATA_HOME", os.path.expanduser("~/.local/share"))
     else:
         base = os.path.expanduser("~/.local/share")
     return base

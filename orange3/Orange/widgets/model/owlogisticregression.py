@@ -12,12 +12,12 @@ from Orange.widgets.utils.signals import Output
 
 class OWLogisticRegression(OWBaseLearner):
     name = "Logistic Regression"
-    description = "The logistic regression classification algorithm with " \
-                  "LASSO (L1) or ridge (L2) regularization."
+    description = (
+        "The logistic regression classification algorithm with "
+        "LASSO (L1) or ridge (L2) regularization."
+    )
     icon = "icons/LogisticRegression.svg"
-    replaces = [
-        "Orange.widgets.classify.owlogisticregression.OWLogisticRegression",
-    ]
+    replaces = ["Orange.widgets.classify.owlogisticregression.OWLogisticRegression"]
     priority = 60
 
     LEARNER = LogisticRegressionLearner
@@ -28,13 +28,17 @@ class OWLogisticRegression(OWBaseLearner):
     penalty_type = settings.Setting(1)
     C_index = settings.Setting(61)
 
-    C_s = list(chain(range(1000, 200, -50),
-                     range(200, 100, -10),
-                     range(100, 20, -5),
-                     range(20, 0, -1),
-                     [x / 10 for x in range(9, 2, -1)],
-                     [x / 100 for x in range(20, 2, -1)],
-                     [x / 1000 for x in range(20, 0, -1)]))
+    C_s = list(
+        chain(
+            range(1000, 200, -50),
+            range(200, 100, -10),
+            range(100, 20, -5),
+            range(20, 0, -1),
+            [x / 10 for x in range(9, 2, -1)],
+            [x / 100 for x in range(20, 2, -1)],
+            [x / 1000 for x in range(20, 0, -1)],
+        )
+    )
     dual = False
     tol = 0.0001
     fit_intercept = True
@@ -46,16 +50,27 @@ class OWLogisticRegression(OWBaseLearner):
     def add_main_layout(self):
         box = gui.widgetBox(self.controlArea, box=True)
         self.penalty_combo = gui.comboBox(
-            box, self, "penalty_type", label="Regularization type: ",
-            items=self.penalty_types, orientation=Qt.Horizontal,
-            addSpace=4, callback=self.settings_changed)
+            box,
+            self,
+            "penalty_type",
+            label="Regularization type: ",
+            items=self.penalty_types,
+            orientation=Qt.Horizontal,
+            addSpace=4,
+            callback=self.settings_changed,
+        )
         gui.widgetLabel(box, "Strength:")
         box2 = gui.hBox(gui.indentedBox(box))
         gui.widgetLabel(box2, "Weak").setStyleSheet("margin-top:6px")
         self.c_slider = gui.hSlider(
-            box2, self, "C_index", minValue=0, maxValue=len(self.C_s) - 1,
+            box2,
+            self,
+            "C_index",
+            minValue=0,
+            maxValue=len(self.C_s) - 1,
             callback=lambda: (self.set_c(), self.settings_changed()),
-            createLabel=False)
+            createLabel=False,
+        )
         gui.widgetLabel(box2, "Strong").setStyleSheet("margin-top:6px")
         box2 = gui.hBox(box)
         box2.layout().setAlignment(Qt.AlignCenter)
@@ -76,7 +91,7 @@ class OWLogisticRegression(OWBaseLearner):
             C=self.strength_C,
             fit_intercept=self.fit_intercept,
             intercept_scaling=self.intercept_scaling,
-            preprocessors=self.preprocessors
+            preprocessors=self.preprocessors,
         )
 
     def update_model(self):
@@ -87,19 +102,29 @@ class OWLogisticRegression(OWBaseLearner):
         self.Outputs.coefficients.send(coef_table)
 
     def get_learner_parameters(self):
-        return (("Regularization", "{}, C={}".format(
-            self.penalty_types[self.penalty_type], self.C_s[self.C_index])),)
+        return (
+            (
+                "Regularization",
+                "{}, C={}".format(
+                    self.penalty_types[self.penalty_type], self.C_s[self.C_index]
+                ),
+            ),
+        )
 
 
 def create_coef_table(classifier):
     i = classifier.intercept
     c = classifier.coefficients
     if c.shape[0] > 2:
-        values = [classifier.domain.class_var.values[int(i)] for i in classifier.used_vals[0]]
+        values = [
+            classifier.domain.class_var.values[int(i)] for i in classifier.used_vals[0]
+        ]
     else:
         values = [classifier.domain.class_var.values[int(classifier.used_vals[0][1])]]
-    domain = Domain([ContinuousVariable(value, number_of_decimals=7)
-                     for value in values], metas=[StringVariable("name")])
+    domain = Domain(
+        [ContinuousVariable(value, number_of_decimals=7) for value in values],
+        metas=[StringVariable("name")],
+    )
     coefs = np.vstack((i.reshape(1, len(i)), c.T))
     names = [[attr.name] for attr in classifier.domain.attributes]
     names = [["intercept"]] + names

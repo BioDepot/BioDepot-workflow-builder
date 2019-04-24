@@ -10,14 +10,17 @@ from warnings import warn
 from xml.sax.saxutils import escape
 
 from AnyQt.QtCore import (
-    Qt, QObject, QAbstractListModel, QAbstractTableModel, QModelIndex,
-    QItemSelectionModel, QT_VERSION
+    Qt,
+    QObject,
+    QAbstractListModel,
+    QAbstractTableModel,
+    QModelIndex,
+    QItemSelectionModel,
+    QT_VERSION,
 )
 from AnyQt.QtCore import pyqtSignal as Signal
 from AnyQt.QtGui import QColor
-from AnyQt.QtWidgets import (
-    QWidget, QBoxLayout, QToolButton, QAbstractButton, QAction
-)
+from AnyQt.QtWidgets import QWidget, QBoxLayout, QToolButton, QAbstractButton, QAction
 
 import numpy
 
@@ -39,8 +42,10 @@ def _argsort(seq, cmp=None, key=None, reverse=False):
         return sorted(indices, key=lambda i: key(seq[i]), reverse=reverse)
     elif cmp is not None:
         from functools import cmp_to_key
-        return sorted(indices, key=cmp_to_key(lambda a, b: cmp(seq[a], seq[b])),
-                      reverse=reverse)
+
+        return sorted(
+            indices, key=cmp_to_key(lambda a, b: cmp(seq[a], seq[b])), reverse=reverse
+        )
     else:
         return sorted(indices, key=lambda i: seq[i], reverse=reverse)
 
@@ -80,12 +85,13 @@ class AbstractSortTableModel(QAbstractTableModel):
     When updating the model (inserting, removing rows), the sort order
     needs to be accounted for (e.g. reset and re-applied).
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.__sortInd = None     #: Indices sorting the source table
+        self.__sortInd = None  #: Indices sorting the source table
         self.__sortIndInv = None  #: The inverse of __sortInd
-        self.__sortColumn = -1    #: Sort key column, or -1
+        self.__sortColumn = -1  #: Sort key column, or -1
         self.__sortOrder = Qt.AscendingOrder
 
     def sortColumnData(self, column):
@@ -98,10 +104,11 @@ class AbstractSortTableModel(QAbstractTableModel):
             data = numpy.asarray(self.sortColumnData(column))
         except NotImplementedError:
             # Fallback to slow implementation
-            data = numpy.array([self.index(row, column).data()
-                                for row in range(self.rowCount())])
+            data = numpy.array(
+                [self.index(row, column).data() for row in range(self.rowCount())]
+            )
 
-        assert data.ndim == 1, 'Data should be 1-dimensional'
+        assert data.ndim == 1, "Data should be 1-dimensional"
         data = data[self.mapToSourceRows(Ellipsis)]
         return data
 
@@ -128,9 +135,9 @@ class AbstractSortTableModel(QAbstractTableModel):
             simply input `rows` is returned.
         """
         # self.__sortInd[rows] fails if `rows` is an empty list or array
-        if self.__sortInd is not None \
-                and (isinstance(rows, (Integral, type(Ellipsis)))
-                     or len(rows)):
+        if self.__sortInd is not None and (
+            isinstance(rows, (Integral, type(Ellipsis))) or len(rows)
+        ):
             new_rows = self.__sortInd[rows]
             if rows is Ellipsis:
                 new_rows.setflags(write=False)
@@ -152,20 +159,24 @@ class AbstractSortTableModel(QAbstractTableModel):
             If they are the same, simply input `rows` is returned.
         """
         # self.__sortInd[rows] fails if `rows` is an empty list or array
-        if self.__sortIndInv is not None \
-                and (isinstance(rows, (Integral, type(Ellipsis)))
-                     or len(rows)):
+        if self.__sortIndInv is not None and (
+            isinstance(rows, (Integral, type(Ellipsis))) or len(rows)
+        ):
             new_rows = self.__sortIndInv[rows]
             if rows is Ellipsis:
                 new_rows.setflags(write=False)
             rows = new_rows
         return rows
 
-    @deprecated('Orange.widgets.utils.itemmodels.AbstractSortTableModel.mapFromSourceRows')
+    @deprecated(
+        "Orange.widgets.utils.itemmodels.AbstractSortTableModel.mapFromSourceRows"
+    )
     def mapFromTableRows(self, rows):
         return self.mapFromSourceRows(rows)
 
-    @deprecated('Orange.widgets.utils.itemmodels.AbstractSortTableModel.mapToSourceRows')
+    @deprecated(
+        "Orange.widgets.utils.itemmodels.AbstractSortTableModel.mapToSourceRows"
+    )
     def mapToTableRows(self, rows):
         return self.mapToSourceRows(rows)
 
@@ -198,9 +209,7 @@ class AbstractSortTableModel(QAbstractTableModel):
         when accessing data by row indexes.
         """
         if QT_VERSION >= 0x50000:
-            self.layoutAboutToBeChanged.emit(
-                [], QAbstractTableModel.VerticalSortHint
-            )
+            self.layoutAboutToBeChanged.emit([], QAbstractTableModel.VerticalSortHint)
         else:
             self.layoutAboutToBeChanged.emit()
 
@@ -233,8 +242,11 @@ class AbstractSortTableModel(QAbstractTableModel):
 
         self.changePersistentIndexList(
             persistent,
-            [self.index(row, pind.column())
-             for row, pind in zip(persistent_rows, persistent)])
+            [
+                self.index(row, pind.column())
+                for row, pind in zip(persistent_rows, persistent)
+            ],
+        )
         if QT_VERSION >= 0x50000:
             self.layoutChanged.emit([], QAbstractTableModel.VerticalSortHint)
         else:
@@ -289,7 +301,9 @@ class PyTableModel(AbstractSortTableModel):
         if not self._editable or not index.isValid():
             return flags
         if isinstance(self._editable, Sequence):
-            return flags | Qt.ItemIsEditable if self._editable[index.column()] else flags
+            return (
+                flags | Qt.ItemIsEditable if self._editable[index.column()] else flags
+            )
         return flags | Qt.ItemIsEditable
 
     def setData(self, index, value, role):
@@ -320,20 +334,24 @@ class PyTableModel(AbstractSortTableModel):
         if role == Qt.DecorationRole and isinstance(value, Variable):
             return gui.attributeIconDict[value]
         if role == Qt.DisplayRole:
-            if (isinstance(value, Number) and
-                    not (isnan(value) or isinf(value) or isinstance(value, Integral))):
+            if isinstance(value, Number) and not (
+                isnan(value) or isinf(value) or isinstance(value, Integral)
+            ):
                 absval = abs(value)
                 strlen = len(str(int(absval)))
-                value = '{:.{}{}}'.format(value,
-                                          2 if absval < .001 else
-                                          3 if strlen < 2 else
-                                          1 if strlen < 5 else
-                                          0 if strlen < 6 else
-                                          3,
-                                          'f' if (absval == 0 or
-                                                  absval >= .001 and
-                                                  strlen < 6)
-                                          else 'e')
+                value = "{:.{}{}}".format(
+                    value,
+                    2
+                    if absval < 0.001
+                    else 3
+                    if strlen < 2
+                    else 1
+                    if strlen < 5
+                    else 0
+                    if strlen < 6
+                    else 3,
+                    "f" if (absval == 0 or absval >= 0.001 and strlen < 6) else "e",
+                )
             return str(value)
         if role == Qt.TextAlignmentRole and isinstance(value, Number):
             return Qt.AlignRight | Qt.AlignVCenter
@@ -363,7 +381,9 @@ class PyTableModel(AbstractSortTableModel):
         headers = self._headers.get(orientation)
 
         if headers and section < len(headers):
-            section = self.mapToSourceRows(section) if orientation == Qt.Vertical else section
+            section = (
+                self.mapToSourceRows(section) if orientation == Qt.Vertical else section
+            )
             value = headers[section]
 
             if role == Qt.ToolTipRole:
@@ -381,7 +401,7 @@ class PyTableModel(AbstractSortTableModel):
 
     def removeRows(self, row, count, parent=QModelIndex()):
         if not parent.isValid():
-            del self[row:row + count]
+            del self[row : row + count]
             for rowidx in range(row, row + count):
                 self._roleData.pop(rowidx, None)
             return True
@@ -390,24 +410,24 @@ class PyTableModel(AbstractSortTableModel):
     def removeColumns(self, column, count, parent=QModelIndex()):
         self.beginRemoveColumns(parent, column, column + count - 1)
         for row in self._table:
-            del row[column:column + count]
+            del row[column : column + count]
         for cols in self._roleData.values():
             for col in range(column, column + count):
                 cols.pop(col, None)
-        del self._headers.get(Qt.Horizontal, [])[column:column + count]
+        del self._headers.get(Qt.Horizontal, [])[column : column + count]
         self.endRemoveColumns()
         return True
 
     def insertRows(self, row, count, parent=QModelIndex()):
         self.beginInsertRows(parent, row, row + count - 1)
-        self._table[row:row] = [[''] * self.columnCount() for _ in range(count)]
+        self._table[row:row] = [[""] * self.columnCount() for _ in range(count)]
         self.endInsertRows()
         return True
 
     def insertColumns(self, column, count, parent=QModelIndex()):
         self.beginInsertColumns(parent, column, column + count - 1)
         for row in self._table:
-            row[column:column] = [''] * count
+            row[column:column] = [""] * count
         self.endInsertColumns()
         return True
 
@@ -442,13 +462,17 @@ class PyTableModel(AbstractSortTableModel):
             start = stop = i = i if i >= 0 else len(self) + i
         self._check_sort_order()
         self._table[i] = value
-        self.dataChanged.emit(self.index(start, 0),
-                              self.index(stop, self.columnCount() - 1))
+        self.dataChanged.emit(
+            self.index(start, 0), self.index(stop, self.columnCount() - 1)
+        )
 
     def _check_sort_order(self):
         if self.mapToSourceRows(Ellipsis) is not Ellipsis:
-            warn("Can't modify PyTableModel when it's sorted",
-                 RuntimeWarning, stacklevel=3)
+            warn(
+                "Can't modify PyTableModel when it's sorted",
+                RuntimeWarning,
+                stacklevel=3,
+            )
             raise RuntimeError("Can't modify PyTableModel when it's sorted")
 
     def wrap(self, table):
@@ -494,14 +518,19 @@ class PyTableModel(AbstractSortTableModel):
 class PyListModel(QAbstractListModel):
     """ A model for displaying python list like objects in Qt item view classes
     """
+
     MIME_TYPE = "application/x-Orange-PyListModelData"
     Separator = object()
 
-    def __init__(self, iterable=None, parent=None,
-                 flags=Qt.ItemIsSelectable | Qt.ItemIsEnabled,
-                 list_item_role=Qt.DisplayRole,
-                 enable_dnd=False,
-                 supportedDropActions=Qt.MoveAction):
+    def __init__(
+        self,
+        iterable=None,
+        parent=None,
+        flags=Qt.ItemIsSelectable | Qt.ItemIsEnabled,
+        list_item_role=Qt.DisplayRole,
+        enable_dnd=False,
+        supportedDropActions=Qt.MoveAction,
+    ):
         super().__init__(parent)
         self._list = []
         self._other_data = []
@@ -540,7 +569,6 @@ class PyListModel(QAbstractListModel):
         if role == Qt.DisplayRole:
             return str(section)
 
-
     # noinspection PyMethodOverriding
     def rowCount(self, parent=QModelIndex()):
         return 0 if parent.isValid() else len(self._list)
@@ -550,8 +578,7 @@ class PyListModel(QAbstractListModel):
 
     def data(self, index, role=Qt.DisplayRole):
         row = index.row()
-        if role in [self.list_item_role, Qt.EditRole] \
-                and self._is_index_valid(index):
+        if role in [self.list_item_role, Qt.EditRole] and self._is_index_valid(index):
             return self[row]
         elif self._is_index_valid(row):
             return self._other_data[row].get(role, None)
@@ -584,8 +611,7 @@ class PyListModel(QAbstractListModel):
         data = dict(data)
         with signal_blocking(self):
             for role, value in data.items():
-                if role == Qt.EditRole and \
-                        self._is_index_valid(index):
+                if role == Qt.EditRole and self._is_index_valid(index):
                     self[index.row()] = value
                 elif self._is_index_valid(index):
                     self._other_data[index.row()][role] = value
@@ -599,7 +625,6 @@ class PyListModel(QAbstractListModel):
         else:
             return self._flags | Qt.ItemIsDropEnabled
 
-
     # noinspection PyMethodOverriding
     def insertRows(self, row, count, parent=QModelIndex()):
         """ Insert ``count`` rows at ``row``, the list fill be filled
@@ -611,21 +636,19 @@ class PyListModel(QAbstractListModel):
         else:
             return False
 
-
     # noinspection PyMethodOverriding
     def removeRows(self, row, count, parent=QModelIndex()):
         """Remove ``count`` rows starting at ``row``
         """
         if not parent.isValid():
-            del self[row:row + count]
+            del self[row : row + count]
             return True
         else:
             return False
 
     def extend(self, iterable):
         list_ = list(iterable)
-        self.beginInsertRows(QModelIndex(),
-                             len(self), len(self) + len(list_) - 1)
+        self.beginInsertRows(QModelIndex(), len(self), len(self) + len(list_) - 1)
         self._list.extend(list_)
         self._other_data.extend([_store() for _ in list_])
         self.endInsertRows()
@@ -667,12 +690,14 @@ class PyListModel(QAbstractListModel):
         return self._list[i]
 
     def __add__(self, iterable):
-        new_list = PyListModel(list(self._list),
-                               # method parent is overloaded in Model
-                               QObject.parent(self),
-                               flags=self._flags,
-                               list_item_role=self.list_item_role,
-                               supportedDropActions=self.supportedDropActions())
+        new_list = PyListModel(
+            list(self._list),
+            # method parent is overloaded in Model
+            QObject.parent(self),
+            flags=self._flags,
+            list_item_role=self.list_item_role,
+            supportedDropActions=self.supportedDropActions(),
+        )
         # pylint: disable=protected-access
         new_list._other_data = list(self._other_data)
         new_list.extend(iterable)
@@ -706,8 +731,8 @@ class PyListModel(QAbstractListModel):
             self._list[start:start] = value
             self._other_data[start:start] = (_store() for _ in value)
             for idx in separators:
-                self._other_data[idx]['flags'] = Qt.NoItemFlags
-                self._other_data[idx][Qt.AccessibleDescriptionRole] = 'separator'
+                self._other_data[idx]["flags"] = Qt.NoItemFlags
+                self._other_data[idx][Qt.AccessibleDescriptionRole] = "separator"
             self.endInsertRows()
         else:
             s = operator.index(s)
@@ -740,7 +765,7 @@ class PyListModel(QAbstractListModel):
         if isinstance(indexList, int):
             indexList = [indexList]
 
-        #TODO: group indexes into ranges
+        # TODO: group indexes into ranges
         for ind in indexList:
             self.dataChanged.emit(self.index(ind), self.index(ind))
 
@@ -761,9 +786,9 @@ class PyListModel(QAbstractListModel):
         items = [self[i.row()] for i in indexlist]
         itemdata = [self.itemData(i) for i in indexlist]
         mime = QAbstractListModel.mimeData(self, indexlist)
-        mime.setData(self.MIME_TYPE, b'see properties: _items, _itemdata')
-        mime.setProperty('_items', items)
-        mime.setProperty('_itemdata', itemdata)
+        mime.setData(self.MIME_TYPE, b"see properties: _items, _itemdata")
+        mime.setProperty("_items", items)
+        mime.setProperty("_itemdata", itemdata)
         return mime
 
     def dropMimeData(self, mime, action, row, column, parent):
@@ -773,8 +798,8 @@ class PyListModel(QAbstractListModel):
         if not mime.hasFormat(self.MIME_TYPE):
             return False
 
-        items = mime.property('_items')
-        itemdata = mime.property('_itemdata')
+        items = mime.property("_items")
+        itemdata = mime.property("_itemdata")
 
         if not items:
             return False
@@ -838,16 +863,20 @@ class VariableListModel(PyListModel):
     def variable_labels_tooltip(self, var):
         text = ""
         if var.attributes:
-            items = [(safe_text(key), safe_text(value))
-                     for key, value in var.attributes.items()]
+            items = [
+                (safe_text(key), safe_text(value))
+                for key, value in var.attributes.items()
+            ]
             labels = list(map("%s = %s".__mod__, items))
             text += "<br/>Variable Labels:<br/>"
             text += "<br/>".join(labels)
         return text
 
     def discrete_variable_tooltip(self, var):
-        text = "<b>%s</b><br/>Categorical with %i values: " %\
-               (safe_text(var.name), len(var.values))
+        text = "<b>%s</b><br/>Categorical with %i values: " % (
+            safe_text(var.name),
+            len(var.values),
+        )
         text += ", ".join("%r" % safe_text(v) for v in var.values)
         text += self.variable_labels_tooltip(var)
         return text
@@ -871,13 +900,25 @@ class VariableListModel(PyListModel):
 class DomainModel(VariableListModel):
     ATTRIBUTES, CLASSES, METAS = 1, 2, 4
     MIXED = ATTRIBUTES | CLASSES | METAS
-    SEPARATED = (CLASSES, PyListModel.Separator,
-                 METAS, PyListModel.Separator,
-                 ATTRIBUTES)
+    SEPARATED = (
+        CLASSES,
+        PyListModel.Separator,
+        METAS,
+        PyListModel.Separator,
+        ATTRIBUTES,
+    )
     PRIMITIVE = (DiscreteVariable, ContinuousVariable)
 
-    def __init__(self, order=SEPARATED, separators=True, placeholder=None,
-                 valid_types=None, alphabetical=False, skip_hidden_vars=True, **kwargs):
+    def __init__(
+        self,
+        order=SEPARATED,
+        separators=True,
+        placeholder=None,
+        valid_types=None,
+        alphabetical=False,
+        skip_hidden_vars=True,
+        **kwargs
+    ):
         """
 
         Parameters
@@ -901,9 +942,7 @@ class DomainModel(VariableListModel):
         if placeholder is not None and None not in order:
             # Add None for the placeholder if it's not already there
             # Include separator if the current order uses them
-            order = (None,) + \
-                    (self.Separator, ) * (self.Separator in order) + \
-                    order
+            order = (None,) + (self.Separator,) * (self.Separator in order) + order
         if not separators:
             order = [e for e in order if e is not self.Separator]
         self.order = order
@@ -927,15 +966,23 @@ class DomainModel(VariableListModel):
             if isinstance(section, int):
                 if domain is None:
                     continue
-                to_add = list(chain(
-                    *(vars for i, vars in enumerate(
-                        (domain.attributes, domain.class_vars, domain.metas))
-                      if (1 << i) & section)))
+                to_add = list(
+                    chain(
+                        *(
+                            vars
+                            for i, vars in enumerate(
+                                (domain.attributes, domain.class_vars, domain.metas)
+                            )
+                            if (1 << i) & section
+                        )
+                    )
+                )
                 if self.skip_hidden_vars:
                     to_add = list(filter_visible(to_add))
                 if self.valid_types is not None:
-                    to_add = [var for var in to_add
-                              if isinstance(var, self.valid_types)]
+                    to_add = [
+                        var for var in to_add if isinstance(var, self.valid_types)
+                    ]
                 if self.alphabetical:
                     to_add = sorted(to_add, key=lambda x: x.name)
             elif isinstance(section, list):
@@ -962,8 +1009,11 @@ class DomainModel(VariableListModel):
                 method(self, *args, **kwargs)
             else:
                 raise TypeError(
-                    "{} can be modified only by calling 'set_domain'".
-                    format(type(self).__name__))
+                    "{} can be modified only by calling 'set_domain'".format(
+                        type(self).__name__
+                    )
+                )
+
         return e
 
     @prevent_modification
@@ -1023,6 +1073,7 @@ class ListSingleSelectionModel(QItemSelectionModel):
         - selectedIndexChanged(QModelIndex)
 
     """
+
     selectedIndexChanged = Signal(QModelIndex)
 
     def __init__(self, model, parent=None):
@@ -1058,14 +1109,14 @@ def select_row(view, row):
     Select a `row` in an item view.
     """
     selmodel = view.selectionModel()
-    selmodel.select(view.model().index(row, 0),
-                    QItemSelectionModel.ClearAndSelect |
-                    QItemSelectionModel.Rows)
+    selmodel.select(
+        view.model().index(row, 0),
+        QItemSelectionModel.ClearAndSelect | QItemSelectionModel.Rows,
+    )
 
 
 class ModelActionsWidget(QWidget):
-    def __init__(self, actions=None, parent=None,
-                 direction=QBoxLayout.LeftToRight):
+    def __init__(self, actions=None, parent=None, direction=QBoxLayout.LeftToRight):
         QWidget.__init__(self, parent)
         self.actions = []
         self.buttons = []
@@ -1104,6 +1155,7 @@ class TableModel(AbstractSortTableModel):
     :param Orange.data.Table sourcedata: Source data table.
     :param QObject parent:
     """
+
     #: Orange.data.Value for the index.
     ValueRole = gui.TableValueRole  # next(gui.OrangeUserRole)
     #: Orange.data.Value of the row's class.
@@ -1127,12 +1179,10 @@ class TableModel(AbstractSortTableModel):
     }
 
     #: Standard column descriptor
-    Column = namedtuple(
-        "Column", ["var", "role", "background", "format"])
+    Column = namedtuple("Column", ["var", "role", "background", "format"])
     #: Basket column descriptor (i.e. sparse X/Y/metas/ compressed into
     #: a single column).
-    Basket = namedtuple(
-        "Basket", ["vars", "role", "background", "density", "format"])
+    Basket = namedtuple("Basket", ["vars", "role", "background", "density", "format"])
 
     # The class uses the same names (X_density etc) as Table
     # pylint: disable=invalid-name
@@ -1147,8 +1197,10 @@ class TableModel(AbstractSortTableModel):
 
         def format_sparse(vars, datagetter, instance):
             data = datagetter(instance)
-            return ", ".join("{}={}".format(vars[i].name, vars[i].repr_val(v))
-                             for i, v in zip(data.indices, data.data))
+            return ", ".join(
+                "{}={}".format(vars[i].name, vars[i].repr_val(v))
+                for i, v in zip(data.indices, data.data)
+            )
 
         def format_sparse_bool(vars, datagetter, instance):
             data = datagetter(instance)
@@ -1158,8 +1210,9 @@ class TableModel(AbstractSortTableModel):
             return str(instance[var])
 
         def make_basket_formater(vars, density, role):
-            formater = (format_sparse if density == Storage.SPARSE
-                        else format_sparse_bool)
+            formater = (
+                format_sparse if density == Storage.SPARSE else format_sparse_bool
+            )
             if role == TableModel.Attribute:
                 getter = operator.attrgetter("sparse_x")
             elif role == TableModel.ClassVar:
@@ -1170,41 +1223,45 @@ class TableModel(AbstractSortTableModel):
 
         def make_basket(vars, density, role):
             return TableModel.Basket(
-                vars, TableModel.Attribute, self.ColorForRole[role], density,
-                make_basket_formater(vars, density, role)
+                vars,
+                TableModel.Attribute,
+                self.ColorForRole[role],
+                density,
+                make_basket_formater(vars, density, role),
             )
 
         def make_column(var, role):
             return TableModel.Column(
-                var, role, self.ColorForRole[role],
-                partial(format_dense, var)
+                var, role, self.ColorForRole[role], partial(format_dense, var)
             )
 
         columns = []
 
         if self.Y_density != Storage.DENSE and domain.class_vars:
-            coldesc = make_basket(domain.class_vars, self.Y_density,
-                                  TableModel.ClassVar)
+            coldesc = make_basket(
+                domain.class_vars, self.Y_density, TableModel.ClassVar
+            )
             columns.append(coldesc)
         else:
-            columns += [make_column(var, TableModel.ClassVar)
-                        for var in domain.class_vars]
+            columns += [
+                make_column(var, TableModel.ClassVar) for var in domain.class_vars
+            ]
 
         if self.M_density != Storage.DENSE and domain.metas:
-            coldesc = make_basket(domain.metas, self.M_density,
-                                  TableModel.Meta)
+            coldesc = make_basket(domain.metas, self.M_density, TableModel.Meta)
             columns.append(coldesc)
         else:
-            columns += [make_column(var, TableModel.Meta)
-                        for var in domain.metas]
+            columns += [make_column(var, TableModel.Meta) for var in domain.metas]
 
         if self.X_density != Storage.DENSE and domain.attributes:
-            coldesc = make_basket(domain.attributes, self.X_density,
-                                  TableModel.Attribute)
+            coldesc = make_basket(
+                domain.attributes, self.X_density, TableModel.Attribute
+            )
             columns.append(coldesc)
         else:
-            columns += [make_column(var, TableModel.Attribute)
-                        for var in domain.attributes]
+            columns += [
+                make_column(var, TableModel.Attribute) for var in domain.attributes
+            ]
 
         #: list of all domain variables (class_vars + metas + attrs)
         self.vars = domain.class_vars + domain.metas + domain.attributes
@@ -1212,13 +1269,13 @@ class TableModel(AbstractSortTableModel):
 
         #: A list of all unique attribute labels (in all variables)
         self._labels = sorted(
-            reduce(operator.ior,
-                   [set(var.attributes) for var in self.vars],
-                   set()))
+            reduce(operator.ior, [set(var.attributes) for var in self.vars], set())
+        )
 
         @lru_cache(maxsize=1000)
         def row_instance(index):
             return self.source[int(index)]
+
         self._row_instance = row_instance
 
         # column basic statistics (VariableStatsRole), computed when
@@ -1233,7 +1290,7 @@ class TableModel(AbstractSortTableModel):
     def sortColumnData(self, column):
         return self._columnSortKeyData(column, TableModel.ValueRole)
 
-    @deprecated('Orange.widgets.utils.itemmodels.TableModel.sortColumnData')
+    @deprecated("Orange.widgets.utils.itemmodels.TableModel.sortColumnData")
     def columnSortKeyData(self, column, role):
         return self._columnSortKeyData(column, role)
 
@@ -1247,8 +1304,7 @@ class TableModel(AbstractSortTableModel):
 
         """
         coldesc = self.columns[column]
-        if isinstance(coldesc, TableModel.Column) \
-                and role == TableModel.ValueRole:
+        if isinstance(coldesc, TableModel.Column) and role == TableModel.ValueRole:
             col_data = numpy.asarray(self.source.get_column_view(coldesc.var)[0])
 
             if coldesc.var.is_continuous:
@@ -1256,31 +1312,40 @@ class TableModel(AbstractSortTableModel):
                 col_data = col_data.astype(float)
             return col_data
         else:
-            return numpy.asarray([self.index(i, column).data(role)
-                                  for i in range(self.rowCount())])
+            return numpy.asarray(
+                [self.index(i, column).data(role) for i in range(self.rowCount())]
+            )
 
-    def data(self, index, role,
-             # For optimizing out LOAD_GLOBAL byte code instructions in
-             # the item role tests.
-             _str=str,
-             _Qt_DisplayRole=Qt.DisplayRole,
-             _Qt_EditRole=Qt.EditRole,
-             _Qt_BackgroundRole=Qt.BackgroundRole,
-             _ValueRole=ValueRole,
-             _ClassValueRole=ClassValueRole,
-             _VariableRole=VariableRole,
-             _DomainRole=DomainRole,
-             _VariableStatsRole=VariableStatsRole,
-             # Some cached local precomputed values.
-             # All of the above roles we respond to
-             _recognizedRoles=frozenset([Qt.DisplayRole,
-                                         Qt.EditRole,
-                                         Qt.BackgroundRole,
-                                         ValueRole,
-                                         ClassValueRole,
-                                         VariableRole,
-                                         DomainRole,
-                                         VariableStatsRole])):
+    def data(
+        self,
+        index,
+        role,
+        # For optimizing out LOAD_GLOBAL byte code instructions in
+        # the item role tests.
+        _str=str,
+        _Qt_DisplayRole=Qt.DisplayRole,
+        _Qt_EditRole=Qt.EditRole,
+        _Qt_BackgroundRole=Qt.BackgroundRole,
+        _ValueRole=ValueRole,
+        _ClassValueRole=ClassValueRole,
+        _VariableRole=VariableRole,
+        _DomainRole=DomainRole,
+        _VariableStatsRole=VariableStatsRole,
+        # Some cached local precomputed values.
+        # All of the above roles we respond to
+        _recognizedRoles=frozenset(
+            [
+                Qt.DisplayRole,
+                Qt.EditRole,
+                Qt.BackgroundRole,
+                ValueRole,
+                ClassValueRole,
+                VariableRole,
+                DomainRole,
+                VariableStatsRole,
+            ]
+        ),
+    ):
         """
         Reimplemented from `QAbstractItemModel.data`
         """
@@ -1288,7 +1353,7 @@ class TableModel(AbstractSortTableModel):
             return None
 
         row, col = index.row(), index.column()
-        if  not 0 <= row <= self.__rowCount:
+        if not 0 <= row <= self.__rowCount:
             return None
 
         row = self.mapToSourceRows(row)
@@ -1366,8 +1431,7 @@ class TableModel(AbstractSortTableModel):
                 return coldesc.var.name
         elif role == Qt.ToolTipRole:
             return self._tooltip(coldesc)
-        elif role == TableModel.VariableRole \
-                and isinstance(coldesc, TableModel.Column):
+        elif role == TableModel.VariableRole and isinstance(coldesc, TableModel.Column):
             return coldesc.var
         elif role == TableModel.VariableStatsRole:
             return self._stats_for_column(section)
@@ -1385,8 +1449,11 @@ class TableModel(AbstractSortTableModel):
 
         labels = self._labels
         variable = coldesc.var
-        pairs = [(escape(key), escape(str(variable.attributes[key])))
-                 for key in labels if key in variable.attributes]
+        pairs = [
+            (escape(key), escape(str(variable.attributes[key])))
+            for key in labels
+            if key in variable.attributes
+        ]
         tip = "<b>%s</b>" % escape(variable.name)
         tip = "<br/>".join([tip] + ["%s = %s" % pair for pair in pairs])
         return tip
@@ -1401,8 +1468,7 @@ class TableModel(AbstractSortTableModel):
 
         if self.__stats is None:
             self.__stats = datacaching.getCached(
-                self.source, basic_stats.DomainBasicStats,
-                (self.source, True)
+                self.source, basic_stats.DomainBasicStats, (self.source, True)
             )
 
         return self.__stats[coldesc.var]

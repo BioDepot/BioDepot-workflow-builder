@@ -1,8 +1,6 @@
 from collections import namedtuple
 
-from AnyQt.QtWidgets import (
-    QListView, QHBoxLayout, QStyledItemDelegate, QApplication
-)
+from AnyQt.QtWidgets import QListView, QHBoxLayout, QStyledItemDelegate, QApplication
 from AnyQt.QtCore import Qt
 
 import Orange.data
@@ -24,34 +22,34 @@ Remove = namedtuple("Remove", [])
 Custom = namedtuple("Custom", ["points"])
 
 METHODS = [
-    (Default, ),
-    (Leave, ),
-    (MDL, ),
-    (EqualFreq, ),
-    (EqualWidth, ),
-    (Remove, ),
-    (Custom, )
+    (Default,),
+    (Leave,),
+    (MDL,),
+    (EqualFreq,),
+    (EqualWidth,),
+    (Remove,),
+    (Custom,),
 ]
 
 _dispatch = {
-    Default:
-        lambda m, data, var: _dispatch[type(m.method)](m.method, data, var),
+    Default: lambda m, data, var: _dispatch[type(m.method)](m.method, data, var),
     Leave: lambda m, data, var: var,
     MDL: lambda m, data, var: disc.EntropyMDL()(data, var),
     EqualFreq: lambda m, data, var: disc.EqualFreq(m.k)(data, var),
     EqualWidth: lambda m, data, var: disc.EqualWidth(m.k)(data, var),
     Remove: lambda m, data, var: None,
-    Custom: lambda m, data, var:
-        disc.Discretizer.create_discretized_var(var, m.points)
+    Custom: lambda m, data, var: disc.Discretizer.create_discretized_var(var, m.points),
 }
 
 
 # Variable discretization state
 DState = namedtuple(
     "DState",
-    ["method",    # discretization method
-     "points",    # induced cut points
-     "disc_var"]  # induced discretized variable
+    [
+        "method",  # discretization method
+        "points",  # induced cut points
+        "disc_var",
+    ],  # induced discretized variable
 )
 
 
@@ -146,7 +144,7 @@ class OWDiscretize(widget.OWWidget):
     want_main_area = False
     resizing_enabled = False
 
-    def  __init__(self):
+    def __init__(self):
         super().__init__()
 
         #: input data
@@ -161,7 +159,8 @@ class OWDiscretize(widget.OWWidget):
 
         box = gui.vBox(self.controlArea, self.tr("Default Discretization"))
         self.default_bbox = rbox = gui.radioButtons(
-            box, self, "default_method", callback=self._default_disc_changed)
+            box, self, "default_method", callback=self._default_disc_changed
+        )
         rb = gui.hBox(rbox)
         self.left = gui.vBox(rb)
         right = gui.vBox(rb)
@@ -173,7 +172,7 @@ class OWDiscretize(widget.OWWidget):
             self.tr("Entropy-MDL discretization"),
             self.tr("Equal-frequency discretization"),
             self.tr("Equal-width discretization"),
-            self.tr("Remove numeric variables")
+            self.tr("Remove numeric variables"),
         ]
 
         for opt in options[1:]:
@@ -186,26 +185,32 @@ class OWDiscretize(widget.OWWidget):
         def _intbox(widget, attr, callback):
             box = gui.indentedBox(widget)
             s = gui.spin(
-                box, self, attr, minv=2, maxv=10, label="Num. of intervals:",
-                callback=callback)
+                box,
+                self,
+                attr,
+                minv=2,
+                maxv=10,
+                label="Num. of intervals:",
+                callback=callback,
+            )
             s.setMaximumWidth(60)
             s.setAlignment(Qt.AlignRight)
             gui.rubber(s.box)
             return box.box
 
-        self.k_general = _intbox(self.left, "default_k",
-                                 self._default_disc_changed)
+        self.k_general = _intbox(self.left, "default_k", self._default_disc_changed)
         self.k_general.layout().setContentsMargins(0, 0, 0, 0)
         vlayout = QHBoxLayout()
         box = gui.widgetBox(
-            self.controlArea, "Individual Attribute Settings",
-            orientation=vlayout, spacing=8
+            self.controlArea,
+            "Individual Attribute Settings",
+            orientation=vlayout,
+            spacing=8,
         )
 
         # List view with all attributes
         self.varview = QListView(
-            selectionMode=QListView.ExtendedSelection,
-            uniformItemSizes=True,
+            selectionMode=QListView.ExtendedSelection, uniformItemSizes=True
         )
         self.varview.setItemDelegate(DiscDelegate())
         self.varmodel = itemmodels.VariableListModel()
@@ -233,14 +238,18 @@ class OWDiscretize(widget.OWWidget):
 
         self.controlbox = controlbox
 
-        box = gui.auto_commit(self.controlArea, self, "autosend", "Apply",
-                              orientation=Qt.Horizontal,
-                              checkbox_label="Apply automatically")
+        box = gui.auto_commit(
+            self.controlArea,
+            self,
+            "autosend",
+            "Apply",
+            orientation=Qt.Horizontal,
+            checkbox_label="Apply automatically",
+        )
         box.button.setFixedWidth(180)
         box.layout().insertStretch(0)
 
         self._update_spin_positions()
-
 
     @Inputs.data
     def set_data(self, data):
@@ -260,8 +269,7 @@ class OWDiscretize(widget.OWWidget):
     def _initialize(self, data):
         # Initialize the default variable states for new data.
         self.class_var = data.domain.class_var
-        cvars = [var for var in data.domain.variables
-                 if var.is_continuous]
+        cvars = [var for var in data.domain.variables if var.is_continuous]
         self.varmodel[:] = cvars
 
         class_var = data.domain.class_var
@@ -330,6 +338,7 @@ class OWDiscretize(widget.OWWidget):
                 return dvar.compute_value.points, dvar
             else:
                 assert False
+
         for i, var in enumerate(self.varmodel):
             state = self.var_state[i]
             if state.points is None and state.disc_var is None:
@@ -338,7 +347,7 @@ class OWDiscretize(widget.OWWidget):
                 self._set_var_state(i, new_state)
 
     def _method_index(self, method):
-        return METHODS.index((type(method), ))
+        return METHODS.index((type(method),))
 
     def _current_default_method(self):
         method = self.default_method + 1
@@ -463,10 +472,7 @@ class OWDiscretize(widget.OWWidget):
 
         class_var = disc_var(self.data.domain.class_var)
 
-        domain = Orange.data.Domain(
-            attributes, class_var,
-            metas=self.data.domain.metas
-        )
+        domain = Orange.data.Domain(attributes, class_var, metas=self.data.domain.metas)
         return domain
 
     def commit(self):
@@ -479,19 +485,23 @@ class OWDiscretize(widget.OWWidget):
     def storeSpecificSettings(self):
         super().storeSpecificSettings()
         self.saved_var_states = {
-            variable_key(var):
-                self.var_state[i]._replace(points=None, disc_var=None)
+            variable_key(var): self.var_state[i]._replace(points=None, disc_var=None)
             for i, var in enumerate(self.varmodel)
         }
 
     def send_report(self):
-        self.report_items((
-            ("Default method", self.options[self.default_method + 1]),))
+        self.report_items((("Default method", self.options[self.default_method + 1]),))
         if self.varmodel:
-            self.report_items("Thresholds", [
-                (var.name,
-                 DiscDelegate.cutsText(self.var_state[i]) or "leave numeric")
-                for i, var in enumerate(self.varmodel)])
+            self.report_items(
+                "Thresholds",
+                [
+                    (
+                        var.name,
+                        DiscDelegate.cutsText(self.var_state[i]) or "leave numeric",
+                    )
+                    for i, var in enumerate(self.varmodel)
+                ],
+            )
 
 
 def main():
@@ -507,4 +517,5 @@ def main():
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

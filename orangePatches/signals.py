@@ -14,12 +14,21 @@ class _Signal:
     @staticmethod
     def get_flags(multiple, default, explicit, dynamic):
         """Compute flags from arguments"""
-        from Orange.canvas.registry.description import \
-            Single, Multiple, Default, NonDefault, Explicit, Dynamic
-        return (Multiple if multiple else Single) | \
-                (Default if default else NonDefault) | \
-                (explicit and Explicit) | \
-                (dynamic and Dynamic)
+        from Orange.canvas.registry.description import (
+            Single,
+            Multiple,
+            Default,
+            NonDefault,
+            Explicit,
+            Dynamic,
+        )
+
+        return (
+            (Multiple if multiple else Single)
+            | (Default if default else NonDefault)
+            | (explicit and Explicit)
+            | (dynamic and Dynamic)
+        )
 
 
 class Input(InputSignal, _Signal):
@@ -64,8 +73,19 @@ class Input(InputSignal, _Signal):
         if set, this signal is only used when it is the only option or when
         explicitly connected in the dialog (default: `False`)
     """
-    def __init__(self, name, type, id=None, doc=None, replaces=None, *,
-                 multiple=False, default=False, explicit=False):
+
+    def __init__(
+        self,
+        name,
+        type,
+        id=None,
+        doc=None,
+        replaces=None,
+        *,
+        multiple=False,
+        default=False,
+        explicit=False
+    ):
         flags = self.get_flags(multiple, default, explicit, False)
         super().__init__(name, type, "", flags, id, doc, replaces or [])
         self._seq_id = next(_counter)
@@ -76,8 +96,9 @@ class Input(InputSignal, _Signal):
         `handler` attribute. The method is returned unchanged.
         """
         if self.handler:
-            raise ValueError("Input {} is already bound to method {}".
-                             format(self.name, self.handler))
+            raise ValueError(
+                "Input {} is already bound to method {}".format(self.name, self.handler)
+            )
         self.handler = method.__name__
         return method
 
@@ -121,8 +142,19 @@ class Output(OutputSignal, _Signal):
         signal which can accept a subtype of the declared output type
         (default: `True`)
     """
-    def __init__(self, name, type, id=None, doc=None, replaces=None, *,
-                 default=False, explicit=False, dynamic=True):
+
+    def __init__(
+        self,
+        name,
+        type,
+        id=None,
+        doc=None,
+        replaces=None,
+        *,
+        default=False,
+        explicit=False,
+        dynamic=True
+    ):
         flags = self.get_flags(False, default, explicit, dynamic)
         super().__init__(name, type, flags, id, doc, replaces or [])
         self.widget = None
@@ -148,6 +180,7 @@ class Output(OutputSignal, _Signal):
 
 class WidgetSignalsMixin:
     """Mixin for managing widget's input and output signals"""
+
     class Inputs:
         pass
 
@@ -171,8 +204,11 @@ class WidgetSignalsMixin:
         list.
         """
         if not any(s.name == signalName for s in self.outputs):
-            raise ValueError('{} is not a valid output signal for widget {}'.format(
-                signalName, self.name))
+            raise ValueError(
+                "{} is not a valid output signal for widget {}".format(
+                    signalName, self.name
+                )
+            )
         if self.signalManager is not None:
             self.signalManager.send(self, signalName, value, id, test)
 
@@ -193,6 +229,7 @@ class WidgetSignalsMixin:
         compatibility, and check the input handlers exist.
         The method is called from the meta-class.
         """
+
         def signal_from_args(args, signal_type):
             if isinstance(args, tuple):
                 return signal_type(*args)
@@ -200,28 +237,37 @@ class WidgetSignalsMixin:
                 return copy.copy(args)
 
         if hasattr(cls, "inputs") and cls.inputs:
-            cls.inputs = [signal_from_args(input_, InputSignal)
-                          for input_ in cls.inputs]
+            cls.inputs = [
+                signal_from_args(input_, InputSignal) for input_ in cls.inputs
+            ]
         if hasattr(cls, "outputs") and cls.outputs:
-            cls.outputs = [signal_from_args(output, OutputSignal)
-                           for output in cls.outputs]
+            cls.outputs = [
+                signal_from_args(output, OutputSignal) for output in cls.outputs
+            ]
 
         cls._check_input_handlers()
 
     @classmethod
     def _check_input_handlers(cls):
-        unbound = [signal.name
-                   for _, signal in getmembers(cls.Inputs, Input)
-                   if not signal.handler]
+        unbound = [
+            signal.name
+            for _, signal in getmembers(cls.Inputs, Input)
+            if not signal.handler
+        ]
         if unbound:
-            raise ValueError("unbound signal(s) in {}: {}".
-                             format(cls.__name__, ", ".join(unbound)))
+            raise ValueError(
+                "unbound signal(s) in {}: {}".format(cls.__name__, ", ".join(unbound))
+            )
 
-        missing_handlers = [signal.handler for signal in cls.inputs
-                            if not hasattr(cls, signal.handler)]
+        missing_handlers = [
+            signal.handler for signal in cls.inputs if not hasattr(cls, signal.handler)
+        ]
         if missing_handlers:
-            raise ValueError("missing handlers in {}: {}".
-                             format(cls.__name__, ", ".join(missing_handlers)))
+            raise ValueError(
+                "missing handlers in {}: {}".format(
+                    cls.__name__, ", ".join(missing_handlers)
+                )
+            )
 
     @classmethod
     def get_signals(cls, direction, ignore_old_style=False):

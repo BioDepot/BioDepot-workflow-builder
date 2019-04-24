@@ -5,15 +5,29 @@ Orange Canvas Tool Dock widget
 import sys
 
 from AnyQt.QtWidgets import (
-    QWidget, QSplitter, QVBoxLayout, QTextEdit, QAction, QSizePolicy,
+    QWidget,
+    QSplitter,
+    QVBoxLayout,
+    QTextEdit,
+    QAction,
+    QSizePolicy,
     QApplication,
 )
 
 from AnyQt.QtGui import QPalette, QDrag
 
 from AnyQt.QtCore import (
-    Qt, QSize, QObject, QPropertyAnimation, QEvent, QRect, QPoint,
-    QModelIndex, QPersistentModelIndex, QEventLoop, QMimeData
+    Qt,
+    QSize,
+    QObject,
+    QPropertyAnimation,
+    QEvent,
+    QRect,
+    QPoint,
+    QModelIndex,
+    QPersistentModelIndex,
+    QEventLoop,
+    QMimeData,
 )
 
 from AnyQt.QtCore import pyqtProperty as Property, pyqtSignal as Signal
@@ -33,6 +47,7 @@ class SplitterResizer(QObject):
     """
     An object able to control the size of a widget in a QSplitter instance.
     """
+
     def __init__(self, parent=None):
         QObject.__init__(self, parent)
         self.__splitter = None
@@ -41,9 +56,7 @@ class SplitterResizer(QObject):
         self.__animationEnabled = True
         self.__size = -1
         self.__expanded = False
-        self.__animation = QPropertyAnimation(
-            self, b"size_", self, duration=200
-        )
+        self.__animation = QPropertyAnimation(self, b"size_", self, duration=200)
         self.__action = QAction("toogle-expanded", self, checkable=True)
         self.__action.triggered[bool].connect(self.setExpanded)
 
@@ -182,8 +195,11 @@ class SplitterResizer(QObject):
             self.__splitter.setSizes(sizes)
 
     def eventFilter(self, obj, event):
-        if obj is self.__widget and event.type() == QEvent.Resize and \
-                self.__animation.state() == QPropertyAnimation.Stopped:
+        if (
+            obj is self.__widget
+            and event.type() == QEvent.Resize
+            and self.__animation.state() == QPropertyAnimation.Stopped
+        ):
             # Update the expanded state when the user opens/closes the widget
             # by dragging the splitter handle.
             if self.__splitter.orientation() == Qt.Vertical:
@@ -198,8 +214,11 @@ class SplitterResizer(QObject):
                 self.__action.setChecked(True)
                 self.__expanded = True
 
-        if obj is self.__splitter and event.type() == QEvent.Show and \
-                self.__updateOnShow:
+        if (
+            obj is self.__splitter
+            and event.type() == QEvent.Show
+            and self.__updateOnShow
+        ):
             # Update the splitter state after receiving valid geometry
             self.__updateOnShow = False
             self.__update()
@@ -221,6 +240,7 @@ class CanvasToolDock(QWidget):
     canvas actions.
 
     """
+
     def __init__(self, parent=None, **kwargs):
         QWidget.__init__(self, parent, **kwargs)
 
@@ -245,8 +265,7 @@ class CanvasToolDock(QWidget):
         self.toolbar.setMovable(False)
         self.toolbar.setFloatable(False)
 
-        self.toolbar.setSizePolicy(QSizePolicy.Ignored,
-                                   QSizePolicy.Preferred)
+        self.toolbar.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Preferred)
 
         layout.addWidget(self.__splitter, 10)
         layout.addWidget(self.toolbar)
@@ -277,9 +296,9 @@ class CanvasToolDock(QWidget):
 class QuickCategoryToolbar(ToolGrid):
     """A toolbar with category buttons.
     """
+
     def __init__(self, parent=None, buttonSize=None, iconSize=None):
-        ToolGrid.__init__(self, parent, 1, buttonSize, iconSize,
-                          Qt.ToolButtonIconOnly)
+        ToolGrid.__init__(self, parent, 1, buttonSize, iconSize, Qt.ToolButtonIconOnly)
         self.__model = None
 
     def setColumnCount(self, count):
@@ -312,8 +331,7 @@ class QuickCategoryToolbar(ToolGrid):
     def createActionForItem(self, item):
         """Create the QAction instance for item.
         """
-        action = QAction(item.icon(), item.text(), self,
-                         toolTip=item.toolTip())
+        action = QAction(item.icon(), item.text(), self, toolTip=item.toolTip())
         action.setData(item)
         return action
 
@@ -336,11 +354,13 @@ class QuickCategoryToolbar(ToolGrid):
         button.setPalette(palette)
         button.setProperty("quick-category-toolbutton", True)
 
-        style_sheet = ("QToolButton {\n"
-                       "    background: %s;\n"
-                       "    border: none;\n"
-                       "    border-bottom: 1px solid palette(mid);\n"
-                       "}")
+        style_sheet = (
+            "QToolButton {\n"
+            "    background: %s;\n"
+            "    border: none;\n"
+            "    border-bottom: 1px solid palette(mid);\n"
+            "}"
+        )
         button.setStyleSheet(style_sheet % create_css_gradient(brush.color()))
 
         return button
@@ -454,7 +474,7 @@ class CategoryPopupMenu(FramelessWindow):
         drag_data = QMimeData()
         drag_data.setData(
             "application/vnv.orange-canvas.registry.qualified-name",
-            desc.qualified_name.encode('utf-8')
+            desc.qualified_name.encode("utf-8"),
         )
         drag = QDrag(self)
         drag.setPixmap(icon.pixmap(38))
@@ -486,8 +506,7 @@ class ItemViewDragStartEventListener(QObject):
     def eventFilter(self, viewport, event):
         view = viewport.parent()
 
-        if event.type() == QEvent.MouseButtonPress and \
-                event.button() == Qt.LeftButton:
+        if event.type() == QEvent.MouseButtonPress and event.button() == Qt.LeftButton:
 
             index = view.indexAt(event.pos())
 
@@ -495,15 +514,19 @@ class ItemViewDragStartEventListener(QObject):
                 self._pos = event.pos()
                 self._index = QPersistentModelIndex(index)
 
-        elif event.type() == QEvent.MouseMove and self._pos is not None and \
-                ((self._pos - event.pos()).manhattanLength() >=
-                 QApplication.startDragDistance()):
+        elif (
+            event.type() == QEvent.MouseMove
+            and self._pos is not None
+            and (
+                (self._pos - event.pos()).manhattanLength()
+                >= QApplication.startDragDistance()
+            )
+        ):
 
             if self._index.isValid():
                 # Map to a QModelIndex in the model.
                 index = self._index
-                index = index.model().index(index.row(), index.column(),
-                                            index.parent())
+                index = index.model().index(index.row(), index.column(), index.parent())
                 self._pos = None
                 self._index = None
 

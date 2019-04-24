@@ -10,14 +10,13 @@ class TestNodeItem(TestItems):
     def setUp(self):
         TestItems.setUp(self)
         from ....registry.tests import small_testing_registry
+
         self.reg = small_testing_registry()
 
         self.data_desc = self.reg.category("Data")
         self.classify_desc = self.reg.category("Classify")
 
-        self.file_desc = self.reg.widget(
-            "Orange.widgets.data.owfile.OWFile"
-        )
+        self.file_desc = self.reg.widget("Orange.widgets.data.owfile.OWFile")
         self.discretize_desc = self.reg.widget(
             "Orange.widgets.data.owdiscretize.OWDiscretize"
         )
@@ -47,8 +46,9 @@ class TestNodeItem(TestItems):
 
         file_item.setProcessingState(False)
         self.assertEqual(file_item.processingState(), False)
-        self.assertEqual(file_item.progress(), -1,
-                         "setProcessingState does not clear the progress.")
+        self.assertEqual(
+            file_item.progress(), -1, "setProcessingState does not clear the progress."
+        )
 
         self.scene.addItem(file_item)
         file_item.setPos(100, 100)

@@ -27,8 +27,7 @@ class TestOWDataTable(WidgetTest, WidgetOutputsTestMixin):
 
     def test_data_model(self):
         self.send_signal(self.widget.Inputs.data, self.data, 1)
-        self.assertEqual(self.widget.tabs.widget(0).model().rowCount(),
-                         len(self.data))
+        self.assertEqual(self.widget.tabs.widget(0).model().rowCount(), len(self.data))
 
     def _select_data(self):
         self.widget.selected_cols = list(range(len(self.data.domain)))

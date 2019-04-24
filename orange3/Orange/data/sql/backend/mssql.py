@@ -4,7 +4,12 @@ from contextlib import contextmanager
 
 import pymssql
 
-from Orange.data import StringVariable, TimeVariable, ContinuousVariable, DiscreteVariable
+from Orange.data import (
+    StringVariable,
+    TimeVariable,
+    ContinuousVariable,
+    DiscreteVariable,
+)
 from Orange.data.sql.backend import Backend
 from Orange.data.sql.backend.base import ToSql, BackendError
 
@@ -42,13 +47,21 @@ class PymssqlBackend(Backend):
     def unquote_identifier(self, quoted_name):
         return quoted_name[1:-1]
 
-    def create_sql_query(self, table_name, fields, filters=(),
-                         group_by=None, order_by=None, offset=None, limit=None,
-                         use_time_sample=None):
+    def create_sql_query(
+        self,
+        table_name,
+        fields,
+        filters=(),
+        group_by=None,
+        order_by=None,
+        offset=None,
+        limit=None,
+        use_time_sample=None,
+    ):
         sql = ["SELECT"]
         if limit and not offset:
             sql.extend(["TOP", str(limit)])
-        sql.append(', '.join(fields))
+        sql.append(", ".join(fields))
         sql.extend(["FROM", table_name])
         if use_time_sample:
             sql.append("TABLESAMPLE system_time(%i)" % use_time_sample)
@@ -78,17 +91,20 @@ class PymssqlBackend(Backend):
         except pymssql.Error as ex:
             raise BackendError(str(ex)) from ex
 
-    def create_variable(self, field_name, field_metadata, type_hints, inspect_table=None):
+    def create_variable(
+        self, field_name, field_metadata, type_hints, inspect_table=None
+    ):
         if field_name in type_hints:
             var = type_hints[field_name]
         else:
-            var = self._guess_variable(field_name, field_metadata,
-                                       inspect_table)
+            var = self._guess_variable(field_name, field_metadata, inspect_table)
 
         field_name_q = self.quote_identifier(field_name)
         if var.is_continuous:
             if isinstance(var, TimeVariable):
-                var.to_sql = ToSql("DATEDIFF(s, '1970-01-01 00:00:00', {})".format(field_name_q))
+                var.to_sql = ToSql(
+                    "DATEDIFF(s, '1970-01-01 00:00:00', {})".format(field_name_q)
+                )
             else:
                 var.to_sql = ToSql(field_name_q)
         else:  # discrete or string
@@ -128,19 +144,21 @@ class PymssqlBackend(Backend):
                     result = cur.fetchone()
                     match = self.EST_ROWS_RE.search(result[0])
                     if not match:
-                    # Either StatementEstRows was not found or
-                    # a float is received.
-                    # If it is a float then it is most probable
-                    # that the server's statistics are out of date
-                    # and the result is false. In that case
-                    # it is preferable to return None so
-                    # an exact count be used.
+                        # Either StatementEstRows was not found or
+                        # a float is received.
+                        # If it is a float then it is most probable
+                        # that the server's statistics are out of date
+                        # and the result is false. In that case
+                        # it is preferable to return None so
+                        # an exact count be used.
                         return None
                     return int(match.group(1))
                 finally:
                     cur.execute("SET SHOWPLAN_XML OFF")
             except pymssql.Error as ex:
                 if "SHOWPLAN permission denied" in str(ex):
-                    warnings.warn("SHOWPLAN permission denied, count approximates will not be used")
+                    warnings.warn(
+                        "SHOWPLAN permission denied, count approximates will not be used"
+                    )
                     return None
                 raise BackendError(str(ex)) from ex

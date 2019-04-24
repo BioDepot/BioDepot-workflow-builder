@@ -3,9 +3,10 @@ import ctypes as ct
 import numpy as np
 from Orange.base import Learner, Model
 
-__all__ = ['SimpleTreeLearner']
+__all__ = ["SimpleTreeLearner"]
 
 from . import _simple_tree
+
 _tree = ct.cdll.LoadLibrary(_simple_tree.__file__)
 
 DiscreteNode = 0
@@ -25,14 +26,14 @@ class SIMPLE_TREE_NODE(ct.Structure):
 
 
 SIMPLE_TREE_NODE._fields_ = [
-    ('type', ct.c_int),
-    ('children_size', ct.c_int),
-    ('split_attr', ct.c_int),
-    ('split', ct.c_float),
-    ('children', ct.POINTER(ct.POINTER(SIMPLE_TREE_NODE))),
-    ('dist', ct.POINTER(ct.c_float)),
-    ('n', ct.c_float),
-    ('sum', ct.c_float),
+    ("type", ct.c_int),
+    ("children_size", ct.c_int),
+    ("split_attr", ct.c_int),
+    ("split", ct.c_float),
+    ("children", ct.POINTER(ct.POINTER(SIMPLE_TREE_NODE))),
+    ("dist", ct.POINTER(ct.c_float)),
+    ("n", ct.c_float),
+    ("sum", ct.c_float),
 ]
 
 _tree.build_tree.restype = ct.POINTER(SIMPLE_TREE_NODE)
@@ -76,10 +77,17 @@ class SimpleTreeLearner(Learner):
         Random seed.
     """
 
-    name = 'simple tree'
+    name = "simple tree"
 
-    def __init__(self, min_instances=2, max_depth=1024, max_majority=1.0,
-                 skip_prob=0.0, bootstrap=False, seed=42):
+    def __init__(
+        self,
+        min_instances=2,
+        max_depth=1024,
+        max_majority=1.0,
+        skip_prob=0.0,
+        bootstrap=False,
+        seed=42,
+    ):
         super().__init__()
         self.min_instances = min_instances
         self.max_depth = max_depth
@@ -111,18 +119,16 @@ class SimpleTreeModel(Model):
             self.type = Regression
             self.cls_vals = 0
         else:
-            raise ValueError("Only Continuous and Discrete "
-                             "variables are supported")
+            raise ValueError("Only Continuous and Discrete " "variables are supported")
 
         if isinstance(learner.skip_prob, (float, int)):
             skip_prob = learner.skip_prob
-        elif learner.skip_prob == 'sqrt':
+        elif learner.skip_prob == "sqrt":
             skip_prob = 1.0 - np.sqrt(X.shape[1]) / X.shape[1]
-        elif learner.skip_prob == 'log2':
+        elif learner.skip_prob == "log2":
             skip_prob = 1.0 - np.log2(X.shape[1]) / X.shape[1]
         else:
-            raise ValueError(
-                "skip_prob not valid: {}".format(learner.skip_prob))
+            raise ValueError("skip_prob not valid: {}".format(learner.skip_prob))
 
         attr_vals = []
         domain = []
@@ -134,8 +140,9 @@ class SimpleTreeModel(Model):
                 attr_vals.append(0)
                 domain.append(FloatVar)
             else:
-                raise ValueError("Only Continuous and Discrete "
-                                 "variables are supported")
+                raise ValueError(
+                    "Only Continuous and Discrete " "variables are supported"
+                )
         attr_vals = np.array(attr_vals, dtype=np.int32)
         domain = np.array(domain, dtype=np.int32)
 
@@ -155,7 +162,8 @@ class SimpleTreeModel(Model):
             attr_vals.ctypes.data_as(c_int_p),
             domain.ctypes.data_as(c_int_p),
             learner.bootstrap,
-            learner.seed)
+            learner.seed,
+        )
 
     def predict_storage(self, data):
         X = np.ascontiguousarray(data.X)
@@ -167,7 +175,8 @@ class SimpleTreeModel(Model):
                 self.node,
                 self.num_attrs,
                 self.cls_vals,
-                p.ctypes.data_as(c_double_p))
+                p.ctypes.data_as(c_double_p),
+            )
             return p.argmax(axis=1), p
         elif self.type == Regression:
             p = np.zeros(X.shape[0])
@@ -176,7 +185,8 @@ class SimpleTreeModel(Model):
                 X.shape[0],
                 self.node,
                 self.num_attrs,
-                p.ctypes.data_as(c_double_p))
+                p.ctypes.data_as(c_double_p),
+            )
             return p
         else:
             assert False, "Invalid prediction type"
@@ -187,7 +197,7 @@ class SimpleTreeModel(Model):
 
     def __getstate__(self):
         dict = self.__dict__.copy()
-        del dict['node']
+        del dict["node"]
         py_node = self.__to_python(self.node)
         return dict, py_node
 
@@ -205,7 +215,8 @@ class SimpleTreeModel(Model):
         py_node.split_attr = n.split_attr
         py_node.split = n.split
         py_node.children = [
-            self.__to_python(n.children[i]) for i in range(n.children_size)]
+            self.__to_python(n.children[i]) for i in range(n.children_size)
+        ]
         if self.type == Classification:
             py_node.dist = [n.dist[i] for i in range(self.cls_vals)]
         else:
@@ -234,20 +245,20 @@ class SimpleTreeModel(Model):
     # for comparing two trees
     def dumps_tree(self, node):
         n = node.contents
-        xs = ['{', str(n.type)]
+        xs = ["{", str(n.type)]
         if n.type != PredictorNode:
             xs.append(str(n.split_attr))
             if n.type == ContinuousNode:
-                xs.append('{:.5f}'.format(n.split))
+                xs.append("{:.5f}".format(n.split))
         elif self.type == Classification:
             for i in range(self.cls_vals):
-                xs.append('{:.2f}'.format(n.dist[i]))
+                xs.append("{:.2f}".format(n.dist[i]))
         else:
-            xs.append('{:.5f} {:.5f}'.format(n.n, n.sum))
+            xs.append("{:.5f} {:.5f}".format(n.n, n.sum))
         for i in range(n.children_size):
             xs.append(self.dumps_tree(n.children[i]))
-        xs.append('}')
-        return ' '.join(xs)
+        xs.append("}")
+        return " ".join(xs)
 
     def to_string(self, node=None, level=0):
         """Return a text-based representation of the tree.
@@ -269,7 +280,7 @@ class SimpleTreeModel(Model):
         """
         if node is None:
             if self.node is None:
-                return '(null node)'
+                return "(null node)"
             else:
                 node = self.node
         n = node.contents
@@ -279,30 +290,27 @@ class SimpleTreeModel(Model):
             decimals = self.domain.class_var.number_of_decimals
         if n.children_size == 0:
             if self.type == Classification:
-                node_cont = [round(n.dist[i], decimals)
-                             for i in range(self.cls_vals)]
+                node_cont = [round(n.dist[i], decimals) for i in range(self.cls_vals)]
                 index = node_cont.index(max(node_cont))
                 major_class = self.cls_vars[0].values[index]
-                return ' --> %s (%s)' % (major_class, node_cont)
+                return " --> %s (%s)" % (major_class, node_cont)
             else:
-                node_cont = str(round(n.sum / n.n, decimals)) + ': ' + str(n.n)
-                return ' --> (%s)' % node_cont
+                node_cont = str(round(n.sum / n.n, decimals)) + ": " + str(n.n)
+                return " --> (%s)" % node_cont
         else:
             attr = self.dom_attr[n.split_attr]
             node_desc = attr.name
             if self.type == Classification:
-                node_cont = [round(n.dist[i], decimals)
-                             for i in range(self.cls_vals)]
+                node_cont = [round(n.dist[i], decimals) for i in range(self.cls_vals)]
             else:
-                node_cont = str(round(n.sum / n.n, decimals)) + ': ' + str(n.n)
-            ret_str = '\n' + '   ' * level + '%s (%s)' % (node_desc,
-                                                          node_cont)
+                node_cont = str(round(n.sum / n.n, decimals)) + ": " + str(n.n)
+            ret_str = "\n" + "   " * level + "%s (%s)" % (node_desc, node_cont)
             for i in range(n.children_size):
                 if attr.is_continuous:
-                    split = '<=' if i % 2 == 0 else '>'
+                    split = "<=" if i % 2 == 0 else ">"
                     split += str(round(n.split, attr.number_of_decimals))
-                    ret_str += '\n' + '   ' * level + ': %s' % split
+                    ret_str += "\n" + "   " * level + ": %s" % split
                 else:
-                    ret_str += '\n' + '   ' * level + ': %s' % attr.values[i]
+                    ret_str += "\n" + "   " * level + ": %s" % attr.values[i]
                 ret_str += self.to_string(n.children[i], level + 1)
             return ret_str

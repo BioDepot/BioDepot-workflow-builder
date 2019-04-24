@@ -14,8 +14,14 @@ class TestDoubleSpin(GuiTest):
         widget = OWWidget()
         widget.some_param = 0
         widget.some_option = False
-        gui.doubleSpin(widget=widget, master=widget, value="some_param",
-                       minv=1, maxv=10, checked="some_option")
+        gui.doubleSpin(
+            widget=widget,
+            master=widget,
+            value="some_param",
+            minv=1,
+            maxv=10,
+            checked="some_option",
+        )
 
 
 class TestListModel(GuiTest):
@@ -24,7 +30,8 @@ class TestListModel(GuiTest):
         self.widget.foo = None
         self.attrs = VariableListModel()
         self.view = gui.listView(
-            self.widget.controlArea, self.widget, "foo", model=self.attrs)
+            self.widget.controlArea, self.widget, "foo", model=self.attrs
+        )
 
     def test_select_callback(self):
         widget = self.widget
@@ -75,14 +82,13 @@ class TestListModel(GuiTest):
 
 
 class TestFloatSlider(GuiTest):
-
     def test_set_value(self):
-        w = gui.FloatSlider(Qt.Horizontal, 0., 1., 0.5)
+        w = gui.FloatSlider(Qt.Horizontal, 0.0, 1.0, 0.5)
         w.setValue(1)
         # Float slider returns value divided by step
         # 1/0.5 = 2
         self.assertEqual(w.value(), 2)
-        w = gui.FloatSlider(Qt.Horizontal, 0., 1., 0.05)
+        w = gui.FloatSlider(Qt.Horizontal, 0.0, 1.0, 0.05)
         w.setValue(1)
         # 1/0.05 = 20
         self.assertEqual(w.value(), 20)

@@ -68,10 +68,16 @@ class CUR(Projector):
 
     """
 
-    name = 'cur'
+    name = "cur"
 
-    def __init__(self, rank=3, max_error=1, compute_U=False,
-                 random_state=None, preprocessors=None):
+    def __init__(
+        self,
+        rank=3,
+        max_error=1,
+        compute_U=False,
+        random_state=None,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.rank = rank
         self.compute_U = compute_U
@@ -113,14 +119,14 @@ class CUR(Projector):
     def _select_columns(self, X, UsV):
         U, s, V = UsV
         lev = self._score_leverage(V)
-        c = self.rank * np.log(self.rank) / self.max_error**2
-        prob = np.minimum(1., c * lev)
+        c = self.rank * np.log(self.rank) / self.max_error ** 2
+        prob = np.minimum(1.0, c * lev)
         rnd = self.random_state.rand(X.shape[1])
         cols = np.nonzero(rnd < prob)[0]
         return lev, cols
 
     def _score_leverage(self, V):
-        return np.array(1. / self.rank * np.sum(np.power(V, 2), 1))
+        return np.array(1.0 / self.rank * np.sum(np.power(V, 2), 1))
 
 
 class CURModel(Projection):
@@ -133,21 +139,24 @@ class CURModel(Projection):
         Xt = self.proj.transform(data.X, axis)
 
         if axis == 0:
+
             def cur_variable(i):
                 var = data.domain[i]
                 return var.copy(compute_value=Projector(self, i))
 
             domain = Orange.data.Domain(
                 [cur_variable(org_idx) for org_idx in self.features_],
-                class_vars=data.domain.class_vars)
+                class_vars=data.domain.class_vars,
+            )
             transformed_data = Orange.data.Table(domain, Xt, data.Y)
         elif axis == 1:
             Y = data.Y[self.proj.samples_]
             metas = data.metas[self.proj.samples_]
             transformed_data = Orange.data.Table(data.domain, Xt, Y, metas=metas)
         else:
-            raise TypeError('CUR can select either columns '
-                            '(axis = 0) or rows (axis = 1).')
+            raise TypeError(
+                "CUR can select either columns " "(axis = 0) or rows (axis = 1)."
+            )
 
         return transformed_data
 
@@ -168,11 +177,11 @@ class Projector:
 
     def __getstate__(self):
         d = dict(self.__dict__)
-        d['transformed'] = None
+        d["transformed"] = None
         return d
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import numpy as np
     import scipy.sparse.linalg as sla
 
@@ -194,11 +203,11 @@ if __name__ == '__main__':
     U, s, V = sla.svds(X, rank)
     S = np.diag(s)
     X_k = np.dot(U, np.dot(S, V))
-    err_svd = np.linalg.norm(X - X_k, 'fro')
-    print('Fro. error (optimal SVD): %5.4f' % err_svd)
+    err_svd = np.linalg.norm(X - X_k, "fro")
+    print("Fro. error (optimal SVD): %5.4f" % err_svd)
 
     X_hat = np.dot(cur_model.C_, np.dot(cur_model.U_, cur_model.R_))
-    err_cur = np.linalg.norm(X - X_hat, 'fro')
-    print('Fro. error (CUR): %5.4f' % err_cur)
+    err_cur = np.linalg.norm(X - X_hat, "fro")
+    print("Fro. error (CUR): %5.4f" % err_cur)
     # CUR guarantees with high probability err_cur <= (2+eps) err_svd
     assert err_cur < (3 + cur_model.max_error) * err_svd

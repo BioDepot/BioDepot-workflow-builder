@@ -4,8 +4,13 @@
 import unittest
 import numpy as np
 
-from Orange.projection import (MDS, Isomap, LocallyLinearEmbedding,
-                               SpectralEmbedding, TSNE)
+from Orange.projection import (
+    MDS,
+    Isomap,
+    LocallyLinearEmbedding,
+    SpectralEmbedding,
+    TSNE,
+)
 from Orange.projection.manifold import torgerson
 from Orange.distance import Euclidean
 from Orange.data import Table
@@ -14,8 +19,8 @@ from Orange.data import Table
 class TestManifold(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.ionosphere = Table('ionosphere')
-        cls.iris = Table('iris')
+        cls.ionosphere = Table("ionosphere")
+        cls.iris = Table("iris")
 
     def test_mds(self):
         data = self.ionosphere[:50]
@@ -23,16 +28,13 @@ class TestManifold(unittest.TestCase):
             self.__mds_test_helper(data, n_com=i)
 
     def __mds_test_helper(self, data, n_com):
-        mds_fit = MDS(
-            n_components=n_com, dissimilarity=Euclidean, random_state=0)
+        mds_fit = MDS(n_components=n_com, dissimilarity=Euclidean, random_state=0)
         mds_fit = mds_fit(data)
 
-        mds_odist = MDS(
-            n_components=n_com, dissimilarity='precomputed', random_state=0)
+        mds_odist = MDS(n_components=n_com, dissimilarity="precomputed", random_state=0)
         mds_odist = mds_odist(Euclidean(data))
 
-        mds_sdist = MDS(
-            n_components=n_com, dissimilarity='euclidean', random_state=0)
+        mds_sdist = MDS(n_components=n_com, dissimilarity="euclidean", random_state=0)
         mds_sdist = mds_sdist(data)
 
         eshape = data.X.shape[0], n_com
@@ -46,26 +48,26 @@ class TestManifold(unittest.TestCase):
         result = np.array([-2.6928912, 0.32603512])
 
         projector = MDS(
-            n_components=2, dissimilarity=Euclidean, init_type='PCA',
-            n_init=1)
+            n_components=2, dissimilarity=Euclidean, init_type="PCA", n_init=1
+        )
         X = projector(self.iris).embedding_
         np.testing.assert_array_almost_equal(X[0], result)
 
         projector = MDS(
-            n_components=2, dissimilarity='precomputed', init_type='PCA',
-            n_init=1)
+            n_components=2, dissimilarity="precomputed", init_type="PCA", n_init=1
+        )
         X = projector(Euclidean(self.iris)).embedding_
         np.testing.assert_array_almost_equal(X[0], result)
 
         projector = MDS(
-            n_components=2, dissimilarity='euclidean', init_type='PCA',
-            n_init=1)
+            n_components=2, dissimilarity="euclidean", init_type="PCA", n_init=1
+        )
         X = projector(self.iris).embedding_
         np.testing.assert_array_almost_equal(X[0], result)
 
         projector = MDS(
-            n_components=6, dissimilarity='euclidean', init_type='PCA',
-            n_init=1)
+            n_components=6, dissimilarity="euclidean", init_type="PCA", n_init=1
+        )
         X = projector(self.iris[:5]).embedding_
         result = np.array([-0.31871, -0.064644, 0.015653, -1.5e-08, -4.3e-11, 0])
         np.testing.assert_array_almost_equal(np.abs(X[0]), np.abs(result))
@@ -88,19 +90,19 @@ class TestManifold(unittest.TestCase):
         lle = LocallyLinearEmbedding(n_neighbors=5, n_components=n_com)
         lle = lle(data)
 
-        ltsa = LocallyLinearEmbedding(n_neighbors=5, n_components=n_com,
-                                      method="ltsa",
-                                      eigen_solver="dense")
+        ltsa = LocallyLinearEmbedding(
+            n_neighbors=5, n_components=n_com, method="ltsa", eigen_solver="dense"
+        )
         ltsa = ltsa(data)
 
-        hessian = LocallyLinearEmbedding(n_neighbors=15, n_components=n_com,
-                                         method="hessian",
-                                         eigen_solver="dense")
+        hessian = LocallyLinearEmbedding(
+            n_neighbors=15, n_components=n_com, method="hessian", eigen_solver="dense"
+        )
         hessian = hessian(data)
 
-        modified = LocallyLinearEmbedding(n_neighbors=5, n_components=n_com,
-                                          method="modified",
-                                          eigen_solver="dense")
+        modified = LocallyLinearEmbedding(
+            n_neighbors=5, n_components=n_com, method="modified", eigen_solver="dense"
+        )
         modified = modified(data)
 
         self.assertEqual((data.X.shape[0], n_com), lle.embedding_.shape)
@@ -123,13 +125,13 @@ class TestManifold(unittest.TestCase):
             self.__tsne_test_helper(data, n_com=i)
 
     def __tsne_test_helper(self, data, n_com):
-        tsne_def = TSNE(n_components=n_com, metric='euclidean')
+        tsne_def = TSNE(n_components=n_com, metric="euclidean")
         tsne_def = tsne_def(data)
 
         tsne_euc = TSNE(n_components=n_com, metric=Euclidean)
         tsne_euc = tsne_euc(data)
 
-        tsne_pre = TSNE(n_components=n_com, metric='precomputed')
+        tsne_pre = TSNE(n_components=n_com, metric="precomputed")
         tsne_pre = tsne_pre(Euclidean(data))
 
         self.assertEqual((data.X.shape[0], n_com), tsne_def.embedding_.shape)

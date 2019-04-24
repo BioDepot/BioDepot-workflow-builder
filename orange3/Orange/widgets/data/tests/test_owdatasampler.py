@@ -83,20 +83,21 @@ class TestOWDataSampler(WidgetTest):
 
     def test_bigger_size_with_replacement(self):
         """Allow bigger output without replacement."""
-        self.send_signal('Data', self.iris[:2])
+        self.send_signal("Data", self.iris[:2])
         sample_size = self.set_fixed_sample_size(3, with_replacement=True)
-        self.assertEqual(3, sample_size, 'Should be able to set a bigger size '
-                         'with replacement')
+        self.assertEqual(
+            3, sample_size, "Should be able to set a bigger size " "with replacement"
+        )
 
     def test_bigger_size_without_replacement(self):
         """Lower output samples to match input's without replacement."""
-        self.send_signal('Data', self.iris[:2])
+        self.send_signal("Data", self.iris[:2])
         sample_size = self.set_fixed_sample_size(3)
         self.assertEqual(2, sample_size)
 
     def test_bigger_output_warning(self):
         """Should warn when sample size is bigger than input."""
-        self.send_signal('Data', self.iris[:2])
+        self.send_signal("Data", self.iris[:2])
         self.set_fixed_sample_size(3, with_replacement=True)
         self.assertTrue(self.widget.Warning.bigger_sample.is_shown())
 

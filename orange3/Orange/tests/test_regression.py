@@ -20,7 +20,8 @@ class TestRegression(unittest.TestCase):
         regression_modules = pkgutil.walk_packages(
             path=Orange.regression.__path__,
             prefix="Orange.regression.",
-            onerror=lambda x: None)
+            onerror=lambda x: None,
+        )
         for importer, modname, ispkg in regression_modules:
             try:
                 module = pkgutil.importlib.import_module(modname)
@@ -28,7 +29,7 @@ class TestRegression(unittest.TestCase):
                 continue
 
             for name, class_ in inspect.getmembers(module, inspect.isclass):
-                if issubclass(class_, Learner) and 'base' not in class_.__module__:
+                if issubclass(class_, Learner) and "base" not in class_.__module__:
                     yield class_
 
     def test_adequacy_all_learners(self):

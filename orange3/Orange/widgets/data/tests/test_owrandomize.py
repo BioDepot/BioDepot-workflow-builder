@@ -26,8 +26,9 @@ class TestOWRandomize(WidgetTest):
         np.testing.assert_array_equal(output.X, self.zoo.X)
         np.testing.assert_array_equal(output.metas, self.zoo.metas)
         self.assertTrue((output.Y != self.zoo.Y).any())
-        self.assertTrue((np.sort(output.Y, axis=0) ==
-                         np.sort(self.zoo.Y, axis=0)).all())
+        self.assertTrue(
+            (np.sort(output.Y, axis=0) == np.sort(self.zoo.Y, axis=0)).all()
+        )
         self.send_signal(self.widget.Inputs.data, None)
         self.assertEqual(self.widget.data, None)
         self.assertIsNone(self.get_output(self.widget.Outputs.data))
@@ -40,14 +41,17 @@ class TestOWRandomize(WidgetTest):
         self.widget.metas_check.setChecked(True)
         output = self.get_output(self.widget.Outputs.data)
         self.assertTrue((output.X != self.zoo.X).any())
-        self.assertTrue((np.sort(output.X, axis=0) ==
-                         np.sort(self.zoo.X, axis=0)).all())
+        self.assertTrue(
+            (np.sort(output.X, axis=0) == np.sort(self.zoo.X, axis=0)).all()
+        )
         self.assertTrue((output.Y != self.zoo.Y).any())
-        self.assertTrue((np.sort(output.Y, axis=0) ==
-                         np.sort(self.zoo.Y, axis=0)).all())
+        self.assertTrue(
+            (np.sort(output.Y, axis=0) == np.sort(self.zoo.Y, axis=0)).all()
+        )
         self.assertTrue((output.metas != self.zoo.metas).any())
-        self.assertTrue((np.sort(output.metas, axis=0) ==
-                         np.sort(self.zoo.metas, axis=0)).all())
+        self.assertTrue(
+            (np.sort(output.metas, axis=0) == np.sort(self.zoo.metas, axis=0)).all()
+        )
 
     def test_scope(self):
         self.send_signal(self.widget.Inputs.data, self.zoo)
@@ -65,8 +69,9 @@ class TestOWRandomize(WidgetTest):
         np.testing.assert_array_equal(output.X, self.zoo.X)
         np.testing.assert_array_equal(output.metas, self.zoo.metas)
         self.assertTrue((output.Y != self.zoo.Y).any())
-        self.assertTrue((np.sort(output.Y, axis=0) ==
-                         np.sort(self.zoo.Y, axis=0)).all())
+        self.assertTrue(
+            (np.sort(output.Y, axis=0) == np.sort(self.zoo.Y, axis=0)).all()
+        )
         self.widget.apply()
         output2 = self.get_output(self.widget.Outputs.data)
         np.testing.assert_array_equal(output.X, output2.X)

@@ -6,10 +6,7 @@ from Orange.widgets.visualize.utils.tree.treeadapter import BaseTreeAdapter
 
 from Orange.misc.cache import memoize_method
 from Orange.preprocess.transformation import Indicator
-from Orange.widgets.visualize.utils.tree.rules import (
-    DiscreteRule,
-    ContinuousRule
-)
+from Orange.widgets.visualize.utils.tree.rules import DiscreteRule, ContinuousRule
 
 
 class SklTreeAdapter(BaseTreeAdapter):
@@ -49,8 +46,10 @@ class SklTreeAdapter(BaseTreeAdapter):
         return self.ROOT_PARENT
 
     def has_children(self, node):
-        return (self._tree.children_left[node] != self.NO_CHILD or
-                self._tree.children_right[node] != self.NO_CHILD)
+        return (
+            self._tree.children_left[node] != self.NO_CHILD
+            or self._tree.children_right[node] != self.NO_CHILD
+        )
 
     def children(self, node):
         if self.has_children(node):
@@ -104,26 +103,29 @@ class SklTreeAdapter(BaseTreeAdapter):
             is_left_child = self.__left_child(parent) == node
 
             # The parent split variable is discrete
-            if isinstance(parent_attr_cv, Indicator) and \
-                    hasattr(parent_attr_cv.variable, 'values'):
+            if isinstance(parent_attr_cv, Indicator) and hasattr(
+                parent_attr_cv.variable, "values"
+            ):
                 values = parent_attr_cv.variable.values
                 attr_name = parent_attr_cv.variable.name
                 eq = not is_left_child * (len(values) != 2)
-                value = values[abs(parent_attr_cv.value -
-                                   is_left_child * (len(values) == 2))]
+                value = values[
+                    abs(parent_attr_cv.value - is_left_child * (len(values) == 2))
+                ]
                 new_rule = DiscreteRule(attr_name, eq, value)
                 # Since discrete variables should appear in their own lines
                 # they must not be merged, so the dict key is set with the
                 # value, so the same keys can exist with different values
                 # e.g. #legs ≠ 2 and #legs ≠ 4
-                attr_name = attr_name + '_' + value
+                attr_name = attr_name + "_" + value
             # The parent split variable is continuous
             else:
                 attr_name = parent_attr.name
                 sign = not is_left_child
                 value = self._tree.threshold[self.parent(node)]
-                new_rule = ContinuousRule(attr_name, sign, value,
-                                          inclusive=is_left_child)
+                new_rule = ContinuousRule(
+                    attr_name, sign, value, inclusive=is_left_child
+                )
 
             # Check if a rule with that attribute exists
             if attr_name in pr:
@@ -228,10 +230,10 @@ class SklTreeAdapter(BaseTreeAdapter):
 
                 column = self.instances.X[indices, feature_idx]
                 leftmask = column <= thresh
-                leftind = assign(self._tree.children_left[node_id],
-                                 indices[leftmask])
-                rightind = assign(self._tree.children_right[node_id],
-                                  indices[~leftmask])
+                leftind = assign(self._tree.children_left[node_id], indices[leftmask])
+                rightind = assign(
+                    self._tree.children_right[node_id], indices[~leftmask]
+                )
                 return list.__iadd__(leftind, rightind)
 
         if self._all_leaves is not None:

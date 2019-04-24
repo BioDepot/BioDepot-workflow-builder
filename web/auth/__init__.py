@@ -1,15 +1,16 @@
-__all__ = ['auth']
-__version__ = '0.1'
+__all__ = ["auth"]
+__version__ = "0.1"
 
 
-from flask_login import (LoginManager,
-                         login_required,
-                         login_user,
-                         current_user,
-                         login_fresh,
-                         logout_user,
-                         AnonymousUserMixin,
-                         )
+from flask_login import (
+    LoginManager,
+    login_required,
+    login_user,
+    current_user,
+    login_fresh,
+    logout_user,
+    AnonymousUserMixin,
+)
 from functools import wraps
 from db.sql import User as DbUser
 import sha
@@ -19,6 +20,7 @@ def noauth(func):
     @wraps(func)
     def with_logging(*args, **kwargs):
         return func(*args, **kwargs)
+
     return with_logging
 
 
@@ -34,11 +36,11 @@ class Auth(object):
         self.current_user = current_user
 
     def login(self, **kargs):
-        if 'username' in kargs and 'password' in kargs:
-            u = User.get(kargs['username'], kargs['password'])
+        if "username" in kargs and "password" in kargs:
+            u = User.get(kargs["username"], kargs["password"])
             if u is None:
                 return None
-            login_user(u, remember=kargs['remember'])
+            login_user(u, remember=kargs["remember"])
             return u
         return None
 
@@ -71,7 +73,7 @@ class User(object):
         if not cls.authenticate(u, password):
             return None
         user = User(u)
-        if u == 'admin':
+        if u == "admin":
             user._is_admin = True
         cls._users[u] = user
         return user
@@ -111,9 +113,10 @@ class User(object):
 
 class Anonymous(AnonymousUserMixin):
     def __init__(self):
-        self._userid = 'Anonymous'
+        self._userid = "Anonymous"
 
     def username(self):
         return self._userid
+
 
 auth = Auth()

@@ -6,10 +6,20 @@ import numpy as np
 
 from AnyQt.QtCore import QModelIndex, Qt
 
-from Orange.data import ContinuousVariable, DiscreteVariable, \
-    StringVariable, Table, Domain
-from Orange.widgets.data.oweditdomain import EditDomainReport, OWEditDomain, \
-    ContinuousVariableEditor, DiscreteVariableEditor, VariableEditor
+from Orange.data import (
+    ContinuousVariable,
+    DiscreteVariable,
+    StringVariable,
+    Table,
+    Domain,
+)
+from Orange.widgets.data.oweditdomain import (
+    EditDomainReport,
+    OWEditDomain,
+    ContinuousVariableEditor,
+    DiscreteVariableEditor,
+    VariableEditor,
+)
 from Orange.widgets.data.owcolor import OWColor, ColorRole
 from Orange.widgets.tests.base import WidgetTest, GuiTest
 
@@ -110,8 +120,8 @@ class TestOWEditDomain(WidgetTest):
         self.send_signal("Data", self.iris, widget=owcolor)
         owcolor.disc_model.setData(QModelIndex(), (250, 97, 70, 255), ColorRole)
         owcolor.cont_model.setData(
-            QModelIndex(), ((255, 80, 114, 255), (255, 255, 0, 255), False),
-            ColorRole)
+            QModelIndex(), ((255, 80, 114, 255), (255, 255, 0, 255), False), ColorRole
+        )
         owcolor_output = self.get_output("Data", owcolor)
         self.send_signal("Data", owcolor_output)
         self.assertEqual(self.widget.data, owcolor_output)
@@ -176,7 +186,7 @@ class TestEditors(GuiTest):
         self.assertIs(w.get_data(), None)
 
         v = StringVariable(name="S")
-        v.attributes.update({"A": 1, "B": "b"},)
+        v.attributes.update({"A": 1, "B": "b"})
         w.set_data(v)
 
         self.assertEqual(w.name_edit.text(), v.name)

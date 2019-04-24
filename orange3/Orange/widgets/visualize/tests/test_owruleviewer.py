@@ -15,7 +15,7 @@ class TestOWRuleViewer(WidgetTest, WidgetOutputsTestMixin):
         super().setUpClass()
         WidgetOutputsTestMixin.init(cls)
 
-        cls.titanic = Table('titanic')
+        cls.titanic = Table("titanic")
         cls.learner = CN2Learner()
         cls.classifier = cls.learner(cls.titanic)
         # CN2Learner does not add `instances` attribute to the model, but
@@ -72,9 +72,10 @@ class TestOWRuleViewer(WidgetTest, WidgetOutputsTestMixin):
 
         # select the last rule (TRUE)
         selection_model = self.widget.view.selectionModel()
-        selection_model.select(self.widget.proxy_model.index(
-            len(self.classifier.rule_list) - 1, 0),
-            selection_model.Select | selection_model.Rows)
+        selection_model.select(
+            self.widget.proxy_model.index(len(self.classifier.rule_list) - 1, 0),
+            selection_model.Select | selection_model.Rows,
+        )
 
         # the number of output data instances (filtered)
         # must match the size of titanic data-set
@@ -92,15 +93,15 @@ class TestOWRuleViewer(WidgetTest, WidgetOutputsTestMixin):
 
         # select the last rule (TRUE)
         selection_model = self.widget.view.selectionModel()
-        selection_model.select(self.widget.proxy_model.index(
-            len(self.classifier.rule_list) - 1, 0),
-            selection_model.Select | selection_model.Rows)
+        selection_model.select(
+            self.widget.proxy_model.index(len(self.classifier.rule_list) - 1, 0),
+            selection_model.Select | selection_model.Rows,
+        )
 
         # copy the selection and test if correct
         self.widget.copy_to_clipboard()
         clipboard_contents = QApplication.clipboard().text()
-        self.assertTrue(self.classifier.rule_list[-1].__str__() ==
-                        clipboard_contents)
+        self.assertTrue(self.classifier.rule_list[-1].__str__() == clipboard_contents)
 
     def test_restore_original_order(self):
         self.send_signal(self.widget.Inputs.classifier, self.classifier)
@@ -137,8 +138,10 @@ class TestOWRuleViewer(WidgetTest, WidgetOutputsTestMixin):
 
         # test that selection persists through view change
         selection_model = self.widget.view.selectionModel()
-        selection_model.select(self.widget.proxy_model.index(0, 0),
-                               selection_model.Select | selection_model.Rows)
+        selection_model.select(
+            self.widget.proxy_model.index(0, 0),
+            selection_model.Select | selection_model.Rows,
+        )
 
         self.widget._save_selected(actual=True)
         temp = self.widget.selected
@@ -152,6 +155,8 @@ class TestOWRuleViewer(WidgetTest, WidgetOutputsTestMixin):
 
     def _select_data(self):
         selection_model = self.widget.view.selectionModel()
-        selection_model.select(self.widget.proxy_model.index(2, 0),
-                               selection_model.Select | selection_model.Rows)
+        selection_model.select(
+            self.widget.proxy_model.index(2, 0),
+            selection_model.Select | selection_model.Rows,
+        )
         return list(range(586, 597))

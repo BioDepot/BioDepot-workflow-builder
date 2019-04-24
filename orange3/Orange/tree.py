@@ -18,6 +18,7 @@ class Node:
         children (list of Node): child branches
         subset (numpy.array): indices of data instances in this node
     """
+
     def __init__(self, attr, attr_idx, value):
         self.attr = attr
         self.attr_idx = attr_idx
@@ -37,6 +38,7 @@ class Node:
 
 class DiscreteNode(Node):
     """Node for discrete attributes"""
+
     def __init__(self, attr, attr_idx, value):
         super().__init__(attr, attr_idx, value)
 
@@ -55,6 +57,7 @@ class MappedDiscreteNode(Node):
     Attributes:
         mapping (numpy.ndarray): indices of branches for each attribute value
     """
+
     def __init__(self, attr, attr_idx, mapping, value):
         super().__init__(attr, attr_idx, value)
         self.mapping = mapping
@@ -79,9 +82,9 @@ class MappedDiscreteNode(Node):
             attribute values and to data instances
         """
         mapping = np.array(
-            [int(x)
-             for x in reversed("{:>0{}b}".format(bit_mapping, n_values))] +
-            [-1], dtype=np.int16)
+            [int(x) for x in reversed("{:>0{}b}".format(bit_mapping, n_values))] + [-1],
+            dtype=np.int16,
+        )
         col_x = col_x.flatten()  # also ensures copy
         col_x[np.isnan(col_x)] = n_values
         return mapping[:-1], mapping[col_x.astype(np.int16)]
@@ -97,8 +100,11 @@ class MappedDiscreteNode(Node):
         if not vals:
             child.description = "(unreachable)"
         else:
-            child.description = vals[0] if len(vals) == 1 else \
-                "{} or {}".format(", ".join(vals[:-1]), vals[-1])
+            child.description = (
+                vals[0]
+                if len(vals) == 1
+                else "{} or {}".format(", ".join(vals[:-1]), vals[-1])
+            )
 
 
 class NumericNode(Node):
@@ -108,6 +114,7 @@ class NumericNode(Node):
         threshold (float): values lower or equal to this threshold go to the
             left branch, larger to the right
     """
+
     def __init__(self, attr, attr_idx, threshold, value):
         super().__init__(attr, attr_idx, value)
         self.threshold = threshold
@@ -125,8 +132,7 @@ class NumericNode(Node):
         elif child_idx == 1 and (lower is None or threshold > lower):
             lower = threshold
         child.condition = (lower, upper)
-        child.description = \
-            "{} {}".format("≤>"[child_idx], attr.str_val(threshold))
+        child.description = "{} {}".format("≤>"[child_idx], attr.str_val(threshold))
 
 
 class TreeModel(TreeModelInterface):
@@ -177,7 +183,7 @@ class TreeModel(TreeModelInterface):
                 val = x[self._code[node_ptr + 2]]
                 if np.isnan(val):
                     break
-                child_ptrs = self._code[node_ptr + 3:]
+                child_ptrs = self._code[node_ptr + 3 :]
                 if self._code[node_ptr] == 3:
                     node_idx = self._code[node_ptr + 1]
                     next_node_ptr = child_ptrs[int(val > self._thresholds[node_idx])]
@@ -192,6 +198,7 @@ class TreeModel(TreeModelInterface):
 
     def get_values(self, X):
         from Orange.classification import _tree_scorers
+
         if sp.isspmatrix_csc(X):
             func = _tree_scorers.compute_predictions_csc
         elif sp.issparse(X):
@@ -216,18 +223,23 @@ class TreeModel(TreeModelInterface):
     def node_count(self):
         def _count(node):
             return 1 + sum(_count(c) for c in node.children if c)
+
         return _count(self.root)
 
     def depth(self):
         def _depth(node):
-            return 1 + max((_depth(child) for child in node.children if child),
-                           default=0)
+            return 1 + max(
+                (_depth(child) for child in node.children if child), default=0
+            )
+
         return _depth(self.root) - 1
 
     def leaf_count(self):
         def _count(node):
-            return not node.children or \
-                   sum(_count(c) if c else 1 for c in node.children)
+            return not node.children or sum(
+                _count(c) if c else 1 for c in node.children
+            )
+
         return _count(self.root)
 
     def get_instances(self, nodes):
@@ -263,8 +275,11 @@ class TreeModel(TreeModelInterface):
                 elif lower is None:
                     rules.append("{} ≤ {}".format(name, attr.repr_val(upper)))
                 else:
-                    rules.append("{} < {} ≤ {}".format(
-                        attr.repr_val(lower), name, attr.repr_val(upper)))
+                    rules.append(
+                        "{} < {} ≤ {}".format(
+                            attr.repr_val(lower), name, attr.repr_val(upper)
+                        )
+                    )
             else:
                 rules.append("{}: {}".format(name, node.description))
             used_attrs.add(node.parent.attr_idx)
@@ -276,9 +291,9 @@ class TreeModel(TreeModelInterface):
             node = self.root
         res = ""
         for child in node.children:
-            res += ("{:>20} {}{} {}\n".format(
-                str(child.value), "    " * level, node.attr.name,
-                child.description))
+            res += "{:>20} {}{} {}\n".format(
+                str(child.value), "    " * level, node.attr.name, child.description
+            )
             res += self.print_tree(child, level + 1)
         return res
 
@@ -335,9 +350,10 @@ class TreeModel(TreeModelInterface):
             self._code[code_ptr] = node.attr_idx
             code_ptr += 1
 
-            jump_table_size = 2 if isinstance(node, NumericNode) \
-                else len(node.attr.values)
-            jump_table = self._code[code_ptr:code_ptr + jump_table_size]
+            jump_table_size = (
+                2 if isinstance(node, NumericNode) else len(node.attr.values)
+            )
+            jump_table = self._code[code_ptr : code_ptr + jump_table_size]
             code_ptr += jump_table_size
             child_indices = [_compile_node(child) for child in node.children]
             if isinstance(node, MappedDiscreteNode):

@@ -27,32 +27,33 @@ class RandomForestRegressor(SklModel, RandomForestModel):
             t.supports_multiclass = self.supports_multiclass
             t.name = "{} - tree {}".format(self.name, i)
             t.original_domain = self.original_domain
-            if hasattr(self, 'instances'):
+            if hasattr(self, "instances"):
                 t.instances = self.instances
             return t
 
-        return [wrap(tree, i)
-                for i, tree in enumerate(self.skl_model.estimators_)]
+        return [wrap(tree, i) for i, tree in enumerate(self.skl_model.estimators_)]
 
 
 class RandomForestRegressionLearner(SklLearner, _FeatureScorerMixin):
     __wraps__ = skl_ensemble.RandomForestRegressor
     __returns__ = RandomForestRegressor
 
-    def __init__(self,
-                 n_estimators=10,
-                 criterion="mse",
-                 max_depth=None,
-                 min_samples_split=2,
-                 min_samples_leaf=1,
-                 min_weight_fraction_leaf=0.,
-                 max_features="auto",
-                 max_leaf_nodes=None,
-                 bootstrap=True,
-                 oob_score=False,
-                 n_jobs=1,
-                 random_state=None,
-                 verbose=0,
-                 preprocessors=None):
+    def __init__(
+        self,
+        n_estimators=10,
+        criterion="mse",
+        max_depth=None,
+        min_samples_split=2,
+        min_samples_leaf=1,
+        min_weight_fraction_leaf=0.0,
+        max_features="auto",
+        max_leaf_nodes=None,
+        bootstrap=True,
+        oob_score=False,
+        n_jobs=1,
+        random_state=None,
+        verbose=0,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()

@@ -13,8 +13,14 @@ import operator
 from collections import namedtuple
 
 from AnyQt.QtWidgets import (
-    QHBoxLayout, QPushButton, QLabel, QSizePolicy, QStyle, QAbstractButton,
-    QWidget, QStyleOption
+    QHBoxLayout,
+    QPushButton,
+    QLabel,
+    QSizePolicy,
+    QStyle,
+    QAbstractButton,
+    QWidget,
+    QStyleOption,
 )
 from AnyQt.QtGui import QIcon, QPixmap, QPainter
 from AnyQt.QtCore import Qt, QSize, QRect, QPoint, QEvent
@@ -27,6 +33,7 @@ class OverlayWidget(QWidget):
     """
     A widget positioned on top of another widget.
     """
+
     def __init__(self, parent=None, alignment=Qt.AlignCenter, **kwargs):
         super().__init__(parent, **kwargs)
         self.setContentsMargins(0, 0, 0, 0)
@@ -123,22 +130,23 @@ class OverlayWidget(QWidget):
             if widget.isWindow():
                 bounds = widget.rect()
             else:
-                bounds = QRect(widget.mapTo(widget.window(), QPoint(0, 0)),
-                               widget.size())
+                bounds = QRect(
+                    widget.mapTo(widget.window(), QPoint(0, 0)), widget.size()
+                )
             tl = self.parent().mapFrom(widget.window(), bounds.topLeft())
             bounds = QRect(tl, widget.size())
         else:
             if widget.isWindow():
                 bounds = widget.geometry()
             else:
-                bounds = QRect(widget.mapToGlobal(QPoint(0, 0)),
-                               widget.size())
+                bounds = QRect(widget.mapToGlobal(QPoint(0, 0)), widget.size())
 
             if self.isWindow():
                 bounds = bounds
             else:
-                bounds = QRect(self.parent().mapFromGlobal(bounds.topLeft()),
-                               bounds.size())
+                bounds = QRect(
+                    self.parent().mapFromGlobal(bounds.topLeft()), bounds.size()
+                )
 
         sh = self.sizeHint()
         minsh = self.minimumSizeHint()
@@ -164,16 +172,15 @@ class OverlayWidget(QWidget):
             else:
                 return max(hint, minimum)
 
-        width = getsize(effectivesh.width(), minsize.width(),
-                        maxsize.width(), hpolicy)
+        width = getsize(effectivesh.width(), minsize.width(), maxsize.width(), hpolicy)
 
         heightforw = self.heightForWidth(width)
         if heightforw > 0:
-            height = getsize(heightforw, minsize.height(),
-                             maxsize.height(), vpolicy)
+            height = getsize(heightforw, minsize.height(), maxsize.height(), vpolicy)
         else:
-            height = getsize(effectivesh.height(), minsize.height(),
-                             maxsize.height(), vpolicy)
+            height = getsize(
+                effectivesh.height(), minsize.height(), maxsize.height(), vpolicy
+            )
 
         size = QSize(width, height)
         if alignment & Qt.AlignLeft:
@@ -209,6 +216,7 @@ class MessageWidget(QWidget):
 
     [[icon] {Message text} (Ok) (Cancel)]
     """
+
     #: Emitted when a button with the AcceptRole is clicked
     accepted = Signal()
     #: Emitted when a button with the RejectRole is clicked
@@ -220,6 +228,7 @@ class MessageWidget(QWidget):
 
     class StandardButton(enum.IntEnum):
         NoButton, Ok, Close, Help = 0x0, 0x1, 0x2, 0x4
+
     NoButton, Ok, Close, Help = list(StandardButton)
 
     class ButtonRole(enum.IntEnum):
@@ -229,8 +238,16 @@ class MessageWidget(QWidget):
 
     _Button = namedtuple("_Button", ["button", "role", "stdbutton"])
 
-    def __init__(self, parent=None, icon=QIcon(), text="", wordWrap=False,
-                 textFormat=Qt.AutoText, standardButtons=NoButton, **kwargs):
+    def __init__(
+        self,
+        parent=None,
+        icon=QIcon(),
+        text="",
+        wordWrap=False,
+        textFormat=Qt.AutoText,
+        standardButtons=NoButton,
+        **kwargs
+    ):
         super().__init__(parent, **kwargs)
         self.__text = text
         self.__icon = QIcon()
@@ -243,8 +260,9 @@ class MessageWidget(QWidget):
 
         self.__iconlabel = QLabel(objectName="icon-label")
         self.__iconlabel.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-        self.__textlabel = QLabel(objectName="text-label", text=text,
-                                  wordWrap=wordWrap, textFormat=textFormat)
+        self.__textlabel = QLabel(
+            objectName="text-label", text=text, wordWrap=wordWrap, textFormat=textFormat
+        )
 
         if sys.platform == "darwin":
             self.__textlabel.setAttribute(Qt.WA_MacSmallSize)
@@ -288,8 +306,7 @@ class MessageWidget(QWidget):
         if self.__icon != icon:
             self.__icon = QIcon(icon)
             if not self.__icon.isNull():
-                size = self.style().pixelMetric(
-                    QStyle.PM_SmallIconSize, None, self)
+                size = self.style().pixelMetric(QStyle.PM_SmallIconSize, None, self)
                 pm = self.__icon.pixmap(QSize(size, size))
             else:
                 pm = QPixmap()
@@ -356,9 +373,9 @@ class MessageWidget(QWidget):
     def standardButtons(self):
         return functools.reduce(
             operator.ior,
-            (slot.stdbutton for slot in self.__buttons
-             if slot.stdbutton is not None),
-            MessageWidget.NoButton)
+            (slot.stdbutton for slot in self.__buttons if slot.stdbutton is not None),
+            MessageWidget.NoButton,
+        )
 
     def addButton(self, button, *rolearg):
         """
@@ -371,33 +388,36 @@ class MessageWidget(QWidget):
         stdbutton = None
         if isinstance(button, QAbstractButton):
             if len(rolearg) != 1:
-                raise TypeError("Wrong number of arguments for "
-                                "addButton(QAbstractButton, role)")
+                raise TypeError(
+                    "Wrong number of arguments for " "addButton(QAbstractButton, role)"
+                )
             role = rolearg[0]
         elif isinstance(button, MessageWidget.StandardButton):
             if len(rolearg) != 0:
-                raise TypeError("Wrong number of arguments for "
-                                "addButton(StandardButton)")
+                raise TypeError(
+                    "Wrong number of arguments for " "addButton(StandardButton)"
+                )
             stdbutton = button
             if button == MessageWidget.Ok:
                 role = MessageWidget.AcceptRole
                 button = QPushButton("Ok", default=False, autoDefault=False)
             elif button == MessageWidget.Close:
                 role = MessageWidget.RejectRole
-#                 button = QPushButton(
-#                     default=False, autoDefault=False, flat=True,
-#                     icon=QIcon(self.style().standardIcon(
-#                                QStyle.SP_TitleBarCloseButton)))
+                #                 button = QPushButton(
+                #                     default=False, autoDefault=False, flat=True,
+                #                     icon=QIcon(self.style().standardIcon(
+                #                                QStyle.SP_TitleBarCloseButton)))
                 button = SimpleButton(
-                    icon=QIcon(self.style().standardIcon(
-                               QStyle.SP_TitleBarCloseButton)))
+                    icon=QIcon(self.style().standardIcon(QStyle.SP_TitleBarCloseButton))
+                )
             elif button == MessageWidget.Help:
                 role = MessageWidget.HelpRole
                 button = QPushButton("Help", default=False, autoDefault=False)
         elif isinstance(button, str):
             if len(rolearg) != 1:
-                raise TypeError("Wrong number of arguments for "
-                                "addButton(str, ButtonRole)")
+                raise TypeError(
+                    "Wrong number of arguments for " "addButton(str, ButtonRole)"
+                )
             role = rolearg[0]
             button = QPushButton(button, default=False, autoDefault=False)
 
@@ -468,8 +488,7 @@ class MessageWidget(QWidget):
             MessageOverlayWidget.AcceptRole: 2,
             MessageOverlayWidget.RejectRole: 3,
         }
-        orderd = sorted(self.__buttons,
-                        key=lambda slot: order.get(slot.role, -1))
+        orderd = sorted(self.__buttons, key=lambda slot: order.get(slot.role, -1))
 
         prev = self.__textlabel
         for slot in orderd:
@@ -492,18 +511,27 @@ class MessageOverlayWidget(OverlayWidget):
     helpRequested = Signal()
 
     NoButton, Ok, Close, Help = list(MessageWidget.StandardButton)
-    InvalidRole, AcceptRole, RejectRole, HelpRole = \
-        list(MessageWidget.ButtonRole)
+    InvalidRole, AcceptRole, RejectRole, HelpRole = list(MessageWidget.ButtonRole)
 
-    def __init__(self, parent=None, text="", icon=QIcon(),
-                 alignment=Qt.AlignTop, wordWrap=False,
-                 standardButtons=NoButton, **kwargs):
+    def __init__(
+        self,
+        parent=None,
+        text="",
+        icon=QIcon(),
+        alignment=Qt.AlignTop,
+        wordWrap=False,
+        standardButtons=NoButton,
+        **kwargs
+    ):
         super().__init__(parent, alignment=alignment, **kwargs)
         layout = QHBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.__msgwidget = MessageWidget(
-            parent=self, text=text, icon=icon, wordWrap=wordWrap,
-            standardButtons=standardButtons
+            parent=self,
+            text=text,
+            icon=icon,
+            wordWrap=wordWrap,
+            standardButtons=standardButtons,
         )
         self.__msgwidget.accepted.connect(self.accepted)
         self.__msgwidget.rejected.connect(self.rejected)

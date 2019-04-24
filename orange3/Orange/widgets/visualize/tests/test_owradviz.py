@@ -3,8 +3,7 @@
 from AnyQt.QtCore import QRectF, QPointF
 
 from Orange.data import Table, Domain
-from Orange.widgets.tests.base import WidgetTest, WidgetOutputsTestMixin, \
-    datasets
+from Orange.widgets.tests.base import WidgetTest, WidgetOutputsTestMixin, datasets
 from Orange.widgets.visualize.owradviz import OWRadviz
 
 
@@ -31,12 +30,17 @@ class TestOWFreeViz(WidgetTest, WidgetOutputsTestMixin):
         self.assertEqual(len(graph.attr_label.model()), 17)
 
     def test_ugly_datasets(self):
-        self.send_signal(self.widget.Inputs.data, Table(datasets.path("testing_dataset_cls")))
-        self.send_signal(self.widget.Inputs.data, Table(datasets.path("testing_dataset_reg")))
+        self.send_signal(
+            self.widget.Inputs.data, Table(datasets.path("testing_dataset_cls"))
+        )
+        self.send_signal(
+            self.widget.Inputs.data, Table(datasets.path("testing_dataset_reg"))
+        )
 
     def test_btn_vizrank(self):
         # TODO: fix this
         w = self.widget
+
         def assertEnabled(data, is_enabled):
             self.send_signal(w.Inputs.data, data)
             self.assertEqual(is_enabled, w.btn_vizrank.isEnabled())
@@ -46,7 +50,9 @@ class TestOWFreeViz(WidgetTest, WidgetOutputsTestMixin):
             assertEnabled(data, is_enabled)
 
     def _select_data(self):
-        self.widget.graph.select_by_rectangle(QRectF(QPointF(-20, -20), QPointF(20, 20)))
+        self.widget.graph.select_by_rectangle(
+            QRectF(QPointF(-20, -20), QPointF(20, 20))
+        )
         return self.widget.graph.get_selection()
 
     def test_subset_data(self):
@@ -58,7 +64,9 @@ class TestOWFreeViz(WidgetTest, WidgetOutputsTestMixin):
     def test_no_features(self):
         w = self.widget
         data = Table("iris")
-        domain = Domain(attributes=data.domain.attributes[:1], class_vars=data.domain.class_vars)
+        domain = Domain(
+            attributes=data.domain.attributes[:1], class_vars=data.domain.class_vars
+        )
         data2 = data.transform(domain)
         self.assertFalse(w.Error.no_features.is_shown())
         self.send_signal(w.Inputs.data, data2)

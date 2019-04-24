@@ -2,9 +2,7 @@ import os
 import pickle
 
 from AnyQt.QtCore import QTimer
-from AnyQt.QtWidgets import (
-    QSizePolicy, QHBoxLayout, QComboBox, QStyle, QFileDialog
-)
+from AnyQt.QtWidgets import QSizePolicy, QHBoxLayout, QComboBox, QStyle, QFileDialog
 
 from Orange.base import Model
 from Orange.widgets import widget, gui
@@ -46,22 +44,20 @@ class OWLoadModel(widget.OWWidget):
         )
 
         self.filesCB = gui.comboBox(
-            box, self, "selectedIndex", callback=self._on_recent)
+            box, self, "selectedIndex", callback=self._on_recent
+        )
         self.filesCB.setMinimumContentsLength(20)
-        self.filesCB.setSizeAdjustPolicy(
-            QComboBox.AdjustToMinimumContentsLength)
+        self.filesCB.setSizeAdjustPolicy(QComboBox.AdjustToMinimumContentsLength)
 
         self.loadbutton = gui.button(box, self, "...", callback=self.browse)
-        self.loadbutton.setIcon(
-            self.style().standardIcon(QStyle.SP_DirOpenIcon))
+        self.loadbutton.setIcon(self.style().standardIcon(QStyle.SP_DirOpenIcon))
         self.loadbutton.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
 
         self.reloadbutton = gui.button(
-            box, self, "Reload", callback=self.reload, default=True)
-        self.reloadbutton.setIcon(
-            self.style().standardIcon(QStyle.SP_BrowserReload))
-        self.reloadbutton.setSizePolicy(QSizePolicy.Maximum,
-                                        QSizePolicy.Fixed)
+            box, self, "Reload", callback=self.reload, default=True
+        )
+        self.reloadbutton.setIcon(self.style().standardIcon(QStyle.SP_BrowserReload))
+        self.reloadbutton.setSizePolicy(QSizePolicy.Maximum, QSizePolicy.Fixed)
 
         # filter valid existing filenames
         self.history = list(filter(os.path.isfile, self.history))[:20]
@@ -88,7 +84,8 @@ class OWLoadModel(widget.OWWidget):
             startdir = os.path.dirname(self.filename)
 
         filename, _ = QFileDialog.getOpenFileName(
-            self, self.tr("Open"), directory=startdir, filter=self.FILTER)
+            self, self.tr("Open"), directory=startdir, filter=self.FILTER
+        )
 
         if filename:
             self.load(filename)
@@ -120,8 +117,7 @@ class OWLoadModel(widget.OWWidget):
 
         self.history.insert(0, filename)
 
-        self.filesCB.insertItem(0, os.path.basename(filename),
-                                userData=filename)
+        self.filesCB.insertItem(0, os.path.basename(filename), userData=filename)
         self.selectedIndex = 0
         self.filename = filename
         self.reloadbutton.setEnabled(self.selectedIndex != -1)
@@ -132,11 +128,14 @@ class OWLoadModel(widget.OWWidget):
 
 def main():
     from AnyQt.QtWidgets import QApplication
+
     app = QApplication([])
     w = OWLoadModel()
     w.show()
     return app.exec_()
 
+
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

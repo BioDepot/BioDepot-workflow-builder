@@ -9,7 +9,11 @@ from numbers import Integral
 import numpy as np
 
 from Orange.data import (
-    Unknown, Variable, ContinuousVariable, DiscreteVariable, StringVariable
+    Unknown,
+    Variable,
+    ContinuousVariable,
+    DiscreteVariable,
+    StringVariable,
 )
 from Orange.util import deprecated, OrangeDeprecationWarning
 
@@ -66,15 +70,18 @@ class DomainConversion:
         self.source = source
 
         self.attributes = [
-            source.index(var) if var in source
-            else var.compute_value for var in destination.attributes]
+            source.index(var) if var in source else var.compute_value
+            for var in destination.attributes
+        ]
         self.class_vars = [
-            source.index(var) if var in source
-            else var.compute_value for var in destination.class_vars]
+            source.index(var) if var in source else var.compute_value
+            for var in destination.class_vars
+        ]
         self.variables = self.attributes + self.class_vars
         self.metas = [
-            source.index(var) if var in source
-            else var.compute_value for var in destination.metas]
+            source.index(var) if var in source else var.compute_value
+            for var in destination.metas
+        ]
 
         def should_be_sparse(feats):
             """
@@ -84,7 +91,7 @@ class DomainConversion:
             """
             fraction_sparse = sum(f.sparse for f in feats) / max(len(feats), 1)
             contain_strings = any(f.is_string for f in feats)
-            return fraction_sparse > 2/3 and not contain_strings
+            return fraction_sparse > 2 / 3 and not contain_strings
 
         # check whether X, Y or metas should be sparse
         self.sparse_X = should_be_sparse(destination.attributes)
@@ -99,7 +106,7 @@ def filter_visible(feats):
 
     Returns: A filtered tuple of features that are visible (i.e. not hidden).
     """
-    return (f for f in feats if not f.attributes.get('hidden', False))
+    return (f for f in feats if not f.attributes.get("hidden", False))
 
 
 class Domain:
@@ -143,24 +150,30 @@ class Domain:
                     else:
                         raise TypeError(
                             "descriptors must be instances of Variable, "
-                            "not '%s'" % type(var).__name__)
+                            "not '%s'" % type(var).__name__
+                        )
 
         # Store everything
         self.attributes = tuple(attributes)
         self.class_vars = tuple(class_vars)
         self._variables = self.attributes + self.class_vars
         self._metas = tuple(metas)
-        self.class_var = \
-            self.class_vars[0] if len(self.class_vars) == 1 else None
+        self.class_var = self.class_vars[0] if len(self.class_vars) == 1 else None
         if not all(var.is_primitive() for var in self._variables):
             raise TypeError("variables must be primitive")
 
-        self._indices = dict(chain.from_iterable(
-            ((var, idx), (var.name, idx), (idx, idx))
-            for idx, var in enumerate(self._variables)))
-        self._indices.update(chain.from_iterable(
-            ((var, -1-idx), (var.name, -1-idx), (-1-idx, -1-idx))
-            for idx, var in enumerate(self.metas)))
+        self._indices = dict(
+            chain.from_iterable(
+                ((var, idx), (var.name, idx), (idx, idx))
+                for idx, var in enumerate(self._variables)
+            )
+        )
+        self._indices.update(
+            chain.from_iterable(
+                ((var, -1 - idx), (var.name, -1 - idx), (-1 - idx, -1 - idx))
+                for idx, var in enumerate(self.metas)
+            )
+        )
 
         self.anonymous = False
         self._known_domains = weakref.WeakKeyDictionary()
@@ -191,40 +204,43 @@ class Domain:
         :return: a new domain
         :rtype: :class:`Domain`
         """
+
         def get_places(max_index):
             return 0 if max_index == 1 else int(log(max_index, 10)) + 1
 
         def get_name(base, index, places):
-            return base if not places \
-                else "{} {:0{}}".format(base, index + 1, places)
+            return base if not places else "{} {:0{}}".format(base, index + 1, places)
 
         if X.ndim != 2:
-            raise ValueError('X must be a 2-dimensional array')
+            raise ValueError("X must be a 2-dimensional array")
         n_attrs = X.shape[1]
         places = get_places(n_attrs)
-        attr_vars = [ContinuousVariable(name=get_name("Feature", a, places))
-                     for a in range(n_attrs)]
+        attr_vars = [
+            ContinuousVariable(name=get_name("Feature", a, places))
+            for a in range(n_attrs)
+        ]
         class_vars = []
         if Y is not None:
             if Y.ndim == 1:
                 Y = Y.reshape(len(Y), 1)
             elif Y.ndim != 2:
-                raise ValueError('Y has invalid shape')
+                raise ValueError("Y has invalid shape")
             n_classes = Y.shape[1]
             places = get_places(n_classes)
             for i, values in enumerate(Y.T):
                 if set(values) == {0, 1}:
-                    name = get_name('Class', i, places)
-                    values = ['v1', 'v2']
+                    name = get_name("Class", i, places)
+                    values = ["v1", "v2"]
                     class_vars.append(DiscreteVariable(name, values))
                 else:
-                    name = get_name('Target', i + 1, places)
+                    name = get_name("Target", i + 1, places)
                     class_vars.append(ContinuousVariable(name))
         if metas is not None:
             n_metas = metas.shape[1]
             places = get_places(n_metas)
-            meta_vars = [StringVariable(get_name("Meta", m, places))
-                         for m in range(n_metas)]
+            meta_vars = [
+                StringVariable(get_name("Meta", m, places)) for m in range(n_metas)
+            ]
         else:
             meta_vars = []
 
@@ -247,7 +263,9 @@ class Domain:
     def __bool__(self):
         warnings.warn(
             "Domain.__bool__ is ambiguous; use 'is None' or 'empty' instead",
-            OrangeDeprecationWarning, stacklevel=2)
+            OrangeDeprecationWarning,
+            stacklevel=2,
+        )
         return len(self) > 0  # Keep the obsolete behaviour
 
     def empty(self):
@@ -272,7 +290,7 @@ class Domain:
         if idx >= 0:
             return self.variables[idx]
         else:
-            return self.metas[-1-idx]
+            return self.metas[-1 - idx]
 
     def __contains__(self, item):
         """
@@ -407,47 +425,59 @@ class Domain:
                 return inst._x, inst._y, inst._metas
             c = self.get_conversion(inst.domain)
             l = len(inst.domain.attributes)
-            values = [(inst._x[i] if 0 <= i < l
-                       else inst._y[i - l] if i >= l
-                       else inst._metas[-i - 1])
-                      if isinstance(i, int)
-                      else (Unknown if not i else i(inst))
-                      for i in c.variables]
-            metas = [(inst._x[i] if 0 <= i < l
-                      else inst._y[i - l] if i >= l
-                      else inst._metas[-i - 1])
-                     if isinstance(i, int)
-                     else (Unknown if not i else i(inst))
-                     for i in c.metas]
+            values = [
+                (
+                    inst._x[i]
+                    if 0 <= i < l
+                    else inst._y[i - l]
+                    if i >= l
+                    else inst._metas[-i - 1]
+                )
+                if isinstance(i, int)
+                else (Unknown if not i else i(inst))
+                for i in c.variables
+            ]
+            metas = [
+                (
+                    inst._x[i]
+                    if 0 <= i < l
+                    else inst._y[i - l]
+                    if i >= l
+                    else inst._metas[-i - 1]
+                )
+                if isinstance(i, int)
+                else (Unknown if not i else i(inst))
+                for i in c.metas
+            ]
         else:
             nvars = len(self._variables)
             nmetas = len(self._metas)
             if len(inst) != nvars and len(inst) != nvars + nmetas:
                 raise ValueError("invalid data length for domain")
-            values = [var.to_val(val)
-                      for var, val in zip(self._variables, inst)]
+            values = [var.to_val(val) for var, val in zip(self._variables, inst)]
             if len(inst) == nvars + nmetas:
-                metas = [var.to_val(val)
-                         for var, val in zip(self._metas, inst[nvars:])]
+                metas = [var.to_val(val) for var, val in zip(self._metas, inst[nvars:])]
             else:
                 metas = [var.Unknown for var in self._metas]
         nattrs = len(self.attributes)
         # Let np.array decide dtype for values
-        return np.array(values[:nattrs]), np.array(values[nattrs:]),\
-               np.array(metas, dtype=object)
+        return (
+            np.array(values[:nattrs]),
+            np.array(values[nattrs:]),
+            np.array(metas, dtype=object),
+        )
 
     def select_columns(self, col_idx):
         attributes, col_indices = self._compute_col_indices(col_idx)
         if attributes is not None:
             n_attrs = len(self.attributes)
-            r_attrs = [attributes[i]
-                       for i, col in enumerate(col_indices)
-                       if 0 <= col < n_attrs]
-            r_classes = [attributes[i]
-                         for i, col in enumerate(col_indices)
-                         if col >= n_attrs]
-            r_metas = [attributes[i]
-                       for i, col in enumerate(col_indices) if col < 0]
+            r_attrs = [
+                attributes[i] for i, col in enumerate(col_indices) if 0 <= col < n_attrs
+            ]
+            r_classes = [
+                attributes[i] for i, col in enumerate(col_indices) if col >= n_attrs
+            ]
+            r_metas = [attributes[i] for i, col in enumerate(col_indices) if col < 0]
             return Domain(r_attrs, r_classes, r_metas)
         else:
             return self
@@ -456,22 +486,22 @@ class Domain:
         if col_idx is ...:
             return None, None
         if isinstance(col_idx, np.ndarray) and col_idx.dtype == bool:
-            return ([attr for attr, c in zip(self, col_idx) if c],
-                    np.nonzero(col_idx))
+            return ([attr for attr, c in zip(self, col_idx) if c], np.nonzero(col_idx))
         elif isinstance(col_idx, slice):
             s = len(self.variables)
             start, end, stride = col_idx.indices(s)
             if col_idx.indices(s) == (0, s, 1):
                 return None, None
             else:
-                return (self[col_idx],
-                        np.arange(start, end, stride))
+                return (self[col_idx], np.arange(start, end, stride))
         elif isinstance(col_idx, Iterable) and not isinstance(col_idx, str):
             attributes = [self[col] for col in col_idx]
             if attributes == self.attributes:
                 return None, None
-            return attributes, np.fromiter(
-                (self.index(attr) for attr in attributes), int)
+            return (
+                attributes,
+                np.fromiter((self.index(attr) for attr in attributes), int),
+            )
         elif isinstance(col_idx, Integral):
             attr = self[col_idx]
         else:
@@ -501,9 +531,11 @@ class Domain:
         if not isinstance(other, Domain):
             return False
 
-        return (self.attributes == other.attributes and
-                self.class_vars == other.class_vars and
-                self.metas == other.metas)
+        return (
+            self.attributes == other.attributes
+            and self.class_vars == other.class_vars
+            and self.metas == other.metas
+        )
 
     def __hash__(self):
         return self._hash

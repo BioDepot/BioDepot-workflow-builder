@@ -1,5 +1,6 @@
 import os
 
+
 class BasePlugin(object):
     def __init__(self, src):
         self.source = src
@@ -14,17 +15,16 @@ class ReadOnlyTokenFile(BasePlugin):
     # or a directory of such files
     def _load_targets(self):
         if os.path.isdir(self.source):
-            cfg_files = [os.path.join(self.source, f) for
-                         f in os.listdir(self.source)]
+            cfg_files = [os.path.join(self.source, f) for f in os.listdir(self.source)]
         else:
             cfg_files = [self.source]
 
         self._targets = {}
         for f in cfg_files:
             for line in [l.strip() for l in open(f).readlines()]:
-                if line and not line.startswith('#'):
-                    tok, target = line.split(': ')
-                    self._targets[tok] = target.strip().split(':')
+                if line and not line.startswith("#"):
+                    tok, target = line.split(": ")
+                    self._targets[tok] = target.strip().split(":")
 
     def lookup(self, token):
         if self._targets is None:
@@ -57,7 +57,7 @@ class BaseTokenAPI(BasePlugin):
     # in this file can be used w/o unecessary dependencies
 
     def process_result(self, resp):
-        return resp.text.split(':')
+        return resp.text.split(":")
 
     def lookup(self, token):
         import requests
@@ -75,4 +75,4 @@ class JSONTokenApi(BaseTokenAPI):
     # should go
 
     def process_result(self, resp):
-        return (resp.json['host'], resp.json['port'])
+        return (resp.json["host"], resp.json["port"])

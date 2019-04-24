@@ -4,23 +4,32 @@
 import unittest
 import numpy as np
 
-from Orange.classification import (CN2Learner, CN2UnorderedLearner,
-                                   CN2SDLearner, CN2SDUnorderedLearner)
-from Orange.classification.rules import (_RuleLearner, _RuleClassifier,
-                                         RuleHunter, Rule, EntropyEvaluator,
-                                         LaplaceAccuracyEvaluator,
-                                         WeightedRelativeAccuracyEvaluator,
-                                         argmaxrnd, hash_dist)
+from Orange.classification import (
+    CN2Learner,
+    CN2UnorderedLearner,
+    CN2SDLearner,
+    CN2SDUnorderedLearner,
+)
+from Orange.classification.rules import (
+    _RuleLearner,
+    _RuleClassifier,
+    RuleHunter,
+    Rule,
+    EntropyEvaluator,
+    LaplaceAccuracyEvaluator,
+    WeightedRelativeAccuracyEvaluator,
+    argmaxrnd,
+    hash_dist,
+)
 from Orange.data import Table
 from Orange.data.filter import HasClass
 from Orange.preprocess import Impute
 
 
 class TestRuleInduction(unittest.TestCase):
-
     def setUp(self):
-        self.titanic = Table('titanic')
-        self.iris = Table('iris')
+        self.titanic = Table("titanic")
+        self.iris = Table("iris")
 
     def test_base_RuleLearner(self):
         """
@@ -45,8 +54,9 @@ class TestRuleInduction(unittest.TestCase):
 
         # test find_rules
         base_rule_learner.domain = self.iris.domain
-        base_rule_learner.find_rules(self.iris.X, self.iris.Y.astype(int),
-                                     None, None, [], self.iris.domain)
+        base_rule_learner.find_rules(
+            self.iris.X, self.iris.Y.astype(int), None, None, [], self.iris.domain
+        )
 
         # test top-level control procedure elements
         self.assertTrue(hasattr(base_rule_learner, "data_stopping"))
@@ -59,7 +69,8 @@ class TestRuleInduction(unittest.TestCase):
         new_rule.target_class = None
 
         X, Y, W = base_rule_learner.exclusive_cover_and_remove(
-            self.iris.X[:3], self.iris.Y[:3], None, new_rule)
+            self.iris.X[:3], self.iris.Y[:3], None, new_rule
+        )
         self.assertTrue(len(X) == len(Y) == 1)
 
         # test rule finder
@@ -80,19 +91,20 @@ class TestRuleInduction(unittest.TestCase):
         (exception raised).
         """
         base_rule_classifier = _RuleClassifier(domain=self.iris.domain)
-        self.assertRaises(NotImplementedError, base_rule_classifier.predict,
-                          self.iris.X)
+        self.assertRaises(
+            NotImplementedError, base_rule_classifier.predict, self.iris.X
+        )
 
     def testCN2Learner(self):
         learner = CN2Learner()
 
         # classic CN2 removes covered learning instances
-        self.assertTrue(learner.cover_and_remove ==
-                        _RuleLearner.exclusive_cover_and_remove)
+        self.assertTrue(
+            learner.cover_and_remove == _RuleLearner.exclusive_cover_and_remove
+        )
 
         # Entropy measure is used to evaluate found hypotheses
-        self.assertTrue(type(learner.rule_finder.quality_evaluator) ==
-                        EntropyEvaluator)
+        self.assertTrue(type(learner.rule_finder.quality_evaluator) == EntropyEvaluator)
 
         # test that the learning requirements are relaxed by default
         self.assertTrue(learner.rule_finder.general_validator.max_rule_length >= 5)
@@ -103,8 +115,7 @@ class TestRuleInduction(unittest.TestCase):
 
         # all learning instances are covered when limitations do not
         # impose rule length or minimum number of covered examples
-        num_covered = np.sum([rule.curr_class_dist
-                              for rule in classifier.rule_list])
+        num_covered = np.sum([rule.curr_class_dist for rule in classifier.rule_list])
         self.assertEqual(num_covered, self.titanic.X.shape[0])
 
         # prediction (matrix-wise, all testing instances at once)
@@ -116,12 +127,14 @@ class TestRuleInduction(unittest.TestCase):
         learner = CN2UnorderedLearner()
 
         # unordered CN2 removes covered learning instances
-        self.assertTrue(learner.cover_and_remove ==
-                        _RuleLearner.exclusive_cover_and_remove)
+        self.assertTrue(
+            learner.cover_and_remove == _RuleLearner.exclusive_cover_and_remove
+        )
 
         # Laplace accuracy measure is used to evaluate found hypotheses
-        self.assertTrue(type(learner.rule_finder.quality_evaluator) ==
-                        LaplaceAccuracyEvaluator)
+        self.assertTrue(
+            type(learner.rule_finder.quality_evaluator) == LaplaceAccuracyEvaluator
+        )
 
         # test that the learning requirements are relaxed by default
         self.assertTrue(learner.rule_finder.general_validator.max_rule_length >= 5)
@@ -136,9 +149,13 @@ class TestRuleInduction(unittest.TestCase):
 
         # all learning instances should be covered given the parameters
         for curr_class in range(len(self.iris.domain.class_var.values)):
-            target_covered = (np.sum([rule.curr_class_dist[rule.target_class]
-                                      for rule in classifier.rule_list
-                                      if rule.target_class == curr_class]))
+            target_covered = np.sum(
+                [
+                    rule.curr_class_dist[rule.target_class]
+                    for rule in classifier.rule_list
+                    if rule.target_class == curr_class
+                ]
+            )
             self.assertEqual(target_covered, np.sum(self.iris.Y == curr_class))
 
         # a custom example, test setting several parameters
@@ -167,8 +184,10 @@ class TestRuleInduction(unittest.TestCase):
 
         # Weighted relative accuracy measure is
         # used to evaluate found hypotheses
-        self.assertTrue(type(learner.rule_finder.quality_evaluator) ==
-                        WeightedRelativeAccuracyEvaluator)
+        self.assertTrue(
+            type(learner.rule_finder.quality_evaluator)
+            == WeightedRelativeAccuracyEvaluator
+        )
 
         # gamma parameter must be initialized and defined
         self.assertTrue(hasattr(learner, "gamma"))
@@ -186,8 +205,10 @@ class TestRuleInduction(unittest.TestCase):
         learner.rule_finder.significance_validator.parent_alpha = 0.2
         learner.rule_finder.significance_validator.default_alpha = 0.8
 
-        self.assertTrue(type(learner.rule_finder.quality_evaluator) ==
-                        WeightedRelativeAccuracyEvaluator)
+        self.assertTrue(
+            type(learner.rule_finder.quality_evaluator)
+            == WeightedRelativeAccuracyEvaluator
+        )
 
         # gamma parameter must be initialized and defined
         self.assertTrue(hasattr(learner, "gamma"))
@@ -205,5 +226,6 @@ class TestRuleInduction(unittest.TestCase):
         self.assertEqual(argmaxrnd(temp, hash_dist(np.array([3, 4]))), 5)
         self.assertRaises(ValueError, argmaxrnd, np.ones((1, 1, 1)))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

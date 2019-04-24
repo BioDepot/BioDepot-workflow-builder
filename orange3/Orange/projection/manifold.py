@@ -10,8 +10,7 @@ import sklearn.manifold as skl_manifold
 from Orange.distance import Distance, DistanceModel, Euclidean
 from Orange.projection import SklProjector
 
-__all__ = ["MDS", "Isomap", "LocallyLinearEmbedding", "SpectralEmbedding",
-           "TSNE"]
+__all__ = ["MDS", "Isomap", "LocallyLinearEmbedding", "SpectralEmbedding", "TSNE"]
 
 
 def torgerson(distances, n_components=2, eigen_solver="auto"):
@@ -52,11 +51,11 @@ def torgerson(distances, n_components=2, eigen_solver="auto"):
 
     B = np.multiply(D_sq, -0.5, out=D_sq)
 
-    if eigen_solver == 'auto':
+    if eigen_solver == "auto":
         if N > 200 and n_components < 10:  # arbitrary - follow skl KernelPCA
-            eigen_solver = 'arpack'
+            eigen_solver = "arpack"
         else:
-            eigen_solver = 'lapack'
+            eigen_solver = "lapack"
 
     if eigen_solver == "arpack":
         v0 = np.random.RandomState(0xD06).uniform(-1, 1, B.shape[0])
@@ -64,8 +63,9 @@ def torgerson(distances, n_components=2, eigen_solver="auto"):
         assert np.all(np.diff(w) >= 0), "w was not in ascending order"
         U, L = v[:, ::-1], w[::-1]
     elif eigen_solver == "lapack":  # lapack (d|s)syevr
-        w, v = lapack_eigh(B, overwrite_a=True,
-                           eigvals=(max(N - n_components, 0), N - 1))
+        w, v = lapack_eigh(
+            B, overwrite_a=True, eigvals=(max(N - n_components, 0), N - 1)
+        )
         assert np.all(np.diff(w) >= 0), "w was not in ascending order"
         U, L = v[:, ::-1], w[::-1]
     else:
@@ -78,9 +78,9 @@ def torgerson(distances, n_components=2, eigen_solver="auto"):
     neg = L < -5 * np.finfo(L.dtype).eps
     if np.any(neg):
         warnings.warn(
-            ("{} of the {} eigenvalues were negative."
-             .format(np.sum(neg), L.size)),
-            UserWarning, stacklevel=2,
+            ("{} of the {} eigenvalues were negative.".format(np.sum(neg), L.size)),
+            UserWarning,
+            stacklevel=2,
         )
     # ... and clamp them all to 0
     L[L < 0] = 0
@@ -95,12 +95,22 @@ def torgerson(distances, n_components=2, eigen_solver="auto"):
 
 class MDS(SklProjector):
     __wraps__ = skl_manifold.MDS
-    name = 'MDS'
+    name = "MDS"
 
-    def __init__(self, n_components=2, metric=True, n_init=4, max_iter=300,
-                 eps=0.001, n_jobs=1, random_state=None,
-                 dissimilarity='euclidean', init_type="random", init_data=None,
-                 preprocessors=None):
+    def __init__(
+        self,
+        n_components=2,
+        metric=True,
+        n_init=4,
+        max_iter=300,
+        eps=0.001,
+        n_jobs=1,
+        random_state=None,
+        dissimilarity="euclidean",
+        init_type="random",
+        init_data=None,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
         self._metric = dissimilarity
@@ -109,18 +119,18 @@ class MDS(SklProjector):
 
     def __call__(self, data):
         params = self.params.copy()
-        dissimilarity = params['dissimilarity']
-        if isinstance(self._metric, DistanceModel) \
-                or (isinstance(self._metric, type)
-                    and issubclass(self._metric, Distance)):
+        dissimilarity = params["dissimilarity"]
+        if isinstance(self._metric, DistanceModel) or (
+            isinstance(self._metric, type) and issubclass(self._metric, Distance)
+        ):
             data = self.preprocess(data)
             _X, Y, domain = data.X, data.Y, data.domain
             X = dist_matrix = self._metric(_X)
-            dissimilarity = 'precomputed'
-        elif self._metric is 'precomputed':
+            dissimilarity = "precomputed"
+        elif self._metric is "precomputed":
             dist_matrix, Y, domain = data, None, None
             X = dist_matrix
-            dissimilarity = 'precomputed'
+            dissimilarity = "precomputed"
         else:
             data = self.preprocess(data)
             X, Y, domain = data.X, data.Y, data.domain
@@ -128,7 +138,7 @@ class MDS(SklProjector):
                 dist_matrix = Euclidean(X)
 
         if self.init_type == "PCA" and self.init_data is None:
-            init_data = torgerson(dist_matrix, params['n_components'])
+            init_data = torgerson(dist_matrix, params["n_components"])
         elif self.init_data is not None:
             init_data = self.init_data
         else:
@@ -143,64 +153,102 @@ class MDS(SklProjector):
 
 class Isomap(SklProjector):
     __wraps__ = skl_manifold.Isomap
-    name = 'Isomap'
+    name = "Isomap"
 
-    def __init__(self, n_neighbors=5, n_components=2, eigen_solver='auto',
-                 tol=0, max_iter=None, path_method='auto',
-                 neighbors_algorithm='auto', n_jobs=1,
-                 preprocessors=None):
+    def __init__(
+        self,
+        n_neighbors=5,
+        n_components=2,
+        eigen_solver="auto",
+        tol=0,
+        max_iter=None,
+        path_method="auto",
+        neighbors_algorithm="auto",
+        n_jobs=1,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
 
 class LocallyLinearEmbedding(SklProjector):
     __wraps__ = skl_manifold.LocallyLinearEmbedding
-    name = 'Locally Linear Embedding'
+    name = "Locally Linear Embedding"
 
-    def __init__(self, n_neighbors=5, n_components=2, reg=0.001,
-                 eigen_solver='auto', tol=1e-06, max_iter=100,
-                 method='standard', hessian_tol=0.0001,
-                 modified_tol=1e-12, neighbors_algorithm='auto',
-                 random_state=None, n_jobs=1,
-                 preprocessors=None):
+    def __init__(
+        self,
+        n_neighbors=5,
+        n_components=2,
+        reg=0.001,
+        eigen_solver="auto",
+        tol=1e-06,
+        max_iter=100,
+        method="standard",
+        hessian_tol=0.0001,
+        modified_tol=1e-12,
+        neighbors_algorithm="auto",
+        random_state=None,
+        n_jobs=1,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
 
 class SpectralEmbedding(SklProjector):
     __wraps__ = skl_manifold.SpectralEmbedding
-    name = 'Spectral Embedding'
+    name = "Spectral Embedding"
 
-    def __init__(self, n_components=2, affinity='nearest_neighbors', gamma=None,
-                 random_state=None, eigen_solver=None, n_neighbors=None, n_jobs=1,
-                 preprocessors=None):
+    def __init__(
+        self,
+        n_components=2,
+        affinity="nearest_neighbors",
+        gamma=None,
+        random_state=None,
+        eigen_solver=None,
+        n_neighbors=None,
+        n_jobs=1,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
 
 class TSNE(SklProjector):
     __wraps__ = skl_manifold.TSNE
-    name = 't-SNE'
+    name = "t-SNE"
 
-    def __init__(self, n_components=2, perplexity=30.0, early_exaggeration=4.0,
-                 learning_rate=1000.0, n_iter=1000, n_iter_without_progress=30,
-                 min_grad_norm=1e-07, metric='euclidean', init='random',
-                 random_state=None, method='barnes_hut', angle=0.5, n_jobs=1,
-                 preprocessors=None):
+    def __init__(
+        self,
+        n_components=2,
+        perplexity=30.0,
+        early_exaggeration=4.0,
+        learning_rate=1000.0,
+        n_iter=1000,
+        n_iter_without_progress=30,
+        min_grad_norm=1e-07,
+        metric="euclidean",
+        init="random",
+        random_state=None,
+        method="barnes_hut",
+        angle=0.5,
+        n_jobs=1,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
     def __call__(self, data):
         params = self.params.copy()
         metric = params["metric"]
-        if metric == 'precomputed':
+        if metric == "precomputed":
             X, Y, domain = data, None, None
         else:
             data = self.preprocess(data)
             X, Y, domain = data.X, data.Y, data.domain
             if isinstance(metric, Distance):
                 X = metric(X)
-                params['metric'] = 'precomputed'
+                params["metric"] = "precomputed"
 
         tsne = self.__wraps__(**params)
         tsne.fit(X, y=Y)

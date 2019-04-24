@@ -9,8 +9,12 @@ from ...registry import global_registry
 from ...registry.qt import QtWidgetRegistry
 from ...gui.dock import CollapsibleDockWidget
 
-from ..canvastooldock import WidgetToolBox, CanvasToolDock, SplitterResizer, \
-                             QuickCategoryToolbar
+from ..canvastooldock import (
+    WidgetToolBox,
+    CanvasToolDock,
+    SplitterResizer,
+    QuickCategoryToolbar,
+)
 
 from ...gui import test
 

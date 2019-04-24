@@ -15,7 +15,7 @@ class InventoryItem(Model):
     Do not edit the class manually.
     """
 
-    def __init__(self, id: str=None, host: str=None):  # noqa: E501
+    def __init__(self, id: str = None, host: str = None):  # noqa: E501
         """InventoryItem - a model defined in Swagger
 
         :param id: The id of this InventoryItem.  # noqa: E501
@@ -23,21 +23,15 @@ class InventoryItem(Model):
         :param host: The host of this InventoryItem.  # noqa: E501
         :type host: str
         """
-        self.swagger_types = {
-            'id': str,
-            'host': str
-        }
+        self.swagger_types = {"id": str, "host": str}
 
-        self.attribute_map = {
-            'id': 'id',
-            'host': 'host'
-        }
+        self.attribute_map = {"id": "id", "host": "host"}
 
         self._id = id
         self._host = host
 
     @classmethod
-    def from_dict(cls, dikt) -> 'InventoryItem':
+    def from_dict(cls, dikt) -> "InventoryItem":
         """Returns the dict as a model
 
         :param dikt: A dict.
@@ -89,6 +83,8 @@ class InventoryItem(Model):
         :type host: str
         """
         if host is None:
-            raise ValueError("Invalid value for `host`, must not be `None`")  # noqa: E501
+            raise ValueError(
+                "Invalid value for `host`, must not be `None`"
+            )  # noqa: E501
 
         self._host = host

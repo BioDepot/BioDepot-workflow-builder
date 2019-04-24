@@ -64,12 +64,16 @@ def tuple_eval(source):
     if not isinstance(node.body, ast.Tuple):
         raise ValueError("%r is not a tuple literal" % source)
 
-    if not all(isinstance(el, (ast.Str, ast.Num)) or
-               # allow signed number literals in Python3 (i.e. -1|+1|-1.0)
-               (isinstance(el, ast.UnaryOp) and
-                isinstance(el.op, (ast.UAdd, ast.USub)) and
-                isinstance(el.operand, ast.Num))
-               for el in node.body.elts):
+    if not all(
+        isinstance(el, (ast.Str, ast.Num)) or
+        # allow signed number literals in Python3 (i.e. -1|+1|-1.0)
+        (
+            isinstance(el, ast.UnaryOp)
+            and isinstance(el.op, (ast.UAdd, ast.USub))
+            and isinstance(el.operand, ast.Num)
+        )
+        for el in node.body.elts
+    ):
         raise ValueError("Can only contain numbers or strings")
 
     return literal_eval(source)
@@ -95,8 +99,11 @@ def _terminal_value(node):
         return node.s
     elif isinstance(node, ast.Num):
         return node.n
-    elif sys.version_info < (3, 4) and isinstance(node, ast.Name) and \
-            node.id in ["True", "False", "None"]:
+    elif (
+        sys.version_info < (3, 4)
+        and isinstance(node, ast.Name)
+        and node.id in ["True", "False", "None"]
+    ):
         return __builtins__[node.id]
     elif sys.version_info >= (3, 4) and isinstance(node, ast.NameConstant):
         return node.value
@@ -122,8 +129,7 @@ def sniff_version(stream):
     return version
 
 
-def parse_scheme(scheme, stream, error_handler=None,
-                 allow_pickle_data=False):
+def parse_scheme(scheme, stream, error_handler=None, allow_pickle_data=False):
     """
     Parse a saved scheme from `stream` and populate a `scheme`
     instance (:class:`Scheme`).
@@ -144,8 +150,7 @@ def parse_scheme(scheme, stream, error_handler=None,
         Specifically allow parsing of picked data streams.
 
     """
-    warnings.warn("Use 'scheme_load' instead", DeprecationWarning,
-                  stacklevel=2)
+    warnings.warn("Use 'scheme_load' instead", DeprecationWarning, stacklevel=2)
 
     doc = parse(stream)
     scheme_el = doc.getroot()
@@ -158,16 +163,25 @@ def parse_scheme(scheme, stream, error_handler=None,
             version = "2.0"
 
     if error_handler is None:
+
         def error_handler(exc):
             raise exc
 
     if version == "1.0":
-        parse_scheme_v_1_0(doc, scheme, error_handler=error_handler,
-                           allow_pickle_data=allow_pickle_data)
+        parse_scheme_v_1_0(
+            doc,
+            scheme,
+            error_handler=error_handler,
+            allow_pickle_data=allow_pickle_data,
+        )
         return scheme
     else:
-        parse_scheme_v_2_0(doc, scheme, error_handler=error_handler,
-                           allow_pickle_data=allow_pickle_data)
+        parse_scheme_v_2_0(
+            doc,
+            scheme,
+            error_handler=error_handler,
+            allow_pickle_data=allow_pickle_data,
+        )
         return scheme
 
 
@@ -189,8 +203,9 @@ def scheme_node_from_element(node_el, registry):
     return SchemeNode(widget_desc, title=title, position=pos)
 
 
-def parse_scheme_v_2_0(etree, scheme, error_handler, widget_registry=None,
-                       allow_pickle_data=False):
+def parse_scheme_v_2_0(
+    etree, scheme, error_handler, widget_registry=None, allow_pickle_data=False
+):
     """
     Parse an `ElementTree` instance.
     """
@@ -241,8 +256,9 @@ def parse_scheme_v_2_0(etree, scheme, error_handler, widget_registry=None,
         enabled = link_el.get("enabled") == "true"
 
         try:
-            link = SchemeLink(source, source_channel, sink, sink_channel,
-                              enabled=enabled)
+            link = SchemeLink(
+                source, source_channel, sink, sink_channel, enabled=enabled
+            )
         except (ValueError, IncompatibleChannelTypeError) as ex:
             error_handler(ex)
         else:
@@ -272,8 +288,9 @@ def parse_scheme_v_2_0(etree, scheme, error_handler, widget_registry=None,
             try:
                 properties = loads(data, format)
             except Exception:
-                log.error("Could not load properties for %r.", node.title,
-                          exc_info=True)
+                log.error(
+                    "Could not load properties for %r.", node.title, exc_info=True
+                )
 
         if properties is not None:
             node.properties = properties
@@ -313,8 +330,9 @@ def parse_scheme_v_2_0(etree, scheme, error_handler, widget_registry=None,
         scheme.add_annotation(annot)
 
 
-def parse_scheme_v_1_0(etree, scheme, error_handler, widget_registry=None,
-                       allow_pickle_data=False):
+def parse_scheme_v_1_0(
+    etree, scheme, error_handler, widget_registry=None, allow_pickle_data=False
+):
     """
     ElementTree Instance of an old .ows scheme format.
     """
@@ -324,8 +342,7 @@ def parse_scheme_v_1_0(etree, scheme, error_handler, widget_registry=None,
     widgets_not_found = []
 
     widgets = widget_registry.widgets()
-    widgets_by_name = [(d.qualified_name.rsplit(".", 1)[-1], d)
-                       for d in widgets]
+    widgets_by_name = [(d.qualified_name.rsplit(".", 1)[-1], d) for d in widgets]
     widgets_by_name = dict(widgets_by_name)
 
     nodes_by_caption = {}
@@ -344,8 +361,7 @@ def parse_scheme_v_1_0(etree, scheme, error_handler, widget_registry=None,
             widgets_not_found.append(caption)
             continue
 
-        node = SchemeNode(desc, title=caption,
-                          position=(int(x_pos), int(y_pos)))
+        node = SchemeNode(desc, title=caption, position=(int(x_pos), int(y_pos)))
         nodes_by_caption[caption] = node
         nodes.append(node)
 
@@ -353,8 +369,7 @@ def parse_scheme_v_1_0(etree, scheme, error_handler, widget_registry=None,
         in_caption = channel_el.get("inWidgetCaption")
         out_caption = channel_el.get("outWidgetCaption")
 
-        if in_caption in widgets_not_found or \
-                out_caption in widgets_not_found:
+        if in_caption in widgets_not_found or out_caption in widgets_not_found:
             continue
 
         source = nodes_by_caption[out_caption]
@@ -364,8 +379,9 @@ def parse_scheme_v_1_0(etree, scheme, error_handler, widget_registry=None,
 
         for source_channel, sink_channel in signals:
             try:
-                link = SchemeLink(source, source_channel, sink, sink_channel,
-                                  enabled=enabled)
+                link = SchemeLink(
+                    source, source_channel, sink, sink_channel, enabled=enabled
+                )
             except (ValueError, IncompatibleChannelTypeError) as ex:
                 error_handler(ex)
             else:
@@ -379,16 +395,18 @@ def parse_scheme_v_1_0(etree, scheme, error_handler, widget_registry=None,
             try:
                 properties = literal_eval(data)
             except Exception:
-                log.error("Could not load properties for the scheme.",
-                          exc_info=True)
+                log.error("Could not load properties for the scheme.", exc_info=True)
 
     for node in nodes:
         if node.title in properties:
             try:
                 node.properties = pickle.loads(properties[node.title])
             except Exception:
-                log.error("Could not unpickle properties for the node %r.",
-                          node.title, exc_info=True)
+                log.error(
+                    "Could not unpickle properties for the node %r.",
+                    node.title,
+                    exc_info=True,
+                )
 
         scheme.add_node(node)
 
@@ -398,34 +416,42 @@ def parse_scheme_v_1_0(etree, scheme, error_handler, widget_registry=None,
 
 # Intermediate scheme representation
 _scheme = namedtuple(
-    "_scheme",
-    ["title", "version", "description", "nodes", "links", "annotations"])
+    "_scheme", ["title", "version", "description", "nodes", "links", "annotations"]
+)
 
 _node = namedtuple(
     "_node",
-    ["id", "title", "name", "position", "project_name", "qualified_name",
-     "version", "data"])
+    [
+        "id",
+        "title",
+        "name",
+        "position",
+        "project_name",
+        "qualified_name",
+        "version",
+        "data",
+    ],
+)
 
-_data = namedtuple(
-    "_data",
-    ["format", "data"])
+_data = namedtuple("_data", ["format", "data"])
 
 _link = namedtuple(
     "_link",
-    ["id", "source_node_id", "sink_node_id", "source_channel", "sink_channel",
-     "enabled"])
+    [
+        "id",
+        "source_node_id",
+        "sink_node_id",
+        "source_channel",
+        "sink_channel",
+        "enabled",
+    ],
+)
 
-_annotation = namedtuple(
-    "_annotation",
-    ["id", "type", "params"])
+_annotation = namedtuple("_annotation", ["id", "type", "params"])
 
-_text_params = namedtuple(
-    "_text_params",
-    ["geometry", "text", "font", "content_type"])
+_text_params = namedtuple("_text_params", ["geometry", "text", "font", "content_type"])
 
-_arrow_params = namedtuple(
-    "_arrow_params",
-    ["geometry", "color"])
+_arrow_params = namedtuple("_arrow_params", ["geometry", "color"])
 
 
 def parse_ows_etree_v_2_0(tree):
@@ -454,7 +480,7 @@ def parse_ows_etree_v_2_0(tree):
             project_name=node.get("project_name"),
             qualified_name=node.get("qualified_name"),
             version=node.get("version", ""),
-            data=properties.get(node_id, None)
+            data=properties.get(node_id, None),
         )
         nodes.append(node)
 
@@ -487,8 +513,7 @@ def parse_ows_etree_v_2_0(tree):
             annotation = _annotation(
                 id=annot.get("id"),
                 type="text",
-                params=_text_params(rect, annot.text or "", font,
-                                    content_type),
+                params=_text_params(rect, annot.text or "", font, content_type),
             )
         elif annot.tag == "arrow":
             start = tuple_eval(annot.get("start", "(0, 0)"))
@@ -497,7 +522,7 @@ def parse_ows_etree_v_2_0(tree):
             annotation = _annotation(
                 id=annot.get("id"),
                 type="arrow",
-                params=_arrow_params((start, end), color)
+                params=_arrow_params((start, end), color),
             )
         annotations.append(annotation)
 
@@ -507,7 +532,7 @@ def parse_ows_etree_v_2_0(tree):
         description=scheme.get("description"),
         nodes=nodes,
         links=links,
-        annotations=annotations
+        annotations=annotations,
     )
 
 
@@ -523,8 +548,7 @@ def parse_ows_etree_v_1_0(tree):
             try:
                 properties = literal_eval(data)
             except Exception:
-                log.error("Could not decode properties data.",
-                          exc_info=True)
+                log.error("Could not decode properties data.", exc_info=True)
 
     for widget in tree.findall("widgets/widget"):
         title = widget.get("caption")
@@ -533,12 +557,11 @@ def parse_ows_etree_v_1_0(tree):
             id=next(id_gen),
             title=widget.get("caption"),
             name=None,
-            position=(float(widget.get("xPos")),
-                      float(widget.get("yPos"))),
+            position=(float(widget.get("xPos")), float(widget.get("yPos"))),
             project_name=None,
             qualified_name=widget.get("widgetName"),
             version="",
-            data=_data("pickle", data)
+            data=_data("pickle", data),
         )
         nodes.append(node)
 
@@ -556,15 +579,23 @@ def parse_ows_etree_v_1_0(tree):
 
         for source_channel, sink_channel in signals:
             links.append(
-                _link(id=next(id_gen),
-                      source_node_id=source.id,
-                      sink_node_id=sink.id,
-                      source_channel=source_channel,
-                      sink_channel=sink_channel,
-                      enabled=enabled)
+                _link(
+                    id=next(id_gen),
+                    source_node_id=source.id,
+                    sink_node_id=sink.id,
+                    source_channel=source_channel,
+                    sink_channel=sink_channel,
+                    enabled=enabled,
+                )
             )
-    return _scheme(title="", description="", version="1.0",
-                   nodes=nodes, links=links, annotations=[])
+    return _scheme(
+        title="",
+        description="",
+        version="1.0",
+        nodes=nodes,
+        links=links,
+        annotations=[],
+    )
 
 
 def parse_ows_stream(stream):
@@ -589,8 +620,7 @@ def parse_ows_stream(stream):
 
 def resolve_1_0(scheme_desc, registry):
     widgets = registry.widgets()
-    widgets_by_name = dict((d.qualified_name.rsplit(".", 1)[-1], d)
-                           for d in widgets)
+    widgets_by_name = dict((d.qualified_name.rsplit(".", 1)[-1], d) for d in widgets)
     nodes = scheme_desc.nodes
     for i, node in list(enumerate(nodes)):
         # 1.0's qualified name is the class name only, need to replace it
@@ -598,8 +628,9 @@ def resolve_1_0(scheme_desc, registry):
         qname = node.qualified_name
         if qname in widgets_by_name:
             desc = widgets_by_name[qname]
-            nodes[i] = node._replace(qualified_name=desc.qualified_name,
-                                     project_name=desc.project_name)
+            nodes[i] = node._replace(
+                qualified_name=desc.qualified_name, project_name=desc.project_name
+            )
 
     return scheme_desc._replace(nodes=nodes)
 
@@ -628,12 +659,15 @@ def resolve_replaced(scheme_desc, registry):
     # replace the nodes
     nodes = scheme_desc.nodes
     for i, node in list(enumerate(nodes)):
-        if not registry.has_widget(node.qualified_name) and \
-                node.qualified_name in replacements:
+        if (
+            not registry.has_widget(node.qualified_name)
+            and node.qualified_name in replacements
+        ):
             qname = replacements[node.qualified_name]
             desc = registry.widget(qname)
-            nodes[i] = node._replace(qualified_name=desc.qualified_name,
-                                     project_name=desc.project_name)
+            nodes[i] = node._replace(
+                qualified_name=desc.qualified_name, project_name=desc.project_name
+            )
         nodes_by_id[node.id] = nodes[i]
 
     # replace links
@@ -642,17 +676,13 @@ def resolve_replaced(scheme_desc, registry):
         nsource = nodes_by_id[link.source_node_id]
         nsink = nodes_by_id[link.sink_node_id]
 
-        _, source_rep = replacements_channels.get(
-            nsource.qualified_name, ({}, {}))
-        sink_rep, _ = replacements_channels.get(
-            nsink.qualified_name, ({}, {}))
+        _, source_rep = replacements_channels.get(nsource.qualified_name, ({}, {}))
+        sink_rep, _ = replacements_channels.get(nsink.qualified_name, ({}, {}))
 
         if link.source_channel in source_rep:
-            link = link._replace(
-                source_channel=source_rep[link.source_channel])
+            link = link._replace(source_channel=source_rep[link.source_channel])
         if link.sink_channel in sink_rep:
-            link = link._replace(
-                sink_channel=sink_rep[link.sink_channel])
+            link = link._replace(sink_channel=sink_rep[link.sink_channel])
         links[i] = link
 
     return scheme_desc._replace(nodes=nodes, links=links)
@@ -665,6 +695,7 @@ def scheme_load(scheme, stream, registry=None, error_handler=None):
         registry = global_registry()
 
     if error_handler is None:
+
         def error_handler(exc):
             raise exc
 
@@ -688,16 +719,16 @@ def scheme_load(scheme, stream, registry=None, error_handler=None):
             error_handler(UnknownWidgetDefinition(*ex.args))
             nodes_not_found.append(node_d.id)
         else:
-            node = SchemeNode(
-                w_desc, title=node_d.title, position=node_d.position)
+            node = SchemeNode(w_desc, title=node_d.title, position=node_d.position)
             data = node_d.data
 
             if data:
                 try:
                     properties = loads(data.data, data.format)
                 except Exception:
-                    log.error("Could not load properties for %r.", node.title,
-                              exc_info=True)
+                    log.error(
+                        "Could not load properties for %r.", node.title, exc_info=True
+                    )
                 else:
                     node.properties = properties
 
@@ -714,9 +745,13 @@ def scheme_load(scheme, stream, registry=None, error_handler=None):
         source = nodes_by_id[source_id]
         sink = nodes_by_id[sink_id]
         try:
-            link = SchemeLink(source, link_d.source_channel,
-                              sink, link_d.sink_channel,
-                              enabled=link_d.enabled)
+            link = SchemeLink(
+                source,
+                link_d.source_channel,
+                sink,
+                link_d.sink_channel,
+                enabled=link_d.enabled,
+            )
         except (ValueError, IncompatibleChannelTypeError) as ex:
             error_handler(ex)
         else:
@@ -726,8 +761,7 @@ def scheme_load(scheme, stream, registry=None, error_handler=None):
         params = annot_d.params
         if annot_d.type == "text":
             annot = SchemeTextAnnotation(
-                params.geometry, params.text, params.content_type,
-                params.font
+                params.geometry, params.text, params.content_type, params.font
             )
         elif annot_d.type == "arrow":
             start, end = params.geometry
@@ -762,28 +796,36 @@ def scheme_to_etree(scheme, data_format="literal", pickle_fallback=False):
     Return an `xml.etree.ElementTree` representation of the `scheme.
     """
     builder = TreeBuilder(element_factory=Element)
-    builder.start("scheme", {"version": "2.0",
-                             "title": scheme.title or "",
-                             "description": scheme.description or ""})
+    builder.start(
+        "scheme",
+        {
+            "version": "2.0",
+            "title": scheme.title or "",
+            "description": scheme.description or "",
+        },
+    )
 
     ## Nodes
     node_ids = defaultdict(inf_range().__next__)
     builder.start("nodes", {})
     for node in scheme.nodes:
         desc = node.description
-        attrs = {"id": str(node_ids[node]),
-                 "name": desc.name,
-                 "qualified_name": desc.qualified_name,
-                 "project_name": desc.project_name or "",
-                 "version": desc.version or "",
-                 "title": node.title,
-                 }
+        attrs = {
+            "id": str(node_ids[node]),
+            "name": desc.name,
+            "qualified_name": desc.qualified_name,
+            "project_name": desc.project_name or "",
+            "version": desc.version or "",
+            "title": node.title,
+        }
         if node.position is not None:
             attrs["position"] = str(node.position)
 
         if type(node) is not SchemeNode:
-            attrs["scheme_node_type"] = "%s.%s" % (type(node).__name__,
-                                                   type(node).__module__)
+            attrs["scheme_node_type"] = "%s.%s" % (
+                type(node).__name__,
+                type(node).__module__,
+            )
         builder.start("node", attrs)
         builder.end("node")
 
@@ -797,13 +839,14 @@ def scheme_to_etree(scheme, data_format="literal", pickle_fallback=False):
         sink = link.sink_node
         source_id = node_ids[source]
         sink_id = node_ids[sink]
-        attrs = {"id": str(link_ids[link]),
-                 "source_node_id": str(source_id),
-                 "sink_node_id": str(sink_id),
-                 "source_channel": link.source_channel.name,
-                 "sink_channel": link.sink_channel.name,
-                 "enabled": "true" if link.enabled else "false",
-                 }
+        attrs = {
+            "id": str(link_ids[link]),
+            "source_node_id": str(source_id),
+            "sink_node_id": str(sink_id),
+            "source_channel": link.source_channel.name,
+            "sink_channel": link.sink_channel.name,
+            "enabled": "true" if link.enabled else "false",
+        }
         builder.start("link", attrs)
         builder.end("link")
 
@@ -823,17 +866,24 @@ def scheme_to_etree(scheme, data_format="literal", pickle_fallback=False):
 
             # Save the font attributes
             font = annotation.font
-            attrs.update({"font-family": font.get("family", None),
-                          "font-size": font.get("size", None)})
-            attrs = [(key, value) for key, value in attrs.items()
-                     if value is not None]
+            attrs.update(
+                {
+                    "font-family": font.get("family", None),
+                    "font-size": font.get("size", None),
+                }
+            )
+            attrs = [(key, value) for key, value in attrs.items() if value is not None]
             attrs = dict((key, str(value)) for key, value in attrs)
             data = annotation.content
         elif isinstance(annotation, SchemeArrowAnnotation):
             tag = "arrow"
-            attrs.update({"start": repr(annotation.start_pos),
-                          "end": repr(annotation.end_pos),
-                          "fill": annotation.color})
+            attrs.update(
+                {
+                    "start": repr(annotation.start_pos),
+                    "end": repr(annotation.end_pos),
+                    "fill": annotation.color,
+                }
+            )
             data = None
         else:
             log.warning("Can't save %r", annotation)
@@ -854,15 +904,19 @@ def scheme_to_etree(scheme, data_format="literal", pickle_fallback=False):
         data = None
         if node.properties:
             try:
-                data, format = dumps(node.properties, format=data_format,
-                                     pickle_fallback=pickle_fallback)
+                data, format = dumps(
+                    node.properties, format=data_format, pickle_fallback=pickle_fallback
+                )
             except Exception:
-                log.error("Error serializing properties for node %r",
-                          node.title, exc_info=True)
+                log.error(
+                    "Error serializing properties for node %r",
+                    node.title,
+                    exc_info=True,
+                )
             if data is not None:
-                builder.start("properties",
-                              {"node_id": str(node_ids[node]),
-                               "format": format})
+                builder.start(
+                    "properties", {"node_id": str(node_ids[node]), "format": format}
+                )
                 builder.data(data)
                 builder.end("properties")
 
@@ -891,8 +945,9 @@ def scheme_to_ows_stream(scheme, stream, pretty=False, pickle_fallback=False):
         notation.
 
     """
-    tree = scheme_to_etree(scheme, data_format="literal",
-                           pickle_fallback=pickle_fallback)
+    tree = scheme_to_etree(
+        scheme, data_format="literal", pickle_fallback=pickle_fallback
+    )
 
     if pretty:
         indent(tree.getroot(), 0)
@@ -910,6 +965,7 @@ def indent(element, level=0, indent="\t"):
     (http://effbot.org/zone/element-lib.htm#prettyprint).
 
     """
+
     def empty(text):
         return not text or not text.strip()
 
@@ -945,8 +1001,7 @@ def dumps(obj, format="literal", prettyprint=False, pickle_fallback=False):
     """
     if format == "literal":
         try:
-            return (literal_dumps(obj, prettyprint=prettyprint, indent=1),
-                    "literal")
+            return (literal_dumps(obj, prettyprint=prettyprint, indent=1), "literal")
         except (ValueError, TypeError) as ex:
             if not pickle_fallback:
                 raise
@@ -955,8 +1010,7 @@ def dumps(obj, format="literal", prettyprint=False, pickle_fallback=False):
 
     elif format == "json":
         try:
-            return (json.dumps(obj, indent=1 if prettyprint else None),
-                    "json")
+            return (json.dumps(obj, indent=1 if prettyprint else None), "json")
         except (ValueError, TypeError):
             if not pickle_fallback:
                 raise
@@ -964,14 +1018,14 @@ def dumps(obj, format="literal", prettyprint=False, pickle_fallback=False):
             log.debug("Could not serialize to a json string")
 
     elif format == "pickle":
-        return base64.encodebytes(pickle.dumps(obj)).decode('ascii'), "pickle"
+        return base64.encodebytes(pickle.dumps(obj)).decode("ascii"), "pickle"
 
     else:
         raise ValueError("Unsupported format %r" % format)
 
     if pickle_fallback:
         log.warning("Using pickle fallback")
-        return base64.encodebytes(pickle.dumps(obj)).decode('ascii'), "pickle"
+        return base64.encodebytes(pickle.dumps(obj)).decode("ascii"), "pickle"
     else:
         raise Exception("Something strange happened.")
 
@@ -982,7 +1036,7 @@ def loads(string, format):
     elif format == "json":
         return json.loads(string)
     elif format == "pickle":
-        return pickle.loads(base64.decodebytes(string.encode('ascii')))
+        return pickle.loads(base64.decodebytes(string.encode("ascii")))
     else:
         raise ValueError("Unknown format")
 
@@ -1009,8 +1063,9 @@ def literal_dumps(obj, prettyprint=False, indent=4):
         elif type(obj) is dict:
             return all(map(check, chain(iter(obj.keys()), iter(obj.values()))))
         else:
-            raise TypeError("{0} can not be serialized as a python "
-                             "literal".format(type(obj)))
+            raise TypeError(
+                "{0} can not be serialized as a python " "literal".format(type(obj))
+            )
 
     check(obj)
 

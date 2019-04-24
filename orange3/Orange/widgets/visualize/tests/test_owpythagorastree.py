@@ -15,10 +15,7 @@ from Orange.widgets.visualize.pythagorastreeviewer import (
     Square,
     SquareGraphicsItem,
 )
-from Orange.widgets.visualize.utils.owlegend import (
-    OWDiscreteLegend,
-    OWContinuousLegend,
-)
+from Orange.widgets.visualize.utils.owlegend import OWDiscreteLegend, OWContinuousLegend
 
 
 # pylint: disable=protected-access
@@ -56,7 +53,8 @@ class TestPythagorasTree(unittest.TestCase):
         angle."""
         initial_square = Square(Point(0, 0), length=2, angle=math.pi / 2)
         point = self.builder._compute_center(
-            initial_square, length=1.13, alpha=math.radians(68.57))
+            initial_square, length=1.13, alpha=math.radians(68.57)
+        )
         expected_point = Point(1.15, 1.78)
         self.assertAlmostEqual(point.x, expected_point.x, places=1)
         self.assertAlmostEqual(point.y, expected_point.y, places=1)
@@ -64,11 +62,10 @@ class TestPythagorasTree(unittest.TestCase):
     def test_compute_center_with_complex_square_angle(self):
         """Compute the center of the square in the next step given a more
         complex angle."""
-        initial_square = Square(
-            Point(1.5, 1.5), length=2.24, angle=math.radians(63.43)
-        )
+        initial_square = Square(Point(1.5, 1.5), length=2.24, angle=math.radians(63.43))
         point = self.builder._compute_center(
-            initial_square, length=1.65, alpha=math.radians(95.06))
+            initial_square, length=1.65, alpha=math.radians(95.06)
+        )
         expected_point = Point(3.48, 3.07)
         self.assertAlmostEqual(point.x, expected_point.x, places=1)
         self.assertAlmostEqual(point.y, expected_point.y, places=1)
@@ -77,19 +74,19 @@ class TestPythagorasTree(unittest.TestCase):
         """Compute the center of the square in the next step when there is a
         base angle - when the square does not touch the base square on the left
         edge."""
-        initial_square = Square(
-            Point(1.5, 1.5), length=2.24, angle=math.radians(63.43)
-        )
+        initial_square = Square(Point(1.5, 1.5), length=2.24, angle=math.radians(63.43))
         point = self.builder._compute_center(
-            initial_square, length=1.51, alpha=math.radians(180 - 95.06),
-            base_angle=math.radians(95.06))
+            initial_square,
+            length=1.51,
+            alpha=math.radians(180 - 95.06),
+            base_angle=math.radians(95.06),
+        )
         expected_point = Point(1.43, 3.98)
         self.assertAlmostEqual(point.x, expected_point.x, places=1)
         self.assertAlmostEqual(point.y, expected_point.y, places=1)
 
 
 class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
-
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -104,11 +101,11 @@ class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
         cls.signal_data = cls.model
 
         # Set up for widget tests
-        titanic_data = Table('titanic')[::50]
+        titanic_data = Table("titanic")[::50]
         cls.titanic = TreeLearner(max_depth=1)(titanic_data)
         cls.titanic.instances = titanic_data
 
-        housing_data = Table('housing')[:10]
+        housing_data = Table("housing")[:10]
         cls.housing = TreeLearner(max_depth=1)(housing_data)
         cls.housing.instances = housing_data
 
@@ -116,15 +113,17 @@ class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
         self.widget = self.create_widget(OWPythagorasTree)  # type: OWPythagorasTree
 
     def _select_data(self):
-        item = [i for i in self.widget.scene.items() if
-                isinstance(i, SquareGraphicsItem)][3]
+        item = [
+            i for i in self.widget.scene.items() if isinstance(i, SquareGraphicsItem)
+        ][3]
         item.setSelected(True)
         return item.tree_node.label.subset
 
     def get_squares(self):
         """Get all the `SquareGraphicsItems` in the widget scene."""
-        return [i for i in self.widget.scene.items()
-                if isinstance(i, SquareGraphicsItem)]
+        return [
+            i for i in self.widget.scene.items() if isinstance(i, SquareGraphicsItem)
+        ]
 
     def get_visible_squares(self):
         return [x for x in self.get_squares() if x.isVisible()]
@@ -147,26 +146,32 @@ class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
 
     def test_changing_target_class_changes_node_coloring(self):
         """Changing the `Target class` combo box should update colors."""
+
         def _test(data_type):
             squares = []
 
             def _callback():
-                squares.append([sq.brush().color() for sq in self.get_visible_squares()])
+                squares.append(
+                    [sq.brush().color() for sq in self.get_visible_squares()]
+                )
 
             simulate.combobox_run_through_all(
-                self.widget.target_class_combo, callback=_callback)
+                self.widget.target_class_combo, callback=_callback
+            )
 
             # Check that individual squares all have different colors
             squares_same = [self._check_all_same(x) for x in zip(*squares)]
             # Check that at least some of the squares have different colors
-            self.assertTrue(any(x is False for x in squares_same),
-                            'Colors did not change for %s data' % data_type)
+            self.assertTrue(
+                any(x is False for x in squares_same),
+                "Colors did not change for %s data" % data_type,
+            )
 
         w = self.widget
         self.send_signal(w.Inputs.tree, self.titanic)
-        _test('classification')
+        _test("classification")
         self.send_signal(w.Inputs.tree, self.housing)
-        _test('regression')
+        _test("regression")
 
     def test_changing_size_adjustment_changes_sizes(self):
         self.send_signal(self.widget.Inputs.tree, self.titanic)
@@ -176,7 +181,8 @@ class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
             squares.append([sq.rect() for sq in self.get_visible_squares()])
 
         simulate.combobox_run_through_all(
-            self.widget.size_calc_combo, callback=_callback)
+            self.widget.size_calc_combo, callback=_callback
+        )
 
         # Check that individual squares are in different position
         squares_same = [self._check_all_same(x) for x in zip(*squares)]
@@ -185,22 +191,29 @@ class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
 
     def test_log_scale_slider(self):
         # Disabled when no tree
-        self.assertFalse(self.widget.log_scale_box.isEnabled(),
-                         'Should be disabled with no tree')
+        self.assertFalse(
+            self.widget.log_scale_box.isEnabled(), "Should be disabled with no tree"
+        )
 
         self.send_signal(self.widget.Inputs.tree, self.titanic)
         # No size adjustment
-        simulate.combobox_activate_item(self.widget.size_calc_combo, 'Normal')
-        self.assertFalse(self.widget.log_scale_box.isEnabled(),
-                         'Should be disabled when no size adjustment')
+        simulate.combobox_activate_item(self.widget.size_calc_combo, "Normal")
+        self.assertFalse(
+            self.widget.log_scale_box.isEnabled(),
+            "Should be disabled when no size adjustment",
+        )
         # Square root adjustment
-        simulate.combobox_activate_item(self.widget.size_calc_combo, 'Square root')
-        self.assertFalse(self.widget.log_scale_box.isEnabled(),
-                         'Should be disabled when square root size adjustment')
+        simulate.combobox_activate_item(self.widget.size_calc_combo, "Square root")
+        self.assertFalse(
+            self.widget.log_scale_box.isEnabled(),
+            "Should be disabled when square root size adjustment",
+        )
         # Log adjustment
-        simulate.combobox_activate_item(self.widget.size_calc_combo, 'Logarithmic')
-        self.assertTrue(self.widget.log_scale_box.isEnabled(),
-                        'Should be enabled when square root size adjustment')
+        simulate.combobox_activate_item(self.widget.size_calc_combo, "Logarithmic")
+        self.assertTrue(
+            self.widget.log_scale_box.isEnabled(),
+            "Should be enabled when square root size adjustment",
+        )
 
         # Get squares for one value of log factor
         self.widget.log_scale_box.setValue(1)
@@ -213,7 +226,8 @@ class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
         # the same
         self.assertTrue(
             any([x != y for x, y in zip(inital_sizing_sq, updated_sizing_sq)]),
-            'Squares are drawn in same positions after changing log factor')
+            "Squares are drawn in same positions after changing log factor",
+        )
 
     def test_legend(self):
         """Test legend behaviour."""
@@ -245,10 +259,10 @@ class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
         self.send_signal(w.Inputs.tree, self.titanic)
         # Hide the legend
         w.cb_show_legend.setChecked(False)
-        self.assertFalse(w.legend.isVisible(), 'Hiding legend failed')
+        self.assertFalse(w.legend.isVisible(), "Hiding legend failed")
         # Show the legend
         w.cb_show_legend.setChecked(True)
-        self.assertTrue(w.legend.isVisible(), 'Showing legend failed')
+        self.assertTrue(w.legend.isVisible(), "Showing legend failed")
 
     def test_tooltip_changes_for_classification_target_class(self):
         """Tooltips should change when a target class is specified with a
@@ -271,10 +285,10 @@ class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
         square = self.get_squares()[0]
         # Hide tooltips
         w.cb_show_tooltips.setChecked(False)
-        self.assertEqual(square.toolTip(), '', 'Hiding tooltips failed')
+        self.assertEqual(square.toolTip(), "", "Hiding tooltips failed")
         # Show tooltips
         w.cb_show_tooltips.setChecked(True)
-        self.assertNotEqual(square.toolTip(), '', 'Showing tooltips failed')
+        self.assertNotEqual(square.toolTip(), "", "Showing tooltips failed")
 
     def test_changing_max_depth_slider(self):
         w = self.widget
@@ -282,31 +296,42 @@ class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
 
         max_depth = w.tree_adapter.max_depth
         num_squares_full = len(self.get_visible_squares())
-        self.assertEqual(w.depth_limit, max_depth, 'Full tree should be drawn initially')
+        self.assertEqual(
+            w.depth_limit, max_depth, "Full tree should be drawn initially"
+        )
 
         self.widget.depth_slider.setValue(max_depth - 1)
         num_squares_less = len(self.get_visible_squares())
-        self.assertLess(num_squares_less, num_squares_full,
-                        'Lowering tree depth limit did not hide squares')
+        self.assertLess(
+            num_squares_less,
+            num_squares_full,
+            "Lowering tree depth limit did not hide squares",
+        )
 
         w.depth_slider.setValue(max_depth + 1)
-        self.assertGreater(len(self.get_visible_squares()), num_squares_less,
-                           'Increasing tree depth limit did not show squares')
+        self.assertGreater(
+            len(self.get_visible_squares()),
+            num_squares_less,
+            "Increasing tree depth limit did not show squares",
+        )
 
     def test_label_on_tree_connect_and_disconnect(self):
         w = self.widget
-        regex = r'Nodes:(.+)\s*Depth:(.+)'
+        regex = r"Nodes:(.+)\s*Depth:(.+)"
         # Should contain no info by default
         self.assertNotRegex(
-            self.widget.info.text(), regex,
-            'Initial info should not contain node or depth info')
+            self.widget.info.text(),
+            regex,
+            "Initial info should not contain node or depth info",
+        )
         # Test info label for tree
         self.send_signal(w.Inputs.tree, self.titanic)
-        self.assertRegex(w.info.text(), regex, 'Valid tree does not update info')
+        self.assertRegex(w.info.text(), regex, "Valid tree does not update info")
         # Remove tree from input
         self.send_signal(w.Inputs.tree, None)
         self.assertNotRegex(
-            w.info.text(), regex, 'Initial info should not contain node or depth info')
+            w.info.text(), regex, "Initial info should not contain node or depth info"
+        )
 
     def test_tree_determinism(self):
         """Check that the tree is drawn identically upon receiving the same
@@ -321,14 +346,19 @@ class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
             self.assertTrue(
                 self._check_all_same(node_row),
                 "The tree was not drawn identically in the %d times it was "
-                "sent to widget after receiving the iris dataset." % n_tries
+                "sent to widget after receiving the iris dataset." % n_tries,
             )
 
         # Make sure trees are deterministic with data where some variables have
         # the same entropy
-        data_same_entropy = Table(path.join(
-            path.dirname(path.dirname(path.dirname(__file__))), "tests",
-            "datasets", "same_entropy.tab"))
+        data_same_entropy = Table(
+            path.join(
+                path.dirname(path.dirname(path.dirname(__file__))),
+                "tests",
+                "datasets",
+                "same_entropy.tab",
+            )
+        )
         data_same_entropy = TreeLearner()(data_same_entropy)
         scene_nodes = []
         for _ in range(n_tries):
@@ -339,7 +369,7 @@ class TestOWPythagorasTree(WidgetTest, WidgetOutputsTestMixin):
                 self._check_all_same(node_row),
                 "The tree was not drawn identically in the %d times it was "
                 "sent to widget after receiving a dataset with variables with "
-                "same entropy." % n_tries
+                "same entropy." % n_tries,
             )
 
     def test_keep_colors_on_sizing_change(self):

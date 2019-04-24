@@ -16,14 +16,14 @@ class FramelessWindow(QWidget):
     the windowing system).
 
     """
+
     def __init__(self, parent=None, **kwargs):
         QWidget.__init__(self, parent, **kwargs)
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)
 
         self.__radius = 6
         self.__isTransparencySupported = is_transparency_supported()
-        self.setAttribute(Qt.WA_TranslucentBackground,
-                          self.__isTransparencySupported)
+        self.setAttribute(Qt.WA_TranslucentBackground, self.__isTransparencySupported)
 
     def setRadius(self, radius):
         """
@@ -41,9 +41,9 @@ class FramelessWindow(QWidget):
         """
         return self.__radius
 
-    radius_ = Property(int, fget=radius, fset=setRadius,
-                       designable=True,
-                       doc="Window border radius")
+    radius_ = Property(
+        int, fget=radius, fset=setRadius, designable=True, doc="Window border radius"
+    )
 
     def resizeEvent(self, event):
         QWidget.resizeEvent(self, event)

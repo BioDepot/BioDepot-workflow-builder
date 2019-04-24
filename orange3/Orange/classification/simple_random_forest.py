@@ -3,7 +3,7 @@ import numpy as np
 from Orange.classification import Learner, Model
 from Orange.classification.simple_tree import SimpleTreeLearner
 
-__all__ = ['SimpleRandomForestLearner']
+__all__ = ["SimpleRandomForestLearner"]
 
 
 class SimpleRandomForestLearner(Learner):
@@ -41,10 +41,17 @@ class SimpleRandomForestLearner(Learner):
         Random seed.
     """
 
-    name = 'simple rf class'
+    name = "simple rf class"
 
-    def __init__(self, n_estimators=10, min_instances=2, max_depth=1024,
-                 max_majority=1.0, skip_prob='sqrt', seed=42):
+    def __init__(
+        self,
+        n_estimators=10,
+        min_instances=2,
+        max_depth=1024,
+        max_majority=1.0,
+        skip_prob="sqrt",
+        seed=42,
+    ):
         super().__init__()
         self.n_estimators = n_estimators
         self.skip_prob = skip_prob
@@ -65,8 +72,12 @@ class SimpleRandomForestModel(Model):
 
     def learn(self, learner, data):
         tree = SimpleTreeLearner(
-            learner.min_instances, learner.max_depth,
-            learner.max_majority, learner.skip_prob, True)
+            learner.min_instances,
+            learner.max_depth,
+            learner.max_majority,
+            learner.skip_prob,
+            True,
+        )
         for i in range(learner.n_estimators):
             tree.seed = learner.seed + i
             self.estimators_.append(tree(data))

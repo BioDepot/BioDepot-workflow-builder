@@ -2,6 +2,7 @@
 
 from AnyQt.QtWidgets import QGraphicsScene
 
+
 class UpdateItemsOnSelectGraphicsScene(QGraphicsScene):
     """Calls the selection_changed method on items.
 
@@ -22,5 +23,5 @@ class UpdateItemsOnSelectGraphicsScene(QGraphicsScene):
 
     def __handle_selection(self):
         for item in self.items():
-            if hasattr(item, 'selection_changed'):
+            if hasattr(item, "selection_changed"):
                 item.selection_changed()

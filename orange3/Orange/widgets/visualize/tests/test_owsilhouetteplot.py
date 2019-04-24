@@ -23,8 +23,9 @@ class TestOWSilhouettePlot(WidgetTest, WidgetOutputsTestMixin):
         cls.signal_data = cls.data
 
     def setUp(self):
-        self.widget = self.create_widget(OWSilhouettePlot,
-                                         stored_settings={"auto_commit": True})
+        self.widget = self.create_widget(
+            OWSilhouettePlot, stored_settings={"auto_commit": True}
+        )
         self.widget = self.widget  # type: OWSilhouettePlot
 
     def test_no_data(self):
@@ -85,9 +86,9 @@ class TestOWSilhouettePlot(WidgetTest, WidgetOutputsTestMixin):
         # gh-1875: Test on mixed string/discrete metas
         data = self.data[::5]
         domain = Orange.data.Domain(
-            data.domain.attributes, [],
-            [data.domain["iris"],
-             Orange.data.StringVariable("S")]
+            data.domain.attributes,
+            [],
+            [data.domain["iris"], Orange.data.StringVariable("S")],
         )
         data = data.from_table(domain, data)
         self.send_signal(self.widget.Inputs.data, data)
@@ -104,9 +105,7 @@ class TestOWSilhouettePlot(WidgetTest, WidgetOutputsTestMixin):
             self.send_signal(self.widget.Inputs.data, data)
             self.assertFalse(self.widget.Error.memory_error.is_shown())
             self.assertFalse(self.widget.Error.value_error.is_shown())
-            with unittest.mock.patch(
-                "numpy.asarray",
-                side_effect=side_effect):
+            with unittest.mock.patch("numpy.asarray", side_effect=side_effect):
                 self.widget._matrix = None
                 self.widget.data = data
                 self.widget._effective_data = data
@@ -122,12 +121,14 @@ class TestOWSilhouettePlot(WidgetTest, WidgetOutputsTestMixin):
         nan = np.NaN
         table = Table(
             Domain(
-                [ContinuousVariable("a"), ContinuousVariable("b"), ContinuousVariable("c")],
-                [DiscreteVariable("d", values=["y", "n"])]),
-            list(zip([4, nan, nan],
-                     [15, nan, nan],
-                     [16, nan, nan],
-                     "nyy"))
+                [
+                    ContinuousVariable("a"),
+                    ContinuousVariable("b"),
+                    ContinuousVariable("c"),
+                ],
+                [DiscreteVariable("d", values=["y", "n"])],
+            ),
+            list(zip([4, nan, nan], [15, nan, nan], [16, nan, nan], "nyy")),
         )
         self.widget.controls.add_scores.setChecked(1)
         self.send_signal(self.widget.Inputs.data, table)

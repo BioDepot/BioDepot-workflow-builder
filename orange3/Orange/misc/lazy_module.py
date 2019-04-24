@@ -5,7 +5,8 @@ class _LazyModule:
     def _do_import(self):
         import Orange
         from importlib import import_module
-        mod = import_module('Orange.' + self.__name, package='Orange')
+
+        mod = import_module("Orange." + self.__name, package="Orange")
         setattr(Orange, self.__name, mod)
         return mod
 
@@ -14,4 +15,3 @@ class _LazyModule:
 
     def __dir__(self):
         return list(self._do_import().__dict__)
-

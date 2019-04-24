@@ -26,6 +26,7 @@ class OWBaseLearnerMeta(WidgetMetaClass):
     its own Outputs class with output that match the corresponding
     learner.
     """
+
     def __new__(cls, name, bases, attributes):
         def abstract_widget():
             return not attributes.get("name")
@@ -42,8 +43,7 @@ class OWBaseLearnerMeta(WidgetMetaClass):
 
         learner = attributes.get("LEARNER")
         if not learner:
-            raise AttributeError(
-                "'{}' must declare attribute LEARNER".format(name))
+            raise AttributeError("'{}' must declare attribute LEARNER".format(name))
 
         outputs = obj.Outputs = copy_outputs(obj.Outputs)
         outputs.learner.type = learner
@@ -64,6 +64,7 @@ class OWBaseLearner(OWWidget, metaclass=OWBaseLearnerMeta):
     in case LEARNER has extra parameters.
 
     """
+
     LEARNER = None
     supports_sparse = True
 
@@ -87,8 +88,9 @@ class OWBaseLearner(OWWidget, metaclass=OWBaseLearnerMeta):
 
     class Outputs:
         learner = Output("Learner", Learner, dynamic=False)
-        model = Output("Model", Model, dynamic=False,
-                       replaces=["Classifier", "Predictor"])
+        model = Output(
+            "Model", Model, dynamic=False, replaces=["Classifier", "Predictor"]
+        )
 
     OUTPUT_MODEL_NAME = Outputs.model.name  # Attr for backcompat w/ self.send() code
 
@@ -224,15 +226,18 @@ class OWBaseLearner(OWWidget, metaclass=OWBaseLearnerMeta):
         # Options specific to target variable type, if supported
         if issubclass(self.LEARNER, Fitter):
             # Only add a classification section if the method is overridden
-            if type(self).add_classification_layout is not \
-                    OWBaseLearner.add_classification_layout:
-                classification_box = gui.widgetBox(
-                    self.controlArea, 'Classification')
+            if (
+                type(self).add_classification_layout
+                is not OWBaseLearner.add_classification_layout
+            ):
+                classification_box = gui.widgetBox(self.controlArea, "Classification")
                 self.add_classification_layout(classification_box)
             # Only add a regression section if the method is overridden
-            if type(self).add_regression_layout is not \
-                    OWBaseLearner.add_regression_layout:
-                regression_box = gui.widgetBox(self.controlArea, 'Regression')
+            if (
+                type(self).add_regression_layout
+                is not OWBaseLearner.add_regression_layout
+            ):
+                regression_box = gui.widgetBox(self.controlArea, "Regression")
                 self.add_regression_layout(regression_box)
         self.add_bottom_buttons()
 
@@ -264,14 +269,19 @@ class OWBaseLearner(OWWidget, metaclass=OWBaseLearnerMeta):
 
     def add_learner_name_widget(self):
         self.name_line_edit = gui.lineEdit(
-            self.controlArea, self, 'learner_name', box='Name',
-            tooltip='The name will identify this model in other widgets',
-            orientation=Qt.Horizontal, callback=self.learner_name_changed)
+            self.controlArea,
+            self,
+            "learner_name",
+            box="Name",
+            tooltip="The name will identify this model in other widgets",
+            orientation=Qt.Horizontal,
+            callback=self.learner_name_changed,
+        )
 
     def add_bottom_buttons(self):
         self.apply_button = gui.auto_commit(
-            self.controlArea, self, 'auto_apply', '&Apply',
-            box=True, commit=self.apply)
+            self.controlArea, self, "auto_apply", "&Apply", box=True, commit=self.apply
+        )
 
     def send(self, signalName, value, id=None):
         # A subclass might still use the old syntax to send outputs

@@ -15,7 +15,6 @@ def my_sum(*nums):
 
 
 class TestCache(unittest.TestCase):
-
     def test_single_cache(self):
         self.assertEqual(my_sum(1, 2, 3, 4, 5), 15)
         self.assertEqual(my_sum(1, 2, 3, 4, 5), 15)

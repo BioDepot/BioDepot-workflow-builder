@@ -4,9 +4,7 @@ from warnings import warn
 
 from AnyQt import QtGui, QtCore, QtSvg
 from AnyQt.QtCore import QMimeData
-from AnyQt.QtWidgets import (
-    QGraphicsScene, QGraphicsView, QWidget, QApplication
-)
+from AnyQt.QtWidgets import QGraphicsScene, QGraphicsView, QWidget, QApplication
 
 from Orange.data.io import FileFormat
 
@@ -15,8 +13,10 @@ from Orange.data.io import FileFormat
 try:
     from Orange.widgets.utils.webview import WebviewWidget
 except ImportError:
-    warn('WebView from QWebKit or QWebEngine is not available. Orange '
-         'widgets that depend on it will fail to work.')
+    warn(
+        "WebView from QWebKit or QWebEngine is not available. Orange "
+        "widgets that depend on it will fail to work."
+    )
     WebviewWidget = None
 
 
@@ -45,15 +45,15 @@ class ImgFormat(FileFormat):
     def write_image(cls, filename, scene):
         try:
             scene = scene.scene()
-            scenerect = scene.sceneRect()   #preserve scene bounding rectangle
+            scenerect = scene.sceneRect()  # preserve scene bounding rectangle
             viewrect = scene.views()[0].sceneRect()
             scene.setSceneRect(viewrect)
-            backgroundbrush = scene.backgroundBrush()  #preserve scene background brush
+            backgroundbrush = scene.backgroundBrush()  # preserve scene background brush
             scene.setBackgroundBrush(QtCore.Qt.white)
             exporter = cls._get_exporter()
             cls._export(exporter(scene), filename)
             scene.setBackgroundBrush(backgroundbrush)  # reset scene background brush
-            scene.setSceneRect(scenerect)   # reset scene bounding rectangle
+            scene.setSceneRect(scenerect)  # reset scene bounding rectangle
         except Exception:
             if isinstance(scene, (QGraphicsScene, QGraphicsView)):
                 rect = scene.sceneRect()
@@ -77,13 +77,13 @@ class ImgFormat(FileFormat):
     @classmethod
     def write(cls, filename, scene):
         if type(scene) == dict:
-            scene = scene['scene']
+            scene = scene["scene"]
         cls.write_image(filename, scene)
 
 
 class PngFormat(ImgFormat):
-    EXTENSIONS = ('.png',)
-    DESCRIPTION = 'Portable Network Graphics'
+    EXTENSIONS = (".png",)
+    DESCRIPTION = "Portable Network Graphics"
     PRIORITY = 50
 
     @staticmethod
@@ -108,6 +108,7 @@ class PngFormat(ImgFormat):
     @staticmethod
     def _get_exporter():
         from pyqtgraph.exporters.ImageExporter import ImageExporter
+
         return ImageExporter
 
     @staticmethod
@@ -118,7 +119,7 @@ class PngFormat(ImgFormat):
 
 class ClipboardFormat(PngFormat):
     EXTENSIONS = ()
-    DESCRIPTION = 'System Clipboard'
+    DESCRIPTION = "System Clipboard"
     PRIORITY = 50
 
     @staticmethod
@@ -134,8 +135,8 @@ class ClipboardFormat(PngFormat):
 
 
 class SvgFormat(ImgFormat):
-    EXTENSIONS = ('.svg',)
-    DESCRIPTION = 'Scalable Vector Graphics'
+    EXTENSIONS = (".svg",)
+    DESCRIPTION = "Scalable Vector Graphics"
     PRIORITY = 100
 
     @staticmethod
@@ -159,6 +160,7 @@ class SvgFormat(ImgFormat):
     @staticmethod
     def _get_exporter():
         from Orange.widgets.utils.SVGExporter import SVGExporter
+
         return SVGExporter
 
     @staticmethod
@@ -172,7 +174,7 @@ class SvgFormat(ImgFormat):
         if isinstance(scene, WebviewWidget):
             try:
                 svg = scene.svg()
-                with open(filename, 'w') as f:
+                with open(filename, "w") as f:
                     f.write(svg)
                 return
             except (ValueError, IOError):
@@ -182,9 +184,10 @@ class SvgFormat(ImgFormat):
 
 
 if hasattr(QtGui, "QPdfWriter"):
+
     class PdfFormat(ImgFormat):
-        EXTENSIONS = ('.pdf', )
-        DESCRIPTION = 'Portable Document Format'
+        EXTENSIONS = (".pdf",)
+        DESCRIPTION = "Portable Document Format"
         PRIORITY = 110
 
         @classmethod

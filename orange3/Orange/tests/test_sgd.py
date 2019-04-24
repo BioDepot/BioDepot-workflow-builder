@@ -30,7 +30,7 @@ class TestSGDRegressionLearner(unittest.TestCase):
 class TestSGDClassificationLearner(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.iris = Table('iris')
+        cls.iris = Table("iris")
 
     def test_SGDClassification(self):
         sgd = SGDClassificationLearner()

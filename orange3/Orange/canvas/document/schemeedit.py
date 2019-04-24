@@ -16,27 +16,38 @@ from operator import attrgetter
 from urllib.parse import urlencode
 
 from AnyQt.QtWidgets import (
-    QWidget, QVBoxLayout, QInputDialog, QMenu, QAction, QActionGroup,
-    QUndoStack, QUndoCommand, QGraphicsItem, QGraphicsObject,
-    QGraphicsTextItem
+    QWidget,
+    QVBoxLayout,
+    QInputDialog,
+    QMenu,
+    QAction,
+    QActionGroup,
+    QUndoStack,
+    QUndoCommand,
+    QGraphicsItem,
+    QGraphicsObject,
+    QGraphicsTextItem,
 )
 from AnyQt.QtGui import (
-    QKeySequence, QCursor, QFont, QPainter, QPixmap, QColor, QIcon,
-    QWhatsThisClickedEvent, QPalette
+    QKeySequence,
+    QCursor,
+    QFont,
+    QPainter,
+    QPixmap,
+    QColor,
+    QIcon,
+    QWhatsThisClickedEvent,
+    QPalette,
 )
 
-from AnyQt.QtCore import (
-    Qt, QObject, QEvent, QSignalMapper, QRectF, QCoreApplication
-)
+from AnyQt.QtCore import Qt, QObject, QEvent, QSignalMapper, QRectF, QCoreApplication
 
 from AnyQt.QtCore import pyqtProperty as Property, pyqtSignal as Signal
 
 from ..registry.qt import whats_this_helper
 from ..gui.quickhelp import QuickHelpTipEvent
 from ..gui.utils import message_information, disabled
-from ..scheme import (
-    scheme, signalmanager, SchemeNode, SchemeLink, BaseSchemeAnnotation
-)
+from ..scheme import scheme, signalmanager, SchemeNode, SchemeLink, BaseSchemeAnnotation
 from ..scheme import widgetsscheme
 from ..canvas.scene import CanvasScene
 from ..canvas.view import CanvasView
@@ -60,8 +71,10 @@ class GraphicsSceneFocusEventListener(QGraphicsObject):
         self.setFlag(QGraphicsItem.ItemHasNoContents)
 
     def sceneEventFilter(self, obj, event):
-        if event.type() == QEvent.FocusIn and \
-                obj.flags() & QGraphicsItem.ItemIsFocusable:
+        if (
+            event.type() == QEvent.FocusIn
+            and obj.flags() & QGraphicsItem.ItemIsFocusable
+        ):
             obj.focusInEvent(event)
             if obj.hasFocus():
                 self.itemFocusedIn.emit(obj)
@@ -83,6 +96,7 @@ class SchemeEditWidget(QWidget):
     A widget for editing a :class:`~.scheme.Scheme` instance.
 
     """
+
     #: Undo command has become available/unavailable.
     undoAvailable = Signal(bool)
 
@@ -105,21 +119,18 @@ class SchemeEditWidget(QWidget):
     pathChanged = Signal(str)
 
     # Quick Menu triggers
-    (NoTriggers,
-     RightClicked,
-     DoubleClicked,
-     SpaceKey,
-     AnyKey) = [0, 1, 2, 4, 8]
+    (NoTriggers, RightClicked, DoubleClicked, SpaceKey, AnyKey) = [0, 1, 2, 4, 8]
 
-    def __init__(self, parent=None, ):
+    def __init__(self, parent=None):
         QWidget.__init__(self, parent)
 
         self.__modified = False
         self.__registry = None
         self.__scheme = None
         self.__path = ""
-        self.__quickMenuTriggers = SchemeEditWidget.SpaceKey | \
-                                   SchemeEditWidget.DoubleClicked
+        self.__quickMenuTriggers = (
+            SchemeEditWidget.SpaceKey | SchemeEditWidget.DoubleClicked
+        )
         self.__emptyClickButtons = 0
         self.__channelNamesVisible = True
         self.__nodeAnimationEnabled = True
@@ -137,9 +148,7 @@ class SchemeEditWidget(QWidget):
         self.__cleanProperties = []
 
         self.__editFinishedMapper = QSignalMapper(self)
-        self.__editFinishedMapper.mapped[QObject].connect(
-            self.__onEditingFinished
-        )
+        self.__editFinishedMapper.mapped[QObject].connect(self.__onEditingFinished)
 
         self.__annotationGeomChanged = QSignalMapper(self)
 
@@ -171,26 +180,28 @@ class SchemeEditWidget(QWidget):
         self.__linkMenu.addAction(self.__linkResetAction)
 
     def __setupActions(self):
-        self.__cleanUpAction = \
-            QAction(self.tr("Clean Up"), self,
-                    objectName="cleanup-action",
-                    toolTip=self.tr("Align widgets to a grid."),
-                    triggered=self.alignToGrid,
-                    )
+        self.__cleanUpAction = QAction(
+            self.tr("Clean Up"),
+            self,
+            objectName="cleanup-action",
+            toolTip=self.tr("Align widgets to a grid."),
+            triggered=self.alignToGrid,
+        )
 
-        self.__newTextAnnotationAction = \
-            QAction(self.tr("Text"), self,
-                    objectName="new-text-action",
-                    toolTip=self.tr("Add a text annotation to the workflow."),
-                    checkable=True,
-                    toggled=self.__toggleNewTextAnnotation,
-                    )
+        self.__newTextAnnotationAction = QAction(
+            self.tr("Text"),
+            self,
+            objectName="new-text-action",
+            toolTip=self.tr("Add a text annotation to the workflow."),
+            checkable=True,
+            toggled=self.__toggleNewTextAnnotation,
+        )
 
         # Create a font size menu for the new annotation action.
         self.__fontMenu = QMenu("Font Size", self)
-        self.__fontActionGroup = group = \
-            QActionGroup(self, exclusive=True,
-                         triggered=self.__onFontSizeTriggered)
+        self.__fontActionGroup = group = QActionGroup(
+            self, exclusive=True, triggered=self.__onFontSizeTriggered
+        )
 
         def font(size):
             f = QFont(self.font())
@@ -198,9 +209,7 @@ class SchemeEditWidget(QWidget):
             return f
 
         for size in [12, 14, 16, 18, 20, 22, 24]:
-            action = QAction("%ipx" % size, group,
-                             checkable=True,
-                             font=font(size))
+            action = QAction("%ipx" % size, group, checkable=True, font=font(size))
 
             self.__fontMenu.addAction(action)
 
@@ -208,19 +217,20 @@ class SchemeEditWidget(QWidget):
 
         self.__newTextAnnotationAction.setMenu(self.__fontMenu)
 
-        self.__newArrowAnnotationAction = \
-            QAction(self.tr("Arrow"), self,
-                    objectName="new-arrow-action",
-                    toolTip=self.tr("Add an arrow annotation to the workflow."),
-                    checkable=True,
-                    toggled=self.__toggleNewArrowAnnotation,
-                    )
+        self.__newArrowAnnotationAction = QAction(
+            self.tr("Arrow"),
+            self,
+            objectName="new-arrow-action",
+            toolTip=self.tr("Add an arrow annotation to the workflow."),
+            checkable=True,
+            toggled=self.__toggleNewArrowAnnotation,
+        )
 
         # Create a color menu for the arrow annotation action
-        self.__arrowColorMenu = QMenu("Arrow Color",)
-        self.__arrowColorActionGroup = group = \
-            QActionGroup(self, exclusive=True,
-                         triggered=self.__onArrowColorTriggered)
+        self.__arrowColorMenu = QMenu("Arrow Color")
+        self.__arrowColorActionGroup = group = QActionGroup(
+            self, exclusive=True, triggered=self.__onArrowColorTriggered
+        )
 
         def color_icon(color):
             icon = QIcon()
@@ -238,8 +248,7 @@ class SchemeEditWidget(QWidget):
 
         for color in ["#000", "#C1272D", "#662D91", "#1F9CDF", "#39B54A"]:
             icon = color_icon(QColor(color))
-            action = QAction(group, icon=icon, checkable=True,
-                             iconVisibleInMenu=True)
+            action = QAction(group, icon=icon, checkable=True, iconVisibleInMenu=True)
             action.setData(color)
             self.__arrowColorMenu.addAction(action)
 
@@ -255,102 +264,122 @@ class SchemeEditWidget(QWidget):
         self.__redoAction.setShortcut(QKeySequence.Redo)
         self.__redoAction.setObjectName("redo-action")
 
-        self.__selectAllAction = \
-            QAction(self.tr("Select All"), self,
-                    objectName="select-all-action",
-                    toolTip=self.tr("Select all items."),
-                    triggered=self.selectAll,
-                    shortcut=QKeySequence.SelectAll
-                    )
+        self.__selectAllAction = QAction(
+            self.tr("Select All"),
+            self,
+            objectName="select-all-action",
+            toolTip=self.tr("Select all items."),
+            triggered=self.selectAll,
+            shortcut=QKeySequence.SelectAll,
+        )
 
-        self.__openSelectedAction = \
-            QAction(self.tr("Open"), self,
-                    objectName="open-action",
-                    toolTip=self.tr("Open selected widget"),
-                    triggered=self.openSelected,
-                    enabled=False)
+        self.__openSelectedAction = QAction(
+            self.tr("Open"),
+            self,
+            objectName="open-action",
+            toolTip=self.tr("Open selected widget"),
+            triggered=self.openSelected,
+            enabled=False,
+        )
 
-        self.__removeSelectedAction = \
-            QAction(self.tr("Remove"), self,
-                    objectName="remove-selected",
-                    toolTip=self.tr("Remove selected items"),
-                    triggered=self.removeSelected,
-                    enabled=False
-                    )
+        self.__removeSelectedAction = QAction(
+            self.tr("Remove"),
+            self,
+            objectName="remove-selected",
+            toolTip=self.tr("Remove selected items"),
+            triggered=self.removeSelected,
+            enabled=False,
+        )
 
-        self.__showSettingsAction = \
-            QAction(self.tr("Show settings"), self,
-                    objectName="show-settings",
-                    toolTip=self.tr("Show widget settings"),
-                    triggered=self.showSettings,
-                    enabled=False)
+        self.__showSettingsAction = QAction(
+            self.tr("Show settings"),
+            self,
+            objectName="show-settings",
+            toolTip=self.tr("Show widget settings"),
+            triggered=self.showSettings,
+            enabled=False,
+        )
 
-        shortcuts = [Qt.Key_Backspace,
-                     Qt.Key_Delete,
-                     Qt.ControlModifier + Qt.Key_Backspace]
+        shortcuts = [
+            Qt.Key_Backspace,
+            Qt.Key_Delete,
+            Qt.ControlModifier + Qt.Key_Backspace,
+        ]
 
         self.__removeSelectedAction.setShortcuts(shortcuts)
 
-        self.__renameAction = \
-            QAction(self.tr("Rename"), self,
-                    objectName="rename-action",
-                    toolTip=self.tr("Rename selected widget"),
-                    triggered=self.__onRenameAction,
-                    shortcut=QKeySequence(Qt.Key_F2),
-                    enabled=False)
+        self.__renameAction = QAction(
+            self.tr("Rename"),
+            self,
+            objectName="rename-action",
+            toolTip=self.tr("Rename selected widget"),
+            triggered=self.__onRenameAction,
+            shortcut=QKeySequence(Qt.Key_F2),
+            enabled=False,
+        )
 
-        self.__helpAction = \
-            QAction(self.tr("Help"), self,
-                    objectName="help-action",
-                    toolTip=self.tr("Show widget help"),
-                    triggered=self.__onHelpAction,
-                    shortcut=QKeySequence("F1"),
-                    enabled=False,
-                    )
+        self.__helpAction = QAction(
+            self.tr("Help"),
+            self,
+            objectName="help-action",
+            toolTip=self.tr("Show widget help"),
+            triggered=self.__onHelpAction,
+            shortcut=QKeySequence("F1"),
+            enabled=False,
+        )
 
-        self.__linkEnableAction = \
-            QAction(self.tr("Enabled"), self,
-                    objectName="link-enable-action",
-                    triggered=self.__toggleLinkEnabled,
-                    checkable=True,
-                    )
+        self.__linkEnableAction = QAction(
+            self.tr("Enabled"),
+            self,
+            objectName="link-enable-action",
+            triggered=self.__toggleLinkEnabled,
+            checkable=True,
+        )
 
-        self.__linkRemoveAction = \
-            QAction(self.tr("Remove"), self,
-                    objectName="link-remove-action",
-                    triggered=self.__linkRemove,
-                    toolTip=self.tr("Remove link."),
-                    )
+        self.__linkRemoveAction = QAction(
+            self.tr("Remove"),
+            self,
+            objectName="link-remove-action",
+            triggered=self.__linkRemove,
+            toolTip=self.tr("Remove link."),
+        )
 
-        self.__linkResetAction = \
-            QAction(self.tr("Reset Signals"), self,
-                    objectName="link-reset-action",
-                    triggered=self.__linkReset,
-                    )
+        self.__linkResetAction = QAction(
+            self.tr("Reset Signals"),
+            self,
+            objectName="link-reset-action",
+            triggered=self.__linkReset,
+        )
 
-        self.__duplicateSelectedAction = \
-            QAction(self.tr("Duplicate Selected"), self,
-                    objectName="duplicate-action",
-                    enabled=False,
-                    shortcut=QKeySequence(Qt.ControlModifier + Qt.Key_D),
-                    triggered=self.__duplicateSelected,
-                    )
+        self.__duplicateSelectedAction = QAction(
+            self.tr("Duplicate Selected"),
+            self,
+            objectName="duplicate-action",
+            enabled=False,
+            shortcut=QKeySequence(Qt.ControlModifier + Qt.Key_D),
+            triggered=self.__duplicateSelected,
+        )
 
-        self.addActions([self.__newTextAnnotationAction,
-                         self.__newArrowAnnotationAction,
-                         self.__linkEnableAction,
-                         self.__linkRemoveAction,
-                         self.__linkResetAction,
-                         self.__duplicateSelectedAction])
+        self.addActions(
+            [
+                self.__newTextAnnotationAction,
+                self.__newArrowAnnotationAction,
+                self.__linkEnableAction,
+                self.__linkRemoveAction,
+                self.__linkResetAction,
+                self.__duplicateSelectedAction,
+            ]
+        )
 
         # Actions which should be disabled while a multistep
         # interaction is in progress.
-        self.__disruptiveActions = \
-                [self.__undoAction,
-                 self.__redoAction,
-                 self.__removeSelectedAction,
-                 self.__selectAllAction,
-                 self.__duplicateSelectedAction]
+        self.__disruptiveActions = [
+            self.__undoAction,
+            self.__redoAction,
+            self.__removeSelectedAction,
+            self.__selectAllAction,
+            self.__duplicateSelectedAction,
+        ]
 
     def __setupUi(self):
         layout = QVBoxLayout()
@@ -380,9 +409,7 @@ class SchemeEditWidget(QWidget):
 
         """
         scene.set_channel_names_visible(self.__channelNamesVisible)
-        scene.set_node_animation_enabled(
-            self.__nodeAnimationEnabled
-        )
+        scene.set_node_animation_enabled(self.__nodeAnimationEnabled)
 
         scene.setFont(self.font())
         scene.setPalette(self.palette())
@@ -392,29 +419,17 @@ class SchemeEditWidget(QWidget):
 
         # Focus listener
         self.__focusListener = GraphicsSceneFocusEventListener()
-        self.__focusListener.itemFocusedIn.connect(
-            self.__onItemFocusedIn
-        )
-        self.__focusListener.itemFocusedOut.connect(
-            self.__onItemFocusedOut
-        )
+        self.__focusListener.itemFocusedIn.connect(self.__onItemFocusedIn)
+        self.__focusListener.itemFocusedOut.connect(self.__onItemFocusedOut)
         scene.addItem(self.__focusListener)
 
-        scene.selectionChanged.connect(
-            self.__onSelectionChanged
-        )
+        scene.selectionChanged.connect(self.__onSelectionChanged)
 
-        scene.node_item_activated.connect(
-            self.__onNodeActivate
-        )
+        scene.node_item_activated.connect(self.__onNodeActivate)
 
-        scene.annotation_added.connect(
-            self.__onAnnotationAdded
-        )
+        scene.annotation_added.connect(self.__onAnnotationAdded)
 
-        scene.annotation_removed.connect(
-            self.__onAnnotationRemoved
-        )
+        scene.annotation_removed.connect(self.__onAnnotationRemoved)
 
         self.__annotationGeomChanged = QSignalMapper(self)
 
@@ -435,16 +450,10 @@ class SchemeEditWidget(QWidget):
         self.__annotationGeomChanged.deleteLater()
         self.__annotationGeomChanged = None
 
-        self.__focusListener.itemFocusedIn.disconnect(
-            self.__onItemFocusedIn
-        )
-        self.__focusListener.itemFocusedOut.disconnect(
-            self.__onItemFocusedOut
-        )
+        self.__focusListener.itemFocusedIn.disconnect(self.__onItemFocusedIn)
+        self.__focusListener.itemFocusedOut.disconnect(self.__onItemFocusedOut)
 
-        scene.selectionChanged.disconnect(
-            self.__onSelectionChanged
-        )
+        scene.selectionChanged.disconnect(self.__onSelectionChanged)
 
         scene.removeEventFilter(self)
 
@@ -462,9 +471,11 @@ class SchemeEditWidget(QWidget):
             - 'New arrow annotation' action (with a color menu)
 
         """
-        return [self.__cleanUpAction,
-                self.__newTextAnnotationAction,
-                self.__newArrowAnnotationAction]
+        return [
+            self.__cleanUpAction,
+            self.__newTextAnnotationAction,
+            self.__newArrowAnnotationAction,
+        ]
 
     def menuBarActions(self):
         """
@@ -502,14 +513,15 @@ class SchemeEditWidget(QWidget):
         at the time when the last call to `setModified(True)` was made.
 
         """
-        propertiesChanged = self.__cleanProperties != \
-                            node_properties(self.__scheme)
+        propertiesChanged = self.__cleanProperties != node_properties(self.__scheme)
 
-        log.debug("Modified strict check (modified flag: %s, "
-                  "undo stack clean: %s, properties: %s)",
-                  self.__modified,
-                  self.__undoStack.isClean(),
-                  propertiesChanged)
+        log.debug(
+            "Modified strict check (modified flag: %s, "
+            "undo stack clean: %s, properties: %s)",
+            self.__modified,
+            self.__undoStack.isClean(),
+            propertiesChanged,
+        )
 
         return self.isModified() or propertiesChanged
 
@@ -600,8 +612,7 @@ class SchemeEditWidget(QWidget):
                 self.__scheme.removeEventFilter(self)
                 sm = self.__scheme.findChild(signalmanager.SignalManager)
                 if sm:
-                    sm.stateChanged.disconnect(
-                        self.__signalManagerStateChanged)
+                    sm.stateChanged.disconnect(self.__signalManagerStateChanged)
 
             self.__scheme = scheme
 
@@ -697,9 +708,7 @@ class SchemeEditWidget(QWidget):
         """
         Set the scheme title.
         """
-        self.__undoStack.push(
-            commands.SetAttrCommand(self.__scheme, "title", title)
-        )
+        self.__undoStack.push(commands.SetAttrCommand(self.__scheme, "title", title))
 
     def setDescription(self, description):
         """
@@ -825,9 +834,7 @@ class SchemeEditWidget(QWidget):
         for item in selected:
             if isinstance(item, items.NodeItem):
                 node = self.scene().node_for_item(item)
-                self.__undoStack.push(
-                    commands.RemoveNodeCommand(self.__scheme, node)
-                )
+                self.__undoStack.push(commands.RemoveNodeCommand(self.__scheme, node))
             elif isinstance(item, items.annotationitem.Annotation):
                 if item.hasFocus() or item.isAncestorOf(scene.focusItem()):
                     # Clear input focus from the item to be removed.
@@ -876,8 +883,7 @@ class SchemeEditWidget(QWidget):
                     x += tile_size
 
                 self.__undoStack.push(
-                    commands.MoveNodeCommand(self.scheme(), node,
-                                             node.position, (x, y))
+                    commands.MoveNodeCommand(self.scheme(), node, node.position, (x, y))
                 )
 
                 tiles[x, y] = node
@@ -906,15 +912,18 @@ class SchemeEditWidget(QWidget):
         """
         Return all selected :class:`.SchemeNode` items.
         """
-        return list(map(self.scene().node_for_item,
-                        self.scene().selected_node_items()))
+        return list(map(self.scene().node_for_item, self.scene().selected_node_items()))
 
     def selectedAnnotations(self):
         """
         Return all selected :class:`.BaseSchemeAnnotation` items.
         """
-        return list(map(self.scene().annotation_for_item,
-                        self.scene().selected_annotation_items()))
+        return list(
+            map(
+                self.scene().annotation_for_item,
+                self.scene().selected_annotation_items(),
+            )
+        )
 
     def openSelected(self):
         """
@@ -929,16 +938,15 @@ class SchemeEditWidget(QWidget):
         Edit (rename) the `node`'s title. Opens an input dialog.
         """
         name, ok = QInputDialog.getText(
-                    self, self.tr("Rename"),
-                    str(self.tr("Enter a new name for the '%s' widget")) \
-                    % node.title,
-                    text=node.title
-                    )
+            self,
+            self.tr("Rename"),
+            str(self.tr("Enter a new name for the '%s' widget")) % node.title,
+            text=node.title,
+        )
 
         if ok:
             self.__undoStack.push(
-                commands.RenameNodeCommand(self.__scheme, node, node.title,
-                                           str(name))
+                commands.RenameNodeCommand(self.__scheme, node, node.title, str(name))
             )
 
     def __onCleanChanged(self, clean):
@@ -959,12 +967,14 @@ class SchemeEditWidget(QWidget):
         # Filter the scene's drag/drop events.
         if obj is self.scene():
             etype = event.type()
-            if etype == QEvent.GraphicsSceneDragEnter or \
-                    etype == QEvent.GraphicsSceneDragMove:
+            if (
+                etype == QEvent.GraphicsSceneDragEnter
+                or etype == QEvent.GraphicsSceneDragMove
+            ):
                 mime_data = event.mimeData()
                 if mime_data.hasFormat(
-                        "application/vnv.orange-canvas.registry.qualified-name"
-                        ):
+                    "application/vnv.orange-canvas.registry.qualified-name"
+                ):
                     event.acceptProposedAction()
                 else:
                     event.ignore()
@@ -1003,8 +1013,7 @@ class SchemeEditWidget(QWidget):
                 # Re post the event
                 self.__showHelpFor(event.href())
 
-            elif event.type() == \
-                    widgetsscheme.ActivateParentEvent.ActivateParent:
+            elif event.type() == widgetsscheme.ActivateParentEvent.ActivateParent:
                 self.window().activateWindow()
                 self.window().raise_()
 
@@ -1017,8 +1026,7 @@ class SchemeEditWidget(QWidget):
 
         pos = event.scenePos()
 
-        anchor_item = scene.item_at(pos, items.NodeAnchorItem,
-                                    buttons=Qt.LeftButton)
+        anchor_item = scene.item_at(pos, items.NodeAnchorItem, buttons=Qt.LeftButton)
         if anchor_item and event.button() == Qt.LeftButton:
             # Start a new link starting at item
             scene.clearSelection()
@@ -1058,9 +1066,11 @@ class SchemeEditWidget(QWidget):
         if scene.user_interaction_handler:
             return False
 
-        if self.__emptyClickButtons & Qt.LeftButton and \
-                event.buttons() & Qt.LeftButton and \
-                self.__possibleSelectionHandler:
+        if (
+            self.__emptyClickButtons & Qt.LeftButton
+            and event.buttons() & Qt.LeftButton
+            and self.__possibleSelectionHandler
+        ):
             # Set the RectangleSelection (initialized in mousePressEvent)
             # on the scene
             handler = self.__possibleSelectionHandler
@@ -1118,8 +1128,7 @@ class SchemeEditWidget(QWidget):
             return False
 
         item = scene.item_at(event.scenePos())
-        if not item and self.__quickMenuTriggers & \
-                SchemeEditWidget.DoubleClicked:
+        if not item and self.__quickMenuTriggers & SchemeEditWidget.DoubleClicked:
             # Double click on an empty spot
             # Create a new node using QuickMenu
             action = interactions.NewNodeAction(self)
@@ -1130,13 +1139,13 @@ class SchemeEditWidget(QWidget):
             event.accept()
             return True
 
-        item = scene.item_at(event.scenePos(), items.LinkItem,
-                             buttons=Qt.LeftButton)
+        item = scene.item_at(event.scenePos(), items.LinkItem, buttons=Qt.LeftButton)
 
         if item is not None and event.button() == Qt.LeftButton:
             link = self.scene().link_for_item(item)
-            action = interactions.EditNodeLinksAction(self, link.source_node,
-                                                      link.sink_node)
+            action = interactions.EditNodeLinksAction(
+                self, link.source_node, link.sink_node
+            )
             action.edit_links()
             event.accept()
             return True
@@ -1150,8 +1159,11 @@ class SchemeEditWidget(QWidget):
 
         # If a QGraphicsItem is in text editing mode, don't interrupt it
         focusItem = scene.focusItem()
-        if focusItem and isinstance(focusItem, QGraphicsTextItem) and \
-                focusItem.textInteractionFlags() & Qt.TextEditable:
+        if (
+            focusItem
+            and isinstance(focusItem, QGraphicsTextItem)
+            and focusItem.textInteractionFlags() & Qt.TextEditable
+        ):
             return False
 
         # If the mouse is not over out view
@@ -1160,13 +1172,17 @@ class SchemeEditWidget(QWidget):
 
         handler = None
         searchText = ""
-        if (event.key() == Qt.Key_Space and \
-                self.__quickMenuTriggers & SchemeEditWidget.SpaceKey):
+        if (
+            event.key() == Qt.Key_Space
+            and self.__quickMenuTriggers & SchemeEditWidget.SpaceKey
+        ):
             handler = interactions.NewNodeAction(self)
 
-        elif len(event.text()) and \
-                self.__quickMenuTriggers & SchemeEditWidget.AnyKey and \
-                is_printable(str(event.text())[0]):
+        elif (
+            len(event.text())
+            and self.__quickMenuTriggers & SchemeEditWidget.AnyKey
+            and is_printable(str(event.text())[0])
+        ):
             handler = interactions.NewNodeAction(self)
             searchText = str(event.text())
 
@@ -1179,9 +1195,9 @@ class SchemeEditWidget(QWidget):
             # be selected items in the canvas), so we disable the
             # remove widget action so the text editing follows standard
             # 'look and feel'
-            with disabled(self.__removeSelectedAction), \
-                 disabled(self.__undoAction), \
-                 disabled(self.__redoAction):
+            with disabled(self.__removeSelectedAction), disabled(
+                self.__undoAction
+            ), disabled(self.__redoAction):
                 handler.create_new(QCursor.pos(), searchText)
 
             event.accept()
@@ -1201,8 +1217,7 @@ class SchemeEditWidget(QWidget):
             self.__widgetMenu.popup(globalPos)
             return True
 
-        item = self.scene().item_at(scenePos, items.LinkItem,
-                                    buttons=Qt.RightButton)
+        item = self.scene().item_at(scenePos, items.LinkItem, buttons=Qt.RightButton)
         if item is not None:
             link = self.scene().link_for_item(item)
             self.__linkEnableAction.setChecked(link.enabled)
@@ -1211,8 +1226,7 @@ class SchemeEditWidget(QWidget):
             return True
 
         item = self.scene().item_at(scenePos)
-        if not item and \
-                self.__quickMenuTriggers & SchemeEditWidget.RightClicked:
+        if not item and self.__quickMenuTriggers & SchemeEditWidget.RightClicked:
             action = interactions.NewNodeAction(self)
 
             with disabled(self.__undoAction), disabled(self.__redoAction):
@@ -1226,9 +1240,10 @@ class SchemeEditWidget(QWidget):
         Helper method for setting the user interaction handlers.
         """
         if self.__scene.user_interaction_handler:
-            if isinstance(self.__scene.user_interaction_handler,
-                          (interactions.ResizeArrowAnnotation,
-                           interactions.ResizeTextAnnotation)):
+            if isinstance(
+                self.__scene.user_interaction_handler,
+                (interactions.ResizeArrowAnnotation, interactions.ResizeTextAnnotation),
+            ):
                 self.__scene.user_interaction_handler.commit()
 
             self.__scene.user_interaction_handler.ended.disconnect(
@@ -1251,9 +1266,7 @@ class SchemeEditWidget(QWidget):
         annotations = self.selectedAnnotations()
 
         self.__openSelectedAction.setEnabled(bool(nodes))
-        self.__removeSelectedAction.setEnabled(
-            bool(nodes) or bool(annotations)
-        )
+        self.__removeSelectedAction.setEnabled(bool(nodes) or bool(annotations))
 
         self.__helpAction.setEnabled(len(nodes) == 1)
         self.__renameAction.setEnabled(len(nodes) == 1)
@@ -1283,8 +1296,9 @@ class SchemeEditWidget(QWidget):
 
         if tip != self.__quickTip:
             self.__quickTip = tip
-            ev = QuickHelpTipEvent("", self.__quickTip,
-                                   priority=QuickHelpTipEvent.Permanent)
+            ev = QuickHelpTipEvent(
+                "", self.__quickTip, priority=QuickHelpTipEvent.Permanent
+            )
 
             QCoreApplication.sendEvent(self, ev)
 
@@ -1307,12 +1321,13 @@ class SchemeEditWidget(QWidget):
     def __onAnnotationGeometryChanged(self, item):
         annot = self.scene().annotation_for_item(item)
         if annot not in self.__itemsMoving:
-            self.__itemsMoving[annot] = (annot.geometry,
-                                         geometry_from_annotation_item(item))
+            self.__itemsMoving[annot] = (
+                annot.geometry,
+                geometry_from_annotation_item(item),
+            )
         else:
             old, _ = self.__itemsMoving[annot]
-            self.__itemsMoving[annot] = (old,
-                                         geometry_from_annotation_item(item))
+            self.__itemsMoving[annot] = (old, geometry_from_annotation_item(item))
 
     def __onAnnotationAdded(self, item):
         log.debug("Annotation added (%r)", item)
@@ -1329,30 +1344,22 @@ class SchemeEditWidget(QWidget):
             item.setTextInteractionFlags(Qt.TextEditorInteraction)
 
             self.__editFinishedMapper.setMapping(item, item)
-            item.editingFinished.connect(
-                self.__editFinishedMapper.map
-            )
+            item.editingFinished.connect(self.__editFinishedMapper.map)
 
         self.__annotationGeomChanged.setMapping(item, item)
-        item.geometryChanged.connect(
-            self.__annotationGeomChanged.map
-        )
+        item.geometryChanged.connect(self.__annotationGeomChanged.map)
 
     def __onAnnotationRemoved(self, item):
         log.debug("Annotation removed (%r)", item)
         if isinstance(item, items.ArrowAnnotation):
             pass
         elif isinstance(item, items.TextAnnotation):
-            item.editingFinished.disconnect(
-                self.__editFinishedMapper.map
-            )
+            item.editingFinished.disconnect(self.__editFinishedMapper.map)
 
         item.removeSceneEventFilter(self.__focusListener)
 
         self.__annotationGeomChanged.removeMappings(item)
-        item.geometryChanged.disconnect(
-            self.__annotationGeomChanged.map
-        )
+        item.geometryChanged.disconnect(self.__annotationGeomChanged.map)
 
     def __onItemFocusedIn(self, item):
         """
@@ -1379,9 +1386,12 @@ class SchemeEditWidget(QWidget):
         if annot.text != content or annot.content_type != content_type:
             self.__undoStack.push(
                 commands.TextChangeCommand(
-                    self.scheme(), annot,
-                    annot.text, annot.content_type,
-                    content, content_type
+                    self.scheme(),
+                    annot,
+                    annot.text,
+                    annot.content_type,
+                    content,
+                    content_type,
                 )
             )
 
@@ -1488,8 +1498,8 @@ class SchemeEditWidget(QWidget):
 
         if not handled:
             message_information(
-                self.tr("There is no documentation for this widget yet."),
-                parent=self)
+                self.tr("There is no documentation for this widget yet."), parent=self
+            )
 
     def __toggleLinkEnabled(self, enabled):
         """
@@ -1498,7 +1508,7 @@ class SchemeEditWidget(QWidget):
         if self.__contextMenuTarget:
             link = self.__contextMenuTarget
             command = commands.SetAttrCommand(
-                link, "enabled", enabled, name=self.tr("Set enabled"),
+                link, "enabled", enabled, name=self.tr("Set enabled")
             )
             self.__undoStack.push(command)
 
@@ -1524,20 +1534,27 @@ class SchemeEditWidget(QWidget):
         """
         Duplicate currently selected nodes.
         """
+
         def copy_node(node):
             x, y = node.position
             return SchemeNode(
-                node.description, node.title, position=(x + 20, y + 20),
-                properties=copy.deepcopy(node.properties))
+                node.description,
+                node.title,
+                position=(x + 20, y + 20),
+                properties=copy.deepcopy(node.properties),
+            )
 
         def copy_link(link, source=None, sink=None):
             source = link.source_node if source is None else source
             sink = link.sink_node if sink is None else sink
             return SchemeLink(
-                source, link.source_channel,
-                sink, link.sink_channel,
+                source,
+                link.source_channel,
+                sink,
+                link.sink_channel,
                 enabled=link.enabled,
-                properties=copy.deepcopy(link.properties))
+                properties=copy.deepcopy(link.properties),
+            )
 
         scheme = self.scheme()
         # ensure up to date node properties (settings)
@@ -1545,29 +1562,39 @@ class SchemeEditWidget(QWidget):
 
         selection = self.selectedNodes()
 
-        links = [link for link in scheme.links
-                 if link.source_node in selection and
-                    link.sink_node in selection]
+        links = [
+            link
+            for link in scheme.links
+            if link.source_node in selection and link.sink_node in selection
+        ]
         nodedups = [copy_node(node) for node in selection]
         allnames = {node.title for node in scheme.nodes + nodedups}
         for nodedup in nodedups:
             nodedup.title = uniquify(
-                nodedup.title, allnames, pattern="{item} ({_})", start=1)
+                nodedup.title, allnames, pattern="{item} ({_})", start=1
+            )
 
         node_to_dup = dict(zip(selection, nodedups))
 
-        linkdups = [copy_link(link, source=node_to_dup[link.source_node],
-                              sink=node_to_dup[link.sink_node])
-                    for link in links]
+        linkdups = [
+            copy_link(
+                link,
+                source=node_to_dup[link.source_node],
+                sink=node_to_dup[link.sink_node],
+            )
+            for link in links
+        ]
 
         command = QUndoCommand(self.tr("Duplicate"))
         macrocommands = []
         for nodedup in nodedups:
             macrocommands.append(
-                commands.AddNodeCommand(scheme, nodedup, parent=command))
+                commands.AddNodeCommand(scheme, nodedup, parent=command)
+            )
         for linkdup in linkdups:
             macrocommands.append(
-                commands.AddLinkCommand(scheme, linkdup, parent=command))
+                commands.AddLinkCommand(scheme, linkdup, parent=command)
+            )
 
         self.__undoStack.push(command)
         scene = self.__scene
@@ -1602,9 +1629,14 @@ class SchemeEditWidget(QWidget):
         End the current control point edit interaction.
         """
         handler = self.__scene.user_interaction_handler
-        if isinstance(handler, (interactions.ResizeArrowAnnotation,
-                                interactions.ResizeTextAnnotation)) and \
-                not handler.isFinished() and not handler.isCanceled():
+        if (
+            isinstance(
+                handler,
+                (interactions.ResizeArrowAnnotation, interactions.ResizeTextAnnotation),
+            )
+            and not handler.isFinished()
+            and not handler.isCanceled()
+        ):
             handler.commit()
             handler.end()
 
@@ -1652,7 +1684,7 @@ def mouse_drag_distance(event, button=Qt.LeftButton):
     when the `button` was pressed and the current mouse position.
 
     """
-    diff = (event.buttonDownScreenPos(button) - event.screenPos())
+    diff = event.buttonDownScreenPos(button) - event.screenPos()
     return diff.manhattanLength()
 
 
@@ -1681,7 +1713,6 @@ def node_properties(scheme):
 
 
 def uniquify(item, names, pattern="{item}-{_}", start=0):
-    candidates = (pattern.format(item=item, _=i)
-                  for i in itertools.count(start))
+    candidates = (pattern.format(item=item, _=i) for i in itertools.count(start))
     candidates = itertools.dropwhile(lambda item: item in names, candidates)
     return next(candidates)

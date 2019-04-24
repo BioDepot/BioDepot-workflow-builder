@@ -12,27 +12,26 @@ from collections import namedtuple
 from operator import eq, attrgetter
 
 from AnyQt.QtWidgets import (
-    QWidget, QFrame, QSizePolicy, QStyle, QStyleOptionToolButton,
-    QStyleOptionToolBox, QScrollArea, QVBoxLayout, QToolButton,
-    QAction, QActionGroup, QApplication
+    QWidget,
+    QFrame,
+    QSizePolicy,
+    QStyle,
+    QStyleOptionToolButton,
+    QStyleOptionToolBox,
+    QScrollArea,
+    QVBoxLayout,
+    QToolButton,
+    QAction,
+    QActionGroup,
+    QApplication,
 )
-from AnyQt.QtGui import (
-    QIcon, QFontMetrics, QPainter, QPalette, QBrush, QPen, QColor,
-)
-from AnyQt.QtCore import (
-    Qt, QObject, QSize, QRect, QPoint, QSignalMapper, QEvent
-)
+from AnyQt.QtGui import QIcon, QFontMetrics, QPainter, QPalette, QBrush, QPen, QColor
+from AnyQt.QtCore import Qt, QObject, QSize, QRect, QPoint, QSignalMapper, QEvent
 from AnyQt.QtCore import pyqtSignal as Signal, pyqtProperty as Property
 
 from .utils import brush_darker
 
-_ToolBoxPage = namedtuple(
-    "_ToolBoxPage",
-    ["index",
-     "widget",
-     "action",
-     "button"]
-    )
+_ToolBoxPage = namedtuple("_ToolBoxPage", ["index", "widget", "action", "button"])
 
 
 FOCUS_OUTLINE_COLOR = "#609ED7"
@@ -59,10 +58,9 @@ class ToolBoxTabButton(QToolButton):
         """
         return self.__nativeStyling
 
-    nativeStyling_ = Property(bool,
-                              fget=nativeStyling,
-                              fset=setNativeStyling,
-                              designable=True)
+    nativeStyling_ = Property(
+        bool, fget=nativeStyling, fset=setNativeStyling, designable=True
+    )
 
     def __init__(self, *args, **kwargs):
         self.__nativeStyling = False
@@ -151,8 +149,7 @@ class ToolBoxTabButton(QToolButton):
             p.drawRect(icon_area_rect)
             # Line between the icon and text
             p.setPen(pen)
-            p.drawLine(icon_area_rect.topRight(),
-                       icon_area_rect.bottomRight())
+            p.drawLine(icon_area_rect.topRight(), icon_area_rect.bottomRight())
 
         if opt.state & QStyle.State_HasFocus:
             # Set the focus frame pen and draw the border
@@ -166,10 +163,11 @@ class ToolBoxTabButton(QToolButton):
         else:
             p.setPen(pen)
             # Draw the top/bottom border
-            if self.position == QStyleOptionToolBox.OnlyOneTab or \
-                    self.position == QStyleOptionToolBox.Beginning or \
-                    self.selected & \
-                        QStyleOptionToolBox.PreviousIsSelected:
+            if (
+                self.position == QStyleOptionToolBox.OnlyOneTab
+                or self.position == QStyleOptionToolBox.Beginning
+                or self.selected & QStyleOptionToolBox.PreviousIsSelected
+            ):
 
                 p.drawLine(rect.topLeft(), rect.topRight())
 
@@ -182,10 +180,11 @@ class ToolBoxTabButton(QToolButton):
         p.setPen(QPen(palette.color(foregroundrole)))
         p.setFont(opt.font)
 
-        p.drawText(text_rect,
-                   int(Qt.AlignVCenter | Qt.AlignLeft) | \
-                   int(Qt.TextSingleLine),
-                   text)
+        p.drawText(
+            text_rect,
+            int(Qt.AlignVCenter | Qt.AlignLeft) | int(Qt.TextSingleLine),
+            text,
+        )
 
         if not opt.icon.isNull():
             if opt.state & QStyle.State_Enabled:
@@ -222,6 +221,7 @@ class ToolBox(QFrame):
     """
     A tool box widget.
     """
+
     # Emitted when a tab is toggled.
     tabToogled = Signal(int, bool)
 
@@ -236,8 +236,9 @@ class ToolBox(QFrame):
             if checked is None:
                 # The action group can be out of sync with the actions state
                 # when switching between exclusive states.
-                actions_checked = [page.action for page in self.__pages
-                                   if page.action.isChecked()]
+                actions_checked = [
+                    page.action for page in self.__pages if page.action.isChecked()
+                ]
                 if actions_checked:
                     checked = actions_checked[0]
 
@@ -253,11 +254,9 @@ class ToolBox(QFrame):
         """
         return self.__exclusive
 
-    exclusive_ = Property(bool,
-                          fget=exclusive,
-                          fset=setExclusive,
-                          designable=True,
-                          doc="Exclusive tabs")
+    exclusive_ = Property(
+        bool, fget=exclusive, fset=setExclusive, designable=True, doc="Exclusive tabs"
+    )
 
     def __init__(self, parent=None, **kwargs):
         QFrame.__init__(self, parent, **kwargs)
@@ -273,20 +272,19 @@ class ToolBox(QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
 
         # Scroll area for the contents.
-        self.__scrollArea = \
-                _ToolBoxScrollArea(self, objectName="toolbox-scroll-area")
+        self.__scrollArea = _ToolBoxScrollArea(self, objectName="toolbox-scroll-area")
 
         self.__scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
         self.__scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.__scrollArea.setSizePolicy(QSizePolicy.MinimumExpanding,
-                                        QSizePolicy.MinimumExpanding)
+        self.__scrollArea.setSizePolicy(
+            QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding
+        )
         self.__scrollArea.setFrameStyle(QScrollArea.NoFrame)
         self.__scrollArea.setWidgetResizable(True)
 
         # A widget with all of the contents.
         # The tabs/contents are placed in the layout inside this widget
-        self.__contents = QWidget(self.__scrollArea,
-                                  objectName="toolbox-contents")
+        self.__contents = QWidget(self.__scrollArea, objectName="toolbox-contents")
 
         # The layout where all the tab/pages are placed
         self.__contentsLayout = QVBoxLayout()
@@ -301,11 +299,11 @@ class ToolBox(QFrame):
         layout.addWidget(self.__scrollArea)
 
         self.setLayout(layout)
-        self.setSizePolicy(QSizePolicy.Fixed,
-                           QSizePolicy.MinimumExpanding)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.MinimumExpanding)
 
-        self.__tabActionGroup = \
-                QActionGroup(self, objectName="toolbox-tab-action-group")
+        self.__tabActionGroup = QActionGroup(
+            self, objectName="toolbox-tab-action-group"
+        )
 
         self.__tabActionGroup.setExclusive(self.__exclusive)
 
@@ -467,8 +465,7 @@ class ToolBox(QFrame):
         button = ToolBoxTabButton(self, objectName="toolbox-tab-button")
         button.setDefaultAction(action)
         button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
-        button.setSizePolicy(QSizePolicy.Expanding,
-                             QSizePolicy.Fixed)
+        button.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         if self.__tabIconSize.isValid():
             button.setIconSize(self.__tabIconSize)
@@ -495,8 +492,7 @@ class ToolBox(QFrame):
             scroll_w = scroll.verticalScrollBar().sizeHint().width()
             frame_w = self.frameWidth() * 2 + scroll.frameWidth() * 2
             max_w = max([p.widget.sizeHint().width() for p in self.__pages])
-            hint = QSize(max(max_w, hint.width()) + scroll_w + frame_w,
-                         hint.height())
+            hint = QSize(max(max_w, hint.width()) + scroll_w + frame_w, hint.height())
 
         return QSize(200, 200).expandedTo(hint)
 
@@ -548,7 +544,7 @@ class ToolBox(QFrame):
             if prev_sel:
                 button.selected |= opt.PreviousIsSelected
             else:
-                button.selected &= ~ opt.PreviousIsSelected
+                button.selected &= ~opt.PreviousIsSelected
 
             button.update()
 
@@ -557,9 +553,11 @@ class ToolBox(QFrame):
         elif self.count() >= 2:
             pages = self.__pages
             for i in range(1, self.count() - 1):
-                update(pages[i].button,
-                       pages[i + 1].action.isChecked(),
-                       pages[i - 1].action.isChecked())
+                update(
+                    pages[i].button,
+                    pages[i + 1].action.isChecked(),
+                    pages[i - 1].action.isChecked(),
+                )
 
     def __updatePositions(self):
         """Update the tab buttons position style flags.

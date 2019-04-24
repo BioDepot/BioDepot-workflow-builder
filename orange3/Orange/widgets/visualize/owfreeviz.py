@@ -7,7 +7,11 @@ from scipy.spatial import distance
 import numpy as np
 
 from AnyQt.QtWidgets import (
-    QFormLayout, QApplication, QGraphicsEllipseItem, QGraphicsSceneMouseEvent, QToolTip
+    QFormLayout,
+    QApplication,
+    QGraphicsEllipseItem,
+    QGraphicsSceneMouseEvent,
+    QToolTip,
 )
 from AnyQt.QtGui import QPen
 from AnyQt.QtCore import Qt, QObject, QEvent, QSize, QRectF, QLineF, QTimer, QPoint
@@ -19,10 +23,15 @@ from Orange.data import Table, Domain, StringVariable, ContinuousVariable
 from Orange.projection.freeviz import FreeViz
 from Orange.widgets import widget, gui, settings
 from Orange.widgets.utils.annotated_data import (
-    create_annotated_table, ANNOTATED_DATA_SIGNAL_NAME, create_groups_table
+    create_annotated_table,
+    ANNOTATED_DATA_SIGNAL_NAME,
+    create_groups_table,
 )
-from Orange.widgets.visualize.owscatterplotgraph import OWScatterPlotGraph, InteractiveViewBox, \
-    HelpEventDelegate
+from Orange.widgets.visualize.owscatterplotgraph import (
+    OWScatterPlotGraph,
+    InteractiveViewBox,
+    HelpEventDelegate,
+)
 from Orange.widgets.visualize.utils.plotutils import AnchorItem
 from Orange.widgets.widget import Input, Output
 from Orange.widgets import report
@@ -37,6 +46,7 @@ class AsyncUpdateLoop(QObject):
     control back to the Qt event loop.
 
     """
+
     Next = QEvent.registerEventType()
 
     #: State flags
@@ -213,6 +223,7 @@ class EventDelegate(HelpEventDelegate):
 SELECTION_WIDTH = 5
 RANGE = QRectF(-1.05, -1.05, 2.1, 2.1)
 
+
 class OWFreeVizGraph(OWScatterPlotGraph):
     jitter_size = settings.Setting(0)
 
@@ -230,9 +241,7 @@ class OWFreeVizGraph(OWScatterPlotGraph):
             self.plot_widget.hideAxis(axis)
 
         if reset_view:
-            self.view_box.setRange(
-                RANGE,
-                padding=0.025)
+            self.view_box.setRange(RANGE, padding=0.025)
             self.master.viewbox.setAspectLocked(True, 1)
             self.master.viewbox.init_history()
             self.master.viewbox.tag_history()
@@ -260,7 +269,9 @@ class OWFreeVizGraph(OWScatterPlotGraph):
         if len(distances[mask]) and np.min(distances[mask]) < 0.08:
             if self.view_box.mousestate == 0:
                 self.view_box.setCursor(Qt.OpenHandCursor)
-            self.show_indicator(point_i=np.flatnonzero(mask)[np.argmin(distances[mask])])
+            self.show_indicator(
+                point_i=np.flatnonzero(mask)[np.argmin(distances[mask])]
+            )
         else:
             self.view_box.setCursor(Qt.ArrowCursor)
         return True
@@ -288,22 +299,27 @@ class OWFreeVizGraph(OWScatterPlotGraph):
                 index = p.data()
                 text += "Attributes:\n"
                 text += "".join(
-                    "   {} = {}\n".format(attr(i).name,
-                                          self.data[index][attr(i)])
-                    for i in self.master.plotdata.topattrs[index])
+                    "   {} = {}\n".format(attr(i).name, self.data[index][attr(i)])
+                    for i in self.master.plotdata.topattrs[index]
+                )
                 if len(self.domain.attributes) > 10:
-                    text += "   ... and {} others\n\n".format(len(self.domain.attributes) - 12)
+                    text += "   ... and {} others\n\n".format(
+                        len(self.domain.attributes) - 12
+                    )
                 #  class_var is always:
-                text += "Class:\n   {} = {}\n".format(self.domain.class_var.name,
-                                                      self.data[index][self.data.domain.class_var])
+                text += "Class:\n   {} = {}\n".format(
+                    self.domain.class_var.name,
+                    self.data[index][self.data.domain.class_var],
+                )
                 if i < len(points) - 1:
-                    text += '------------------\n'
-            text = ('<span style="white-space:pre">{}</span>'.format(escape(text)))
+                    text += "------------------\n"
+            text = '<span style="white-space:pre">{}</span>'.format(escape(text))
 
             QToolTip.showText(event.screenPos(), text, widget=self.plot_widget)
             return True
         else:
             return False
+
 
 MAX_ITERATIONS = 1000
 MAX_ANCHORS = 20
@@ -345,20 +361,21 @@ class OWFreeViz(widget.OWWidget):
 
     graph_name = "graph.plot_widget.plotItem"
 
-
     class Warning(widget.OWWidget.Warning):
         sparse_not_supported = widget.Msg("Sparse data is ignored.")
 
     class Error(widget.OWWidget.Error):
         no_class_var = widget.Msg("Need a class variable")
-        not_enough_class_vars = widget.Msg("Needs discrete class variable " \
-                                          "with at lest 2 values")
-        features_exceeds_instances = widget.Msg("Algorithm should not be used when " \
-                                                "number of features exceeds the number " \
-                                                "of instances.")
+        not_enough_class_vars = widget.Msg(
+            "Needs discrete class variable " "with at lest 2 values"
+        )
+        features_exceeds_instances = widget.Msg(
+            "Algorithm should not be used when "
+            "number of features exceeds the number "
+            "of instances."
+        )
         too_many_data_instances = widget.Msg("Cannot handle so large data.")
         no_valid_data = widget.Msg("No valid data.")
-
 
     def __init__(self):
         super().__init__()
@@ -376,7 +393,9 @@ class OWFreeViz(widget.OWWidget):
         self.variable_y = ContinuousVariable("freeviz-y")
 
         box0 = gui.vBox(self.mainArea, True, margin=0)
-        self.graph = OWFreeVizGraph(self, box0, "Plot", view_box=FreeVizInteractiveViewBox)
+        self.graph = OWFreeVizGraph(
+            self, box0, "Plot", view_box=FreeVizInteractiveViewBox
+        )
         box0.layout().addWidget(self.graph.plot_widget)
         plot = self.graph.plot_widget
 
@@ -385,18 +404,27 @@ class OWFreeViz(widget.OWWidget):
             labelAlignment=Qt.AlignLeft,
             formAlignment=Qt.AlignLeft,
             fieldGrowthPolicy=QFormLayout.AllNonFixedFieldsGrow,
-            verticalSpacing=10
+            verticalSpacing=10,
         )
         form.addRow(
             "Initialization",
-            gui.comboBox(box, self, "initialization",
-                         items=["Circular", "Random"],
-                         callback=self.reset_initialization)
+            gui.comboBox(
+                box,
+                self,
+                "initialization",
+                items=["Circular", "Random"],
+                callback=self.reset_initialization,
+            ),
         )
         box.layout().addLayout(form)
 
-        self.btn_start = gui.button(widget=box, master=self, label="Optimize",
-                                    callback=self.toogle_start, enabled=False)
+        self.btn_start = gui.button(
+            widget=box,
+            master=self,
+            label="Optimize",
+            callback=self.toogle_start,
+            enabled=False,
+        )
 
         self.viewbox = plot.getViewBox()
         self.replot = None
@@ -407,19 +435,24 @@ class OWFreeViz(widget.OWWidget):
 
         box = gui.widgetBox(self.controlArea, "Show anchors")
         self.rslider = gui.hSlider(
-            box, self, "radius", minValue=0, maxValue=100,
-            step=5, label="Radius", createLabel=False, ticks=True,
-            callback=self.update_radius)
+            box,
+            self,
+            "radius",
+            minValue=0,
+            maxValue=100,
+            step=5,
+            label="Radius",
+            createLabel=False,
+            ticks=True,
+            callback=self.update_radius,
+        )
         self.rslider.setTickInterval(0)
         self.rslider.setPageStep(10)
 
         box = gui.vBox(self.controlArea, "Plot Properties")
 
         g.add_widgets([g.JitterSizeSlider], box)
-        g.add_widgets([g.ShowLegend,
-                       g.ClassDensity,
-                       g.LabelOnlySelected],
-                      box)
+        g.add_widgets([g.ShowLegend, g.ClassDensity, g.LabelOnlySelected], box)
 
         self.graph.box_zoom_select(self.controlArea)
         self.controlArea.layout().addStretch(100)
@@ -428,8 +461,13 @@ class OWFreeViz(widget.OWWidget):
         p = self.graph.plot_widget.palette()
         self.graph.set_palette(p)
 
-        gui.auto_commit(self.controlArea, self, "auto_commit",
-                        "Send Selection", "Send Automatically")
+        gui.auto_commit(
+            self.controlArea,
+            self,
+            "auto_commit",
+            "Send Selection",
+            "Send Automatically",
+        )
         self.graph.zoom_actions(self)
         # FreeViz
         self._loop = AsyncUpdateLoop(parent=self)
@@ -454,12 +492,11 @@ class OWFreeViz(widget.OWWidget):
             return
 
         minradius = self.radius / 100 + 1e-5
-        for anchor, item in zip(self.plotdata.anchors,
-                                self.plotdata.anchoritem):
+        for anchor, item in zip(self.plotdata.anchors, self.plotdata.anchoritem):
             item.setVisible(np.linalg.norm(anchor) > minradius)
         self.plotdata.hidecircle.setRect(
-            QRectF(-minradius, -minradius,
-                   2 * minradius, 2 * minradius))
+            QRectF(-minradius, -minradius, 2 * minradius, 2 * minradius)
+        )
 
     def toogle_start(self):
         if self._loop.isRunning():
@@ -482,8 +519,9 @@ class OWFreeViz(widget.OWWidget):
         def update_freeviz(interval, initial):
             anchors = initial
             while True:
-                res = FreeViz.freeviz(X, Y, scale=False, center=False,
-                                      initial=anchors, maxiter=interval)
+                res = FreeViz.freeviz(
+                    X, Y, scale=False, center=False, initial=anchors, maxiter=interval
+                )
                 _, anchors_new = res[:2]
                 yield res[:2]
                 if np.allclose(anchors, anchors_new, rtol=1e-5, atol=1e-4):
@@ -493,8 +531,7 @@ class OWFreeViz(widget.OWWidget):
 
         interval = 10  # TODO
 
-        self._loop.setCoroutine(
-            update_freeviz(interval, anchors))
+        self._loop.setCoroutine(update_freeviz(interval, anchors))
         self.btn_start.setText("Stop")
         self.progressBarInit(processEvents=False)
         self.setBlocking(True)
@@ -523,7 +560,8 @@ class OWFreeViz(widget.OWWidget):
         assert not self.plotdata is None
         increment = 1  # TODO
         self.progressBarAdvance(
-            increment * 100. / MAX_ITERATIONS, processEvents=False)  # TODO
+            increment * 100.0 / MAX_ITERATIONS, processEvents=False
+        )  # TODO
         embedding_coords, projection = res
         self.plotdata.embedding_coords = embedding_coords
         self.plotdata.anchors = projection
@@ -576,8 +614,7 @@ class OWFreeViz(widget.OWWidget):
         self.plotdata.items = []
         for anchor, var in zip(self.plotdata.anchors, self.data.domain.attributes):
             if True or np.linalg.norm(anchor) > minradius:
-                axitem = AnchorItem(
-                    line=QLineF(0, 0, *anchor), text=var.name,)
+                axitem = AnchorItem(line=QLineF(0, 0, *anchor), text=var.name)
                 axitem.setVisible(np.linalg.norm(anchor) > minradius)
                 axitem.setPen(pg.mkPen((100, 100, 100)))
                 axitem.setArrowVisible(True)
@@ -585,9 +622,7 @@ class OWFreeViz(widget.OWWidget):
                 self.viewbox.addItem(axitem)
 
         hidecircle = QGraphicsEllipseItem()
-        hidecircle.setRect(
-            QRectF(-minradius, -minradius,
-                   2 * minradius, 2 * minradius))
+        hidecircle.setRect(QRectF(-minradius, -minradius, 2 * minradius, 2 * minradius))
 
         _pen = QPen(Qt.lightGray, 1)
         _pen.setCosmetic(True)
@@ -632,8 +667,10 @@ class OWFreeViz(widget.OWWidget):
             elif data.domain.class_var is None:
                 self.Error.no_class_var()
                 data = None
-            elif data.domain.class_var.is_discrete and \
-                            len(data.domain.class_var.values) < 2:
+            elif (
+                data.domain.class_var.is_discrete
+                and len(data.domain.class_var.values) < 2
+            ):
                 self.Error.not_enough_class_vars()
                 data = None
             if data and len(data.domain.attributes) > data.X.shape[0]:
@@ -695,7 +732,7 @@ class OWFreeViz(widget.OWWidget):
 
         if data.domain.class_var.is_discrete:
             Y = Y.astype(int)
-        X = (X - np.mean(X, axis=0))
+        X = X - np.mean(X, axis=0)
         span = np.ptp(X, axis=0)
         X[:, span > 0] /= span[span > 0].reshape(1, -1)
         self._X = X
@@ -712,8 +749,11 @@ class OWFreeViz(widget.OWWidget):
         X = self.plotdata.X = self._X
         self.plotdata.Y = self._Y
         self.plotdata.validmask = self._validmask
-        self.plotdata.selection = self._selection if self._selection is not None else \
-            np.zeros(len(self._validmask), dtype=np.uint8)
+        self.plotdata.selection = (
+            self._selection
+            if self._selection is not None
+            else np.zeros(len(self._validmask), dtype=np.uint8)
+        )
         anchors = self.plotdata.anchors
         if len(anchors) == 0:
             if self.initialization == self.Circular:
@@ -724,14 +764,15 @@ class OWFreeViz(widget.OWWidget):
         EX = np.dot(X, anchors)
         c = np.zeros((X.shape[0], X.shape[1]))
         for i in range(X.shape[0]):
-            c[i] = np.argsort((np.power(X[i] * anchors[:, 0], 2) +
-                               np.power(X[i] * anchors[:, 1], 2)))[::-1]
+            c[i] = np.argsort(
+                (np.power(X[i] * anchors[:, 0], 2) + np.power(X[i] * anchors[:, 1], 2))
+            )[::-1]
         self.plotdata.topattrs = np.array(c, dtype=int)[:, :10]
         radius = np.max(np.linalg.norm(EX, axis=1))
 
         self.plotdata.anchors = anchors
 
-        coords = (EX / radius)
+        coords = EX / radius
         self.plotdata.embedding_coords = coords
         if reset_view:
             self.viewbox.setRange(RANGE)
@@ -740,8 +781,11 @@ class OWFreeViz(widget.OWWidget):
 
     def randomize_indices(self):
         X = self._X
-        self.plotdata.rand = np.random.choice(len(X), MAX_POINTS, replace=False) \
-            if len(X) > MAX_POINTS else None
+        self.plotdata.rand = (
+            np.random.choice(len(X), MAX_POINTS, replace=False)
+            if len(X) > MAX_POINTS
+            else None
+        )
 
     def manual_move_anchor(self, show_anchors=True):
         self.__replot_requested = False
@@ -761,15 +805,15 @@ class OWFreeViz(widget.OWWidget):
             selection = selection[rand]
         else:
             selection = self.plotdata.selection[validmask]
-        coords = (EX / radius)
+        coords = EX / radius
 
         if show_anchors:
             self._anchor_circle()
-        attributes = () + self.data.domain.attributes + (self.variable_x, self.variable_y)
-        domain = Domain(attributes=attributes,
-                        class_vars=self.data.domain.class_vars)
-        data = Table.from_numpy(domain, X=np.hstack((data_x, coords)),
-                                Y=data_y)
+        attributes = (
+            () + self.data.domain.attributes + (self.variable_x, self.variable_y)
+        )
+        domain = Domain(attributes=attributes, class_vars=self.data.domain.class_vars)
+        data = Table.from_numpy(domain, X=np.hstack((data_x, coords)), Y=data_y)
         self.graph.new_data(data, None)
         self.graph.selection = selection
         self.graph.update_data(self.variable_x, self.variable_y, reset_view=False)
@@ -777,18 +821,25 @@ class OWFreeViz(widget.OWWidget):
     def plot(self, reset_view=False, show_anchors=True):
         if show_anchors:
             self._anchor_circle()
-        attributes = () + self.data.domain.attributes + (self.variable_x, self.variable_y)
-        domain = Domain(attributes=attributes,
-                        class_vars=self.data.domain.class_vars,
-                        metas=self.data.domain.metas)
+        attributes = (
+            () + self.data.domain.attributes + (self.variable_x, self.variable_y)
+        )
+        domain = Domain(
+            attributes=attributes,
+            class_vars=self.data.domain.class_vars,
+            metas=self.data.domain.metas,
+        )
         mask = self.plotdata.validmask
         array = np.zeros((len(self.data), 2), dtype=np.float)
         array[mask] = self.plotdata.embedding_coords
         data = self.data.transform(domain)
         data[:, self.variable_x] = array[:, 0].reshape(-1, 1)
         data[:, self.variable_y] = array[:, 1].reshape(-1, 1)
-        subset_data = data[self._subset_mask & mask]\
-            if self._subset_mask is not None and len(self._subset_mask) else None
+        subset_data = (
+            data[self._subset_mask & mask]
+            if self._subset_mask is not None and len(self._subset_mask)
+            else None
+        )
         self.plotdata.data = data
         self.graph.new_data(data[mask], subset_data)
         if self.plotdata.selection is not None:
@@ -826,15 +877,20 @@ class OWFreeViz(widget.OWWidget):
         if self.data is not None and self.plotdata.validmask is not None:
             name = self.data.name
             metas = () + self.data.domain.metas + (self.variable_x, self.variable_y)
-            domain = Domain(attributes=self.data.domain.attributes,
-                            class_vars=self.data.domain.class_vars,
-                            metas=metas)
+            domain = Domain(
+                attributes=self.data.domain.attributes,
+                class_vars=self.data.domain.class_vars,
+                metas=metas,
+            )
             data = self.plotdata.data.transform(domain)
             validmask = self.plotdata.validmask
             mask = np.array(validmask, dtype=int)
-            mask[mask == 1] = graph.selection if graph.selection is not None \
-                else [False * len(mask)]
-            selection = np.array([], dtype=np.uint8) if mask is None else np.flatnonzero(mask)
+            mask[mask == 1] = (
+                graph.selection if graph.selection is not None else [False * len(mask)]
+            )
+            selection = (
+                np.array([], dtype=np.uint8) if mask is None else np.flatnonzero(mask)
+            )
             if len(selection):
                 selected = data[selection]
                 selected.name = name + ": selected"
@@ -847,14 +903,13 @@ class OWFreeViz(widget.OWWidget):
             annotated.name = name + ": annotated"
 
             comp_domain = Domain(
-                self.data.domain.attributes,
-                metas=[StringVariable(name='component')])
+                self.data.domain.attributes, metas=[StringVariable(name="component")]
+            )
 
             metas = np.array([["FreeViz 1"], ["FreeViz 2"]])
             components = Table.from_numpy(
-                comp_domain,
-                X=self.plotdata.anchors.T,
-                metas=metas)
+                comp_domain, X=self.plotdata.anchors.T, metas=metas
+            )
 
             components.name = name + ": components"
 
@@ -869,27 +924,43 @@ class OWFreeViz(widget.OWWidget):
         def name(var):
             return var and var.name
 
-        caption = report.render_items_vert((
-            ("Color", name(self.graph.attr_color)),
-            ("Label", name(self.graph.attr_label)),
-            ("Shape", name(self.graph.attr_shape)),
-            ("Size", name(self.graph.attr_size)),
-            ("Jittering", self.graph.jitter_size != 0 and "{} %".format(self.graph.jitter_size))))
+        caption = report.render_items_vert(
+            (
+                ("Color", name(self.graph.attr_color)),
+                ("Label", name(self.graph.attr_label)),
+                ("Shape", name(self.graph.attr_shape)),
+                ("Size", name(self.graph.attr_size)),
+                (
+                    "Jittering",
+                    self.graph.jitter_size != 0
+                    and "{} %".format(self.graph.jitter_size),
+                ),
+            )
+        )
         self.report_plot()
         if caption:
             self.report_caption(caption)
 
 
 class MoveIndicator(pg.GraphicsObject):
-    def __init__(self, x, y, parent=None, line=QLineF(), scene_size=1, text="", **kwargs):
+    def __init__(
+        self, x, y, parent=None, line=QLineF(), scene_size=1, text="", **kwargs
+    ):
         super().__init__(parent, **kwargs)
         self.arrows = [
-            pg.ArrowItem(pos=(x - scene_size * 0.07 * np.cos(np.radians(angle)),
-                              y + scene_size * 0.07 * np.sin(np.radians(angle))),
-                         parent=self, angle=angle,
-                         headLen=13, tipAngle=45,
-                         brush=pg.mkColor(128, 128, 128))
-            for angle in (0, 90, 180, 270)]
+            pg.ArrowItem(
+                pos=(
+                    x - scene_size * 0.07 * np.cos(np.radians(angle)),
+                    y + scene_size * 0.07 * np.sin(np.radians(angle)),
+                ),
+                parent=self,
+                angle=angle,
+                headLen=13,
+                tipAngle=45,
+                brush=pg.mkColor(128, 128, 128),
+            )
+            for angle in (0, 90, 180, 270)
+        ]
 
     def paint(self, painter, option, widget):
         pass

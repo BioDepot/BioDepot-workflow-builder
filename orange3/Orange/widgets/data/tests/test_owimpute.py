@@ -15,12 +15,12 @@ from Orange.widgets.utils.itemmodels import select_row
 
 class Foo(Learner):
     def __call__(self, *args, **kwargs):
-        1/0
+        1 / 0
 
 
 class Bar:
     def __call__(self, args, **kwargs):
-        1/0
+        1 / 0
 
 
 class FooBar(Learner):
@@ -89,9 +89,13 @@ class TestOWImpute(WidgetTest):
         self.assertEqual(widget.default_method_index, Method.Average)
 
         self.assertTrue(
-            all(isinstance(m, AsDefault) and isinstance(m.method, impute.Average)
-                for m in map(widget.get_method_for_column,
-                             range(len(data.domain.variables)))))
+            all(
+                isinstance(m, AsDefault) and isinstance(m.method, impute.Average)
+                for m in map(
+                    widget.get_method_for_column, range(len(data.domain.variables))
+                )
+            )
+        )
 
         # change method for first variable
         select_row(view, 0)
@@ -106,10 +110,8 @@ class TestOWImpute(WidgetTest):
         self.assertEqual(varbg.checkedId(), -1)
 
         varbg.button(Method.Leave).click()
-        self.assertIsInstance(widget.get_method_for_column(0),
-                              impute.DoNotImpute)
-        self.assertIsInstance(widget.get_method_for_column(2),
-                              impute.DoNotImpute)
+        self.assertIsInstance(widget.get_method_for_column(0), impute.DoNotImpute)
+        self.assertIsInstance(widget.get_method_for_column(2), impute.DoNotImpute)
         # reset both back to default
         varbg.button(Method.AsAboveSoBelow).click()
         self.assertIsInstance(widget.get_method_for_column(0), AsDefault)
@@ -136,23 +138,28 @@ class TestOWImpute(WidgetTest):
             return widget.get_method_for_column(data.domain.index(var))
 
         # select 'chest pain'
-        selectvars(['chest pain'])
-        self.assertTrue(widget.value_combo.isVisibleTo(widget) and
-                        widget.value_combo.isEnabledTo(widget))
+        selectvars(["chest pain"])
+        self.assertTrue(
+            widget.value_combo.isVisibleTo(widget)
+            and widget.value_combo.isEnabledTo(widget)
+        )
         self.assertEqual(varbg.checkedId(), Method.AsAboveSoBelow)
 
         simulate.combobox_activate_item(
-            widget.value_combo, data.domain["chest pain"].values[1])
+            widget.value_combo, data.domain["chest pain"].values[1]
+        )
         # The 'Value' (impute.Default) should have been selected automatically
         self.assertEqual(varbg.checkedId(), Method.Default)
-        imputer = effective_method('chest pain')
+        imputer = effective_method("chest pain")
         self.assertIsInstance(imputer, impute.Default)
         self.assertEqual(imputer.default, 1)
 
         # select continuous 'rest SBP' and 'cholesterol' variables
         selectvars(["rest SBP", "cholesterol"])
-        self.assertTrue(widget.value_double.isVisibleTo(widget) and
-                        widget.value_double.isEnabledTo(widget))
+        self.assertTrue(
+            widget.value_double.isVisibleTo(widget)
+            and widget.value_double.isEnabledTo(widget)
+        )
         self.assertEqual(varbg.checkedId(), Method.AsAboveSoBelow)
         widget.value_double.setValue(-1.0)
         QTest.keyClick(self.widget.value_double, Qt.Key_Enter)
@@ -169,13 +176,17 @@ class TestOWImpute(WidgetTest):
         # disabled
         selectvars(["chest pain"], selmodel.Select)
         self.assertEqual(varbg.checkedId(), -1)
-        self.assertFalse(widget.value_combo.isEnabledTo(widget) and
-                         widget.value_double.isEnabledTo(widget))
+        self.assertFalse(
+            widget.value_combo.isEnabledTo(widget)
+            and widget.value_double.isEnabledTo(widget)
+        )
 
         # select 'chest pain' only and check that the selected value is
         # restored in the value combo
         selectvars(["chest pain"])
-        self.assertTrue(widget.value_combo.isVisibleTo(widget) and
-                        widget.value_combo.isEnabledTo(widget))
+        self.assertTrue(
+            widget.value_combo.isVisibleTo(widget)
+            and widget.value_combo.isEnabledTo(widget)
+        )
         self.assertEqual(varbg.checkedId(), Method.Default)
         self.assertEqual(widget.value_combo.currentIndex(), 1)

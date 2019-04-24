@@ -10,10 +10,9 @@ from Orange.projection import CUR
 
 
 class TestCUR(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls):
-        cls.ionosphere = Orange.data.Table('ionosphere')
+        cls.ionosphere = Orange.data.Table("ionosphere")
 
     def test_cur_projection(self):
         self.__projection_test_helper(self.ionosphere, rank=10, max_error=10)
@@ -36,11 +35,11 @@ class TestCUR(unittest.TestCase):
         U, s, V = sla.svds(data.X, rank)
         S = np.diag(s)
         X_k = np.dot(U, np.dot(S, V))
-        err_svd = np.linalg.norm(data.X - X_k, 'fro')
+        err_svd = np.linalg.norm(data.X - X_k, "fro")
         cur = CUR(rank=rank, max_error=max_error, compute_U=True, random_state=0)
         cur_model = cur(data)
         X_hat = np.dot(cur_model.C_, np.dot(cur_model.U_, cur_model.R_))
-        err_cur = np.linalg.norm(data.X - X_hat, 'fro')
+        err_cur = np.linalg.norm(data.X - X_hat, "fro")
         self.assertLess(err_cur, (3 + cur_model.max_error) * err_svd)
 
     def test_cur_axis(self):

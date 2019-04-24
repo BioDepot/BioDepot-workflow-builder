@@ -12,17 +12,26 @@ from collections import namedtuple
 from xml.sax.saxutils import escape
 
 from AnyQt.QtWidgets import (
-    QApplication, QDialog, QVBoxLayout, QDialogButtonBox, QGraphicsScene,
-    QGraphicsView, QGraphicsWidget, QGraphicsRectItem,
-    QGraphicsLineItem, QGraphicsTextItem, QGraphicsLayoutItem,
-    QGraphicsLinearLayout, QGraphicsGridLayout, QGraphicsPixmapItem,
-    QGraphicsDropShadowEffect, QSizePolicy
+    QApplication,
+    QDialog,
+    QVBoxLayout,
+    QDialogButtonBox,
+    QGraphicsScene,
+    QGraphicsView,
+    QGraphicsWidget,
+    QGraphicsRectItem,
+    QGraphicsLineItem,
+    QGraphicsTextItem,
+    QGraphicsLayoutItem,
+    QGraphicsLinearLayout,
+    QGraphicsGridLayout,
+    QGraphicsPixmapItem,
+    QGraphicsDropShadowEffect,
+    QSizePolicy,
 )
 from AnyQt.QtGui import QPalette, QPen, QPainter, QIcon
 
-from AnyQt.QtCore import (
-    Qt, QObject, QSize, QSizeF, QPointF, QRectF, QT_VERSION
-)
+from AnyQt.QtCore import Qt, QObject, QSize, QSizeF, QPointF, QRectF, QT_VERSION
 from AnyQt.QtCore import pyqtSignal as Signal
 
 from ..scheme import SchemeNode, SchemeLink, compatible_channels
@@ -32,7 +41,7 @@ from ..resources import icon_loader
 
 # This is a special value defined in Qt4 but does not seem to be exported
 # by PyQt4
-QWIDGETSIZE_MAX = ((1 << 24) - 1)
+QWIDGETSIZE_MAX = (1 << 24) - 1
 
 
 class EditLinksDialog(QDialog):
@@ -48,6 +57,7 @@ class EditLinksDialog(QDialog):
     ...
 
     """
+
     def __init__(self, *args, **kwargs):
         QDialog.__init__(self, *args, **kwargs)
 
@@ -68,10 +78,10 @@ class EditLinksDialog(QDialog):
         self.scene.editWidget.geometryChanged.connect(self.__onGeometryChanged)
 
         # Ok/Cancel/Clear All buttons.
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok |
-                                   QDialogButtonBox.Cancel |
-                                   QDialogButtonBox.Reset,
-                                   Qt.Horizontal)
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel | QDialogButtonBox.Reset,
+            Qt.Horizontal,
+        )
 
         clear_button = buttons.button(QDialogButtonBox.Reset)
         clear_button.setText(self.tr("Clear All"))
@@ -117,12 +127,12 @@ class EditLinksDialog(QDialog):
     def __onGeometryChanged(self):
         size = self.scene.editWidget.size()
         left, top, right, bottom = self.getContentsMargins()
-        self.view.setFixedSize(size.toSize() + \
-                               QSize(left + right + 4, top + bottom + 4))
+        self.view.setFixedSize(
+            size.toSize() + QSize(left + right + 4, top + bottom + 4)
+        )
 
 
-def find_item_at(scene, pos, order=Qt.DescendingOrder, type=None,
-                 name=None):
+def find_item_at(scene, pos, order=Qt.DescendingOrder, type=None, name=None):
     """
     Find an object in a :class:`QGraphicsScene` `scene` at `pos`.
     If `type` is not `None` the it must specify  the type of the item.
@@ -132,12 +142,10 @@ def find_item_at(scene, pos, order=Qt.DescendingOrder, type=None,
     """
     items = scene.items(pos, Qt.IntersectsItemShape, order)
     for item in items:
-        if type is not None and \
-                not isinstance(item, type):
+        if type is not None and not isinstance(item, type):
             continue
 
-        if name is not None and isinstance(item, QObject) and \
-                item.objectName() != name:
+        if name is not None and isinstance(item, QObject) and item.objectName() != name:
             continue
         return item
     else:
@@ -148,6 +156,7 @@ class LinksEditScene(QGraphicsScene):
     """
     A :class:`QGraphicsScene` used by the :class:`LinkEditWidget`.
     """
+
     def __init__(self, *args, **kwargs):
         QGraphicsScene.__init__(self, *args, **kwargs)
 
@@ -159,16 +168,19 @@ class LinksEditScene(QGraphicsScene):
 
 _Link = namedtuple(
     "_Link",
-    ["output",    # OutputSignal
-     "input",     # InputSignal
-     "lineItem",  # QGraphicsLineItem connecting the input to output
-     ])
+    [
+        "output",  # OutputSignal
+        "input",  # InputSignal
+        "lineItem",  # QGraphicsLineItem connecting the input to output
+    ],
+)
 
 
 class LinksEditWidget(QGraphicsWidget):
     """
     A Graphics Widget for editing the links between two nodes.
     """
+
     def __init__(self, *args, **kwargs):
         QGraphicsWidget.__init__(self, *args, **kwargs)
         self.setAcceptedMouseButtons(Qt.LeftButton | Qt.RightButton)
@@ -248,8 +260,7 @@ class LinksEditWidget(QGraphicsWidget):
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
-            startItem = find_item_at(self.scene(), event.pos(),
-                                     type=ChannelAnchor)
+            startItem = find_item_at(self.scene(), event.pos(), type=ChannelAnchor)
             if startItem is not None:
                 # Start a connection line drag.
                 self.__dragStartItem = startItem
@@ -257,8 +268,9 @@ class LinksEditWidget(QGraphicsWidget):
                 event.accept()
                 return
 
-            lineItem = find_item_at(self.scene(), event.scenePos(),
-                                    type=QGraphicsLineItem)
+            lineItem = find_item_at(
+                self.scene(), event.scenePos(), type=QGraphicsLineItem
+            )
             if lineItem is not None:
                 # Remove a connection under the mouse
                 for link in self.__links:
@@ -273,15 +285,17 @@ class LinksEditWidget(QGraphicsWidget):
         if event.buttons() & Qt.LeftButton:
 
             downPos = event.buttonDownPos(Qt.LeftButton)
-            if not self.__tmpLine and self.__dragStartItem and \
-                    (downPos - event.pos()).manhattanLength() > \
-                        QApplication.instance().startDragDistance():
+            if (
+                not self.__tmpLine
+                and self.__dragStartItem
+                and (downPos - event.pos()).manhattanLength()
+                > QApplication.instance().startDragDistance()
+            ):
                 # Start a line drag
                 line = QGraphicsLineItem(self)
                 start = self.__dragStartItem.boundingRect().center()
                 start = self.mapFromItem(self.__dragStartItem, start)
-                line.setLine(start.x(), start.y(),
-                             event.pos().x(), event.pos().y())
+                line.setLine(start.x(), start.y(), event.pos().x(), event.pos().y())
 
                 pen = QPen(self.palette().color(QPalette.Foreground), 4)
                 pen.setCapStyle(Qt.RoundCap)
@@ -300,8 +314,7 @@ class LinksEditWidget(QGraphicsWidget):
 
     def mouseReleaseEvent(self, event):
         if event.button() == Qt.LeftButton and self.__tmpLine:
-            endItem = find_item_at(self.scene(), event.scenePos(),
-                                     type=ChannelAnchor)
+            endItem = find_item_at(self.scene(), event.scenePos(), type=ChannelAnchor)
 
             if endItem is not None:
                 startItem = self.__dragStartItem
@@ -336,12 +349,12 @@ class LinksEditWidget(QGraphicsWidget):
             return
 
         if output not in self.source.output_channels():
-            raise ValueError("%r is not an output channel of %r" % \
-                             (output, self.source))
+            raise ValueError(
+                "%r is not an output channel of %r" % (output, self.source)
+            )
 
         if input not in self.sink.input_channels():
-            raise ValueError("%r is not an input channel of %r" % \
-                             (input, self.sink))
+            raise ValueError("%r is not an input channel of %r" % (input, self.sink))
 
         if input.single:
             # Remove existing link if it exists.
@@ -359,8 +372,7 @@ class LinksEditWidget(QGraphicsWidget):
 
         sink_pos = sink_anchor.boundingRect().center()
         sink_pos = self.mapFromItem(sink_anchor, sink_pos)
-        line.setLine(source_pos.x(), source_pos.y(),
-                     sink_pos.x(), sink_pos.y())
+        line.setLine(source_pos.x(), source_pos.y(), sink_pos.x(), sink_pos.y())
         pen = QPen(self.palette().color(QPalette.Foreground), 4)
         pen.setCapStyle(Qt.RoundCap)
         line.setPen(pen)
@@ -377,8 +389,9 @@ class LinksEditWidget(QGraphicsWidget):
                 self.__links.remove(link)
                 break
         else:
-            raise ValueError("No such link {0.name!r} -> {1.name!r}." \
-                             .format(output, input))
+            raise ValueError(
+                "No such link {0.name!r} -> {1.name!r}.".format(output, input)
+            )
 
     def clearLinks(self):
         """
@@ -397,23 +410,23 @@ class LinksEditWidget(QGraphicsWidget):
         # Space between left and right anchors
         widget.layout().setHorizontalSpacing(50)
 
-        left_node = EditLinksNode(self, direction=Qt.LeftToRight,
-                                  node=self.source)
+        left_node = EditLinksNode(self, direction=Qt.LeftToRight, node=self.source)
 
-        left_node.setSizePolicy(QSizePolicy.MinimumExpanding,
-                                QSizePolicy.MinimumExpanding)
+        left_node.setSizePolicy(
+            QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding
+        )
 
-        right_node = EditLinksNode(self, direction=Qt.RightToLeft,
-                                   node=self.sink)
+        right_node = EditLinksNode(self, direction=Qt.RightToLeft, node=self.sink)
 
-        right_node.setSizePolicy(QSizePolicy.MinimumExpanding,
-                                 QSizePolicy.MinimumExpanding)
+        right_node.setSizePolicy(
+            QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding
+        )
 
         left_node.setMinimumWidth(150)
         right_node.setMinimumWidth(150)
 
-        widget.layout().addItem(left_node, 0, 0,)
-        widget.layout().addItem(right_node, 0, 1,)
+        widget.layout().addItem(left_node, 0, 0)
+        widget.layout().addItem(right_node, 0, 1)
 
         title_template = "<center><b>{0}<b></center>"
 
@@ -425,15 +438,19 @@ class LinksEditWidget(QGraphicsWidget):
         right_title.setHtml(title_template.format(escape(self.sink.title)))
         right_title.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
-        widget.layout().addItem(left_title, 1, 0,
-                                alignment=Qt.AlignHCenter | Qt.AlignTop)
-        widget.layout().addItem(right_title, 1, 1,
-                                alignment=Qt.AlignHCenter | Qt.AlignTop)
+        widget.layout().addItem(
+            left_title, 1, 0, alignment=Qt.AlignHCenter | Qt.AlignTop
+        )
+        widget.layout().addItem(
+            right_title, 1, 1, alignment=Qt.AlignHCenter | Qt.AlignTop
+        )
 
         widget.setParentItem(self)
 
-        max_w = max(left_node.sizeHint(Qt.PreferredSize).width(),
-                    right_node.sizeHint(Qt.PreferredSize).width())
+        max_w = max(
+            left_node.sizeHint(Qt.PreferredSize).width(),
+            right_node.sizeHint(Qt.PreferredSize).width(),
+        )
 
         # fix same size
         left_node.setMinimumWidth(max_w)
@@ -466,8 +483,15 @@ class EditLinksNode(QGraphicsWidget):
 
     """
 
-    def __init__(self, parent=None, direction=Qt.LeftToRight,
-                 node=None, icon=None, iconSize=None, **args):
+    def __init__(
+        self,
+        parent=None,
+        direction=Qt.LeftToRight,
+        node=None,
+        icon=None,
+        iconSize=None,
+        **args
+    ):
         QGraphicsWidget.__init__(self, parent, **args)
         self.setAcceptedMouseButtons(Qt.NoButton)
         self.__direction = direction
@@ -479,8 +503,7 @@ class EditLinksNode(QGraphicsWidget):
         # contents centered vertically.
         self.layout().setMaximumSize(QSizeF(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX))
 
-        self.setSizePolicy(QSizePolicy.MinimumExpanding,
-                           QSizePolicy.MinimumExpanding)
+        self.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding)
 
         self.__iconSize = iconSize or QSize(64, 64)
         self.__icon = icon
@@ -502,8 +525,9 @@ class EditLinksNode(QGraphicsWidget):
             channel_alignemnt = Qt.AlignLeft
 
         self.layout().setAlignment(self.__iconLayoutItem, Qt.AlignCenter)
-        self.layout().setAlignment(self.__channelLayout,
-                                   Qt.AlignVCenter | channel_alignemnt)
+        self.layout().setAlignment(
+            self.__channelLayout, Qt.AlignVCenter | channel_alignemnt
+        )
 
         if node is not None:
             self.setSchemeNode(node)
@@ -558,9 +582,9 @@ class EditLinksNode(QGraphicsWidget):
 
         self.setIcon(icon)
 
-        label_template = ('<div align="{align}">'
-                          '<span class="channelname">{name}</span>'
-                          '</div>')
+        label_template = (
+            '<div align="{align}">' '<span class="channelname">{name}</span>' "</div>"
+        )
 
         if self.__direction == Qt.LeftToRight:
             align = "right"
@@ -579,26 +603,21 @@ class EditLinksNode(QGraphicsWidget):
         grid = self.__channelLayout
 
         for i, channel in enumerate(channels):
-            text = label_template.format(align=align,
-                                         name=escape(channel.name))
+            text = label_template.format(align=align, name=escape(channel.name))
 
             text_item = GraphicsTextWidget(self)
             text_item.setHtml(text)
             text_item.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
-            text_item.setToolTip(
-                escape(getattr(channel, 'description', channel.type)))
+            text_item.setToolTip(escape(getattr(channel, "description", channel.type)))
 
-            grid.addItem(text_item, i, label_row,
-                         alignment=label_alignment)
+            grid.addItem(text_item, i, label_row, alignment=label_alignment)
 
-            anchor = ChannelAnchor(self, channel=channel,
-                                   rect=QRectF(0, 0, 20, 20))
+            anchor = ChannelAnchor(self, channel=channel, rect=QRectF(0, 0, 20, 20))
 
             anchor.setBrush(self.palette().brush(QPalette.Mid))
 
             layout_item = GraphicsItemLayoutItem(grid, item=anchor)
-            grid.addItem(layout_item, i, anchor_row,
-                         alignment=anchor_alignment)
+            grid.addItem(layout_item, i, anchor_row, alignment=anchor_alignment)
             anchor.setToolTip(escape(channel.type))
 
             self.__channelAnchors.append(anchor)
@@ -635,7 +654,7 @@ class GraphicsItemLayoutItem(QGraphicsLayoutItem):
 
     """
 
-    def __init__(self, parent=None, item=None, ):
+    def __init__(self, parent=None, item=None):
         self.__item = None
 
         QGraphicsLayoutItem.__init__(self, parent, isLayout=False)
@@ -669,6 +688,7 @@ class ChannelAnchor(QGraphicsRectItem):
     """
     A rectangular Channel Anchor indicator.
     """
+
     def __init__(self, parent=None, channel=None, rect=None, **kwargs):
         QGraphicsRectItem.__init__(self, **kwargs)
         self.setAcceptHoverEvents(True)
@@ -683,8 +703,7 @@ class ChannelAnchor(QGraphicsRectItem):
         if channel:
             self.setChannel(channel)
 
-        self.__shadow = QGraphicsDropShadowEffect(blurRadius=5,
-                                                  offset=QPointF(0, 0))
+        self.__shadow = QGraphicsDropShadowEffect(blurRadius=5, offset=QPointF(0, 0))
         self.setGraphicsEffect(self.__shadow)
         self.__shadow.setEnabled(False)
 

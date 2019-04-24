@@ -17,16 +17,18 @@ class DummyRegressionLearner(LearnerRegression):
 
 
 class DummyFitter(Fitter):
-    name = 'dummy'
-    __fits__ = {'classification': DummyClassificationLearner,
-                'regression': DummyRegressionLearner}
+    name = "dummy"
+    __fits__ = {
+        "classification": DummyClassificationLearner,
+        "regression": DummyRegressionLearner,
+    }
 
 
 class FitterTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.heart_disease = Table('heart_disease')
-        cls.housing = Table('housing')
+        cls.heart_disease = Table("heart_disease")
+        cls.housing = Table("housing")
 
     def test_dispatches_to_correct_learner(self):
         """Based on the input data, it should dispatch the fitting process to
@@ -37,23 +39,30 @@ class FitterTest(unittest.TestCase):
 
         fitter(self.heart_disease)
         self.assertEqual(
-            DummyClassificationLearner.fit.call_count, 1,
-            'Classification learner was never called for classification'
-            'problem')
+            DummyClassificationLearner.fit.call_count,
+            1,
+            "Classification learner was never called for classification" "problem",
+        )
         self.assertEqual(
-            DummyRegressionLearner.fit.call_count, 0,
-            'Regression learner was called for classification problem')
+            DummyRegressionLearner.fit.call_count,
+            0,
+            "Regression learner was called for classification problem",
+        )
 
         DummyClassificationLearner.fit.reset_mock()
         DummyRegressionLearner.fit.reset_mock()
 
         fitter(self.housing)
         self.assertEqual(
-            DummyRegressionLearner.fit.call_count, 1,
-            'Regression learner was never called for regression problem')
+            DummyRegressionLearner.fit.call_count,
+            1,
+            "Regression learner was never called for regression problem",
+        )
         self.assertEqual(
-            DummyClassificationLearner.fit.call_count, 0,
-            'Classification learner was called for regression problem')
+            DummyClassificationLearner.fit.call_count,
+            0,
+            "Classification learner was called for regression problem",
+        )
 
     def test_constructs_learners_with_appropriate_parameters(self):
         """In case the classification and regression learners require different
@@ -71,8 +80,10 @@ class FitterTest(unittest.TestCase):
                 self.param = regression_param
 
         class DummyFitter(Fitter):
-            __fits__ = {'classification': DummyClassificationLearner,
-                        'regression': DummyRegressionLearner}
+            __fits__ = {
+                "classification": DummyClassificationLearner,
+                "regression": DummyRegressionLearner,
+            }
 
         # Prevent fitting error from being thrown
         DummyClassificationLearner.fit = Mock()
@@ -89,7 +100,7 @@ class FitterTest(unittest.TestCase):
             self.assertEqual(fitter.get_learner(Fitter.CLASSIFICATION).param, 10)
             self.assertEqual(fitter.get_learner(Fitter.REGRESSION).param, 20)
         except TypeError:
-            self.fail('Fitter did not properly distribute params to learners')
+            self.fail("Fitter did not properly distribute params to learners")
 
     def test_correctly_sets_preprocessors_on_learner(self):
         """Fitters have to be able to pass the `use_default_preprocessors` and
@@ -100,12 +111,16 @@ class FitterTest(unittest.TestCase):
         learner = fitter.get_learner(Fitter.CLASSIFICATION)
 
         self.assertEqual(
-            learner.use_default_preprocessors, True,
-            'Fitter did not properly pass the `use_default_preprocessors`'
-            'attribute to its learners')
+            learner.use_default_preprocessors,
+            True,
+            "Fitter did not properly pass the `use_default_preprocessors`"
+            "attribute to its learners",
+        )
         self.assertEqual(
-            tuple(learner.active_preprocessors), (pp,),
-            'Fitter did not properly pass its preprocessors to its learners')
+            tuple(learner.active_preprocessors),
+            (pp,),
+            "Fitter did not properly pass its preprocessors to its learners",
+        )
 
     def test_properly_delegates_preprocessing(self):
         class DummyClassificationLearner(LearnerClassification):
@@ -116,24 +131,29 @@ class FitterTest(unittest.TestCase):
                 self.param = classification_param
 
         class DummyFitter(Fitter):
-            __fits__ = {'classification': DummyClassificationLearner,
-                        'regression': DummyRegressionLearner}
+            __fits__ = {
+                "classification": DummyClassificationLearner,
+                "regression": DummyRegressionLearner,
+            }
 
         data = self.heart_disease
         fitter = DummyFitter()
         # Sanity check
-        self.assertTrue(any(
-            isinstance(v, ContinuousVariable) for v in data.domain.variables))
+        self.assertTrue(
+            any(isinstance(v, ContinuousVariable) for v in data.domain.variables)
+        )
         # Preprocess the data and check that the discretization was applied
         pp_data = fitter.preprocess(self.heart_disease)
-        self.assertTrue(not any(
-            isinstance(v, ContinuousVariable) for v in pp_data.domain.variables))
+        self.assertTrue(
+            not any(isinstance(v, ContinuousVariable) for v in pp_data.domain.variables)
+        )
 
     def test_default_kwargs_with_change_kwargs(self):
         """Fallback to default args in case specialized params not specified.
         """
+
         class DummyClassificationLearner(LearnerClassification):
-            def __init__(self, param='classification_default', **_):
+            def __init__(self, param="classification_default", **_):
                 super().__init__()
                 self.param = param
 
@@ -141,7 +161,7 @@ class FitterTest(unittest.TestCase):
                 return DummyModel(self.param)
 
         class DummyRegressionLearner(LearnerRegression):
-            def __init__(self, param='regression_default', **_):
+            def __init__(self, param="regression_default", **_):
                 super().__init__()
                 self.param = param
 
@@ -153,18 +173,19 @@ class FitterTest(unittest.TestCase):
                 self.param = param
 
         class DummyFitter(Fitter):
-            __fits__ = {'classification': DummyClassificationLearner,
-                        'regression': DummyRegressionLearner}
+            __fits__ = {
+                "classification": DummyClassificationLearner,
+                "regression": DummyRegressionLearner,
+            }
 
             def _change_kwargs(self, kwargs, problem_type):
                 if problem_type == self.CLASSIFICATION:
-                    kwargs['param'] = kwargs.get('classification_param')
+                    kwargs["param"] = kwargs.get("classification_param")
                 else:
-                    kwargs['param'] = kwargs.get('regression_param')
+                    kwargs["param"] = kwargs.get("regression_param")
                 return kwargs
 
         learner = DummyFitter()
-        iris, housing = Table('iris')[:5], Table('housing')[:5]
-        self.assertEqual(learner(iris).param, 'classification_default')
-        self.assertEqual(learner(housing).param, 'regression_default')
-
+        iris, housing = Table("iris")[:5], Table("housing")[:5]
+        self.assertEqual(learner(iris).param, "classification_default")
+        self.assertEqual(learner(housing).param, "regression_default")

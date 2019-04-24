@@ -18,9 +18,7 @@ class TestRegistry(unittest.TestCase):
     def test_registry_const(self):
         reg = WidgetRegistry()
 
-        data_desc = description.CategoryDescription.from_package(
-            "Orange.widgets.data"
-        )
+        data_desc = description.CategoryDescription.from_package("Orange.widgets.data")
 
         reg.register_category(data_desc)
 
@@ -41,9 +39,7 @@ class TestRegistry(unittest.TestCase):
         # ValueError adding a description with the same qualified name
         with self.assertRaises(ValueError):
             desc = description.WidgetDescription(
-                name="A name",
-                id=file_desc.id,
-                qualified_name=file_desc.qualified_name
+                name="A name", id=file_desc.id, qualified_name=file_desc.qualified_name
             )
             reg.register_widget(desc)
 
@@ -54,11 +50,9 @@ class TestRegistry(unittest.TestCase):
         reg.register_widget(discretize_desc)
 
         self.assertTrue(reg.has_widget(discretize_desc.qualified_name))
-        self.assertIs(reg.widget(discretize_desc.qualified_name),
-                      discretize_desc)
+        self.assertIs(reg.widget(discretize_desc.qualified_name), discretize_desc)
 
-        self.assertSetEqual(set(reg.widgets("Data")),
-                            set([file_desc, discretize_desc]))
+        self.assertSetEqual(set(reg.widgets("Data")), set([file_desc, discretize_desc]))
 
         classify_desc = description.CategoryDescription.from_package(
             "Orange.widgets.classify"
@@ -68,8 +62,7 @@ class TestRegistry(unittest.TestCase):
 
         self.assertTrue(reg.has_category(classify_desc.name))
         self.assertIs(reg.category(classify_desc.name), classify_desc)
-        self.assertSetEqual(set(reg.categories()),
-                            set([data_desc, classify_desc]))
+        self.assertSetEqual(set(reg.categories()), set([data_desc, classify_desc]))
 
         bayes_desc = description.WidgetDescription.from_module(
             "Orange.widgets.classify.ownaivebayes"
@@ -88,16 +81,19 @@ class TestRegistry(unittest.TestCase):
         self.assertSequenceEqual(reg.categories(), reg1.categories())
 
         # Test 'widgets()'
-        self.assertSetEqual(set(reg1.widgets()),
-                            set([file_desc, discretize_desc, bayes_desc]))
+        self.assertSetEqual(
+            set(reg1.widgets()), set([file_desc, discretize_desc, bayes_desc])
+        )
 
         # Test ordering by priority
         self.assertSequenceEqual(
-             reg.widgets("Data"),
-             sorted([file_desc, discretize_desc], key=attrgetter("priority"))
+            reg.widgets("Data"),
+            sorted([file_desc, discretize_desc], key=attrgetter("priority")),
         )
 
-        self.assertTrue(all(isinstance(desc.priority, int)
-                            for desc in [file_desc, discretize_desc,
-                                         bayes_desc])
-                        )
+        self.assertTrue(
+            all(
+                isinstance(desc.priority, int)
+                for desc in [file_desc, discretize_desc, bayes_desc]
+            )
+        )

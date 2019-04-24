@@ -2,8 +2,7 @@
 # pylint: disable=missing-docstring
 from Orange.data import Table, Domain, DiscreteVariable, ContinuousVariable
 from Orange.widgets.tests.base import WidgetTest
-from Orange.widgets.unsupervised.owcorrespondence \
-    import OWCorrespondenceAnalysis
+from Orange.widgets.unsupervised.owcorrespondence import OWCorrespondenceAnalysis
 
 
 class TestOWCorrespondence(WidgetTest):
@@ -25,17 +24,15 @@ class TestOWCorrespondence(WidgetTest):
         """
         table = Table(
             Domain(
-                [ContinuousVariable("a"),
-                 DiscreteVariable("b", values=["t", "f"]),
-                 DiscreteVariable("c", values=["y", "n"]),
-                 DiscreteVariable("d", values=["k", "l", "z"])]
+                [
+                    ContinuousVariable("a"),
+                    DiscreteVariable("b", values=["t", "f"]),
+                    DiscreteVariable("c", values=["y", "n"]),
+                    DiscreteVariable("d", values=["k", "l", "z"]),
+                ]
             ),
-            list(zip(
-                [42.48, 16.84, 15.23, 23.8],
-                ["t", "t", "", "f"],
-                "yyyy",
-                "klkk"
-            )))
+            list(zip([42.48, 16.84, 15.23, 23.8], ["t", "t", "", "f"], "yyyy", "klkk")),
+        )
         self.send_signal(self.widget.Inputs.data, table)
 
     def test_data_one_value_zero(self):
@@ -44,12 +41,7 @@ class TestOWCorrespondence(WidgetTest):
         one value.
         GH-2149
         """
-        table = Table(
-            Domain(
-                [DiscreteVariable("a", values=["0"])]
-            ),
-            [(0,), (0,), (0,)]
-        )
+        table = Table(Domain([DiscreteVariable("a", values=["0"])]), [(0,), (0,), (0,)])
         self.send_signal(self.widget.Inputs.data, table)
 
     def test_no_discrete_variables(self):
@@ -57,12 +49,7 @@ class TestOWCorrespondence(WidgetTest):
         Do not crash when there are no discrete (categorical) variable(s).
         GH-2723
         """
-        table = Table(
-            Domain(
-                [ContinuousVariable("a")]
-            ),
-            [(1,), (2,), (3,)]
-        )
+        table = Table(Domain([ContinuousVariable("a")]), [(1,), (2,), (3,)])
         self.assertFalse(self.widget.Error.no_disc_vars.is_shown())
         self.send_signal(self.widget.Inputs.data, table)
         self.assertTrue(self.widget.Error.no_disc_vars.is_shown())

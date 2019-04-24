@@ -30,8 +30,9 @@ class ScaleData:
         self._compute_jittered_data()
 
     def _compute_domain_data_stat(self):
-        stt = self.domain_data_stat = \
-            getCached(self.data, DomainBasicStats, (self.data, True))
+        stt = self.domain_data_stat = getCached(
+            self.data, DomainBasicStats, (self.data, True)
+        )
         domain = self.domain
         for attr in chain(domain.variables, domain.metas):
             if attr.is_discrete:
@@ -62,8 +63,11 @@ class ScaleData:
                 c -= dstat.min
                 if dstat.max != dstat.min:
                     c /= dstat.max - dstat.min
-        setCached(data, "visualizationData",
-                  (self.data, self.scaled_data, self.valid_data_array))
+        setCached(
+            data,
+            "visualizationData",
+            (self.data, self.scaled_data, self.valid_data_array),
+        )
 
     def _compute_jittered_data(self):
         data = self.data
@@ -93,9 +97,11 @@ class ScaleData:
             return
 
         domain = data.domain
-        new_domain = Domain(attributes=domain.attributes,
-                            class_vars=domain.class_vars,
-                            metas=tuple(v for v in domain.metas if v.is_primitive()))
+        new_domain = Domain(
+            attributes=domain.attributes,
+            class_vars=domain.class_vars,
+            metas=tuple(v for v in domain.metas if v.is_primitive()),
+        )
         self.data = data.transform(new_domain)
         self.data.metas = self.data.metas.astype(float)
         self.domain = self.data.domain
@@ -110,8 +116,10 @@ class ScaleData:
             return 0
         self.attribute_flip_info[attr] = 1 - self.attribute_flip_info.get(attr, 0)
         if attr.is_continuous:
-            self.attr_values[attr] = [-self.attr_values[attr][1],
-                                      -self.attr_values[attr][0]]
+            self.attr_values[attr] = [
+                -self.attr_values[attr][1],
+                -self.attr_values[attr][0],
+            ]
         col = self.jittered_data.get_column_view(attr)[0]
         col *= -1
         col += 1
@@ -144,8 +152,7 @@ class ScaleData:
 
 
 class ScaleScatterPlotData(ScaleData):
-    def get_xy_data_positions(self, attr_x, attr_y, filter_valid=False,
-                              copy=True):
+    def get_xy_data_positions(self, attr_x, attr_y, filter_valid=False, copy=True):
         """
         Create x-y projection of attributes in attrlist.
 

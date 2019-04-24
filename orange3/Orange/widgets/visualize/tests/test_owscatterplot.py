@@ -11,8 +11,7 @@ from Orange.data import Table, Domain, ContinuousVariable, DiscreteVariable
 from Orange.widgets.visualize.owscatterplotgraph import MAX
 from Orange.widgets.widget import AttributeList
 from Orange.widgets.tests.base import WidgetTest, WidgetOutputsTestMixin, datasets
-from Orange.widgets.visualize.owscatterplot import \
-    OWScatterPlot, ScatterPlotVizRank
+from Orange.widgets.visualize.owscatterplot import OWScatterPlot, ScatterPlotVizRank
 from Orange.widgets.tests.utils import simulate
 
 
@@ -68,25 +67,23 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         self.assertIs(self.widget.attr_y, self.data.domain[3])
 
     def test_score_heuristics(self):
-        domain = Domain([ContinuousVariable(c) for c in "abcd"],
-                        DiscreteVariable("c", values="ab"))
+        domain = Domain(
+            [ContinuousVariable(c) for c in "abcd"], DiscreteVariable("c", values="ab")
+        )
         a = np.arange(10).reshape((10, 1))
         data = Table(domain, np.hstack([a, a, a, a]), a >= 5)
         self.send_signal(self.widget.Inputs.data, data)
         vizrank = ScatterPlotVizRank(self.widget)
-        self.assertEqual([x.name for x in vizrank.score_heuristic()],
-                         list("abcd"))
+        self.assertEqual([x.name for x in vizrank.score_heuristic()], list("abcd"))
 
     def test_optional_combos(self):
         domain = self.data.domain
-        d1 = Domain(domain.attributes[:2], domain.class_var,
-                    [domain.attributes[2]])
+        d1 = Domain(domain.attributes[:2], domain.class_var, [domain.attributes[2]])
         t1 = Table(d1, self.data)
         self.send_signal(self.widget.Inputs.data, t1)
         self.widget.graph.attr_size = domain.attributes[2]
 
-        d2 = Domain(domain.attributes[:2], domain.class_var,
-                    [domain.attributes[3]])
+        d2 = Domain(domain.attributes[:2], domain.class_var, [domain.attributes[3]])
         t2 = Table(d2, self.data)
         self.send_signal(self.widget.Inputs.data, t2)
 
@@ -160,8 +157,10 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         self.assertEqual(len(self.widget.controls.graph.attr_label.model()), 8)
         other_widget = self.create_widget(OWScatterPlot)
         self.send_signal(self.widget.Inputs.data, self.data, widget=other_widget)
-        self.assertEqual(self.widget.graph.controls.attr_color.currentText(),
-                         self.data.domain.class_var.name)
+        self.assertEqual(
+            self.widget.graph.controls.attr_color.currentText(),
+            self.data.domain.class_var.name,
+        )
 
     def test_group_selections(self):
         self.send_signal(self.widget.Inputs.data, self.data)
@@ -181,7 +180,11 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
             return self.get_output(self.widget.Outputs.annotated_data).metas
 
         def annotations():
-            return self.get_output(self.widget.Outputs.annotated_data).domain.metas[0].values
+            return (
+                self.get_output(self.widget.Outputs.annotated_data)
+                .domain.metas[0]
+                .values
+            )
 
         # Select 0:5
         graph.select(points[:5])
@@ -243,13 +246,8 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         GH-2122
         """
         table = Table(
-            Domain(
-                [ContinuousVariable("a"),
-                 DiscreteVariable("b", values=["y", "n"])]
-            ),
-            list(zip(
-                [],
-                ""))
+            Domain([ContinuousVariable("a"), DiscreteVariable("b", values=["y", "n"])]),
+            list(zip([], "")),
         )
         self.send_signal(self.widget.Inputs.data, table)
         self.widget.reset_graph_data()
@@ -259,13 +257,15 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         self.widget.graph.select_by_rectangle(QRectF(4, 3, 3, 1))
         selected_inds = np.flatnonzero(self.widget.graph.selection)
         settings = self.widget.settingsHandler.pack_data(self.widget)
-        np.testing.assert_equal(selected_inds, [i for i, g in settings["selection_group"]])
+        np.testing.assert_equal(
+            selected_inds, [i for i, g in settings["selection_group"]]
+        )
 
     def test_points_selection(self):
         # Opening widget with saved selection should restore it
         self.widget = self.create_widget(
-            OWScatterPlot, stored_settings={
-                "selection_group": [(i, 1) for i in range(50)]}
+            OWScatterPlot,
+            stored_settings={"selection_group": [(i, 1) for i in range(50)]},
         )
         self.send_signal(self.widget.Inputs.data, self.data)  # iris
         selected_data = self.get_output(self.widget.Outputs.selected_data)
@@ -286,8 +286,8 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         # if selection contains rows that are not present in the current
         # dataset, widget should select what can be selected.
         self.widget = self.create_widget(
-            OWScatterPlot, stored_settings={
-                "selection_group": [(i, 1) for i in range(50)]}
+            OWScatterPlot,
+            stored_settings={"selection_group": [(i, 1) for i in range(50)]},
         )
         self.send_signal(self.widget.Inputs.data, self.data[:10])
         selected_data = self.get_output(self.widget.Outputs.selected_data)
@@ -319,8 +319,7 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         GH-2152
         GH-2157
         """
-        table = Table("iris").to_sparse(sparse_attributes=True,
-                                        sparse_class=True)
+        table = Table("iris").to_sparse(sparse_attributes=True, sparse_class=True)
         self.send_signal(self.widget.Inputs.data, table)
         self.widget.set_subset_data(table[:30])
         data = self.get_output("Data")
@@ -334,15 +333,13 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         GH-2384
         """
         domain = Table("iris").domain
-        self.send_signal(self.widget.Inputs.features,
-                         AttributeList(domain.variables))
+        self.send_signal(self.widget.Inputs.features, AttributeList(domain.variables))
         self.send_signal(self.widget.Inputs.features, None)
 
     def test_features_and_data(self):
         data = Table("iris")
         self.send_signal(self.widget.Inputs.data, data)
-        self.send_signal(self.widget.Inputs.features,
-                         AttributeList(data.domain[2:]))
+        self.send_signal(self.widget.Inputs.features, AttributeList(data.domain[2:]))
         self.assertIs(self.widget.attr_x, data.domain[2])
         self.assertIs(self.widget.attr_y, data.domain[3])
 
@@ -397,6 +394,7 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         the class column is missing.
         GH-2757
         """
+
         def assert_vizrank_enabled(data, is_enabled):
             self.send_signal(self.widget.Inputs.data, data)
             self.assertEqual(is_enabled, self.widget.vizrank_button.isEnabled())
@@ -405,13 +403,16 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         data2 = Table("iris")[::30]
         data2.Y[:] = np.nan
         domain = Domain(
-            attributes=data2.domain.attributes[:4], class_vars=DiscreteVariable("iris", values=[]))
+            attributes=data2.domain.attributes[:4],
+            class_vars=DiscreteVariable("iris", values=[]),
+        )
         data2 = Table(domain, data2.X, Y=data2.Y)
         data3 = Table("iris")[::30]
         data3.Y[:] = np.nan
 
-        for data, is_enabled in zip([data1, data2, data1, data3, data1],
-                                    [True, False, True, False, True]):
+        for data, is_enabled in zip(
+            [data1, data2, data1, data3, data1], [True, False, True, False, True]
+        ):
             assert_vizrank_enabled(data, is_enabled)
 
     def test_auto_send_selection(self):
@@ -432,10 +433,14 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
 
     def test_color_is_optional(self):
         zoo = Table("zoo")
-        backbone, breathes, airborne, type = \
-            [zoo.domain[x] for x in ["backbone", "breathes", "airborne", "type"]]
-        default_x, default_y, default_color = \
-            zoo.domain[0], zoo.domain[1], zoo.domain.class_var
+        backbone, breathes, airborne, type = [
+            zoo.domain[x] for x in ["backbone", "breathes", "airborne", "type"]
+        ]
+        default_x, default_y, default_color = (
+            zoo.domain[0],
+            zoo.domain[1],
+            zoo.domain.class_var,
+        )
         attr_x = self.widget.controls.attr_x
         attr_y = self.widget.controls.attr_y
         attr_color = self.widget.controls.graph.attr_color
@@ -492,14 +497,16 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         domain = Domain(
             attributes=data.domain.attributes[:2],
             class_vars=data.domain.class_vars,
-            metas=data.domain.attributes[2:]
+            metas=data.domain.attributes[2:],
         )
         data = data.transform(domain)
         # Sometimes floats in metas are saved as objects
         data.metas = data.metas.astype(object)
         self.send_signal(w.Inputs.data, data)
         simulate.combobox_activate_item(w.cb_attr_x, data.domain.metas[1].name)
-        simulate.combobox_activate_item(w.controls.graph.attr_color, data.domain.metas[0].name)
+        simulate.combobox_activate_item(
+            w.controls.graph.attr_color, data.domain.metas[0].name
+        )
         w.update_graph()
 
     def test_subset_data(self):
@@ -553,12 +560,14 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         all_points = scatterplot_item.points()
 
         event = MagicMock()
-        with patch.object(scatterplot_item, "mapFromScene"), \
-                patch.object(QToolTip, "showText") as show_text:
+        with patch.object(scatterplot_item, "mapFromScene"), patch.object(
+            QToolTip, "showText"
+        ) as show_text:
 
             # Single point hovered
-            with patch.object(scatterplot_item, "pointsAt",
-                              return_value=[all_points[42]]):
+            with patch.object(
+                scatterplot_item, "pointsAt", return_value=[all_points[42]]
+            ):
                 # Show just x and y attribute
                 graph.tooltip_shows_all = False
                 self.assertTrue(graph.help_event(event))
@@ -578,8 +587,11 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
                 self.assertIn("... and 4 others", text)
 
             # Two points hovered
-            with patch.object(scatterplot_item, "pointsAt",
-                              return_value=[all_points[42], all_points[100]]):
+            with patch.object(
+                scatterplot_item,
+                "pointsAt",
+                return_value=[all_points[42], all_points[100]],
+            ):
                 self.assertTrue(graph.help_event(event))
                 (_, text), _ = show_text.call_args
                 self.assertIn("age = {}".format(data[42, "age"]), text)
@@ -588,8 +600,7 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
                 self.assertIn("gender = {}".format(data[100, "gender"]), text)
 
             # No points hovered
-            with patch.object(scatterplot_item, "pointsAt",
-                              return_value=[]):
+            with patch.object(scatterplot_item, "pointsAt", return_value=[]):
                 show_text.reset_mock()
                 self.assertFalse(graph.help_event(event))
                 self.assertEqual(show_text.call_count, 0)
@@ -600,18 +611,21 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
         Also test for values with a nan.
         GH-2804
         """
+
         def prepare_data():
             data = Table("iris")
             values = list(range(15))
             class_var = DiscreteVariable("iris5", values=[str(v) for v in values])
-            data = data.transform(Domain(attributes=data.domain.attributes, class_vars=[class_var]))
+            data = data.transform(
+                Domain(attributes=data.domain.attributes, class_vars=[class_var])
+            )
             data.Y = np.array(values * 10, dtype=float)
             return data
 
         def assert_equal(data, max):
             self.send_signal(self.widget.Inputs.data, data)
             pen_data, brush_data = self.widget.graph.compute_colors()
-            self.assertEqual(max, len(np.unique([id(p) for p in pen_data])), )
+            self.assertEqual(max, len(np.unique([id(p) for p in pen_data])))
 
         assert_equal(prepare_data(), MAX)
         # data with nan value
@@ -622,4 +636,5 @@ class TestOWScatterPlot(WidgetTest, WidgetOutputsTestMixin):
 
 if __name__ == "__main__":
     import unittest
+
     unittest.main()

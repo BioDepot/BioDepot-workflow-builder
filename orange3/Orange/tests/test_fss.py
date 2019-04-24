@@ -7,18 +7,22 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 from Orange.data import Table, Variable
-from Orange.preprocess.score import ANOVA, Gini, UnivariateLinearRegression, \
-    Chi2
-from Orange.preprocess import SelectBestFeatures, Impute, RemoveNaNColumns, SelectRandomFeatures
+from Orange.preprocess.score import ANOVA, Gini, UnivariateLinearRegression, Chi2
+from Orange.preprocess import (
+    SelectBestFeatures,
+    Impute,
+    RemoveNaNColumns,
+    SelectRandomFeatures,
+)
 
 
 class TestFSS(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.titanic = Table('titanic')
-        cls.wine = Table('wine')
-        cls.iris = Table('iris')
-        cls.auro_mpg = Table('auto-mpg')
+        cls.titanic = Table("titanic")
+        cls.wine = Table("wine")
+        cls.iris = Table("iris")
+        cls.auro_mpg = Table("auto-mpg")
 
     def setUp(self):
         Variable._clear_all_caches()
@@ -27,7 +31,9 @@ class TestFSS(unittest.TestCase):
         gini = Gini()
         s = SelectBestFeatures(method=gini, k=1)
         data2 = s(self.titanic)
-        best = max((gini(self.titanic, f), f) for f in self.titanic.domain.attributes)[1]
+        best = max((gini(self.titanic, f), f) for f in self.titanic.domain.attributes)[
+            1
+        ]
         self.assertEqual(data2.domain.attributes[0], best)
 
     def test_select_threshold(self):
@@ -45,8 +51,7 @@ class TestFSS(unittest.TestCase):
         c = self.iris.columns
         for method in (Gini(), Chi2()):
             d1 = SelectBestFeatures(method=method)(self.iris)
-            expected = \
-                (c.petal_length, c.petal_width, c.sepal_length, c.sepal_width)
+            expected = (c.petal_length, c.petal_width, c.sepal_length, c.sepal_width)
             self.assertSequenceEqual(d1.domain.attributes, expected)
 
             scores = method(d1)
@@ -79,14 +84,14 @@ class TestRemoveNaNColumns(unittest.TestCase):
         data.X[:, (1, 3)] = np.NaN
 
         new_data = RemoveNaNColumns()(data)
-        self.assertEqual(len(new_data.domain.attributes),
-                         len(data.domain.attributes) - 2)
+        self.assertEqual(
+            len(new_data.domain.attributes), len(data.domain.attributes) - 2
+        )
 
         data = Table("iris")
         data.X[0, 0] = np.NaN
         new_data = RemoveNaNColumns()(data)
-        self.assertEqual(len(new_data.domain.attributes),
-                         len(data.domain.attributes))
+        self.assertEqual(len(new_data.domain.attributes), len(data.domain.attributes))
 
     def test_column_filtering_sparse(self):
         data = Table("iris")

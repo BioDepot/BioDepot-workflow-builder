@@ -15,14 +15,14 @@ from Orange.regression import SklTreeRegressionLearner
 
 class TestSklTreeLearner(unittest.TestCase):
     def test_classification(self):
-        table = Table('iris')
+        table = Table("iris")
         learn = SklTreeLearner()
         clf = learn(table)
         Z = clf(table)
         self.assertTrue(np.all(table.Y.flatten() == Z))
 
     def test_regression(self):
-        table = Table('housing')
+        table = Table("housing")
         learn = SklTreeRegressionLearner()
         model = learn(table)
         pred = model(table)
@@ -31,7 +31,7 @@ class TestSklTreeLearner(unittest.TestCase):
 
 class TestTreeLearner(unittest.TestCase):
     def test_uses_preprocessors(self):
-        iris = Table('iris')
+        iris = Table("iris")
         mock_preprocessor = Mock(return_value=iris)
 
         tree = TreeLearner(preprocessors=[mock_preprocessor])
@@ -42,7 +42,7 @@ class TestTreeLearner(unittest.TestCase):
 class TestDecisionTreeClassifier(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.iris = Table('iris')
+        cls.iris = Table("iris")
 
     def test_full_tree(self):
         table = self.iris
@@ -95,8 +95,10 @@ class TestDecisionTreeClassifier(unittest.TestCase):
         clf = clf.fit(table.X, table.Y)
         clfw = skl_tree.DecisionTreeClassifier(max_depth=2)
         clfw = clfw.fit(table.X, table.Y, sample_weight=np.arange(len(table)))
-        self.assertFalse(len(clf.tree_.feature) == len(clfw.tree_.feature) and
-                         np.all(clf.tree_.feature == clfw.tree_.feature))
+        self.assertFalse(
+            len(clf.tree_.feature) == len(clfw.tree_.feature)
+            and np.all(clf.tree_.feature == clfw.tree_.feature)
+        )
 
     def test_impurity(self):
         table = self.iris

@@ -30,15 +30,15 @@ class OWDistanceTransformation(widget.OWWidget):
         ("No normalization", lambda x: x),
         ("To interval [0, 1]", lambda x: scale(x, min=0, max=1)),
         ("To interval [-1, 1]", lambda x: scale(x, min=-1, max=1)),
-        ("Sigmoid function: 1/(1+exp(-X))", lambda x: 1/(1+np.exp(-x))),
+        ("Sigmoid function: 1/(1+exp(-X))", lambda x: 1 / (1 + np.exp(-x))),
     )
 
     inversion_options = (
         ("No inversion", lambda x: x),
         ("-X", lambda x: -x),
-        ("1 - X", lambda x: 1-x),
+        ("1 - X", lambda x: 1 - x),
         ("max(X) - X", lambda x: np.max(x) - x),
-        ("1/X", lambda x: 1/x),
+        ("1/X", lambda x: 1 / x),
     )
 
     def __init__(self):
@@ -46,15 +46,23 @@ class OWDistanceTransformation(widget.OWWidget):
 
         self.data = None
 
-        gui.radioButtons(self.controlArea, self, "normalization_method",
-                         box="Normalization",
-                         btnLabels=[x[0] for x in self.normalization_options],
-                         callback=self._invalidate)
+        gui.radioButtons(
+            self.controlArea,
+            self,
+            "normalization_method",
+            box="Normalization",
+            btnLabels=[x[0] for x in self.normalization_options],
+            callback=self._invalidate,
+        )
 
-        gui.radioButtons(self.controlArea, self, "inversion_method",
-                         box="Inversion",
-                         btnLabels=[x[0] for x in self.inversion_options],
-                         callback=self._invalidate)
+        gui.radioButtons(
+            self.controlArea,
+            self,
+            "inversion_method",
+            box="Inversion",
+            btnLabels=[x[0] for x in self.inversion_options],
+            callback=self._invalidate,
+        )
 
         gui.auto_commit(self.controlArea, self, "autocommit", "Apply")
 
@@ -80,12 +88,13 @@ class OWDistanceTransformation(widget.OWWidget):
         inv, invopt = self.inversion_method, self.inversion_options
         parts = []
         if inv:
-            parts.append('inversion ({})'.format(invopt[inv][0]))
+            parts.append("inversion ({})".format(invopt[inv][0]))
         if norm:
-            parts.append('normalization ({})'.format(normopt[norm][0]))
+            parts.append("normalization ({})".format(normopt[norm][0]))
         self.report_items(
-            'Model parameters',
-            {'Transformation': ', '.join(parts).capitalize() or 'None'})
+            "Model parameters",
+            {"Transformation": ", ".join(parts).capitalize() or "None"},
+        )
 
     def _invalidate(self):
         self.commit()

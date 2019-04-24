@@ -41,12 +41,15 @@ class SoftmaxRegressionLearner(Learner):
     fmin_args : dict, optional
         Parameters for L-BFGS algorithm.
     """
-    name = 'softmax'
-    preprocessors = [HasClass(),
-                     RemoveNaNColumns(),
-                     Impute(),
-                     Continuize(),
-                     Normalize()]
+
+    name = "softmax"
+    preprocessors = [
+        HasClass(),
+        RemoveNaNColumns(),
+        Impute(),
+        Continuize(),
+        Normalize(),
+    ]
 
     def __init__(self, lambda_=1.0, preprocessors=None, **fmin_args):
         super().__init__(preprocessors=preprocessors)
@@ -72,12 +75,12 @@ class SoftmaxRegressionLearner(Learner):
 
     def fit(self, X, y, W):
         if len(y.shape) > 1:
-            raise ValueError('Softmax regression does not support '
-                             'multi-label classification')
+            raise ValueError(
+                "Softmax regression does not support " "multi-label classification"
+            )
 
         if np.isnan(np.sum(X)) or np.isnan(np.sum(y)):
-            raise ValueError('Softmax regression does not support '
-                             'unknown values')
+            raise ValueError("Softmax regression does not support " "unknown values")
 
         X = np.hstack((X, np.ones((X.shape[0], 1))))
 
@@ -85,8 +88,9 @@ class SoftmaxRegressionLearner(Learner):
         Y = np.eye(self.num_classes)[y.ravel().astype(int)]
 
         theta = np.zeros(self.num_classes * X.shape[1])
-        theta, j, ret = fmin_l_bfgs_b(self.cost_grad, theta,
-                                      args=(X, Y), **self.fmin_args)
+        theta, j, ret = fmin_l_bfgs_b(
+            self.cost_grad, theta, args=(X, Y), **self.fmin_args
+        )
         Theta = theta.reshape((self.num_classes, X.shape[1]))
 
         return SoftmaxRegressionModel(Theta)
@@ -104,7 +108,7 @@ class SoftmaxRegressionModel(Model):
         return P
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import Orange.data
 
     def numerical_grad(f, params, e=1e-4):
@@ -118,7 +122,7 @@ if __name__ == '__main__':
             perturb[i] = 0
         return grad
 
-    d = Orange.data.Table('iris')
+    d = Orange.data.Table("iris")
     m = SoftmaxRegressionLearner(lambda_=1.0)
 
     # gradient check

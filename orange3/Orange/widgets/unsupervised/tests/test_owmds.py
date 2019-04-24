@@ -28,37 +28,42 @@ class TestOWMDS(WidgetTest, WidgetOutputsTestMixin):
         cls.same_input_output_domain = False
 
         my_dir = os.path.dirname(__file__)
-        datasets_dir = os.path.join(my_dir, '..', '..', '..', 'datasets')
+        datasets_dir = os.path.join(my_dir, "..", "..", "..", "datasets")
         cls.datasets_dir = os.path.realpath(datasets_dir)
 
     def setUp(self):
         self.widget = self.create_widget(
-            OWMDS, stored_settings={
+            OWMDS,
+            stored_settings={
                 "__version__": 2,
                 "max_iter": 10,
                 "initialization": OWMDS.PCA,
-            }
+            },
         )  # type: OWMDS
         self.towns = DistMatrix.from_file(
-            os.path.join(self.datasets_dir, "slovenian-towns.dst"))
-
+            os.path.join(self.datasets_dir, "slovenian-towns.dst")
+        )
 
     def tearDown(self):
         self.widget.onDeleteWidget()
         super().tearDown()
 
     def _select_data(self):
-        self.widget.graph.select_by_rectangle(QRectF(QPointF(-20, -20), QPointF(20, 20)))
+        self.widget.graph.select_by_rectangle(
+            QRectF(QPointF(-20, -20), QPointF(20, 20))
+        )
         return self.widget.graph.get_selection()
 
     def test_pca_init(self):
         self.send_signal(self.signal_name, self.signal_data)
         output = self.get_output(self.widget.Outputs.annotated_data, wait=1000)
         expected = np.array(
-            [[-2.69304803, 0.32676458],
-             [-2.7246721, -0.20921726],
-             [-2.90244761, -0.13630526],
-             [-2.75281107, -0.33854819]]
+            [
+                [-2.69304803, 0.32676458],
+                [-2.7246721, -0.20921726],
+                [-2.90244761, -0.13630526],
+                [-2.75281107, -0.33854819],
+            ]
         )
         np.testing.assert_array_almost_equal(output.metas[:4, :2], expected)
 
@@ -142,48 +147,61 @@ class TestOWMDS(WidgetTest, WidgetOutputsTestMixin):
 
     def test_migrate_settings_from_version_1(self):
         context_settings = [
-            Context(attributes={'iris': 1,
-                                'petal length': 2, 'petal width': 2,
-                                'sepal length': 2, 'sepal width': 2},
-                    metas={},
-                    ordered_domain=[('sepal length', 2),
-                                    ('sepal width', 2),
-                                    ('petal length', 2),
-                                    ('petal width', 2),
-                                    ('iris', 1)],
-                    time=1500000000,
-                    values={'__version__': 1,
-                            'color_value': ('iris', 1),
-                            'shape_value': ('iris', 2),
-                            'size_value': ('Stress', -2),
-                            'label_value': ('sepal length', 2)})]
+            Context(
+                attributes={
+                    "iris": 1,
+                    "petal length": 2,
+                    "petal width": 2,
+                    "sepal length": 2,
+                    "sepal width": 2,
+                },
+                metas={},
+                ordered_domain=[
+                    ("sepal length", 2),
+                    ("sepal width", 2),
+                    ("petal length", 2),
+                    ("petal width", 2),
+                    ("iris", 1),
+                ],
+                time=1500000000,
+                values={
+                    "__version__": 1,
+                    "color_value": ("iris", 1),
+                    "shape_value": ("iris", 2),
+                    "size_value": ("Stress", -2),
+                    "label_value": ("sepal length", 2),
+                },
+            )
+        ]
         settings = {
-            '__version__': 1,
-            'autocommit': False,
-            'connected_pairs': 5,
-            'initialization': 0,
-            'jitter': 0.5,
-            'label_only_selected': True,
-            'legend_anchor': ((1, 0), (1, 0)),
-            'max_iter': 300,
-            'refresh_rate': 3,
-            'symbol_opacity': 230,
-            'symbol_size': 8,
-            'context_settings': context_settings,
-            'savedWidgetGeometry': None
+            "__version__": 1,
+            "autocommit": False,
+            "connected_pairs": 5,
+            "initialization": 0,
+            "jitter": 0.5,
+            "label_only_selected": True,
+            "legend_anchor": ((1, 0), (1, 0)),
+            "max_iter": 300,
+            "refresh_rate": 3,
+            "symbol_opacity": 230,
+            "symbol_size": 8,
+            "context_settings": context_settings,
+            "savedWidgetGeometry": None,
         }
         w = self.create_widget(OWMDS, stored_settings=settings)
         data = self.data
         self.send_signal(w.Inputs.data, data, widget=w)
         g = w.graph
-        for a, value in ((g.attr_color, "iris"),
-                         (g.attr_shape, "iris"),
-                         (g.attr_size, "Stress"),
-                         (g.attr_label, "sepal length"),
-                         (g.label_only_selected, True),
-                         (g.alpha_value, 230),
-                         (g.point_width, 8),
-                         (g.jitter_size, 0.5)):
+        for a, value in (
+            (g.attr_color, "iris"),
+            (g.attr_shape, "iris"),
+            (g.attr_size, "Stress"),
+            (g.attr_label, "sepal length"),
+            (g.label_only_selected, True),
+            (g.alpha_value, 230),
+            (g.point_width, 8),
+            (g.jitter_size, 0.5),
+        ):
             self.assertTrue(a, value)
         self.assertFalse(w.auto_commit)
 
@@ -227,8 +245,9 @@ class TestOWMDS(WidgetTest, WidgetOutputsTestMixin):
         dist = Euclidean(data)
         self.send_signal(w.Inputs.distances, dist)
         self.send_signal(w.Inputs.data, data)
-        self.assertTrue(set(chain(data.domain.variables, data.domain.metas))
-                        < set(w.label_model))
+        self.assertTrue(
+            set(chain(data.domain.variables, data.domain.metas)) < set(w.label_model)
+        )
 
     def test_attr_label_from_data(self):
         w = self.widget
@@ -239,8 +258,9 @@ class TestOWMDS(WidgetTest, WidgetOutputsTestMixin):
         data = Table("zoo")
         dist = Euclidean(data)
         self.send_signal(w.Inputs.distances, dist)
-        self.assertTrue(set(chain(data.domain.variables, data.domain.metas))
-                        < set(w.label_model))
+        self.assertTrue(
+            set(chain(data.domain.variables, data.domain.metas)) < set(w.label_model)
+        )
 
     def test_attr_label_matrix_and_data(self):
         w = self.widget
@@ -253,14 +273,16 @@ class TestOWMDS(WidgetTest, WidgetOutputsTestMixin):
         dist = Euclidean(data)
         self.send_signal(w.Inputs.distances, dist)
         self.send_signal(w.Inputs.data, data)
-        self.assertTrue(set(chain(data.domain.variables, data.domain.metas))
-                        < set(w.label_model))
+        self.assertTrue(
+            set(chain(data.domain.variables, data.domain.metas)) < set(w.label_model)
+        )
 
         # Has data, but receives a signal without data: has to keep the label
         dist.row_items = None
         self.send_signal(w.Inputs.distances, dist)
-        self.assertTrue(set(chain(data.domain.variables, data.domain.metas))
-                        < set(w.label_model))
+        self.assertTrue(
+            set(chain(data.domain.variables, data.domain.metas)) < set(w.label_model)
+        )
 
         # Has matrix without data, and loses the data: remove the label
         self.send_signal(w.Inputs.data, None)
@@ -268,8 +290,9 @@ class TestOWMDS(WidgetTest, WidgetOutputsTestMixin):
 
         # Has matrix without data, receives data: add attrs to combo, select
         self.send_signal(w.Inputs.data, data)
-        self.assertTrue(set(chain(data.domain.variables, data.domain.metas))
-                        < set(w.label_model))
+        self.assertTrue(
+            set(chain(data.domain.variables, data.domain.metas)) < set(w.label_model)
+        )
 
 
 if __name__ == "__main__":

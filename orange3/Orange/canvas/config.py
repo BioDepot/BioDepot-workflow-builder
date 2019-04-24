@@ -11,9 +11,7 @@ import itertools
 
 import pkg_resources
 
-from AnyQt.QtGui import (
-    QPainter, QFont, QFontMetrics, QColor, QPixmap, QIcon
-)
+from AnyQt.QtGui import QPainter, QFont, QFontMetrics, QColor, QPixmap, QIcon
 
 from AnyQt.QtCore import Qt, QCoreApplication, QPoint, QRect, QSettings
 
@@ -45,93 +43,101 @@ def init():
     global init
     init = lambda: None
 
+
 rc = {}
 
 
-spec = \
-    [("startup/show-splash-screen", bool, True,
-      "Show splash screen at startup"),
-
-     ("startup/show-welcome-screen", bool, True,
-      "Show Welcome screen at startup"),
-
-     ("startup/check-updates", bool, True,
-      "Check for updates"),
-
-     ("stylesheet", str, "orange",
-      "QSS stylesheet to use"),
-
-     ("schemeinfo/show-at-new-scheme", bool, True,
-      "Show Workflow Properties when creating a new Workflow"),
-
-     ("mainwindow/scheme-margins-enabled", bool, False,
-      "Show margins around the workflow view"),
-
-     ("mainwindow/show-scheme-shadow", bool, True,
-      "Show shadow around the workflow view"),
-
-     ("mainwindow/toolbox-dock-exclusive", bool, True,
-      "Should the toolbox show only one expanded category at the time"),
-
-     ("mainwindow/toolbox-dock-floatable", bool, False,
-      "Is the canvas toolbox floatable (detachable from the main window)"),
-
-     ("mainwindow/toolbox-dock-movable", bool, True,
-      "Is the canvas toolbox movable (between left and right edge)"),
-
-     ("mainwindow/toolbox-dock-use-popover-menu", bool, True,
-      "Use a popover menu to select a widget when clicking on a category "
-      "button"),
-
-     ("mainwindow/number-of-recent-schemes", int, 15,
-      "Number of recent workflows to keep in history"),
-
-     ("schemeedit/show-channel-names", bool, True,
-      "Show channel names"),
-
-     ("schemeedit/show-link-state", bool, True,
-      "Show link state hints."),
-
-     ("schemeedit/enable-node-animations", bool, True,
-      "Enable node animations."),
-
-     ("schemeedit/freeze-on-load", bool, False,
-      "Freeze signal propagation when loading a workflow."),
-
-     ("quickmenu/trigger-on-double-click", bool, True,
-      "Show quick menu on double click."),
-
-     ("quickmenu/trigger-on-right-click", bool, True,
-      "Show quick menu on right click."),
-
-     ("quickmenu/trigger-on-space-key", bool, True,
-      "Show quick menu on space key press."),
-
-     ("quickmenu/trigger-on-any-key", bool, False,
-      "Show quick menu on double click."),
-
-     ("logging/level", int, 1, "Logging level"),
-
-     ("logging/show-on-error", bool, True, "Show log window on error"),
-
-     ("logging/dockable", bool, True, "Allow log window to be docked"),
-
-     ("help/open-in-external-browser", bool, False,
-      "Open help in an external browser"),
-
-     ("error-reporting/machine-id", str, '',
-     "Report custom name instead of machine ID"),
-
-     ("add-ons/allow-conda", bool, True,
-      "Install add-ons with conda"),
-
-     ("add-ons/pip-install-arguments", str, '',
-      'Arguments to pass to "pip install" when installing add-ons.'),
-
-     ("network/http-proxy", str, '', 'HTTP proxy.'),
-
-     ("network/https-proxy", str, '', 'HTTPS proxy.'),
-     ]
+spec = [
+    ("startup/show-splash-screen", bool, True, "Show splash screen at startup"),
+    ("startup/show-welcome-screen", bool, True, "Show Welcome screen at startup"),
+    ("startup/check-updates", bool, True, "Check for updates"),
+    ("stylesheet", str, "orange", "QSS stylesheet to use"),
+    (
+        "schemeinfo/show-at-new-scheme",
+        bool,
+        True,
+        "Show Workflow Properties when creating a new Workflow",
+    ),
+    (
+        "mainwindow/scheme-margins-enabled",
+        bool,
+        False,
+        "Show margins around the workflow view",
+    ),
+    (
+        "mainwindow/show-scheme-shadow",
+        bool,
+        True,
+        "Show shadow around the workflow view",
+    ),
+    (
+        "mainwindow/toolbox-dock-exclusive",
+        bool,
+        True,
+        "Should the toolbox show only one expanded category at the time",
+    ),
+    (
+        "mainwindow/toolbox-dock-floatable",
+        bool,
+        False,
+        "Is the canvas toolbox floatable (detachable from the main window)",
+    ),
+    (
+        "mainwindow/toolbox-dock-movable",
+        bool,
+        True,
+        "Is the canvas toolbox movable (between left and right edge)",
+    ),
+    (
+        "mainwindow/toolbox-dock-use-popover-menu",
+        bool,
+        True,
+        "Use a popover menu to select a widget when clicking on a category " "button",
+    ),
+    (
+        "mainwindow/number-of-recent-schemes",
+        int,
+        15,
+        "Number of recent workflows to keep in history",
+    ),
+    ("schemeedit/show-channel-names", bool, True, "Show channel names"),
+    ("schemeedit/show-link-state", bool, True, "Show link state hints."),
+    ("schemeedit/enable-node-animations", bool, True, "Enable node animations."),
+    (
+        "schemeedit/freeze-on-load",
+        bool,
+        False,
+        "Freeze signal propagation when loading a workflow.",
+    ),
+    (
+        "quickmenu/trigger-on-double-click",
+        bool,
+        True,
+        "Show quick menu on double click.",
+    ),
+    ("quickmenu/trigger-on-right-click", bool, True, "Show quick menu on right click."),
+    (
+        "quickmenu/trigger-on-space-key",
+        bool,
+        True,
+        "Show quick menu on space key press.",
+    ),
+    ("quickmenu/trigger-on-any-key", bool, False, "Show quick menu on double click."),
+    ("logging/level", int, 1, "Logging level"),
+    ("logging/show-on-error", bool, True, "Show log window on error"),
+    ("logging/dockable", bool, True, "Allow log window to be docked"),
+    ("help/open-in-external-browser", bool, False, "Open help in an external browser"),
+    ("error-reporting/machine-id", str, "", "Report custom name instead of machine ID"),
+    ("add-ons/allow-conda", bool, True, "Install add-ons with conda"),
+    (
+        "add-ons/pip-install-arguments",
+        str,
+        "",
+        'Arguments to pass to "pip install" when installing add-ons.',
+    ),
+    ("network/http-proxy", str, "", "HTTP proxy."),
+    ("network/https-proxy", str, "", "HTTPS proxy."),
+]
 
 spec = [config_slot(*t) for t in spec]
 
@@ -149,6 +155,7 @@ def data_dir():
 
     """
     from Orange.misc import environ
+
     path = os.path.join(environ.data_dir(), "canvas")
 
     if not os.path.isdir(path):
@@ -162,6 +169,7 @@ def cache_dir():
 
     """
     from Orange.misc import environ
+
     path = os.path.join(environ.cache_dir(), "canvas")
 
     if not os.path.isdir(path):
@@ -190,6 +198,7 @@ def widget_settings_dir():
     Return the widget settings directory.
     """
     from Orange.misc import environ
+
     return environ.widget_settings_dir()
 
 
@@ -219,8 +228,7 @@ def recent_schemes():
             recent = pickle.load(f)
 
     # Filter out files not found on the file system
-    recent = [(title, path) for title, path in recent \
-              if os.path.exists(path)]
+    recent = [(title, path) for title, path in recent if os.path.exists(path)]
     return recent
 
 
@@ -242,6 +250,7 @@ WIDGETS_ENTRY = "orange.widgets"
 # Orange's setup.py, but that would not guaranty this entry point
 # is the first in a list.
 
+
 def default_entry_point():
     """
     Return a default orange.widgets entry point for loading
@@ -249,8 +258,7 @@ def default_entry_point():
 
     """
     dist = pkg_resources.get_distribution("Orange3")
-    ep = pkg_resources.EntryPoint("Orange Widgets", "Orange.widgets",
-                                  dist=dist)
+    ep = pkg_resources.EntryPoint("Orange Widgets", "Orange.widgets", dist=dist)
     return ep
 
 
@@ -261,13 +269,12 @@ def widgets_entry_points():
 
     """
     ep_iter = pkg_resources.iter_entry_points(WIDGETS_ENTRY)
-    chain = [[default_entry_point()],
-             ep_iter
-             ]
+    chain = [[default_entry_point()], ep_iter]
     return itertools.chain(*chain)
 
+
 #: Parameters for searching add-on packages in PyPi using xmlrpc api.
-ADDON_KEYWORD = 'orange3 add-on'
+ADDON_KEYWORD = "orange3 add-on"
 ADDON_PYPI_SEARCH_SPEC = {"keywords": ADDON_KEYWORD}
 #: Entry points by which add-ons register with pkg_resources.
 ADDON_ENTRY = "orange3.addon"
@@ -277,8 +284,7 @@ def splash_screen():
     """
     """
     pm = QPixmap(
-        pkg_resources.resource_filename(
-            __name__, "icons/orange-splash-screen.png")
+        pkg_resources.resource_filename(__name__, "icons/orange-splash-screen.png")
     )
 
     version = QCoreApplication.applicationVersion()
@@ -306,8 +312,5 @@ def application_icon():
     """
     Return the main application icon.
     """
-    path = pkg_resources.resource_filename(
-        __name__, "icons/orange-canvas.svg"
-    )
+    path = pkg_resources.resource_filename(__name__, "icons/orange-canvas.svg")
     return QIcon(path)
-

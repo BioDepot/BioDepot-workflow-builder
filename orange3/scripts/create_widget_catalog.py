@@ -7,7 +7,13 @@ import numpy as np
 from AnyQt import QtGui
 from AnyQt.QtCore import QRectF, Qt, QTimer
 from AnyQt.QtGui import QImage
-from AnyQt.QtWidgets import QGraphicsScene, QApplication, QWidget, QGraphicsView, QHBoxLayout
+from AnyQt.QtWidgets import (
+    QGraphicsScene,
+    QApplication,
+    QWidget,
+    QGraphicsView,
+    QHBoxLayout,
+)
 
 from Orange.canvas import config
 from Orange.canvas.canvas.items import NodeItem
@@ -51,14 +57,16 @@ class WidgetCatalog:
             widgets = []
             result.append((category.name, widgets))
             for widget in category.widgets:
-                widgets.append({
-                    "text": widget.name,
-                    "doc": self.__get_help(widget),
-                    "img": self.__get_icon(widget, category),
-                    "keyword": widget.keywords,
-                })
+                widgets.append(
+                    {
+                        "text": widget.name,
+                        "doc": self.__get_help(widget),
+                        "img": self.__get_icon(widget, category),
+                        "keyword": widget.keywords,
+                    }
+                )
 
-        with open(path.join(self.output_dir, "widgets.json"), 'wt') as f:
+        with open(path.join(self.output_dir, "widgets.json"), "wt") as f:
             json.dump(result, f, indent=1)
         print("Done")
 
@@ -66,12 +74,8 @@ class WidgetCatalog:
     def __get_widget_registry():
         widget_discovery = QtWidgetDiscovery()
         widget_registry = QtWidgetRegistry()
-        widget_discovery.found_category.connect(
-            widget_registry.register_category
-        )
-        widget_discovery.found_widget.connect(
-            widget_registry.register_widget
-        )
+        widget_discovery.found_category.connect(widget_registry.register_category)
+        widget_discovery.found_widget.connect(widget_registry.register_widget)
         widget_discovery.run(config.widgets_entry_points())
 
         # Fixup category.widgets list
@@ -89,7 +93,7 @@ class WidgetCatalog:
         w = IconWidget()
         w.set_widget(widget, category)
         w.show()
-        #self.app.processEvents()
+        # self.app.processEvents()
         filename = "icons/{}.png".format(widget.qualified_name)
         w.render_as_png(path.join(self.output_dir, filename))
         w.hide()
@@ -136,17 +140,21 @@ class IconWidget(QWidget):
     def __transparent_png(self):
         # PyQt is stupid and does not increment reference count on bg
         self.__bg = bg = np.zeros((50, 50, 4), dtype=np.ubyte)
-        return QImage(bg.ctypes.data, bg.shape[1], bg.shape[0], QtGui.QImage.Format_ARGB32)
+        return QImage(
+            bg.ctypes.data, bg.shape[1], bg.shape[0], QtGui.QImage.Format_ARGB32
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from optparse import OptionParser
 
     parser = OptionParser(usage="usage: %prog --output <outputdir> [options]")
-    parser.add_option('--url-prefix', dest="prefix",
-                      help="prefix to prepend to image urls")
-    parser.add_option('--output', dest="output",
-                      help="path where widgets.json will be created")
+    parser.add_option(
+        "--url-prefix", dest="prefix", help="prefix to prepend to image urls"
+    )
+    parser.add_option(
+        "--output", dest="output", help="path where widgets.json will be created"
+    )
 
     options, args = parser.parse_args()
     if not options.output:

@@ -22,8 +22,7 @@ class TestClusterTableModel(unittest.TestCase):
         self.assertEqual(model.rowCount(), 3)
         ind0, ind1 = model.index(0, 0), model.index(1, 0)
         self.assertEqual(model.flags(ind0), Qt.NoItemFlags)
-        self.assertEqual(model.flags(ind1),
-                         Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+        self.assertEqual(model.flags(ind1), Qt.ItemIsEnabled | Qt.ItemIsSelectable)
         data = model.data
         self.assertEqual(data(ind0), "NA")
         self.assertEqual(data(ind1), "0.250")
@@ -32,8 +31,9 @@ class TestClusterTableModel(unittest.TestCase):
         self.assertIsNone(data(ind0, gui.BarRatioRole))
         self.assertAlmostEqual(data(ind1, gui.BarRatioRole), 0.250)
 
-        self.assertAlmostEqual(data(ind1, Qt.TextAlignmentRole),
-                               Qt.AlignVCenter | Qt.AlignLeft)
+        self.assertAlmostEqual(
+            data(ind1, Qt.TextAlignmentRole), Qt.AlignVCenter | Qt.AlignLeft
+        )
 
         self.assertEqual(model.headerData(1, Qt.Vertical), "4")
 
@@ -50,10 +50,7 @@ class TestOWKMeans(WidgetTest):
         super().tearDown()
 
     def test_migrate_version_1_settings(self):
-        widget = self.create_widget(
-            OWKMeans,
-            stored_settings={'auto_apply': False}
-        )
+        widget = self.create_widget(OWKMeans, stored_settings={"auto_apply": False})
         self.assertFalse(widget.auto_commit)
 
     def test_optimization_report_display(self):
@@ -159,15 +156,16 @@ class TestOWKMeans(WidgetTest):
         widget.auto_commit = False
         self.send_signal(self.widget.Inputs.data, self.iris)
 
-        with patch.object(widget, "_compute_clustering",
-                          wraps=widget._compute_clustering) as compute:
+        with patch.object(
+            widget, "_compute_clustering", wraps=widget._compute_clustering
+        ) as compute:
 
             widget.k = 3
             widget.optimize_k = False
 
             self.commit_and_wait()
             self.assertEqual(compute.call_count, 1)
-            self.assertEqual(compute.call_args[1]['k'], 3)
+            self.assertEqual(compute.call_args[1]["k"], 3)
 
             widget.k_from = 2
             widget.k_to = 3
@@ -178,7 +176,7 @@ class TestOWKMeans(WidgetTest):
             # Since 3 was already computed before when we weren't optimizing,
             # we only need to compute for 3
             self.assertEqual(compute.call_count, 1)
-            self.assertEqual(compute.call_args[1]['k'], 2)
+            self.assertEqual(compute.call_args[1]["k"], 2)
 
             # Commiting again should not recompute the clusterings
             compute.reset_mock()
@@ -222,8 +220,10 @@ class TestOWKMeans(WidgetTest):
             scores, start_k = set_scores.call_args[0]
             self.assertEqual(
                 scores,
-                [km if isinstance(km, str) else km.silhouette
-                 for km in (widget.clusterings[k] for k in range(3, 9))]
+                [
+                    km if isinstance(km, str) else km.silhouette
+                    for km in (widget.clusterings[k] for k in range(3, 9))
+                ],
             )
             self.assertEqual(start_k, 3)
 
@@ -285,10 +285,13 @@ class TestOWKMeans(WidgetTest):
         widget = self.widget
         widget.k = 4
         widget.optimize_k = False
-        with patch.object(widget, "report_items") as report_items, \
-                patch.object(widget, "report_data") as report_data, \
-                patch.object(widget, "report_table") as report_table, \
-                patch.object(widget, "selected_row", new=Mock(return_value=42)):
+        with patch.object(widget, "report_items") as report_items, patch.object(
+            widget, "report_data"
+        ) as report_data, patch.object(
+            widget, "report_table"
+        ) as report_table, patch.object(
+            widget, "selected_row", new=Mock(return_value=42)
+        ):
             widget.send_report()
             items = report_items.call_args[0][0]
             self.assertEqual(items[0], ("Number of clusters", 4))
@@ -309,8 +312,7 @@ class TestOWKMeans(WidgetTest):
             items = report_items.call_args[0][0]
             self.assertEqual(items[0], ("Number of clusters", 44))
             self.assertIs(report_data.call_args[0][1], data)
-            self.assertIs(report_table.call_args[0][1],
-                          widget.table_view)
+            self.assertIs(report_table.call_args[0][1], widget.table_view)
 
     def test_not_enough_rows(self):
         """
@@ -384,19 +386,17 @@ class TestOWKMeans(WidgetTest):
         meta1, meta2 = np.ones((5, 1)), np.ones((5, 2))
 
         table1 = Table.from_numpy(
-            domain=Domain.from_numpy(X=x, Y=y1, metas=meta1),
-            X=x, Y=y1, metas=meta1,
+            domain=Domain.from_numpy(X=x, Y=y1, metas=meta1), X=x, Y=y1, metas=meta1
         )
         # X is same, should not cause update
         table2 = Table.from_numpy(
-            domain=Domain.from_numpy(X=x, Y=y2, metas=meta2),
-            X=x, Y=y2, metas=meta2,
+            domain=Domain.from_numpy(X=x, Y=y2, metas=meta2), X=x, Y=y2, metas=meta2
         )
         # X is different, should cause update
         table3 = table1.copy()
         table3.X[:, 0] = 1
 
-        with patch.object(self.widget, 'commit') as commit:
+        with patch.object(self.widget, "commit") as commit:
             self.send_signal(self.widget.Inputs.data, table1)
             self.commit_and_wait()
             call_count = commit.call_count

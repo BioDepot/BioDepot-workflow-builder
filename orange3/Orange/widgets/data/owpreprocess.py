@@ -5,35 +5,54 @@ import pkg_resources
 import numpy
 
 from AnyQt.QtWidgets import (
-    QWidget, QButtonGroup, QGroupBox, QRadioButton, QSlider,
-    QDoubleSpinBox, QComboBox, QSpinBox, QListView, QLabel,
-    QScrollArea, QVBoxLayout, QHBoxLayout, QFormLayout,
-    QSizePolicy, QApplication, QCheckBox
+    QWidget,
+    QButtonGroup,
+    QGroupBox,
+    QRadioButton,
+    QSlider,
+    QDoubleSpinBox,
+    QComboBox,
+    QSpinBox,
+    QListView,
+    QLabel,
+    QScrollArea,
+    QVBoxLayout,
+    QHBoxLayout,
+    QFormLayout,
+    QSizePolicy,
+    QApplication,
+    QCheckBox,
 )
 
-from AnyQt.QtGui import (
-    QIcon, QStandardItemModel, QStandardItem
-)
+from AnyQt.QtGui import QIcon, QStandardItemModel, QStandardItem
 
-from AnyQt.QtCore import (
-    Qt, QEvent, QSize, QMimeData, QTimer
-)
+from AnyQt.QtCore import Qt, QEvent, QSize, QMimeData, QTimer
 
 from AnyQt.QtCore import pyqtSignal as Signal, pyqtSlot as Slot
 
 
 import Orange.data
 from Orange import preprocess
-from Orange.preprocess import Continuize, ProjectPCA, \
-    ProjectCUR, Scale as _Scale, Randomize as _Randomize
+from Orange.preprocess import (
+    Continuize,
+    ProjectPCA,
+    ProjectCUR,
+    Scale as _Scale,
+    Randomize as _Randomize,
+)
 from Orange.widgets import widget, gui, settings
 from Orange.widgets.utils.overlay import OverlayWidget
 from Orange.widgets.utils.sql import check_sql_input
 from Orange.widgets.widget import Input, Output
 
 from Orange.widgets.data.utils.preprocess import (
-    BaseEditor, blocked, StandardItemModel, DescriptionRole,
-    ParametersRole, Controller, SequenceFlow
+    BaseEditor,
+    blocked,
+    StandardItemModel,
+    DescriptionRole,
+    ParametersRole,
+    Controller,
+    SequenceFlow,
 )
 
 
@@ -44,6 +63,7 @@ class _NoneDisc(preprocess.discretize.Discretization):
     all discrete features from the domain.
 
     """
+
     _reprable_module = True
 
     def __call__(self, data, variable):
@@ -54,21 +74,22 @@ class DiscretizeEditor(BaseEditor):
     """
     Editor for preprocess.Discretize.
     """
+
     #: Discretize methods
     NoDisc, EqualWidth, EqualFreq, Drop, EntropyMDL = 0, 1, 2, 3, 4
     Discretizers = {
         NoDisc: (None, {}),
         EqualWidth: (preprocess.discretize.EqualWidth, {"n": 4}),
-        EqualFreq:  (preprocess.discretize.EqualFreq, {"n": 4}),
+        EqualFreq: (preprocess.discretize.EqualFreq, {"n": 4}),
         Drop: (_NoneDisc, {}),
-        EntropyMDL: (preprocess.discretize.EntropyMDL, {"force": False})
+        EntropyMDL: (preprocess.discretize.EntropyMDL, {"force": False}),
     }
     Names = {
         NoDisc: "None",
         EqualWidth: "Equal width discretization",
         EqualFreq: "Equal frequency discretization",
         Drop: "Remove numeric features",
-        EntropyMDL: "Entropy-MDL discretization"
+        EntropyMDL: "Entropy-MDL discretization",
     }
 
     def __init__(self, parent=None, **kwargs):
@@ -80,11 +101,9 @@ class DiscretizeEditor(BaseEditor):
         self.setLayout(layout)
         self.__group = group = QButtonGroup(self, exclusive=True)
 
-        for method in [self.EntropyMDL, self.EqualFreq, self.EqualWidth,
-                       self.Drop]:
+        for method in [self.EntropyMDL, self.EqualFreq, self.EqualWidth, self.Drop]:
             rb = QRadioButton(
-                self, text=self.Names[method],
-                checked=self.__method == method
+                self, text=self.Names[method], checked=self.__method == method
             )
             layout.addWidget(rb)
             group.addButton(rb, method)
@@ -92,15 +111,17 @@ class DiscretizeEditor(BaseEditor):
         group.buttonClicked.connect(self.__on_buttonClicked)
 
         self.__slbox = slbox = QGroupBox(
-            title="Number of intervals (for equal width/frequency)",
-            flat=True
+            title="Number of intervals (for equal width/frequency)", flat=True
         )
         slbox.setLayout(QHBoxLayout())
         self.__slider = slider = QSlider(
             orientation=Qt.Horizontal,
-            minimum=2, maximum=10, value=self.__nintervals,
+            minimum=2,
+            maximum=10,
+            value=self.__nintervals,
             enabled=self.__method in [self.EqualFreq, self.EqualWidth],
-            pageStep=1, tickPosition=QSlider.TicksBelow
+            pageStep=1,
+            tickPosition=QSlider.TicksBelow,
         )
         slider.valueChanged.connect(self.__on_valueChanged)
         slbox.layout().addWidget(slider)
@@ -118,9 +139,7 @@ class DiscretizeEditor(BaseEditor):
             self.__method = method
             b = self.__group.button(method)
             b.setChecked(True)
-            self.__slider.setEnabled(
-                method in [self.EqualFreq, self.EqualWidth]
-            )
+            self.__slider.setEnabled(method in [self.EqualFreq, self.EqualWidth])
             self.changed.emit()
 
     def method(self):
@@ -184,22 +203,27 @@ class DiscretizeEditor(BaseEditor):
         return preprocess.Discretize(method(**params), remove_const=False)
 
     def __repr__(self):
-        n_int = ", Number of intervals: {}".format(self.__nintervals) \
-            if self.__method in [self.EqualFreq, self.EqualWidth] else ""
+        n_int = (
+            ", Number of intervals: {}".format(self.__nintervals)
+            if self.__method in [self.EqualFreq, self.EqualWidth]
+            else ""
+        )
         return "{}{}".format(self.Names[self.__method], n_int)
 
 
 class ContinuizeEditor(BaseEditor):
     _Type = type(Continuize.FirstAsBase)
 
-    Continuizers = OrderedDict([
-        (Continuize.FrequentAsBase, "Most frequent is base"),
-        (Continuize.Indicators, "One feature per value"),
-        (Continuize.RemoveMultinomial, "Remove non-binary features"),
-        (Continuize.Remove, "Remove categorical features"),
-        (Continuize.AsOrdinal, "Treat as ordinal"),
-        (Continuize.AsNormalizedOrdinal, "Divide by number of values")
-    ])
+    Continuizers = OrderedDict(
+        [
+            (Continuize.FrequentAsBase, "Most frequent is base"),
+            (Continuize.Indicators, "One feature per value"),
+            (Continuize.RemoveMultinomial, "Remove non-binary features"),
+            (Continuize.Remove, "Remove categorical features"),
+            (Continuize.AsOrdinal, "Treat as ordinal"),
+            (Continuize.AsNormalizedOrdinal, "Divide by number of values"),
+        ]
+    )
 
     def __init__(self, parent=None, **kwargs):
         super().__init__(parent, **kwargs)
@@ -209,11 +233,8 @@ class ContinuizeEditor(BaseEditor):
         group.buttonClicked.connect(self.__on_buttonClicked)
 
         for treatment, text in ContinuizeEditor.Continuizers.items():
-            rb = QRadioButton(
-                text=text,
-                checked=self.__treatment == treatment)
-            group.addButton(rb, _enum_to_index(ContinuizeEditor._Type,
-                                               treatment))
+            rb = QRadioButton(text=text, checked=self.__treatment == treatment)
+            group.addButton(rb, _enum_to_index(ContinuizeEditor._Type, treatment))
             self.layout().addWidget(rb)
 
         self.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Fixed)
@@ -238,7 +259,8 @@ class ContinuizeEditor(BaseEditor):
 
     def __on_buttonClicked(self):
         self.__treatment = _index_to_enum(
-            ContinuizeEditor._Type, self.__group.checkedId())
+            ContinuizeEditor._Type, self.__group.checkedId()
+        )
         self.changed.emit()
         self.edited.emit()
 
@@ -262,8 +284,15 @@ class _RemoveNaNRows(preprocess.preprocess.Preprocess):
 
 
 class ImputeEditor(BaseEditor):
-    (NoImputation, Constant, Average,
-     Model, Random, DropRows, DropColumns) = 0, 1, 2, 3, 4, 5, 6
+    (NoImputation, Constant, Average, Model, Random, DropRows, DropColumns) = (
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+    )
 
     Imputers = {
         NoImputation: (None, {}),
@@ -271,7 +300,7 @@ class ImputeEditor(BaseEditor):
         Average: (preprocess.impute.Average(), {}),
         #         Model: (preprocess.impute.Model, {}),
         Random: (preprocess.impute.Random(), {}),
-        DropRows: (None, {})
+        DropRows: (None, {}),
     }
     Names = {
         NoImputation: "Don't impute.",
@@ -357,7 +386,7 @@ class UnivariateFeatureSelect(QWidget):
 
         box = QGroupBox(title="Score", flat=True)
         box.setLayout(QVBoxLayout())
-        self.__cb = cb = QComboBox(self, )
+        self.__cb = cb = QComboBox(self)
         self.__cb.currentIndexChanged.connect(self.setScoreIndex)
         self.__cb.activated.connect(self.edited)
         box.layout().addWidget(cb)
@@ -372,8 +401,9 @@ class UnivariateFeatureSelect(QWidget):
         fixedrb = QRadioButton("Fixed:", checked=True)
         group.addButton(fixedrb, UnivariateFeatureSelect.Fixed)
         kspin = QSpinBox(
-            minimum=1, value=self.__k,
-            enabled=self.__strategy == UnivariateFeatureSelect.Fixed
+            minimum=1,
+            value=self.__k,
+            enabled=self.__strategy == UnivariateFeatureSelect.Fixed,
         )
         kspin.valueChanged[int].connect(self.setK)
         kspin.editingFinished.connect(self.edited)
@@ -383,9 +413,12 @@ class UnivariateFeatureSelect(QWidget):
         percrb = QRadioButton("Percentile:")
         group.addButton(percrb, UnivariateFeatureSelect.Percentile)
         pspin = QDoubleSpinBox(
-            minimum=0.0, maximum=100.0, singleStep=0.5,
-            value=self.__p, suffix="%",
-            enabled=self.__strategy == UnivariateFeatureSelect.Percentile
+            minimum=0.0,
+            maximum=100.0,
+            singleStep=0.5,
+            value=self.__p,
+            suffix="%",
+            enabled=self.__strategy == UnivariateFeatureSelect.Percentile,
         )
 
         pspin.valueChanged[float].connect(self.setP)
@@ -396,9 +429,9 @@ class UnivariateFeatureSelect(QWidget):
         percrb.setEnabled(False)
         form.addRow(percrb, pspin)
 
-#         form.addRow(QRadioButton("FDR"), QDoubleSpinBox())
-#         form.addRow(QRadioButton("FPR"), QDoubleSpinBox())
-#         form.addRow(QRadioButton("FWE"), QDoubleSpinBox())
+        #         form.addRow(QRadioButton("FDR"), QDoubleSpinBox())
+        #         form.addRow(QRadioButton("FPR"), QDoubleSpinBox())
+        #         form.addRow(QRadioButton("FWE"), QDoubleSpinBox())
 
         self.__group.buttonClicked.connect(self.__on_buttonClicked)
         box.setLayout(form)
@@ -477,7 +510,7 @@ class FeatureSelectEditor(BaseEditor):
         ("ANOVA", preprocess.score.ANOVA),
         ("Chi2", preprocess.score.Chi2),
         ("RReliefF", preprocess.score.RReliefF),
-        ("Univariate Linear Regression", preprocess.score.UnivariateLinearRegression)
+        ("Univariate Linear Regression", preprocess.score.UnivariateLinearRegression),
     ]
 
     def __init__(self, parent=None):
@@ -490,15 +523,16 @@ class FeatureSelectEditor(BaseEditor):
 
         self.__uni_fs = UnivariateFeatureSelect()
         self.__uni_fs.setItems(
-            [{"text": "Information Gain", "tooltip": ""},
-             {"text": "Gain Ratio"},
-             {"text": "Gini Index"},
-             {"text": "ReliefF"},
-             {"text": "Fast Correlation Based Filter"},
-             {"text": "ANOVA"},
-             {"text": "Chi2"},
-             {"text": "RReliefF"},
-             {"text": "Univariate Linear Regression"}
+            [
+                {"text": "Information Gain", "tooltip": ""},
+                {"text": "Gain Ratio"},
+                {"text": "Gini Index"},
+                {"text": "ReliefF"},
+                {"text": "Fast Correlation Based Filter"},
+                {"text": "ANOVA"},
+                {"text": "Chi2"},
+                {"text": "RReliefF"},
+                {"text": "Univariate Linear Regression"},
             ]
         )
         self.layout().addWidget(self.__uni_fs)
@@ -527,10 +561,13 @@ class FeatureSelectEditor(BaseEditor):
     def __repr__(self):
         params = self.__uni_fs.parameters()
         return "Score: {}, Strategy (Fixed): {}".format(
-            self.MEASURES[params["score"]][0], params["k"])
+            self.MEASURES[params["score"]][0], params["k"]
+        )
+
 
 # TODO: Model based FS (random forest variable importance, ...), RFE
 # Unsupervised (min variance, constant, ...)??
+
 
 class RandomFeatureSelectEditor(BaseEditor):
     #: Strategy
@@ -552,8 +589,9 @@ class RandomFeatureSelectEditor(BaseEditor):
         fixedrb = QRadioButton("Fixed", checked=True)
         group.addButton(fixedrb, RandomFeatureSelectEditor.Fixed)
         kspin = QSpinBox(
-            minimum=1, value=self.__k,
-            enabled=self.__strategy == RandomFeatureSelectEditor.Fixed
+            minimum=1,
+            value=self.__k,
+            enabled=self.__strategy == RandomFeatureSelectEditor.Fixed,
         )
         kspin.valueChanged[int].connect(self.setK)
         kspin.editingFinished.connect(self.edited)
@@ -563,9 +601,12 @@ class RandomFeatureSelectEditor(BaseEditor):
         percrb = QRadioButton("Percentage")
         group.addButton(percrb, RandomFeatureSelectEditor.Percentage)
         pspin = QDoubleSpinBox(
-            minimum=0.0, maximum=100.0, singleStep=0.5,
-            value=self.__p, suffix="%",
-            enabled=self.__strategy == RandomFeatureSelectEditor.Percentage
+            minimum=0.0,
+            maximum=100.0,
+            singleStep=0.5,
+            value=self.__p,
+            suffix="%",
+            enabled=self.__strategy == RandomFeatureSelectEditor.Percentage,
         )
         pspin.valueChanged[float].connect(self.setP)
         pspin.editingFinished.connect(self.edited)
@@ -630,7 +671,7 @@ class RandomFeatureSelectEditor(BaseEditor):
         if strategy == RandomFeatureSelectEditor.Fixed:
             return preprocess.fss.SelectRandomFeatures(k=k)
         elif strategy == RandomFeatureSelectEditor.Percentage:
-            return preprocess.fss.SelectRandomFeatures(k=p/100)
+            return preprocess.fss.SelectRandomFeatures(k=p / 100)
         else:
             # further implementations
             raise NotImplementedError
@@ -658,12 +699,10 @@ class Scale(BaseEditor):
 
         form = QFormLayout()
         self.__centercb = QComboBox()
-        self.__centercb.addItems(["No Centering", "Center by Mean",
-                                  "Center by Median"])
+        self.__centercb.addItems(["No Centering", "Center by Mean", "Center by Median"])
 
         self.__scalecb = QComboBox()
-        self.__scalecb.addItems(["No scaling", "Scale by SD",
-                                 "Scale by span"])
+        self.__scalecb.addItems(["No scaling", "Scale by SD", "Scale by span"])
 
         form.addRow("Center:", self.__centercb)
         form.addRow("Scale:", self.__scalecb)
@@ -680,10 +719,12 @@ class Scale(BaseEditor):
         self.__scalecb.setCurrentIndex(_enum_to_index(_Scale.ScalingType, scale))
 
     def parameters(self):
-        return {"center": _index_to_enum(_Scale.CenteringType,
-                                         self.__centercb.currentIndex()),
-                "scale": _index_to_enum(_Scale.ScalingType,
-                                        self.__scalecb.currentIndex())}
+        return {
+            "center": _index_to_enum(
+                _Scale.CenteringType, self.__centercb.currentIndex()
+            ),
+            "scale": _index_to_enum(_Scale.ScalingType, self.__scalecb.currentIndex()),
+        }
 
     @staticmethod
     def createinstance(params):
@@ -692,8 +733,9 @@ class Scale(BaseEditor):
         return _Scale(center=center, scale=scale)
 
     def __repr__(self):
-        return "{}, {}".format(self.__centercb.currentText(),
-                               self.__scalecb.currentText())
+        return "{}, {}".format(
+            self.__centercb.currentText(), self.__scalecb.currentText()
+        )
 
 
 class Randomize(BaseEditor):
@@ -705,9 +747,7 @@ class Randomize(BaseEditor):
 
         form = QFormLayout()
         self.__rand_type_cb = QComboBox()
-        self.__rand_type_cb.addItems(["Classes",
-                                      "Features",
-                                      "Meta data"])
+        self.__rand_type_cb.addItems(["Classes", "Features", "Meta data"])
 
         self.__rand_type_cb.currentIndexChanged.connect(self.changed)
         self.__rand_type_cb.activated.connect(self.edited)
@@ -725,9 +765,12 @@ class Randomize(BaseEditor):
         self.__rand_seed_ch.setChecked(params.get("rand_seed", 1) or 0)
 
     def parameters(self):
-        return {"rand_type": _index_to_enum(_Randomize.Type,
-                                            self.__rand_type_cb.currentIndex()),
-                "rand_seed": 1 if self.__rand_seed_ch.isChecked() else None}
+        return {
+            "rand_type": _index_to_enum(
+                _Randomize.Type, self.__rand_type_cb.currentIndex()
+            ),
+            "rand_seed": 1 if self.__rand_seed_ch.isChecked() else None,
+        }
 
     @staticmethod
     def createinstance(params):
@@ -736,13 +779,13 @@ class Randomize(BaseEditor):
         return _Randomize(rand_type=rand_type, rand_seed=rand_seed)
 
     def __repr__(self):
-        return "{}, {}".format(self.__rand_type_cb.currentText(),
-                               "Replicable" if self.__rand_seed_ch.isChecked()
-                               else "Not replicable")
+        return "{}, {}".format(
+            self.__rand_type_cb.currentText(),
+            "Replicable" if self.__rand_seed_ch.isChecked() else "Not replicable",
+        )
 
 
 class PCA(BaseEditor):
-
     def __init__(self, parent=None, **kwargs):
         super().__init__(parent, **kwargs)
         self.setLayout(QVBoxLayout())
@@ -779,7 +822,6 @@ class PCA(BaseEditor):
 
 
 class CUR(BaseEditor):
-
     def __init__(self, parent=None, **kwargs):
         super().__init__(parent, **kwargs)
         self.setLayout(QVBoxLayout())
@@ -792,8 +834,8 @@ class CUR(BaseEditor):
         self.rspin.valueChanged[int].connect(self.setR)
         self.rspin.editingFinished.connect(self.edited)
         self.espin = QDoubleSpinBox(
-            minimum=0.1, maximum=100.0, singleStep=0.1,
-            value=self.max_error)
+            minimum=0.1, maximum=100.0, singleStep=0.1, value=self.max_error
+        )
         self.espin.valueChanged[float].connect(self.setE)
         self.espin.editingFinished.connect(self.edited)
 
@@ -827,8 +869,9 @@ class CUR(BaseEditor):
         return ProjectCUR(rank=rank, max_error=max_error)
 
     def __repr__(self):
-        return "Rank: {}, Relative error: {}".format(self.rspin.value(),
-                                                     self.espin.value())
+        return "Rank: {}, Relative error: {}".format(
+            self.rspin.value(), self.espin.value()
+        )
 
 
 # This is intended for future improvements.
@@ -841,9 +884,20 @@ class Description:
     """
     A description of an action/function.
     """
-    def __init__(self, title, icon=None, summary=None, input=None, output=None,
-                 requires=None, note=None, related=None, keywords=None,
-                 helptopic=None):
+
+    def __init__(
+        self,
+        title,
+        icon=None,
+        summary=None,
+        input=None,
+        output=None,
+        requires=None,
+        note=None,
+        related=None,
+        keywords=None,
+        helptopic=None,
+    ):
         self.title = title
         self.icon = icon
         self.summary = summary
@@ -871,60 +925,68 @@ def icon_path(basename):
 
 PREPROCESSORS = [
     PreprocessAction(
-        "Discretize", "orange.preprocess.discretize", "Discretization",
-        Description("Discretize Continuous Variables",
-                    icon_path("Discretize.svg")),
-        DiscretizeEditor
+        "Discretize",
+        "orange.preprocess.discretize",
+        "Discretization",
+        Description("Discretize Continuous Variables", icon_path("Discretize.svg")),
+        DiscretizeEditor,
     ),
     PreprocessAction(
-        "Continuize", "orange.preprocess.continuize", "Continuization",
-        Description("Continuize Discrete Variables",
-                    icon_path("Continuize.svg")),
-        ContinuizeEditor
+        "Continuize",
+        "orange.preprocess.continuize",
+        "Continuization",
+        Description("Continuize Discrete Variables", icon_path("Continuize.svg")),
+        ContinuizeEditor,
     ),
     PreprocessAction(
-        "Impute", "orange.preprocess.impute", "Impute",
-        Description("Impute Missing Values",
-                    icon_path("Impute.svg")),
-        ImputeEditor
+        "Impute",
+        "orange.preprocess.impute",
+        "Impute",
+        Description("Impute Missing Values", icon_path("Impute.svg")),
+        ImputeEditor,
     ),
     PreprocessAction(
-        "Feature Selection", "orange.preprocess.fss", "Feature Selection",
-        Description("Select Relevant Features",
-                    icon_path("SelectColumns.svg")),
-        FeatureSelectEditor
+        "Feature Selection",
+        "orange.preprocess.fss",
+        "Feature Selection",
+        Description("Select Relevant Features", icon_path("SelectColumns.svg")),
+        FeatureSelectEditor,
     ),
     PreprocessAction(
-        "Random Feature Selection", "orange.preprocess.randomfss",
         "Random Feature Selection",
-        Description("Select Random Features",
-                    icon_path("SelectColumnsRandom.svg")),
-        RandomFeatureSelectEditor
+        "orange.preprocess.randomfss",
+        "Random Feature Selection",
+        Description("Select Random Features", icon_path("SelectColumnsRandom.svg")),
+        RandomFeatureSelectEditor,
     ),
     PreprocessAction(
-        "Normalize", "orange.preprocess.scale", "Scale",
-        Description("Normalize Features",
-                    icon_path("Normalize.svg")),
-        Scale
+        "Normalize",
+        "orange.preprocess.scale",
+        "Scale",
+        Description("Normalize Features", icon_path("Normalize.svg")),
+        Scale,
     ),
     PreprocessAction(
-        "Randomize", "orange.preprocess.randomize", "Randomization",
-        Description("Randomize",
-                    icon_path("Random.svg")),
-        Randomize
+        "Randomize",
+        "orange.preprocess.randomize",
+        "Randomization",
+        Description("Randomize", icon_path("Random.svg")),
+        Randomize,
     ),
     PreprocessAction(
-        "PCA", "orange.preprocess.pca", "PCA",
-        Description("Principal Component Analysis",
-                    icon_path("PCA.svg")),
-        PCA
+        "PCA",
+        "orange.preprocess.pca",
+        "PCA",
+        Description("Principal Component Analysis", icon_path("PCA.svg")),
+        PCA,
     ),
     PreprocessAction(
-        "CUR", "orange.preprocess.cur", "CUR",
-        Description("CUR Matrix Decomposition",
-                    icon_path("SelectColumns.svg")),
-        CUR
-    )
+        "CUR",
+        "orange.preprocess.cur",
+        "CUR",
+        Description("CUR Matrix Decomposition", icon_path("SelectColumns.svg")),
+        CUR,
+    ),
 ]
 
 
@@ -957,7 +1019,9 @@ class OWPreprocess(widget.OWWidget):
         data = Input("Data", Orange.data.Table)
 
     class Outputs:
-        preprocessor = Output("Preprocessor", preprocess.preprocess.Preprocess, dynamic=False)
+        preprocessor = Output(
+            "Preprocessor", preprocess.preprocess.Preprocess, dynamic=False
+        )
         preprocessed_data = Output("Preprocessed Data", Orange.data.Table)
 
     storedsettings = settings.Setting({})
@@ -979,6 +1043,7 @@ class OWPreprocess(widget.OWWidget):
             m = QMimeData()
             m.setData("application/x-qwidget-ref", qname.encode("utf-8"))
             return m
+
         # TODO: Fix this (subclass even if just to pass a function
         # for mimeData delegate)
         self.preprocessors.mimeData = mimeData
@@ -988,7 +1053,7 @@ class OWPreprocess(widget.OWWidget):
         self.preprocessorsView = view = QListView(
             selectionMode=QListView.SingleSelection,
             dragEnabled=True,
-            dragDropMode=QListView.DragOnly
+            dragDropMode=QListView.DragOnly,
         )
         view.setModel(self.preprocessors)
         view.activated.connect(self.__activated)
@@ -1009,11 +1074,10 @@ class OWPreprocess(widget.OWWidget):
         self.overlay.setWidget(self.flow_view)
         self.overlay.setLayout(QVBoxLayout())
         self.overlay.layout().addWidget(
-            QLabel("Drag items from the list on the left", wordWrap=True))
-
-        self.scroll_area = QScrollArea(
-            verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn
+            QLabel("Drag items from the list on the left", wordWrap=True)
         )
+
+        self.scroll_area = QScrollArea(verticalScrollBarPolicy=Qt.ScrollBarAlwaysOn)
         self.scroll_area.viewport().setAcceptDrops(True)
         self.scroll_area.setWidget(self.flow_view)
         self.scroll_area.setWidgetResizable(True)
@@ -1035,8 +1099,7 @@ class OWPreprocess(widget.OWWidget):
             item = QStandardItem(icon, description.title)
             item.setToolTip(description.summary or "")
             item.setData(pp_def, DescriptionRole)
-            item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable |
-                          Qt.ItemIsDragEnabled)
+            item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled)
             self.preprocessors.appendRow([item])
 
         try:
@@ -1061,8 +1124,7 @@ class OWPreprocess(widget.OWWidget):
         model = StandardItemModel()
 
         def dropMimeData(data, action, row, column, parent):
-            if data.hasFormat("application/x-qwidget-ref") and \
-                    action == Qt.CopyAction:
+            if data.hasFormat("application/x-qwidget-ref") and action == Qt.CopyAction:
                 qname = bytes(data.data("application/x-qwidget-ref")).decode()
 
                 ppdef = self._qname2ppdef[qname]
@@ -1106,7 +1168,6 @@ class OWPreprocess(widget.OWWidget):
         d["preprocessors"] = preprocessors
         return d
 
-
     def set_model(self, ppmodel):
         if self.preprocessormodel:
             self.preprocessormodel.dataChanged.disconnect(self.__on_modelchanged)
@@ -1126,8 +1187,7 @@ class OWPreprocess(widget.OWWidget):
         self.__update_overlay()
 
     def __update_overlay(self):
-        if self.preprocessormodel is None or \
-                self.preprocessormodel.rowCount() == 0:
+        if self.preprocessormodel is None or self.preprocessormodel.rowCount() == 0:
             self.overlay.setWidget(self.flow_view)
             self.overlay.show()
         else:
@@ -1231,16 +1291,18 @@ class OWPreprocess(widget.OWWidget):
         sh = self.flow_view.minimumSizeHint()
         scroll_width = self.scroll_area.verticalScrollBar().width()
         self.scroll_area.setMinimumWidth(
-            min(max(sh.width() + scroll_width + 2, self.controlArea.width()),
-                520))
+            min(max(sh.width() + scroll_width + 2, self.controlArea.width()), 520)
+        )
 
     def sizeHint(self):
         sh = super().sizeHint()
         return sh.expandedTo(QSize(sh.width() + 300, 500))
 
     def send_report(self):
-        pp = [(self.controler.model().index(i, 0).data(Qt.DisplayRole), w)
-              for i, w in enumerate(self.controler.view.widgets())]
+        pp = [
+            (self.controler.model().index(i, 0).data(Qt.DisplayRole), w)
+            for i, w in enumerate(self.controler.view.widgets())
+        ]
         if len(pp):
             self.report_items("Settings", pp)
 
@@ -1263,6 +1325,7 @@ def test_main(argv=sys.argv):
     w.saveSettings()
     w.onDeleteWidget()
     return r
+
 
 if __name__ == "__main__":
     sys.exit(test_main())

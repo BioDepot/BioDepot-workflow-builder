@@ -5,19 +5,27 @@ import unittest
 from scipy import sparse
 
 from AnyQt.QtWidgets import (
-    QButtonGroup, QRadioButton, QSpinBox, QDoubleSpinBox, QComboBox
+    QButtonGroup,
+    QRadioButton,
+    QSpinBox,
+    QDoubleSpinBox,
+    QComboBox,
 )
 
 from Orange.data import Table
 from Orange.widgets.model.owrules import OWRuleLearner
-from Orange.widgets.tests.base import (WidgetTest, WidgetLearnerTestMixin,
-                                       ParameterMapping)
+from Orange.widgets.tests.base import (
+    WidgetTest,
+    WidgetLearnerTestMixin,
+    ParameterMapping,
+)
 
 
 class TestOWRulesClassification(WidgetTest, WidgetLearnerTestMixin):
     def setUp(self):
-        self.widget = self.create_widget(OWRuleLearner,
-                                         stored_settings={"auto_apply": False})
+        self.widget = self.create_widget(
+            OWRuleLearner, stored_settings={"auto_apply": False}
+        )
         self.init()
 
         self.radio_button_groups = self.widget.findChildren(QButtonGroup)
@@ -27,8 +35,9 @@ class TestOWRulesClassification(WidgetTest, WidgetLearnerTestMixin):
         self.combo_boxes = self.widget.findChildren(QComboBox)
 
         self.parameters = [
-            ParameterMapping("Evaluation measure", self.combo_boxes[0],
-                             self.widget.storage_measures),
+            ParameterMapping(
+                "Evaluation measure", self.combo_boxes[0], self.widget.storage_measures
+            ),
             ParameterMapping("Beam width", self.spin_boxes[0]),
             ParameterMapping("Minimum rule coverage", self.spin_boxes[1]),
             ParameterMapping("Maximum rule length", self.spin_boxes[2]),
@@ -102,11 +111,9 @@ class TestOWRulesClassification(WidgetTest, WidgetLearnerTestMixin):
         self.assertTrue(self.double_spin_boxes[2].isEnabled())
 
         # test values, make sure they are correct
-        self.assertEqual(self.double_spin_boxes[1].value(),
-                         self.widget.default_alpha)
+        self.assertEqual(self.double_spin_boxes[1].value(), self.widget.default_alpha)
 
-        self.assertEqual(self.double_spin_boxes[2].value(),
-                         self.widget.parent_alpha)
+        self.assertEqual(self.double_spin_boxes[2].value(), self.widget.parent_alpha)
 
     def test_sparse_data(self):
         data = Table("iris")
@@ -128,7 +135,8 @@ class TestOWRulesClassification(WidgetTest, WidgetLearnerTestMixin):
         self.assertFalse(self.widget.Error.out_of_memory.is_shown())
         with unittest.mock.patch(
             "Orange.widgets.model.owrules.CustomRuleLearner.__call__",
-            side_effect=MemoryError):
+            side_effect=MemoryError,
+        ):
             self.send_signal("Data", data)
             self.assertTrue(self.widget.Error.out_of_memory.is_shown())
         self.send_signal("Data", None)

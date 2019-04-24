@@ -23,16 +23,10 @@ from Orange.widgets.widget import Input
 from Orange.widgets import report
 
 
-CurvePoints = namedtuple(
-    "CurvePoints",
-    ["cases", "tpr", "thresholds"]
-)
+CurvePoints = namedtuple("CurvePoints", ["cases", "tpr", "thresholds"])
 CurvePoints.is_valid = property(lambda self: self.cases.size > 0)
 
-LiftCurve = namedtuple(
-    "LiftCurve",
-    ["points", "hull"]
-)
+LiftCurve = namedtuple("LiftCurve", ["points", "hull"])
 LiftCurve.is_valid = property(lambda self: self.points.is_valid)
 
 
@@ -44,18 +38,14 @@ def liftCurve_from_results(results, clf_index, target):
     return LiftCurve(points, hull)
 
 
-PlotCurve = namedtuple(
-    "PlotCurve",
-    ["curve",
-     "curve_item",
-     "hull_item"]
-)
+PlotCurve = namedtuple("PlotCurve", ["curve", "curve_item", "hull_item"])
 
 
 class OWLiftCurve(widget.OWWidget):
     name = "Lift Curve"
-    description = "Construct and display a lift curve " \
-                  "from the evaluation of classifiers."
+    description = (
+        "Construct and display a lift curve " "from the evaluation of classifiers."
+    )
     icon = "icons/LiftCurve.svg"
     priority = 1020
 
@@ -87,18 +77,31 @@ class OWLiftCurve(widget.OWWidget):
         tbox.setFlat(True)
 
         self.target_cb = gui.comboBox(
-            tbox, self, "target_index", callback=self._on_target_changed,
-            contentsLength=8)
+            tbox,
+            self,
+            "target_index",
+            callback=self._on_target_changed,
+            contentsLength=8,
+        )
 
         cbox = gui.vBox(box, "Classifiers")
         cbox.setFlat(True)
         self.classifiers_list_box = gui.listBox(
-            cbox, self, "selected_classifiers", "classifier_names",
+            cbox,
+            self,
+            "selected_classifiers",
+            "classifier_names",
             selectionMode=QtWidgets.QListView.MultiSelection,
-            callback=self._on_classifiers_changed)
+            callback=self._on_classifiers_changed,
+        )
 
-        gui.checkBox(box, self, "display_convex_hull",
-                     "Show lift convex hull", callback=self._replot)
+        gui.checkBox(
+            box,
+            self,
+            "display_convex_hull",
+            "Show lift convex hull",
+            callback=self._replot,
+        )
 
         self.plotview = pg.GraphicsView(background="w")
         self.plotview.setFrameStyle(QtWidgets.QFrame.StyledPanel)
@@ -176,17 +179,19 @@ class OWLiftCurve(widget.OWWidget):
             shadow_pen = QPen(pen.color().lighter(160), 2.5)
             shadow_pen.setCosmetic(True)
             item = pg.PlotDataItem(
-                curve.points[0], curve.points[1],
-                pen=pen, shadowPen=shadow_pen,
-                symbol="+", symbolSize=3, symbolPen=shadow_pen,
-                antialias=True
+                curve.points[0],
+                curve.points[1],
+                pen=pen,
+                shadowPen=shadow_pen,
+                symbol="+",
+                symbolSize=3,
+                symbolPen=shadow_pen,
+                antialias=True,
             )
             hull_item = pg.PlotDataItem(
-                curve.hull[0], curve.hull[1],
-                pen=pen, antialias=True
+                curve.hull[0], curve.hull[1], pen=pen, antialias=True
             )
-            self._curve_data[target, clf_idx] = \
-                PlotCurve(curve, item, hull_item)
+            self._curve_data[target, clf_idx] = PlotCurve(curve, item, hull_item)
 
         return self._curve_data[target, clf_idx]
 
@@ -229,8 +234,9 @@ class OWLiftCurve(widget.OWWidget):
     def send_report(self):
         if self.results is None:
             return
-        caption = report.list_legend(self.classifiers_list_box,
-                                     self.selected_classifiers)
+        caption = report.list_legend(
+            self.classifiers_list_box, self.selected_classifiers
+        )
         self.report_items((("Target class", self.target_cb.currentText()),))
         self.report_plot()
         self.report_caption(caption)
@@ -259,8 +265,11 @@ def lift_curve(ytrue, ypred, target=1):
 def main():
     import sip
     from AnyQt.QtWidgets import QApplication
-    from Orange.classification import (LogisticRegressionLearner, SVMLearner,
-                                       NuSVMLearner)
+    from Orange.classification import (
+        LogisticRegressionLearner,
+        SVMLearner,
+        NuSVMLearner,
+    )
 
     app = QApplication([])
     w = OWLiftCurve()
@@ -270,12 +279,13 @@ def main():
     data = Orange.data.Table("ionosphere")
     results = Orange.evaluation.CrossValidation(
         data,
-        [LogisticRegressionLearner(penalty="l2"),
-         LogisticRegressionLearner(penalty="l1"),
-         SVMLearner(probability=True),
-         NuSVMLearner(probability=True)
+        [
+            LogisticRegressionLearner(penalty="l2"),
+            LogisticRegressionLearner(penalty="l1"),
+            SVMLearner(probability=True),
+            NuSVMLearner(probability=True),
         ],
-        store_data=True
+        store_data=True,
     )
     results.learner_names = ["LR l2", "LR l1", "SVM", "Nu SVM"]
     w.set_results(results)

@@ -6,17 +6,37 @@ from itertools import chain
 import numpy as np
 
 from AnyQt.QtWidgets import (
-    QWidget, QTableWidget, QHeaderView, QComboBox, QLineEdit, QToolButton,
-    QMessageBox, QMenu, QListView, QGridLayout, QPushButton, QSizePolicy,
-    QLabel)
+    QWidget,
+    QTableWidget,
+    QHeaderView,
+    QComboBox,
+    QLineEdit,
+    QToolButton,
+    QMessageBox,
+    QMenu,
+    QListView,
+    QGridLayout,
+    QPushButton,
+    QSizePolicy,
+    QLabel,
+)
 from AnyQt.QtGui import (
-    QDoubleValidator, QRegExpValidator, QStandardItemModel, QStandardItem,
-    QFontMetrics, QPalette
+    QDoubleValidator,
+    QRegExpValidator,
+    QStandardItemModel,
+    QStandardItem,
+    QFontMetrics,
+    QPalette,
 )
 from AnyQt.QtCore import Qt, QPoint, QRegExp, QPersistentModelIndex, QLocale
 
-from Orange.data import (ContinuousVariable, DiscreteVariable, StringVariable,
-                         Table, TimeVariable)
+from Orange.data import (
+    ContinuousVariable,
+    DiscreteVariable,
+    StringVariable,
+    Table,
+    TimeVariable,
+)
 import Orange.data.filter as data_filter
 from Orange.data.filter import FilterContinuous, FilterString
 from Orange.data.domain import filter_visible
@@ -28,8 +48,10 @@ from Orange.widgets.widget import Input, Output
 from Orange.widgets.utils import vartype
 from Orange.widgets import report
 from Orange.widgets.widget import Msg
-from Orange.widgets.utils.annotated_data import (create_annotated_table,
-                                                 ANNOTATED_DATA_SIGNAL_NAME)
+from Orange.widgets.utils.annotated_data import (
+    create_annotated_table,
+    ANNOTATED_DATA_SIGNAL_NAME,
+)
 
 
 class SelectRowsContextHandler(DomainContextHandler):
@@ -41,7 +63,7 @@ class SelectRowsContextHandler(DomainContextHandler):
         return varname in attrs or varname in metas
 
     def encode_setting(self, context, setting, value):
-        if setting.name == 'conditions':
+        if setting.name == "conditions":
             CONTINUOUS = vartype(ContinuousVariable())
             for i, (attr, op, values) in enumerate(value):
                 if context.attributes.get(attr) == CONTINUOUS:
@@ -52,13 +74,15 @@ class SelectRowsContextHandler(DomainContextHandler):
 
     def decode_setting(self, setting, value, domain=None):
         value = super().decode_setting(setting, value, domain)
-        if setting.name == 'conditions':
+        if setting.name == "conditions":
             for i, (attr, op, values) in enumerate(value):
                 var = attr in domain and domain[attr]
                 if var and var.is_continuous and not isinstance(var, TimeVariable):
-                    value[i] = (attr, op,
-                                list([QLocale().toString(float(i), 'f')
-                                      for i in values]))
+                    value[i] = (
+                        attr,
+                        op,
+                        list([QLocale().toString(float(i), "f") for i in values]),
+                    )
         return value
 
 
@@ -110,7 +134,7 @@ class OWSelectRows(widget.OWWidget):
             (FilterDiscreteType.Equal, "is"),
             (FilterDiscreteType.NotEqual, "is not"),
             (FilterDiscreteType.In, "is one of"),
-            (FilterDiscreteType.IsDefined, "is defined")
+            (FilterDiscreteType.IsDefined, "is defined"),
         ],
         StringVariable: [
             (FilterString.Equal, "equals"),
@@ -125,12 +149,13 @@ class OWSelectRows(widget.OWWidget):
             (FilterString.StartsWith, "begins with"),
             (FilterString.EndsWith, "ends with"),
             (FilterString.IsDefined, "is defined"),
-        ]
+        ],
     }
     Operators[TimeVariable] = Operators[ContinuousVariable]
 
-    operator_names = {vtype: [name for _, name in filters]
-                      for vtype, filters in Operators.items()}
+    operator_names = {
+        vtype: [name for _, name in filters] for vtype, filters in Operators.items()
+    }
 
     class Error(widget.OWWidget.Error):
         parsing_error = Msg("{}")
@@ -145,27 +170,31 @@ class OWSelectRows(widget.OWWidget):
         self.data = None
         self.data_desc = self.match_desc = self.nonmatch_desc = None
 
-        box = gui.vBox(self.controlArea, 'Conditions', stretch=100)
+        box = gui.vBox(self.controlArea, "Conditions", stretch=100)
         self.cond_list = QTableWidget(
-            box, showGrid=False, selectionMode=QTableWidget.NoSelection)
+            box, showGrid=False, selectionMode=QTableWidget.NoSelection
+        )
         box.layout().addWidget(self.cond_list)
         self.cond_list.setColumnCount(4)
         self.cond_list.setRowCount(0)
         self.cond_list.verticalHeader().hide()
         self.cond_list.horizontalHeader().hide()
         for i in range(3):
-            self.cond_list.horizontalHeader().setSectionResizeMode(i, QHeaderView.Stretch)
+            self.cond_list.horizontalHeader().setSectionResizeMode(
+                i, QHeaderView.Stretch
+            )
         self.cond_list.horizontalHeader().resizeSection(3, 30)
         self.cond_list.viewport().setBackgroundRole(QPalette.Window)
 
         box2 = gui.hBox(box)
         gui.rubber(box2)
-        self.add_button = gui.button(
-            box2, self, "Add Condition", callback=self.add_row)
+        self.add_button = gui.button(box2, self, "Add Condition", callback=self.add_row)
         self.add_all_button = gui.button(
-            box2, self, "Add All Variables", callback=self.add_all)
+            box2, self, "Add All Variables", callback=self.add_all
+        )
         self.remove_all_button = gui.button(
-            box2, self, "Remove All", callback=self.remove_all)
+            box2, self, "Remove All", callback=self.remove_all
+        )
         gui.rubber(box2)
 
         boxes = gui.widgetBox(self.controlArea, orientation=QGridLayout())
@@ -173,19 +202,27 @@ class OWSelectRows(widget.OWWidget):
         layout.setColumnStretch(0, 1)
         layout.setColumnStretch(1, 1)
 
-        box_data = gui.vBox(boxes, 'Data', addToLayout=False)
+        box_data = gui.vBox(boxes, "Data", addToLayout=False)
         self.data_in_variables = gui.widgetLabel(box_data, " ")
         self.data_out_rows = gui.widgetLabel(box_data, " ")
         layout.addWidget(box_data, 0, 0)
 
-        box_setting = gui.vBox(boxes, 'Purging', addToLayout=False)
+        box_setting = gui.vBox(boxes, "Purging", addToLayout=False)
         self.cb_pa = gui.checkBox(
-            box_setting, self, "purge_attributes", "Remove unused features",
-            callback=self.conditions_changed)
+            box_setting,
+            self,
+            "purge_attributes",
+            "Remove unused features",
+            callback=self.conditions_changed,
+        )
         gui.separator(box_setting, height=1)
         self.cb_pc = gui.checkBox(
-            box_setting, self, "purge_classes", "Remove unused classes",
-            callback=self.conditions_changed)
+            box_setting,
+            self,
+            "purge_classes",
+            "Remove unused classes",
+            callback=self.conditions_changed,
+        )
         layout.addWidget(box_setting, 0, 1)
 
         self.report_button.setFixedWidth(120)
@@ -193,8 +230,13 @@ class OWSelectRows(widget.OWWidget):
         layout.addWidget(self.buttonsArea, 1, 0)
 
         acbox = gui.auto_commit(
-            None, self, "auto_commit", label="Send", orientation=Qt.Horizontal,
-            checkbox_label="Send automatically")
+            None,
+            self,
+            "auto_commit",
+            label="Send",
+            orientation=Qt.Horizontal,
+            checkbox_label="Send automatically",
+        )
         layout.addWidget(acbox, 1, 1)
 
         self.set_data(None)
@@ -207,7 +249,8 @@ class OWSelectRows(widget.OWWidget):
 
         attr_combo = gui.OrangeComboBox(
             minimumContentsLength=12,
-            sizeAdjustPolicy=QComboBox.AdjustToMinimumContentsLengthWithIcon)
+            sizeAdjustPolicy=QComboBox.AdjustToMinimumContentsLengthWithIcon,
+        )
         attr_combo.row = row
         for var in self._visible_variables(self.data.domain):
             attr_combo.addItem(*gui.attributeItem(var))
@@ -215,34 +258,43 @@ class OWSelectRows(widget.OWWidget):
         self.cond_list.setCellWidget(row, 0, attr_combo)
 
         index = QPersistentModelIndex(model.index(row, 3))
-        temp_button = QPushButton('×', self, flat=True,
-                                  styleSheet='* {font-size: 16pt; color: silver}'
-                                             '*:hover {color: black}')
+        temp_button = QPushButton(
+            "×",
+            self,
+            flat=True,
+            styleSheet="* {font-size: 16pt; color: silver}" "*:hover {color: black}",
+        )
         temp_button.clicked.connect(lambda: self.remove_one(index.row()))
         self.cond_list.setCellWidget(row, 3, temp_button)
 
         self.remove_all_button.setDisabled(False)
-        self.set_new_operators(attr_combo, attr is not None,
-                               condition_type, condition_value)
+        self.set_new_operators(
+            attr_combo, attr is not None, condition_type, condition_value
+        )
         attr_combo.currentIndexChanged.connect(
-            lambda _: self.set_new_operators(attr_combo, False))
+            lambda _: self.set_new_operators(attr_combo, False)
+        )
 
         self.cond_list.resizeRowToContents(row)
 
     @staticmethod
     def _visible_variables(domain):
         """Generate variables in order they should be presented in in combos."""
-        return filter_visible(chain(domain.class_vars,
-                                    domain.metas,
-                                    domain.attributes))
+        return filter_visible(chain(domain.class_vars, domain.metas, domain.attributes))
 
     def add_all(self):
         if self.cond_list.rowCount():
             Mb = QMessageBox
-            if Mb.question(
-                    self, "Remove existing filters",
+            if (
+                Mb.question(
+                    self,
+                    "Remove existing filters",
                     "This will replace the existing filters with "
-                    "filters for all variables.", Mb.Ok | Mb.Cancel) != Mb.Ok:
+                    "filters for all variables.",
+                    Mb.Ok | Mb.Cancel,
+                )
+                != Mb.Ok
+            ):
                 return
             self.remove_all()
         domain = self.data.domain
@@ -267,8 +319,9 @@ class OWSelectRows(widget.OWWidget):
         self.cond_list.setRowCount(0)
         self.remove_all_button.setDisabled(True)
 
-    def set_new_operators(self, attr_combo, adding_all,
-                          selected_index=None, selected_values=None):
+    def set_new_operators(
+        self, attr_combo, adding_all, selected_index=None, selected_values=None
+    ):
         oper_combo = QComboBox()
         oper_combo.row = attr_combo.row
         oper_combo.attr_combo = attr_combo
@@ -278,12 +331,16 @@ class OWSelectRows(widget.OWWidget):
         self.cond_list.setCellWidget(oper_combo.row, 1, oper_combo)
         self.set_new_values(oper_combo, adding_all, selected_values)
         oper_combo.currentIndexChanged.connect(
-            lambda _: self.set_new_values(oper_combo, False))
+            lambda _: self.set_new_values(oper_combo, False)
+        )
 
     @staticmethod
     def _get_lineedit_contents(box):
-        return [child.text() for child in getattr(box, "controls", [box])
-                if isinstance(child, QLineEdit)]
+        return [
+            child.text()
+            for child in getattr(box, "controls", [box])
+            if isinstance(child, QLineEdit)
+        ]
 
     @staticmethod
     def _get_value_contents(box):
@@ -302,12 +359,12 @@ class OWSelectRows(widget.OWWidget):
                         if item.checkState():
                             cont.append(row + 1)
                             names.append(item.text())
-                    child.desc_text = ', '.join(names)
+                    child.desc_text = ", ".join(names)
                     child.set_text()
             elif isinstance(child, QLabel) or child is None:
                 pass
             else:
-                raise TypeError('Type %s not supported.' % type(child))
+                raise TypeError("Type %s not supported." % type(child))
         return tuple(cont)
 
     class QDoubleValidatorEmpty(QDoubleValidator):
@@ -325,9 +382,12 @@ class OWSelectRows(widget.OWWidget):
         #         child.setParent(None)
 
         def add_textual(contents):
-            le = gui.lineEdit(box, self, None,
-                              sizePolicy=QSizePolicy(QSizePolicy.Expanding,
-                                                     QSizePolicy.Expanding))
+            le = gui.lineEdit(
+                box,
+                self,
+                None,
+                sizePolicy=QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding),
+            )
             if contents:
                 le.setText(contents)
             le.setAlignment(Qt.AlignRight)
@@ -381,7 +441,9 @@ class OWSelectRows(widget.OWWidget):
             box.var_type = vartype(var)
             self.cond_list.setCellWidget(oper_combo.row, 2, box)
             if var.is_continuous:
-                validator = add_datetime if isinstance(var, TimeVariable) else add_numeric
+                validator = (
+                    add_datetime if isinstance(var, TimeVariable) else add_numeric
+                )
                 box.controls = [validator(lc[0])]
                 if oper > 5:
                     gui.widgetLabel(box, " and ")
@@ -405,8 +467,8 @@ class OWSelectRows(widget.OWWidget):
         self.remove_all_rows()
         self.add_button.setDisabled(data is None)
         self.add_all_button.setDisabled(
-            data is None or
-            len(data.domain.variables) + len(data.domain.metas) > 100)
+            data is None or len(data.domain.variables) + len(data.domain.metas) > 100
+        )
         if not data:
             self.data_desc = None
             self.commit()
@@ -434,13 +496,17 @@ class OWSelectRows(widget.OWWidget):
         try:
             self.conditions = []
             self.conditions = [
-                (self.cond_list.cellWidget(row, 0).currentText(),
-                 self.cond_list.cellWidget(row, 1).currentIndex(),
-                 self._get_value_contents(self.cond_list.cellWidget(row, 2)))
-                for row in range(self.cond_list.rowCount())]
+                (
+                    self.cond_list.cellWidget(row, 0).currentText(),
+                    self.cond_list.cellWidget(row, 1).currentIndex(),
+                    self._get_value_contents(self.cond_list.cellWidget(row, 2)),
+                )
+                for row in range(self.cond_list.rowCount())
+            ]
             if self.update_on_change and (
-                    self.last_output_conditions is None or
-                    self.last_output_conditions != self.conditions):
+                self.last_output_conditions is None
+                or self.last_output_conditions != self.conditions
+            ):
                 self.commit()
         except AttributeError:
             # Attribute error appears if the signal is triggered when the
@@ -460,8 +526,10 @@ class OWSelectRows(widget.OWWidget):
         try:
             floats, ok = zip(*[parse(v) for v in values])
             if not all(ok):
-                raise ValueError('Some values could not be parsed as floats'
-                                 'in the current locale: {}'.format(values))
+                raise ValueError(
+                    "Some values could not be parsed as floats"
+                    "in the current locale: {}".format(values)
+                )
         except TypeError:
             floats = values  # values already floats
         assert all(isinstance(v, float) for v in floats)
@@ -489,18 +557,18 @@ class OWSelectRows(widget.OWWidget):
                         return
                     if floats is None:
                         continue
-                    filter = data_filter.FilterContinuous(
-                        attr_index, opertype, *floats)
+                    filter = data_filter.FilterContinuous(attr_index, opertype, *floats)
                 elif attr.is_string:
                     filter = data_filter.FilterString(
-                        attr_index, opertype, *[str(v) for v in values])
+                        attr_index, opertype, *[str(v) for v in values]
+                    )
                 else:
                     if opertype == FilterDiscreteType.IsDefined:
                         f_values = None
                     else:
                         if not values or not values[0]:
                             continue
-                        values = [attr.values[i-1] for i in values]
+                        values = [attr.values[i - 1] for i in values]
                         if opertype == FilterDiscreteType.Equal:
                             f_values = {values[0]}
                         elif opertype == FilterDiscreteType.NotEqual:
@@ -528,12 +596,19 @@ class OWSelectRows(widget.OWWidget):
 
             purge_attrs = self.purge_attributes
             purge_classes = self.purge_classes
-            if (purge_attrs or purge_classes) and \
-                    not isinstance(self.data, SqlTable):
-                attr_flags = sum([Remove.RemoveConstant * purge_attrs,
-                                  Remove.RemoveUnusedValues * purge_attrs])
-                class_flags = sum([Remove.RemoveConstant * purge_classes,
-                                   Remove.RemoveUnusedValues * purge_classes])
+            if (purge_attrs or purge_classes) and not isinstance(self.data, SqlTable):
+                attr_flags = sum(
+                    [
+                        Remove.RemoveConstant * purge_attrs,
+                        Remove.RemoveUnusedValues * purge_attrs,
+                    ]
+                )
+                class_flags = sum(
+                    [
+                        Remove.RemoveConstant * purge_classes,
+                        Remove.RemoveUnusedValues * purge_classes,
+                    ]
+                )
                 # same settings used for attributes and meta features
                 remover = Remove(attr_flags, class_flags, attr_flags)
 
@@ -564,11 +639,14 @@ class OWSelectRows(widget.OWWidget):
         if data is None:
             lab1.setText("")
         else:
-            lab1.setText(label + "~%s row%s, %s variable%s" %
-                         (sp(data.approx_len()) +
-                          sp(len(data.domain.variables) +
-                             len(data.domain.metas)))
-                        )
+            lab1.setText(
+                label
+                + "~%s row%s, %s variable%s"
+                % (
+                    sp(data.approx_len())
+                    + sp(len(data.domain.variables) + len(data.domain.metas))
+                )
+            )
 
     def send_report(self):
         if not self.data:
@@ -598,26 +676,27 @@ class OWSelectRows(widget.OWWidget):
             elif attr.is_discrete:
                 if name == "is one of":
                     if len(values) == 1:
-                        conditions.append("{} is {}".format(
-                            attr, attr.values[values[0] - 1]))
+                        conditions.append(
+                            "{} is {}".format(attr, attr.values[values[0] - 1])
+                        )
                     elif len(values) > 1:
-                        conditions.append("{} is {} or {}".format(
-                            attr,
-                            ", ".join(attr.values[v - 1] for v in values[:-1]),
-                            attr.values[values[-1] - 1]))
+                        conditions.append(
+                            "{} is {} or {}".format(
+                                attr,
+                                ", ".join(attr.values[v - 1] for v in values[:-1]),
+                                attr.values[values[-1] - 1],
+                            )
+                        )
                 else:
                     if not (values and values[0]):
                         continue
                     value = values[0] - 1
-                    conditions.append("{} {} {}".
-                                      format(attr, name, attr.values[value]))
+                    conditions.append("{} {} {}".format(attr, name, attr.values[value]))
             else:
                 if len(values) == 1:
-                    conditions.append("{} {} {}".
-                                      format(attr, name, *values))
+                    conditions.append("{} {} {}".format(attr, name, *values))
                 else:
-                    conditions.append("{} {} {} and {}".
-                                      format(attr, name, *values))
+                    conditions.append("{} {} {} and {}".format(attr, name, *values))
         items = OrderedDict()
         if describe_domain:
             items.update(self.data_desc)
@@ -629,18 +708,23 @@ class OWSelectRows(widget.OWWidget):
             self.report_items("Matching data", self.match_desc)
             self.report_items("Non-matching data", self.nonmatch_desc)
         else:
-            match_inst = \
-                bool(self.match_desc) and \
-                self.match_desc["Data instances"]
-            nonmatch_inst = \
-                bool(self.nonmatch_desc) and \
-                self.nonmatch_desc["Data instances"]
+            match_inst = bool(self.match_desc) and self.match_desc["Data instances"]
+            nonmatch_inst = (
+                bool(self.nonmatch_desc) and self.nonmatch_desc["Data instances"]
+            )
             self.report_items(
                 "Output",
-                (("Matching data",
-                  "{} instances".format(match_inst) if match_inst else "None"),
-                 ("Non-matching data",
-                  nonmatch_inst > 0 and "{} instances".format(nonmatch_inst))))
+                (
+                    (
+                        "Matching data",
+                        "{} instances".format(match_inst) if match_inst else "None",
+                    ),
+                    (
+                        "Non-matching data",
+                        nonmatch_inst > 0 and "{} instances".format(nonmatch_inst),
+                    ),
+                ),
+            )
 
 
 class CheckBoxPopup(QWidget):
@@ -669,7 +753,7 @@ class CheckBoxPopup(QWidget):
         self.setWindowFlags(Qt.Popup)
 
         self.widget = widget
-        self.widget.desc_text = ', '.join(text)
+        self.widget.desc_text = ", ".join(text)
         self.widget.set_text()
 
     def moved(self):
@@ -681,9 +765,9 @@ class CheckBoxPopup(QWidget):
 class DropDownToolButton(QToolButton):
     def __init__(self, parent, var, lc):
         QToolButton.__init__(self, parent)
-        self.desc_text = ''
+        self.desc_text = ""
         self.popup = CheckBoxPopup(var, lc, parent, self)
-        self.setMenu(QMenu()) # to show arrow
+        self.setMenu(QMenu())  # to show arrow
         self.clicked.connect(self.open_popup)
 
     def open_popup(self):
@@ -692,8 +776,9 @@ class DropDownToolButton(QToolButton):
 
     def set_text(self):
         metrics = QFontMetrics(self.font())
-        self.setText(metrics.elidedText(self.desc_text, Qt.ElideRight,
-                                        self.width() - 15))
+        self.setText(
+            metrics.elidedText(self.desc_text, Qt.ElideRight, self.width() - 15)
+        )
 
     def resizeEvent(self, QResizeEvent):
         self.set_text()
@@ -701,6 +786,7 @@ class DropDownToolButton(QToolButton):
 
 def main(argv=None):  # pragma: no cover
     from AnyQt.QtWidgets import QApplication
+
     app = QApplication(argv or [])
     argv = app.arguments()
     if len(argv) > 1:

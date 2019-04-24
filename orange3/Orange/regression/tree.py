@@ -5,8 +5,7 @@ import scipy.sparse as sp
 import sklearn.tree as skl_tree
 
 from Orange.base import TreeModel as TreeModelInterface
-from Orange.tree import Node, DiscreteNode, MappedDiscreteNode, \
-    NumericNode, TreeModel
+from Orange.tree import Node, DiscreteNode, MappedDiscreteNode, NumericNode, TreeModel
 from Orange.regression import SklLearner, SklModel, Learner
 from Orange.classification import _tree_scorers
 
@@ -45,21 +44,27 @@ class TreeLearner(Learner):
     -------
     instance of OrangeTreeModel
     """
+
     __returns__ = TreeModel
 
     # Binarization is exhaustive, so we set a limit on the number of values
     MAX_BINARIZATION = 16
 
     def __init__(
-            self, *args,
-            binarize=False, min_samples_leaf=1, min_samples_split=2,
-            max_depth=None, **kwargs):
+        self,
+        *args,
+        binarize=False,
+        min_samples_leaf=1,
+        min_samples_split=2,
+        max_depth=None,
+        **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.params = {}
-        self.binarize = self.params['binarity'] = binarize
-        self.min_samples_leaf = self.params['min_samples_leaf'] = min_samples_leaf
-        self.min_samples_split = self.params['min_samples_split'] = min_samples_split
-        self.max_depth = self.params['max_depth'] = max_depth
+        self.binarize = self.params["binarity"] = binarize
+        self.min_samples_leaf = self.params["min_samples_leaf"] = min_samples_leaf
+        self.min_samples_split = self.params["min_samples_split"] = min_samples_split
+        self.max_depth = self.params["max_depth"] = max_depth
 
     def _select_attr(self, data):
         """Select the attribute for the next split.
@@ -77,7 +82,8 @@ class TreeLearner(Learner):
         def _score_disc():
             n_values = len(attr.values)
             score = _tree_scorers.compute_grouped_MSE(
-                col_x, col_y, n_values, self.min_samples_leaf)
+                col_x, col_y, n_values, self.min_samples_leaf
+            )
             # The score is already adjusted for missing attribute values, so
             # we don't do it here
             if score == 0:
@@ -91,13 +97,15 @@ class TreeLearner(Learner):
             if n_values == 2:
                 return _score_disc()
             score, mapping = _tree_scorers.find_binarization_MSE(
-                col_x, col_y, n_values, self.min_samples_leaf)
+                col_x, col_y, n_values, self.min_samples_leaf
+            )
             # The score is already adjusted for missing attribute values, so
             # we don't do it here
             if score == 0:
                 return REJECT_ATTRIBUTE
             mapping, branches = MappedDiscreteNode.branches_from_mapping(
-                col_x, mapping, len(attr.values))
+                col_x, mapping, len(attr.values)
+            )
             node = MappedDiscreteNode(attr, attr_no, mapping, None)
             return score, node, branches, 2
 
@@ -107,9 +115,10 @@ class TreeLearner(Learner):
             non_nans = len(col_x) - nans
             arginds = np.argsort(col_x)[:non_nans]
             score, cut = _tree_scorers.find_threshold_MSE(
-                col_x, col_y, arginds, self.min_samples_leaf)
+                col_x, col_y, arginds, self.min_samples_leaf
+            )
             if score == 0:
-                return  REJECT_ATTRIBUTE
+                return REJECT_ATTRIBUTE
             score *= non_nans / len(col_x)
             branches = np.full(len(col_x), -1, dtype=int)
             mask = ~np.isnan(col_x)
@@ -123,7 +132,7 @@ class TreeLearner(Learner):
         domain = data.domain
         col_y = data.Y
         best_score, *best_res = REJECT_ATTRIBUTE
-        best_res = [Node(None, 0, None), ] + best_res[1:]
+        best_res = [Node(None, 0, None)] + best_res[1:]
         disc_scorer = _score_disc_bin if self.binarize else _score_disc
         for attr_no, attr in enumerate(domain.attributes):
             col_x = data[:, attr_no].X
@@ -143,8 +152,11 @@ class TreeLearner(Learner):
         node_insts = data[active_inst]
         if len(node_insts) < self.min_samples_leaf:
             return None
-        if len(node_insts) < self.min_samples_split or \
-                self.max_depth is not None and level > self.max_depth:
+        if (
+            len(node_insts) < self.min_samples_split
+            or self.max_depth is not None
+            and level > self.max_depth
+        ):
             node, branches, n_children = Node(None, None, None), None, 0
         else:
             node, branches, n_children = self._select_attr(node_insts)
@@ -154,23 +166,26 @@ class TreeLearner(Learner):
         if branches is not None:
             node.children = [
                 self.build_tree(data, active_inst[branches == br], level + 1)
-                for br in range(n_children)]
+                for br in range(n_children)
+            ]
         return node
 
     def fit_storage(self, data):
         if self.binarize and any(
-                attr.is_discrete and len(attr.values) > self.MAX_BINARIZATION
-                for attr in data.domain.attributes):
+            attr.is_discrete and len(attr.values) > self.MAX_BINARIZATION
+            for attr in data.domain.attributes
+        ):
             # No fallback in the script; widgets can prevent this error
             # by providing a fallback and issue a warning about doing so
-            raise ValueError("Exhaustive binarization does not handle "
-                             "attributes with more than {} values".
-                             format(self.MAX_BINARIZATION))
+            raise ValueError(
+                "Exhaustive binarization does not handle "
+                "attributes with more than {} values".format(self.MAX_BINARIZATION)
+            )
 
         active_inst = np.nonzero(~np.isnan(data.Y))[0].astype(np.int32)
         root = self.build_tree(data, active_inst)
         if root is None:
-            root = Node(None, 0, np.array([0., 0.]))
+            root = Node(None, 0, np.array([0.0, 0.0]))
         root.subset = active_inst
         model = TreeModel(data, root)
         return model
@@ -183,12 +198,19 @@ class SklTreeRegressor(SklModel, TreeModelInterface):
 class SklTreeRegressionLearner(SklLearner):
     __wraps__ = skl_tree.DecisionTreeRegressor
     __returns__ = SklTreeRegressor
-    name = 'regression tree'
+    name = "regression tree"
 
-    def __init__(self, criterion="mse", splitter="best", max_depth=None,
-                 min_samples_split=2, min_samples_leaf=1,
-                 max_features=None,
-                 random_state=None, max_leaf_nodes=None,
-                 preprocessors=None):
+    def __init__(
+        self,
+        criterion="mse",
+        splitter="best",
+        max_depth=None,
+        min_samples_split=2,
+        min_samples_leaf=1,
+        max_features=None,
+        random_state=None,
+        max_leaf_nodes=None,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()

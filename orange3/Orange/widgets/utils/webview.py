@@ -21,13 +21,24 @@ import sip
 
 from Orange.util import inherit_docstrings, OrangeDeprecationWarning
 
-from AnyQt.QtCore import Qt, QObject, QFile, QTimer, QUrl, QSize, QEventLoop, \
-    pyqtProperty, pyqtSlot, pyqtSignal
+from AnyQt.QtCore import (
+    Qt,
+    QObject,
+    QFile,
+    QTimer,
+    QUrl,
+    QSize,
+    QEventLoop,
+    pyqtProperty,
+    pyqtSlot,
+    pyqtSignal,
+)
 from AnyQt.QtGui import QColor
 from AnyQt.QtWidgets import QSizePolicy, QWidget, qApp
 
 try:
     from AnyQt.QtWebKitWidgets import QWebView
+
     HAVE_WEBKIT = True
 except ImportError:
     HAVE_WEBKIT = False
@@ -35,15 +46,18 @@ except ImportError:
 try:
     from AnyQt.QtWebEngineWidgets import QWebEngineView, QWebEngineScript
     from AnyQt.QtWebChannel import QWebChannel
+
     HAVE_WEBENGINE = True
 except ImportError:
     HAVE_WEBENGINE = False
 
 
-_WEBVIEW_HELPERS = join(dirname(__file__), '_webview', 'helpers.js')
-_WEBENGINE_INIT_WEBCHANNEL = join(dirname(__file__), '_webview', 'init-webengine-webchannel.js')
+_WEBVIEW_HELPERS = join(dirname(__file__), "_webview", "helpers.js")
+_WEBENGINE_INIT_WEBCHANNEL = join(
+    dirname(__file__), "_webview", "init-webengine-webchannel.js"
+)
 
-_ORANGE_DEBUG = os.environ.get('ORANGE_DEBUG')
+_ORANGE_DEBUG = os.environ.get("ORANGE_DEBUG")
 
 
 class _QWidgetJavaScriptWrapper(QObject):
@@ -65,6 +79,7 @@ class _QWidgetJavaScriptWrapper(QObject):
 
 
 if HAVE_WEBENGINE:
+
     class WebEngineView(QWebEngineView):
         """
         A QWebEngineView initialized to support communication with JS code.
@@ -84,71 +99,83 @@ if HAVE_WEBENGINE:
 
         # Prefix added to objects exposed via WebviewWidget.exposeObject()
         # This caters to this class' subclass
-        _EXPOSED_OBJ_PREFIX = '__ORANGE_'
+        _EXPOSED_OBJ_PREFIX = "__ORANGE_"
 
         def __init__(self, parent=None, bridge=None, *, debug=False, **kwargs):
             debug = debug or _ORANGE_DEBUG
             if debug:
-                port = os.environ.setdefault('QTWEBENGINE_REMOTE_DEBUGGING', '12088')
+                port = os.environ.setdefault("QTWEBENGINE_REMOTE_DEBUGGING", "12088")
                 warnings.warn(
-                    'To debug QWebEngineView, set environment variable '
-                    'QTWEBENGINE_REMOTE_DEBUGGING={port} and then visit '
-                    'http://127.0.0.1:{port}/ in a Chromium-based browser. '
-                    'See https://doc.qt.io/qt-5/qtwebengine-debugging.html '
-                    'This has also been done for you.'.format(port=port))
-            super().__init__(parent,
-                             sizeHint=QSize(500, 400),
-                             sizePolicy=QSizePolicy(QSizePolicy.Expanding,
-                                                    QSizePolicy.Expanding),
-                             **kwargs)
+                    "To debug QWebEngineView, set environment variable "
+                    "QTWEBENGINE_REMOTE_DEBUGGING={port} and then visit "
+                    "http://127.0.0.1:{port}/ in a Chromium-based browser. "
+                    "See https://doc.qt.io/qt-5/qtwebengine-debugging.html "
+                    "This has also been done for you.".format(port=port)
+                )
+            super().__init__(
+                parent,
+                sizeHint=QSize(500, 400),
+                sizePolicy=QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding),
+                **kwargs
+            )
             self.bridge = bridge
             self.debug = debug
             with open(_WEBVIEW_HELPERS, encoding="utf-8") as f:
-                self._onloadJS(f.read(),
-                               name='webview_helpers',
-                               injection_point=QWebEngineScript.DocumentCreation)
+                self._onloadJS(
+                    f.read(),
+                    name="webview_helpers",
+                    injection_point=QWebEngineScript.DocumentCreation,
+                )
 
             qtwebchannel_js = QFile("://qtwebchannel/qwebchannel.js")
             if qtwebchannel_js.open(QFile.ReadOnly):
                 source = bytes(qtwebchannel_js.readAll()).decode("utf-8")
                 with open(_WEBENGINE_INIT_WEBCHANNEL, encoding="utf-8") as f:
                     init_webchannel_src = f.read()
-                self._onloadJS(source + init_webchannel_src %
-                               dict(exposeObject_prefix=self._EXPOSED_OBJ_PREFIX),
-                               name='webchannel_init',
-                               injection_point=QWebEngineScript.DocumentCreation)
+                self._onloadJS(
+                    source
+                    + init_webchannel_src
+                    % dict(exposeObject_prefix=self._EXPOSED_OBJ_PREFIX),
+                    name="webchannel_init",
+                    injection_point=QWebEngineScript.DocumentCreation,
+                )
             else:
                 warnings.warn(
-                    "://qtwebchannel/qwebchannel.js is not readable.",
-                    RuntimeWarning)
+                    "://qtwebchannel/qwebchannel.js is not readable.", RuntimeWarning
+                )
 
-            self._onloadJS(';window.__load_finished = true;',
-                           name='load_finished',
-                           injection_point=QWebEngineScript.DocumentReady)
+            self._onloadJS(
+                ";window.__load_finished = true;",
+                name="load_finished",
+                injection_point=QWebEngineScript.DocumentReady,
+            )
 
             channel = QWebChannel(self)
             if bridge is not None:
                 if isinstance(bridge, QWidget):
                     warnings.warn(
                         "Don't expose QWidgets in WebView. Construct minimal "
-                        "QObjects instead.", OrangeDeprecationWarning,
-                        stacklevel=2)
+                        "QObjects instead.",
+                        OrangeDeprecationWarning,
+                        stacklevel=2,
+                    )
                 channel.registerObject("pybridge", bridge)
 
-            channel.registerObject('__bridge', _QWidgetJavaScriptWrapper(self))
+            channel.registerObject("__bridge", _QWidgetJavaScriptWrapper(self))
 
             self.page().setWebChannel(channel)
 
-        def _onloadJS(self, code, name='', injection_point=QWebEngineScript.DocumentReady):
+        def _onloadJS(
+            self, code, name="", injection_point=QWebEngineScript.DocumentReady
+        ):
             script = QWebEngineScript()
-            script.setName(name or ('script_' + str(random())[2:]))
+            script.setName(name or ("script_" + str(random())[2:]))
             script.setSourceCode(code)
             script.setInjectionPoint(injection_point)
             script.setWorldId(script.MainWorld)
             script.setRunsOnSubFrames(False)
             self.page().scripts().insert(script)
-            self.loadStarted.connect(
-                lambda: self.page().scripts().insert(script))
+            self.loadStarted.connect(lambda: self.page().scripts().insert(script))
 
         def runJavaScript(self, javascript, resultCallback=None):
             """
@@ -167,6 +194,7 @@ if HAVE_WEBENGINE:
 
 
 if HAVE_WEBKIT:
+
     class WebKitView(QWebView):
         """
         Construct a new QWebView widget that has no history and
@@ -186,12 +214,14 @@ if HAVE_WEBKIT:
         **kwargs:
             Passed to QWebView.
         """
+
         def __init__(self, parent=None, bridge=None, *, debug=False, **kwargs):
-            super().__init__(parent,
-                             sizeHint=QSize(500, 400),
-                             sizePolicy=QSizePolicy(QSizePolicy.Expanding,
-                                                    QSizePolicy.Expanding),
-                             **kwargs)
+            super().__init__(
+                parent,
+                sizeHint=QSize(500, 400),
+                sizePolicy=QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding),
+                **kwargs
+            )
 
             if isinstance(parent, QWidget) and parent.layout() is not None:
                 parent.layout().addWidget(self)  # TODO REMOVE
@@ -204,14 +234,19 @@ if HAVE_WEBKIT:
             if isinstance(bridge, QWidget):
                 warnings.warn(
                     "Don't expose QWidgets in WebView. Construct minimal "
-                    "QObjects instead.", OrangeDeprecationWarning,
-                    stacklevel=2)
+                    "QObjects instead.",
+                    OrangeDeprecationWarning,
+                    stacklevel=2,
+                )
 
             def _onload(_ok):
                 if _ok:
                     self.frame = self.page().mainFrame()
                     self.frame.javaScriptWindowObjectCleared.connect(
-                        lambda: self.frame.addToJavaScriptWindowObject('pybridge', bridge))
+                        lambda: self.frame.addToJavaScriptWindowObject(
+                            "pybridge", bridge
+                        )
+                    )
                     with open(_WEBVIEW_HELPERS, encoding="utf-8") as f:
                         self.frame.evaluateJavaScript(f.read())
 
@@ -242,8 +277,9 @@ if HAVE_WEBKIT:
 def _to_primitive_types(d):
     # pylint: disable=too-many-return-statements
     if isinstance(d, QWidget):
-        raise ValueError("Don't expose QWidgets in WebView. Construct minimal "
-                         "QObjects instead.")
+        raise ValueError(
+            "Don't expose QWidgets in WebView. Construct minimal " "QObjects instead."
+        )
     if isinstance(d, Integral):
         return int(d)
     if isinstance(d, Real):
@@ -265,9 +301,10 @@ def _to_primitive_types(d):
     if isinstance(d, QColor):
         return d.name()
     raise TypeError(
-        'object must consist of primitive types '
-        '(allowed: int, float, str, bool, list, '
-        'dict, set, numpy.ndarray, ...). Type is: ' + d.__class__)
+        "object must consist of primitive types "
+        "(allowed: int, float, str, bool, list, "
+        "dict, set, numpy.ndarray, ...). Type is: " + d.__class__
+    )
 
 
 class _WebViewBase:
@@ -347,19 +384,20 @@ class _WebViewBase:
         exposeObject() method are indeed exposed in JS, and the code `code`
         has finished evaluating.
         """
+
         def _later():
             if not self.__is_init and self.__js_queue:
                 return QTimer.singleShot(1, _later)
             if self.__js_queue:
                 # '/n' is required when the last line is a comment
-                code = '\n;'.join(self.__js_queue)
+                code = "\n;".join(self.__js_queue)
                 self.__js_queue.clear()
                 self._evalJS(code)
 
         # WebView returns the result of the last evaluated expression.
         # This result may be too complex an object to safely receive on this
         # end, so instead, just make it return 0.
-        code += ';0;'
+        code += ";0;"
         self.__js_queue.append(code)
         QTimer.singleShot(1, _later)
 
@@ -367,9 +405,9 @@ class _WebViewBase:
         """ Return SVG string of the first SVG element on the page, or
         raise ValueError if not any. """
         html = self.html()
-        return html[html.index('<svg '):html.index('</svg>') + 6]
+        return html[html.index("<svg ") : html.index("</svg>") + 6]
 
-    def setHtml(self, html, base_url=''):
+    def setHtml(self, html, base_url=""):
         """Set the HTML content of the current webframe to `html`
         (an UTF-8 string)."""
         super().setHtml(html, QUrl(base_url))
@@ -377,7 +415,7 @@ class _WebViewBase:
     @staticmethod
     def toFileURL(local_path):
         """Return local_path as file:// URL"""
-        return urljoin('file:', pathname2url(abspath(local_path)))
+        return urljoin("file:", pathname2url(abspath(local_path)))
 
     def setUrl(self, url):
         """Point the current frame to URL url."""
@@ -418,7 +456,7 @@ if HAVE_WEBKIT:
             super().__init__(parent)
             self._obj = dict(obj=obj)
 
-        @pyqtProperty('QVariantMap')
+        @pyqtProperty("QVariantMap")
         def pop_object(self):
             return self._obj
 
@@ -431,9 +469,12 @@ if HAVE_WEBKIT:
             def load_finished():
                 if not sip.isdeleted(self):
                     self.frame.addToJavaScriptWindowObject(
-                        '__bridge', _QWidgetJavaScriptWrapper(self))
-                    self._evalJS('setTimeout(function(){'
-                                 '__bridge.load_really_finished(); }, 100);')
+                        "__bridge", _QWidgetJavaScriptWrapper(self)
+                    )
+                    self._evalJS(
+                        "setTimeout(function(){"
+                        "__bridge.load_really_finished(); }, 100);"
+                    )
 
             self.loadFinished.connect(load_finished)
 
@@ -446,8 +487,7 @@ if HAVE_WEBKIT:
             return self.frame.evaluateJavaScript(code)
 
         def onloadJS(self, code):
-            self.frame.loadFinished.connect(
-                lambda: WebviewWidget.evalJS(self, code))
+            self.frame.loadFinished.connect(lambda: WebviewWidget.evalJS(self, code))
 
         def html(self):
             return self.frame.toHtml()
@@ -455,14 +495,20 @@ if HAVE_WEBKIT:
         def exposeObject(self, name, obj):
             obj = _to_primitive_types(obj)
             jsobj = _JSObject(self, name, obj)
-            self.frame.addToJavaScriptWindowObject('__js_object_' + name, jsobj)
-            WebviewWidget.evalJS(self, '''
+            self.frame.addToJavaScriptWindowObject("__js_object_" + name, jsobj)
+            WebviewWidget.evalJS(
+                self,
+                """
                 window.{0} = window.__js_object_{0}.pop_object.obj;
                 fixupPythonObject({0}); 0;
-            '''.format(name))
+            """.format(
+                    name
+                ),
+            )
 
 
 elif HAVE_WEBENGINE:
+
     class IdStore:
         """Generates and stores unique ids.
 
@@ -493,7 +539,6 @@ elif HAVE_WEBENGINE:
             with self.lock:
                 self.ids.remove(id)
 
-
     class _JSObjectChannel(QObject):
         """ This class hopefully prevent options data from being
         marshalled into a string-like dumb (JSON) object when
@@ -501,7 +546,7 @@ elif HAVE_WEBENGINE:
         optimally as it knows to."""
 
         # JS webchannel listens to this signal
-        objectChanged = pyqtSignal('QVariantMap')
+        objectChanged = pyqtSignal("QVariantMap")
 
         def __init__(self, parent):
             super().__init__(parent)
@@ -514,7 +559,8 @@ elif HAVE_WEBENGINE:
                 raise ValueError(
                     "QWebChannel doesn't transmit QObject instances. If you "
                     "need a QObject available in JavaScript, pass it as a "
-                    "bridge in WebviewWidget constructor.")
+                    "bridge in WebviewWidget constructor."
+                )
             id = next(self._id_gen)
             value = self._objects[id] = dict(id=id, name=name, obj=obj)
             # Wait till JS is connected to receive objects
@@ -528,9 +574,7 @@ elif HAVE_WEBENGINE:
         def is_all_exposed(self):
             return len(self._objects) == 0
 
-
     _NOTSET = object()
-
 
     @inherit_docstrings
     class WebviewWidget(_WebViewBase, WebEngineView):
@@ -547,8 +591,7 @@ elif HAVE_WEBENGINE:
             # the objects being available (but could otherwise be executed before
             # the objects are exposed in JS).
             self._jsobject_channel = jsobj = _JSObjectChannel(self)
-            self.page().webChannel().registerObject(
-                '__js_object_channel', jsobj)
+            self.page().webChannel().registerObject("__js_object_channel", jsobj)
             self._results = IdStore()
 
         def _evalJS(self, code):
@@ -564,7 +607,7 @@ elif HAVE_WEBENGINE:
             self._onloadJS(code, injection_point=QWebEngineScript.Deferred)
 
         def html(self):
-            self.page().toHtml(lambda html: setattr(self, '_html', html))
+            self.page().toHtml(lambda html: setattr(self, "_html", html))
             wait(until=lambda: self._html is not _NOTSET or sip.isdeleted(self))
             html, self._html = self._html, _NOTSET
             return html
@@ -573,7 +616,7 @@ elif HAVE_WEBENGINE:
             obj = _to_primitive_types(obj)
             self._jsobject_channel.send_object(name, obj)
 
-        def setHtml(self, html, base_url=''):
+        def setHtml(self, html, base_url=""):
             # TODO: remove once anaconda will provide PyQt without this bug.
             #
             # At least on some installations of PyQt 5.6.0 with anaconda

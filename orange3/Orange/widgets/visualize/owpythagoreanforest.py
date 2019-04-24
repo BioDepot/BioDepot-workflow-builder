@@ -1,14 +1,31 @@
 """Pythagorean forest widget for visualizing random forests."""
 from math import log, sqrt
+
 # pylint: disable=unused-import
 from typing import Any, Callable, Optional
 
 # pylint: disable=unused-import
-from AnyQt.QtCore import Qt, QRectF, QSize, QPointF, QSizeF, QModelIndex, \
-    QItemSelection, QT_VERSION
+from AnyQt.QtCore import (
+    Qt,
+    QRectF,
+    QSize,
+    QPointF,
+    QSizeF,
+    QModelIndex,
+    QItemSelection,
+    QT_VERSION,
+)
 from AnyQt.QtGui import QPainter, QPen, QColor, QBrush, QMouseEvent
-from AnyQt.QtWidgets import QSizePolicy, QGraphicsScene, QLabel, QSlider, \
-    QListView, QStyledItemDelegate, QStyleOptionViewItem, QStyle
+from AnyQt.QtWidgets import (
+    QSizePolicy,
+    QGraphicsScene,
+    QLabel,
+    QSlider,
+    QListView,
+    QStyledItemDelegate,
+    QStyleOptionViewItem,
+    QStyle,
+)
 
 from Orange.base import RandomForestModel, TreeModel
 from Orange.data import Table
@@ -19,8 +36,7 @@ from Orange.widgets.visualize.pythagorastreeviewer import (
     PythagorasTreeViewer,
     ContinuousTreeNode,
 )
-from Orange.widgets.visualize.utils.tree.skltreeadapter import \
-    SklTreeAdapter
+from Orange.widgets.visualize.utils.tree.skltreeadapter import SklTreeAdapter
 from Orange.widgets.widget import OWWidget
 
 
@@ -44,22 +60,23 @@ class PythagoreanForestModel(PyListModel):
             return self.item_scale * QSize(100, 100)
 
         if role == Qt.DisplayRole:
-            if 'tree' not in self._other_data[idx]:
+            if "tree" not in self._other_data[idx]:
                 scene = QGraphicsScene(parent=self)
                 tree = PythagorasTreeViewer(
                     adapter=self._list[idx],
                     weight_adjustment=OWPythagoreanForest.SIZE_CALCULATION[
-                        self.size_calc_idx][1],
+                        self.size_calc_idx
+                    ][1],
                     interactive=False,
                     padding=100,
                     depth_limit=self.depth_limit,
                     target_class_index=self.target_class_idx,
                 )
                 scene.addItem(tree)
-                self._other_data[idx]['scene'] = scene
-                self._other_data[idx]['tree'] = tree
+                self._other_data[idx]["scene"] = scene
+                self._other_data[idx]["tree"] = tree
 
-            return self._other_data[idx]['scene']
+            return self._other_data[idx]["scene"]
 
         return super().data(index, role)
 
@@ -72,8 +89,8 @@ class PythagoreanForestModel(PyListModel):
         # type: (Callable[[PythagorasTreeViewer], None]) -> None
         """Apply `func` to every rendered tree viewer instance."""
         for idx, tree_data in enumerate(self._other_data):
-            if 'tree' in tree_data:
-                func(tree_data['tree'])
+            if "tree" in tree_data:
+                func(tree_data["tree"])
                 index = self.index(idx)
                 if QT_VERSION < 0x50000:
                     self.dataChanged.emit(index, index)
@@ -112,7 +129,7 @@ class PythagorasTreeDelegate(QStyledItemDelegate):
             painter.setPen(QPen(QColor(125, 162, 206, 192)))
             painter.setBrush(QBrush(QColor(217, 232, 252, 192)))
         else:
-            painter.setPen(QPen(QColor('#ebebeb')))
+            painter.setPen(QPen(QColor("#ebebeb")))
         painter.drawRoundedRect(rect, 3, 3)
         painter.restore()
 
@@ -146,6 +163,7 @@ class PythagorasTreeDelegate(QStyledItemDelegate):
 
 class ClickToClearSelectionListView(QListView):
     """Clicking outside any item clears the current selection."""
+
     def mousePressEvent(self, event):
         # type: (QMouseEvent) -> None
         super().mousePressEvent(event)
@@ -156,9 +174,9 @@ class ClickToClearSelectionListView(QListView):
 
 
 class OWPythagoreanForest(OWWidget):
-    name = 'Pythagorean Forest'
-    description = 'Pythagorean forest for visualising random forests.'
-    icon = 'icons/PythagoreanForest.svg'
+    name = "Pythagorean Forest"
+    description = "Pythagorean forest for visualising random forests."
+    icon = "icons/PythagoreanForest.svg"
     settings_version = 2
 
     priority = 1001
@@ -170,7 +188,7 @@ class OWPythagoreanForest(OWWidget):
         tree = Output("Tree", TreeModel)
 
     # Enable the save as feature
-    graph_name = 'scene'
+    graph_name = "scene"
 
     # Settings
     depth_limit = settings.ContextSetting(10)
@@ -179,19 +197,19 @@ class OWPythagoreanForest(OWWidget):
     zoom = settings.Setting(200)
 
     SIZE_CALCULATION = [
-        ('Normal', lambda x: x),
-        ('Square root', lambda x: sqrt(x)),
-        ('Logarithmic', lambda x: log(x + 1)),
+        ("Normal", lambda x: x),
+        ("Square root", lambda x: sqrt(x)),
+        ("Logarithmic", lambda x: log(x + 1)),
     ]
 
     @classmethod
     def migrate_settings(cls, settings, version):
         if version < 2:
-            settings.pop('selected_tree_index', None)
+            settings.pop("selected_tree_index", None)
             v1_min, v1_max = 20, 150
             v2_min, v2_max = 100, 400
             ratio = (v2_max - v2_min) / (v1_max - v1_min)
-            settings['zoom'] = int(ratio * (settings['zoom'] - v1_min) + v2_min)
+            settings["zoom"] = int(ratio * (settings["zoom"] - v1_min) + v2_min)
 
     def __init__(self):
         super().__init__()
@@ -204,26 +222,42 @@ class OWPythagoreanForest(OWWidget):
 
         # CONTROL AREA
         # Tree info area
-        box_info = gui.widgetBox(self.controlArea, 'Forest')
+        box_info = gui.widgetBox(self.controlArea, "Forest")
         self.ui_info = gui.widgetLabel(box_info)
 
         # Display controls area
-        box_display = gui.widgetBox(self.controlArea, 'Display')
+        box_display = gui.widgetBox(self.controlArea, "Display")
         self.ui_depth_slider = gui.hSlider(
-            box_display, self, 'depth_limit', label='Depth', ticks=False,
+            box_display, self, "depth_limit", label="Depth", ticks=False
         )  # type: QSlider
         self.ui_target_class_combo = gui.comboBox(
-            box_display, self, 'target_class_index', label='Target class',
-            orientation=Qt.Horizontal, items=[], contentsLength=8,
+            box_display,
+            self,
+            "target_class_index",
+            label="Target class",
+            orientation=Qt.Horizontal,
+            items=[],
+            contentsLength=8,
         )  # type: gui.OrangeComboBox
         self.ui_size_calc_combo = gui.comboBox(
-            box_display, self, 'size_calc_idx', label='Size',
+            box_display,
+            self,
+            "size_calc_idx",
+            label="Size",
             orientation=Qt.Horizontal,
-            items=list(zip(*self.SIZE_CALCULATION))[0], contentsLength=8,
+            items=list(zip(*self.SIZE_CALCULATION))[0],
+            contentsLength=8,
         )  # type: gui.OrangeComboBox
         self.ui_zoom_slider = gui.hSlider(
-            box_display, self, 'zoom', label='Zoom', ticks=False, minValue=100,
-            maxValue=400, createLabel=False, intOnly=False,
+            box_display,
+            self,
+            "zoom",
+            label="Zoom",
+            ticks=False,
+            minValue=100,
+            maxValue=400,
+            createLabel=False,
+            intOnly=False,
         )  # type: QSlider
 
         # Stretch to fit the rest of the unsused area
@@ -234,14 +268,14 @@ class OWPythagoreanForest(OWWidget):
         # MAIN AREA
         self.forest_model = PythagoreanForestModel(parent=self)
         self.forest_model.update_item_size(self.zoom)
-        self.ui_depth_slider.valueChanged.connect(
-            self.forest_model.update_depth)
+        self.ui_depth_slider.valueChanged.connect(self.forest_model.update_depth)
         self.ui_target_class_combo.currentIndexChanged.connect(
-            self.forest_model.update_target_class)
-        self.ui_zoom_slider.valueChanged.connect(
-            self.forest_model.update_item_size)
+            self.forest_model.update_target_class
+        )
+        self.ui_zoom_slider.valueChanged.connect(self.forest_model.update_item_size)
         self.ui_size_calc_combo.currentIndexChanged.connect(
-            self.forest_model.update_size_calc)
+            self.forest_model.update_size_calc
+        )
 
         self.list_delegate = PythagorasTreeDelegate(parent=self)
         self.list_view = ClickToClearSelectionListView(parent=self)
@@ -293,7 +327,7 @@ class OWPythagoreanForest(OWWidget):
         self._clear_depth_slider()
 
     def _update_info_box(self):
-        self.ui_info.setText('Trees: {}'.format(len(self.forest.trees)))
+        self.ui_info.setText("Trees: {}".format(len(self.forest.trees)))
 
     def _update_depth_slider(self):
         self.depth_limit = self._get_max_depth()
@@ -304,22 +338,25 @@ class OWPythagoreanForest(OWWidget):
 
     def _update_target_class_combo(self):
         self._clear_target_class_combo()
-        label = [x for x in self.ui_target_class_combo.parent().children()
-                 if isinstance(x, QLabel)][0]
+        label = [
+            x
+            for x in self.ui_target_class_combo.parent().children()
+            if isinstance(x, QLabel)
+        ][0]
 
         if self.instances.domain.has_discrete_class:
-            label_text = 'Target class'
+            label_text = "Target class"
             values = [c.title() for c in self.instances.domain.class_vars[0].values]
-            values.insert(0, 'None')
+            values.insert(0, "None")
         else:
-            label_text = 'Node color'
+            label_text = "Node color"
             values = list(ContinuousTreeNode.COLOR_METHODS.keys())
         label.setText(label_text)
         self.ui_target_class_combo.addItems(values)
         self.ui_target_class_combo.setCurrentIndex(self.target_class_index)
 
     def _clear_info_box(self):
-        self.ui_info.setText('No forest on input.')
+        self.ui_info.setText("No forest on input.")
 
     def _clear_target_class_combo(self):
         self.ui_target_class_combo.clear()
@@ -369,6 +406,7 @@ class OWPythagoreanForest(OWWidget):
 class SklRandomForestAdapter:
     """Take a `RandomForest` and wrap all the trees into the `SklTreeAdapter`
     instances that Pythagorean trees use."""
+
     def __init__(self, model):
         self._adapters = None
         self._domain = model.domain
@@ -387,7 +425,7 @@ class SklRandomForestAdapter:
         return self._domain
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from Orange.modelling import RandomForestLearner
     from AnyQt.QtWidgets import QApplication
     import sys
@@ -395,7 +433,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     ow = OWPythagoreanForest()
     ow.resetSettings()
-    data = Table(sys.argv[1] if len(sys.argv) > 1 else 'iris')
+    data = Table(sys.argv[1] if len(sys.argv) > 1 else "iris")
     rf = RandomForestLearner(n_estimators=100)(data)
     rf.instances = data
     ow.set_rf(rf)

@@ -8,13 +8,22 @@ import numpy as np
 
 from AnyQt.QtCore import Qt
 
-from Orange.data import \
-    Domain, \
-    ContinuousVariable, DiscreteVariable, StringVariable, TimeVariable
-from Orange.widgets.utils.itemmodels import \
-    AbstractSortTableModel, PyTableModel,\
-    PyListModel, VariableListModel, DomainModel,\
-    _argsort, _as_contiguous_range
+from Orange.data import (
+    Domain,
+    ContinuousVariable,
+    DiscreteVariable,
+    StringVariable,
+    TimeVariable,
+)
+from Orange.widgets.utils.itemmodels import (
+    AbstractSortTableModel,
+    PyTableModel,
+    PyListModel,
+    VariableListModel,
+    DomainModel,
+    _argsort,
+    _as_contiguous_range,
+)
 from Orange.widgets.gui import TableVariable
 
 
@@ -23,17 +32,22 @@ class TestArgsort(unittest.TestCase):
         self.assertEqual(_argsort("dacb"), [1, 3, 2, 0])
         self.assertEqual(_argsort("dacb", reverse=True), [0, 2, 3, 1])
         self.assertEqual(_argsort([3, -1, 0, 2], key=abs), [2, 1, 3, 0])
+        self.assertEqual(_argsort([3, -1, 0, 2], key=abs, reverse=True), [0, 3, 1, 2])
         self.assertEqual(
-            _argsort([3, -1, 0, 2], key=abs, reverse=True), [0, 3, 1, 2])
+            _argsort(
+                [3, -1, 0, 2], cmp=lambda x, y: (abs(x) > abs(y)) - (abs(x) < abs(y))
+            ),
+            [2, 1, 3, 0],
+        )
         self.assertEqual(
-            _argsort([3, -1, 0, 2],
-                     cmp=lambda x, y: (abs(x) > abs(y)) - (abs(x) < abs(y))),
-            [2, 1, 3, 0])
-        self.assertEqual(
-            _argsort([3, -1, 0, 2],
-                     cmp=lambda x, y: (abs(x) > abs(y)) - (abs(x) < abs(y)),
-                     reverse=True),
-            [0, 3, 1, 2])
+            _argsort(
+                [3, -1, 0, 2],
+                cmp=lambda x, y: (abs(x) > abs(y)) - (abs(x) < abs(y)),
+                reverse=True,
+            ),
+            [0, 3, 1, 2],
+        )
+
 
 class TestUtils(unittest.TestCase):
     def test_as_contiguous_range(self):
@@ -43,13 +57,12 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(_as_contiguous_range(slice(8), 6), (0, 6, 1))
         self.assertEqual(_as_contiguous_range(slice(8, None, -1), 6), (0, 6, 1))
         self.assertEqual(_as_contiguous_range(slice(7, None, -1), 9), (0, 8, 1))
-        self.assertEqual(_as_contiguous_range(slice(None, None, -1), 9),
-                         (0, 9, 1))
+        self.assertEqual(_as_contiguous_range(slice(None, None, -1), 9), (0, 9, 1))
+
 
 class TestPyTableModel(unittest.TestCase):
     def setUp(self):
-        self.model = PyTableModel([[1, 4],
-                                   [2, 3]])
+        self.model = PyTableModel([[1, 4], [2, 3]])
 
     def test_init(self):
         self.model = PyTableModel()
@@ -64,21 +77,25 @@ class TestPyTableModel(unittest.TestCase):
 
     def test_data(self):
         mi = self.model.index(0, 0)
-        self.assertEqual(self.model.data(mi), '1')
+        self.assertEqual(self.model.data(mi), "1")
         self.assertEqual(self.model.data(mi, Qt.EditRole), 1)
 
     def test_editable(self):
         editable_model = PyTableModel([[0]], editable=True)
-        self.assertFalse(int(self.model.flags(self.model.index(0, 0)) & Qt.ItemIsEditable))
-        self.assertTrue(int(editable_model.flags(editable_model.index(0, 0)) & Qt.ItemIsEditable))
+        self.assertFalse(
+            int(self.model.flags(self.model.index(0, 0)) & Qt.ItemIsEditable)
+        )
+        self.assertTrue(
+            int(editable_model.flags(editable_model.index(0, 0)) & Qt.ItemIsEditable)
+        )
 
     def test_sort(self):
         self.model.sort(1)
         self.assertEqual(self.model.index(0, 0).data(Qt.EditRole), 2)
 
     def test_setHeaderLabels(self):
-        self.model.setHorizontalHeaderLabels(['Col 1', 'Col 2'])
-        self.assertEqual(self.model.headerData(1, Qt.Horizontal), 'Col 2')
+        self.model.setHorizontalHeaderLabels(["Col 1", "Col 2"])
+        self.assertEqual(self.model.headerData(1, Qt.Horizontal), "Col 2")
         self.assertEqual(self.model.headerData(1, Qt.Vertical), 2)
 
     def test_removeRows(self):
@@ -97,7 +114,7 @@ class TestPyTableModel(unittest.TestCase):
 
     def test_insertColumns(self):
         self.model.insertColumns(0, 1)
-        self.assertEqual(self.model[0], ['', 1, 4])
+        self.assertEqual(self.model[0], ["", 1, 4])
 
     def test_wrap(self):
         self.model.wrap([[0]])
@@ -129,37 +146,38 @@ class TestPyTableModel(unittest.TestCase):
 
     def test_other_roles(self):
         self.model.append([2, 3])
-        self.model.setData(self.model.index(2, 0),
-                           Qt.AlignCenter,
-                           Qt.TextAlignmentRole)
+        self.model.setData(self.model.index(2, 0), Qt.AlignCenter, Qt.TextAlignmentRole)
         del self.model[1]
-        self.assertTrue(Qt.AlignCenter &
-                        self.model.data(self.model.index(1, 0),
-                                        Qt.TextAlignmentRole))
+        self.assertTrue(
+            Qt.AlignCenter
+            & self.model.data(self.model.index(1, 0), Qt.TextAlignmentRole)
+        )
 
 
 class TestAbstractSortTableModel(unittest.TestCase):
     def test_sorting(self):
         assert issubclass(PyTableModel, AbstractSortTableModel)
-        model = PyTableModel([[1, 4],
-                              [2, 2],
-                              [3, 3]])
+        model = PyTableModel([[1, 4], [2, 2], [3, 3]])
         model.sort(1, Qt.AscendingOrder)
         # mapToSourceRows
         self.assertSequenceEqual(model.mapToSourceRows(...).tolist(), [1, 2, 0])
         self.assertEqual(model.mapToSourceRows(1).tolist(), 2)
         self.assertSequenceEqual(model.mapToSourceRows([1, 2]).tolist(), [2, 0])
         self.assertSequenceEqual(model.mapToSourceRows([]), [])
-        self.assertSequenceEqual(model.mapToSourceRows(np.array([], dtype=int)).tolist(), [])
-        self.assertRaises(IndexError, model.mapToSourceRows, np.r_[0.])
+        self.assertSequenceEqual(
+            model.mapToSourceRows(np.array([], dtype=int)).tolist(), []
+        )
+        self.assertRaises(IndexError, model.mapToSourceRows, np.r_[0.0])
 
         # mapFromSourceRows
         self.assertSequenceEqual(model.mapFromSourceRows(...).tolist(), [2, 0, 1])
         self.assertEqual(model.mapFromSourceRows(1).tolist(), 0)
         self.assertSequenceEqual(model.mapFromSourceRows([1, 2]).tolist(), [0, 1])
         self.assertSequenceEqual(model.mapFromSourceRows([]), [])
-        self.assertSequenceEqual(model.mapFromSourceRows(np.array([], dtype=int)).tolist(), [])
-        self.assertRaises(IndexError, model.mapFromSourceRows, np.r_[0.])
+        self.assertSequenceEqual(
+            model.mapFromSourceRows(np.array([], dtype=int)).tolist(), []
+        )
+        self.assertRaises(IndexError, model.mapFromSourceRows, np.r_[0.0])
 
         model.sort(1, Qt.DescendingOrder)
         self.assertSequenceEqual(model.mapToSourceRows(...).tolist(), [0, 2, 1])
@@ -243,8 +261,7 @@ class TestPyListModel(unittest.TestCase):
         self.assertIs(model.data(model.index(0), Qt.EditRole), None)
 
         model.setData(model.index(1), "This is two", Qt.ToolTipRole)
-        self.assertEqual(model.data(model.index(1), Qt.ToolTipRole),
-                         "This is two",)
+        self.assertEqual(model.data(model.index(1), Qt.ToolTipRole), "This is two")
 
         self.assertFalse(model.setData(model.index(5), "foo"))
 
@@ -266,7 +283,7 @@ class TestPyListModel(unittest.TestCase):
         self.assertSequenceEqual(model, [-1, 0, 1, 2, 3, 4])
 
         model = PyListModel([1, 2, 3, 4])
-        model[len(model):len(model)] = [5, 6]
+        model[len(model) : len(model)] = [5, 6]
         self.assertSequenceEqual(model, [1, 2, 3, 4, 5, 6])
 
         model = PyListModel([1, 2, 3, 4])
@@ -289,7 +306,7 @@ class TestPyListModel(unittest.TestCase):
         self.assertEqual(self.model[-4], 1)
 
         with self.assertRaises(IndexError):
-            self.model[4]    # pylint: disable=pointless-statement
+            self.model[4]  # pylint: disable=pointless-statement
 
         with self.assertRaises(IndexError):
             self.model[-5]  # pylint: disable=pointless-statement
@@ -459,8 +476,9 @@ class TestVariableListModel(unittest.TestCase):
         cls.cont = ContinuousVariable("age")
         cls.string = StringVariable("name")
         cls.time = TimeVariable("birth")
-        cls.model = VariableListModel([
-            cls.cont, None, "Foo", cls.disc, cls.string, cls.time])
+        cls.model = VariableListModel(
+            [cls.cont, None, "Foo", cls.disc, cls.string, cls.time]
+        )
 
     def test_placeholder(self):
         model = self.model
@@ -511,8 +529,10 @@ class TestVariableListModel(unittest.TestCase):
 
     @unittest.skip
     def test_decoration(self):
-        decorations = [self.model.data(self.model.index(i), Qt.DecorationRole)
-                       for i in range(self.model.rowCount())]
+        decorations = [
+            self.model.data(self.model.index(i), Qt.DecorationRole)
+            for i in range(self.model.rowCount())
+        ]
         self.assertIs(decorations[1], decorations[2])
         del decorations[2]
         for i, dec1 in enumerate(decorations):
@@ -521,9 +541,12 @@ class TestVariableListModel(unittest.TestCase):
 
     def test_table_variable(self):
         self.assertEqual(
-            [self.model.data(self.model.index(i), TableVariable)
-             for i in range(self.model.rowCount())],
-            [self.cont, None, None, self.disc, self.string, self.time])
+            [
+                self.model.data(self.model.index(i), TableVariable)
+                for i in range(self.model.rowCount())
+            ],
+            [self.cont, None, None, self.disc, self.string, self.time],
+        )
 
     def test_other_roles(self):
         with patch.object(PyListModel, "data") as data:
@@ -535,10 +558,11 @@ class TestVariableListModel(unittest.TestCase):
     def test_invalid_index(self):
         self.assertIsNone(self.model.data(self.model.index(0).parent()))
 
+
 class TestDomainModel(unittest.TestCase):
     def test_init_with_single_section(self):
         model = DomainModel(order=DomainModel.CLASSES)
-        self.assertEqual(model.order, (DomainModel.CLASSES, ))
+        self.assertEqual(model.order, (DomainModel.CLASSES,))
 
     def test_separators(self):
         attrs = [ContinuousVariable(n) for n in "abg"]
@@ -571,14 +595,13 @@ class TestDomainModel(unittest.TestCase):
         sep = model.Separator
         self.assertEqual(model.order, (None, sep) + model.SEPARATED)
 
-        model = DomainModel(order=("bar", ), placeholder="foo")
+        model = DomainModel(order=("bar",), placeholder="foo")
         self.assertEqual(model.order, (None, "bar"))
 
         model = DomainModel(order=("bar", None, "baz"), placeholder="foo")
         self.assertEqual(model.order, ("bar", None, "baz"))
 
-        model = DomainModel(order=("bar", sep, "baz"),
-                            placeholder="foo")
+        model = DomainModel(order=("bar", sep, "baz"), placeholder="foo")
         self.assertEqual(model.order, (None, sep, "bar", sep, "baz"))
 
     def test_subparts(self):
@@ -588,32 +611,33 @@ class TestDomainModel(unittest.TestCase):
 
         m = DomainModel
         sep = m.Separator
-        model = DomainModel(
-            order=(m.ATTRIBUTES | m.METAS, sep, m.CLASSES))
+        model = DomainModel(order=(m.ATTRIBUTES | m.METAS, sep, m.CLASSES))
         model.set_domain(Domain(attrs, classes, metas))
         self.assertEqual(list(model), attrs + metas + [sep] + classes)
 
         m = DomainModel
         sep = m.Separator
         model = DomainModel(
-            order=(m.ATTRIBUTES | m.METAS, sep, m.CLASSES),
-            alphabetical=True)
+            order=(m.ATTRIBUTES | m.METAS, sep, m.CLASSES), alphabetical=True
+        )
         model.set_domain(Domain(attrs, classes, metas))
-        self.assertEqual(list(model),
-                         sorted(attrs + metas, key=lambda x: x.name) +
-                         [sep] +
-                         sorted(classes, key=lambda x: x.name))
+        self.assertEqual(
+            list(model),
+            sorted(attrs + metas, key=lambda x: x.name)
+            + [sep]
+            + sorted(classes, key=lambda x: x.name),
+        )
 
     def test_filtering(self):
         cont = [ContinuousVariable(n) for n in "abc"]
         disc = [DiscreteVariable(n) for n in "def"]
         attrs = cont + disc
 
-        model = DomainModel(valid_types=(ContinuousVariable, ))
+        model = DomainModel(valid_types=(ContinuousVariable,))
         model.set_domain(Domain(attrs))
         self.assertEqual(list(model), cont)
 
-        model = DomainModel(valid_types=(DiscreteVariable, ))
+        model = DomainModel(valid_types=(DiscreteVariable,))
         model.set_domain(Domain(attrs))
         self.assertEqual(list(model), disc)
 
@@ -621,8 +645,7 @@ class TestDomainModel(unittest.TestCase):
         model.set_domain(Domain(attrs))
         self.assertEqual(list(model), disc[1:])
 
-        model = DomainModel(valid_types=(DiscreteVariable, ),
-                            skip_hidden_vars=False)
+        model = DomainModel(valid_types=(DiscreteVariable,), skip_hidden_vars=False)
         model.set_domain(Domain(attrs))
         self.assertEqual(list(model), disc)
 
@@ -642,7 +665,8 @@ class TestDomainModel(unittest.TestCase):
         model.set_domain(Domain(attrs, classes, metas))
         self.assertEqual(
             list(model),
-            classes + [PyListModel.Separator] + metas + [PyListModel.Separator] + attrs)
+            classes + [PyListModel.Separator] + metas + [PyListModel.Separator] + attrs,
+        )
 
     def test_read_only(self):
         model = DomainModel()
@@ -666,12 +690,17 @@ class TestDomainModel(unittest.TestCase):
         self.assertRaises(TypeError, model.setData, index, domain[0])
         self.assertTrue(model.setData(index, "foo", Qt.ToolTipRole))
 
-        self.assertRaises(TypeError, model.setItemData, index,
-                          {Qt.EditRole: domain[0], Qt.ToolTipRole: "foo"})
+        self.assertRaises(
+            TypeError,
+            model.setItemData,
+            index,
+            {Qt.EditRole: domain[0], Qt.ToolTipRole: "foo"},
+        )
         self.assertTrue(model.setItemData(index, {Qt.ToolTipRole: "foo"}))
 
         self.assertRaises(TypeError, model.insertRows, 0, 0)
         self.assertRaises(TypeError, model.removeRows, 0, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

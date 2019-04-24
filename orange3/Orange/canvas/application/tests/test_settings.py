@@ -20,12 +20,17 @@ class TestUserSettings(test.QAppTestCase):
         self.app.exec_()
 
     def test_settings_model(self):
-        store = QSettings(QSettings.IniFormat, QSettings.UserScope,
-                          "biolab.si", "Orange Canvas UnitTests")
+        store = QSettings(
+            QSettings.IniFormat,
+            QSettings.UserScope,
+            "biolab.si",
+            "Orange Canvas UnitTests",
+        )
 
-        defaults = [config_slot("S1", bool, True, "Something"),
-                    config_slot("S2", str, "I an not a String",
-                                "Disregard the string.")]
+        defaults = [
+            config_slot("S1", bool, True, "Something"),
+            config_slot("S2", str, "I an not a String", "Disregard the string."),
+        ]
 
         settings = Settings(defaults=defaults, store=store)
         model = UserSettingsModel(settings=settings)

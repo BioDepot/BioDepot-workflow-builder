@@ -33,8 +33,7 @@ class DynamicResizeToolBar(QToolBar):
 
     def actionEvent(self, event):
         QToolBar.actionEvent(self, event)
-        if event.type() == QEvent.ActionAdded or \
-                event.type() == QEvent.ActionRemoved:
+        if event.type() == QEvent.ActionAdded or event.type() == QEvent.ActionRemoved:
             self.__layout(self.size())
 
     def sizeHint(self):
@@ -79,8 +78,7 @@ class DynamicResizeToolBar(QToolBar):
             widgets = sorted(widgets, key=lambda w: w.pos().y())
 
         spacing = self.layout().spacing()
-        uniform_layout_helper(widgets, mygeom, orientation,
-                              spacing=spacing)
+        uniform_layout_helper(widgets, mygeom, orientation, spacing=spacing)
 
 
 def uniform_layout_helper(items, contents_rect, expanding, spacing):

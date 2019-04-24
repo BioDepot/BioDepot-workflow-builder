@@ -40,8 +40,11 @@ def get_indices(names, name):
     :param name: str
     :return: list of indices
     """
-    return [int(a.group(2)) for x in names
-            for a in re.finditer(RE_FIND_INDEX.format(name), x)]
+    return [
+        int(a.group(2))
+        for x in names
+        for a in re.finditer(RE_FIND_INDEX.format(name), x)
+    ]
 
 
 def get_next_name(names, name):
@@ -55,8 +58,7 @@ def get_next_name(names, name):
     """
     if isinstance(names, Domain):
         names = [
-            var.name
-            for var in chain(names.attributes, names.class_vars, names.metas)
+            var.name for var in chain(names.attributes, names.class_vars, names.metas)
         ]
     indexes = get_indices(names, name)
     if name not in names and not indexes:
@@ -73,8 +75,9 @@ def get_unique_names(names, proposed):
     :return: list of strings
     """
     if len([name for name in proposed if name in names]):
-        max_index = max([max(get_indices(names, name),
-                             default=1) for name in proposed], default=1)
+        max_index = max(
+            [max(get_indices(names, name), default=1) for name in proposed], default=1
+        )
         for i, name in enumerate(proposed):
             proposed[i] = "{} ({})".format(name, max_index + 1)
     return proposed
@@ -84,9 +87,9 @@ def _table_with_annotation_column(data, values, column_data, var_name):
     var = DiscreteVariable(get_next_name(data.domain, var_name), values)
     class_vars, metas = data.domain.class_vars, data.domain.metas
     if not data.domain.class_vars:
-        class_vars += (var, )
+        class_vars += (var,)
     else:
-        metas += (var, )
+        metas += (var,)
     domain = Domain(data.domain.attributes, class_vars, metas)
     table = data.transform(domain)
     table[:, var] = column_data.reshape((len(data), 1))
@@ -109,12 +112,13 @@ def create_annotated_table(data, selected_indices):
     if selected_indices is not None:
         annotated[selected_indices] = 1
     return _table_with_annotation_column(
-        data, ("No", "Yes"), annotated, ANNOTATED_DATA_FEATURE_NAME)
+        data, ("No", "Yes"), annotated, ANNOTATED_DATA_FEATURE_NAME
+    )
 
 
-def create_groups_table(data, selection,
-                        include_unselected=True,
-                        var_name=ANNOTATED_DATA_FEATURE_NAME):
+def create_groups_table(
+    data, selection, include_unselected=True, var_name=ANNOTATED_DATA_FEATURE_NAME
+):
     if data is None:
         return None
     values = ["G{}".format(i + 1) for i in range(np.max(selection))]

@@ -10,24 +10,37 @@ from .. import config
 from ..utils.settings import SettingChangedEvent
 
 from ..utils.propertybindings import (
-    AbstractBoundProperty, PropertyBinding, BindingManager
+    AbstractBoundProperty,
+    PropertyBinding,
+    BindingManager,
 )
 
 from AnyQt.QtWidgets import (
-    QWidget, QMainWindow, QComboBox, QCheckBox, QListView, QTabWidget,
-    QToolBar, QAction, QStackedWidget, QVBoxLayout, QHBoxLayout,
-    QFormLayout, QSizePolicy, QLineEdit, QLabel
+    QWidget,
+    QMainWindow,
+    QComboBox,
+    QCheckBox,
+    QListView,
+    QTabWidget,
+    QToolBar,
+    QAction,
+    QStackedWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QFormLayout,
+    QSizePolicy,
+    QLineEdit,
+    QLabel,
 )
 
-from AnyQt.QtCore import (
-    Qt, QEventLoop, QAbstractItemModel, QModelIndex
-)
+from AnyQt.QtCore import Qt, QEventLoop, QAbstractItemModel, QModelIndex
 
 log = logging.getLogger(__name__)
 
 
 def refresh_proxies():
     from Orange.canvas.__main__ import fix_set_proxy_env
+
     fix_set_proxy_env()
 
 
@@ -37,6 +50,7 @@ class UserDefaultsPropertyBinding(AbstractBoundProperty):
     :class:`Orange.canvas.utility.settings.Settings` instance.
 
     """
+
     def __init__(self, obj, propertyName, parent=None):
         AbstractBoundProperty.__init__(self, obj, propertyName, parent)
 
@@ -49,8 +63,10 @@ class UserDefaultsPropertyBinding(AbstractBoundProperty):
         self.obj[self.propertyName] = value
 
     def eventFilter(self, obj, event):
-        if event.type() == SettingChangedEvent.SettingChanged and \
-                event.key() == self.propertyName:
+        if (
+            event.type() == SettingChangedEvent.SettingChanged
+            and event.key() == self.propertyName
+        ):
             self.notifyChanged()
 
         return AbstractBoundProperty.eventFilter(self, obj, event)
@@ -62,6 +78,7 @@ class UserSettingsModel(QAbstractItemModel):
     key, setting value entries along with it's status and type.
 
     """
+
     def __init__(self, parent=None, settings=None):
         QAbstractItemModel.__init__(self, parent)
 
@@ -94,9 +111,13 @@ class UserSettingsModel(QAbstractItemModel):
         return QModelIndex()
 
     def index(self, row, column=0, parent=QModelIndex()):
-        if parent.isValid() or \
-                column < 0 or column >= self.columnCount() or \
-                row < 0 or row >= self.rowCount():
+        if (
+            parent.isValid()
+            or column < 0
+            or column >= self.columnCount()
+            or row < 0
+            or row >= self.rowCount()
+        ):
             return QModelIndex()
 
         return self.createIndex(row, column, row)
@@ -141,8 +162,9 @@ class UserSettingsModel(QAbstractItemModel):
             try:
                 self.__settings[key] = value
             except (TypeError, ValueError) as ex:
-                log.error("Failed to set value (%r) for key %r", value, key,
-                          exc_info=True)
+                log.error(
+                    "Failed to set value (%r) for key %r", value, key, exc_info=True
+                )
             else:
                 self.dataChanged.emit(index, index)
                 return True
@@ -162,8 +184,7 @@ def container_widget_helper(orientation=Qt.Vertical, spacing=None, margin=0):
     widget = QWidget()
     if orientation == Qt.Vertical:
         layout = QVBoxLayout()
-        widget.setSizePolicy(QSizePolicy.Fixed,
-                             QSizePolicy.MinimumExpanding)
+        widget.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.MinimumExpanding)
     else:
         layout = QHBoxLayout()
 
@@ -183,6 +204,7 @@ class UserSettingsDialog(QMainWindow):
     A User Settings/Defaults dialog.
 
     """
+
     MAC_UNIFIED = True
 
     def __init__(self, parent=None, **kwargs):
@@ -193,8 +215,7 @@ class UserSettingsDialog(QMainWindow):
         self.layout().setSizeConstraint(QVBoxLayout.SetFixedSize)
 
         self.__macUnified = sys.platform == "darwin" and self.MAC_UNIFIED
-        self._manager = BindingManager(self,
-                                       submitPolicy=BindingManager.AutoSubmit)
+        self._manager = BindingManager(self, submitPolicy=BindingManager.AutoSubmit)
 
         self.__loop = None
 
@@ -211,12 +232,9 @@ class UserSettingsDialog(QMainWindow):
             self.setUnifiedTitleAndToolBarOnMac(True)
 
             # This does not seem to work
-            self.setWindowFlags(self.windowFlags() & \
-                                ~Qt.MacWindowToolBarButtonHint)
+            self.setWindowFlags(self.windowFlags() & ~Qt.MacWindowToolBarButtonHint)
 
-            self.tab.actionTriggered[QAction].connect(
-                self.__macOnToolBarAction
-            )
+            self.tab.actionTriggered[QAction].connect(self.__macOnToolBarAction)
 
             central = QStackedWidget()
 
@@ -230,8 +248,7 @@ class UserSettingsDialog(QMainWindow):
 
         # General Tab
         tab = QWidget()
-        self.addTab(tab, self.tr("General"),
-                    toolTip=self.tr("General Options"))
+        self.addTab(tab, self.tr("General"), toolTip=self.tr("General Options"))
 
         form = QFormLayout()
         tab.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -243,8 +260,9 @@ class UserSettingsDialog(QMainWindow):
         cb_anim = QCheckBox(
             self.tr("Enable node animations"),
             objectName="enable-node-animations",
-            toolTip=self.tr("Enable shadow and ping animations for nodes "
-                            "in the workflow.")
+            toolTip=self.tr(
+                "Enable shadow and ping animations for nodes " "in the workflow."
+            ),
         )
         self.bind(cb_anim, "checked", "schemeedit/enable-node-animations")
         nodes.layout().addWidget(cb_anim)
@@ -258,8 +276,7 @@ class UserSettingsDialog(QMainWindow):
         cb_show = QCheckBox(
             self.tr("Show channel names between widgets"),
             objectName="show-channel-names",
-            toolTip=self.tr("Show source and sink channel names "
-                            "over the links.")
+            toolTip=self.tr("Show source and sink channel names " "over the links."),
         )
 
         self.bind(cb_show, "checked", "schemeedit/show-channel-names")
@@ -272,21 +289,33 @@ class UserSettingsDialog(QMainWindow):
         quickmenu.setLayout(QVBoxLayout())
         quickmenu.layout().setContentsMargins(0, 0, 0, 0)
 
-        cb1 = QCheckBox(self.tr("On double click"),
-                        toolTip=self.tr("Open quick menu on a double click "
-                                        "on an empty spot in the canvas"))
+        cb1 = QCheckBox(
+            self.tr("On double click"),
+            toolTip=self.tr(
+                "Open quick menu on a double click " "on an empty spot in the canvas"
+            ),
+        )
 
-        cb2 = QCheckBox(self.tr("On right click"),
-                        toolTip=self.tr("Open quick menu on a right click "
-                                        "on an empty spot in the canvas"))
+        cb2 = QCheckBox(
+            self.tr("On right click"),
+            toolTip=self.tr(
+                "Open quick menu on a right click " "on an empty spot in the canvas"
+            ),
+        )
 
-        cb3 = QCheckBox(self.tr("On space key press"),
-                        toolTip=self.tr("On Space key press while the mouse"
-                                        "is hovering over the canvas."))
+        cb3 = QCheckBox(
+            self.tr("On space key press"),
+            toolTip=self.tr(
+                "On Space key press while the mouse" "is hovering over the canvas."
+            ),
+        )
 
-        cb4 = QCheckBox(self.tr("On any key press"),
-                        toolTip=self.tr("On any key press while the mouse"
-                                        "is hovering over the canvas."))
+        cb4 = QCheckBox(
+            self.tr("On any key press"),
+            toolTip=self.tr(
+                "On any key press while the mouse" "is hovering over the canvas."
+            ),
+        )
 
         self.bind(cb1, "checked", "quickmenu/trigger-on-double-click")
         self.bind(cb2, "checked", "quickmenu/trigger-on-right-click")
@@ -304,14 +333,17 @@ class UserSettingsDialog(QMainWindow):
         startup.setLayout(QVBoxLayout())
         startup.layout().setContentsMargins(0, 0, 0, 0)
 
-        cb_splash = QCheckBox(self.tr("Show splash screen"), self,
-                              objectName="show-splash-screen")
+        cb_splash = QCheckBox(
+            self.tr("Show splash screen"), self, objectName="show-splash-screen"
+        )
 
-        cb_welcome = QCheckBox(self.tr("Show welcome screen"), self,
-                               objectName="show-welcome-screen")
+        cb_welcome = QCheckBox(
+            self.tr("Show welcome screen"), self, objectName="show-welcome-screen"
+        )
 
-        cb_updates = QCheckBox(self.tr("Check for updates"), self,
-                               objectName="check-updates")
+        cb_updates = QCheckBox(
+            self.tr("Check for updates"), self, objectName="check-updates"
+        )
 
         self.bind(cb_splash, "checked", "startup/show-splash-screen")
         self.bind(cb_welcome, "checked", "startup/show-welcome-screen")
@@ -338,8 +370,7 @@ class UserSettingsDialog(QMainWindow):
 
         # Output Tab
         tab = QWidget()
-        self.addTab(tab, self.tr("Output"),
-                    toolTip="Output Redirection")
+        self.addTab(tab, self.tr("Output"), toolTip="Output Redirection")
 
         form = QFormLayout()
 
@@ -347,11 +378,15 @@ class UserSettingsDialog(QMainWindow):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         combo = QComboBox()
-        combo.addItems([self.tr("Critical"),
-                        self.tr("Error"),
-                        self.tr("Warn"),
-                        self.tr("Info"),
-                        self.tr("Debug")])
+        combo.addItems(
+            [
+                self.tr("Critical"),
+                self.tr("Error"),
+                self.tr("Warn"),
+                self.tr("Info"),
+                self.tr("Debug"),
+            ]
+        )
         self.bind(combo, "currentIndex", "logging/level")
         layout.addWidget(combo)
         box.setLayout(layout)
@@ -360,8 +395,9 @@ class UserSettingsDialog(QMainWindow):
         box = QWidget()
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
-        cb1 = QCheckBox(self.tr("Open in external browser"),
-                        objectName="open-in-external-browser")
+        cb1 = QCheckBox(
+            self.tr("Open in external browser"), objectName="open-in-external-browser"
+        )
         self.bind(cb1, "checked", "help/open-in-external-browser")
         layout.addWidget(cb1)
         box.setLayout(layout)
@@ -371,8 +407,11 @@ class UserSettingsDialog(QMainWindow):
 
         # Error Reporting Tab
         tab = QWidget()
-        self.addTab(tab, self.tr("Error Reporting"),
-                    toolTip="Settings related to error reporting")
+        self.addTab(
+            tab,
+            self.tr("Error Reporting"),
+            toolTip="Settings related to error reporting",
+        )
 
         form = QFormLayout()
         line_edit_mid = QLineEdit()
@@ -382,16 +421,18 @@ class UserSettingsDialog(QMainWindow):
 
         # Add-ons Tab
         tab = QWidget()
-        self.addTab(tab, self.tr("Add-ons"),
-                    toolTip="Settings related to add-on installation")
+        self.addTab(
+            tab, self.tr("Add-ons"), toolTip="Settings related to add-on installation"
+        )
 
         form = QFormLayout()
         conda = QWidget(self, objectName="conda-group")
         conda.setLayout(QVBoxLayout())
         conda.layout().setContentsMargins(0, 0, 0, 0)
 
-        cb_conda_install = QCheckBox(self.tr("Install add-ons with conda"), self,
-                                     objectName="allow-conda")
+        cb_conda_install = QCheckBox(
+            self.tr("Install add-ons with conda"), self, objectName="allow-conda"
+        )
         self.bind(cb_conda_install, "checked", "add-ons/allow-conda")
         conda.layout().addWidget(cb_conda_install)
 
@@ -406,8 +447,7 @@ class UserSettingsDialog(QMainWindow):
 
         # Network Tab
         tab = QWidget()
-        self.addTab(tab, self.tr("Network"),
-                    toolTip="Settings related to networking")
+        self.addTab(tab, self.tr("Network"), toolTip="Settings related to networking")
 
         form = QFormLayout()
         line_edit_http_proxy = QLineEdit()
@@ -472,8 +512,7 @@ class UserSettingsDialog(QMainWindow):
                 # Cannot reset.
                 pass
             except Exception:
-                log.error("Error reseting %r", source.propertyName,
-                          exc_info=True)
+                log.error("Error reseting %r", source.propertyName, exc_info=True)
 
     def exec_(self):
         self.__loop = QEventLoop()

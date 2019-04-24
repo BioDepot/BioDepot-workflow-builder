@@ -62,9 +62,13 @@ class Backend(metaclass=Registry):
         with self.execute_sql_query(query) as cur:
             tables = []
             for schema, name in cur.fetchall():
-                sql = "{}.{}".format(
-                    self.quote_identifier(schema),
-                    self.quote_identifier(name)) if schema else self.quote_identifier(name)
+                sql = (
+                    "{}.{}".format(
+                        self.quote_identifier(schema), self.quote_identifier(name)
+                    )
+                    if schema
+                    else self.quote_identifier(name)
+                )
                 tables.append(TableDesc(name, schema, sql))
             return tables
 
@@ -98,9 +102,9 @@ class Backend(metaclass=Registry):
         """
         fields = [self.quote_identifier(field_name)]
 
-        query = self.create_sql_query(table_name, fields,
-                                      group_by=fields, order_by=fields,
-                                      limit=21)
+        query = self.create_sql_query(
+            table_name, fields, group_by=fields, order_by=fields, limit=21
+        )
         with self.execute_sql_query(query) as cur:
             values = cur.fetchall()
         if len(values) > 20:
@@ -108,8 +112,9 @@ class Backend(metaclass=Registry):
         else:
             return tuple(str(x[0]) for x in values)
 
-    def create_variable(self, field_name, field_metadata,
-                        type_hints, inspect_table=None):
+    def create_variable(
+        self, field_name, field_metadata, type_hints, inspect_table=None
+    ):
         """Create variable based on field information
 
         Parameters
@@ -146,9 +151,16 @@ class Backend(metaclass=Registry):
     # query related methods
 
     def create_sql_query(
-            self, table_name, fields, filters=(),
-            group_by=None, order_by=None, offset=None, limit=None,
-            use_time_sample=None):
+        self,
+        table_name,
+        fields,
+        filters=(),
+        group_by=None,
+        order_by=None,
+        offset=None,
+        limit=None,
+        use_time_sample=None,
+    ):
         """Construct an sql query using the provided elements.
 
         Parameters
@@ -229,6 +241,7 @@ class TableDesc:
 
     def __str__(self):
         return self.name
+
 
 class ToSql:
     def __init__(self, sql):

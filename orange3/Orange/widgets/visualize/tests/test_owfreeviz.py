@@ -7,8 +7,7 @@ from AnyQt.QtCore import QRectF, QPointF
 from Orange.data import Table, Domain, ContinuousVariable, DiscreteVariable
 from Orange.widgets.tests.utils import simulate
 from Orange.widgets.visualize.owfreeviz import OWFreeViz
-from Orange.widgets.tests.base import WidgetTest, WidgetOutputsTestMixin, \
-    datasets
+from Orange.widgets.tests.base import WidgetTest, WidgetOutputsTestMixin, datasets
 
 
 class TestOWFreeViz(WidgetTest, WidgetOutputsTestMixin):
@@ -34,8 +33,12 @@ class TestOWFreeViz(WidgetTest, WidgetOutputsTestMixin):
         self.assertEqual(len(graph.attr_label.model()), 17)
 
     def test_ugly_datasets(self):
-        self.send_signal(self.widget.Inputs.data, Table(datasets.path("testing_dataset_cls")))
-        self.send_signal(self.widget.Inputs.data, Table(datasets.path("testing_dataset_reg")))
+        self.send_signal(
+            self.widget.Inputs.data, Table(datasets.path("testing_dataset_cls"))
+        )
+        self.send_signal(
+            self.widget.Inputs.data, Table(datasets.path("testing_dataset_reg"))
+        )
 
     def test_error_msg(self):
         data = self.data[:, list(range(len(self.data.domain.attributes)))]
@@ -53,7 +56,9 @@ class TestOWFreeViz(WidgetTest, WidgetOutputsTestMixin):
         self.assertFalse(self.widget.Error.not_enough_class_vars.is_shown())
 
     def _select_data(self):
-        self.widget.graph.select_by_rectangle(QRectF(QPointF(-20, -20), QPointF(20, 20)))
+        self.widget.graph.select_by_rectangle(
+            QRectF(QPointF(-20, -20), QPointF(20, 20))
+        )
         return self.widget.graph.get_selection()
 
     def test_optimization(self):
@@ -92,13 +97,8 @@ class TestOWFreeViz(WidgetTest, WidgetOutputsTestMixin):
 
     def test_none_data(self):
         table = Table(
-            Domain(
-                [ContinuousVariable("a"),
-                 DiscreteVariable("b", values=["y", "n"])]
-            ),
-            list(zip(
-                [],
-                ""))
+            Domain([ContinuousVariable("a"), DiscreteVariable("b", values=["y", "n"])]),
+            list(zip([], "")),
         )
         self.send_signal(self.widget.Inputs.data, table)
         self.widget.reset_graph_data()

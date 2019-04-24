@@ -8,10 +8,13 @@ from Orange.data.sql.table import SqlTable
 from Orange.preprocess import Discretize
 from Orange.preprocess.discretize import EqualFreq
 from Orange.tests.sql.base import PostgresTest
+
 try:
     from Orange.widgets.visualize.owmosaic import get_conditional_distribution
-    from Orange.widgets.visualize.utils.lac import \
-        create_sql_contingency, get_bin_centers
+    from Orange.widgets.visualize.utils.lac import (
+        create_sql_contingency,
+        get_bin_centers,
+    )
 except ImportError:
     no_widgets = True
 else:

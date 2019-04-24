@@ -6,9 +6,15 @@ from ...gui import test
 from ...registry.tests import small_testing_registry
 
 from .. import (
-    Scheme, SchemeNode, SchemeLink, SchemeTextAnnotation,
-    SchemeArrowAnnotation, SchemeTopologyError, SinkChannelError,
-    DuplicatedLinkError, IncompatibleChannelTypeError
+    Scheme,
+    SchemeNode,
+    SchemeLink,
+    SchemeTextAnnotation,
+    SchemeArrowAnnotation,
+    SchemeTopologyError,
+    SinkChannelError,
+    DuplicatedLinkError,
+    IncompatibleChannelTypeError,
 )
 
 
@@ -76,27 +82,24 @@ class TestScheme(test.QCoreAppTestCase):
         self.assertTrue(l2 not in links_added)
 
         # Add a link to itself.
-        self.assertRaises(SchemeTopologyError, scheme.new_link,
-                          w2, "Data", w2, "Data")
+        self.assertRaises(SchemeTopologyError, scheme.new_link, w2, "Data", w2, "Data")
 
         # Add an link with incompatible types
-        self.assertRaises(IncompatibleChannelTypeError,
-                          scheme.new_link, w3, "Learner", w2, "Data")
+        self.assertRaises(
+            IncompatibleChannelTypeError, scheme.new_link, w3, "Learner", w2, "Data"
+        )
 
         # Add a link to a node with no input channels
-        self.assertRaises(ValueError, scheme.new_link,
-                          w2, "Data", w1, "Data")
+        self.assertRaises(ValueError, scheme.new_link, w2, "Data", w1, "Data")
 
         # add back l2 for the folowing checks
         scheme.add_link(l2)
 
         # Add a duplicate link
-        self.assertRaises(DuplicatedLinkError, scheme.new_link,
-                          w1, "Data", w3, "Data")
+        self.assertRaises(DuplicatedLinkError, scheme.new_link, w1, "Data", w3, "Data")
 
         # Add a link to an already connected sink channel
-        self.assertRaises(SinkChannelError, scheme.new_link,
-                          w2, "Data", w3, "Data")
+        self.assertRaises(SinkChannelError, scheme.new_link, w2, "Data", w3, "Data")
 
         text_annot = SchemeTextAnnotation((0, 0, 100, 20), "Text")
         scheme.add_annotation(text_annot)

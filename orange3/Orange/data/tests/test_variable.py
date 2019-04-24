@@ -12,8 +12,15 @@ from io import StringIO
 
 import numpy as np
 
-from Orange.data import Variable, ContinuousVariable, DiscreteVariable, \
-    StringVariable, TimeVariable, Unknown, Value
+from Orange.data import (
+    Variable,
+    ContinuousVariable,
+    DiscreteVariable,
+    StringVariable,
+    TimeVariable,
+    Unknown,
+    Value,
+)
 from Orange.data.io import CSVReader
 from Orange.tests.base import create_pickling_tests
 
@@ -132,7 +139,8 @@ class TestVariable(unittest.TestCase):
 
 def variabletest(varcls):
     def decorate(cls):
-        return type(cls.__name__, (cls, unittest.TestCase), {'varcls': varcls})
+        return type(cls.__name__, (cls, unittest.TestCase), {"varcls": varcls})
+
     return decorate
 
 
@@ -144,7 +152,7 @@ class TestDiscreteVariable(VariableTest):
 
         self.assertEqual(var.to_val(0), 0)
         self.assertEqual(var.to_val("F"), 0)
-        self.assertEqual(var.to_val(0.), 0)
+        self.assertEqual(var.to_val(0.0), 0)
         self.assertTrue(math.isnan(var.to_val("?")))
 
         # TODO: with self.assertRaises(ValueError): var.to_val(2)
@@ -187,15 +195,13 @@ class TestDiscreteVariable(VariableTest):
         self.assertIs(find_comp("abc", ["a", "b", "c"], ordered=True), abc)
         self.assertIs(find_comp("abc", ["a", "b", "c", "d"], ordered=True), abc)
 
-        abd = DiscreteVariable.make(
-            "abc", values=["a", "d", "b"], ordered=True)
+        abd = DiscreteVariable.make("abc", values=["a", "d", "b"], ordered=True)
         self.assertIsNot(abc, abd)
 
         abc_un = DiscreteVariable.make("abc", values=["a", "b", "c"])
         self.assertIsNot(abc_un, abc)
 
-        self.assertIs(
-            find_comp("abc", values=["a", "d", "b"], ordered=True), abd)
+        self.assertIs(find_comp("abc", values=["a", "d", "b"], ordered=True), abd)
         self.assertIs(find_comp("abc", values=["a", "b", "c"]), abc_un)
 
     def test_make(self):
@@ -211,25 +217,27 @@ class TestDiscreteVariable(VariableTest):
 
     def test_repr(self):
         var = DiscreteVariable.make("a", values=["F", "M"])
-        self.assertEqual(
-            repr(var),
-            "DiscreteVariable(name='a', values=['F', 'M'])")
+        self.assertEqual(repr(var), "DiscreteVariable(name='a', values=['F', 'M'])")
         var.base_value = 1
         self.assertEqual(
-            repr(var),
-            "DiscreteVariable(name='a', values=['F', 'M'], base_value=1)")
+            repr(var), "DiscreteVariable(name='a', values=['F', 'M'], base_value=1)"
+        )
         var.ordered = True
         self.assertEqual(
             repr(var),
             "DiscreteVariable(name='a', values=['F', 'M'], "
-            "ordered=True, base_value=1)")
+            "ordered=True, base_value=1)",
+        )
 
         var = DiscreteVariable.make("a", values="1234567")
         self.assertEqual(
             repr(var),
-            "DiscreteVariable(name='a', values=['1', '2', '3', '4', '5', '6', '7'])")
+            "DiscreteVariable(name='a', values=['1', '2', '3', '4', '5', '6', '7'])",
+        )
 
-    @unittest.skipUnless(is_on_path("PyQt4") or is_on_path("PyQt5"), "PyQt is not importable")
+    @unittest.skipUnless(
+        is_on_path("PyQt4") or is_on_path("PyQt5"), "PyQt is not importable"
+    )
     def test_colors(self):
         var = DiscreteVariable.make("a", values=["F", "M"])
         self.assertIsNone(var._colors)
@@ -247,17 +255,17 @@ class TestDiscreteVariable(VariableTest):
         np.testing.assert_almost_equal(var.colors, [[42, 41, 40], [3, 4, 5]])
 
         var = DiscreteVariable.make("x", values=["A", "B"])
-        var.attributes["colors"] = ['#0a0b0c', '#0d0e0f']
+        var.attributes["colors"] = ["#0a0b0c", "#0d0e0f"]
         np.testing.assert_almost_equal(var.colors, [[10, 11, 12], [13, 14, 15]])
 
         # Test ncolors adapts to nvalues
-        var = DiscreteVariable.make('foo', values=['d', 'r'])
+        var = DiscreteVariable.make("foo", values=["d", "r"])
         self.assertEqual(len(var.colors), 2)
-        var.add_value('e')
+        var.add_value("e")
         self.assertEqual(len(var.colors), 3)
         user_defined = (0, 0, 0)
         var.set_color(2, user_defined)
-        var.add_value('k')
+        var.add_value("k")
         self.assertEqual(len(var.colors), 4)
         np.testing.assert_array_equal(var.colors[2], user_defined)
 
@@ -298,7 +306,7 @@ class TestContinuousVariable(VariableTest):
         self.assertIs(a.colors, a._colors)
 
         a = ContinuousVariable("a")
-        a.attributes["colors"] = ['#010203', '#040506', True]
+        a.attributes["colors"] = ["#010203", "#040506", True]
         self.assertEqual(a.colors, ((1, 2, 3), (4, 5, 6), True))
 
         a.colors = ((3, 2, 1), (6, 5, 4), True)
@@ -319,103 +327,114 @@ class TestStringVariable(VariableTest):
 class TestTimeVariable(VariableTest):
     TESTS = [
         # in str, UTC timestamp, out str (in UTC)
-        ('2015-10-12 14:13:11.01+0200', 1444651991.01, '2015-10-12 14:13:11.010000+0200'),
-        ('2015-10-12T14:13:11.81+0200', 1444651991.81, '2015-10-12 14:13:11.810000+0200'),
-        ('2015-10-12 14:13:11.81', 1444659191.81, '2015-10-12 14:13:11.810000'),
-        ('2015-10-12T14:13:11.81', 1444659191.81, '2015-10-12 14:13:11.810000'),
-        ('2015-10-12 14:13:11+0200', 1444651991, '2015-10-12 14:13:11+0200'),
-        ('2015-10-12T14:13:11+0200', 1444651991, '2015-10-12 14:13:11+0200'),
-        ('20151012T141311+0200', 1444651991, '2015-10-12 14:13:11+0200'),
-        ('20151012141311+0200', 1444651991, '2015-10-12 14:13:11+0200'),
-        ('2015-10-12 14:13:11', 1444659191, '2015-10-12 14:13:11'),
-        ('2015-10-12T14:13:11', 1444659191, '2015-10-12 14:13:11'),
-        ('2015-10-12 14:13', 1444659180, '2015-10-12 14:13:00'),
-        ('20151012T141311', 1444659191, '2015-10-12 14:13:11'),
-        ('20151012141311', 1444659191, '2015-10-12 14:13:11'),
-        ('2015-10-12', 1444608000, '2015-10-12'),
-        ('20151012', 1444608000, '2015-10-12'),
-        ('2015-285', 1444608000, '2015-10-12'),
-        ('2015-10', 1443657600, '2015-10-01'),
-        ('2015', 1420070400, '2015-01-01'),
-        ('01:01:01.01', 3661.01, '01:01:01.010000'),
-        ('010101.01', 3661.01, '01:01:01.010000'),
-        ('01:01:01', 3661, '01:01:01'),
-        ('01:01', 3660, '01:01:00'),
-        ('1970-01-01 00:00:00', 0, '1970-01-01 00:00:00'),
-        ('1969-12-31 23:59:59', -1, '1969-12-31 23:59:59'),
-        ('1969-12-31 23:59:58.9', -1.1, '1969-12-31 23:59:58.900000'),
-        ('1900-01-01', -2208988800, '1900-01-01'),
-        ('nan', np.nan, '?'),
-        ('1444651991.81', 1444651991.81, '2015-10-12 12:13:11.810000'),
+        (
+            "2015-10-12 14:13:11.01+0200",
+            1444651991.01,
+            "2015-10-12 14:13:11.010000+0200",
+        ),
+        (
+            "2015-10-12T14:13:11.81+0200",
+            1444651991.81,
+            "2015-10-12 14:13:11.810000+0200",
+        ),
+        ("2015-10-12 14:13:11.81", 1444659191.81, "2015-10-12 14:13:11.810000"),
+        ("2015-10-12T14:13:11.81", 1444659191.81, "2015-10-12 14:13:11.810000"),
+        ("2015-10-12 14:13:11+0200", 1444651991, "2015-10-12 14:13:11+0200"),
+        ("2015-10-12T14:13:11+0200", 1444651991, "2015-10-12 14:13:11+0200"),
+        ("20151012T141311+0200", 1444651991, "2015-10-12 14:13:11+0200"),
+        ("20151012141311+0200", 1444651991, "2015-10-12 14:13:11+0200"),
+        ("2015-10-12 14:13:11", 1444659191, "2015-10-12 14:13:11"),
+        ("2015-10-12T14:13:11", 1444659191, "2015-10-12 14:13:11"),
+        ("2015-10-12 14:13", 1444659180, "2015-10-12 14:13:00"),
+        ("20151012T141311", 1444659191, "2015-10-12 14:13:11"),
+        ("20151012141311", 1444659191, "2015-10-12 14:13:11"),
+        ("2015-10-12", 1444608000, "2015-10-12"),
+        ("20151012", 1444608000, "2015-10-12"),
+        ("2015-285", 1444608000, "2015-10-12"),
+        ("2015-10", 1443657600, "2015-10-01"),
+        ("2015", 1420070400, "2015-01-01"),
+        ("01:01:01.01", 3661.01, "01:01:01.010000"),
+        ("010101.01", 3661.01, "01:01:01.010000"),
+        ("01:01:01", 3661, "01:01:01"),
+        ("01:01", 3660, "01:01:00"),
+        ("1970-01-01 00:00:00", 0, "1970-01-01 00:00:00"),
+        ("1969-12-31 23:59:59", -1, "1969-12-31 23:59:59"),
+        ("1969-12-31 23:59:58.9", -1.1, "1969-12-31 23:59:58.900000"),
+        ("1900-01-01", -2208988800, "1900-01-01"),
+        ("nan", np.nan, "?"),
+        ("1444651991.81", 1444651991.81, "2015-10-12 12:13:11.810000"),
     ]
 
     def test_parse_repr(self):
         for datestr, timestamp, outstr in self.TESTS:
-            var = TimeVariable('time')
+            var = TimeVariable("time")
             ts = var.to_val(datestr)  # calls parse for strings
             if not np.isnan(ts):
                 self.assertEqual(ts, timestamp, msg=datestr)
             self.assertEqual(var.repr_val(ts), outstr, msg=datestr)
 
     def test_parse_utc(self):
-        var = TimeVariable('time')
-        datestr, offset = '2015-10-18 22:48:20', '+0200'
+        var = TimeVariable("time")
+        datestr, offset = "2015-10-18 22:48:20", "+0200"
         ts1 = var.parse(datestr + offset)
         self.assertEqual(var.repr_val(ts1), datestr + offset)
         # Once a value is without a TZ, all the values lose it
         ts2 = var.parse(datestr)
         self.assertEqual(var.repr_val(ts2), datestr)
-        self.assertEqual(var.repr_val(ts1), '2015-10-18 20:48:20')
+        self.assertEqual(var.repr_val(ts1), "2015-10-18 20:48:20")
 
     def test_parse_timestamp(self):
         var = TimeVariable("time")
         datestr = str(datetime(2016, 6, 14, 23, 8, tzinfo=timezone.utc).timestamp())
         ts1 = var.parse(datestr)
-        self.assertEqual(var.repr_val(ts1), '2016-06-14 23:08:00')
+        self.assertEqual(var.repr_val(ts1), "2016-06-14 23:08:00")
 
     def test_parse_invalid(self):
-        var = TimeVariable('var')
+        var = TimeVariable("var")
         with self.assertRaises(ValueError):
-            var.parse('123')
+            var.parse("123")
 
     def test_have_date(self):
-        var = TimeVariable('time')
-        ts = var.parse('1937-08-02')  # parse date
-        self.assertEqual(var.repr_val(ts), '1937-08-02')
-        ts = var.parse('16:20')  # parse time
+        var = TimeVariable("time")
+        ts = var.parse("1937-08-02")  # parse date
+        self.assertEqual(var.repr_val(ts), "1937-08-02")
+        ts = var.parse("16:20")  # parse time
         # observe have datetime
-        self.assertEqual(var.repr_val(ts), '1970-01-01 16:20:00')
+        self.assertEqual(var.repr_val(ts), "1970-01-01 16:20:00")
 
     def test_no_date_no_time(self):
-        self.assertEqual(TimeVariable('relative time').repr_val(1.6), '1.6')
+        self.assertEqual(TimeVariable("relative time").repr_val(1.6), "1.6")
 
     def test_readwrite_timevariable(self):
         output_csv = StringIO()
-        input_csv = StringIO("""\
+        input_csv = StringIO(
+            """\
 Date,Feature
 time,continuous
 ,
 1920-12-12,1.0
 1920-12-13,3.0
 1920-12-14,5.5
-""")
+"""
+        )
         for stream in (output_csv, input_csv):
             stream.close = lambda: None  # HACK: Prevent closing of streams
 
         table = CSVReader(input_csv).read()
-        self.assertIsInstance(table.domain['Date'], TimeVariable)
-        self.assertEqual(table[0, 'Date'], '1920-12-12')
+        self.assertIsInstance(table.domain["Date"], TimeVariable)
+        self.assertEqual(table[0, "Date"], "1920-12-12")
         # Dates before 1970 are negative
-        self.assertTrue(all(inst['Date'] < 0 for inst in table))
+        self.assertTrue(all(inst["Date"] < 0 for inst in table))
 
         CSVReader.write_file(output_csv, table)
-        self.assertEqual(input_csv.getvalue().splitlines(),
-                         output_csv.getvalue().splitlines())
+        self.assertEqual(
+            input_csv.getvalue().splitlines(), output_csv.getvalue().splitlines()
+        )
 
     def test_repr_value(self):
         # https://github.com/biolab/orange3/pull/1760
-        var = TimeVariable('time')
-        self.assertEqual(var.repr_val(Value(var, 416.3)), '416.3')
+        var = TimeVariable("time")
+        self.assertEqual(var.repr_val(Value(var, 416.3)), "416.3")
 
 
 PickleContinuousVariable = create_pickling_tests(
@@ -426,20 +445,20 @@ PickleContinuousVariable = create_pickling_tests(
 PickleDiscreteVariable = create_pickling_tests(
     "PickleDiscreteVariable",
     ("with_name", lambda: DiscreteVariable(name="Feature 0")),
-    ("with_str_value", lambda: DiscreteVariable(name="Feature 0",
-                                                values=["F", "M"])),
-    ("ordered", lambda: DiscreteVariable(name="Feature 0",
-                                         values=["F", "M"],
-                                         ordered=True)),
-    ("with_base_value", lambda: DiscreteVariable(name="Feature 0",
-                                                 values=["F", "M"],
-                                                 base_value=0))
+    ("with_str_value", lambda: DiscreteVariable(name="Feature 0", values=["F", "M"])),
+    (
+        "ordered",
+        lambda: DiscreteVariable(name="Feature 0", values=["F", "M"], ordered=True),
+    ),
+    (
+        "with_base_value",
+        lambda: DiscreteVariable(name="Feature 0", values=["F", "M"], base_value=0),
+    ),
 )
 
 
 PickleStringVariable = create_pickling_tests(
-    "PickleStringVariable",
-    ("with_name", lambda: StringVariable(name="Feature 0"))
+    "PickleStringVariable", ("with_name", lambda: StringVariable(name="Feature 0"))
 )
 
 

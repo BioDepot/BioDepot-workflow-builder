@@ -8,6 +8,7 @@ import logging
 from xml.sax import make_parser, handler, saxutils, SAXParseException
 
 from ..scheme.readwrite import scheme_load
+
 log = logging.getLogger(__name__)
 
 
@@ -62,9 +63,11 @@ def preview_parse(scheme_file):
     description_data = handler.description or ""
     svg_data = "".join(handler.thumbnail_data)
 
-    return (saxutils.unescape(name_data),
-            saxutils.unescape(description_data),
-            saxutils.unescape(svg_data))
+    return (
+        saxutils.unescape(name_data),
+        saxutils.unescape(description_data),
+        saxutils.unescape(svg_data),
+    )
 
 
 def filter_properties(stream):
@@ -81,6 +84,7 @@ def filter_properties(stream):
     xml : bytes
         ows xml without the '<properties>' nodes.
     """
+
     class PropertiesFilter(saxutils.XMLFilterBase):
         _in_properties = False
 
@@ -161,8 +165,7 @@ def scan_update(item):
         try:
             svg = scheme_svg_thumbnail(path)
         except Exception:
-            log.error("Could not render scheme preview for %r", title,
-                      exc_info=True)
+            log.error("Could not render scheme preview for %r", title, exc_info=True)
 
     if item.name() != title:
         item.setName(title)

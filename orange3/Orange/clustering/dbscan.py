@@ -6,12 +6,20 @@ from numpy import atleast_2d, ndarray, where
 
 __all__ = ["DBSCAN"]
 
+
 class DBSCAN(SklProjector):
     __wraps__ = skl_cluster.DBSCAN
 
-    def __init__(self, eps=0.5, min_samples=5, metric='euclidean',
-                 algorithm='auto', leaf_size=30, p=None,
-                 preprocessors=None):
+    def __init__(
+        self,
+        eps=0.5,
+        min_samples=5,
+        metric="euclidean",
+        algorithm="auto",
+        leaf_size=30,
+        p=None,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()
 
@@ -19,9 +27,9 @@ class DBSCAN(SklProjector):
         proj = skl_cluster.DBSCAN(**self.params)
         self.X = X
         if isinstance(X, Table):
-            proj = proj.fit(X.X,)
+            proj = proj.fit(X.X)
         else:
-            proj = proj.fit(X, )
+            proj = proj.fit(X)
         return DBSCANModel(proj)
 
 
@@ -38,8 +46,9 @@ class DBSCANModel(Projection):
                 data = data.transform(self.pre_domain)
             y = self.proj.fit_predict(data.X)
             vals = [-1] + list(self.proj.core_sample_indices_)
-            c = DiscreteVariable(name='Core sample index',
-                                 values=[str(v) for v in vals])
+            c = DiscreteVariable(
+                name="Core sample index", values=[str(v) for v in vals]
+            )
             domain = Domain([c])
             return Table(domain, y.reshape(len(y), 1))
 
@@ -47,5 +56,6 @@ class DBSCANModel(Projection):
             if data.domain is not self.pre_domain:
                 data = Instance(self.pre_domain, data)
             # Instances-by-Instance classification is not defined;
-            raise Exception("Core sample assignment is not supported "
-                            "for single instances.")
+            raise Exception(
+                "Core sample assignment is not supported " "for single instances."
+            )

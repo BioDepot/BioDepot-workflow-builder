@@ -33,23 +33,23 @@ class WidgetTestCase(WidgetTest):
         widget = self.create_widget(MyWidget)
         widget.widget = self.create_widget(MyWidget)
 
-        setattr(widget, 'field', 1)
+        setattr(widget, "field", 1)
         self.assertEqual(widget.field, 1)
 
-        setattr(widget, 'component.b', 2)
+        setattr(widget, "component.b", 2)
         self.assertEqual(widget.component.b, 2)
 
-        setattr(widget, 'widget.field', 3)
+        setattr(widget, "widget.field", 3)
         self.assertEqual(widget.widget.field, 3)
 
-        setattr(widget, 'unknown_field', 4)
+        setattr(widget, "unknown_field", 4)
         self.assertEqual(widget.unknown_field, 4)
 
         with self.assertRaises(AttributeError):
-            setattr(widget, 'widget.widget.field', 5)
+            setattr(widget, "widget.widget.field", 5)
 
         with self.assertRaises(AttributeError):
-            setattr(widget, 'unknown_field2.field', 6)
+            setattr(widget, "unknown_field2.field", 6)
 
     def test_notify_controller_on_attribute_change(self):
         widget = self.create_widget(MyWidget)
@@ -57,8 +57,8 @@ class WidgetTestCase(WidgetTest):
         callback = MagicMock()
         callback2 = MagicMock()
 
-        widget.connect_control('field', callback)
-        widget.connect_control('field', callback2)
+        widget.connect_control("field", callback)
+        widget.connect_control("field", callback2)
         widget.field = 5
         self.assertTrue(callback.called)
         self.assertTrue(callback2.called)
@@ -89,7 +89,6 @@ class WidgetTestCase(WidgetTest):
 
 
 class WidgetMsgTestCase(WidgetTest):
-
     class TestWidget(OWWidget):
         name = "Test"
 
@@ -112,7 +111,7 @@ class WidgetMsgTestCase(WidgetTest):
         w = WidgetMsgTestCase.TestWidget()
         messages = set(self.active_messages(w))
 
-        self.assertEqual(len(messages), 1, )
+        self.assertEqual(len(messages), 1)
 
         w.messageActivated.connect(messages.add)
         w.messageDeactivated.connect(messages.remove)
@@ -125,9 +124,7 @@ class WidgetMsgTestCase(WidgetTest):
         self.assertEqual(len(messages), 0)
         self.assertSetEqual(set(self.active_messages(w)), set())
 
-        with patch.object(
-                WidgetMsgTestCase.TestWidget,
-                "want_basic_layout", False):
+        with patch.object(WidgetMsgTestCase.TestWidget, "want_basic_layout", False):
             # OWWidget without a basic layout (completely empty; no default
             # message bar)
             w = WidgetMsgTestCase.TestWidget()

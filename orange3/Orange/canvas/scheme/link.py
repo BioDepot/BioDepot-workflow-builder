@@ -83,6 +83,7 @@ class SchemeLink(QObject):
         """
         Flags indicating the runtime state of a link
         """
+
         #: The link has no associated state.
         NoState = 0
         #: A link is empty when it has no value on it
@@ -95,17 +96,23 @@ class SchemeLink(QObject):
 
     NoState, Empty, Active, Pending = State
 
-    def __init__(self, source_node, source_channel,
-                 sink_node, sink_channel, enabled=True, properties=None,
-                 parent=None):
+    def __init__(
+        self,
+        source_node,
+        source_channel,
+        sink_node,
+        sink_channel,
+        enabled=True,
+        properties=None,
+        parent=None,
+    ):
         QObject.__init__(self, parent)
         self.source_node = source_node
 
         if isinstance(source_channel, str):
             source_channel = source_node.output_channel(source_channel)
         elif source_channel not in source_node.output_channels():
-            raise ValueError("%r not in in nodes output channels." \
-                             % source_channel)
+            raise ValueError("%r not in in nodes output channels." % source_channel)
 
         self.source_channel = source_channel
 
@@ -114,16 +121,14 @@ class SchemeLink(QObject):
         if isinstance(sink_channel, str):
             sink_channel = sink_node.input_channel(sink_channel)
         elif sink_channel not in sink_node.input_channels():
-            raise ValueError("%r not in in nodes input channels." \
-                             % source_channel)
+            raise ValueError("%r not in in nodes input channels." % source_channel)
 
         self.sink_channel = sink_channel
 
         if not compatible_channels(source_channel, sink_channel):
             raise IncompatibleChannelTypeError(
-                    "Cannot connect %r to %r" \
-                    % (source_channel.type, sink_channel.type)
-                )
+                "Cannot connect %r to %r" % (source_channel.type, sink_channel.type)
+            )
 
         self.__enabled = enabled
         self.__dynamic_enabled = False
@@ -147,9 +152,11 @@ class SchemeLink(QObject):
         """
         Is this link dynamic.
         """
-        return self.source_channel.dynamic and \
-            issubclass(self.sink_type(), self.source_type()) and \
-            not (self.sink_type() is self.source_type())
+        return (
+            self.source_channel.dynamic
+            and issubclass(self.sink_type(), self.source_type())
+            and not (self.sink_type() is self.source_type())
+        )
 
     def set_enabled(self, enabled):
         """
@@ -183,8 +190,7 @@ class SchemeLink(QObject):
         """
         return self.is_dynamic() and self.__dynamic_enabled
 
-    dynamic_enabled = Property(bool, fget=dynamic_enabled,
-                               fset=set_dynamic_enabled)
+    dynamic_enabled = Property(bool, fget=dynamic_enabled, fset=set_dynamic_enabled)
 
     def set_runtime_state(self, state):
         """
@@ -219,14 +225,13 @@ class SchemeLink(QObject):
         """
         return self.__tool_tip
 
-    tool_tip = Property(str, fget=tool_tip,
-                        fset=set_tool_tip)
+    tool_tip = Property(str, fget=tool_tip, fset=set_tool_tip)
 
     def __str__(self):
         return "{0}(({1}, {2}) -> ({3}, {4}))".format(
-                    type(self).__name__,
-                    self.source_node.title,
-                    self.source_channel.name,
-                    self.sink_node.title,
-                    self.sink_channel.name
-                )
+            type(self).__name__,
+            self.source_node.title,
+            self.source_channel.name,
+            self.sink_node.title,
+            self.sink_channel.name,
+        )

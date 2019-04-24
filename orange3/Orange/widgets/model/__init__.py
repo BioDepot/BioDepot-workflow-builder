@@ -1,11 +1,11 @@
 """Learners"""
 
-NAME = 'Model'
+NAME = "Model"
 
-DESCRIPTION = 'Prediction.'
+DESCRIPTION = "Prediction."
 
-BACKGROUND = '#FAC1D9'
+BACKGROUND = "#FAC1D9"
 
-ICON = 'icons/Category-Model.svg'
+ICON = "icons/Category-Model.svg"
 
 PRIORITY = 4

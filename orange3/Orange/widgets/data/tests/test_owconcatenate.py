@@ -5,17 +5,22 @@ import unittest
 import numpy as np
 
 from Orange.data import (
-    Table, Domain, ContinuousVariable, DiscreteVariable, StringVariable
+    Table,
+    Domain,
+    ContinuousVariable,
+    DiscreteVariable,
+    StringVariable,
 )
 from Orange.widgets.data.owconcatenate import (
-    OWConcatenate, domain_intersection, domain_union
+    OWConcatenate,
+    domain_intersection,
+    domain_union,
 )
 
 from Orange.widgets.tests.base import WidgetTest
 
 
 class TestOWConcatenate(WidgetTest):
-
     def setUp(self):
         self.widget = self.create_widget(OWConcatenate)
         self.iris = Table("iris")
@@ -51,10 +56,10 @@ class TestOWConcatenate(WidgetTest):
         self.assertLess(set(self.iris.domain.variables), set(outvars))
         self.assertLess(set(self.titanic.domain.variables), set(outvars))
         # the first part of the dataset is iris, the second part is titanic
-        np.testing.assert_equal(self.iris.X, output.X[:len(self.iris), :-3])
-        self.assertTrue(np.isnan(output.X[:len(self.iris), -3:]).all())
-        np.testing.assert_equal(self.titanic.X, output.X[len(self.iris):, -3:])
-        self.assertTrue(np.isnan(output.X[len(self.iris):, :-3]).all())
+        np.testing.assert_equal(self.iris.X, output.X[: len(self.iris), :-3])
+        self.assertTrue(np.isnan(output.X[: len(self.iris), -3:]).all())
+        np.testing.assert_equal(self.titanic.X, output.X[len(self.iris) :, -3:])
+        self.assertTrue(np.isnan(output.X[len(self.iris) :, :-3]).all())
 
     def test_two_inputs_intersection(self):
         self.send_signal(self.widget.Inputs.additional_data, self.iris, 0)
@@ -72,10 +77,12 @@ class TestOWConcatenate(WidgetTest):
         self.send_signal(self.widget.Inputs.additional_data, self.titanic, 1)
         outputb = self.get_output(self.widget.Outputs.data)
         outvarsb = outputb.domain.variables
+
         def get_source():
             output = self.get_output(self.widget.Outputs.data)
             outvars = output.domain.variables + output.domain.metas
             return (set(outvars) - set(outvarsb)).pop()
+
         # test adding source
         self.widget.controls.append_source_column.toggle()
         source = get_source()
@@ -94,8 +101,8 @@ class TestOWConcatenate(WidgetTest):
             output = self.get_output(self.widget.Outputs.data)
             self.assertTrue(source in getattr(output.domain, place))
             data = Table(Domain([source]), output)
-            np.testing.assert_equal(data[:len(self.iris)].X, 0)
-            np.testing.assert_equal(data[len(self.iris):].X, 1)
+            np.testing.assert_equal(data[: len(self.iris)].X, 0)
+            np.testing.assert_equal(data[len(self.iris) :].X, 1)
 
     def test_singleclass_source_class(self):
         self.send_signal(self.widget.Inputs.primary_data, self.iris)
@@ -113,8 +120,9 @@ class TestOWConcatenate(WidgetTest):
 class TestTools(unittest.TestCase):
     def test_domain_intersect(self):
         X1, X2, X3 = map(ContinuousVariable, ["X1", "X2", "X3"])
-        D1, D2, D3 = map(lambda n: DiscreteVariable(n, values=["a", "b"]),
-                         ["D1", "D2", "D3"])
+        D1, D2, D3 = map(
+            lambda n: DiscreteVariable(n, values=["a", "b"]), ["D1", "D2", "D3"]
+        )
         S1, S2 = map(StringVariable, ["S1", "S2"])
         domain1 = Domain([X1, X2], [D1], [S1])
         domain2 = Domain([X3], [D2], [S2])
@@ -137,8 +145,9 @@ class TestTools(unittest.TestCase):
 
     def test_domain_union(self):
         X1, X2, X3 = map(ContinuousVariable, ["X1", "X2", "X3"])
-        D1, D2, D3 = map(lambda n: DiscreteVariable(n, values=["a", "b"]),
-                         ["D1", "D2", "D3"])
+        D1, D2, D3 = map(
+            lambda n: DiscreteVariable(n, values=["a", "b"]), ["D1", "D2", "D3"]
+        )
         S1, S2 = map(StringVariable, ["S1", "S2"])
         domain1 = Domain([X1, X2], [D1], [S1])
         domain2 = Domain([X3], [D2], [S2])

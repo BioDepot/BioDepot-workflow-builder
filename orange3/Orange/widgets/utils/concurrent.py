@@ -21,8 +21,17 @@ except ImportError:
     pass
 
 from AnyQt.QtCore import (
-    Qt, QObject, QMetaObject, QThreadPool, QThread, QRunnable, QSemaphore,
-    QEventLoop, QCoreApplication, QEvent, Q_ARG
+    Qt,
+    QObject,
+    QMetaObject,
+    QThreadPool,
+    QThread,
+    QRunnable,
+    QSemaphore,
+    QEventLoop,
+    QCoreApplication,
+    QEvent,
+    Q_ARG,
 )
 
 from AnyQt.QtCore import pyqtSignal as Signal, pyqtSlot as Slot
@@ -48,6 +57,7 @@ class _TaskDepotThread(QThread):
     started by a QThreadPool.
 
     """
+
     _lock = threading.Lock()
     _instance = None
 
@@ -114,9 +124,11 @@ class _TaskRunnable(QRunnable):
         assert self.task.thread() is _TaskDepotThread.instance()
 
         QMetaObject.invokeMethod(
-            self.task.thread(), "transfer", Qt.BlockingQueuedConnection,
+            self.task.thread(),
+            "transfer",
+            Qt.BlockingQueuedConnection,
             Q_ARG(object, self.task),
-            Q_ARG(object, QThread.currentThread())
+            Q_ARG(object, QThread.currentThread()),
         )
 
         self.eventLoop.processEvents()
@@ -154,6 +166,7 @@ class FutureRunnable(QRunnable):
     >>> f.result()
     42
     """
+
     def __init__(self, future, func, args, kwargs):
         # type: (Future, Callable, tuple, dict) -> None
         super().__init__()
@@ -171,7 +184,7 @@ class FutureRunnable(QRunnable):
             func, args, kwargs = self.task
             try:
                 result = func(*args, **kwargs)
-            except BaseException as ex: # pylint: disable=broad-except
+            except BaseException as ex:  # pylint: disable=broad-except
                 self.future.set_exception(ex)
             else:
                 self.future.set_result(result)
@@ -220,12 +233,12 @@ class ThreadExecutor(QObject, concurrent.futures.Executor):
         """
         with self._state_lock:
             if self._shutdown:
-                raise RuntimeError("Cannot schedule new futures after " +
-                                   "shutdown.")
+                raise RuntimeError("Cannot schedule new futures after " + "shutdown.")
 
             if isinstance(func, Task):
-                warnings.warn("Use `submit_task` to run `Task`s",
-                              DeprecationWarning, stacklevel=2)
+                warnings.warn(
+                    "Use `submit_task` to run `Task`s", DeprecationWarning, stacklevel=2
+                )
                 f, runnable = self.__make_task_runnable(func)
             else:
                 f = Future()
@@ -238,12 +251,12 @@ class ThreadExecutor(QObject, concurrent.futures.Executor):
 
     def submit_task(self, task):
         # undocumented for a reason, should probably be deprecated and removed
-        warnings.warn("`submit_task` will be deprecated",
-                      PendingDeprecationWarning, stacklevel=2)
+        warnings.warn(
+            "`submit_task` will be deprecated", PendingDeprecationWarning, stacklevel=2
+        )
         with self._state_lock:
             if self._shutdown:
-                raise RuntimeError("Cannot schedule new futures after " +
-                                   "shutdown.")
+                raise RuntimeError("Cannot schedule new futures after " + "shutdown.")
 
             f, runnable = self.__make_task_runnable(task)
 
@@ -254,8 +267,7 @@ class ThreadExecutor(QObject, concurrent.futures.Executor):
 
     def __make_task_runnable(self, task):
         if task.thread() is not QThread.currentThread():
-            raise ValueError("Can only submit Tasks from it's own " +
-                             "thread.")
+            raise ValueError("Can only submit Tasks from it's own " + "thread.")
 
         if task.parent() is not None:
             raise ValueError("Can not submit Tasks with a parent.")
@@ -296,8 +308,8 @@ class Task(QObject):
     def __init__(self, parent=None, function=None):
         super().__init__(parent)
         warnings.warn(
-            "`Task` has been deprecated", PendingDeprecationWarning,
-            stacklevel=2)
+            "`Task` has been deprecated", PendingDeprecationWarning, stacklevel=2
+        )
         self.function = function
 
         self._future = Future()
@@ -378,6 +390,7 @@ class FutureWatcher(QObject):
     >>> f.result()
     1000
     """
+
     #: Signal emitted when the future is done (cancelled or finished)
     done = Signal(Future)
 
@@ -429,8 +442,7 @@ class FutureWatcher(QObject):
                 return
 
             try:
-                QCoreApplication.postEvent(
-                    selfref, QEvent(FutureWatcher.__FutureDone))
+                QCoreApplication.postEvent(selfref, QEvent(FutureWatcher.__FutureDone))
             except RuntimeError:
                 # Ignore RuntimeErrors (when C++ side of QObject is deleted)
                 # (? Use QObject.destroyed and remove the done callback ?)
@@ -446,13 +458,11 @@ class FutureWatcher(QObject):
         return self.__future
 
     def isCancelled(self):
-        warnings.warn("isCancelled is deprecated", DeprecationWarning,
-                      stacklevel=2)
+        warnings.warn("isCancelled is deprecated", DeprecationWarning, stacklevel=2)
         return self.__future.cancelled()
 
     def isDone(self):
-        warnings.warn("isDone is deprecated", DeprecationWarning,
-                      stacklevel=2)
+        warnings.warn("isDone is deprecated", DeprecationWarning, stacklevel=2)
         return self.__future.done()
 
     def result(self):
@@ -544,6 +554,7 @@ class FutureSetWatcher(QObject):
     Result at 0: 1000
     ...
     """
+
     #: Signal emitted when the future at `index` is done (cancelled or
     #: finished)
     doneAt = Signal([int, Future])
@@ -715,6 +726,7 @@ class methodinvoke(object):
     >>> app.exec()
     0
     """
+
     @staticmethod
     def from_method(method, arg_types=(), *, conntype=Qt.QueuedConnection):
         """
@@ -739,8 +751,7 @@ class methodinvoke(object):
         name = method.__name__
         return methodinvoke(obj, name, arg_types, conntype=conntype)
 
-    def __init__(self, obj, method, arg_types=(), *,
-                 conntype=Qt.QueuedConnection):
+    def __init__(self, obj, method, arg_types=(), *, conntype=Qt.QueuedConnection):
         self.obj = obj
         self.method = method
         self.arg_types = tuple(arg_types)
@@ -748,5 +759,4 @@ class methodinvoke(object):
 
     def __call__(self, *args):
         args = [Q_ARG(atype, arg) for atype, arg in zip(self.arg_types, args)]
-        return QMetaObject.invokeMethod(
-            self.obj, self.method, self.conntype, *args)
+        return QMetaObject.invokeMethod(self.obj, self.method, self.conntype, *args)

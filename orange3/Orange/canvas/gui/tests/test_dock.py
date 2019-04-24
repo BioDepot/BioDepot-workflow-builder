@@ -4,8 +4,13 @@ Tests for the DockWidget.
 """
 
 from AnyQt.QtWidgets import (
-    QWidget, QMainWindow, QListView, QTextEdit, QToolButton,
-    QHBoxLayout, QLabel
+    QWidget,
+    QMainWindow,
+    QListView,
+    QTextEdit,
+    QToolButton,
+    QHBoxLayout,
+    QLabel,
 )
 from AnyQt.QtCore import QStringListModel
 from AnyQt.QtCore import Qt

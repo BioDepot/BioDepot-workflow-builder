@@ -101,20 +101,33 @@ class OutputView(QWidget):
     def writelinesWithFormat(self, lines, charformat):
         self.writeWithFormat("".join(lines), charformat)
 
-    def formated(self, color=None, background=None, weight=None,
-                 italic=None, underline=None, font=None):
+    def formated(
+        self,
+        color=None,
+        background=None,
+        weight=None,
+        italic=None,
+        underline=None,
+        font=None,
+    ):
         """
         Return a formated file like object proxy.
         """
         charformat = update_char_format(
-            self.currentCharFormat(), color, background, weight,
-            italic, underline, font
+            self.currentCharFormat(), color, background, weight, italic, underline, font
         )
         return formater(self, charformat)
 
 
-def update_char_format(baseformat, color=None, background=None, weight=None,
-                       italic=None, underline=None, font=None):
+def update_char_format(
+    baseformat,
+    color=None,
+    background=None,
+    weight=None,
+    italic=None,
+    underline=None,
+    font=None,
+):
     """
     Return a copy of `baseformat` :class:`QTextCharFormat` with
     updated color, weight, background and font properties.
@@ -137,8 +150,9 @@ def update_char_format(baseformat, color=None, background=None, weight=None,
     return charformat
 
 
-def update_font(basefont, weight=None, italic=None, underline=None,
-                pixelSize=None, pointSize=None):
+def update_font(
+    basefont, weight=None, italic=None, underline=None, pixelSize=None, pointSize=None
+):
     """
     Return a copy of `basefont` :class:`QFont` with updated properties.
     """
@@ -176,10 +190,18 @@ class formater(object):
     def flush(self):
         self.outputview.flush()
 
-    def formated(self, color=None, background=None, weight=None,
-                 italic=None, underline=None, font=None):
-        charformat = update_char_format(self.charformat, color, background,
-                                        weight, italic, underline, font)
+    def formated(
+        self,
+        color=None,
+        background=None,
+        weight=None,
+        italic=None,
+        underline=None,
+        font=None,
+    ):
+        charformat = update_char_format(
+            self.charformat, color, background, weight, italic, underline, font
+        )
         return formater(self.outputview, charformat)
 
     def __enter__(self):
@@ -217,12 +239,12 @@ class ExceptHook(QObject):
 
     def __call__(self, exc_type, exc_value, tb):
         if self._stream:
-            header = exc_type.__name__ + ' Exception'
+            header = exc_type.__name__ + " Exception"
             if QThread.currentThread() != QCoreApplication.instance().thread():
                 header += " (in non-GUI thread)"
             text = traceback.format_exception(exc_type, exc_value, tb)
-            text.insert(0, '{:-^79}\n'.format(' ' + header + ' '))
-            text.append('-' * 79 + '\n')
+            text.insert(0, "{:-^79}\n".format(" " + header + " "))
+            text.append("-" * 79 + "\n")
             self._stream.writelines(text)
 
         self.handledException.emit(((exc_type, exc_value, tb), self._canvas))

@@ -5,8 +5,9 @@ import Orange.misc
 from Orange.data import Table, Domain, ContinuousVariable, DiscreteVariable
 from Orange.distance import Euclidean
 from Orange.widgets.tests.base import WidgetTest, WidgetOutputsTestMixin
-from Orange.widgets.unsupervised.owhierarchicalclustering import \
-    OWHierarchicalClustering
+from Orange.widgets.unsupervised.owhierarchicalclustering import (
+    OWHierarchicalClustering,
+)
 
 
 class TestOWHierarchicalClustering(WidgetTest, WidgetOutputsTestMixin):
@@ -30,12 +31,13 @@ class TestOWHierarchicalClustering(WidgetTest, WidgetOutputsTestMixin):
         return [14, 15, 32, 33]
 
     def _compare_selected_annotated_domains(self, selected, annotated):
-        self.assertEqual(annotated.domain.variables,
-                         selected.domain.variables)
+        self.assertEqual(annotated.domain.variables, selected.domain.variables)
         self.assertNotIn("Other", selected.domain.metas[0].values)
         self.assertIn("Other", annotated.domain.metas[0].values)
-        self.assertLess(set(var.name for var in selected.domain.metas),
-                        set(var.name for var in annotated.domain.metas))
+        self.assertLess(
+            set(var.name for var in selected.domain.metas),
+            set(var.name for var in annotated.domain.metas),
+        )
 
     def test_selection_box_output(self):
         """Check output if Selection method changes"""
@@ -61,8 +63,7 @@ class TestOWHierarchicalClustering(WidgetTest, WidgetOutputsTestMixin):
         """Check whether widget retrieves correct settings for annotation"""
         widget = self.widget
 
-        dist_names = Orange.misc.DistMatrix(
-            np.zeros((4, 4)), self.data, axis=0)
+        dist_names = Orange.misc.DistMatrix(np.zeros((4, 4)), self.data, axis=0)
         dist_no_names = Orange.misc.DistMatrix(np.zeros((10, 10)), axis=1)
 
         self.send_signal(self.widget.Inputs.distances, self.distances)
@@ -111,11 +112,8 @@ class TestOWHierarchicalClustering(WidgetTest, WidgetOutputsTestMixin):
         GH-2380
         """
         table = Table(
-            Domain(
-                [ContinuousVariable("a")],
-                [DiscreteVariable("b", values=["y"])]),
-            list(zip([1.79e308, -1e120],
-                     "yy"))
+            Domain([ContinuousVariable("a")], [DiscreteVariable("b", values=["y"])]),
+            list(zip([1.79e308, -1e120], "yy")),
         )
         distances = Euclidean(table)
         self.assertFalse(self.widget.Error.not_finite_distances.is_shown())

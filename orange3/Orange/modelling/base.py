@@ -18,17 +18,18 @@ class Fitter(Learner):
     learners.
 
     """
+
     __fits__ = {}
     __returns__ = Model
 
     # Constants to indicate what kind of problem we're dealing with
-    CLASSIFICATION, REGRESSION = 'classification', 'regression'
+    CLASSIFICATION, REGRESSION = "classification", "regression"
 
     def __init__(self, preprocessors=None, **kwargs):
         super().__init__(preprocessors=preprocessors)
         self.kwargs = kwargs
         # Make sure to pass preprocessor params to individual learners
-        self.kwargs['preprocessors'] = preprocessors
+        self.kwargs["preprocessors"] = preprocessors
         self.__learners = {self.CLASSIFICATION: None, self.REGRESSION: None}
 
     def _fit_model(self, data):
@@ -66,9 +67,13 @@ class Fitter(Learner):
         if isinstance(problem_type, Table):
             problem_type = problem_type.domain
         if isinstance(problem_type, Domain):
-            problem_type = (self.CLASSIFICATION if problem_type.has_discrete_class else
-                            self.REGRESSION if problem_type.has_continuous_class else
-                            None)
+            problem_type = (
+                self.CLASSIFICATION
+                if problem_type.has_discrete_class
+                else self.REGRESSION
+                if problem_type.has_continuous_class
+                else None
+            )
         # Prevent trying to access the learner when problem type is None
         if problem_type not in self.__fits__:
             raise TypeError("No learner to handle '{}'".format(problem_type))
@@ -80,7 +85,8 @@ class Fitter(Learner):
 
     def __kwargs(self, problem_type):
         learner_kwargs = set(
-            self.__fits__[problem_type].__init__.__code__.co_varnames[1:])
+            self.__fits__[problem_type].__init__.__code__.co_varnames[1:]
+        )
         changed_kwargs = self._change_kwargs(self.kwargs, problem_type)
         # Make sure to remove any params that are set to None and use defaults
         filtered_kwargs = {k: v for k, v in changed_kwargs.items() if v is not None}
@@ -104,16 +110,16 @@ class Fitter(Learner):
     def supports_weights(self):
         """The fitter supports weights if both the classification and
         regression learners support weights."""
-        return (
-            getattr(self.get_learner(self.CLASSIFICATION), 'supports_weights', False) and
-            getattr(self.get_learner(self.REGRESSION), 'supports_weights', False)
-        )
+        return getattr(
+            self.get_learner(self.CLASSIFICATION), "supports_weights", False
+        ) and getattr(self.get_learner(self.REGRESSION), "supports_weights", False)
 
     @property
     def params(self):
         raise TypeError(
-            'A fitter does not have its own params. If you need to access '
-            'learner params, please use the `get_params` method.')
+            "A fitter does not have its own params. If you need to access "
+            "learner params, please use the `get_params` method."
+        )
 
     def get_params(self, problem_type):
         """Access the specific learner params of a given learner."""

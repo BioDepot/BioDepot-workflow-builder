@@ -30,8 +30,14 @@ class EllipticEnvelopeLearner(SklLearner):
     __returns__ = EllipticEnvelopeClassifier
     preprocessors = [Continuize(), RemoveNaNColumns(), SklImpute()]
 
-    def __init__(self, store_precision=True, assume_centered=False,
-                 support_fraction=None, contamination=0.1,
-                 random_state=None, preprocessors=None):
+    def __init__(
+        self,
+        store_precision=True,
+        assume_centered=False,
+        support_fraction=None,
+        contamination=0.1,
+        random_state=None,
+        preprocessors=None,
+    ):
         super().__init__(preprocessors=preprocessors)
         self.params = vars()

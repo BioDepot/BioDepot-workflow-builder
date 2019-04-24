@@ -1,12 +1,16 @@
 import numpy as np
-from sklearn.metrics import silhouette_score, adjusted_mutual_info_score, silhouette_samples
+from sklearn.metrics import (
+    silhouette_score,
+    adjusted_mutual_info_score,
+    silhouette_samples,
+)
 
 from Orange.data import Table
 from Orange.evaluation.testing import Results
 from Orange.evaluation.scoring import Score
 
 
-__all__ = ['ClusteringEvaluation']
+__all__ = ["ClusteringEvaluation"]
 
 
 class ClusteringResults(Results):
@@ -37,15 +41,23 @@ class ClusteringScore(Score):
         # Clustering scores from labels
         if self.considers_actual:
             return np.fromiter(
-                (score_function(results.actual.flatten(), predicted.flatten())
-                 for predicted in results.predicted),
-                dtype=np.float64, count=len(results.predicted))
+                (
+                    score_function(results.actual.flatten(), predicted.flatten())
+                    for predicted in results.predicted
+                ),
+                dtype=np.float64,
+                count=len(results.predicted),
+            )
         # Clustering scores from data only
         else:
             return np.fromiter(
-                (score_function(results.data.X, predicted.flatten())
-                 for predicted in results.predicted),
-                dtype=np.float64, count=len(results.predicted))
+                (
+                    score_function(results.data.X, predicted.flatten())
+                    for predicted in results.predicted
+                ),
+                dtype=np.float64,
+                count=len(results.predicted),
+            )
 
 
 class Silhouette(ClusteringScore):
@@ -75,10 +87,15 @@ class ClusteringEvaluation(ClusteringResults):
         The number of runs.
 
     """
-    def __init__(self, data, learners, k=1,
-                 store_models=False):
-        super().__init__(data=data, nmethods=len(learners), store_data=True,
-                         store_models=store_models, predicted=None)
+
+    def __init__(self, data, learners, k=1, store_models=False):
+        super().__init__(
+            data=data,
+            nmethods=len(learners),
+            store_data=True,
+            store_models=store_models,
+            predicted=None,
+        )
 
         self.k = k
         Y = data.Y.copy().flatten()
@@ -104,7 +121,6 @@ class ClusteringEvaluation(ClusteringResults):
 
                 labels = model(data)
                 self.predicted[i, k, :] = labels.X.flatten()
-
 
 
 def graph_silhouette(X, y, xlim=None, colors=None, figsize=None, filename=None):
@@ -133,10 +149,11 @@ def graph_silhouette(X, y, xlim=None, colors=None, figsize=None, filename=None):
 
     # Detect number of clusters and set colors
     N = len(set(y))
-    if isinstance(colors, type(None)) :
+    if isinstance(colors, type(None)):
         colors = ["g" if i % 2 else "b" for i in range(N)]
     elif len(colors) != N:
         import sys
+
         sys.stderr.write("Number of colors does not match the number of clusters. \n")
         return
 
@@ -145,8 +162,12 @@ def graph_silhouette(X, y, xlim=None, colors=None, figsize=None, filename=None):
     s = s[np.argsort(y)]  # Sort by clusters
     parts = []
     # Within clusters sort by silhouette scores
-    for label, (i, j) in enumerate([(sum(y == c1), sum(y == c1) + sum(y == c2))
-                                    for c1, c2 in zip(range(-1, N-1), range(0, N))]):
+    for label, (i, j) in enumerate(
+        [
+            (sum(y == c1), sum(y == c1) + sum(y == c2))
+            for c1, c2 in zip(range(-1, N - 1), range(0, N))
+        ]
+    ):
         scores = sorted(s[i:j])
         parts.append((scores, label))
 
@@ -159,9 +180,13 @@ def graph_silhouette(X, y, xlim=None, colors=None, figsize=None, filename=None):
     total = 0
     centers = []
     for i, (scores, label) in enumerate(parts):
-        plt.barh(range(total, total + len(scores)),
-                 scores, color=colors[i], edgecolor=colors[i])
-        centers.append(total+len(scores)/2)
+        plt.barh(
+            range(total, total + len(scores)),
+            scores,
+            color=colors[i],
+            edgecolor=colors[i],
+        )
+        centers.append(total + len(scores) / 2)
         total += len(scores)
     if not isinstance(xlim, type(None)):
         plt.xlim(xlim)

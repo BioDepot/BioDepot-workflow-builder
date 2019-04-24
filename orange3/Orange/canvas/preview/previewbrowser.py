@@ -6,13 +6,18 @@ Preview Browser Widget.
 from xml.sax.saxutils import escape
 
 from AnyQt.QtWidgets import (
-    QWidget, QLabel, QListView, QAction, QVBoxLayout, QHBoxLayout, QSizePolicy,
-    QStyleOption, QStylePainter
+    QWidget,
+    QLabel,
+    QListView,
+    QAction,
+    QVBoxLayout,
+    QHBoxLayout,
+    QSizePolicy,
+    QStyleOption,
+    QStylePainter,
 )
 from AnyQt.QtSvg import QSvgWidget
-from AnyQt.QtCore import (
-    Qt, QSize, QByteArray, QModelIndex, QEvent
-)
+from AnyQt.QtCore import Qt, QSize, QByteArray, QModelIndex, QEvent
 from AnyQt.QtCore import pyqtSignal as Signal
 
 from ..utils import check_type
@@ -44,6 +49,7 @@ class LinearIconView(QListView):
     Suitable for displaying large(ish) icons with text underneath single
     horizontal line layout.
     """
+
     def __init__(self, *args, **kwargs):
         QListView.__init__(self, *args, **kwargs)
 
@@ -55,8 +61,7 @@ class LinearIconView(QListView):
         self.setEditTriggers(QListView.NoEditTriggers)
         self.setMovement(QListView.Static)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.setSizePolicy(QSizePolicy.Expanding,
-                           QSizePolicy.Fixed)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         self.setIconSize(QSize(120, 80))
 
@@ -73,8 +78,7 @@ class LinearIconView(QListView):
             # Sample the first 10 items for a size hint. The objective is to
             # get a representative height due to the word wrapping
             samplesize = min(10, self.model().rowCount())
-            contentheight = max(self.sizeHintForRow(i)
-                                for i in range(samplesize))
+            contentheight = max(self.sizeHintForRow(i) for i in range(samplesize))
             height = contentheight + scrollHint.height()
             _, top, _, bottom = self.getContentsMargins()
             return QSize(200, height + top + bottom + self.verticalOffset())
@@ -93,11 +97,11 @@ class LinearIconView(QListView):
 class TextLabel(QWidget):
     """A plain text label widget with support for elided text.
     """
+
     def __init__(self, *args, **kwargs):
         QWidget.__init__(self, *args, **kwargs)
 
-        self.setSizePolicy(QSizePolicy.Expanding,
-                           QSizePolicy.Preferred)
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
 
         self.__text = ""
         self.__textElideMode = Qt.ElideMiddle
@@ -151,11 +155,15 @@ class TextLabel(QWidget):
 
         rect = option.rect
         metrics = option.fontMetrics
-        text = metrics.elidedText(self.__text, self.__textElideMode,
-                                  rect.width())
-        painter.drawItemText(rect, self.__alignment,
-                             option.palette, self.isEnabled(), text,
-                             self.foregroundRole())
+        text = metrics.elidedText(self.__text, self.__textElideMode, rect.width())
+        painter.drawItemText(
+            rect,
+            self.__alignment,
+            option.palette,
+            self.isEnabled(),
+            text,
+            self.foregroundRole(),
+        )
         painter.end()
 
     def changeEvent(self, event):
@@ -173,6 +181,7 @@ class TextLabel(QWidget):
 class PreviewBrowser(QWidget):
     """A Preview Browser for recent/premade scheme selection.
     """
+
     # Emitted when the current previewed item changes
     currentIndexChanged = Signal(int)
 
@@ -194,9 +203,12 @@ class PreviewBrowser(QWidget):
 
         # Top row with full text description and a large preview
         # image.
-        self.__label = QLabel(self, objectName="description-label",
-                              wordWrap=True,
-                              alignment=Qt.AlignTop | Qt.AlignLeft)
+        self.__label = QLabel(
+            self,
+            objectName="description-label",
+            wordWrap=True,
+            alignment=Qt.AlignTop | Qt.AlignLeft,
+        )
 
         self.__label.setWordWrap(True)
         self.__label.setFixedSize(220, PREVIEW_SIZE[1])
@@ -210,23 +222,21 @@ class PreviewBrowser(QWidget):
         # Path text below the description and image
         path_layout = QHBoxLayout()
         path_layout.setContentsMargins(12, 0, 12, 0)
-        path_label = QLabel("<b>{0!s}</b>".format(self.tr("Path:")), self,
-                            objectName="path-label")
+        path_label = QLabel(
+            "<b>{0!s}</b>".format(self.tr("Path:")), self, objectName="path-label"
+        )
 
         self.__path = TextLabel(self, objectName="path-text")
 
         path_layout.addWidget(path_label)
         path_layout.addWidget(self.__path)
 
-        self.__selectAction = \
-            QAction(self.tr("Select"), self,
-                    objectName="select-action",
-                    )
+        self.__selectAction = QAction(
+            self.tr("Select"), self, objectName="select-action"
+        )
 
-        top_layout.addWidget(self.__label, 1,
-                             alignment=Qt.AlignTop | Qt.AlignLeft)
-        top_layout.addWidget(self.__image, 1,
-                             alignment=Qt.AlignTop | Qt.AlignRight)
+        top_layout.addWidget(self.__label, 1, alignment=Qt.AlignTop | Qt.AlignLeft)
+        top_layout.addWidget(self.__image, 1, alignment=Qt.AlignTop | Qt.AlignRight)
 
         vlayout.addLayout(top_layout)
         vlayout.addLayout(path_layout)
@@ -314,8 +324,10 @@ class PreviewBrowser(QWidget):
         range.
 
         """
-        if self.__currentIndex <= topleft.row() and \
-                self.__currentIndex >= bottomRight.row():
+        if (
+            self.__currentIndex <= topleft.row()
+            and self.__currentIndex >= bottomRight.row()
+        ):
             self.__update()
 
     def __onDoubleClicked(self, index):

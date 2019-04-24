@@ -7,18 +7,33 @@ import itertools
 
 import numpy as np
 
-from Orange.data import Table, Domain, ContinuousVariable, DiscreteVariable, \
-    StringVariable
-from Orange.data.filter import \
-    FilterContinuous, FilterDiscrete, FilterString, Values, HasClass, \
-    IsDefined, SameValue, Random, ValueFilter, FilterStringList, FilterRegex
+from Orange.data import (
+    Table,
+    Domain,
+    ContinuousVariable,
+    DiscreteVariable,
+    StringVariable,
+)
+from Orange.data.filter import (
+    FilterContinuous,
+    FilterDiscrete,
+    FilterString,
+    Values,
+    HasClass,
+    IsDefined,
+    SameValue,
+    Random,
+    ValueFilter,
+    FilterStringList,
+    FilterRegex,
+)
 
 NIMOCK = MagicMock(side_effect=NotImplementedError())
 
 
 class TestFilterValues(unittest.TestCase):
     def setUp(self):
-        self.iris = Table('iris')
+        self.iris = Table("iris")
 
     @patch("Orange.data.Table._filter_values", NIMOCK)
     def test_values(self):
@@ -34,22 +49,25 @@ class TestFilterValues(unittest.TestCase):
         self.assertTrue((d123.X[:, 0] >= 5).all())
         self.assertTrue((d123.X[:, 1] <= 3).all())
         self.assertTrue((d123.Y == 2).all())
-        self.assertEqual(len(d123),
-                         (~((self.iris.X[:, 0] < 5) | (self.iris.X[:, 1] > 3)) &
-                          (self.iris.Y == 2)).sum())
+        self.assertEqual(
+            len(d123),
+            (
+                ~((self.iris.X[:, 0] < 5) | (self.iris.X[:, 1] > 3))
+                & (self.iris.Y == 2)
+            ).sum(),
+        )
 
 
 class TestIsDefinedFilter(unittest.TestCase):
     def setUp(self):
-        self.table = Table('imports-85')
+        self.table = Table("imports-85")
         self.n_missing = 46
         self.assertTrue(self.table.has_missing())
 
     def test_is_defined_filter_table(self):
         filter_ = IsDefined()
         without_missing = filter_(self.table)
-        self.assertEqual(len(without_missing),
-                         len(self.table) - self.n_missing)
+        self.assertEqual(len(without_missing), len(self.table) - self.n_missing)
         self.assertFalse(without_missing.has_missing())
 
         filter_ = IsDefined(negate=True)
@@ -69,22 +87,21 @@ class TestIsDefinedFilter(unittest.TestCase):
         self.assertTrue(filter_(instance_with_missing))
         self.assertFalse(filter_(instance_without_missing))
 
-    @patch('Orange.data.Table._filter_is_defined', NIMOCK)
+    @patch("Orange.data.Table._filter_is_defined", NIMOCK)
     def test_is_defined_filter_not_implemented(self):
         self.test_is_defined_filter_table()
 
 
 class TestHasClassFilter(unittest.TestCase):
     def setUp(self):
-        self.table = Table('imports-85')
+        self.table = Table("imports-85")
         self.n_missing = 4
         self.assertTrue(self.table.has_missing_class())
 
     def test_has_class_filter_table(self):
         filter_ = HasClass()
         with_class = filter_(self.table)
-        self.assertEqual(len(with_class),
-                         len(self.table) - self.n_missing)
+        self.assertEqual(len(with_class), len(self.table) - self.n_missing)
         self.assertFalse(with_class.has_missing_class())
 
         filter_ = HasClass(negate=True)
@@ -93,13 +110,13 @@ class TestHasClassFilter(unittest.TestCase):
         self.assertTrue(without_class.has_missing_class())
 
     def test_has_class_multiclass(self):
-        domain = Domain([DiscreteVariable("x", values="01")],
-                        [DiscreteVariable("y1", values="01"),
-                        DiscreteVariable("y2", values="01")])
-        table = Table(domain, [[0, 1, np.nan],
-                               [1, np.nan, 0],
-                               [1, 0, 1],
-                               [1, np.nan, np.nan]])
+        domain = Domain(
+            [DiscreteVariable("x", values="01")],
+            [DiscreteVariable("y1", values="01"), DiscreteVariable("y2", values="01")],
+        )
+        table = Table(
+            domain, [[0, 1, np.nan], [1, np.nan, 0], [1, 0, 1], [1, np.nan, np.nan]]
+        )
         table = HasClass()(table)
         self.assertTrue(not np.isnan(table).any())
         self.assertEqual(table.domain, domain)
@@ -117,7 +134,7 @@ class TestHasClassFilter(unittest.TestCase):
         self.assertTrue(filter_(class_missing))
         self.assertFalse(filter_(class_present))
 
-    @patch('Orange.data.Table._filter_has_class', NIMOCK)
+    @patch("Orange.data.Table._filter_has_class", NIMOCK)
     def test_has_class_filter_not_implemented(self):
         self.test_has_class_filter_table()
 
@@ -140,11 +157,11 @@ class TestFilterContinuous(unittest.TestCase):
         self.assertEqual(flt.ref, -1)
 
         self.assertRaises(
-            TypeError,
-            FilterContinuous, 1, FilterContinuous.Equal, 0, c=12)
+            TypeError, FilterContinuous, 1, FilterContinuous.Equal, 0, c=12
+        )
         self.assertRaises(
-            TypeError,
-            FilterContinuous, 1, FilterContinuous.Equal, 0, min=5, c=12)
+            TypeError, FilterContinuous, 1, FilterContinuous.Equal, 0, min=5, c=12
+        )
 
         flt = FilterContinuous(1, FilterContinuous.Between, min=1, max=2)
         self.assertEqual(flt.ref, 1)
@@ -282,7 +299,6 @@ class TestFilterDiscrete(unittest.TestCase):
 
 
 class TestFilterString(unittest.TestCase):
-
     def setUp(self):
         self.data = Table("zoo")
         self.inst = self.data[0]  # aardvark
@@ -366,11 +382,11 @@ class TestFilterString(unittest.TestCase):
 
 class TestSameValueFilter(unittest.TestCase):
     def setUp(self):
-        self.table = Table('zoo')
+        self.table = Table("zoo")
 
-        self.attr_disc  = self.table.domain["type"]
-        self.attr_cont  = self.table.domain["legs"]
-        self.attr_meta  = self.table.domain["name"]
+        self.attr_disc = self.table.domain["type"]
+        self.attr_cont = self.table.domain["legs"]
+        self.attr_meta = self.table.domain["name"]
 
         self.value_cont = 4
         self.value_disc = self.attr_disc.to_val("mammal")
@@ -378,19 +394,22 @@ class TestSameValueFilter(unittest.TestCase):
 
     def test_same_value_filter_table(self):
 
-        test_pairs = ((self.attr_cont, 4, self.value_cont),
-                      (self.attr_disc, "mammal", self.value_disc),
-                      (self.attr_meta, "girl", self.value_meta),)
+        test_pairs = (
+            (self.attr_cont, 4, self.value_cont),
+            (self.attr_disc, "mammal", self.value_disc),
+            (self.attr_meta, "girl", self.value_meta),
+        )
 
         for var_index, value, num_value in test_pairs:
             filter_ = SameValue(var_index, value)(self.table)
             self.assertTrue(all(inst[var_index] == num_value for inst in filter_))
 
             filter_inverse = SameValue(var_index, value, negate=True)(self.table)
-            self.assertTrue(all(inst[var_index] != num_value for inst in filter_inverse))
+            self.assertTrue(
+                all(inst[var_index] != num_value for inst in filter_inverse)
+            )
 
             self.assertEqual(len(filter_) + len(filter_inverse), len(self.table))
-
 
         for t1, t2 in itertools.combinations(test_pairs, 2):
             pos1, val1, r1 = t1
@@ -407,14 +426,18 @@ class TestSameValueFilter(unittest.TestCase):
             self.assertTrue(len(filter_1) >= len(filter_12))
             self.assertTrue(len(filter_2) >= len(filter_12))
 
-            self.assertTrue(all(inst[pos1] == r1 and
-                                inst[pos2] == r2 and
-                                inst in filter_21
-                                for inst in filter_12))
-            self.assertTrue(all(inst[pos1] == r1 and
-                                inst[pos2] == r2 and
-                                inst in filter_12
-                                for inst in filter_21))
+            self.assertTrue(
+                all(
+                    inst[pos1] == r1 and inst[pos2] == r2 and inst in filter_21
+                    for inst in filter_12
+                )
+            )
+            self.assertTrue(
+                all(
+                    inst[pos1] == r1 and inst[pos2] == r2 and inst in filter_12
+                    for inst in filter_21
+                )
+            )
 
     def test_same_value_filter_instance(self):
         inst = self.table[0]
@@ -425,15 +448,15 @@ class TestSameValueFilter(unittest.TestCase):
         filter_n = SameValue(self.attr_disc, self.value_disc, negate=True)(inst)
         self.assertEqual(filter_n, inst[self.attr_disc] != self.value_disc)
 
-    @patch('Orange.data.Table._filter_same_value', NIMOCK)
+    @patch("Orange.data.Table._filter_same_value", NIMOCK)
     def test_has_class_filter_not_implemented(self):
         self.test_same_value_filter_table()
 
 
 class TestFilterReprs(unittest.TestCase):
     def setUp(self):
-        self.table = Table('zoo')
-        self.attr_disc  = self.table.domain["type"]
+        self.table = Table("zoo")
+        self.attr_disc = self.table.domain["type"]
         self.value_disc = self.attr_disc.to_val("mammal")
         self.vs = self.table.domain.variables
 

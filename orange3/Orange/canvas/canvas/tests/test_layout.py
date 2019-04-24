@@ -74,18 +74,13 @@ class TestAnchorLayout(QAppTestCase):
 
     def widget_desc(self):
         from ...registry.tests import small_testing_registry
+
         reg = small_testing_registry()
 
-        file_desc = reg.widget(
-            "Orange.widgets.data.owfile.OWFile"
-        )
+        file_desc = reg.widget("Orange.widgets.data.owfile.OWFile")
 
-        discretize_desc = reg.widget(
-            "Orange.widgets.data.owdiscretize.OWDiscretize"
-        )
+        discretize_desc = reg.widget("Orange.widgets.data.owdiscretize.OWDiscretize")
 
-        bayes_desc = reg.widget(
-            "Orange.widgets.classify.ownaivebayes.OWNaiveBayes"
-        )
+        bayes_desc = reg.widget("Orange.widgets.classify.ownaivebayes.OWNaiveBayes")
 
         return file_desc, discretize_desc, bayes_desc

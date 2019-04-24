@@ -3,9 +3,7 @@ import time
 from collections import OrderedDict, Iterable
 from itertools import chain
 
-from AnyQt.QtCore import (
-    Qt, QAbstractItemModel, QByteArray, QBuffer, QIODevice, QLocale
-)
+from AnyQt.QtCore import Qt, QAbstractItemModel, QByteArray, QBuffer, QIODevice, QLocale
 from AnyQt.QtGui import QColor, QBrush
 from AnyQt.QtWidgets import QGraphicsScene, QTableView
 
@@ -19,6 +17,7 @@ class Report:
     """
     A class that adds report-related methods to the widget.
     """
+
     report_html = ""
     name = ""
 
@@ -52,7 +51,7 @@ class Report:
         self.report_html += get_html_section(self.name)
         self.report_html += '<div class="content">\n'
         self.send_report()
-        self.report_html += '</div></section>\n\n'
+        self.report_html += "</div></section>\n\n"
 
     @staticmethod
     def _fix_args(name, items):
@@ -177,8 +176,9 @@ class Report:
             self.report_html += svg
 
     # noinspection PyBroadException
-    def report_table(self, name, table=None, header_rows=0, header_columns=0,
-                     num_format=None):
+    def report_table(
+        self, name, table=None, header_rows=0, header_columns=0, num_format=None
+    ):
         """
         Add content of a table to the report.
 
@@ -209,94 +209,136 @@ class Report:
             return item and item.data(Qt.DisplayRole) or ""
 
         def report_abstract_model(model, view=None):
-            columns = [i for i in range(model.columnCount())
-                       if not view or not view.isColumnHidden(i)]
-            rows = [i for i in range(model.rowCount())
-                    if not view or not view.isRowHidden(i)]
+            columns = [
+                i
+                for i in range(model.columnCount())
+                if not view or not view.isColumnHidden(i)
+            ]
+            rows = [
+                i
+                for i in range(model.rowCount())
+                if not view or not view.isRowHidden(i)
+            ]
 
-            has_horizontal_header = (try_(lambda: not view.horizontalHeader().isHidden()) or
-                                     try_(lambda: not view.header().isHidden()))
+            has_horizontal_header = try_(
+                lambda: not view.horizontalHeader().isHidden()
+            ) or try_(lambda: not view.header().isHidden())
             has_vertical_header = try_(lambda: not view.verticalHeader().isHidden())
 
             def item_html(row, col):
-
-                def data(role=Qt.DisplayRole,
-                         orientation=Qt.Horizontal if row is None else Qt.Vertical):
+                def data(
+                    role=Qt.DisplayRole,
+                    orientation=Qt.Horizontal if row is None else Qt.Vertical,
+                ):
                     if row is None or col is None:
-                        return model.headerData(col if row is None else row,
-                                                orientation, role)
+                        return model.headerData(
+                            col if row is None else row, orientation, role
+                        )
                     return model.data(model.index(row, col), role)
 
-                selected = (view.selectionModel().isSelected(model.index(row, col))
-                            if view and row is not None and col is not None else False)
+                selected = (
+                    view.selectionModel().isSelected(model.index(row, col))
+                    if view and row is not None and col is not None
+                    else False
+                )
 
                 fgcolor = data(Qt.ForegroundRole)
-                fgcolor = (QBrush(fgcolor).color().name()
-                           if isinstance(fgcolor, (QBrush, QColor)) else 'black')
+                fgcolor = (
+                    QBrush(fgcolor).color().name()
+                    if isinstance(fgcolor, (QBrush, QColor))
+                    else "black"
+                )
 
                 bgcolor = data(Qt.BackgroundRole)
-                bgcolor = (QBrush(bgcolor).color().name()
-                           if isinstance(bgcolor, (QBrush, QColor)) else 'transparent')
-                if bgcolor.lower() == '#ffffff':
-                    bgcolor = 'transparent'
+                bgcolor = (
+                    QBrush(bgcolor).color().name()
+                    if isinstance(bgcolor, (QBrush, QColor))
+                    else "transparent"
+                )
+                if bgcolor.lower() == "#ffffff":
+                    bgcolor = "transparent"
 
                 font = data(Qt.FontRole)
-                weight = 'font-weight: bold;' if font and font.bold() else ''
+                weight = "font-weight: bold;" if font and font.bold() else ""
 
                 alignment = data(Qt.TextAlignmentRole) or Qt.AlignLeft
-                halign = ('left' if alignment & Qt.AlignLeft else
-                          'right' if alignment & Qt.AlignRight else
-                          'center')
-                valign = ('top' if alignment & Qt.AlignTop else
-                          'bottom' if alignment & Qt.AlignBottom else
-                          'middle')
-                return ('<{tag} style="'
-                        'color:{fgcolor};'
-                        'border:{border};'
-                        'background:{bgcolor};'
-                        '{weight}'
-                        'text-align:{halign};'
-                        'vertical-align:{valign};">{text}</{tag}>'.format(
-                            tag='th' if row is None or col is None else 'td',
-                            border='1px solid black' if selected else '0',
-                            text=data() or '', weight=weight, fgcolor=fgcolor,
-                            bgcolor=bgcolor, halign=halign, valign=valign))
+                halign = (
+                    "left"
+                    if alignment & Qt.AlignLeft
+                    else "right"
+                    if alignment & Qt.AlignRight
+                    else "center"
+                )
+                valign = (
+                    "top"
+                    if alignment & Qt.AlignTop
+                    else "bottom"
+                    if alignment & Qt.AlignBottom
+                    else "middle"
+                )
+                return (
+                    '<{tag} style="'
+                    "color:{fgcolor};"
+                    "border:{border};"
+                    "background:{bgcolor};"
+                    "{weight}"
+                    "text-align:{halign};"
+                    'vertical-align:{valign};">{text}</{tag}>'.format(
+                        tag="th" if row is None or col is None else "td",
+                        border="1px solid black" if selected else "0",
+                        text=data() or "",
+                        weight=weight,
+                        fgcolor=fgcolor,
+                        bgcolor=bgcolor,
+                        halign=halign,
+                        valign=valign,
+                    )
+                )
 
             stream = []
 
             if has_horizontal_header:
-                stream.append('<tr>')
+                stream.append("<tr>")
                 if has_vertical_header:
-                    stream.append('<th></th>')
+                    stream.append("<th></th>")
                 stream.extend(item_html(None, col) for col in columns)
-                stream.append('</tr>')
+                stream.append("</tr>")
 
             for row in rows[:row_limit]:
-                stream.append('<tr>')
+                stream.append("<tr>")
                 if has_vertical_header:
                     stream.append(item_html(row, None))
                 stream.extend(item_html(row, col) for col in columns)
-                stream.append('</tr>')
+                stream.append("</tr>")
 
-            return ''.join(stream)
+            return "".join(stream)
 
         if num_format:
+
             def fmtnum(s):
                 try:
                     return num_format.format(float(s))
                 except:
                     return s
+
         else:
+
             def fmtnum(s):
                 return s
 
-        def report_list(data,
-                        header_rows=header_rows, header_columns=header_columns):
+        def report_list(data, header_rows=header_rows, header_columns=header_columns):
             cells = ["<td>{}</td>", "<th>{}</th>"]
-            return join("  <tr>\n    {}</tr>\n".format(
-                join(cells[rowi < header_rows or coli < header_columns]
-                     .format(fmtnum(elm)) for coli, elm in enumerate(row))
-            ) for rowi, row in zip(range(row_limit + header_rows), data))
+            return join(
+                "  <tr>\n    {}</tr>\n".format(
+                    join(
+                        cells[rowi < header_rows or coli < header_columns].format(
+                            fmtnum(elm)
+                        )
+                        for coli, elm in enumerate(row)
+                    )
+                )
+                for rowi, row in zip(range(row_limit + header_rows), data)
+            )
 
         self.report_name(name)
         n_hidden_rows, n_cols = 0, 1
@@ -319,7 +361,9 @@ class Report:
 
         if n_hidden_rows > 0:
             body += """<tr><th></th><td colspan='{}'><b>+ {} more</b></td></tr>
-            """.format(n_cols, n_hidden_rows)
+            """.format(
+                n_cols, n_hidden_rows
+            )
 
         if body:
             self.report_html += "<table>\n" + body + "</table>"
@@ -346,8 +390,9 @@ class Report:
         name, data = self._fix_args(name, data)
 
         def report_abstract_model(model):
-            content = (model.data(model.index(row, 0))
-                       for row in range(model.rowCount()))
+            content = (
+                model.data(model.index(row, 0)) for row in range(model.rowCount())
+            )
             return clipped_list(content, limit, less_lookups=True)
 
         self.report_name(name)
@@ -453,8 +498,18 @@ def plural_w(s, number, suffix="s", capitalize=False):
     :type suffix: str
     :rtype: str
     """
-    numbers = ("zero", "one", "two", "three", "four", "five", "six", "seven",
-               "nine", "ten")
+    numbers = (
+        "zero",
+        "one",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "nine",
+        "ten",
+    )
     number_str = numbers[number] if number < len(numbers) else str(number)
     if capitalize:
         number_str = number_str.capitalize()
@@ -483,13 +538,13 @@ def clip_string(s, limit=1000, sep=None):
     """
     if len(s) < limit:
         return s
-    s = s[:limit - 3]
+    s = s[: limit - 3]
     if sep is None:
         return s
     sep_pos = s.rfind(sep)
     if sep_pos == -1:
         return s
-    return s[:sep_pos + len(sep)] + "..."
+    return s[: sep_pos + len(sep)] + "..."
 
 
 def clipped_list(items, limit=1000, less_lookups=False, total_min=10, total=""):
@@ -565,9 +620,15 @@ def render_items(items):
     """
     if isinstance(items, dict):
         items = items.items()
-    return "<ul>" + "".join(
-        "<b>{}:</b> {}</br>".format(key, value) for key, value in items
-        if value is not None and value is not False) + "</ul>"
+    return (
+        "<ul>"
+        + "".join(
+            "<b>{}:</b> {}</br>".format(key, value)
+            for key, value in items
+            if value is not None and value is not False
+        )
+        + "</ul>"
+    )
 
 
 def render_items_vert(items):
@@ -583,8 +644,11 @@ def render_items_vert(items):
     """
     if isinstance(items, dict):
         items = items.items()
-    return ", ".join("<b>{}</b>: {}".format(key, value) for key, value in items
-                     if value is not None and value is not False)
+    return ", ".join(
+        "<b>{}</b>: {}".format(key, value)
+        for key, value in items
+        if value is not None and value is not False
+    )
 
 
 def get_html_img(scene):
@@ -614,15 +678,27 @@ def describe_domain(domain):
     """
 
     def clip_attrs(items, s):
-        return clipped_list([a.name for a in items], 1000,
-                            total_min=10, total=" (total: {{}} {})".format(s))
+        return clipped_list(
+            [a.name for a in items],
+            1000,
+            total_min=10,
+            total=" (total: {{}} {})".format(s),
+        )
 
     return OrderedDict(
-        [("Features", clip_attrs(domain.attributes, "features")),
-         ("Meta attributes", bool(domain.metas) and
-          clip_attrs(domain.metas, "meta attributes")),
-         ("Target", bool(domain.class_vars) and
-          clip_attrs(domain.class_vars, "targets variables"))])
+        [
+            ("Features", clip_attrs(domain.attributes, "features")),
+            (
+                "Meta attributes",
+                bool(domain.metas) and clip_attrs(domain.metas, "meta attributes"),
+            ),
+            (
+                "Target",
+                bool(domain.class_vars)
+                and clip_attrs(domain.class_vars, "targets variables"),
+            ),
+        ]
+    )
 
 
 def describe_data(data):
@@ -669,8 +745,7 @@ def describe_domain_brief(domain):
     if domain.has_discrete_class:
         items["Target"] = "Class '{}'".format(domain.class_var.name)
     elif domain.has_continuous_class:
-        items["Target"] = "Numeric variable '{}'". \
-            format(domain.class_var.name)
+        items["Target"] = "Numeric variable '{}'".format(domain.class_var.name)
     elif domain.class_vars:
         items["Targets"] = len(domain.class_vars)
     else:
@@ -701,9 +776,13 @@ def describe_data_brief(data):
     items.update(describe_domain_brief(data.domain))
     return items
 
+
 def colored_square(r, g, b):
-    return '<span class="legend-square" ' \
-           'style="background-color: rgb({}, {}, {})"></span>'.format(r, g, b)
+    return (
+        '<span class="legend-square" '
+        'style="background-color: rgb({}, {}, {})"></span>'.format(r, g, b)
+    )
+
 
 def list_legend(model, selected=None):
     """
@@ -728,9 +807,9 @@ def list_legend(model, selected=None):
             continue
         index = model.index(row, 0)
         icon = model.data(index, Qt.DecorationRole)
-        r, g, b, a = QColor(
-            icon.pixmap(12, 12).toImage().pixel(0, 0)).getRgb()
+        r, g, b, a = QColor(icon.pixmap(12, 12).toImage().pixel(0, 0)).getRgb()
         text = model.data(index, Qt.DisplayRole)
-        legend += colored_square(r, g, b) + \
-                  '<span class="legend-item">{}</span>'.format(text)
+        legend += colored_square(
+            r, g, b
+        ) + '<span class="legend-item">{}</span>'.format(text)
     return legend

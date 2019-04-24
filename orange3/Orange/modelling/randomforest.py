@@ -5,7 +5,7 @@ from Orange.modelling import SklFitter
 from Orange.preprocess.score import LearnerScorer
 from Orange.regression import RandomForestRegressionLearner as RFRegression
 
-__all__ = ['RandomForestLearner']
+__all__ = ["RandomForestLearner"]
 
 
 class _FeatureScorerMixin(LearnerScorer):
@@ -18,9 +18,8 @@ class _FeatureScorerMixin(LearnerScorer):
 
 
 class RandomForestLearner(SklFitter, _FeatureScorerMixin):
-    name = 'random forest'
+    name = "random forest"
 
-    __fits__ = {'classification': RFClassification,
-                'regression': RFRegression}
+    __fits__ = {"classification": RFClassification, "regression": RFRegression}
 
     __returns__ = RandomForestModel

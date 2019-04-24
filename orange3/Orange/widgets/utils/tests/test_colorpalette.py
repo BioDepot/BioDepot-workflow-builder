@@ -1,4 +1,4 @@
-from AnyQt.QtCore import  Qt
+from AnyQt.QtCore import Qt
 from AnyQt.QtGui import QColor
 
 from Orange.widgets.tests.base import WidgetTest
@@ -10,10 +10,9 @@ class TestColorPalette(WidgetTest):
         dlg = ColorPaletteDlg(None)
 
         dlg.createContinuousPalette(
-            "", "Gradient palette", False, QColor(Qt.white), QColor(Qt.black))
+            "", "Gradient palette", False, QColor(Qt.white), QColor(Qt.black)
+        )
 
         dlg.contLeft.getColor().getRgb()
         dlg.contRight.getColor().getRgb()
         dlg.contpassThroughBlack
-
-

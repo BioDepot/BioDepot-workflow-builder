@@ -30,12 +30,23 @@ class OWSaveDistances(widget.OWWidget):
         self.filename = ""
 
         self.save = gui.auto_commit(
-            self.controlArea, self, "auto_save", "Save", box=False,
-            commit=self.save_file, callback=self.adjust_label,
-            disabled=True, addSpace=True)
+            self.controlArea,
+            self,
+            "auto_save",
+            "Save",
+            box=False,
+            commit=self.save_file,
+            callback=self.adjust_label,
+            disabled=True,
+            addSpace=True,
+        )
         self.saveAs = gui.button(
-            self.controlArea, self, "Save As...",
-            callback=self.save_file_as, disabled=True)
+            self.controlArea,
+            self,
+            "Save As...",
+            callback=self.save_file_as,
+            disabled=True,
+        )
         self.saveAs.setMinimumWidth(300)
         self.adjustSize()
 
@@ -56,7 +67,8 @@ class OWSaveDistances(widget.OWWidget):
     def save_file_as(self):
         file_name = self.filename or self.last_dir or os.path.expanduser("~")
         filename, _ = QFileDialog.getSaveFileName(
-            self, "Select file", file_name, 'Distance files (*.dst)')
+            self, "Select file", file_name, "Distance files (*.dst)"
+        )
         if not filename:
             return
         self.filename = filename
@@ -77,8 +89,11 @@ class OWSaveDistances(widget.OWWidget):
             if skip_row and skip_col:
                 self.warning("Associated data table was not saved")
             elif skip_row or skip_col:
-                self.warning("Data associated with {} was not saved".
-                             format(["rows", "columns"][skip_col]))
+                self.warning(
+                    "Data associated with {} was not saved".format(
+                        ["rows", "columns"][skip_col]
+                    )
+                )
             else:
                 self.warning()
 
@@ -86,6 +101,7 @@ class OWSaveDistances(widget.OWWidget):
 if __name__ == "__main__":
     import sys
     from AnyQt.QtWidgets import QApplication
+
     a = QApplication(sys.argv)
     table = Table("iris")
     ow = OWSaveDistances()

@@ -5,8 +5,14 @@ import numpy as np
 
 from AnyQt.QtWidgets import QTableView, QItemDelegate, QHeaderView
 from AnyQt.QtGui import QColor, QPen, QBrush
-from AnyQt.QtCore import Qt, QAbstractTableModel, QModelIndex, \
-    QItemSelectionModel, QItemSelection, QSize
+from AnyQt.QtCore import (
+    Qt,
+    QAbstractTableModel,
+    QModelIndex,
+    QItemSelectionModel,
+    QItemSelection,
+    QSize,
+)
 
 from Orange.data import Table, Variable, ContinuousVariable, DiscreteVariable
 from Orange.misc import DistMatrix
@@ -37,8 +43,7 @@ class DistanceMatrixModel(QAbstractTableModel):
         if distances is None:
             return
         span = distances.max()
-        self.colors = \
-            (distances * (170 / span if span > 1e-10 else 0)).astype(np.int)
+        self.colors = (distances * (170 / span if span > 1e-10 else 0)).astype(np.int)
         self.zero_diag = all(distances.diagonal() < 1e-6)
         self.endResetModel()
 
@@ -51,8 +56,10 @@ class DistanceMatrixModel(QAbstractTableModel):
             palette = ContinuousPaletteGenerator(*variable.colors)
             off, m = values.min(), values.max()
             fact = off != m and 1 / (m - off)
-            self.label_colors = [palette[x] if not isnan(x) else Qt.lightGray
-                                 for x in (values - off) * fact]
+            self.label_colors = [
+                palette[x] if not isnan(x) else Qt.lightGray
+                for x in (values - off) * fact
+            ]
         else:
             self.label_colors = None
 
@@ -116,12 +123,10 @@ class TableBorderItem(QItemDelegate):
             painter.save()
             x1, y1, x2, y2 = option.rect.getCoords()
             if vcolor is not None:
-                painter.setPen(
-                    QPen(QBrush(vcolor), 1, Qt.SolidLine, Qt.RoundCap))
+                painter.setPen(QPen(QBrush(vcolor), 1, Qt.SolidLine, Qt.RoundCap))
                 painter.drawLine(x1, y1, x1, y2)
             if hcolor is not None:
-                painter.setPen(
-                    QPen(QBrush(hcolor), 1, Qt.SolidLine, Qt.RoundCap))
+                painter.setPen(QPen(QBrush(hcolor), 1, Qt.SolidLine, Qt.RoundCap))
                 painter.drawLine(x1, y1, x2, y1)
             painter.restore()
 
@@ -133,8 +138,7 @@ class SymmetricSelectionModel(QItemSelectionModel):
 
         model = self.model()
         indexes = selection.indexes()
-        sel_inds = {ind.row() for ind in indexes} | \
-                   {ind.column() for ind in indexes}
+        sel_inds = {ind.row() for ind in indexes} | {ind.column() for ind in indexes}
         if flags == QItemSelectionModel.ClearAndSelect:
             selected = set()
         else:
@@ -150,8 +154,9 @@ class SymmetricSelectionModel(QItemSelectionModel):
                 top_left = model.index(r_start, c_start)
                 bottom_right = model.index(r_end - 1, c_end - 1)
                 new_selection.select(top_left, bottom_right)
-        QItemSelectionModel.select(self, new_selection,
-                                   QItemSelectionModel.ClearAndSelect)
+        QItemSelectionModel.select(
+            self, new_selection, QItemSelectionModel.ClearAndSelect
+        )
 
     def selected_items(self):
         return list({ind.row() for ind in self.selectedIndexes()})
@@ -180,8 +185,7 @@ class DistanceMatrixContextHandler(ContextHandler):
     # noinspection PyMethodOverriding
     def match(self, context, matrix, annotations):
         annotations = self._var_names(annotations)
-        if context.dim != matrix.shape[0] or \
-                context.annotation not in annotations:
+        if context.dim != matrix.shape[0] or context.annotation not in annotations:
             return 0
         return 1 + (context.annotations == annotations)
 
@@ -232,8 +236,7 @@ class OWDistanceMatrix(widget.OWWidget):
             header.setSectionResizeMode(QHeaderView.ResizeToContents)
             header.setHighlightSections(True)
             header.setSectionsClickable(False)
-        view.verticalHeader().setDefaultAlignment(
-            Qt.AlignRight | Qt.AlignVCenter)
+        view.verticalHeader().setDefaultAlignment(Qt.AlignRight | Qt.AlignVCenter)
         selmodel = SymmetricSelectionModel(view.model(), view)
         view.setSelectionModel(selmodel)
         view.setSelectionBehavior(QTableView.SelectItems)
@@ -242,14 +245,25 @@ class OWDistanceMatrix(widget.OWWidget):
         settings_box = gui.hBox(self.mainArea)
 
         self.annot_combo = gui.comboBox(
-            settings_box, self, "annotation_idx", label="Labels: ",
+            settings_box,
+            self,
+            "annotation_idx",
+            label="Labels: ",
             orientation=Qt.Horizontal,
-            callback=self._invalidate_annotations, contentsLength=12)
+            callback=self._invalidate_annotations,
+            contentsLength=12,
+        )
         self.annot_combo.setModel(VariableListModel())
         self.annot_combo.model()[:] = ["None", "Enumeration"]
         gui.rubber(settings_box)
-        acb = gui.auto_commit(settings_box, self, "auto_commit",
-                              "Send Selected", "Send Automatically", box=None)
+        acb = gui.auto_commit(
+            settings_box,
+            self,
+            "auto_commit",
+            "Send Selected",
+            "Send Automatically",
+            box=None,
+        )
         acb.setFixedWidth(200)
         # Signal must be connected after self.commit is redirected
         selmodel.selectionChanged.connect(self.commit)
@@ -271,13 +285,15 @@ class OWDistanceMatrix(widget.OWWidget):
         if items and not distances.axis:
             annotations.append("Attribute names")
             self.annotation_idx = 2
-        elif isinstance(items, list) and \
-                all(isinstance(item, Variable) for item in items):
+        elif isinstance(items, list) and all(
+            isinstance(item, Variable) for item in items
+        ):
             annotations.append("Name")
             self.annotation_idx = 2
         elif isinstance(items, Table):
             annotations.extend(
-                itertools.chain(items.domain.variables, items.domain.metas))
+                itertools.chain(items.domain.variables, items.domain.metas)
+            )
             if items.domain.class_var:
                 self.annotation_idx = 2 + len(items.domain.attributes)
         self.annot_combo.model()[:] = annotations
@@ -301,8 +317,7 @@ class OWDistanceMatrix(widget.OWWidget):
         elif self.annot_combo.model()[self.annotation_idx] == "Attribute names":
             attr = self.distances.row_items.domain.attributes
             labels = [str(attr[i]) for i in range(self.distances.shape[0])]
-        elif self.annotation_idx == 2 and \
-                isinstance(self.items, widget.AttributeList):
+        elif self.annotation_idx == 2 and isinstance(self.items, widget.AttributeList):
             labels = [v.name for v in self.items]
         elif isinstance(self.items, Table):
             var = self.annot_combo.model()[self.annotation_idx]
@@ -339,38 +354,52 @@ class OWDistanceMatrix(widget.OWWidget):
 
         def _rgb(brush):
             return "rgb({}, {}, {})".format(*brush.color().getRgb())
+
         if model.labels:
             col_label = model.color_for_label
             label_colors = [_rgb(col_label(i)) for i in range(dim)]
             self.report_raw('<table style="border-collapse:collapse">')
             self.report_raw("<tr><td></td>")
-            self.report_raw("".join(
+            self.report_raw(
+                "".join(
                     '<td style="background-color: {}">{}</td>'.format(*cv)
-                    for cv in zip(label_colors, model.labels)))
+                    for cv in zip(label_colors, model.labels)
+                )
+            )
             self.report_raw("</tr>")
             for i in range(dim):
                 self.report_raw("<tr>")
                 self.report_raw(
-                    '<td style="background-color: {}">{}</td>'.
-                    format(label_colors[i], model.labels[i]))
+                    '<td style="background-color: {}">{}</td>'.format(
+                        label_colors[i], model.labels[i]
+                    )
+                )
                 self.report_raw(
                     "".join(
                         '<td style="background-color: {};'
                         'border-top:1px solid {}; border-left:1px solid {};">'
-                        '{:.3f}</td>'.format(
+                        "{:.3f}</td>".format(
                             _rgb(col_cell(i, j)),
-                            label_colors[i], label_colors[j],
-                            self.distances[i, j])
-                        for j in range(dim)))
+                            label_colors[i],
+                            label_colors[j],
+                            self.distances[i, j],
+                        )
+                        for j in range(dim)
+                    )
+                )
                 self.report_raw("</tr>")
             self.report_raw("</table>")
         else:
-            self.report_raw('<table>')
+            self.report_raw("<table>")
             for i in range(dim):
                 self.report_raw(
-                    "<tr>" +
-                    "".join('<td style="background-color: {}">{:.3f}</td>'.
-                            format(_rgb(col_cell(i, j)), self.distances[i, j])
-                            for j in range(dim)) +
-                    "</tr>")
+                    "<tr>"
+                    + "".join(
+                        '<td style="background-color: {}">{:.3f}</td>'.format(
+                            _rgb(col_cell(i, j)), self.distances[i, j]
+                        )
+                        for j in range(dim)
+                    )
+                    + "</tr>"
+                )
             self.report_raw("</table>")

@@ -11,8 +11,13 @@ organized in a tree structure.
 import logging
 
 from AnyQt.QtWidgets import (
-    QTreeView, QWidget, QVBoxLayout, QSizePolicy, QStyledItemDelegate,
-    QStyle, QAction
+    QTreeView,
+    QWidget,
+    QVBoxLayout,
+    QSizePolicy,
+    QStyledItemDelegate,
+    QStyle,
+    QAction,
 )
 from AnyQt.QtGui import QStandardItemModel
 from AnyQt.QtCore import Qt, QEvent, QModelIndex, QAbstractProxyModel
@@ -25,13 +30,13 @@ class ToolTree(QWidget):
     """
     A ListView like presentation of a list of actions.
     """
+
     triggered = Signal(QAction)
     hovered = Signal(QAction)
 
     def __init__(self, parent=None, **kwargs):
         QTreeView.__init__(self, parent, **kwargs)
-        self.setSizePolicy(QSizePolicy.MinimumExpanding,
-                           QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Expanding)
 
         self.__model = QStandardItemModel()
         self.__flattened = False
@@ -167,13 +172,13 @@ class ToolTree(QWidget):
         if obj is self.__view and event.type() == QEvent.KeyPress:
             key = event.key()
 
-            space_activates = \
-                self.style().styleHint(
-                        QStyle.SH_Menu_SpaceActivatesItem,
-                        None, None)
+            space_activates = self.style().styleHint(
+                QStyle.SH_Menu_SpaceActivatesItem, None, None
+            )
 
-            if key in [Qt.Key_Enter, Qt.Key_Return, Qt.Key_Select] or \
-                    (key == Qt.Key_Space and space_activates):
+            if key in [Qt.Key_Enter, Qt.Key_Return, Qt.Key_Select] or (
+                key == Qt.Key_Space and space_activates
+            ):
                 index = self.__view.currentIndex()
                 if index.isValid() and index.flags() & Qt.ItemIsEnabled:
                     # Emit activated on behalf of QTreeView.
@@ -193,6 +198,7 @@ class FlattenedTreeItemModel(QAbstractProxyModel):
     like item model.
 
     """
+
     Default = 1
     InternalNodesDisabled = 2
     LeavesOnly = 4
@@ -305,8 +311,7 @@ class FlattenedTreeItemModel(QAbstractProxyModel):
         if self.__flatteningMode == self.InternalNodesDisabled:
             sourceIndex = self.mapToSource(index)
             sourceModel = self.sourceModel()
-            if sourceModel.rowCount(sourceIndex) > 0 and \
-                    flags & Qt.ItemIsEnabled:
+            if sourceModel.rowCount(sourceIndex) > 0 and flags & Qt.ItemIsEnabled:
                 # Internal node, enabled in the source model, disable it
                 flags ^= Qt.ItemIsEnabled
         return flags
@@ -345,7 +350,7 @@ class FlattenedTreeItemModel(QAbstractProxyModel):
                     source_key.append(key_path)
 
                 for i in range(source.rowCount(index)):
-                    create_mapping(index.child(i, 0), key_path + (i, ))
+                    create_mapping(index.child(i, 0), key_path + (i,))
 
             else:
                 source_offset_map[key_path] = len(source_offset_map)
@@ -376,8 +381,9 @@ class FlattenedTreeItemModel(QAbstractProxyModel):
         self._updateRowMapping()
         self.endResetModel()
 
-    def _sourceRowsMoved(self, sourceParent, sourceStart, sourceEnd,
-                         destParent, destRow):
+    def _sourceRowsMoved(
+        self, sourceParent, sourceStart, sourceEnd, destParent, destRow
+    ):
         self.beginResetModel()
         self._updateRowMapping()
         self.endResetModel()

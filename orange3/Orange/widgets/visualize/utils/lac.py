@@ -8,15 +8,14 @@ from Orange.preprocess.discretize import EqualFreq
 def create_sql_contingency(X, columns, m):
     def convert(row):
         c = len(row) - 1
-        return [m[columns[i]].get(v) if i != c else v
-                for i, v in enumerate(row)]
+        return [m[columns[i]].get(v) if i != c else v for i, v in enumerate(row)]
 
     group_by = [a.to_sql() for a in (X.domain[c] for c in columns)]
-    filters = ['%s IS NOT NULL' % a for a in group_by]
-    fields = group_by + ['COUNT(%s)' % group_by[0]]
+    filters = ["%s IS NOT NULL" % a for a in group_by]
+    fields = group_by + ["COUNT(%s)" % group_by[0]]
     query = X._sql_query(fields, group_by=group_by, filters=filters)
     with X._execute_sql_query(query) as cur:
-        cont = np.array(list(map(convert, cur.fetchall())), dtype='float')
+        cont = np.array(list(map(convert, cur.fetchall())), dtype="float")
     return cont[:, :-1], cont[:, -1:].flatten()
 
 
@@ -53,12 +52,13 @@ def initialize_kmeans(conts, k):
             for a, w in zip(c, cw):
                 for l in oldxm[tuple(a[:2])]:
                     olda, oldw = oldx[l]
-                    x.append((olda + (a[2],), oldw+w))
+                    x.append((olda + (a[2],), oldw + w))
                     xm.setdefault(tuple(a)[1:], []).append(len(x) - 1)
 
     X = np.array([y[0] for y in x])
 
     import sklearn.cluster as skl_cluster
+
     kmeans = skl_cluster.KMeans(n_clusters=k)
     Y = kmeans.fit_predict(X)
     means = kmeans.cluster_centers_
@@ -82,14 +82,15 @@ def lac(conts, k, nsteps=30, window_size=1):
     # Initialize parameters
     priors = np.ones(k) / k
 
-
     print("Initializing")
-    import sys; sys.stdout.flush()
+    import sys
+
+    sys.stdout.flush()
     means, covars = initialize_random(conts, k)
-    #means, covars = initialize_kmeans(conts, k)
+    # means, covars = initialize_kmeans(conts, k)
     print("Done")
 
-    w = [np.empty((k, len(c[0]),)) for c in conts]
+    w = [np.empty((k, len(c[0]))) for c in conts]
     active = np.ones(k, dtype=np.bool)
 
     for i in range(1, nsteps + 1):
@@ -108,13 +109,14 @@ def lac(conts, k, nsteps=30, window_size=1):
 
                 if active[j]:
                     det = covars[j, dims].prod()
-                    inv_covars = 1. / covars[j, dims]
+                    inv_covars = 1.0 / covars[j, dims]
                     xn = x - means[j, dims]
-                    factor = (2.0 * np.pi) ** (x.shape[1]/ 2.0) * det ** 0.5
-                    w[l][j] = \
-                        priors[j] \
-                        * np.exp(np.sum(xn * inv_covars * xn, axis=1) * -.5) \
+                    factor = (2.0 * np.pi) ** (x.shape[1] / 2.0) * det ** 0.5
+                    w[l][j] = (
+                        priors[j]
+                        * np.exp(np.sum(xn * inv_covars * xn, axis=1) * -0.5)
                         / factor
+                    )
                 else:
                     w[l][j] = 0
             w[l][active] /= w[l][active].sum(axis=0)
@@ -124,17 +126,22 @@ def lac(conts, k, nsteps=30, window_size=1):
             priors = n / np.sum(n)
             for j in range(k):
                 if n[j]:
-                    mu = np.dot(w[l][j, :] * cw, x[:, active_dim]) / (w[l][j, :] * cw).sum()
+                    mu = (
+                        np.dot(w[l][j, :] * cw, x[:, active_dim])
+                        / (w[l][j, :] * cw).sum()
+                    )
 
                     xn = x[:, active_dim] - mu
-                    sigma = np.sum(xn ** 2 * w[l][j] * cw, axis=0) / (w[l][j, :] * cw).sum()
+                    sigma = (
+                        np.sum(xn ** 2 * w[l][j] * cw, axis=0) / (w[l][j, :] * cw).sum()
+                    )
 
                     if np.isnan(mu).any() or np.isnan(sigma).any():
                         return w, means, covars, priors
                 else:
                     active[j] = 0
-                    mu = 0.
-                    sigma = 0.
+                    mu = 0.0
+                    sigma = 0.0
                 means[j, l] = mu
                 covars[j, l] = sigma
 
@@ -159,6 +166,7 @@ def create_contingencies(X, callback=None):
     m = get_bin_centers(X_)
 
     from Orange.data.sql.table import SqlTable
+
     if isinstance(X, SqlTable):
         conts = []
         al = len(X.domain)
@@ -200,18 +208,16 @@ def create_contingencies(X, callback=None):
 def get_bin_centers(X_):
     m = []
     for i, var in enumerate(X_.domain.variables):
-        cleaned_values = [tuple(map(str.strip, v.strip('[]()<>=≥').split('-')))
-                          for v in var.values]
+        cleaned_values = [
+            tuple(map(str.strip, v.strip("[]()<>=≥").split("-"))) for v in var.values
+        ]
         try:
             float_values = [[float(v) for v in vals] for vals in cleaned_values]
             bin_centers = {
                 i: v[0] if len(v) == 1 else v[0] + (v[1] - v[0])
                 for i, v in enumerate(float_values)
-                }
+            }
         except ValueError:
-            bin_centers = {
-                i: i
-                for i, v in enumerate(cleaned_values)
-                }
+            bin_centers = {i: i for i, v in enumerate(cleaned_values)}
         m.append(bin_centers)
     return m

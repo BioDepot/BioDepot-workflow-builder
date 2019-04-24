@@ -17,19 +17,18 @@ class TestDiscreteDistribution(unittest.TestCase):
     def setUp(self):
         self.freqs = [4.0, 20.0, 13.0, 8.0, 10.0, 41.0, 5.0]
         s = sum(self.freqs)
-        self.rfreqs = [x/s for x in self.freqs]
+        self.rfreqs = [x / s for x in self.freqs]
 
         self.data = data.Table.from_numpy(
             data.Domain(
                 attributes=[
-                    data.DiscreteVariable('rgb', values=['r', 'g', 'b', 'a']),
-                    data.DiscreteVariable('num', values=['1', '2', '3'], ordered=True),
+                    data.DiscreteVariable("rgb", values=["r", "g", "b", "a"]),
+                    data.DiscreteVariable("num", values=["1", "2", "3"], ordered=True),
                 ]
             ),
-            X=np.array([
-                [0, 2, 0, 1, 1, 0, np.nan, 1],
-                [0, 2, 0, np.nan, 1, 2, np.nan, 1],
-            ]).T
+            X=np.array(
+                [[0, 2, 0, 1, 1, 0, np.nan, 1], [0, 2, 0, np.nan, 1, 2, np.nan, 1]]
+            ).T,
         )
         self.rgb, self.num = distribution.get_distributions(self.data)
 
@@ -75,8 +74,7 @@ class TestDiscreteDistribution(unittest.TestCase):
         self.assertIsInstance(disc1, np.ndarray)
         self.assertIs(disc1.variable, d.domain.class_var)
         self.assertEqual(disc.unknowns, 0)
-        np.testing.assert_array_equal(disc1,
-                                      [0]*len(d.domain.class_var.values))
+        np.testing.assert_array_equal(disc1, [0] * len(d.domain.class_var.values))
 
     def test_fallback(self):
         d = data.Table("zoo")
@@ -90,7 +88,7 @@ class TestDiscreteDistribution(unittest.TestCase):
 
     def test_fallback_with_weights_and_nan(self):
         d = data.Table("zoo")
-        d.set_weights(np.random.uniform(0., 1., size=len(d)))
+        d.set_weights(np.random.uniform(0.0, 1.0, size=len(d)))
         d.Y[::10] = np.nan
 
         default = distribution.Discrete(d, "type")
@@ -159,7 +157,7 @@ class TestDiscreteDistribution(unittest.TestCase):
         self.assertEqual(disc3, list(range(1, 8)))
 
         disc3 *= 2
-        self.assertEqual(disc3, [2*x for x in range(1, 8)])
+        self.assertEqual(disc3, [2 * x for x in range(1, 8)])
 
     def test_normalize(self):
         d = data.Table("zoo")
@@ -172,7 +170,7 @@ class TestDiscreteDistribution(unittest.TestCase):
         disc1 = distribution.Discrete(None, d.domain.class_var)
         disc1.normalize()
         v = len(d.domain.class_var.values)
-        np.testing.assert_almost_equal(disc1, [1/v]*v)
+        np.testing.assert_almost_equal(disc1, [1 / v] * v)
 
     def test_modus(self):
         d = data.Table("zoo")
@@ -191,8 +189,8 @@ class TestDiscreteDistribution(unittest.TestCase):
         self.assertEqual(self.rgb.min(), None)
         self.assertEqual(self.rgb.max(), None)
         # Min and max should work for ordinal variables
-        self.assertEqual(self.num.min(), '1')
-        self.assertEqual(self.num.max(), '3')
+        self.assertEqual(self.num.min(), "1")
+        self.assertEqual(self.num.max(), "3")
 
 
 class TestContinuousDistribution(unittest.TestCase):
@@ -203,24 +201,62 @@ class TestContinuousDistribution(unittest.TestCase):
         cls.data = data.Table.from_numpy(
             data.Domain(
                 attributes=[
-                    data.ContinuousVariable('n1'),
-                    data.ContinuousVariable('n2'),
+                    data.ContinuousVariable("n1"),
+                    data.ContinuousVariable("n2"),
                 ]
             ),
-            X=np.array([range(10), [1, 1, 1, 5, 5, 8, 9, np.nan, 9, 9]]).T
+            X=np.array([range(10), [1, 1, 1, 5, 5, 8, 9, np.nan, 9, 9]]).T,
         )
         cls.n1, cls.n2 = distribution.get_distributions(cls.data)
 
     def setUp(self):
-        self.freqs = np.array([(1.0, 1), (1.1, 1), (1.2, 2), (1.3, 7), (1.4, 12),
-                               (1.5, 14), (1.6, 7), (1.7, 4), (1.9, 2), (3.0, 1),
-                               (3.3, 2), (3.5, 2), (3.6, 1), (3.7, 1), (3.8, 1),
-                               (3.9, 3), (4.0, 5), (4.1, 3), (4.2, 4), (4.3, 2),
-                               (4.4, 4), (4.5, 8), (4.6, 3), (4.7, 5), (4.8, 4),
-                               (4.9, 5), (5.0, 4), (5.1, 8), (5.2, 2), (5.3, 2),
-                               (5.4, 2), (5.5, 3), (5.6, 6), (5.7, 3), (5.8, 3),
-                               (5.9, 2), (6.0, 2), (6.1, 3), (6.3, 1), (6.4, 1),
-                               (6.6, 1), (6.7, 2), (6.9, 1)]).T
+        self.freqs = np.array(
+            [
+                (1.0, 1),
+                (1.1, 1),
+                (1.2, 2),
+                (1.3, 7),
+                (1.4, 12),
+                (1.5, 14),
+                (1.6, 7),
+                (1.7, 4),
+                (1.9, 2),
+                (3.0, 1),
+                (3.3, 2),
+                (3.5, 2),
+                (3.6, 1),
+                (3.7, 1),
+                (3.8, 1),
+                (3.9, 3),
+                (4.0, 5),
+                (4.1, 3),
+                (4.2, 4),
+                (4.3, 2),
+                (4.4, 4),
+                (4.5, 8),
+                (4.6, 3),
+                (4.7, 5),
+                (4.8, 4),
+                (4.9, 5),
+                (5.0, 4),
+                (5.1, 8),
+                (5.2, 2),
+                (5.3, 2),
+                (5.4, 2),
+                (5.5, 3),
+                (5.6, 6),
+                (5.7, 3),
+                (5.8, 3),
+                (5.9, 2),
+                (6.0, 2),
+                (6.1, 3),
+                (6.3, 1),
+                (6.4, 1),
+                (6.6, 1),
+                (6.7, 2),
+                (6.9, 1),
+            ]
+        ).T
 
     def test_from_table(self):
         d = self.iris
@@ -327,25 +363,20 @@ class TestClassDistribution(unittest.TestCase):
         self.assertIsInstance(disc, np.ndarray)
         self.assertIs(disc.variable, d.domain["type"])
         self.assertEqual(disc.unknowns, 0)
-        np.testing.assert_array_equal(disc,
-                                      [4.0, 20.0, 13.0, 8.0, 10.0, 41.0, 5.0])
+        np.testing.assert_array_equal(disc, [4.0, 20.0, 13.0, 8.0, 10.0, 41.0, 5.0])
 
     def test_multiple_target_variables(self):
         d = data.Table.from_numpy(
             data.Domain(
-                attributes=[data.ContinuousVariable('n1')],
+                attributes=[data.ContinuousVariable("n1")],
                 class_vars=[
-                    data.DiscreteVariable('c1', values=['r', 'g', 'b', 'a']),
-                    data.DiscreteVariable('c2', values=['r', 'g', 'b', 'a']),
-                    data.DiscreteVariable('c3', values=['r', 'g', 'b', 'a']),
-                ]
+                    data.DiscreteVariable("c1", values=["r", "g", "b", "a"]),
+                    data.DiscreteVariable("c2", values=["r", "g", "b", "a"]),
+                    data.DiscreteVariable("c3", values=["r", "g", "b", "a"]),
+                ],
             ),
             X=np.array([range(5)]).T,
-            Y=np.array([
-                [0, 1, 2, 3, 4],
-                [0, 1, 2, 3, 4],
-                [0, 1, 2, 3, 4],
-            ]).T
+            Y=np.array([[0, 1, 2, 3, 4], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4]]).T,
         )
         dists = distribution.class_distribution(d)
         self.assertEqual(len(dists), 3)
@@ -363,15 +394,53 @@ class TestGetDistribution(unittest.TestCase):
         np.testing.assert_array_equal(disc, [50, 50, 50])
 
         petal_length = d.columns.petal_length
-        freqs = np.array([(1.0, 1), (1.1, 1), (1.2, 2), (1.3, 7), (1.4, 12),
-                          (1.5, 14), (1.6, 7), (1.7, 4), (1.9, 2), (3.0, 1),
-                          (3.3, 2), (3.5, 2), (3.6, 1), (3.7, 1), (3.8, 1),
-                          (3.9, 3), (4.0, 5), (4.1, 3), (4.2, 4), (4.3, 2),
-                          (4.4, 4), (4.5, 8), (4.6, 3), (4.7, 5), (4.8, 4),
-                          (4.9, 5), (5.0, 4), (5.1, 8), (5.2, 2), (5.3, 2),
-                          (5.4, 2), (5.5, 3), (5.6, 6), (5.7, 3), (5.8, 3),
-                          (5.9, 2), (6.0, 2), (6.1, 3), (6.3, 1), (6.4, 1),
-                          (6.6, 1), (6.7, 2), (6.9, 1)]).T
+        freqs = np.array(
+            [
+                (1.0, 1),
+                (1.1, 1),
+                (1.2, 2),
+                (1.3, 7),
+                (1.4, 12),
+                (1.5, 14),
+                (1.6, 7),
+                (1.7, 4),
+                (1.9, 2),
+                (3.0, 1),
+                (3.3, 2),
+                (3.5, 2),
+                (3.6, 1),
+                (3.7, 1),
+                (3.8, 1),
+                (3.9, 3),
+                (4.0, 5),
+                (4.1, 3),
+                (4.2, 4),
+                (4.3, 2),
+                (4.4, 4),
+                (4.5, 8),
+                (4.6, 3),
+                (4.7, 5),
+                (4.8, 4),
+                (4.9, 5),
+                (5.0, 4),
+                (5.1, 8),
+                (5.2, 2),
+                (5.3, 2),
+                (5.4, 2),
+                (5.5, 3),
+                (5.6, 6),
+                (5.7, 3),
+                (5.8, 3),
+                (5.9, 2),
+                (6.0, 2),
+                (6.1, 3),
+                (6.3, 1),
+                (6.4, 1),
+                (6.6, 1),
+                (6.7, 2),
+                (6.9, 1),
+            ]
+        ).T
         disc = distribution.get_distribution(d, petal_length)
         np.testing.assert_almost_equal(disc, freqs)
 
@@ -386,15 +455,53 @@ class TestDomainDistribution(unittest.TestCase):
             self.assertIsInstance(ddist[i], distribution.Continuous)
         self.assertIsInstance(ddist[-1], distribution.Discrete)
 
-        freqs = np.array([(1.0, 1), (1.1, 1), (1.2, 2), (1.3, 7), (1.4, 12),
-                          (1.5, 14), (1.6, 7), (1.7, 4), (1.9, 2), (3.0, 1),
-                          (3.3, 2), (3.5, 2), (3.6, 1), (3.7, 1), (3.8, 1),
-                          (3.9, 3), (4.0, 5), (4.1, 3), (4.2, 4), (4.3, 2),
-                          (4.4, 4), (4.5, 8), (4.6, 3), (4.7, 5), (4.8, 4),
-                          (4.9, 5), (5.0, 4), (5.1, 8), (5.2, 2), (5.3, 2),
-                          (5.4, 2), (5.5, 3), (5.6, 6), (5.7, 3), (5.8, 3),
-                          (5.9, 2), (6.0, 2), (6.1, 3), (6.3, 1), (6.4, 1),
-                          (6.6, 1), (6.7, 2), (6.9, 1)]).T
+        freqs = np.array(
+            [
+                (1.0, 1),
+                (1.1, 1),
+                (1.2, 2),
+                (1.3, 7),
+                (1.4, 12),
+                (1.5, 14),
+                (1.6, 7),
+                (1.7, 4),
+                (1.9, 2),
+                (3.0, 1),
+                (3.3, 2),
+                (3.5, 2),
+                (3.6, 1),
+                (3.7, 1),
+                (3.8, 1),
+                (3.9, 3),
+                (4.0, 5),
+                (4.1, 3),
+                (4.2, 4),
+                (4.3, 2),
+                (4.4, 4),
+                (4.5, 8),
+                (4.6, 3),
+                (4.7, 5),
+                (4.8, 4),
+                (4.9, 5),
+                (5.0, 4),
+                (5.1, 8),
+                (5.2, 2),
+                (5.3, 2),
+                (5.4, 2),
+                (5.5, 3),
+                (5.6, 6),
+                (5.7, 3),
+                (5.8, 3),
+                (5.9, 2),
+                (6.0, 2),
+                (6.1, 3),
+                (6.3, 1),
+                (6.4, 1),
+                (6.6, 1),
+                (6.7, 2),
+                (6.9, 1),
+            ]
+        ).T
         np.testing.assert_almost_equal(ddist[2], freqs)
         np.testing.assert_almost_equal(ddist[-1], [50, 50, 50])
 
@@ -409,18 +516,42 @@ class TestDomainDistribution(unittest.TestCase):
             self.assertEqual(computed.unknowns, n_all - sum_dist)
 
         domain = data.Domain(
-            [data.DiscreteVariable("d%i" % i, values=list("abc")) for i in range(10)] +
-            [data.ContinuousVariable("c%i" % i) for i in range(10)])
+            [data.DiscreteVariable("d%i" % i, values=list("abc")) for i in range(10)]
+            + [data.ContinuousVariable("c%i" % i) for i in range(10)]
+        )
 
         # pylint: disable=bad-whitespace
         X = sp.csr_matrix(
             # 0  1  2  3       4       5       6  7  8  9 10 11 12   13 14 15 16      17 18 19
             # --------------------------------------------------------------------------------
-            [[0, 2, 0, 2,      1,      1,      2, 0, 0, 1, 0, 0, 0,   1, 1, 0, 2, np.nan, 2, 0],
-             [0, 0, 1, 1, np.nan, np.nan,      1, 0, 2, 0, 0, 0, 0,   0, 2, 0, 1, np.nan, 0, 0],
-             [0, 0, 0, 1,      0,      2, np.nan, 0, 0, 0, 0, 0, 0,   0, 0, 0, 0,      0, 0, 0],
-             [0, 0, 0, 0,      0,      0,      0, 0, 0, 0, 0, 0, 0,   0, 0, 0, 0,      0, 0, 0],
-             [0, 0, 2, 0,      0,      0,      1, 0, 0, 0, 0, 0, 0, 1.1, 0, 0, 0,      0, 0, 0]]
+            [
+                [0, 2, 0, 2, 1, 1, 2, 0, 0, 1, 0, 0, 0, 1, 1, 0, 2, np.nan, 2, 0],
+                [
+                    0,
+                    0,
+                    1,
+                    1,
+                    np.nan,
+                    np.nan,
+                    1,
+                    0,
+                    2,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    2,
+                    0,
+                    1,
+                    np.nan,
+                    0,
+                    0,
+                ],
+                [0, 0, 0, 1, 0, 2, np.nan, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1.1, 0, 0, 0, 0, 0, 0],
+            ]
         )
         X[0, 0] = 0
 
@@ -496,24 +627,21 @@ class TestDomainDistribution(unittest.TestCase):
 class TestContinuous(unittest.TestCase):
     def test_mean(self):
         # pylint: disable=bad-whitespace
-        x = np.array([[0, 5, 10],
-                      [9, 0,  1]])
+        x = np.array([[0, 5, 10], [9, 0, 1]])
         dist = distribution.Continuous(x)
 
         self.assertEqual(dist.mean(), np.mean(([0] * 9) + [10]))
 
     def test_variance(self):
         # pylint: disable=bad-whitespace
-        x = np.array([[0, 5, 10],
-                      [9, 0,  1]])
+        x = np.array([[0, 5, 10], [9, 0, 1]])
         dist = distribution.Continuous(x)
 
         self.assertEqual(dist.variance(), np.var(([0] * 9) + [10]))
 
     def test_standard_deviation(self):
         # pylint: disable=bad-whitespace
-        x = np.array([[0, 5, 10],
-                      [9, 0,  1]])
+        x = np.array([[0, 5, 10], [9, 0, 1]])
         dist = distribution.Continuous(x)
 
         self.assertEqual(dist.standard_deviation(), np.std(([0] * 9) + [10]))

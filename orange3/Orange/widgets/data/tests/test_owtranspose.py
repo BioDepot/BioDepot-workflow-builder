@@ -34,9 +34,11 @@ class TestOWTranspose(WidgetTest):
         metas = data.domain.metas
         domain = data.domain
         # Put one non-string column to metas, so widget must skip it
-        domain2 = Domain(domain.attributes[:-1],
-                         domain.class_vars,
-                         (domain.attributes[0], ) + domain.metas)
+        domain2 = Domain(
+            domain.attributes[:-1],
+            domain.class_vars,
+            (domain.attributes[0],) + domain.metas,
+        )
         data2 = Table(domain2, data)
 
         widget.feature_type = widget.GENERIC
@@ -48,7 +50,8 @@ class TestOWTranspose(WidgetTest):
         output = self.get_output(widget.Outputs.data)
         self.assertListEqual(
             [a.name for a in output.domain.attributes],
-            [metas[0].to_val(m) for m in data.metas[:, 0]])
+            [metas[0].to_val(m) for m in data.metas[:, 0]],
+        )
 
         # Test that the widget takes the correct column
         widget.feature_names_column = metas[1]
@@ -56,7 +59,8 @@ class TestOWTranspose(WidgetTest):
         output = self.get_output(widget.Outputs.data)
         self.assertListEqual(
             [a.name for a in output.domain.attributes],
-            [metas[1].to_val(m) for m in data.metas[:, 1]])
+            [metas[1].to_val(m) for m in data.metas[:, 1]],
+        )
 
         # Switch to generic
         self.assertEqual(widget.DEFAULT_PREFIX, "Feature")
@@ -64,23 +68,30 @@ class TestOWTranspose(WidgetTest):
         widget.apply()
         output = self.get_output(widget.Outputs.data)
         self.assertTrue(
-            all(x.name.startswith(widget.DEFAULT_PREFIX)
-                for x in output.domain.attributes))
+            all(
+                x.name.startswith(widget.DEFAULT_PREFIX)
+                for x in output.domain.attributes
+            )
+        )
 
         # Check that the widget uses the supplied name
         widget.feature_name = "Foo"
         widget.apply()
         output = self.get_output(widget.Outputs.data)
         self.assertTrue(
-            all(x.name.startswith("Foo ") for x in output.domain.attributes))
+            all(x.name.startswith("Foo ") for x in output.domain.attributes)
+        )
 
         # Check that the widget uses default when name is not given
         widget.feature_name = ""
         widget.apply()
         output = self.get_output(widget.Outputs.data)
         self.assertTrue(
-            all(x.name.startswith(widget.DEFAULT_PREFIX)
-                for x in output.domain.attributes))
+            all(
+                x.name.startswith(widget.DEFAULT_PREFIX)
+                for x in output.domain.attributes
+            )
+        )
 
     def test_send_report(self):
         widget = self.widget
@@ -134,12 +145,14 @@ class TestOWTranspose(WidgetTest):
 
     def test_error(self):
         widget = self.widget
-        with unittest.mock.patch("Orange.data.Table.transpose",
-                                 side_effect=ValueError("foo")):
+        with unittest.mock.patch(
+            "Orange.data.Table.transpose", side_effect=ValueError("foo")
+        ):
             self.send_signal(widget.Inputs.data, self.zoo)
             self.assertTrue(widget.Error.value_error.is_shown())
         self.send_signal(widget.Inputs.data, self.zoo)
         self.assertFalse(widget.Error.value_error.is_shown())
+
 
 if __name__ == "__main__":
     unittest.main()

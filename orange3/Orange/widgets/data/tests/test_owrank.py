@@ -47,27 +47,31 @@ class TestOWRank(WidgetTest):
         self.assertIsInstance(value.scorer, Scorer)
 
     def test_input_scorer_fitter(self):
-        heart_disease = Table('heart_disease')
+        heart_disease = Table("heart_disease")
         self.assertEqual(self.widget.scorers, {})
 
         model = self.widget.ranksModel
 
-        for fitter, name in ((RandomForestLearner(), 'random forest'),
-                             (SGDLearner(), 'sgd')):
+        for fitter, name in (
+            (RandomForestLearner(), "random forest"),
+            (SGDLearner(), "sgd"),
+        ):
             with self.subTest(fitter=fitter):
                 self.send_signal("Scorer", fitter, 1)
 
-                for data in (self.housing,
-                             heart_disease):
+                for data in (self.housing, heart_disease):
                     with self.subTest(data=data.name):
-                        self.send_signal('Data', data)
-                        scores = [model.data(model.index(row, model.columnCount() - 1))
-                                  for row in range(model.rowCount())]
+                        self.send_signal("Data", data)
+                        scores = [
+                            model.data(model.index(row, model.columnCount() - 1))
+                            for row in range(model.rowCount())
+                        ]
                         self.assertEqual(len(scores), len(data.domain.attributes))
                         self.assertFalse(np.isnan(scores).any())
 
                         last_column = model.headerData(
-                            model.columnCount() - 1, Qt.Horizontal).lower()
+                            model.columnCount() - 1, Qt.Horizontal
+                        ).lower()
                         self.assertIn(name, last_column)
 
                 self.send_signal("Scorer", None, 1)
@@ -111,16 +115,22 @@ class TestOWRank(WidgetTest):
         """Check scoring methods check boxes"""
         self.send_signal(self.widget.Inputs.data, self.iris)
         self.assertEqual(self.widget.problem_type_mode, ProblemType.CLASSIFICATION)
-        self.assertEqual(self.widget.measuresStack.currentIndex(), ProblemType.CLASSIFICATION)
+        self.assertEqual(
+            self.widget.measuresStack.currentIndex(), ProblemType.CLASSIFICATION
+        )
 
         self.send_signal(self.widget.Inputs.data, self.housing)
         self.assertEqual(self.widget.problem_type_mode, ProblemType.REGRESSION)
-        self.assertEqual(self.widget.measuresStack.currentIndex(), ProblemType.REGRESSION)
+        self.assertEqual(
+            self.widget.measuresStack.currentIndex(), ProblemType.REGRESSION
+        )
 
         data = Table.from_table(Domain(self.iris.domain.variables), self.iris)
         self.send_signal(self.widget.Inputs.data, data)
         self.assertEqual(self.widget.problem_type_mode, ProblemType.UNSUPERVISED)
-        self.assertEqual(self.widget.measuresStack.currentIndex(), ProblemType.UNSUPERVISED)
+        self.assertEqual(
+            self.widget.measuresStack.currentIndex(), ProblemType.UNSUPERVISED
+        )
 
     def test_scoring_method_defaults(self):
         """Check default scoring methods are selected"""
@@ -144,64 +154,92 @@ class TestOWRank(WidgetTest):
         self.send_signal(self.widget.Inputs.data, self.housing)
         self.send_signal(self.widget.Inputs.scorer, self.pca, 1)
         self.send_signal(self.widget.Inputs.scorer, self.log_reg, 2)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.housing.domain.attributes), 16))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.housing.domain.attributes), 16),
+        )
 
     def test_reg_scorer_cls_data(self):
         """Check scores on the output with inadequate scorer"""
         self.send_signal(self.widget.Inputs.data, self.iris)
         self.send_signal(self.widget.Inputs.scorer, self.pca, 1)
         self.send_signal(self.widget.Inputs.scorer, self.lin_reg, 2)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.iris.domain.attributes), 7))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.iris.domain.attributes), 7),
+        )
 
     def test_scores_updates_cls(self):
         """Check arbitrary workflow with classification data"""
         self.send_signal(self.widget.Inputs.data, self.iris)
         self.send_signal(self.widget.Inputs.scorer, self.log_reg, 1)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.iris.domain.attributes), 5))
-        self._get_checkbox('Gini').setChecked(False)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.iris.domain.attributes), 4))
-        self._get_checkbox('Gini').setChecked(True)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.iris.domain.attributes), 5))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.iris.domain.attributes), 5),
+        )
+        self._get_checkbox("Gini").setChecked(False)
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.iris.domain.attributes), 4),
+        )
+        self._get_checkbox("Gini").setChecked(True)
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.iris.domain.attributes), 5),
+        )
         self.send_signal(self.widget.Inputs.scorer, self.log_reg, 2)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.iris.domain.attributes), 8))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.iris.domain.attributes), 8),
+        )
         self.send_signal(self.widget.Inputs.scorer, None, 1)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.iris.domain.attributes), 5))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.iris.domain.attributes), 5),
+        )
         self.send_signal(self.widget.Inputs.scorer, self.log_reg, 1)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.iris.domain.attributes), 8))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.iris.domain.attributes), 8),
+        )
         self.send_signal(self.widget.Inputs.scorer, self.lin_reg, 3)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.iris.domain.attributes), 9))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.iris.domain.attributes), 9),
+        )
 
     def test_scores_updates_reg(self):
         """Check arbitrary workflow with regression data"""
         self.send_signal(self.widget.Inputs.data, self.housing)
         self.send_signal(self.widget.Inputs.scorer, self.lin_reg, 1)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.housing.domain.attributes), 3))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.housing.domain.attributes), 3),
+        )
 
-        self._get_checkbox('Univar. reg.').setChecked(False)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.housing.domain.attributes), 2))
+        self._get_checkbox("Univar. reg.").setChecked(False)
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.housing.domain.attributes), 2),
+        )
 
-        self._get_checkbox('Univar. reg.').setChecked(True)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.housing.domain.attributes), 3))
+        self._get_checkbox("Univar. reg.").setChecked(True)
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.housing.domain.attributes), 3),
+        )
 
         self.send_signal(self.widget.Inputs.scorer, None, 1)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.housing.domain.attributes), 2))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.housing.domain.attributes), 2),
+        )
 
         self.send_signal(self.widget.Inputs.scorer, self.lin_reg, 1)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.housing.domain.attributes), 3))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.housing.domain.attributes), 3),
+        )
 
     def test_scores_updates_no_class(self):
         """Check arbitrary workflow with no class variable dataset"""
@@ -211,22 +249,28 @@ class TestOWRank(WidgetTest):
         self.assertIsNone(self.get_output(self.widget.Outputs.scores))
 
         self.send_signal(self.widget.Inputs.scorer, self.lin_reg, 1)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.iris.domain.variables), 1))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.iris.domain.variables), 1),
+        )
 
         self.send_signal(self.widget.Inputs.scorer, self.pca, 1)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.iris.domain.variables), 7))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.iris.domain.variables), 7),
+        )
 
         self.send_signal(self.widget.Inputs.scorer, self.lin_reg, 2)
-        self.assertEqual(self.get_output(self.widget.Outputs.scores).X.shape,
-                         (len(self.iris.domain.variables), 8))
+        self.assertEqual(
+            self.get_output(self.widget.Outputs.scores).X.shape,
+            (len(self.iris.domain.variables), 8),
+        )
 
     def test_scores_sorting(self):
         """Check clicking on header column orders scores in a different way"""
         self.send_signal(self.widget.Inputs.data, self.iris)
         order1 = self.widget.ranksModel.mapToSourceRows(...).tolist()
-        self._get_checkbox('FCBF').setChecked(True)
+        self._get_checkbox("FCBF").setChecked(True)
         self.widget.ranksView.horizontalHeader().setSortIndicator(3, Qt.DescendingOrder)
         order2 = self.widget.ranksModel.mapToSourceRows(...).tolist()
         self.assertNotEqual(order1, order2)
@@ -234,20 +278,22 @@ class TestOWRank(WidgetTest):
     def test_scores_nan_sorting(self):
         """Check NaNs are sorted last"""
         data = self.iris.copy()
-        data.get_column_view('petal length')[0][:] = np.nan
+        data.get_column_view("petal length")[0][:] = np.nan
         self.send_signal(self.widget.Inputs.data, data)
 
         # Assert last row is all nan
-        for order in (Qt.AscendingOrder,
-                      Qt.DescendingOrder):
+        for order in (Qt.AscendingOrder, Qt.DescendingOrder):
             self.widget.ranksView.horizontalHeader().setSortIndicator(1, order)
-            last_row = self.widget.ranksModel[self.widget.ranksModel.mapToSourceRows(...)[-1]]
+            last_row = self.widget.ranksModel[
+                self.widget.ranksModel.mapToSourceRows(...)[-1]
+            ]
             np.testing.assert_array_equal(last_row, np.repeat(np.nan, 3))
 
     def test_default_sort_indicator(self):
         self.send_signal(self.widget.Inputs.data, self.iris)
         self.assertNotEqual(
-            0, self.widget.ranksView.horizontalHeader().sortIndicatorSection())
+            0, self.widget.ranksView.horizontalHeader().sortIndicatorSection()
+        )
 
     def test_data_which_make_scorer_nan(self):
         """
@@ -255,41 +301,37 @@ class TestOWRank(WidgetTest):
         GH-2168
         """
         table = Table(
-            Domain(
-                [ContinuousVariable("c")],
-                [DiscreteVariable("d", values="01")]
-            ),
-            list(zip(
-                [-np.power(10, 10), 1, 1],
-                [0, 1, 1]
-            )))
-        self.widget.selected_methods.add('ANOVA')
+            Domain([ContinuousVariable("c")], [DiscreteVariable("d", values="01")]),
+            list(zip([-np.power(10, 10), 1, 1], [0, 1, 1])),
+        )
+        self.widget.selected_methods.add("ANOVA")
         self.send_signal(self.widget.Inputs.data, table)
 
     def test_setting_migration_fixes_header_state(self):
         # Settings as of version 3.3.5
         settings = {
-            '__version__': 1,
-            'auto_apply': True,
-            'headerState': (
-                b'\x00\x00\x00\xff\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00'
-                b'\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00'
-                b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\xd0\x00'
-                b'\x00\x00\x08\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00'
-                b'\x00\x00\x00\x00\x00d\xff\xff\xff\xff\x00\x00\x00\x84\x00'
-                b'\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x14\x00\x00\x00'
-                b'\x01\x00\x00\x00\x00\x00\x00\x02\xbc\x00\x00\x00\x07\x00'
-                b'\x00\x00\x00',
-                b'\x00\x00\x00\xff\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00'
-                b'\x00\x01\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00'
-                b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xdc\x00'
-                b'\x00\x00\x03\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00'
-                b'\x00\x00\x00\x00\x00d\xff\xff\xff\xff\x00\x00\x00\x84\x00'
-                b'\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x14\x00\x00\x00'
-                b'\x01\x00\x00\x00\x00\x00\x00\x00\xc8\x00\x00\x00\x02\x00'
-                b'\x00\x00\x00'),
-            'nSelected': 5,
-            'selectMethod': 3
+            "__version__": 1,
+            "auto_apply": True,
+            "headerState": (
+                b"\x00\x00\x00\xff\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00"
+                b"\x00\x00\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00"
+                b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\xd0\x00"
+                b"\x00\x00\x08\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00"
+                b"\x00\x00\x00\x00\x00d\xff\xff\xff\xff\x00\x00\x00\x84\x00"
+                b"\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x14\x00\x00\x00"
+                b"\x01\x00\x00\x00\x00\x00\x00\x02\xbc\x00\x00\x00\x07\x00"
+                b"\x00\x00\x00",
+                b"\x00\x00\x00\xff\x00\x00\x00\x00\x00\x00\x00\x01\x00\x00"
+                b"\x00\x01\x00\x00\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00"
+                b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xdc\x00"
+                b"\x00\x00\x03\x00\x01\x01\x00\x00\x00\x00\x00\x00\x00\x00"
+                b"\x00\x00\x00\x00\x00d\xff\xff\xff\xff\x00\x00\x00\x84\x00"
+                b"\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00\x14\x00\x00\x00"
+                b"\x01\x00\x00\x00\x00\x00\x00\x00\xc8\x00\x00\x00\x02\x00"
+                b"\x00\x00\x00",
+            ),
+            "nSelected": 5,
+            "selectMethod": 3,
         }
 
         w = self.create_widget(OWRank, stored_settings=settings)
@@ -307,24 +349,28 @@ class TestOWRank(WidgetTest):
         self.assertIsNone(self.get_output(widget.Outputs.reduced_data))
 
         # Make selection, but auto-send disabled
-        selection = QItemSelection(model.index(1, 0),
-                                   model.index(1, model.columnCount() - 1))
+        selection = QItemSelection(
+            model.index(1, 0), model.index(1, model.columnCount() - 1)
+        )
         selectionModel.select(selection, selectionModel.ClearAndSelect)
         self.assertIsNone(self.get_output(widget.Outputs.reduced_data))
 
         # Enable auto-send: should output data
         widget.controls.auto_apply.setChecked(True)
         reduced_data = self.get_output(widget.Outputs.reduced_data)
-        self.assertEqual(reduced_data.domain.attributes,
-                         (self.iris.domain["petal width"], ))
+        self.assertEqual(
+            reduced_data.domain.attributes, (self.iris.domain["petal width"],)
+        )
 
         # Change selection: should change the output immediately
-        selection = QItemSelection(model.index(0, 0),
-                                   model.index(0, model.columnCount() - 1))
+        selection = QItemSelection(
+            model.index(0, 0), model.index(0, model.columnCount() - 1)
+        )
         selectionModel.select(selection, selectionModel.ClearAndSelect)
         reduced_data = self.get_output(widget.Outputs.reduced_data)
-        self.assertEqual(reduced_data.domain.attributes,
-                         (self.iris.domain["petal length"], ))
+        self.assertEqual(
+            reduced_data.domain.attributes, (self.iris.domain["petal length"],)
+        )
 
     def test_no_attributes(self):
         """

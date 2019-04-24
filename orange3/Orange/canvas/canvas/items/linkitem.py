@@ -8,12 +8,14 @@ import math
 from xml.sax.saxutils import escape
 
 from AnyQt.QtWidgets import (
-    QGraphicsItem, QGraphicsEllipseItem, QGraphicsPathItem, QGraphicsWidget,
-    QGraphicsTextItem, QGraphicsDropShadowEffect
+    QGraphicsItem,
+    QGraphicsEllipseItem,
+    QGraphicsPathItem,
+    QGraphicsWidget,
+    QGraphicsTextItem,
+    QGraphicsDropShadowEffect,
 )
-from AnyQt.QtGui import (
-    QPen, QBrush, QColor, QPainterPath, QTransform, QPalette
-)
+from AnyQt.QtGui import QPen, QBrush, QColor, QPainterPath, QTransform, QPalette
 from AnyQt.QtCore import Qt, QPointF, QRectF, QLineF, QEvent
 
 from .nodeitem import SHADOW_COLOR
@@ -26,14 +28,14 @@ class LinkCurveItem(QGraphicsPathItem):
     """
     Link curve item. The main component of a :class:`LinkItem`.
     """
+
     def __init__(self, parent):
         super().__init__(parent)
         self.setAcceptedMouseButtons(Qt.NoButton)
         self.setAcceptHoverEvents(True)
 
         self.shadow = QGraphicsDropShadowEffect(
-            blurRadius=10, color=QColor(SHADOW_COLOR),
-            offset=QPointF(0, 0)
+            blurRadius=10, color=QColor(SHADOW_COLOR), offset=QPointF(0, 0)
         )
 
         self.setGraphicsEffect(self.shadow)
@@ -81,9 +83,7 @@ class LinkCurveItem(QGraphicsPathItem):
     def shape(self):
         if self.__shape is None:
             path = self.curvePath()
-            pen = QPen(QBrush(Qt.black),
-                       max(self.pen().widthF(), 20),
-                       Qt.SolidLine)
+            pen = QPen(QBrush(Qt.black), max(self.pen().widthF(), 20), Qt.SolidLine)
             self.__shape = stroke_path(path, pen)
         return self.__shape
 
@@ -180,8 +180,7 @@ def qpainterpath_simple_split(path, t):
         return p1, p2
     elif el1.type == QPainterPath.CurveToElement:
         c0, c1, c2, c3 = el0, el1, path.elementAt(2), path.elementAt(3)
-        assert all(el.type == QPainterPath.CurveToDataElement
-                   for el in [c2, c3])
+        assert all(el.type == QPainterPath.CurveToDataElement for el in [c2, c3])
         cp = [QPointF(el.x, el.y) for el in [c0, c1, c2, c3]]
         first, second = bezier_subdivide(cp, t)
         p1, p2 = QPainterPath(), QPainterPath()
@@ -245,9 +244,10 @@ class LinkAnchorIndicator(QGraphicsEllipseItem):
     of the :class:`LinkItem`.
 
     """
+
     def __init__(self, *args):
         QGraphicsEllipseItem.__init__(self, *args)
-        self.setRect(-3.5, -3.5, 7., 7.)
+        self.setRect(-3.5, -3.5, 7.0, 7.0)
         self.setPen(QPen(Qt.NoPen))
         self.setBrush(QBrush(QColor("#9CACB4")))
         self.__hover = False
@@ -383,9 +383,7 @@ class LinkItem(QGraphicsWidget):
             self.sourceAnchor = anchor
 
             if self.sourceAnchor is not None:
-                self.sourceAnchor.scenePositionChanged.connect(
-                    self._sourcePosChanged
-                )
+                self.sourceAnchor.scenePositionChanged.connect(self._sourcePosChanged)
 
         self.__updateCurve()
 
@@ -406,9 +404,7 @@ class LinkItem(QGraphicsWidget):
         if self.sinkItem != item:
             if self.sinkAnchor:
                 # Remove a previous source item and the corresponding anchor
-                self.sinkAnchor.scenePositionChanged.disconnect(
-                    self._sinkPosChanged
-                )
+                self.sinkAnchor.scenePositionChanged.disconnect(self._sinkPosChanged)
 
                 if self.sinkItem is not None:
                     self.sinkItem.removeInputAnchor(self.sinkAnchor)
@@ -426,16 +422,12 @@ class LinkItem(QGraphicsWidget):
 
         if self.sinkAnchor != anchor:
             if self.sinkAnchor is not None:
-                self.sinkAnchor.scenePositionChanged.disconnect(
-                    self._sinkPosChanged
-                )
+                self.sinkAnchor.scenePositionChanged.disconnect(self._sinkPosChanged)
 
             self.sinkAnchor = anchor
 
             if self.sinkAnchor is not None:
-                self.sinkAnchor.scenePositionChanged.connect(
-                    self._sinkPosChanged
-                )
+                self.sinkAnchor.scenePositionChanged.connect(self._sinkPosChanged)
 
         self.__updateCurve()
 
@@ -498,9 +490,11 @@ class LinkItem(QGraphicsWidget):
             # TODO: make the curve tangent orthogonal to the anchors path.
             path = QPainterPath()
             path.moveTo(source_pos)
-            path.cubicTo(source_pos + QPointF(cp_offset, 0),
-                         sink_pos - QPointF(cp_offset, 0),
-                         sink_pos)
+            path.cubicTo(
+                source_pos + QPointF(cp_offset, 0),
+                sink_pos - QPointF(cp_offset, 0),
+                sink_pos,
+            )
 
             self.curveItem.setCurvePath(path)
             self.sourceIndicator.setPos(source_pos)
@@ -516,9 +510,9 @@ class LinkItem(QGraphicsWidget):
 
         if self.__sourceName or self.__sinkName:
             if self.__sourceName != self.__sinkName:
-                text = ("<nobr>{0}</nobr> \u2192 <nobr>{1}</nobr>"
-                        .format(escape(self.__sourceName),
-                                escape(self.__sinkName)))
+                text = "<nobr>{0}</nobr> \u2192 <nobr>{1}</nobr>".format(
+                    escape(self.__sourceName), escape(self.__sinkName)
+                )
             else:
                 # If the names are the same show only one.
                 # Is this right? If the sink has two input channels of the
@@ -528,8 +522,7 @@ class LinkItem(QGraphicsWidget):
         else:
             text = ""
 
-        self.linkTextItem.setHtml('<div align="center">{0}</div>'
-                                  .format(text))
+        self.linkTextItem.setHtml('<div align="center">{0}</div>'.format(text))
         path = self.curveItem.curvePath()
 
         # Constrain the text width if it is too long to fit on a single line
@@ -722,8 +715,7 @@ class LinkItem(QGraphicsWidget):
         self.curveItem.setPen(pen)
 
     def __updatePalette(self):
-        self.linkTextItem.setDefaultTextColor(
-            self.palette().color(QPalette.Text))
+        self.linkTextItem.setDefaultTextColor(self.palette().color(QPalette.Text))
 
     def __updateFont(self):
         self.linkTextItem.setFont(self.font())

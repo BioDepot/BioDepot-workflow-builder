@@ -1,6 +1,5 @@
 from Orange.data import Table, StringVariable
-from Orange.widgets.settings import (Setting, ContextSetting,
-                                     DomainContextHandler)
+from Orange.widgets.settings import Setting, ContextSetting, DomainContextHandler
 from Orange.widgets.utils.itemmodels import DomainModel
 from Orange.widgets.widget import OWWidget, Msg
 from Orange.widgets import gui
@@ -40,28 +39,39 @@ class OWTranspose(OWWidget):
         self.data = None
 
         box = gui.radioButtons(
-            self.controlArea, self, "feature_type", box="Feature names",
-            callback=lambda: self.apply())
+            self.controlArea,
+            self,
+            "feature_type",
+            box="Feature names",
+            callback=lambda: self.apply(),
+        )
 
         button = gui.appendRadioButton(box, "Generic")
         edit = gui.lineEdit(
-            gui.indentedBox(box, gui.checkButtonOffsetHint(button)), self,
+            gui.indentedBox(box, gui.checkButtonOffsetHint(button)),
+            self,
             "feature_name",
-            placeholderText="Type a prefix ...", toolTip="Custom feature name")
+            placeholderText="Type a prefix ...",
+            toolTip="Custom feature name",
+        )
         edit.editingFinished.connect(self._apply_editing)
 
         self.meta_button = gui.appendRadioButton(box, "From meta attribute:")
         self.feature_model = DomainModel(
-            order=DomainModel.METAS, valid_types=StringVariable,
-            alphabetical=True)
+            order=DomainModel.METAS, valid_types=StringVariable, alphabetical=True
+        )
         self.feature_combo = gui.comboBox(
-            gui.indentedBox(box, gui.checkButtonOffsetHint(button)), self,
-            "feature_names_column", contentsLength=12,
-            callback=self._feature_combo_changed, model=self.feature_model)
+            gui.indentedBox(box, gui.checkButtonOffsetHint(button)),
+            self,
+            "feature_names_column",
+            contentsLength=12,
+            callback=self._feature_combo_changed,
+            model=self.feature_model,
+        )
 
         self.apply_button = gui.auto_commit(
-            self.controlArea, self, "auto_apply", "&Apply",
-            box=False, commit=self.apply)
+            self.controlArea, self, "auto_apply", "&Apply", box=False, commit=self.apply
+        )
         self.apply_button.button.setAutoDefault(False)
 
         self.set_controls()
@@ -103,8 +113,10 @@ class OWTranspose(OWWidget):
             try:
                 transposed = Table.transpose(
                     self.data,
-                    self.feature_type == self.FROM_META_ATTR and self.feature_names_column,
-                    feature_name=self.feature_name or self.DEFAULT_PREFIX)
+                    self.feature_type == self.FROM_META_ATTR
+                    and self.feature_names_column,
+                    feature_name=self.feature_name or self.DEFAULT_PREFIX,
+                )
             except ValueError as e:
                 self.Error.value_error(e)
         self.Outputs.data.send(transposed)

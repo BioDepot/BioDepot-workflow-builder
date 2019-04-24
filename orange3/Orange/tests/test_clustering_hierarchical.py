@@ -17,18 +17,30 @@ def flatten(seq):
 class TestHierarchical(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        m = [[],
-             [3],
-             [2, 4],
-             [17, 5, 4],
-             [2, 8, 3, 8],
-             [7, 5, 10, 11, 2],
-             [8, 4, 1, 5, 11, 13],
-             [4, 7, 12, 8, 10, 1, 5],
-             [13, 9, 14, 15, 7, 8, 4, 6],
-             [12, 10, 11, 15, 2, 5, 7, 3, 1]]
-        cls.items = ["Ann", "Bob", "Curt", "Danny", "Eve", "Fred",
-                     "Greg", "Hue", "Ivy", "Jon"]
+        m = [
+            [],
+            [3],
+            [2, 4],
+            [17, 5, 4],
+            [2, 8, 3, 8],
+            [7, 5, 10, 11, 2],
+            [8, 4, 1, 5, 11, 13],
+            [4, 7, 12, 8, 10, 1, 5],
+            [13, 9, 14, 15, 7, 8, 4, 6],
+            [12, 10, 11, 15, 2, 5, 7, 3, 1],
+        ]
+        cls.items = [
+            "Ann",
+            "Bob",
+            "Curt",
+            "Danny",
+            "Eve",
+            "Fred",
+            "Greg",
+            "Hue",
+            "Ivy",
+            "Jon",
+        ]
 
         dist = numpy.array(list(flatten(m)), dtype=float)
         matrix = hierarchical.squareform(dist, mode="lower")
@@ -45,7 +57,7 @@ class TestHierarchical(unittest.TestCase):
         self.assertEqual(len(indices), len(self.matrix.items))
         self.assertEqual(set(indices), set(range(len(self.matrix.items))))
 
-        #self.assertEqual(indices,
+        # self.assertEqual(indices,
         #                 [3, 1, 2, 6, 0, 4, 8, 9, 5, 7])
 
     def test_order(self):
@@ -81,39 +93,34 @@ class TestHierarchical(unittest.TestCase):
         self.assertEqual(top1, top)
 
     def test_form(self):
-        m = [[0, 2, 3, 4],
-             [2, 0, 6, 7],
-             [3, 6, 0, 8],
-             [4, 7, 8, 0]]
+        m = [[0, 2, 3, 4], [2, 0, 6, 7], [3, 6, 0, 8], [4, 7, 8, 0]]
 
         m = numpy.array(m)
         dist = hierarchical.condensedform(m, mode="lower")
         numpy.testing.assert_equal(dist, numpy.array([2, 3, 6, 4, 7, 8]))
-        numpy.testing.assert_equal(
-            hierarchical.squareform(dist, mode="lower"), m)
+        numpy.testing.assert_equal(hierarchical.squareform(dist, mode="lower"), m)
         dist = hierarchical.condensedform(m, mode="upper")
         numpy.testing.assert_equal(dist, numpy.array([2, 3, 4, 6, 7, 8]))
-        numpy.testing.assert_equal(
-            hierarchical.squareform(dist, mode="upper"), m)
+        numpy.testing.assert_equal(hierarchical.squareform(dist, mode="upper"), m)
 
     def test_pre_post_order(self):
         tree = hierarchical.Tree
         root = tree("A", (tree("B"), tree("C")))
-        self.assertEqual([n.value for n in hierarchical.postorder(root)],
-                         ["B", "C", "A"])
-        self.assertEqual([n.value for n in hierarchical.preorder(root)],
-                         ["A", "B", "C"])
+        self.assertEqual(
+            [n.value for n in hierarchical.postorder(root)], ["B", "C", "A"]
+        )
+        self.assertEqual(
+            [n.value for n in hierarchical.preorder(root)], ["A", "B", "C"]
+        )
 
     def test_optimal_ordering(self):
         def indices(root):
             return [leaf.value.index for leaf in hierarchical.leaves(root)]
 
-        ordered = hierarchical.optimal_leaf_ordering(
-            self.cluster, self.matrix)
+        ordered = hierarchical.optimal_leaf_ordering(self.cluster, self.matrix)
 
         self.assertEqual(ordered.value.range, self.cluster.value.range)
-        self.assertSetEqual(set(indices(self.cluster)),
-                            set(indices(ordered)))
+        self.assertSetEqual(set(indices(self.cluster)), set(indices(ordered)))
 
         def pairs(iterable):
             i1, i2 = tee(iterable)
@@ -122,6 +129,7 @@ class TestHierarchical(unittest.TestCase):
 
         def score(root):
             return sum([self.matrix[i, j] for i, j in pairs(indices(root))])
+
         score_unordered = score(self.cluster)
         score_ordered = score(ordered)
         self.assertGreater(score_unordered, score_ordered)
@@ -136,10 +144,7 @@ class TestHierarchical(unittest.TestCase):
         numpy.testing.assert_almost_equal(tree.value.height, 0.75)
 
     def test_invalid_linkage(self):
-        link = numpy.array(
-            [[0.0, 1.0, 1.0, 2.0],
-             [2.0, 1.0, 2.0, 3.0]]
-        )
+        link = numpy.array([[0.0, 1.0, 1.0, 2.0], [2.0, 1.0, 2.0, 3.0]])
         with self.assertRaises(ValueError):
             hierarchical.tree_from_linkage(link)
 

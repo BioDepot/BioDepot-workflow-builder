@@ -4,8 +4,16 @@ Scheme Info editor widget.
 """
 
 from AnyQt.QtWidgets import (
-    QWidget, QDialog, QLabel, QTextEdit, QCheckBox, QFormLayout,
-    QVBoxLayout, QHBoxLayout, QDialogButtonBox, QSizePolicy
+    QWidget,
+    QDialog,
+    QLabel,
+    QTextEdit,
+    QCheckBox,
+    QFormLayout,
+    QVBoxLayout,
+    QHBoxLayout,
+    QDialogButtonBox,
+    QSizePolicy,
 )
 
 from AnyQt.QtCore import Qt
@@ -17,6 +25,7 @@ from ..gui.utils import StyledWidget_paintEvent, StyledWidget
 class SchemeInfoEdit(QWidget):
     """Scheme info editor widget.
     """
+
     def __init__(self, *args, **kwargs):
         QWidget.__init__(self, *args, **kwargs)
         self.scheme = None
@@ -29,8 +38,7 @@ class SchemeInfoEdit(QWidget):
 
         self.name_edit = LineEdit(self)
         self.name_edit.setPlaceholderText(self.tr("untitled"))
-        self.name_edit.setSizePolicy(QSizePolicy.Expanding,
-                                     QSizePolicy.Fixed)
+        self.name_edit.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
         self.desc_edit = QTextEdit(self)
         self.desc_edit.setTabChangesFocus(True)
 
@@ -60,8 +68,7 @@ class SchemeInfoEdit(QWidget):
         back to the scheme.
 
         """
-        if self.__schemeIsUntitled and \
-            self.name_edit.text() == self.tr("untitled"):
+        if self.__schemeIsUntitled and self.name_edit.text() == self.tr("untitled"):
             # 'untitled' text was not changed
             name = ""
         else:
@@ -97,8 +104,9 @@ class SchemeInfoDialog(QDialog):
         self.editor = SchemeInfoEdit(self)
         self.editor.layout().setContentsMargins(20, 20, 20, 20)
         self.editor.layout().setSpacing(15)
-        self.editor.setSizePolicy(QSizePolicy.MinimumExpanding,
-                                  QSizePolicy.MinimumExpanding)
+        self.editor.setSizePolicy(
+            QSizePolicy.MinimumExpanding, QSizePolicy.MinimumExpanding
+        )
 
         heading = self.tr("Workflow Info")
         heading = "<h3>{0}</h3>".format(heading)
@@ -108,10 +116,8 @@ class SchemeInfoDialog(QDialog):
         self.editor.layout().insertRow(0, self.heading)
 
         self.buttonbox = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel,
-            Qt.Horizontal,
-            self
-            )
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel, Qt.Horizontal, self
+        )
 
         # Insert button box
         self.editor.layout().addRow(self.buttonbox)
@@ -119,23 +125,26 @@ class SchemeInfoDialog(QDialog):
         widget = StyledWidget(self, objectName="auto-show-container")
         check_layout = QHBoxLayout()
         check_layout.setContentsMargins(20, 10, 20, 10)
-        self.__showAtNewSchemeCheck = \
-            QCheckBox(self.tr("Show when I make a New Workflow."),
-                      self,
-                      objectName="auto-show-check",
-                      checked=False,
-                      )
+        self.__showAtNewSchemeCheck = QCheckBox(
+            self.tr("Show when I make a New Workflow."),
+            self,
+            objectName="auto-show-check",
+            checked=False,
+        )
 
         check_layout.addWidget(self.__showAtNewSchemeCheck)
         check_layout.addWidget(
-               QLabel(self.tr("You can also edit Workflow Info later "
-                              "(File -> Workflow Info)."),
-                      self,
-                      objectName="auto-show-info"),
-               alignment=Qt.AlignRight)
+            QLabel(
+                self.tr(
+                    "You can also edit Workflow Info later " "(File -> Workflow Info)."
+                ),
+                self,
+                objectName="auto-show-info",
+            ),
+            alignment=Qt.AlignRight,
+        )
         widget.setLayout(check_layout)
-        widget.setSizePolicy(QSizePolicy.MinimumExpanding,
-                             QSizePolicy.Fixed)
+        widget.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed)
 
         if self.__autoCommit:
             self.buttonbox.accepted.connect(self.editor.commit)

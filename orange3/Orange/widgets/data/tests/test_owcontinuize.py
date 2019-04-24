@@ -66,7 +66,6 @@ class TestOWContinuize(WidgetTest):
         self.send_signal(self.widget.Inputs.data, table)
         self.widget.unconditional_commit()
 
-
     def test_one_column_nan_values_normalize_span(self):
         """
         No crash on a column with NaN values and with selected option

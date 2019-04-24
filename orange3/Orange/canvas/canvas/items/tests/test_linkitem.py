@@ -22,9 +22,7 @@ class TestLinkItem(TestItems):
         file_item.setWidgetCategory(data_desc)
         file_item.setPos(0, 100)
 
-        discretize_desc = reg.widget(
-            "Orange.widgets.data.owdiscretize.OWDiscretize"
-        )
+        discretize_desc = reg.widget("Orange.widgets.data.owdiscretize.OWDiscretize")
 
         discretize_item = NodeItem()
         discretize_item.setWidgetDescription(discretize_desc)
@@ -32,9 +30,7 @@ class TestLinkItem(TestItems):
         discretize_item.setPos(200, 100)
         classify_desc = reg.category("Classify")
 
-        bayes_desc = reg.widget(
-            "Orange.widgets.classify.ownaivebayes.OWNaiveBayes"
-        )
+        bayes_desc = reg.widget("Orange.widgets.classify.ownaivebayes.OWNaiveBayes")
 
         nb_item = NodeItem()
         nb_item.setWidgetDescription(bayes_desc)

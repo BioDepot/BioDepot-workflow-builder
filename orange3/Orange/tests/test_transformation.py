@@ -3,8 +3,13 @@ import unittest
 import numpy as np
 import scipy.sparse as sp
 
-from Orange.data import Table, Domain, DiscreteVariable, ContinuousVariable, \
-    StringVariable
+from Orange.data import (
+    Table,
+    Domain,
+    DiscreteVariable,
+    ContinuousVariable,
+    StringVariable,
+)
 from Orange.preprocess.transformation import Identity, Transformation, Lookup
 
 
@@ -44,9 +49,11 @@ class TestTransformation(unittest.TestCase):
         self.assertRaises(NotImplementedError, trans, self.data)
 
     def test_identity(self):
-        domain = Domain([ContinuousVariable("X")],
-                        [DiscreteVariable("C", values=["0", "1", "2"])],
-                        [StringVariable("S")])
+        domain = Domain(
+            [ContinuousVariable("X")],
+            [DiscreteVariable("C", values=["0", "1", "2"])],
+            [StringVariable("S")],
+        )
         X = np.random.normal(size=(4, 1))
         Y = np.random.randint(3, size=(4, 1))
         M = np.array(["A", "B", "C", "D"], dtype=object).reshape(-1, 1)
@@ -70,4 +77,5 @@ class LookupTest(unittest.TestCase):
         for col in [column, sp.csr_matrix(column)]:
             np.testing.assert_array_equal(
                 lookup.transform(col),
-                np.array([2, 0, 2, 1, np.nan, 1], dtype=np.float64))
+                np.array([2, 0, 2, 1, np.nan, 1], dtype=np.float64),
+            )

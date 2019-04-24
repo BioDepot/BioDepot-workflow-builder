@@ -10,9 +10,8 @@ class TestItems(unittest.TestCase):
     def setUp(self):
         import logging
 
-        from AnyQt.QtWidgets import \
-            QApplication, QGraphicsScene, QGraphicsView
-        from AnyQt.QtGui import  QPainter
+        from AnyQt.QtWidgets import QApplication, QGraphicsScene, QGraphicsView
+        from AnyQt.QtGui import QPainter
         from AnyQt.QtCore import QTimer
 
         logging.basicConfig()
@@ -21,10 +20,10 @@ class TestItems(unittest.TestCase):
         self.scene = QGraphicsScene()
         self.view = QGraphicsView(self.scene)
         self.view.setRenderHints(
-            QPainter.Antialiasing | \
-            QPainter.SmoothPixmapTransform | \
-            QPainter.TextAntialiasing
-            )
+            QPainter.Antialiasing
+            | QPainter.SmoothPixmapTransform
+            | QPainter.TextAntialiasing
+        )
         self.view.resize(500, 300)
         self.view.show()
         QTimer.singleShot(10000, self.app.exit)

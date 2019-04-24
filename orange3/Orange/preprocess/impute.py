@@ -6,8 +6,16 @@ from Orange.statistics import distribution, basic_stats
 from Orange.util import Reprable
 from .transformation import Transformation, Lookup
 
-__all__ = ["ReplaceUnknowns", "Average", "DoNotImpute", "DropInstances",
-           "Model", "AsValue", "Random", "Default"]
+__all__ = [
+    "ReplaceUnknowns",
+    "Average",
+    "DoNotImpute",
+    "DropInstances",
+    "Model",
+    "AsValue",
+    "Random",
+    "Default",
+]
 
 
 class ReplaceUnknowns(Transformation):
@@ -21,6 +29,7 @@ class ReplaceUnknowns(Transformation):
     value : int or float
         The value with which to replace the unknown values
     """
+
     def __init__(self, variable, value=0):
         super().__init__(variable)
         self.value = value
@@ -114,7 +123,7 @@ class ImputeSql(Reprable):
         self.default = default
 
     def __call__(self):
-        return 'coalesce(%s, %s)' % (self.var.to_sql(), str(self.default))
+        return "coalesce(%s, %s)" % (self.var.to_sql(), str(self.default))
 
 
 class Default(BaseImputeMethod):
@@ -122,7 +131,7 @@ class Default(BaseImputeMethod):
     short_name = "value"
     description = ""
     columns_only = True
-    format = '{var} -> {self.default}'
+    format = "{var} -> {self.default}"
 
     def __init__(self, default=0):
         self.default = default
@@ -147,6 +156,7 @@ class ReplaceUnknownsModel(Reprable):
     model : Orange.base.Model
         A fitted model predicting `variable`.
     """
+
     def __init__(self, variable, model):
         assert model.domain.class_var == variable
         self.variable = variable
@@ -156,8 +166,7 @@ class ReplaceUnknownsModel(Reprable):
         if isinstance(data, Orange.data.Instance):
             column = np.array([float(data[self.variable])])
         else:
-            column = np.array(data.get_column_view(self.variable)[0],
-                              copy=True)
+            column = np.array(data.get_column_view(self.variable)[0], copy=True)
 
         mask = np.isnan(column)
         if not np.any(mask):
@@ -176,9 +185,10 @@ class Model(BaseImputeMethod):
     short_name = "model"
     description = ""
     format = BaseImputeMethod.format + " ({self.learner.name})"
+
     @property
     def name(self):
-        return "{} ({})".format(self._name, getattr(self.learner, 'name', ''))
+        return "{} ({})".format(self._name, getattr(self.learner, "name", ""))
 
     def __init__(self, learner):
         self.learner = learner
@@ -191,11 +201,11 @@ class Model(BaseImputeMethod):
             data = data.transform(domain)
             model = self.learner(data)
             assert model.domain.class_var == variable
-            return variable.copy(
-                compute_value=ReplaceUnknownsModel(variable, model))
+            return variable.copy(compute_value=ReplaceUnknownsModel(variable, model))
         else:
-            raise ValueError("`{}` doesn't support domain type"
-                             .format(self.learner.name))
+            raise ValueError(
+                "`{}` doesn't support domain type".format(self.learner.name)
+            )
 
     def copy(self):
         return Model(self.learner)
@@ -215,8 +225,7 @@ def domain_with_class_var(domain, class_var):
     if domain.class_var is class_var:
         return domain
     elif class_var in domain.attributes:
-        attrs = [var for var in domain.attributes
-                 if var is not class_var]
+        attrs = [var for var in domain.attributes if var is not class_var]
     else:
         attrs = domain.attributes
     return Orange.data.Domain(attrs, class_var)
@@ -246,9 +255,10 @@ class AsValue(BaseImputeMethod):
                 compute_value=Lookup(
                     variable,
                     np.arange(len(variable.values), dtype=int),
-                    unknown=len(variable.values)),
+                    unknown=len(variable.values),
+                ),
                 sparse=variable.sparse,
-                )
+            )
             return var
 
         elif variable.is_continuous:
@@ -260,9 +270,10 @@ class AsValue(BaseImputeMethod):
                 sparse=variable.sparse,
             )
             stats = basic_stats.BasicStats(data, variable)
-            return (variable.copy(compute_value=ReplaceUnknowns(variable,
-                                                                stats.mean)),
-                    indicator_var)
+            return (
+                variable.copy(compute_value=ReplaceUnknowns(variable, stats.mean)),
+                indicator_var,
+            )
         else:
             raise TypeError(type(variable))
 
@@ -279,6 +290,7 @@ class ReplaceUnknownsRandom(Transformation):
     distribution : Orange.statistics.distribution.Distribution
         The corresponding sampling distribution
     """
+
     def __init__(self, variable, distribution):
         assert distribution.size > 0
         assert distribution.variable == variable
@@ -290,8 +302,7 @@ class ReplaceUnknownsRandom(Transformation):
         elif variable.is_continuous:
             counts = np.array(distribution)[1, :]
         else:
-            raise TypeError("Only discrete and continuous "
-                            "variables are supported")
+            raise TypeError("Only discrete and continuous " "variables are supported")
         csum = np.sum(counts)
         if csum > 0:
             self.sample_prob = counts / csum
@@ -307,12 +318,18 @@ class ReplaceUnknownsRandom(Transformation):
 
         if self.variable.is_discrete:
             sample = np.random.choice(
-                len(self.variable.values), size=len(nanindices),
-                replace=True, p=self.sample_prob)
+                len(self.variable.values),
+                size=len(nanindices),
+                replace=True,
+                p=self.sample_prob,
+            )
         else:
             sample = np.random.choice(
-                np.asarray(self.distribution)[0, :], size=len(nanindices),
-                replace=True, p=self.sample_prob)
+                np.asarray(self.distribution)[0, :],
+                size=len(nanindices),
+                replace=True,
+                p=self.sample_prob,
+            )
 
         c[nanindices] = sample
         return c
@@ -333,12 +350,10 @@ class Random(BaseImputeMethod):
             assert len(variable.values) == 0
             raise ValueError("'{}' has no values".format(variable))
         elif isinvalid and variable.is_continuous:
-            raise ValueError("'{}' has an unknown distribution"
-                             .format(variable))
+            raise ValueError("'{}' has an unknown distribution".format(variable))
 
         if variable.is_discrete and np.sum(dist) == 0:
             dist += 1 / len(dist)
         elif variable.is_continuous and np.sum(dist[1, :]) == 0:
             dist[1, :] += 1 / dist.shape[1]
-        return variable.copy(
-            compute_value=ReplaceUnknownsRandom(variable, dist))
+        return variable.copy(compute_value=ReplaceUnknownsRandom(variable, dist))

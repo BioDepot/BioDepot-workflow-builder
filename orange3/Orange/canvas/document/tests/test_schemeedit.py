@@ -3,8 +3,13 @@ Tests for scheme document.
 """
 
 from ..schemeedit import SchemeEditWidget
-from ...scheme import Scheme, SchemeNode, SchemeLink, SchemeTextAnnotation, \
-                      SchemeArrowAnnotation
+from ...scheme import (
+    Scheme,
+    SchemeNode,
+    SchemeLink,
+    SchemeTextAnnotation,
+    SchemeArrowAnnotation,
+)
 
 from ...registry.tests import small_testing_registry
 
@@ -24,8 +29,8 @@ class TestSchemeEdit(QAppTestCase):
         self.assertIs(w.scheme(), scheme)
         self.assertTrue(not w.isModified())
 
-#        w.setModified(True)
-#        self.assertTrue(w.isModified())
+        #        w.setModified(True)
+        #        self.assertTrue(w.isModified())
 
         scheme = Scheme()
 
@@ -52,8 +57,7 @@ class TestSchemeEdit(QAppTestCase):
         scheme.annotation_added.connect(annot_list.append)
         scheme.annotation_removed.connect(annot_list.remove)
 
-        node = SchemeNode(file_desc, title="title1",
-                                 position=(100, 100))
+        node = SchemeNode(file_desc, title="title1", position=(100, 100))
         w.addNode(node)
 
         self.assertSequenceEqual(node_list, [node])
@@ -70,8 +74,7 @@ class TestSchemeEdit(QAppTestCase):
 
         stack.redo()
 
-        node1 = SchemeNode(disc_desc, title="title2",
-                           position=(300, 100))
+        node1 = SchemeNode(disc_desc, title="title2", position=(300, 100))
         w.addNode(node1)
 
         self.assertSequenceEqual(node_list, [node, node1])

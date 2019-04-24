@@ -55,17 +55,17 @@ class TestOWPCA(WidgetTest):
     def test_migrate_settings_limits_components(self):
         settings = dict(ncomponents=10)
         OWPCA.migrate_settings(settings, 0)
-        self.assertEqual(settings['ncomponents'], 10)
+        self.assertEqual(settings["ncomponents"], 10)
         settings = dict(ncomponents=101)
         OWPCA.migrate_settings(settings, 0)
-        self.assertEqual(settings['ncomponents'], 100)
+        self.assertEqual(settings["ncomponents"], 100)
 
     def test_migrate_settings_changes_variance_covered_to_int(self):
         settings = dict(variance_covered=17.5)
         OWPCA.migrate_settings(settings, 0)
         self.assertEqual(settings["variance_covered"], 17)
 
-        settings = dict(variance_covered=float('nan'))
+        settings = dict(variance_covered=float("nan"))
         OWPCA.migrate_settings(settings, 0)
         self.assertEqual(settings["variance_covered"], 100)
 
@@ -101,17 +101,22 @@ class TestOWPCA(WidgetTest):
     def test_all_components_continuous(self):
         data = Table("banking-crises.tab")
         # GH-2329 only occurred on TimeVariables when normalize=False
-        self.assertTrue(any(isinstance(a, TimeVariable)
-                            for a in data.domain.attributes))
+        self.assertTrue(
+            any(isinstance(a, TimeVariable) for a in data.domain.attributes)
+        )
 
         self.widget.normalize = False
-        self.widget._update_normalize()     # pylint: disable=protected-access
+        self.widget._update_normalize()  # pylint: disable=protected-access
         self.widget.set_data(data)
 
         components = self.get_output(self.widget.Outputs.components)
-        self.assertTrue(all(type(a) is ContinuousVariable   # pylint: disable=unidiomatic-typecheck
-                            for a in components.domain.attributes),
-                        "Some variables aren't of type ContinuousVariable")
+        self.assertTrue(
+            all(
+                type(a) is ContinuousVariable  # pylint: disable=unidiomatic-typecheck
+                for a in components.domain.attributes
+            ),
+            "Some variables aren't of type ContinuousVariable",
+        )
 
     def test_normalization(self):
         data = Table("iris.tab")

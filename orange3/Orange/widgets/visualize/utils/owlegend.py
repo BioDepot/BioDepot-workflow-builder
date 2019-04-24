@@ -2,8 +2,14 @@
 import numpy as np
 
 from AnyQt.QtWidgets import (
-    QGraphicsWidget, QGraphicsItem, QGraphicsRectItem, QGraphicsEllipseItem,
-    QGraphicsTextItem, QGraphicsLinearLayout, QGraphicsView, QApplication
+    QGraphicsWidget,
+    QGraphicsItem,
+    QGraphicsRectItem,
+    QGraphicsEllipseItem,
+    QGraphicsTextItem,
+    QGraphicsLinearLayout,
+    QGraphicsView,
+    QApplication,
 )
 from AnyQt.QtGui import QColor, QBrush, QPen, QLinearGradient, QFont
 from AnyQt.QtCore import Qt, QPointF, QSizeF, QRectF, QPoint, QSize, QRect
@@ -25,10 +31,10 @@ class Anchorable(QGraphicsWidget):
 
     """
 
-    __corners = ['topLeft', 'topRight', 'bottomLeft', 'bottomRight']
+    __corners = ["topLeft", "topRight", "bottomLeft", "bottomRight"]
     TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT = __corners
 
-    def __init__(self, parent=None, corner='bottomRight', offset=(10, 10)):
+    def __init__(self, parent=None, corner="bottomRight", offset=(10, 10)):
         super().__init__(parent)
 
         self.__corner_str = corner if corner in self.__corners else None
@@ -122,8 +128,10 @@ class Anchorable(QGraphicsWidget):
             return np.sqrt((pt1.x() - pt2.x()) ** 2 + (pt1.y() - pt2.y()) ** 2)
 
         distances = [
-            (distance(getattr(view_box, corner)(),
-                      getattr(legend_box, corner)()), corner)
+            (
+                distance(getattr(view_box, corner)(), getattr(legend_box, corner)()),
+                corner,
+            )
             for corner in self.__corners
         ]
         _, corner = min(distances)
@@ -161,14 +169,13 @@ class Anchorable(QGraphicsWidget):
 
 class AnchorableGraphicsView(QGraphicsView):
     """Subclass when wanting to use Anchorable items in your view."""
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         # Handle scroll bar hiding or showing
-        self.horizontalScrollBar().valueChanged.connect(
-            self.update_anchored_items)
-        self.verticalScrollBar().valueChanged.connect(
-            self.update_anchored_items)
+        self.horizontalScrollBar().valueChanged.connect(self.update_anchored_items)
+        self.verticalScrollBar().valueChanged.connect(self.update_anchored_items)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -199,6 +206,7 @@ class ColorIndicator(QGraphicsWidget):
     """Base class for an item indicator.
 
     Usually the little square or circle in the legend in front of the text."""
+
     pass
 
 
@@ -289,6 +297,7 @@ class LegendItemTitle(QGraphicsWidget):
         This
 
     """
+
     _size_hint = QSizeF(100, 10)
 
     def __init__(self, text, parent, font):
@@ -370,7 +379,7 @@ class LegendGradient(QGraphicsWidget):
         self.__gradient = QLinearGradient()
         num_colors = len(palette)
         for idx, stop in enumerate(palette):
-            self.__gradient.setColorAt(idx * (1. / (num_colors - 1)), stop)
+            self.__gradient.setColorAt(idx * (1.0 / (num_colors - 1)), stop)
 
         # We need to tell the gradient where it's start and stop points are
         self.__gradient.setStart(QPointF(0, 0))
@@ -413,8 +422,7 @@ class ContinuousLegendItem(QGraphicsLinearLayout):
 
     """
 
-    def __init__(self, palette, values, parent, font=None,
-                 orientation=Qt.Vertical):
+    def __init__(self, palette, values, parent, font=None, orientation=Qt.Vertical):
         if orientation == Qt.Vertical:
             super().__init__(Qt.Horizontal)
         else:
@@ -447,7 +455,7 @@ class ContinuousLegendItem(QGraphicsLinearLayout):
     @staticmethod
     def _format_values(values):
         """Get the formatted values to output."""
-        return ['{:.3f}'.format(v) for v in values]
+        return ["{:.3f}".format(v) for v in values]
 
 
 class Legend(Anchorable):
@@ -484,9 +492,17 @@ class Legend(Anchorable):
 
     """
 
-    def __init__(self, parent=None, orientation=Qt.Vertical, domain=None,
-                 items=None, bg_color=QColor(232, 232, 232, 196),
-                 font=None, color_indicator_cls=LegendItemSquare, **kwargs):
+    def __init__(
+        self,
+        parent=None,
+        orientation=Qt.Vertical,
+        domain=None,
+        items=None,
+        bg_color=QColor(232, 232, 232, 196),
+        font=None,
+        color_indicator_cls=LegendItemSquare,
+        **kwargs
+    ):
         super().__init__(parent, **kwargs)
 
         self._layout = None
@@ -501,8 +517,9 @@ class Legend(Anchorable):
         else:
             self.font = font
 
-        self.setFlags(QGraphicsWidget.ItemIsMovable |
-                      QGraphicsItem.ItemIgnoresTransformations)
+        self.setFlags(
+            QGraphicsWidget.ItemIsMovable | QGraphicsItem.ItemIgnoresTransformations
+        )
 
         self._setup_layout()
         if domain is not None:
@@ -598,8 +615,9 @@ class OWDiscreteLegend(Legend):
         class_var = domain.class_var
 
         if not class_var.is_discrete:
-            raise AttributeError('[OWDiscreteLegend] The class var provided '
-                                 'was not discrete.')
+            raise AttributeError(
+                "[OWDiscreteLegend] The class var provided " "was not discrete."
+            )
 
         self.set_items(zip(class_var.values, class_var.colors.tolist()))
 
@@ -610,7 +628,7 @@ class OWDiscreteLegend(Legend):
                 title=class_name,
                 parent=self,
                 color_indicator_cls=self.color_indicator_cls,
-                font=self.font
+                font=self.font,
             )
             self._layout.addItem(legend_item)
 
@@ -627,7 +645,7 @@ class OWContinuousLegend(Legend):
 
     def __init__(self, *args, **kwargs):
         # Variables used in the `set_` methods must be set before calling super
-        self.__range = kwargs.get('range', ())
+        self.__range = kwargs.get("range", ())
 
         super().__init__(*args, **kwargs)
 
@@ -637,8 +655,9 @@ class OWContinuousLegend(Legend):
         class_var = domain.class_var
 
         if not class_var.is_continuous:
-            raise AttributeError('[OWContinuousLegend] The class var provided '
-                                 'was not continuous.')
+            raise AttributeError(
+                "[OWContinuousLegend] The class var provided " "was not continuous."
+            )
 
         # The first and last values must represent the range, the rest should
         # be dummy variables, as they are not shown anywhere
@@ -647,8 +666,7 @@ class OWContinuousLegend(Legend):
         start, end, pass_through_black = class_var.colors
         # If pass through black, push black in between and add index to vals
         if pass_through_black:
-            colors = [self._convert_to_color(c) for c
-                      in [start, '#000000', end]]
+            colors = [self._convert_to_color(c) for c in [start, "#000000", end]]
             values.insert(1, -1)
         else:
             colors = [self._convert_to_color(c) for c in [start, end]]
@@ -663,13 +681,15 @@ class OWContinuousLegend(Legend):
         if self.orientation == Qt.Vertical and vals[0] < vals[len(vals) - 1]:
             colors, vals = list(reversed(colors)), list(reversed(vals))
 
-        self._layout.addItem(ContinuousLegendItem(
-            palette=colors,
-            values=vals,
-            parent=self,
-            font=self.font,
-            orientation=self.orientation
-        ))
+        self._layout.addItem(
+            ContinuousLegendItem(
+                palette=colors,
+                values=vals,
+                parent=self,
+                font=self.font,
+                orientation=self.orientation,
+            )
+        )
 
 
 class OWBinnedContinuousLegend(Legend):

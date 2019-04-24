@@ -47,15 +47,12 @@ class AboutDialog(QDialog):
             version = dist.version
             git_revision = "Unknown"
 
-        text = ABOUT_TEMPLATE.format(version=version,
-                git_revision=git_revision[:7])
+        text = ABOUT_TEMPLATE.format(version=version, git_revision=git_revision[:7])
         # TODO: Also list all known add-on versions.
         text_label = QLabel(text)
         layout.addWidget(text_label, Qt.AlignCenter)
 
-        buttons = QDialogButtonBox(QDialogButtonBox.Close,
-                                   Qt.Horizontal,
-                                   self)
+        buttons = QDialogButtonBox(QDialogButtonBox.Close, Qt.Horizontal, self)
         layout.addWidget(buttons)
         buttons.rejected.connect(self.accept)
         layout.setSizeConstraint(QVBoxLayout.SetFixedSize)

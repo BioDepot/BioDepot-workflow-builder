@@ -102,8 +102,8 @@ class TestOWBoxPlot(WidgetTest, WidgetOutputsTestMixin):
         def select_group(i):
             group_selection = group_list.selectionModel()
             group_selection.setCurrentIndex(
-                group_list.model().index(i),
-                group_selection.ClearAndSelect)
+                group_list.model().index(i), group_selection.ClearAndSelect
+            )
 
         data = self.titanic
         self.send_signal("Data", data)
@@ -114,25 +114,41 @@ class TestOWBoxPlot(WidgetTest, WidgetOutputsTestMixin):
         self.assertTrue(order_check.isEnabled())
 
         order_check.setChecked(False)
-        self.assertEqual(tuple(attributes),
-                         data.domain.class_vars + data.domain.attributes)
+        self.assertEqual(
+            tuple(attributes), data.domain.class_vars + data.domain.attributes
+        )
         order_check.setChecked(True)
-        self.assertEqual([x.name for x in attributes],
-                         ['sex', 'survived', 'age', 'status'])
+        self.assertEqual(
+            [x.name for x in attributes], ["sex", "survived", "age", "status"]
+        )
         select_group(1)  # Class
-        self.assertEqual([x.name for x in attributes],
-                         ['sex', 'status', 'age', 'survived'])
+        self.assertEqual(
+            [x.name for x in attributes], ["sex", "status", "age", "survived"]
+        )
 
         data = self.heart
         self.send_signal("Data", data)
         select_group(1)  # Class
         order_check.setChecked(True)
-        self.assertEqual([x.name for x in attributes],
-                         ['thal', 'major vessels colored', 'chest pain',
-                          'ST by exercise', 'max HR', 'exerc ind ang',
-                          'slope peak exc ST', 'gender', 'age', 'rest SBP',
-                          'rest ECG', 'cholesterol',
-                          'fasting blood sugar > 120', 'diameter narrowing'])
+        self.assertEqual(
+            [x.name for x in attributes],
+            [
+                "thal",
+                "major vessels colored",
+                "chest pain",
+                "ST by exercise",
+                "max HR",
+                "exerc ind ang",
+                "slope peak exc ST",
+                "gender",
+                "age",
+                "rest SBP",
+                "rest ECG",
+                "cholesterol",
+                "fasting blood sugar > 120",
+                "diameter narrowing",
+            ],
+        )
 
     def test_box_order_when_missing_stats(self):
         self.widget.compare = 1
@@ -145,16 +161,47 @@ class TestOWBoxPlot(WidgetTest, WidgetOutputsTestMixin):
         self.send_signal(self.widget.Inputs.data, self.zoo)
         self.assertIsNone(self.get_output(self.widget.Outputs.selected_data))
         self.send_signal(self.widget.Inputs.data, self.data)
-        np.testing.assert_array_equal(self.get_output(self.widget.Outputs.selected_data).X,
-                                      self.data.X[selected_indices])
+        np.testing.assert_array_equal(
+            self.get_output(self.widget.Outputs.selected_data).X,
+            self.data.X[selected_indices],
+        )
 
     def _select_data(self):
-        items = [item for item in self.widget.box_scene.items()
-                 if isinstance(item, FilterGraphicsRectItem)]
+        items = [
+            item
+            for item in self.widget.box_scene.items()
+            if isinstance(item, FilterGraphicsRectItem)
+        ]
         items[0].setSelected(True)
-        return [100, 103, 104, 108, 110, 111, 112, 115, 116,
-                120, 123, 124, 126, 128, 132, 133, 136, 137,
-                139, 140, 141, 143, 144, 145, 146, 147, 148]
+        return [
+            100,
+            103,
+            104,
+            108,
+            110,
+            111,
+            112,
+            115,
+            116,
+            120,
+            123,
+            124,
+            126,
+            128,
+            132,
+            133,
+            136,
+            137,
+            139,
+            140,
+            141,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+        ]
 
     def test_continuous_metas(self):
         domain = self.iris.domain

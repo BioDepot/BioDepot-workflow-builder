@@ -23,7 +23,11 @@ import numpy as np
 from AnyQt.QtCore import Qt, QTimer, QRectF, QSizeF
 from AnyQt.QtGui import QColor, QPen
 from AnyQt.QtWidgets import (
-    QSizePolicy, QGraphicsItem, QGraphicsRectItem, QGraphicsWidget, QStyle
+    QSizePolicy,
+    QGraphicsItem,
+    QGraphicsRectItem,
+    QGraphicsWidget,
+    QStyle,
 )
 
 from Orange.widgets.utils import to_html
@@ -34,8 +38,8 @@ from Orange.widgets.visualize.utils.tree.treeadapter import TreeAdapter
 # z index range, increase if needed
 Z_STEP = 5000000
 
-Square = namedtuple('Square', ['center', 'length', 'angle'])
-Point = namedtuple('Point', ['x', 'y'])
+Square = namedtuple("Square", ["center", "length", "angle"])
+Point = namedtuple("Point", ["x", "y"])
 
 
 class PythagorasTreeViewer(QGraphicsWidget):
@@ -87,8 +91,7 @@ class PythagorasTreeViewer(QGraphicsWidget):
 
     """
 
-    def __init__(self, parent=None, adapter=None, depth_limit=0, padding=0,
-                 **kwargs):
+    def __init__(self, parent=None, adapter=None, depth_limit=0, padding=0, **kwargs):
         super().__init__(parent)
 
         # In case a tree was passed, it will be handled at the end of init
@@ -96,7 +99,7 @@ class PythagorasTreeViewer(QGraphicsWidget):
         self.root = None
 
         self._depth_limit = depth_limit
-        self._interactive = kwargs.get('interactive', True)
+        self._interactive = kwargs.get("interactive", True)
         self._padding = padding
 
         self._square_objects = {}
@@ -111,16 +114,17 @@ class PythagorasTreeViewer(QGraphicsWidget):
         if adapter is not None:
             self.set_tree(
                 adapter,
-                target_class_index=kwargs.get('target_class_index'),
-                weight_adjustment=kwargs.get('weight_adjustment'),
+                target_class_index=kwargs.get("target_class_index"),
+                weight_adjustment=kwargs.get("weight_adjustment"),
             )
             # Since `set_tree` needs to draw the entire tree to be visualized
             # properly, it overrides the `depth_limit` to max. If we specified
             # the depth limit, however, apply that afterwards-
             self.set_depth_limit(depth_limit)
 
-    def set_tree(self, tree_adapter, weight_adjustment=lambda x: x,
-                 target_class_index=0):
+    def set_tree(
+        self, tree_adapter, weight_adjustment=lambda x: x, target_class_index=0
+    ):
         """Pass in a new tree adapter instance and perform updates to canvas.
 
         Parameters
@@ -147,8 +151,7 @@ class PythagorasTreeViewer(QGraphicsWidget):
     def set_size_calc(self, weight_adjustment):
         """Set the weight adjustment on the tree. Redraws the whole tree."""
         # Since we have to redraw the whole tree anyways, just call `set_tree`
-        self.set_tree(self.tree_adapter, weight_adjustment,
-                      self._target_class_index)
+        self.set_tree(self.tree_adapter, weight_adjustment, self._target_class_index)
 
     def set_depth_limit(self, depth):
         """Update the drawing depth limit.
@@ -267,10 +270,14 @@ class PythagorasTreeViewer(QGraphicsWidget):
             if node.label in self._square_objects:
                 self._square_objects[node.label].show()
             else:
-                square_obj = InteractiveSquareGraphicsItem \
-                    if self._interactive else SquareGraphicsItem
+                square_obj = (
+                    InteractiveSquareGraphicsItem
+                    if self._interactive
+                    else SquareGraphicsItem
+                )
                 self._square_objects[node.label] = square_obj(
-                    node, parent=self, zvalue=depth)
+                    node, parent=self, zvalue=depth
+                )
 
     def _depth_was_decreased(self):
         if not self._drawn_nodes:
@@ -294,7 +301,8 @@ class PythagorasTreeViewer(QGraphicsWidget):
 
     def boundingRect(self):
         return self.childrenBoundingRect().adjusted(
-            -self._padding, -self._padding, self._padding, self._padding)
+            -self._padding, -self._padding, self._padding, self._padding
+        )
 
     def sizeHint(self, size_hint, size_constraint=None, *args, **kwargs):
         return self.boundingRect().size() + QSizeF(self._padding, self._padding)
@@ -322,7 +330,7 @@ class SquareGraphicsItem(QGraphicsRectItem):
         self.setTransformOriginPoint(self.boundingRect().center())
         self.setRotation(degrees(self.tree_node.square.angle))
 
-        self.setBrush(kwargs.get('brush', QColor('#297A1F')))
+        self.setBrush(kwargs.get("brush", QColor("#297A1F")))
         # The border should be invariant to scaling
         pen = QPen(QColor(Qt.black))
         pen.setWidthF(0.75)
@@ -330,7 +338,7 @@ class SquareGraphicsItem(QGraphicsRectItem):
         self.setPen(pen)
 
         self.setAcceptHoverEvents(True)
-        self.setZValue(kwargs.get('zvalue', 0))
+        self.setZValue(kwargs.get("zvalue", 0))
         self.z_step = Z_STEP
 
         # calculate the correct z values based on the parent
@@ -338,8 +346,9 @@ class SquareGraphicsItem(QGraphicsRectItem):
             p = self.tree_node.parent
             # override root z step
             num_children = len(p.children)
-            own_index = [1 if c.label == self.tree_node.label else 0
-                         for c in p.children].index(1)
+            own_index = [
+                1 if c.label == self.tree_node.label else 0 for c in p.children
+            ].index(1)
 
             self.z_step = int(p.graphics_item.z_step / num_children)
             base_z = p.graphics_item.zValue()
@@ -380,9 +389,9 @@ class InteractiveSquareGraphicsItem(SquareGraphicsItem):
 
     timer = QTimer()
 
-    MAX_OPACITY = 1.
-    SELECTION_OPACITY = .5
-    HOVER_OPACITY = .1
+    MAX_OPACITY = 1.0
+    SELECTION_OPACITY = 0.5
+    HOVER_OPACITY = 0.1
 
     def __init__(self, tree_node, parent=None, **kwargs):
         super().__init__(tree_node, parent, **kwargs)
@@ -423,7 +432,6 @@ class InteractiveSquareGraphicsItem(SquareGraphicsItem):
         self._propagate_z_values(self, fnc, other_fnc)
 
     def hoverLeaveEvent(self, event):
-
         def fnc(graphics_item):
             # No need to set opacity in this branch since it was just selected
             # and had the max value
@@ -440,7 +448,8 @@ class InteractiveSquareGraphicsItem(SquareGraphicsItem):
             graphics_item.setOpacity(opacity)
 
         self.timer.timeout.connect(
-            lambda: self._propagate_z_values(self, fnc, other_fnc))
+            lambda: self._propagate_z_values(self, fnc, other_fnc)
+        )
 
         self.timer.start(250)
 
@@ -596,12 +605,14 @@ class TreeNode(metaclass=ABCMeta):
         if rules:
             if isinstance(rules[0], Rule):
                 sorted_rules = sorted(rules[:-1], key=lambda rule: rule.attr_name)
-                return '<br>'.join(str(rule) for rule in sorted_rules) + \
-                       '<br><b>%s</b>' % rules[-1]
+                return (
+                    "<br>".join(str(rule) for rule in sorted_rules)
+                    + "<br><b>%s</b>" % rules[-1]
+                )
             else:
-                return '<br>'.join(to_html(rule) for rule in rules)
+                return "<br>".join(to_html(rule) for rule in rules)
         else:
-            return ''
+            return ""
 
 
 class DiscreteTreeNode(TreeNode):
@@ -623,7 +634,9 @@ class DiscreteTreeNode(TreeNode):
 
         if self.target_class_index:
             p = distribution[self.target_class_index - 1] / total
-            color = self.color_palette[self.target_class_index - 1].lighter(200 - 100 * p)
+            color = self.color_palette[self.target_class_index - 1].lighter(
+                200 - 100 * p
+            )
         else:
             modus = np.argmax(distribution)
             p = distribution[modus] / (total or 1)
@@ -636,27 +649,30 @@ class DiscreteTreeNode(TreeNode):
         total = int(np.sum(distribution))
         if self.target_class_index:
             samples = distribution[self.target_class_index - 1]
-            text = ''
+            text = ""
         else:
             modus = np.argmax(distribution)
             samples = distribution[modus]
-            text = self.tree.domain.class_vars[0].values[modus] + \
-                '<br>'
+            text = self.tree.domain.class_vars[0].values[modus] + "<br>"
         ratio = samples / np.sum(distribution)
 
         rules_str = self._rules_str()
         splitting_attr = self.tree.attribute(self.label)
 
-        return '<p>' \
-            + text \
-            + '{}/{} samples ({:2.3f}%)'.format(
-                int(samples), total, ratio * 100) \
-            + '<hr>' \
-            + ('Split by ' + splitting_attr.name
-               if not self.tree.is_leaf(self.label) else '') \
-            + ('<br><br>' if rules_str and not self.tree.is_leaf(self.label) else '') \
-            + rules_str \
-            + '</p>'
+        return (
+            "<p>"
+            + text
+            + "{}/{} samples ({:2.3f}%)".format(int(samples), total, ratio * 100)
+            + "<hr>"
+            + (
+                "Split by " + splitting_attr.name
+                if not self.tree.is_leaf(self.label)
+                else ""
+            )
+            + ("<br><br>" if rules_str and not self.tree.is_leaf(self.label) else "")
+            + rules_str
+            + "</p>"
+        )
 
 
 class ContinuousTreeNode(TreeNode):
@@ -673,9 +689,9 @@ class ContinuousTreeNode(TreeNode):
 
     COLOR_NONE, COLOR_MEAN, COLOR_STD = range(3)
     COLOR_METHODS = {
-        'None': COLOR_NONE,
-        'Mean': COLOR_MEAN,
-        'Standard deviation': COLOR_STD,
+        "None": COLOR_NONE,
+        "Mean": COLOR_MEAN,
+        "Standard deviation": COLOR_STD,
     }
 
     @property
@@ -717,15 +733,20 @@ class ContinuousTreeNode(TreeNode):
         rules_str = self._rules_str()
         splitting_attr = self.tree.attribute(self.label)
 
-        return '<p>Mean: {:2.3f}'.format(mean) \
-            + '<br>Standard deviation: {:2.3f}'.format(std) \
-            + '<br>{} samples'.format(num_samples) \
-            + '<hr>' \
-            + ('Split by ' + splitting_attr.name
-               if not self.tree.is_leaf(self.label) else '') \
-            + ('<br><br>' if rules_str and not self.tree.is_leaf(self.label) else '') \
-            + rules_str \
-            + '</p>'
+        return (
+            "<p>Mean: {:2.3f}".format(mean)
+            + "<br>Standard deviation: {:2.3f}".format(std)
+            + "<br>{} samples".format(num_samples)
+            + "<hr>"
+            + (
+                "Split by " + splitting_attr.name
+                if not self.tree.is_leaf(self.label)
+                else ""
+            )
+            + ("<br><br>" if rules_str and not self.tree.is_leaf(self.label) else "")
+            + rules_str
+            + "</p>"
+        )
 
 
 class PythagorasTree:
@@ -773,8 +794,9 @@ class PythagorasTree:
             self._slopes.clear()
 
         # Calculate the adjusted child weights for the node children
-        child_weights = [self.adjust_weight(tree.weight(c))
-                         for c in tree.children(node)]
+        child_weights = [
+            self.adjust_weight(tree.weight(c)) for c in tree.children(node)
+        ]
         total_weight = sum(child_weights)
         normalized_child_weights = [cw / total_weight for cw in child_weights]
 
@@ -818,9 +840,7 @@ class PythagorasTree:
         # the sum of the previous anlges
         prev_angles = sum(self._slopes[parent_square])
 
-        center = self._compute_center(
-            parent_square, length, alpha, prev_angles
-        )
+        center = self._compute_center(parent_square, length, alpha, prev_angles)
         # the angle of the square is dependent on the parent, the current
         # angle and the previous angles. Subtract PI/2 so it starts drawing at
         # 0rads.
@@ -857,12 +877,12 @@ class PythagorasTree:
         """
         parent_center, parent_length, parent_angle = initial_square
         # get the point on the square side that will be the rotation origin
-        t0 = self._get_point_on_square_edge(
-            parent_center, parent_length, parent_angle)
+        t0 = self._get_point_on_square_edge(parent_center, parent_length, parent_angle)
         # get the edge point that we will rotate around t0
         square_diagonal_length = sqrt(2 * parent_length ** 2)
         edge = self._get_point_on_square_edge(
-            parent_center, square_diagonal_length, parent_angle - pi / 4)
+            parent_center, square_diagonal_length, parent_angle - pi / 4
+        )
         # if the new square is not the first child, we need to rotate the edge
         if base_angle != 0:
             edge = self._rotate_point(edge, t0, base_angle)
@@ -899,7 +919,7 @@ class PythagorasTree:
         temp = Point(point.x - around.x, point.y - around.y)
         temp = Point(
             temp.x * cos(alpha) - temp.y * sin(alpha),
-            temp.x * sin(alpha) + temp.y * cos(alpha)
+            temp.x * sin(alpha) + temp.y * cos(alpha),
         )
         return Point(temp.x + around.x, temp.y + around.y)
 
@@ -923,6 +943,5 @@ class PythagorasTree:
 
         """
         return Point(
-            center.x + length / 2 * cos(angle),
-            center.y + length / 2 * sin(angle)
+            center.x + length / 2 * cos(angle), center.y + length / 2 * sin(angle)
         )

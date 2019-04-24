@@ -9,18 +9,40 @@ import numpy as np
 import scipy.sparse as sp
 
 from AnyQt.QtWidgets import (
-    QSizePolicy, QGraphicsScene, QGraphicsView, QGraphicsRectItem,
-    QGraphicsWidget, QGraphicsSimpleTextItem, QGraphicsPixmapItem,
-    QGraphicsGridLayout, QGraphicsLinearLayout, QGraphicsLayoutItem,
-    QFormLayout, QApplication
+    QSizePolicy,
+    QGraphicsScene,
+    QGraphicsView,
+    QGraphicsRectItem,
+    QGraphicsWidget,
+    QGraphicsSimpleTextItem,
+    QGraphicsPixmapItem,
+    QGraphicsGridLayout,
+    QGraphicsLinearLayout,
+    QGraphicsLayoutItem,
+    QFormLayout,
+    QApplication,
 )
 from AnyQt.QtGui import (
-    QFontMetrics, QPen, QPixmap, QColor, QLinearGradient, QPainter,
-    QTransform, QIcon, QBrush,
-    QStandardItemModel, QStandardItem,
+    QFontMetrics,
+    QPen,
+    QPixmap,
+    QColor,
+    QLinearGradient,
+    QPainter,
+    QTransform,
+    QIcon,
+    QBrush,
+    QStandardItemModel,
+    QStandardItem,
 )
 from AnyQt.QtCore import (
-    Qt, QSize, QPointF, QSizeF, QRectF, QObject, QEvent,
+    Qt,
+    QSize,
+    QPointF,
+    QSizeF,
+    QRectF,
+    QObject,
+    QEvent,
     pyqtSignal as Signal,
 )
 import pyqtgraph as pg
@@ -31,11 +53,12 @@ import Orange.distance
 
 from Orange.clustering import hierarchical
 from Orange.widgets.utils import colorbrewer
-from Orange.widgets.utils.annotated_data import (create_annotated_table,
-                                                 ANNOTATED_DATA_SIGNAL_NAME)
+from Orange.widgets.utils.annotated_data import (
+    create_annotated_table,
+    ANNOTATED_DATA_SIGNAL_NAME,
+)
 from Orange.widgets import widget, gui, settings
-from Orange.widgets.unsupervised.owhierarchicalclustering import \
-    DendrogramWidget
+from Orange.widgets.unsupervised.owhierarchicalclustering import DendrogramWidget
 from Orange.widgets.widget import Msg, Input, Output
 
 
@@ -46,8 +69,7 @@ def split_domain(domain, split_label):
     for attr in domain.attributes:
         groups[attr.attributes.get(split_label)].append(attr)
 
-    attr_values = [attr.attributes.get(split_label)
-                   for attr in domain.attributes]
+    attr_values = [attr.attributes.get(split_label) for attr in domain.attributes]
 
     domains = []
     for value, attrs in groups.items():
@@ -110,6 +132,7 @@ def barycenter(a, axis=0):
 
     return np.average(X, weights=weights, axis=axis)
 
+
 from Orange.clustering import kmeans
 
 
@@ -136,8 +159,11 @@ def candidate_split_labels(data):
     candidates = []
     for key, groups in by_keys.items():
         count = len(groups[0])
-        if all(len(attrs) == count for attrs in groups) and \
-                len(groups) > 1 and count > 1:
+        if (
+            all(len(attrs) == count for attrs in groups)
+            and len(groups) > 1
+            and count > 1
+        ):
             candidates.append(key)
 
     return candidates
@@ -183,10 +209,15 @@ def color_palette_model(palettes, iconsize=QSize(64, 16)):
     return model
 
 
-def color_palette_table(colors, samples=255,
-                        threshold_low=0.0, threshold_high=1.0,
-                        underflow=None, overflow=None,
-                        gamma=None):
+def color_palette_table(
+    colors,
+    samples=255,
+    threshold_low=0.0,
+    threshold_high=1.0,
+    underflow=None,
+    overflow=None,
+    gamma=None,
+):
     N = len(colors)
     colors = np.array(colors, dtype=np.ubyte)
     low, high = threshold_low * 255, threshold_high * 255
@@ -200,23 +231,38 @@ def color_palette_table(colors, samples=255,
         overflow = [None, None, None]
 
     if gamma is None or gamma < 0.0001:
-        r = np.interp(space, points, colors[:, 0],
-                      left=underflow[0], right=overflow[0])
-        g = np.interp(space, points, colors[:, 1],
-                      left=underflow[1], right=overflow[1])
-        b = np.interp(space, points, colors[:, 2],
-                      left=underflow[2], right=overflow[2])
+        r = np.interp(space, points, colors[:, 0], left=underflow[0], right=overflow[0])
+        g = np.interp(space, points, colors[:, 1], left=underflow[1], right=overflow[1])
+        b = np.interp(space, points, colors[:, 2], left=underflow[2], right=overflow[2])
     else:
-        r = interp_exp(space, points, colors[:, 0], gamma=gamma,
-                       left=underflow[0], right=overflow[0])
-        g = interp_exp(space, points, colors[:, 1], gamma=gamma,
-                       left=underflow[0], right=overflow[0])
-        b = interp_exp(space, points, colors[:, 2], gamma=gamma,
-                       left=underflow[0], right=overflow[0])
+        r = interp_exp(
+            space,
+            points,
+            colors[:, 0],
+            gamma=gamma,
+            left=underflow[0],
+            right=overflow[0],
+        )
+        g = interp_exp(
+            space,
+            points,
+            colors[:, 1],
+            gamma=gamma,
+            left=underflow[0],
+            right=overflow[0],
+        )
+        b = interp_exp(
+            space,
+            points,
+            colors[:, 2],
+            gamma=gamma,
+            left=underflow[0],
+            right=overflow[0],
+        )
     return np.c_[r, g, b]
 
 
-def interp_exp(x, xp, fp, gamma=0.0, left=None, right=None,):
+def interp_exp(x, xp, fp, gamma=0.0, left=None, right=None):
     assert np.all(np.diff(xp) > 0)
     x = np.asanyarray(x)
     xp = np.asanyarray(xp)
@@ -247,7 +293,7 @@ def interp_exp(x, xp, fp, gamma=0.0, left=None, right=None,):
         if gamma < np.finfo(float).eps:
             return x
         else:
-            return (np.exp(gamma * x) - 1) / (np.exp(gamma) - 1.)
+            return (np.exp(gamma * x) - 1) / (np.exp(gamma) - 1.0)
 
     def gamma_fun(x, gamma):
         out = np.array(x)
@@ -263,6 +309,7 @@ def interp_exp(x, xp, fp, gamma=0.0, left=None, right=None,):
     f[between] = (1 - m) * y0 + m * y1
 
     return f
+
 
 # TODO:
 #     * Richer Tool Tips
@@ -281,12 +328,7 @@ def interp_exp(x, xp, fp, gamma=0.0, left=None, right=None,):
 
 
 RowPart = namedtuple(
-    "RowPart",
-    ["title",
-     "indices",
-     "sortindices",
-     "cluster",
-     "cluster_ordered"]
+    "RowPart", ["title", "indices", "sortindices", "cluster", "cluster_ordered"]
 )
 
 
@@ -305,14 +347,18 @@ class RowPart(RowPart):
     cluster : hierarchical.Tree optional
     cluster_ordered : hierarchical.Tree optional
     """
-    def __new__(cls, title, indices, sortindices, cluster=None,
-                cluster_ordered=None):
+
+    def __new__(cls, title, indices, sortindices, cluster=None, cluster_ordered=None):
         if isinstance(indices, slice):
-            assert indices.start is not None and indices.stop is not None \
-                   and indices.start <= indices.stop \
-                   and (indices.step == 1 or indices.step is None)
-        return super().__new__(cls, title, indices, sortindices,
-                               cluster, cluster_ordered)
+            assert (
+                indices.start is not None
+                and indices.stop is not None
+                and indices.start <= indices.stop
+                and (indices.step == 1 or indices.step is None)
+            )
+        return super().__new__(
+            cls, title, indices, sortindices, cluster, cluster_ordered
+        )
 
     @property
     def is_empty(self):
@@ -328,12 +374,13 @@ class RowPart(RowPart):
 
 ColumnPart = namedtuple(
     "ColumnPart",
-    ["title",    #: str
-     "indices",  #: indices
-     "domain",   #: list of Variable
-     "cluster",  #: hierarchical.Tree option
-     "cluster_ordered",  #: hierarchical.Tree option
-    ]
+    [
+        "title",  #: str
+        "indices",  #: indices
+        "domain",  #: list of Variable
+        "cluster",  #: hierarchical.Tree option
+        "cluster_ordered",  #: hierarchical.Tree option
+    ],
 )
 
 
@@ -352,10 +399,9 @@ class ColumnPart(ColumnPart):
     cluster : hierarchical.Tree optional
     cluster_ordered : hierarchical.Tree optional
     """
-    def __new__(cls, title, indices, domain, cluster=None,
-                cluster_ordered=None):
-        return super().__new__(cls, title, indices, domain, cluster,
-                               cluster_ordered)
+
+    def __new__(cls, title, indices, domain, cluster=None, cluster_ordered=None):
+        return super().__new__(cls, title, indices, domain, cluster, cluster_ordered)
 
     @property
     def cluster_ord(self):
@@ -364,21 +410,21 @@ class ColumnPart(ColumnPart):
 
 Parts = namedtuple(
     "Parts",
-    ["rows",     #: A list of RowPart descriptors
-     "columns",  #: A list of ColumnPart descriptors
-     "span",     #: (min, max) global data range
-    ]
+    [
+        "rows",  #: A list of RowPart descriptors
+        "columns",  #: A list of ColumnPart descriptors
+        "span",  #: (min, max) global data range
+    ],
 )
 
 Parts.levels = property(lambda self: self.span)
 
 
-_color_palettes = (sorted(colorbrewer.colorSchemes["sequential"].items()) +
-                   [("Blue-Yellow", {2: [(0, 0, 255), (255, 255, 0)]}),
-                    ("Green-Black-Red", {3: [(0, 255, 0), (0, 0, 0),
-                                             (255, 0, 0)]})])
-_default_palette_index = \
-    [name for name, _, in _color_palettes].index("Blue-Yellow")
+_color_palettes = sorted(colorbrewer.colorSchemes["sequential"].items()) + [
+    ("Blue-Yellow", {2: [(0, 0, 255), (255, 255, 0)]}),
+    ("Green-Black-Red", {3: [(0, 255, 0), (0, 0, 0), (255, 0, 0)]}),
+]
+_default_palette_index = [name for name, _, in _color_palettes].index("Blue-Yellow")
 
 
 class OWHeatMap(widget.OWWidget):
@@ -439,8 +485,7 @@ class OWHeatMap(widget.OWWidget):
         no_continuous = Msg("No numeric features")
         not_enough_features = Msg("Not enough features for column clustering")
         not_enough_instances = Msg("Not enough instances for clustering")
-        not_enough_instances_k_means = Msg(
-            "Not enough instances for k-means merging")
+        not_enough_instances_k_means = Msg("Not enough instances for k-means merging")
         not_enough_memory = Msg("Not enough memory to show this data")
 
     def __init__(self):
@@ -469,7 +514,7 @@ class OWHeatMap(widget.OWWidget):
         #: the indices which merge the input_data into the heatmap row i
         self.merge_indices = None
 
-        self.annotation_vars = ['(None)']
+        self.annotation_vars = ["(None)"]
         self.__rows_cache = {}
         self.__columns_cache = {}
 
@@ -492,21 +537,44 @@ class OWHeatMap(widget.OWWidget):
         form = QFormLayout(
             formAlignment=Qt.AlignLeft,
             labelAlignment=Qt.AlignLeft,
-            fieldGrowthPolicy=QFormLayout.AllNonFixedFieldsGrow
+            fieldGrowthPolicy=QFormLayout.AllNonFixedFieldsGrow,
         )
 
         lowslider = gui.hSlider(
-            colorbox, self, "threshold_low", minValue=0.0, maxValue=1.0,
-            step=0.05, ticks=True, intOnly=False,
-            createLabel=False, callback=self.update_lowslider)
+            colorbox,
+            self,
+            "threshold_low",
+            minValue=0.0,
+            maxValue=1.0,
+            step=0.05,
+            ticks=True,
+            intOnly=False,
+            createLabel=False,
+            callback=self.update_lowslider,
+        )
         highslider = gui.hSlider(
-            colorbox, self, "threshold_high", minValue=0.0, maxValue=1.0,
-            step=0.05, ticks=True, intOnly=False,
-            createLabel=False, callback=self.update_highslider)
+            colorbox,
+            self,
+            "threshold_high",
+            minValue=0.0,
+            maxValue=1.0,
+            step=0.05,
+            ticks=True,
+            intOnly=False,
+            createLabel=False,
+            callback=self.update_highslider,
+        )
         gammaslider = gui.hSlider(
-            colorbox, self, "gamma", minValue=0.0, maxValue=20.0,
-            step=1.0, ticks=True, intOnly=False,
-            createLabel=False, callback=self.update_color_schema
+            colorbox,
+            self,
+            "gamma",
+            minValue=0.0,
+            maxValue=20.0,
+            step=1.0,
+            ticks=True,
+            intOnly=False,
+            createLabel=False,
+            callback=self.update_color_schema,
         )
 
         form.addRow("Low:", lowslider)
@@ -515,63 +583,102 @@ class OWHeatMap(widget.OWWidget):
 
         colorbox.layout().addLayout(form)
 
-        mergebox = gui.vBox(self.controlArea, "Merge",)
-        gui.checkBox(mergebox, self, "merge_kmeans", "Merge by k-means",
-                     callback=self.update_sorting_examples)
+        mergebox = gui.vBox(self.controlArea, "Merge")
+        gui.checkBox(
+            mergebox,
+            self,
+            "merge_kmeans",
+            "Merge by k-means",
+            callback=self.update_sorting_examples,
+        )
         ibox = gui.indentedBox(mergebox)
-        gui.spin(ibox, self, "merge_kmeans_k", minv=5, maxv=500,
-                 label="Clusters:", keyboardTracking=False,
-                 callbackOnReturn=True, callback=self.update_merge)
+        gui.spin(
+            ibox,
+            self,
+            "merge_kmeans_k",
+            minv=5,
+            maxv=500,
+            label="Clusters:",
+            keyboardTracking=False,
+            callbackOnReturn=True,
+            callback=self.update_merge,
+        )
 
         cluster_box = gui.vBox(self.controlArea, "Cluster")
         self.col_check = gui.checkBox(
-            cluster_box, self, "col_clustering", "Columns",
-            callback=self.update_clustering_examples)
+            cluster_box,
+            self,
+            "col_clustering",
+            "Columns",
+            callback=self.update_clustering_examples,
+        )
         self.row_check = gui.checkBox(
-            cluster_box, self, "row_clustering", "Rows",
-            callback=self.update_clustering_examples)
+            cluster_box,
+            self,
+            "row_clustering",
+            "Rows",
+            callback=self.update_clustering_examples,
+        )
 
-        box = gui.vBox(self.controlArea, 'Annotation && Legends')
+        box = gui.vBox(self.controlArea, "Annotation && Legends")
 
-        gui.checkBox(box, self, 'legend', 'Show legend',
-                     callback=self.update_legend)
+        gui.checkBox(box, self, "legend", "Show legend", callback=self.update_legend)
 
-        gui.checkBox(box, self, 'averages', 'Stripes with averages',
-                     callback=self.update_averages_stripe)
+        gui.checkBox(
+            box,
+            self,
+            "averages",
+            "Stripes with averages",
+            callback=self.update_averages_stripe,
+        )
 
         annotbox = gui.vBox(box, "Row Annotations", addSpace=False)
         annotbox.setFlat(True)
         self.annotations_cb = gui.comboBox(
-            annotbox, self, "annotation_index", contentsLength=12,
-            items=self.annotation_vars, callback=self.update_annotations)
+            annotbox,
+            self,
+            "annotation_index",
+            contentsLength=12,
+            items=self.annotation_vars,
+            callback=self.update_annotations,
+        )
 
         posbox = gui.vBox(box, "Column Labels Position", addSpace=False)
         posbox.setFlat(True)
 
         gui.comboBox(
-            posbox, self, "column_label_pos",
+            posbox,
+            self,
+            "column_label_pos",
             items=["None", "Top", "Bottom", "Top and Bottom"],
-            callback=self.update_column_annotations)
+            callback=self.update_column_annotations,
+        )
 
-        gui.checkBox(self.controlArea, self, "keep_aspect",
-                     "Keep aspect ratio", box="Resize",
-                     callback=self.__aspect_mode_changed)
+        gui.checkBox(
+            self.controlArea,
+            self,
+            "keep_aspect",
+            "Keep aspect ratio",
+            box="Resize",
+            callback=self.__aspect_mode_changed,
+        )
 
         gui.rubber(self.controlArea)
-        gui.auto_commit(self.controlArea,
-                        self,
-                        "auto_commit",
-                        "Send Selection",
-                        "Send Automatically"
-                       )
+        gui.auto_commit(
+            self.controlArea,
+            self,
+            "auto_commit",
+            "Send Selection",
+            "Send Automatically",
+        )
 
         # Scene with heatmap
         self.heatmap_scene = self.scene = HeatmapScene(parent=self)
         self.selection_manager = HeatmapSelectionManager(self)
         self.selection_manager.selection_changed.connect(
-            self.__update_selection_geometry)
-        self.selection_manager.selection_finished.connect(
-            self.on_selection_finished)
+            self.__update_selection_geometry
+        )
+        self.selection_manager.selection_finished.connect(self.on_selection_finished)
         self.heatmap_scene.set_selection_manager(self.selection_manager)
 
         item = QGraphicsRectItem(0, 0, 10, 10, None)
@@ -610,9 +717,11 @@ class OWHeatMap(widget.OWWidget):
         else:
             _, colors = max(data.items())
             return color_palette_table(
-                colors, threshold_low=self.threshold_low,
+                colors,
+                threshold_low=self.threshold_low,
                 threshold_high=self.threshold_high,
-                gamma=self.gamma)
+                gamma=self.gamma,
+            )
 
     def clear(self):
         self.data = None
@@ -621,8 +730,8 @@ class OWHeatMap(widget.OWWidget):
         self.kmeans_model = None
         self.merge_indices = None
         self.annotations_cb.clear()
-        self.annotations_cb.addItem('(None)')
-        self.annotation_vars = ['(None)']
+        self.annotations_cb.addItem("(None)")
+        self.annotation_vars = ["(None)"]
         self.clear_scene()
         self.selected_rows = []
         self.__columns_cache.clear()
@@ -678,28 +787,31 @@ class OWHeatMap(widget.OWWidget):
             input_data = data = None
 
         # Data contains some discrete attributes which must be filtered
-        if data is not None and \
-                any(var.is_discrete for var in data.domain.attributes):
+        if data is not None and any(var.is_discrete for var in data.domain.attributes):
             ndisc = sum(var.is_discrete for var in data.domain.attributes)
             data = data.transform(
-                Domain([var for var in data.domain.attributes
-                        if var.is_continuous],
-                       data.domain.class_vars,
-                       data.domain.metas))
+                Domain(
+                    [var for var in data.domain.attributes if var.is_continuous],
+                    data.domain.class_vars,
+                    data.domain.metas,
+                )
+            )
             if not data.domain.attributes:
                 self.Error.no_continuous()
                 input_data = data = None
             else:
-                self.Information.discrete_ignored(
-                    ndisc, "s" if ndisc > 1 else "")
+                self.Information.discrete_ignored(ndisc, "s" if ndisc > 1 else "")
 
         self.data = data
         self.input_data = input_data
 
         if data is not None:
             variables = self.data.domain.class_vars + self.data.domain.metas
-            variables = [var for var in variables
-                         if isinstance(var, (DiscreteVariable, StringVariable))]
+            variables = [
+                var
+                for var in variables
+                if isinstance(var, (DiscreteVariable, StringVariable))
+            ]
             self.annotation_vars.extend(variables)
 
             for var in variables:
@@ -716,15 +828,13 @@ class OWHeatMap(widget.OWWidget):
             self.clear_messages()
             if self.col_clustering and len(self.data.domain.attributes) < 2:
                 self.Error.not_enough_features()
-            elif (self.col_clustering or self.row_clustering) and \
-                    len(self.data) < 2:
+            elif (self.col_clustering or self.row_clustering) and len(self.data) < 2:
                 self.Error.not_enough_instances()
             elif self.merge_kmeans and len(self.data) < 3:
                 self.Error.not_enough_instances_k_means()
             else:
                 self.construct_heatmaps(self.data)
-                self.construct_heatmaps_scene(
-                    self.heatmapparts, self.effective_data)
+                self.construct_heatmaps_scene(self.heatmapparts, self.effective_data)
                 self.selected_rows = []
         else:
             self.clear()
@@ -743,29 +853,56 @@ class OWHeatMap(widget.OWWidget):
         if group_var is not None:
             assert group_var.is_discrete
             _col_data, _ = data.get_column_view(group_var)
-            row_indices = [np.flatnonzero(_col_data == i)
-                           for i in range(len(group_var.values))]
-            row_groups = [RowPart(title=name, indices=ind, sortindices=None,
-                                  cluster=None, cluster_ordered=None)
-                          for name, ind in zip(group_var.values, row_indices)]
+            row_indices = [
+                np.flatnonzero(_col_data == i) for i in range(len(group_var.values))
+            ]
+            row_groups = [
+                RowPart(
+                    title=name,
+                    indices=ind,
+                    sortindices=None,
+                    cluster=None,
+                    cluster_ordered=None,
+                )
+                for name, ind in zip(group_var.values, row_indices)
+            ]
         else:
-            row_groups = [RowPart(title=None, indices=slice(0, len(data)),
-                                  sortindices=None,
-                                  cluster=None, cluster_ordered=None)]
+            row_groups = [
+                RowPart(
+                    title=None,
+                    indices=slice(0, len(data)),
+                    sortindices=None,
+                    cluster=None,
+                    cluster_ordered=None,
+                )
+            ]
 
         if group_key is not None:
             col_groups = split_domain(data.domain, group_key)
             assert len(col_groups) > 0
-            col_indices = [np.array([data.domain.index(var) for var in group])
-                           for _, group in col_groups]
-            col_groups = [ColumnPart(title=name, domain=d, indices=ind,
-                                     cluster=None, cluster_ordered=None)
-                          for (name, d), ind in zip(col_groups, col_indices)]
+            col_indices = [
+                np.array([data.domain.index(var) for var in group])
+                for _, group in col_groups
+            ]
+            col_groups = [
+                ColumnPart(
+                    title=name,
+                    domain=d,
+                    indices=ind,
+                    cluster=None,
+                    cluster_ordered=None,
+                )
+                for (name, d), ind in zip(col_groups, col_indices)
+            ]
         else:
             col_groups = [
                 ColumnPart(
-                    title=None, indices=slice(0, len(data.domain.attributes)),
-                    domain=data.domain, cluster=None, cluster_ordered=None)
+                    title=None,
+                    indices=slice(0, len(data.domain.attributes)),
+                    domain=data.domain,
+                    cluster=None,
+                    cluster_ordered=None,
+                )
             ]
 
         minv, maxv = np.nanmin(data.X), np.nanmax(data.X)
@@ -796,10 +933,12 @@ class OWHeatMap(widget.OWWidget):
                 if cluster_ord is None:
                     with self.progressBar():
                         cluster_ord = hierarchical.optimal_leaf_ordering(
-                            cluster, matrix,
-                            progress_callback=self.progressBarSet)
+                            cluster, matrix, progress_callback=self.progressBarSet
+                        )
 
-            row_groups.append(row._replace(cluster=cluster, cluster_ordered=cluster_ord))
+            row_groups.append(
+                row._replace(cluster=cluster, cluster_ordered=cluster_ord)
+            )
 
         return parts._replace(columns=parts.columns, rows=row_groups)
 
@@ -830,10 +969,13 @@ class OWHeatMap(widget.OWWidget):
         if cluster_ord is None:
             with self.progressBar():
                 cluster_ord = hierarchical.optimal_leaf_ordering(
-                    cluster, matrix, progress_callback=self.progressBarSet)
+                    cluster, matrix, progress_callback=self.progressBarSet
+                )
 
-        col_groups = [col._replace(cluster=cluster, cluster_ordered=cluster_ord)
-                      for col in parts.columns]
+        col_groups = [
+            col._replace(cluster=cluster, cluster_ordered=cluster_ord)
+            for col in parts.columns
+        ]
         return parts._replace(columns=col_groups, rows=parts.rows)
 
     def construct_heatmaps(self, data, split_label=None):
@@ -853,18 +995,25 @@ class OWHeatMap(widget.OWWidget):
             if self.kmeans_model is None:
                 effective_data = self.input_data.transform(
                     Orange.data.Domain(
-                        [var for var in self.input_data.domain.attributes
-                         if var.is_continuous],
+                        [
+                            var
+                            for var in self.input_data.domain.attributes
+                            if var.is_continuous
+                        ],
                         self.input_data.domain.class_vars,
-                        self.input_data.domain.metas))
+                        self.input_data.domain.metas,
+                    )
+                )
                 nclust = min(self.merge_kmeans_k, len(effective_data) - 1)
                 self.kmeans_model = kmeans_compress(effective_data, k=nclust)
                 effective_data.domain = self.kmeans_model.pre_domain
-                self.merge_indices = [np.flatnonzero(self.kmeans_model.labels_ == ind)
-                                      for ind in range(nclust)]
+                self.merge_indices = [
+                    np.flatnonzero(self.kmeans_model.labels_ == ind)
+                    for ind in range(nclust)
+                ]
                 effective_data = Orange.data.Table(
                     Orange.data.Domain(effective_data.domain.attributes),
-                    self.kmeans_model.centroids
+                    self.kmeans_model.centroids,
                 )
             else:
                 effective_data = self.effective_data
@@ -882,22 +1031,21 @@ class OWHeatMap(widget.OWWidget):
         parts = self._make_parts(effective_data, group_var, group_label)
         # Restore/update the row/columns items descriptions from cache if
         # available
-        rows_cache_key = (group_var,
-                          self.merge_kmeans_k if self.merge_kmeans else None)
+        rows_cache_key = (group_var, self.merge_kmeans_k if self.merge_kmeans else None)
         if rows_cache_key in self.__rows_cache:
             parts = parts._replace(rows=self.__rows_cache[rows_cache_key].rows)
 
         if group_label in self.__columns_cache:
-            parts = parts._replace(
-                columns=self.__columns_cache[group_label].columns)
+            parts = parts._replace(columns=self.__columns_cache[group_label].columns)
 
         if self.row_clustering:
             assert len(effective_data) <= OWHeatMap._MaxOrderedClustering
             parts = self.cluster_rows(effective_data, parts)
 
         if self.col_clustering:
-            assert len(effective_data.domain.attributes) <= \
-                   OWHeatMap._MaxOrderedClustering
+            assert (
+                len(effective_data.domain.attributes) <= OWHeatMap._MaxOrderedClustering
+            )
             parts = self.cluster_columns(effective_data, parts)
 
         # Cache the updated parts
@@ -909,13 +1057,18 @@ class OWHeatMap(widget.OWWidget):
     def construct_heatmaps_scene(self, parts, data):
         def select_row(item):
             return namespace(
-                title=item.title, indices=item.indices,
-                cluster=item.cluster_ord if self.row_clustering else None)
+                title=item.title,
+                indices=item.indices,
+                cluster=item.cluster_ord if self.row_clustering else None,
+            )
 
         def select_col(item):
             return namespace(
-                title=item.title, indices=item.indices, domain=item.domain,
-                cluster=item.cluster_ord if self.col_clustering else None)
+                title=item.title,
+                indices=item.indices,
+                domain=item.domain,
+                cluster=item.cluster_ord if self.col_clustering else None,
+            )
 
         rows = [select_row(rowitem) for rowitem in parts.rows]
         cols = [select_col(colitem) for colitem in parts.columns]
@@ -970,17 +1123,16 @@ class OWHeatMap(widget.OWWidget):
                 dendrogram = DendrogramWidget(
                     parent=widget,
                     selectionMode=DendrogramWidget.NoSelection,
-                    hoverHighlightEnabled=True)
+                    hoverHighlightEnabled=True,
+                )
                 dendrogram.set_root(rowitem.cluster)
                 dendrogram.setMaximumWidth(100)
                 dendrogram.setMinimumWidth(100)
                 # Ignore dendrogram vertical size hint (heatmap's size
                 # should define the  row's vertical size).
-                dendrogram.setSizePolicy(
-                    QSizePolicy.Expanding, QSizePolicy.Ignored)
+                dendrogram.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Ignored)
                 dendrogram.itemClicked.connect(
-                    lambda item, partindex=i:
-                    self.__select_by_cluster(item, partindex)
+                    lambda item, partindex=i: self.__select_by_cluster(item, partindex)
                 )
 
                 grid.addItem(dendrogram, Row0 + i * 2 + 1, DendrogramColumn)
@@ -1000,15 +1152,15 @@ class OWHeatMap(widget.OWWidget):
                     parent=widget,
                     orientation=DendrogramWidget.Top,
                     selectionMode=DendrogramWidget.NoSelection,
-                    hoverHighlightEnabled=False)
+                    hoverHighlightEnabled=False,
+                )
 
                 dendrogram.set_root(colitem.cluster)
                 dendrogram.setMaximumHeight(100)
                 dendrogram.setMinimumHeight(100)
                 # Ignore dendrogram horizontal size hint (heatmap's width
                 # should define the column width).
-                dendrogram.setSizePolicy(
-                    QSizePolicy.Ignored, QSizePolicy.Expanding)
+                dendrogram.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Expanding)
                 grid.addItem(dendrogram, DendrogramRow, Col0 + j)
                 sort_j.append(np.array(leaf_indices(colitem.cluster)))
                 column_dendrograms[j] = dendrogram
@@ -1046,8 +1198,7 @@ class OWHeatMap(widget.OWWidget):
 
         for i, rowitem in enumerate(parts.rows):
             if isinstance(rowitem.indices, slice):
-                indices = np.array(
-                    range(*rowitem.indices.indices(data.X.shape[0])))
+                indices = np.array(range(*rowitem.indices.indices(data.X.shape[0])))
             else:
                 indices = rowitem.indices
             if sort_i[i] is not None:
@@ -1056,7 +1207,8 @@ class OWHeatMap(widget.OWWidget):
             labels = [str(i) for i in indices]
 
             labelslist = GraphicsSimpleTextList(
-                labels, parent=widget, orientation=Qt.Vertical)
+                labels, parent=widget, orientation=Qt.Vertical
+            )
 
             labelslist._indices = indices
             labelslist.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
@@ -1070,8 +1222,7 @@ class OWHeatMap(widget.OWWidget):
         for j, colitem in enumerate(parts.columns):
             # Top attr annotations
             if isinstance(colitem.indices, slice):
-                indices = np.array(
-                    range(*colitem.indices.indices(data.X.shape[1])))
+                indices = np.array(range(*colitem.indices.indices(data.X.shape[1])))
             else:
                 indices = colitem.indices
             if sort_j[j] is not None:
@@ -1080,20 +1231,23 @@ class OWHeatMap(widget.OWWidget):
             labels = [data.domain[i].name for i in indices]
 
             labelslist = GraphicsSimpleTextList(
-                labels, parent=widget, orientation=Qt.Horizontal)
+                labels, parent=widget, orientation=Qt.Horizontal
+            )
             labelslist.setAlignment(Qt.AlignBottom | Qt.AlignLeft)
             labelslist._indices = indices
 
             labelslist.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
-            grid.addItem(labelslist, TopLabelsRow, Col0 + j,
-                         Qt.AlignBottom | Qt.AlignLeft)
+            grid.addItem(
+                labelslist, TopLabelsRow, Col0 + j, Qt.AlignBottom | Qt.AlignLeft
+            )
             col_annotation_widgets.append(labelslist)
             col_annotation_widgets_top.append(labelslist)
 
             # Bottom attr annotations
             labelslist = GraphicsSimpleTextList(
-                labels, parent=widget, orientation=Qt.Horizontal)
+                labels, parent=widget, orientation=Qt.Horizontal
+            )
             labelslist.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
             labelslist.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
 
@@ -1101,9 +1255,7 @@ class OWHeatMap(widget.OWWidget):
             col_annotation_widgets.append(labelslist)
             col_annotation_widgets_bottom.append(labelslist)
 
-        legend = GradientLegendWidget(
-            parts.levels[0], parts.levels[1],
-            parent=widget)
+        legend = GradientLegendWidget(parts.levels[0], parts.levels[1], parent=widget)
 
         legend.set_color_table(palette)
         legend.setMinimumSize(QSizeF(100, 20))
@@ -1129,8 +1281,7 @@ class OWHeatMap(widget.OWWidget):
 
     def __update_size_constraints(self):
         if self.heatmap_scene.widget is not None:
-            mode = Qt.KeepAspectRatio if self.keep_aspect \
-                   else Qt.IgnoreAspectRatio
+            mode = Qt.KeepAspectRatio if self.keep_aspect else Qt.IgnoreAspectRatio
             # get the preferred size from the view (view size - space for
             # scrollbars)
             view = self.sceneView
@@ -1138,8 +1289,10 @@ class OWHeatMap(widget.OWWidget):
             fw = view.frameWidth()
             vsb_extent = view.verticalScrollBar().sizeHint().width()
             hsb_extent = view.horizontalScrollBar().sizeHint().height()
-            size = QSizeF(max(size.width() - 2 * fw - vsb_extent, 0),
-                          max(size.height() - 2 * fw - hsb_extent, 0))
+            size = QSizeF(
+                max(size.width() - 2 * fw - vsb_extent, 0),
+                max(size.height() - 2 * fw - hsb_extent, 0),
+            )
             widget = self.heatmap_scene.widget
             layout = widget.layout()
             if mode == Qt.IgnoreAspectRatio:
@@ -1163,8 +1316,7 @@ class OWHeatMap(widget.OWWidget):
                 if preferred.width() < size.expandedTo(minsize).width():
                     size = preferred
 
-                widget.resize(size.expandedTo(minsize).width(),
-                              widget.size().height())
+                widget.resize(size.expandedTo(minsize).width(), widget.size().height())
                 # calculate and set the heatmap row's heights based on
                 # the width
                 for i, hm_row in enumerate(self.heatmap_widget_grid):
@@ -1172,8 +1324,10 @@ class OWHeatMap(widget.OWWidget):
                     for hm in hm_row:
                         hm_size = QSizeF(hm.heatmap_item.pixmap().size())
                         hm_size = scaled(
-                            hm_size, QSizeF(hm.size().width(), -1),
-                            Qt.KeepAspectRatioByExpanding)
+                            hm_size,
+                            QSizeF(hm.size().width(), -1),
+                            Qt.KeepAspectRatioByExpanding,
+                        )
 
                         heights.append(hm_size.height())
                     layout.setRowMaximumHeight(3 + i * 2 + 1, max(heights))
@@ -1185,12 +1339,12 @@ class OWHeatMap(widget.OWWidget):
                 minsize = widget.effectiveSizeHint(Qt.MinimumSize, constraint)
                 sh = sh.expandedTo(minsize).expandedTo(widget.minimumSize())
 
-#                 print("Resize 2", sh)
-#                 print("  old:", widget.size().width(), widget.size().height())
-#                 print("  new:", widget.size().width(), sh.height())
+                #                 print("Resize 2", sh)
+                #                 print("  old:", widget.size().width(), widget.size().height())
+                #                 print("  new:", widget.size().width(), sh.height())
 
                 widget.resize(sh)
-#                 print("Did resize")
+            #                 print("Did resize")
             self.__fixup_grid_layout()
 
     def __fixup_grid_layout(self):
@@ -1203,8 +1357,7 @@ class OWHeatMap(widget.OWWidget):
         self.__update_size_constraints()
 
     def eventFilter(self, reciever, event):
-        if reciever is self.sceneView.viewport() and \
-                event.type() == QEvent.Resize:
+        if reciever is self.sceneView.viewport() and event.type() == QEvent.Resize:
             self.__update_size_constraints()
 
         return super().eventFilter(reciever, event)
@@ -1214,6 +1367,7 @@ class OWHeatMap(widget.OWWidget):
         Update horizontal dendrogram and text list widgets margins to
         include the space for average stripe.
         """
+
         def offset(hm):
             if hm.show_averages:
                 return hm.averages_item.size().width()
@@ -1223,15 +1377,15 @@ class OWHeatMap(widget.OWWidget):
         hm_row = self.heatmap_widget_grid[0]
         dendrogram_col = self.col_dendrograms
 
-        col_annot = zip(self.col_annotation_widgets_top,
-                        self.col_annotation_widgets_bottom)
+        col_annot = zip(
+            self.col_annotation_widgets_top, self.col_annotation_widgets_bottom
+        )
 
         for hm, annot, dendrogram in zip(hm_row, col_annot, dendrogram_col):
             left_offset = offset(hm)
             if dendrogram is not None:
                 _, top, right, bottom = dendrogram.getContentsMargins()
-                dendrogram.setContentsMargins(
-                    left_offset, top, right, bottom)
+                dendrogram.setContentsMargins(left_offset, top, right, bottom)
 
             _, top, right, bottom = annot[0].getContentsMargins()
             annot[0].setContentsMargins(left_offset, top, right, bottom)
@@ -1261,13 +1415,15 @@ class OWHeatMap(widget.OWWidget):
 
         if not rco_enabled and self.row_clustering:
             self.row_clustering = False
-            row_clust_msg = "Row clustering was disabled due to the " \
-                            "input matrix being to big"
+            row_clust_msg = (
+                "Row clustering was disabled due to the " "input matrix being to big"
+            )
 
         if not cco_enabled and self.col_clustering:
             self.col_clustering = False
-            col_clust_msg = "Column clustering was disabled due to " \
-                            "the input matrix being to big"
+            col_clust_msg = (
+                "Column clustering was disabled due to " "the input matrix being to big"
+            )
 
         self.Information.row_clust.clear()
         self.Information.col_clust.clear()
@@ -1360,7 +1516,7 @@ class OWHeatMap(widget.OWWidget):
         if self.input_data is not None:
             if self.annotation_vars:
                 var = self.annotation_vars[self.annotation_index]
-                if var == '(None)':
+                if var == "(None)":
                     var = None
             else:
                 var = None
@@ -1386,8 +1542,7 @@ class OWHeatMap(widget.OWWidget):
                         )
                         # collect all original labels for every merged row
                         values = [annot_col[merge_indices[i]] for i in indices]
-                        labels = [join(list(map(var.str_val, vals)))
-                                  for vals in values]
+                        labels = [join(list(map(var.str_val, vals))) for vals in values]
                     else:
                         data = annot_col[indices]
                         labels = [var.str_val(val) for val in data]
@@ -1427,13 +1582,19 @@ class OWHeatMap(widget.OWWidget):
             pass
         else:
             key = QApplication.keyboardModifiers()
-            clear = not (key & ((Qt.ControlModifier | Qt.ShiftModifier |
-                                 Qt.AltModifier)))
-            remove = (key & (Qt.ControlModifier | Qt.AltModifier))
-            append = (key & Qt.ControlModifier)
+            clear = not (
+                key & ((Qt.ControlModifier | Qt.ShiftModifier | Qt.AltModifier))
+            )
+            remove = key & (Qt.ControlModifier | Qt.AltModifier)
+            append = key & Qt.ControlModifier
             self.selection_manager.selection_add(
-                node.value.first, node.value.last - 1, hm,
-                clear=clear, remove=remove, append=append)
+                node.value.first,
+                node.value.last - 1,
+                hm,
+                clear=clear,
+                remove=remove,
+                append=append,
+            )
 
     def __update_selection_geometry(self):
         for item in self.selection_rects:
@@ -1464,8 +1625,9 @@ class OWHeatMap(widget.OWWidget):
             merge_indices = None
 
         if self.input_data is not None and self.selected_rows:
-            sortind = np.hstack([labels._indices
-                                 for labels in self.row_annotation_widgets])
+            sortind = np.hstack(
+                [labels._indices for labels in self.row_annotation_widgets]
+            )
             indices = sortind[self.selected_rows]
 
             if merge_indices is not None:
@@ -1475,26 +1637,33 @@ class OWHeatMap(widget.OWWidget):
             data = self.input_data[indices]
 
         self.Outputs.selected_data.send(data)
-        self.Outputs.annotated_data.send(create_annotated_table(self.input_data, indices))
+        self.Outputs.annotated_data.send(
+            create_annotated_table(self.input_data, indices)
+        )
 
     def onDeleteWidget(self):
         self.clear()
         super().onDeleteWidget()
 
     def send_report(self):
-        self.report_items((
-            ("Columns:", "Clustering" if self.col_clustering else "No sorting"),
-            ("Rows:", "Clustering" if self.row_clustering else "No sorting"),
-            ("Row annotation",
-             self.annotation_index > 0 and
-             self.annotation_vars[self.annotation_index])
-        ))
+        self.report_items(
+            (
+                ("Columns:", "Clustering" if self.col_clustering else "No sorting"),
+                ("Rows:", "Clustering" if self.row_clustering else "No sorting"),
+                (
+                    "Row annotation",
+                    self.annotation_index > 0
+                    and self.annotation_vars[self.annotation_index],
+                ),
+            )
+        )
         self.report_plot()
 
 
 class GraphicsWidget(QGraphicsWidget):
     """A graphics widget which can notify on relayout events.
     """
+
     #: The widget's layout has activated (i.e. did a relayout
     #: of the widget's contents)
     layoutDidActivate = Signal()
@@ -1504,6 +1673,7 @@ class GraphicsWidget(QGraphicsWidget):
         if event.type() == QEvent.LayoutRequest and self.layout() is not None:
             self.layoutDidActivate.emit()
         return rval
+
 
 QWIDGETSIZE_MAX = 16777215
 
@@ -1534,8 +1704,14 @@ def scaled(size, constraint, mode=Qt.KeepAspectRatio):
 
 
 class GraphicsPixmapWidget(QGraphicsWidget):
-    def __init__(self, parent=None, pixmap=None, scaleContents=False,
-                 aspectMode=Qt.KeepAspectRatio, **kwargs):
+    def __init__(
+        self,
+        parent=None,
+        pixmap=None,
+        scaleContents=False,
+        aspectMode=Qt.KeepAspectRatio,
+        **kwargs
+    ):
         super().__init__(parent)
         self.setContentsMargins(0, 0, 0, 0)
         self.__scaleContents = scaleContents
@@ -1633,10 +1809,12 @@ class GraphicsHeatmapWidget(QGraphicsWidget):
         layout = QGraphicsLinearLayout(Qt.Horizontal)
         layout.setContentsMargins(0, 0, 0, 0)
         self.heatmap_item = GraphicsPixmapWidget(
-            self, scaleContents=True, aspectMode=Qt.IgnoreAspectRatio)
+            self, scaleContents=True, aspectMode=Qt.IgnoreAspectRatio
+        )
 
         self.averages_item = GraphicsPixmapWidget(
-            self, scaleContents=True, aspectMode=Qt.IgnoreAspectRatio)
+            self, scaleContents=True, aspectMode=Qt.IgnoreAspectRatio
+        )
 
         layout.addItem(self.averages_item)
         layout.addItem(self.heatmap_item)
@@ -1714,15 +1892,13 @@ class GraphicsHeatmapWidget(QGraphicsWidget):
                 lut = self.__colortable
             else:
                 lut = None
-            argb, _ = pg.makeARGB(
-                self.__data, lut=lut, levels=self.__levels, scale=250)
+            argb, _ = pg.makeARGB(self.__data, lut=lut, levels=self.__levels, scale=250)
             argb[np.isnan(self.__data)] = (100, 100, 100, 255)
 
             qimage = pg.makeQImage(argb, transpose=False)
             self.__pixmap = QPixmap.fromImage(qimage)
             avg = np.nanmean(self.__data, axis=1, keepdims=True)
-            argb, _ = pg.makeARGB(
-                avg, lut=lut, levels=self.__levels, scale=250)
+            argb, _ = pg.makeARGB(avg, lut=lut, levels=self.__levels, scale=250)
             qimage = pg.makeQImage(argb, transpose=False)
             self.__avgpixmap = QPixmap.fromImage(qimage)
         else:
@@ -1744,8 +1920,9 @@ class GraphicsHeatmapWidget(QGraphicsWidget):
         """Return the cell row, column from `pos` in local coordinates.
         """
         if self.__pixmap.isNull() or not (
-                self.heatmap_item.geometry().contains(pos) or
-                self.averages_item.geometry().contains(pos)):
+            self.heatmap_item.geometry().contains(pos)
+            or self.averages_item.geometry().contains(pos)
+        ):
             return (-1, -1)
 
         if self.heatmap_item.geometry().contains(pos):
@@ -1803,6 +1980,7 @@ class GraphicsHeatmapWidget(QGraphicsWidget):
 
 class HeatmapScene(QGraphicsScene):
     """A Graphics Scene with heatmap widgets."""
+
     def __init__(self, parent=None):
         QGraphicsScene.__init__(self, parent)
         self.selection_manager = HeatmapSelectionManager()
@@ -1838,7 +2016,10 @@ class HeatmapScene(QGraphicsScene):
         anchors = list(dendrogram_widget.leaf_anchors())
         cluster = dendrogram.cluster
         start, end = anchors[cluster.first], anchors[cluster.last - 1]
-        start, end = dendrogram_widget.mapToScene(start), dendrogram_widget.mapToScene(end)
+        start, end = (
+            dendrogram_widget.mapToScene(start),
+            dendrogram_widget.mapToScene(end),
+        )
         # Find a heatmap widget containing start and end y coordinates.
 
         heatmap = None
@@ -1853,12 +2034,14 @@ class HeatmapScene(QGraphicsScene):
             start, end = heatmap.mapFromScene(start), heatmap.mapFromScene(end)
             start, _ = heatmap.cell_at(QPointF(b_rect.center().x(), start.y()))
             end, _ = heatmap.cell_at(QPointF(b_rect.center().x(), end.y()))
-            clear = not (key & ((Qt.ControlModifier | Qt.ShiftModifier |
-                                 Qt.AltModifier)))
-            remove = (key & (Qt.ControlModifier | Qt.AltModifier))
-            append = (key & Qt.ControlModifier)
+            clear = not (
+                key & ((Qt.ControlModifier | Qt.ShiftModifier | Qt.AltModifier))
+            )
+            remove = key & (Qt.ControlModifier | Qt.AltModifier)
+            append = key & Qt.ControlModifier
             self.selection_manager.selection_add(
-                start, end, heatmap, clear=clear, remove=remove, append=append)
+                start, end, heatmap, clear=clear, remove=remove, append=append
+            )
         return
 
     def mousePressEvent(self, event):
@@ -1901,6 +2084,7 @@ class GraphicsSimpleTextLayoutItem(QGraphicsLayoutItem):
     to be managed by a layout.
 
     """
+
     def __init__(self, text_item, orientation=Qt.Horizontal, parent=None):
         super().__init__(parent)
         self.orientation = orientation
@@ -1945,6 +2129,7 @@ class GraphicsSimpleTextLayoutItem(QGraphicsLayoutItem):
 
 class GraphicsSimpleTextList(QGraphicsWidget):
     """A simple text list widget."""
+
     def __init__(self, labels=[], orientation=Qt.Vertical, parent=None):
         super().__init__(parent)
         self.label_items = []
@@ -1970,7 +2155,8 @@ class GraphicsSimpleTextList(QGraphicsWidget):
             layout.removeAt(i)
 
         self.label_items = []
-#         self.updateGeometry()
+
+    #         self.updateGeometry()
 
     def set_labels(self, labels):
         """Set the text labels to show in the widget.
@@ -1999,8 +2185,9 @@ class GraphicsSimpleTextList(QGraphicsWidget):
             return QSizeF(0, 0)
         elif which == Qt.PreferredSize:
             fm = QFontMetrics(QApplication.instance().font())
-            brects = [fm.boundingRect(item.text_item.text())
-                      for item in self.label_items]
+            brects = [
+                fm.boundingRect(item.text_item.text()) for item in self.label_items
+            ]
             spacing = self.layout().spacing()
             height = sum((r.height() + spacing for r in brects), 0)
             width = max((r.width() for r in brects), default=0)
@@ -2091,8 +2278,9 @@ class GradientLegendWidget(QGraphicsWidget):
         layout_labels.addItem(self.item_high)
 
         self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        self.__pixitem = GraphicsPixmapWidget(parent=self, scaleContents=True,
-                                              aspectMode=Qt.IgnoreAspectRatio)
+        self.__pixitem = GraphicsPixmapWidget(
+            parent=self, scaleContents=True, aspectMode=Qt.IgnoreAspectRatio
+        )
         self.__pixitem.setMinimumHeight(12)
         layout.addItem(self.__pixitem)
         self.__update()
@@ -2104,8 +2292,7 @@ class GradientLegendWidget(QGraphicsWidget):
     def __update(self):
         data = np.linspace(self.low, self.high, num=50, endpoint=True)
         data = data.reshape((1, -1))
-        argb, _ = pg.makeARGB(data, lut=self.color_table,
-                              levels=(self.low, self.high))
+        argb, _ = pg.makeARGB(data, lut=self.color_table, levels=(self.low, self.high))
         qimg = pg.makeQImage(argb, transpose=False)
         self.__pixitem.setPixmap(QPixmap.fromImage(qimg))
 
@@ -2117,6 +2304,7 @@ class GradientLegendWidget(QGraphicsWidget):
 class HeatmapSelectionManager(QObject):
     """Selection manager for heatmap rows
     """
+
     selection_changed = Signal()
     selection_finished = Signal()
 
@@ -2201,12 +2389,14 @@ class HeatmapSelectionManager(QObject):
         if event.modifiers() & Qt.ControlModifier:
             self.selection_ranges_temp = self.selection_ranges
             self.selection_ranges = self.remove_range(
-                self.selection_ranges, row, row, append=True)
+                self.selection_ranges, row, row, append=True
+            )
         elif event.modifiers() & Qt.ShiftModifier:
             self.selection_ranges.append(range)
         elif event.modifiers() & Qt.AltModifier:
             self.selection_ranges = self.remove_range(
-                self.selection_ranges, row, row, append=False)
+                self.selection_ranges, row, row, append=False
+            )
         else:
             self.selection_ranges = [range]
         self.select_rows(self.combined_ranges(self.selection_ranges))
@@ -2223,10 +2413,12 @@ class HeatmapSelectionManager(QObject):
         row = start + row
         if event.modifiers() & Qt.ControlModifier:
             self.selection_ranges = self.remove_range(
-                self.selection_ranges_temp, self._start_row, row, append=True)
+                self.selection_ranges_temp, self._start_row, row, append=True
+            )
         elif event.modifiers() & Qt.AltModifier:
             self.selection_ranges = self.remove_range(
-                self.selection_ranges, self._start_row, row, append=False)
+                self.selection_ranges, self._start_row, row, append=False
+            )
         else:
             if self.selection_ranges:
                 self.selection_ranges[-1] = (self._start_row, row)
@@ -2246,15 +2438,17 @@ class HeatmapSelectionManager(QObject):
             pass
         elif event.modifiers() & Qt.AltModifier:
             self.selection_ranges = self.remove_range(
-                self.selection_ranges, self._start_row, row, append=False)
+                self.selection_ranges, self._start_row, row, append=False
+            )
         else:
             if len(self.selection_ranges) > 0:
                 self.selection_ranges[-1] = (self._start_row, row)
         self.select_rows(self.combined_ranges(self.selection_ranges))
         self.selection_finished.emit()
 
-    def selection_add(self, start, end, heatmap=None, clear=True,
-                      remove=False, append=False):
+    def selection_add(
+        self, start, end, heatmap=None, clear=True, remove=False, append=False
+    ):
         """ Add/remove a selection range from `start` to `end`.
         """
         if heatmap is not None:
@@ -2266,7 +2460,8 @@ class HeatmapSelectionManager(QObject):
             self.selection_ranges = []
         if remove:
             self.selection_ranges = self.remove_range(
-                self.selection_ranges, start, end, append=append)
+                self.selection_ranges, start, end, append=append
+            )
         else:
             self.selection_ranges.append((start, end))
         self.select_rows(self.combined_ranges(self.selection_ranges))
@@ -2275,11 +2470,13 @@ class HeatmapSelectionManager(QObject):
     def remove_range(self, ranges, start, end, append=False):
         if start > end:
             start, end = end, start
-        comb_ranges = [i for i in self.combined_ranges(ranges)
-                       if i > end or i < start]
+        comb_ranges = [i for i in self.combined_ranges(ranges) if i > end or i < start]
         if append:
-            comb_ranges += [i for i in range(start, end + 1)
-                            if i not in self.combined_ranges(ranges)]
+            comb_ranges += [
+                i
+                for i in range(start, end + 1)
+                if i not in self.combined_ranges(ranges)
+            ]
             comb_ranges = sorted(comb_ranges)
         return self.combined_to_ranges(comb_ranges)
 
@@ -2299,6 +2496,7 @@ class HeatmapSelectionManager(QObject):
     def update_selection_rects(self):
         """ Update the selection rects.
         """
+
         def continuous_ranges(selections):
             """ Group continuous ranges
             """
@@ -2343,8 +2541,12 @@ class HeatmapSelectionManager(QObject):
             rect = QRectF()
             for heatmap in heatmaps:
                 h_start, _ = self._heatmap_ranges[heatmap]
-                rect |= heatmap.mapToScene(heatmap.row_rect(start - h_start)).boundingRect()
-                rect |= heatmap.mapToScene(heatmap.row_rect(end - h_start)).boundingRect()
+                rect |= heatmap.mapToScene(
+                    heatmap.row_rect(start - h_start)
+                ).boundingRect()
+                rect |= heatmap.mapToScene(
+                    heatmap.row_rect(end - h_start)
+                ).boundingRect()
             return rect
 
         self.selection_rects = []
@@ -2404,6 +2606,7 @@ def test_main(argv=sys.argv):
     ow.handleNewSignals()
     ow.saveSettings()
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(test_main())

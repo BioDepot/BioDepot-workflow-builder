@@ -8,33 +8,43 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-from Orange.canvas.registry.description import \
-    Single, Multiple, Default, NonDefault, Explicit, Dynamic, InputSignal, \
-    OutputSignal
+from Orange.canvas.registry.description import (
+    Single,
+    Multiple,
+    Default,
+    NonDefault,
+    Explicit,
+    Dynamic,
+    InputSignal,
+    OutputSignal,
+)
 from Orange.widgets.tests.base import GuiTest
-from Orange.widgets.utils.signals import _Signal, Input, Output, \
-    WidgetSignalsMixin
+from Orange.widgets.utils.signals import _Signal, Input, Output, WidgetSignalsMixin
 from Orange.widgets.widget import OWWidget
 
 
 class SignalTest(unittest.TestCase):
     def test_get_flags(self):
-        self.assertEqual(_Signal.get_flags(False, False, False, False),
-                         Single | NonDefault)
-        self.assertEqual(_Signal.get_flags(True, False, False, False),
-                         Multiple | NonDefault)
-        self.assertEqual(_Signal.get_flags(False, True, False, False),
-                         Single | Default)
-        self.assertEqual(_Signal.get_flags(False, False, True, False),
-                         Single | NonDefault | Explicit)
-        self.assertEqual(_Signal.get_flags(False, False, False, True),
-                         Single | NonDefault | Dynamic)
+        self.assertEqual(
+            _Signal.get_flags(False, False, False, False), Single | NonDefault
+        )
+        self.assertEqual(
+            _Signal.get_flags(True, False, False, False), Multiple | NonDefault
+        )
+        self.assertEqual(_Signal.get_flags(False, True, False, False), Single | Default)
+        self.assertEqual(
+            _Signal.get_flags(False, False, True, False), Single | NonDefault | Explicit
+        )
+        self.assertEqual(
+            _Signal.get_flags(False, False, False, True), Single | NonDefault | Dynamic
+        )
 
 
 class InputTest(unittest.TestCase):
     def test_init(self):
-        with patch("Orange.widgets.utils.signals._Signal.get_flags",
-                   return_value=42) as getflags:
+        with patch(
+            "Orange.widgets.utils.signals._Signal.get_flags", return_value=42
+        ) as getflags:
             signal = Input("a name", int, "an id", "a doc", ["x"])
             self.assertEqual(signal.name, "a name")
             self.assertEqual(signal.type, int)
@@ -60,9 +70,11 @@ class InputTest(unittest.TestCase):
         @input
         def foo():
             pass
+
         self.assertEqual(input.handler, "foo")
 
         with self.assertRaises(ValueError):
+
             @input
             def bar():
                 pass
@@ -70,8 +82,9 @@ class InputTest(unittest.TestCase):
 
 class OutputTest(unittest.TestCase):
     def test_init(self):
-        with patch("Orange.widgets.utils.signals._Signal.get_flags",
-                   return_value=42) as getflags:
+        with patch(
+            "Orange.widgets.utils.signals._Signal.get_flags", return_value=42
+        ) as getflags:
             signal = Output("a name", int, "an id", "a doc", ["x"])
             self.assertEqual(signal.name, "a name")
             self.assertEqual(signal.type, int)
@@ -97,14 +110,14 @@ class OutputTest(unittest.TestCase):
         value = object()
         id = 42
         bound.send(value, id)
-        widget.signalManager.send.assert_called_with(
-            widget, "a name", value, id)
+        widget.signalManager.send.assert_called_with(widget, "a name", value, id)
 
 
 class WidgetSignalsMixinTest(GuiTest):
     def test_init_binds_outputs(self):
         class MockWidget(OWWidget):
             name = "foo"
+
             class Outputs:
                 an_output = Output("a name", int)
 
@@ -114,6 +127,7 @@ class WidgetSignalsMixinTest(GuiTest):
 
     def test_checking_invalid_inputs(self):
         with self.assertRaises(ValueError):
+
             class MockWidget(OWWidget):
                 name = "foo"
 
@@ -121,6 +135,7 @@ class WidgetSignalsMixinTest(GuiTest):
                     an_input = Input("a name", int)
 
         with self.assertRaises(ValueError):
+
             class MockWidget(OWWidget):
                 name = "foo"
                 inputs = [("a name", int, "no_such_handler")]
@@ -207,6 +222,7 @@ class WidgetSignalsMixinTest(GuiTest):
         outputs = TestWidget.get_signals("outputs")
         self.assertTrue(all(isinstance(s, Output) for s in outputs))
         self.assertSequenceEqual([s.name for s in outputs], list("123a"))
+
 
 if __name__ == "__main__":
     unittest.main()

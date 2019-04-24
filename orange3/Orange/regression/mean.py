@@ -11,6 +11,7 @@ class MeanLearner(Learner):
     """
     Fit a regression model that returns the average response (class) value.
     """
+
     def fit_storage(self, data):
         """
         Construct a :obj:`MeanModel` by computing the mean value of the given
@@ -22,8 +23,10 @@ class MeanLearner(Learner):
         :rtype: :obj:`MeanModel`
         """
         if not data.domain.has_continuous_class:
-            raise ValueError("regression.MeanLearner expects a domain with a "
-                             "(single) continuous variable")
+            raise ValueError(
+                "regression.MeanLearner expects a domain with a "
+                "(single) continuous variable"
+            )
         dist = distribution.get_distribution(data, data.domain.class_var)
         return MeanModel(dist)
 
@@ -38,6 +41,7 @@ class MeanModel(Model):
     .. automethod:: __init__
 
     """
+
     def __init__(self, dist, domain=None):
         """
         Construct :obj:`Orange.regression.MeanModel` that always returns the
@@ -73,6 +77,7 @@ class MeanModel(Model):
         return numpy.full(len(X), self.mean)
 
     def __str__(self):
-        return 'MeanModel({})'.format(self.mean)
+        return "MeanModel({})".format(self.mean)
+
 
 MeanLearner.__returns__ = MeanModel

@@ -42,14 +42,13 @@ def package(qualified_name):
         return module.__package__
     else:
         # 'qualified_name' is itself the package
-        assert(module.__name__ == qualified_name)
+        assert module.__name__ == qualified_name
         return qualified_name
+
 
 dirname = os.path.abspath(os.path.dirname(__file__))
 
-DEFAULT_SEARCH_PATHS = \
-    [("", dirname),
-     ("", os.path.join(dirname, "../widgets"))]
+DEFAULT_SEARCH_PATHS = [("", dirname), ("", os.path.join(dirname, "../widgets"))]
 
 del dirname
 
@@ -123,8 +122,7 @@ class resource_loader(object):
             return path
         elif self.is_valid_prefixed(path):
             for pp, search_path in self.search_paths():
-                if pp == prefix and \
-                        self.match(os.path.join(search_path, path)):
+                if pp == prefix and self.match(os.path.join(search_path, path)):
                     return os.path.join(search_path, path)
 
         return None
@@ -144,6 +142,7 @@ class resource_loader(object):
             return open(path, "rb")
         else:
             raise IOError(2, "Cannot find %r" % name)
+
 
 import glob
 
@@ -171,8 +170,7 @@ class icon_loader(resource_loader):
         if not path:
             path = self.find(self.DEFAULT_ICON if default is None else default)
         if not path:
-            raise IOError(2, "Cannot find %r in %s" %
-                          (name, self.search_paths()))
+            raise IOError(2, "Cannot find %r in %s" % (name, self.search_paths()))
         if self.is_icon_glob(path):
             icons = self.icon_glob(path)
         else:
@@ -198,6 +196,7 @@ import unittest
 class TestIconLoader(unittest.TestCase):
     def setUp(self):
         from AnyQt.QtWidgets import QApplication
+
         self.app = QApplication([])
 
     def tearDown(self):
@@ -216,13 +215,9 @@ class TestIconLoader(unittest.TestCase):
         self.assertTrue(not icon.isNull())
 
     def test_from_desc(self):
-        from .registry.description import (
-            WidgetDescription, CategoryDescription
-        )
+        from .registry.description import WidgetDescription, CategoryDescription
 
-        desc = WidgetDescription.from_module(
-            "Orange.widgets.data.owfile"
-        )
+        desc = WidgetDescription.from_module("Orange.widgets.data.owfile")
 
         loader = icon_loader.from_description(desc)
         path = loader.find(desc.icon)
@@ -240,6 +235,7 @@ class TestIconLoader(unittest.TestCase):
     def test_package_reflection(self):
         from Orange.widgets.data import owfile
         from Orange.widgets import data
+
         package_name = data.__name__
         p1 = package("Orange.widgets.data.owfile.OWFile")
         self.assertEqual(p1, package_name)

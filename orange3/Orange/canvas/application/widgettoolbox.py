@@ -9,14 +9,19 @@ A tool box with a tool grid for each category.
 
 import logging
 
-from AnyQt.QtWidgets import (
-    QAbstractButton, QSizePolicy, QAction, QApplication
-)
+from AnyQt.QtWidgets import QAbstractButton, QSizePolicy, QAction, QApplication
 from AnyQt.QtGui import QDrag, QPalette, QBrush
 
 from AnyQt.QtCore import (
-    Qt, QObject, QModelIndex, QSize, QEvent, QMimeData, QByteArray,
-    QDataStream, QIODevice
+    Qt,
+    QObject,
+    QModelIndex,
+    QSize,
+    QEvent,
+    QMimeData,
+    QByteArray,
+    QDataStream,
+    QIODevice,
 )
 
 from AnyQt.QtCore import pyqtSignal as Signal, pyqtProperty as Property
@@ -45,6 +50,7 @@ class WidgetToolGrid(ToolGrid):
     from a item model. Also adds support for drag operations.
 
     """
+
     def __init__(self, *args, **kwargs):
         ToolGrid.__init__(self, *args, **kwargs)
 
@@ -55,9 +61,7 @@ class WidgetToolGrid(ToolGrid):
         self.__actionRole = QtWidgetRegistry.WIDGET_ACTION_ROLE
 
         self.__dragListener = DragStartEventListener(self)
-        self.__dragListener.dragStartOperationRequested.connect(
-            self.__startDrag
-        )
+        self.__dragListener.dragStartOperationRequested.connect(self.__startDrag)
         self.__statusTipPromoter = StatusTipPromoter(self)
 
     def setModel(self, model, rootIndex=QModelIndex()):
@@ -193,7 +197,7 @@ class WidgetToolGrid(ToolGrid):
         drag_data = QMimeData()
         drag_data.setData(
             "application/vnv.orange-canvas.registry.qualified-name",
-            desc.qualified_name.encode("utf-8")
+            desc.qualified_name.encode("utf-8"),
         )
         drag = QDrag(button)
         drag.setPixmap(icon.pixmap(self.iconSize()))
@@ -207,6 +211,7 @@ class DragStartEventListener(QObject):
     operation on buttons which otherwise do not support it.
 
     """
+
     dragStartOperationRequested = Signal(QAbstractButton)
     """A drag operation started on a button."""
 
@@ -223,9 +228,11 @@ class DragStartEventListener(QObject):
             self.button = event.button()
 
         elif event.type() == QEvent.MouseMove and obj is self.buttonDownObj:
-            if (self.buttonDownPos - event.pos()).manhattanLength() > \
-                    QApplication.startDragDistance() and \
-                    not self.buttonDownObj.hitButton(event.pos()):
+            if (
+                self.buttonDownPos - event.pos()
+            ).manhattanLength() > QApplication.startDragDistance() and not self.buttonDownObj.hitButton(
+                event.pos()
+            ):
                 # Process the widget's mouse event, before starting the
                 # drag operation, so the widget can update its state.
                 obj.mouseMoveEvent(event)
@@ -256,8 +263,7 @@ class WidgetToolBox(ToolBox):
         self.__model = None
         self.__iconSize = QSize(25, 25)
         self.__buttonSize = QSize(50, 50)
-        self.setSizePolicy(QSizePolicy.Fixed,
-                           QSizePolicy.Expanding)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
 
     def setIconSize(self, size):
         """
@@ -273,8 +279,7 @@ class WidgetToolBox(ToolBox):
         """
         return self.__iconSize
 
-    iconSize_ = Property(QSize, fget=iconSize, fset=setIconSize,
-                         designable=True)
+    iconSize_ = Property(QSize, fget=iconSize, fset=setIconSize, designable=True)
 
     def setButtonSize(self, size):
         """
@@ -289,8 +294,7 @@ class WidgetToolBox(ToolBox):
         """
         return self.__buttonSize
 
-    buttonSize_ = Property(QSize, fget=buttonSize, fset=setButtonSize,
-                           designable=True)
+    buttonSize_ = Property(QSize, fget=buttonSize, fset=setButtonSize, designable=True)
 
     def saveState(self):
         """

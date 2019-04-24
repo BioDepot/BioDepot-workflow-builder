@@ -5,12 +5,14 @@ import unittest
 import numpy as np
 from Orange.data import Table
 from Orange.preprocess import *
-from Orange.regression import (LinearRegressionLearner,
-                               RidgeRegressionLearner,
-                               LassoRegressionLearner,
-                               ElasticNetLearner,
-                               ElasticNetCVLearner,
-                               MeanLearner)
+from Orange.regression import (
+    LinearRegressionLearner,
+    RidgeRegressionLearner,
+    LassoRegressionLearner,
+    ElasticNetLearner,
+    ElasticNetCVLearner,
+    MeanLearner,
+)
 from Orange.evaluation import CrossValidation, RMSE
 from sklearn import linear_model
 
@@ -52,27 +54,31 @@ class TestLinearRegressionLearner(unittest.TestCase):
         learner = LinearRegressionLearner()
         scores = learner.score_data(self.housing)
         self.assertEqual(
-            'LSTAT', self.housing.domain.attributes[np.argmax(scores[0])].name)
+            "LSTAT", self.housing.domain.attributes[np.argmax(scores[0])].name
+        )
         self.assertEqual(scores.shape[1], len(self.housing.domain.attributes))
 
     def test_scorer(self):
-        learners = [LinearRegressionLearner(),
-                    RidgeRegressionLearner(),
-                    LassoRegressionLearner(alpha=0.01),
-                    ElasticNetLearner(alpha=0.01)]
+        learners = [
+            LinearRegressionLearner(),
+            RidgeRegressionLearner(),
+            LassoRegressionLearner(alpha=0.01),
+            ElasticNetLearner(alpha=0.01),
+        ]
         for learner in learners:
             scores = learner.score_data(self.housing)
             self.assertEqual(
-                'LSTAT',
-                self.housing.domain.attributes[np.argmax(scores[0])].name)
-            self.assertEqual(scores.shape[1],
-                             len(self.housing.domain.attributes))
+                "LSTAT", self.housing.domain.attributes[np.argmax(scores[0])].name
+            )
+            self.assertEqual(scores.shape[1], len(self.housing.domain.attributes))
 
     def test_scorer_feature(self):
-        learners = [LinearRegressionLearner(),
-                    RidgeRegressionLearner(),
-                    LassoRegressionLearner(alpha=0.01),
-                    ElasticNetLearner(alpha=0.01)]
+        learners = [
+            LinearRegressionLearner(),
+            RidgeRegressionLearner(),
+            LassoRegressionLearner(alpha=0.01),
+            ElasticNetLearner(alpha=0.01),
+        ]
         for learner in learners:
             scores = learner.score_data(self.housing)
             for i, attr in enumerate(self.housing.domain.attributes):
@@ -88,9 +94,11 @@ class TestLinearRegressionLearner(unittest.TestCase):
 
     def test_comparison_with_sklearn(self):
         alphas = [0.001, 0.1, 1, 10, 100]
-        learners = [(LassoRegressionLearner, linear_model.Lasso),
-                    (RidgeRegressionLearner, linear_model.Ridge),
-                    (ElasticNetLearner, linear_model.ElasticNet)]
+        learners = [
+            (LassoRegressionLearner, linear_model.Lasso),
+            (RidgeRegressionLearner, linear_model.Ridge),
+            (ElasticNetLearner, linear_model.ElasticNet),
+        ]
         for o_learner, s_learner in learners:
             for a in alphas:
                 lr = o_learner(alpha=a)

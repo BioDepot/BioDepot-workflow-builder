@@ -4,8 +4,15 @@ Orange Canvas Welcome Dialog
 """
 
 from AnyQt.QtWidgets import (
-    QDialog, QWidget, QToolButton, QCheckBox, QAction,
-    QHBoxLayout, QVBoxLayout, QSizePolicy, QLabel
+    QDialog,
+    QWidget,
+    QToolButton,
+    QCheckBox,
+    QAction,
+    QHBoxLayout,
+    QVBoxLayout,
+    QSizePolicy,
+    QLabel,
 )
 from AnyQt.QtGui import QFont, QIcon, QPixmap, QPainter, QColor, QBrush
 from AnyQt.QtCore import Qt, QRect, QSize, QPoint, QT_VERSION
@@ -35,7 +42,7 @@ def decorate_welcome_icon(icon, background_color):
         ellipse_rect = QRect(0, 0, size, size)
         p.drawEllipse(ellipse_rect)
         icon_rect.moveCenter(ellipse_rect.center())
-        icon.paint(p, icon_rect, Qt.AlignCenter, )
+        icon.paint(p, icon_rect, Qt.AlignCenter)
         p.end()
 
         welcome_icon.addPixmap(pixmap)
@@ -43,8 +50,7 @@ def decorate_welcome_icon(icon, background_color):
     return welcome_icon
 
 
-WELCOME_WIDGET_BUTTON_STYLE = \
-"""
+WELCOME_WIDGET_BUTTON_STYLE = """
 
 WelcomeActionButton {
     border: none;
@@ -80,6 +86,7 @@ class WelcomeDialog(QDialog):
     of buttons (actions) for a beginner to choose from.
 
     """
+
     triggered = Signal(QAction)
 
     def __init__(self, *args, **kwargs):
@@ -106,8 +113,7 @@ class WelcomeDialog(QDialog):
         bottom_bar_layout = QHBoxLayout()
         bottom_bar_layout.setContentsMargins(20, 10, 20, 10)
         bottom_bar.setLayout(bottom_bar_layout)
-        bottom_bar.setSizePolicy(QSizePolicy.MinimumExpanding,
-                                 QSizePolicy.Maximum)
+        bottom_bar.setSizePolicy(QSizePolicy.MinimumExpanding, QSizePolicy.Maximum)
 
         check = QCheckBox(self.tr("Show at startup"), bottom_bar)
         check.setChecked(False)
@@ -115,17 +121,15 @@ class WelcomeDialog(QDialog):
         self.__showAtStartupCheck = check
 
         feedback = QLabel(
-            '<a href="http://orange.biolab.si/survey/long.html">Help us improve!</a>')
+            '<a href="http://orange.biolab.si/survey/long.html">Help us improve!</a>'
+        )
         feedback.setTextInteractionFlags(Qt.TextBrowserInteraction)
         feedback.setOpenExternalLinks(True)
 
-        bottom_bar_layout.addWidget(check, alignment=Qt.AlignVCenter | \
-                                    Qt.AlignLeft)
-        bottom_bar_layout.addWidget(feedback, alignment=Qt.AlignVCenter | \
-                                    Qt.AlignRight)
+        bottom_bar_layout.addWidget(check, alignment=Qt.AlignVCenter | Qt.AlignLeft)
+        bottom_bar_layout.addWidget(feedback, alignment=Qt.AlignVCenter | Qt.AlignRight)
 
-        self.layout().addWidget(bottom_bar, alignment=Qt.AlignBottom,
-                                stretch=1)
+        self.layout().addWidget(bottom_bar, alignment=Qt.AlignBottom, stretch=1)
 
         self.setSizeGripEnabled(False)
         self.setFixedSize(620, 390)
@@ -158,14 +162,14 @@ class WelcomeDialog(QDialog):
         layout.setSpacing(65)
         widget.setLayout(layout)
 
-        self.__mainLayout.insertWidget(index, widget, stretch=10,
-                                       alignment=Qt.AlignCenter)
+        self.__mainLayout.insertWidget(
+            index, widget, stretch=10, alignment=Qt.AlignCenter
+        )
 
         for i, action in enumerate(actions):
             self.insertAction(index, i, action, background)
 
-    def insertAction(self, row, index, action,
-                      background="light-orange"):
+    def insertAction(self, row, index, action, background="light-orange"):
         """Insert `action` in `row` in position `index`.
         """
         button = self.createButton(action, background)

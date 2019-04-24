@@ -47,21 +47,23 @@ class TestOWDistributions(WidgetTest):
     def test_discretize_meta(self):
         """The widget discretizes continuous meta attributes"""
         domain = self.iris.domain
-        mdomain = Domain(domain.attributes[:-1], domain.class_var,
-                         metas=domain.attributes[-1:])
+        mdomain = Domain(
+            domain.attributes[:-1], domain.class_var, metas=domain.attributes[-1:]
+        )
         miris = Table(mdomain, self.iris)
         self.send_signal(self.widget.Inputs.data, miris)
         widget = self.widget
         widget.disc_cont = True
-        widget.varview.selectionModel().select(
-            widget.varview.model().index(4, 0))
+        widget.varview.selectionModel().select(widget.varview.model().index(4, 0))
         self.assertIsInstance(widget.var, DiscreteVariable)
         self.assertEqual(widget.var.name, mdomain.metas[0].name)
 
     def test_variable_group_combinations(self):
         """Check widget for all combinations of variable and group for dataset
         with constant columns and missing data"""
-        self.send_signal(self.widget.Inputs.data, Table(datasets.path("testing_dataset_cls")))
+        self.send_signal(
+            self.widget.Inputs.data, Table(datasets.path("testing_dataset_cls"))
+        )
         for groupvar_idx in range(len(self.widget.groupvarmodel)):
             self.widget.groupvar_idx = groupvar_idx
             for var_idx in range(len(self.widget.varmodel)):

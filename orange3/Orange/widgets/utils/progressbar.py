@@ -60,9 +60,10 @@ class ProgressBarMixin:
 
         if value > 0:
             if self.__progressState != 1:
-                warnings.warn("progressBarSet() called without a "
-                              "preceding progressBarInit()",
-                              stacklevel=2)
+                warnings.warn(
+                    "progressBarSet() called without a " "preceding progressBarInit()",
+                    stacklevel=2,
+                )
                 self.__progressState = 1
                 self.processingStateChanged.emit(1)
 
@@ -76,8 +77,9 @@ class ProgressBarMixin:
                 text = "{}:{:02}:{:02}".format(hrs, mins, secs)
             else:
                 text = "{}:{}:{:02}".format(hrs, mins, secs)
-            self.setWindowTitle("{} ({:d}%, ETA: {})"
-                                .format(self.captionTitle, int(value), text))
+            self.setWindowTitle(
+                "{} ({:d}%, ETA: {})".format(self.captionTitle, int(value), text)
+            )
         else:
             self.setWindowTitle(self.captionTitle + " (0% complete)")
 
@@ -92,8 +94,7 @@ class ProgressBarMixin:
         """
         return self.__progressBarValue
 
-    progressBarValue = pyqtProperty(
-        float, fset=progressBarSet, fget=progressBarValue)
+    progressBarValue = pyqtProperty(float, fset=progressBarSet, fget=progressBarValue)
     processingState = pyqtProperty(int, fget=lambda self: self.__progressState)
 
     def progressBarAdvance(self, value, processEvents=None):

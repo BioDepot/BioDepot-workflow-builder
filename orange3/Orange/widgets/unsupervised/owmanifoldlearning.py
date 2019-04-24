@@ -4,8 +4,13 @@ from AnyQt.QtWidgets import QWidget, QVBoxLayout
 from AnyQt.QtCore import Qt
 
 from Orange.data import Table, Domain, ContinuousVariable
-from Orange.projection import (MDS, Isomap, LocallyLinearEmbedding,
-                               SpectralEmbedding, TSNE)
+from Orange.projection import (
+    MDS,
+    Isomap,
+    LocallyLinearEmbedding,
+    SpectralEmbedding,
+    TSNE,
+)
 from Orange.widgets.widget import OWWidget, Msg, Input, Output
 from Orange.widgets.settings import Setting, SettingProvider
 from Orange.widgets import gui
@@ -31,10 +36,18 @@ class ManifoldParametersEditor(QWidget, gui.OWComponent):
     def _create_spin_parameter(self, name, minv, maxv, label):
         self.__spin_parameter_update(name)
         return gui.spin(
-            self.main_area, self, name, minv, maxv, label=label,
-            alignment=Qt.AlignRight, callbackOnReturn=True,
-            callback=lambda f=self.__spin_parameter_update,
-                            p=name: self.__parameter_changed(f, p))
+            self.main_area,
+            self,
+            name,
+            minv,
+            maxv,
+            label=label,
+            alignment=Qt.AlignRight,
+            callbackOnReturn=True,
+            callback=lambda f=self.__spin_parameter_update, p=name: self.__parameter_changed(
+                f, p
+            ),
+        )
 
     def __spin_parameter_update(self, name):
         self.parameters[name] = getattr(self, name)
@@ -43,10 +56,16 @@ class ManifoldParametersEditor(QWidget, gui.OWComponent):
         self.__combo_parameter_update(name)
         items = (x[1] for x in getattr(self, name + "_values"))
         return gui.comboBox(
-            self.main_area, self, name + "_index", label=label, items=items,
+            self.main_area,
+            self,
+            name + "_index",
+            label=label,
+            items=items,
             orientation=Qt.Horizontal,
-            callback=lambda f=self.__combo_parameter_update,
-                            p=name: self.__parameter_changed(f, p))
+            callback=lambda f=self.__combo_parameter_update, p=name: self.__parameter_changed(
+                f, p
+            ),
+        )
 
     def __combo_parameter_update(self, name):
         index = getattr(self, name + "_index")
@@ -57,9 +76,14 @@ class ManifoldParametersEditor(QWidget, gui.OWComponent):
         self.__check_parameter_update(name)
         box = gui.hBox(self.main_area)
         return gui.checkBox(
-            box, self, name, label,
-            callback=lambda f=self.__check_parameter_update,
-                            p=name: self.__parameter_changed(f, p))
+            box,
+            self,
+            name,
+            label,
+            callback=lambda f=self.__check_parameter_update, p=name: self.__parameter_changed(
+                f, p
+            ),
+        )
 
     def __check_parameter_update(self, name):
         checked = getattr(self, name)
@@ -73,9 +97,14 @@ class ManifoldParametersEditor(QWidget, gui.OWComponent):
         box = gui.hBox(self.main_area)
         lbl = gui.label(box, self, label + ":")
         rbt = gui.radioButtons(
-            box, self, name + "_index", btnLabels=values,
-            callback=lambda f=self.__radio_parameter_update,
-                            p=name: self.__parameter_changed(f, p))
+            box,
+            self,
+            name + "_index",
+            btnLabels=values,
+            callback=lambda f=self.__radio_parameter_update, p=name: self.__parameter_changed(
+                f, p
+            ),
+        )
         rbt.layout().setAlignment(Qt.AlignTop)
         lbl.setAlignment(Qt.AlignTop)
         return rbt
@@ -104,32 +133,35 @@ class TSNEParametersEditor(ManifoldParametersEditor):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.metric_combo = self._create_combo_parameter(
-            "metric", "Metric:")
+        self.metric_combo = self._create_combo_parameter("metric", "Metric:")
         self.perplexity_spin = self._create_spin_parameter(
-            "perplexity", 1, 100, "Perplexity:")
+            "perplexity", 1, 100, "Perplexity:"
+        )
         self.early_exaggeration_spin = self._create_spin_parameter(
-            "early_exaggeration", 1, 100, "Early exaggeration:")
+            "early_exaggeration", 1, 100, "Early exaggeration:"
+        )
         self.lr_spin = self._create_spin_parameter(
-            "learning_rate", 1, 1000, "Learning rate:")
+            "learning_rate", 1, 1000, "Learning rate:"
+        )
         self.n_iter_spin = self._create_spin_parameter(
-            "n_iter", 250, 1e5, "Max iterations:")
-        self.init_radio = self._create_radio_parameter(
-            "init", "Initialization:")
+            "n_iter", 250, 1e5, "Max iterations:"
+        )
+        self.init_radio = self._create_radio_parameter("init", "Initialization:")
 
 
 class MDSParametersEditor(ManifoldParametersEditor):
     max_iter = Setting(300)
     init_type_index = Setting(0)
-    init_type_values = (("PCA", "PCA (Torgerson)"),
-                        ("random", "Random"))
+    init_type_values = (("PCA", "PCA (Torgerson)"), ("random", "Random"))
 
     def __init__(self, parent):
         super().__init__(parent)
         self.max_iter_spin = self._create_spin_parameter(
-            "max_iter", 10, 10 ** 4, "Max iterations:")
+            "max_iter", 10, 10 ** 4, "Max iterations:"
+        )
         self.random_state_radio = self._create_radio_parameter(
-            "init_type", "Initialization")
+            "init_type", "Initialization"
+        )
 
 
 class IsomapParametersEditor(ManifoldParametersEditor):
@@ -138,37 +170,42 @@ class IsomapParametersEditor(ManifoldParametersEditor):
     def __init__(self, parent):
         super().__init__(parent)
         self.n_neighbors_spin = self._create_spin_parameter(
-            "n_neighbors", 1, 10 ** 2, "Neighbors:")
+            "n_neighbors", 1, 10 ** 2, "Neighbors:"
+        )
 
 
 class LocallyLinearEmbeddingParametersEditor(ManifoldParametersEditor):
     n_neighbors = Setting(5)
     max_iter = Setting(100)
     method_index = Setting(0)
-    method_values = (("standard", "Standard"),
-                     ("modified", "Modified"),
-                     ("hessian", "Hessian eigenmap"),
-                     ("ltsa", "Local"))
+    method_values = (
+        ("standard", "Standard"),
+        ("modified", "Modified"),
+        ("hessian", "Hessian eigenmap"),
+        ("ltsa", "Local"),
+    )
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.method_combo = self._create_combo_parameter(
-            "method", "Method:")
+        self.method_combo = self._create_combo_parameter("method", "Method:")
         self.n_neighbors_spin = self._create_spin_parameter(
-            "n_neighbors", 1, 10 ** 2, "Neighbors:")
+            "n_neighbors", 1, 10 ** 2, "Neighbors:"
+        )
         self.max_iter_spin = self._create_spin_parameter(
-            "max_iter", 10, 10 ** 4, "Max iterations:")
+            "max_iter", 10, 10 ** 4, "Max iterations:"
+        )
 
 
 class SpectralEmbeddingParametersEditor(ManifoldParametersEditor):
     affinity_index = Setting(0)
-    affinity_values = (("nearest_neighbors", "Nearest neighbors"),
-                       ("rbf", "RBF kernel"))
+    affinity_values = (
+        ("nearest_neighbors", "Nearest neighbors"),
+        ("rbf", "RBF kernel"),
+    )
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.affinity_combo = self._create_combo_parameter(
-            "affinity", "Affinity:")
+        self.affinity_combo = self._create_combo_parameter("affinity", "Affinity:")
 
 
 class OWManifoldLearning(OWWidget):
@@ -183,8 +220,7 @@ class OWManifoldLearning(OWWidget):
     class Outputs:
         transformed_data = Output("Transformed data", Table, dynamic=False)
 
-    MANIFOLD_METHODS = (TSNE, MDS, Isomap, LocallyLinearEmbedding,
-                        SpectralEmbedding)
+    MANIFOLD_METHODS = (TSNE, MDS, Isomap, LocallyLinearEmbedding, SpectralEmbedding)
 
     tsne_editor = SettingProvider(TSNEParametersEditor)
     mds_editor = SettingProvider(MDSParametersEditor)
@@ -200,12 +236,15 @@ class OWManifoldLearning(OWWidget):
     auto_apply = Setting(True)
 
     class Error(OWWidget.Error):
-        n_neighbors_too_small = Msg("For chosen method and components, "
-                                    "neighbors must be greater than {}")
+        n_neighbors_too_small = Msg(
+            "For chosen method and components, " "neighbors must be greater than {}"
+        )
         manifold_error = Msg("{}")
-        sparse_methods = Msg('Only t-SNE method supported on sparse data')
-        sparse_tsne_distance = Msg('Chebyshev, Jaccard, and Mahalanobis '
-                                   'distances not supported with sparse data.')
+        sparse_methods = Msg("Only t-SNE method supported on sparse data")
+        sparse_tsne_distance = Msg(
+            "Chebyshev, Jaccard, and Mahalanobis "
+            "distances not supported with sparse data."
+        )
         out_of_memory = Msg("Out of memory")
 
     def __init__(self):
@@ -214,9 +253,12 @@ class OWManifoldLearning(OWWidget):
         # GUI
         method_box = gui.vBox(self.controlArea, "Method")
         self.manifold_methods_combo = gui.comboBox(
-            method_box, self, "manifold_method_index",
+            method_box,
+            self,
+            "manifold_method_index",
             items=[m.name for m in self.MANIFOLD_METHODS],
-            callback=self.manifold_method_changed)
+            callback=self.manifold_method_changed,
+        )
 
         self.params_box = gui.vBox(self.controlArea, "Parameters")
 
@@ -226,8 +268,12 @@ class OWManifoldLearning(OWWidget):
         self.lle_editor = LocallyLinearEmbeddingParametersEditor(self)
         self.spectral_editor = SpectralEmbeddingParametersEditor(self)
         self.parameter_editors = [
-            self.tsne_editor, self.mds_editor, self.isomap_editor,
-            self.lle_editor, self.spectral_editor]
+            self.tsne_editor,
+            self.mds_editor,
+            self.isomap_editor,
+            self.lle_editor,
+            self.spectral_editor,
+        ]
 
         for editor in self.parameter_editors:
             self.params_box.layout().addWidget(editor)
@@ -237,12 +283,19 @@ class OWManifoldLearning(OWWidget):
 
         output_box = gui.vBox(self.controlArea, "Output")
         self.n_components_spin = gui.spin(
-            output_box, self, "n_components", 1, 10, label="Components:",
-            alignment=Qt.AlignRight, callbackOnReturn=True,
-            callback=self.settings_changed)
+            output_box,
+            self,
+            "n_components",
+            1,
+            10,
+            label="Components:",
+            alignment=Qt.AlignRight,
+            callbackOnReturn=True,
+            callback=self.settings_changed,
+        )
         self.apply_button = gui.auto_commit(
-            output_box, self, "auto_apply", "&Apply",
-            box=False, commit=self.apply)
+            output_box, self, "auto_apply", "&Apply", box=False, commit=self.apply
+        )
 
     def manifold_method_changed(self):
         self.params_widget.hide()
@@ -256,8 +309,9 @@ class OWManifoldLearning(OWWidget):
     @Inputs.data
     def set_data(self, data):
         self.data = data
-        self.n_components_spin.setMaximum(len(self.data.domain.attributes)
-                                          if self.data else 10)
+        self.n_components_spin.setMaximum(
+            len(self.data.domain.attributes) if self.data else 10
+        )
         self.apply()
 
     def apply(self):
@@ -269,23 +323,26 @@ class OWManifoldLearning(OWWidget):
         self.Error.clear()
         self.Error.sparse_methods(shown=sparse_incompat)
         if have_data and not sparse_incompat:
-            domain = Domain([ContinuousVariable("C{}".format(i))
-                             for i in range(self.n_components)],
-                            data.domain.class_vars,
-                            data.domain.metas)
+            domain = Domain(
+                [ContinuousVariable("C{}".format(i)) for i in range(self.n_components)],
+                data.domain.class_vars,
+                data.domain.metas,
+            )
             try:
                 projector = method(**self.get_method_parameters(data, method))
                 X = projector(data).embedding_
                 out = Table(domain, X, data.Y, data.metas)
             except TypeError as e:
-                if 'sparse' in e.args[0] and 'distance' in e.args[0]:
+                if "sparse" in e.args[0] and "distance" in e.args[0]:
                     self.Error.sparse_tsne_distance()
                 else:
                     raise
             except ValueError as e:
-                if e.args[0] == "for method='hessian', n_neighbors " \
-                                "must be greater than [n_components" \
-                                " * (n_components + 3) / 2]":
+                if (
+                    e.args[0] == "for method='hessian', n_neighbors "
+                    "must be greater than [n_components"
+                    " * (n_components + 3) / 2]"
+                ):
                     n = self.n_components * (self.n_components + 3) / 2
                     self.Error.n_neighbors_too_small("{}".format(n))
                 else:
@@ -301,7 +358,7 @@ class OWManifoldLearning(OWWidget):
         parameters = dict(n_components=self.n_components)
         parameters.update(self.params_widget.parameters)
         if data is not None and data.is_sparse() and method == TSNE:
-            parameters.update(method='exact', init='random')
+            parameters.update(method="exact", init="random")
         return parameters
 
     def send_report(self):

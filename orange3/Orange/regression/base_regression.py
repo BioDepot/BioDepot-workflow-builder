@@ -1,7 +1,11 @@
 from Orange.base import Learner, Model, SklLearner, SklModel
 
-__all__ = ["LearnerRegression", "ModelRegression",
-           "SklModelRegression", "SklLearnerRegression"]
+__all__ = [
+    "LearnerRegression",
+    "ModelRegression",
+    "SklModelRegression",
+    "SklLearnerRegression",
+]
 
 
 class LearnerRegression(Learner):

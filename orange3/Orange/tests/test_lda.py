@@ -12,7 +12,7 @@ from Orange.data import Table
 
 class TestLDA(unittest.TestCase):
     def test_lda(self):
-        iris = Table('iris')
+        iris = Table("iris")
         n_components = 2
         lda = LDA(n_components=n_components)
         model = lda(iris)

@@ -17,32 +17,31 @@ class TestOWPythagoreanForest(WidgetTest):
         super().setUpClass()
 
         # Set up for widget tests
-        titanic_data = Table('titanic')[::50]
+        titanic_data = Table("titanic")[::50]
         cls.titanic = RandomForestLearner(n_estimators=3)(titanic_data)
         cls.titanic.instances = titanic_data
 
-        housing_data = Table('housing')[:10]
-        cls.housing = RandomForestRegressionLearner(
-            n_estimators=3)(housing_data)
+        housing_data = Table("housing")[:10]
+        cls.housing = RandomForestRegressionLearner(n_estimators=3)(housing_data)
         cls.housing.instances = housing_data
 
     def setUp(self):
-        self.widget = self.create_widget(OWPythagoreanForest)  # type: OWPythagoreanForest
+        self.widget = self.create_widget(
+            OWPythagoreanForest
+        )  # type: OWPythagoreanForest
 
     def test_migrate_version_1_settings(self):
         # Version 1 zoom ranged from 20-150, version 2 zoom ranges from 100-400
         # Test minimium value falls into the range
         widget_min_zoom = self.create_widget(
-            OWPythagoreanForest,
-            stored_settings={'zoom': 20, 'version': 2},
+            OWPythagoreanForest, stored_settings={"zoom": 20, "version": 2}
         )  # type: OWPythagoreanForest
         self.assertTrue(widget_min_zoom.zoom <= 400)
         self.assertTrue(widget_min_zoom.zoom >= 100)
 
         # Test maximum value falls into the range
         widget_max_zoom = self.create_widget(
-            OWPythagoreanForest,
-            stored_settings={'zoom': 150, 'version': 2},
+            OWPythagoreanForest, stored_settings={"zoom": 150, "version": 2}
         )  # type: OWPythagoreanForest
         self.assertTrue(widget_max_zoom.zoom <= 400)
         self.assertTrue(widget_max_zoom.zoom >= 100)
@@ -52,44 +51,62 @@ class TestOWPythagoreanForest(WidgetTest):
         trees = []
         for idx in range(len(model)):
             scene = model.data(model.index(idx), Qt.DisplayRole)
-            tree, = [item for item in scene.items()
-                     if isinstance(item, PythagorasTreeViewer)]
+            tree, = [
+                item for item in scene.items() if isinstance(item, PythagorasTreeViewer)
+            ]
             trees.append(tree)
         return trees
 
     def test_sending_rf_draws_trees(self):
         w = self.widget
         # No trees by default
-        self.assertEqual(len(self.get_tree_widgets()), 0,
-                         'No trees should be drawn when no forest on input')
+        self.assertEqual(
+            len(self.get_tree_widgets()),
+            0,
+            "No trees should be drawn when no forest on input",
+        )
 
         # Draw trees for classification rf
         self.send_signal(w.Inputs.random_forest, self.titanic)
-        self.assertEqual(len(self.get_tree_widgets()), 3,
-                         'Incorrect number of trees when forest on input')
+        self.assertEqual(
+            len(self.get_tree_widgets()),
+            3,
+            "Incorrect number of trees when forest on input",
+        )
 
         # Clear trees when None
         self.send_signal(w.Inputs.random_forest, None)
-        self.assertEqual(len(self.get_tree_widgets()), 0,
-                         'Trees are cleared when forest is disconnected')
+        self.assertEqual(
+            len(self.get_tree_widgets()),
+            0,
+            "Trees are cleared when forest is disconnected",
+        )
 
         # Draw trees for regression rf
         self.send_signal(w.Inputs.random_forest, self.housing)
-        self.assertEqual(len(self.get_tree_widgets()), 3,
-                         'Incorrect number of trees when forest on input')
+        self.assertEqual(
+            len(self.get_tree_widgets()),
+            3,
+            "Incorrect number of trees when forest on input",
+        )
 
     def test_info_label(self):
         w = self.widget
-        regex = r'Trees:(.+)'
+        regex = r"Trees:(.+)"
         # If no forest on input, display a message saying that
-        self.assertNotRegex(w.ui_info.text(), regex,
-                            'Initial info should not contain info on trees')
+        self.assertNotRegex(
+            w.ui_info.text(), regex, "Initial info should not contain info on trees"
+        )
 
         self.send_signal(w.Inputs.random_forest, self.titanic)
-        self.assertRegex(self.widget.ui_info.text(), regex, 'Valid RF does not update info')
+        self.assertRegex(
+            self.widget.ui_info.text(), regex, "Valid RF does not update info"
+        )
 
         self.send_signal(w.Inputs.random_forest, None)
-        self.assertNotRegex(w.ui_info.text(), regex, 'Removing RF does not clear info box')
+        self.assertNotRegex(
+            w.ui_info.text(), regex, "Removing RF does not clear info box"
+        )
 
     def test_depth_slider(self):
         w = self.widget
@@ -112,7 +129,7 @@ class TestOWPythagoreanForest(WidgetTest):
 
         """
         widgets = self.get_tree_widgets()
-        assert len(widgets), 'Empty list of tree widgets'
+        assert len(widgets), "Empty list of tree widgets"
         return widgets[0]
 
     def _get_visible_squares(self, tree):
@@ -134,20 +151,26 @@ class TestOWPythagoreanForest(WidgetTest):
             colors, tree = [], self._get_first_tree()
 
             def _callback():
-                colors.append([sq.brush().color() for sq in self._get_visible_squares(tree)])
+                colors.append(
+                    [sq.brush().color() for sq in self._get_visible_squares(tree)]
+                )
 
-            simulate.combobox_run_through_all(w.ui_target_class_combo, callback=_callback)
+            simulate.combobox_run_through_all(
+                w.ui_target_class_combo, callback=_callback
+            )
 
             # Check that individual squares all have different colors
             squares_same = [self._check_all_same(x) for x in zip(*colors)]
             # Check that at least some of the squares have different colors
-            self.assertTrue(any(x is False for x in squares_same),
-                            'Colors did not change for %s data' % data_type)
+            self.assertTrue(
+                any(x is False for x in squares_same),
+                "Colors did not change for %s data" % data_type,
+            )
 
         self.send_signal(w.Inputs.random_forest, self.titanic)
-        _test('classification')
+        _test("classification")
         self.send_signal(w.Inputs.random_forest, self.housing)
-        _test('regression')
+        _test("regression")
 
     def test_changing_size_adjustment_changes_sizes(self):
         w = self.widget
@@ -192,7 +215,9 @@ class TestOWPythagoreanForest(WidgetTest):
         tree = self._get_first_tree()
 
         def _callback():
-            colors.append([sq.brush().color() for sq in self._get_visible_squares(tree)])
+            colors.append(
+                [sq.brush().color() for sq in self._get_visible_squares(tree)]
+            )
 
         simulate.combobox_run_through_all(w.ui_size_calc_combo, callback=_callback)
 

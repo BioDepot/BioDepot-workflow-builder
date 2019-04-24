@@ -12,7 +12,7 @@ from Orange.classification import MajorityLearner
 class TestMajorityLearner(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.iris = Table('iris')
+        cls.iris = Table("iris")
         cls.learn = MajorityLearner()
 
     def test_majority(self):
@@ -31,7 +31,7 @@ class TestMajorityLearner(unittest.TestCase):
         nrows = 100
         ncols = 10
         x = np.random.randint(1, 5, (nrows, ncols))
-        y = np.array(70*[0] + 30*[1]).reshape((nrows, 1))
+        y = np.array(70 * [0] + 30 * [1]).reshape((nrows, 1))
         heavy_class = 1
         w = (y == heavy_class) * 2 + 1
         t = Table(x, y, W=w)
@@ -46,9 +46,9 @@ class TestMajorityLearner(unittest.TestCase):
         self.assertTrue(np.allclose(y, y.sum() / y.size))
 
     def test_missing(self):
-        iris = Table('iris')
+        iris = Table("iris")
         learn = MajorityLearner()
-        for e in iris[: len(iris) // 2: 2]:
+        for e in iris[: len(iris) // 2 : 2]:
             e.set_class("?")
         clf = learn(iris)
         y = clf(iris)
@@ -61,13 +61,13 @@ class TestMajorityLearner(unittest.TestCase):
         self.assertEqual(y.all(), 1)
 
     def test_continuous(self):
-        autompg = Table('auto-mpg')
+        autompg = Table("auto-mpg")
         learn = MajorityLearner()
         self.assertRaises(ValueError, learn, autompg)
 
     def test_returns_random_class(self):
         iris = self.iris
-        train = np.ones((150,), dtype='bool')
+        train = np.ones((150,), dtype="bool")
         train[0] = False
         majority = MajorityLearner()(iris[train])
         pred1 = majority(iris[0])

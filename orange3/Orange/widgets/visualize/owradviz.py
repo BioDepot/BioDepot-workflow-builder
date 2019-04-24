@@ -10,8 +10,14 @@ from scipy.spatial import distance
 from AnyQt.QtGui import QStandardItem, QColor, QFontMetrics
 from AnyQt.QtCore import Qt, QEvent, QSize, QRectF, QPoint
 from AnyQt.QtCore import pyqtSignal as Signal
-from AnyQt.QtWidgets import qApp, QSizePolicy, QApplication, QToolTip, QGraphicsSceneMouseEvent, \
-    QGraphicsEllipseItem
+from AnyQt.QtWidgets import (
+    qApp,
+    QSizePolicy,
+    QApplication,
+    QToolTip,
+    QGraphicsSceneMouseEvent,
+    QGraphicsEllipseItem,
+)
 
 import pyqtgraph as pg
 from pyqtgraph.graphicsItems.ScatterPlotItem import ScatterPlotItem
@@ -27,12 +33,18 @@ from Orange.widgets import widget, gui, settings
 from Orange.widgets.gui import OWComponent
 from Orange.widgets.settings import Setting
 from Orange.widgets.utils.annotated_data import (
-    create_annotated_table, ANNOTATED_DATA_SIGNAL_NAME, create_groups_table)
+    create_annotated_table,
+    ANNOTATED_DATA_SIGNAL_NAME,
+    create_groups_table,
+)
 from Orange.widgets.utils.itemmodels import VariableListModel
 from Orange.widgets.utils.plot import VariablesSelection
 from Orange.widgets.visualize.utils import VizRankDialog
-from Orange.widgets.visualize.owscatterplotgraph import OWScatterPlotGraph, InteractiveViewBox, \
-    HelpEventDelegate
+from Orange.widgets.visualize.owscatterplotgraph import (
+    OWScatterPlotGraph,
+    InteractiveViewBox,
+    HelpEventDelegate,
+)
 from Orange.widgets.visualize.utils.plotutils import TextItem
 from Orange.widgets.widget import Input, Output
 from Orange.canvas import report
@@ -59,8 +71,16 @@ class RadvizVizRank(VizRankDialog, OWComponent):
 
         box = gui.hBox(self)
         self.n_attrs_spin = gui.spin(
-            box, self, "n_attrs", 3, max_n_attrs, label="Maximum number of variables: ",
-            controlWidth=50, alignment=Qt.AlignRight, callback=self._n_attrs_changed)
+            box,
+            self,
+            "n_attrs",
+            3,
+            max_n_attrs,
+            label="Maximum number of variables: ",
+            controlWidth=50,
+            alignment=Qt.AlignRight,
+            callback=self._n_attrs_changed,
+        )
         gui.rubber(box)
         self.last_run_n_attrs = None
         self.attr_color = master.graph.attr_color
@@ -77,11 +97,18 @@ class RadvizVizRank(VizRankDialog, OWComponent):
         used by VizRank to evaluate attributes
         """
         master = self.master
-        attrs = [v for v in chain(master.model_selected[:], master.model_other[:])
-                 if v is not self.attr_color]
-        data = self.master.data.transform(Domain(attributes=attrs, class_vars=self.attr_color))
+        attrs = [
+            v
+            for v in chain(master.model_selected[:], master.model_other[:])
+            if v is not self.attr_color
+        ]
+        data = self.master.data.transform(
+            Domain(attributes=attrs, class_vars=self.attr_color)
+        )
         self.data = data
-        self.valid_data = np.hstack((~np.isnan(data.X), ~np.isnan(data.Y.reshape(len(data.Y), 1))))
+        self.valid_data = np.hstack(
+            (~np.isnan(data.X), ~np.isnan(data.Y.reshape(len(data.Y), 1)))
+        )
         relief = ReliefF if self.attr_color.is_discrete else RReliefF
         weights = relief(n_iterations=100, k_nearest=self.minK)(data)
         attrs = sorted(zip(weights, attrs), key=lambda x: (-x[0], x[1].name))
@@ -101,12 +128,16 @@ class RadvizVizRank(VizRankDialog, OWComponent):
         scores
         """
         if self.percent_data_used != 100:
-            rand = np.random.choice(len(x), int(len(x) * self.percent_data_used / 100),
-                                    replace=False)
+            rand = np.random.choice(
+                len(x), int(len(x) * self.percent_data_used / 100), replace=False
+            )
             x = x[rand]
             y = y[rand]
-        neigh = KNeighborsClassifier(n_neighbors=3) if self.attr_color.is_discrete else \
-            KNeighborsRegressor(n_neighbors=3)
+        neigh = (
+            KNeighborsClassifier(n_neighbors=3)
+            if self.attr_color.is_discrete
+            else KNeighborsRegressor(n_neighbors=3)
+        )
         assert ~(np.isnan(x).any(axis=None) | np.isnan(x).any(axis=None))
         neigh.fit(x, y)
         with warnings.catch_warnings():
@@ -126,7 +157,9 @@ class RadvizVizRank(VizRankDialog, OWComponent):
         self.button.setEnabled(self.check_preconditions())
 
     def progressBarSet(self, value, processEvents=None):
-        self.setWindowTitle(self.captionTitle + " Evaluated {} permutations".format(value))
+        self.setWindowTitle(
+            self.captionTitle + " Evaluated {} permutations".format(value)
+        )
         if processEvents is not None and processEvents is not False:
             qApp.processEvents(processEvents)
 
@@ -181,7 +214,9 @@ class RadvizVizRank(VizRankDialog, OWComponent):
 
     def row_for_state(self, score, state):
         attrs = [self.attrs[s] for s in state]
-        item = QStandardItem("[{:0.6f}] ".format(-score) + ", ".join(a.name for a in attrs))
+        item = QStandardItem(
+            "[{:0.6f}] ".format(-score) + ", ".join(a.name for a in attrs)
+        )
         item.setData(attrs, self._AttrRole)
         return [item]
 
@@ -248,7 +283,9 @@ class RadvizInteractiveViewBox(InteractiveViewBox):
                 self.mouse_state = 0
             angle = np.arctan2(pos.y(), pos.x())
             QToolTip.showText(
-                QPoint(ev.screenPos().x(), ev.screenPos().y()), "{:.2f}".format(np.rad2deg(angle)))
+                QPoint(ev.screenPos().x(), ev.screenPos().y()),
+                "{:.2f}".format(np.rad2deg(angle)),
+            )
             points[self.point_i][0] = np.cos(angle)
             points[self.point_i][1] = np.sin(angle)
             if ev.finish:
@@ -270,8 +307,8 @@ class EventDelegate(HelpEventDelegate):
         return super().eventFilter(obj, ev)
 
 
-
 SELECTION_WIDTH = 5
+
 
 class OWRadvizGraph(OWScatterPlotGraph):
     jitter_size = settings.Setting(0)
@@ -298,6 +335,7 @@ class OWRadvizGraph(OWScatterPlotGraph):
             for arcarrow in self.master.plotdata.arcarrows:
                 self.plot_widget.removeItem(arcarrow)
             self.master.plotdata.arcarrows = []
+
         def add_arc_arrows(x, y, col):
             func = self.view_box.childGroup.mapToDevice
             dx = (func(QPoint(1, 0)) - func(QPoint(-1, 0))).x()
@@ -352,15 +390,18 @@ class OWRadvizGraph(OWScatterPlotGraph):
                 text += "Attributes:\n"
                 text += "".join(
                     "   {} = {}\n".format(attr.name, self.data[index][attr])
-                    for attr in vars)
+                    for attr in vars
+                )
                 if len(vars[:]) > 10:
                     text += "   ... and {} others\n\n".format(len(vars[:]) - 12)
                 # class_var is always:
-                text += "Class:\n   {} = {}\n".format(self.domain.class_var.name,
-                                                      self.data[index][self.data.domain.class_var])
+                text += "Class:\n   {} = {}\n".format(
+                    self.domain.class_var.name,
+                    self.data[index][self.data.domain.class_var],
+                )
                 if i < len(points) - 1:
-                    text += '------------------\n'
-            text = ('<span style="white-space:pre">{}</span>'.format(escape(text)))
+                    text += "------------------\n"
+            text = '<span style="white-space:pre">{}</span>'.format(escape(text))
 
             QToolTip.showText(event.screenPos(), text, widget=self.plot_widget)
             return True
@@ -369,6 +410,7 @@ class OWRadvizGraph(OWScatterPlotGraph):
 
 RANGE = QRectF(-1.2, -1.05, 2.4, 2.1)
 MAX_POINTS = 100
+
 
 class OWRadviz(widget.OWWidget):
     name = "Radviz"
@@ -409,7 +451,9 @@ class OWRadviz(widget.OWWidget):
 
     class Error(widget.OWWidget.Error):
         sparse_data = widget.Msg("Sparse data is not supported")
-        no_features = widget.Msg("At least 3 numeric or categorical variables are required")
+        no_features = widget.Msg(
+            "At least 3 numeric or categorical variables are required"
+        )
         no_instances = widget.Msg("At least 2 data instances are required")
 
     def __init__(self):
@@ -440,7 +484,8 @@ class OWRadviz(widget.OWWidget):
         self.variables_selection(self, self.model_selected, self.model_other)
 
         self.vizrank, self.btn_vizrank = RadvizVizRank.add_vizrank(
-            self.controlArea, self, "Suggest features", self.vizrank_set_attrs)
+            self.controlArea, self, "Suggest features", self.vizrank_set_attrs
+        )
         self.btn_vizrank.setSizePolicy(*SIZE_POLICY)
         self.variables_selection.add_remove.layout().addWidget(self.btn_vizrank)
 
@@ -466,13 +511,18 @@ class OWRadviz(widget.OWWidget):
         p = self.graph.plot_widget.palette()
         self.graph.set_palette(p)
 
-        gui.auto_commit(self.controlArea, self, "auto_commit", "Send Selection",
-                        auto_label="Send Automatically")
+        gui.auto_commit(
+            self.controlArea,
+            self,
+            "auto_commit",
+            "Send Selection",
+            auto_label="Send Automatically",
+        )
 
         self.graph.zoom_actions(self)
 
         self._circle = QGraphicsEllipseItem()
-        self._circle.setRect(QRectF(-1., -1., 2., 2.))
+        self._circle.setRect(QRectF(-1.0, -1.0, 2.0, 2.0))
         self._circle.setPen(pg.mkPen(QColor(0, 0, 0), width=2))
 
     def resizeEvent(self, event):
@@ -530,18 +580,28 @@ class OWRadviz(widget.OWWidget):
         """
         if not self.__replot_requested:
             self.__replot_requested = True
-            QApplication.postEvent(self, QEvent(self.ReplotRequest), Qt.LowEventPriority - 10)
+            QApplication.postEvent(
+                self, QEvent(self.ReplotRequest), Qt.LowEventPriority - 10
+            )
 
     def init_attr_values(self):
         self.graph.set_domain(self.data)
 
     def _vizrank_color_change(self):
         attr_color = self.graph.attr_color
-        is_enabled = self.data is not None and not self.data.is_sparse() and \
-                     (len(self.model_other) + len(self.model_selected)) > 3 and len(self.data) > 1
+        is_enabled = (
+            self.data is not None
+            and not self.data.is_sparse()
+            and (len(self.model_other) + len(self.model_selected)) > 3
+            and len(self.data) > 1
+        )
         self.btn_vizrank.setEnabled(
-            is_enabled and attr_color is not None
-            and not np.isnan(self.data.get_column_view(attr_color)[0].astype(float)).all())
+            is_enabled
+            and attr_color is not None
+            and not np.isnan(
+                self.data.get_column_view(attr_color)[0].astype(float)
+            ).all()
+        )
         self.vizrank.initialize()
 
     @Inputs.data
@@ -552,6 +612,7 @@ class OWRadviz(widget.OWWidget):
         Args:
             data (Orange.data.table): data instances
         """
+
         def sql(data):
             self.Information.sql_sampled_data.clear()
             if isinstance(data, SqlTable):
@@ -569,12 +630,14 @@ class OWRadviz(widget.OWWidget):
             state = VariablesSelection.encode_var_state(
                 [list(self.model_selected), list(self.model_other)]
             )
-            state = {key: (source_ind, np.inf) for key, (source_ind, _) in state.items()}
+            state = {
+                key: (source_ind, np.inf) for key, (source_ind, _) in state.items()
+            }
 
             self.openContext(data.domain)
-            selected_keys = [key
-                             for key, (sind, _) in self.variable_state.items()
-                             if sind == 0]
+            selected_keys = [
+                key for key, (sind, _) in self.variable_state.items() if sind == 0
+            ]
 
             if set(selected_keys).issubset(set(state.keys())):
                 pass
@@ -585,7 +648,8 @@ class OWRadviz(widget.OWWidget):
             # ... and restore it with saved positions taking precedence over
             # the defaults
             selected, other = VariablesSelection.decode_var_state(
-                state, [list(self.model_selected), list(self.model_other)])
+                state, [list(self.model_selected), list(self.model_other)]
+            )
             return selected, other
 
         def is_sparse(data):
@@ -596,8 +660,11 @@ class OWRadviz(widget.OWWidget):
 
         def are_features(data):
             domain = data.domain
-            vars = [var for var in chain(domain.class_vars, domain.metas, domain.attributes)
-                    if var.is_primitive()]
+            vars = [
+                var
+                for var in chain(domain.class_vars, domain.metas, domain.attributes)
+                if var.is_primitive()
+            ]
             if len(vars) < 3:
                 self.Error.no_features()
                 data = None
@@ -624,8 +691,9 @@ class OWRadviz(widget.OWWidget):
             self.data = data
             self.init_attr_values()
             domain = data.domain
-            vars = [v for v in chain(domain.metas, domain.attributes)
-                    if v.is_primitive()]
+            vars = [
+                v for v in chain(domain.metas, domain.attributes) if v.is_primitive()
+            ]
             self.model_selected[:] = vars[:5]
             self.model_other[:] = vars[5:] + list(domain.class_vars)
             self.model_selected[:], self.model_other[:] = settings(data)
@@ -652,8 +720,7 @@ class OWRadviz(widget.OWWidget):
             if self.subset_data is not None and self._subset_mask is None:
                 dataids = self.data.ids.ravel()
                 subsetids = np.unique(self.subset_data.ids)
-                self._subset_mask = np.in1d(
-                    dataids, subsetids, assume_unique=True)
+                self._subset_mask = np.in1d(dataids, subsetids, assume_unique=True)
             self.setup_plot(reset_view=True)
             self.cb_class_density.setEnabled(self.graph.can_draw_density())
         else:
@@ -702,17 +769,20 @@ class OWRadviz(widget.OWWidget):
 
         domain = self.data.domain
         new_metas = domain.metas + (self.variable_x, self.variable_y)
-        domain = Domain(attributes=domain.attributes,
-                        class_vars=domain.class_vars,
-                        metas=new_metas)
+        domain = Domain(
+            attributes=domain.attributes, class_vars=domain.class_vars, metas=new_metas
+        )
         mask = self.plotdata.valid_mask
         array = np.zeros((len(self.data), 2), dtype=np.float)
         array[mask] = self.plotdata.embedding_coords
         data = self.data.transform(domain)
         data[:, self.variable_x] = array[:, 0].reshape(-1, 1)
         data[:, self.variable_y] = array[:, 1].reshape(-1, 1)
-        subset_data = data[self._subset_mask & mask]\
-            if self._subset_mask is not None and len(self._subset_mask) else None
+        subset_data = (
+            data[self._subset_mask & mask]
+            if self._subset_mask is not None and len(self._subset_mask)
+            else None
+        )
         self.plotdata.data = data
         self.graph.new_data(data[mask], subset_data)
         if self._selection is not None:
@@ -720,16 +790,18 @@ class OWRadviz(widget.OWWidget):
         self.graph.update_data(self.variable_x, self.variable_y, reset_view=reset_view)
         self.graph.plot_widget.addItem(self._circle)
         self.graph.scatterplot_points = ScatterPlotItem(
-            x=self.plotdata.points[:, 0],
-            y=self.plotdata.points[:, 1]
+            x=self.plotdata.points[:, 0], y=self.plotdata.points[:, 1]
         )
         self._update_points_labels()
         self.graph.plot_widget.addItem(self.graph.scatterplot_points)
 
     def randomize_indices(self):
         ec = self.plotdata.embedding_coords
-        self.plotdata.rand = np.random.choice(len(ec), MAX_POINTS, replace=False) \
-            if len(ec) > MAX_POINTS else None
+        self.plotdata.rand = (
+            np.random.choice(len(ec), MAX_POINTS, replace=False)
+            if len(ec) > MAX_POINTS
+            else None
+        )
 
     def manual_move(self):
         self.__replot_requested = False
@@ -740,7 +812,9 @@ class OWRadviz(widget.OWWidget):
             data = self.data[valid_mask]
             selection = self._selection[valid_mask]
             selection = selection[rand]
-            ec, _, valid_mask = radviz(data, list(self.model_selected), self.plotdata.points)
+            ec, _, valid_mask = radviz(
+                data, list(self.model_selected), self.plotdata.points
+            )
             assert sum(valid_mask) == len(data)
             data = data[rand]
             ec = ec[rand]
@@ -757,16 +831,21 @@ class OWRadviz(widget.OWWidget):
             selection = self._selection[valid_mask]
 
         attributes = (self.variable_x, self.variable_y) + self.data.domain.attributes
-        domain = Domain(attributes=attributes,
-                        class_vars=self.data.domain.class_vars,
-                        metas=self.data.domain.metas)
-        data = Table.from_numpy(domain, X=np.hstack((ec, data_x)), Y=data_y, metas=data_metas)
+        domain = Domain(
+            attributes=attributes,
+            class_vars=self.data.domain.class_vars,
+            metas=self.data.domain.metas,
+        )
+        data = Table.from_numpy(
+            domain, X=np.hstack((ec, data_x)), Y=data_y, metas=data_metas
+        )
         self.graph.new_data(data, None)
         self.graph.selection = selection
         self.graph.update_data(self.variable_x, self.variable_y, reset_view=True)
         self.graph.plot_widget.addItem(self._circle)
         self.graph.scatterplot_points = ScatterPlotItem(
-            x=self.plotdata.points[:, 0], y=self.plotdata.points[:, 1])
+            x=self.plotdata.points[:, 0], y=self.plotdata.points[:, 1]
+        )
         self._update_points_labels()
         self.graph.plot_widget.addItem(self.graph.scatterplot_points)
 
@@ -781,13 +860,15 @@ class OWRadviz(widget.OWWidget):
         for row in self.plotdata.points:
             ti = TextItem()
             metrics = QFontMetrics(ti.textItem.font())
-            text_width = ((RANGE.width())/2. - np.abs(row[0])) / sx
+            text_width = ((RANGE.width()) / 2.0 - np.abs(row[0])) / sx
             name = row[2].name
             ti.setText(name)
             ti.setTextWidth(text_width)
             ti.setColor(QColor(0, 0, 0))
             br = ti.boundingRect()
-            width = metrics.width(name) if metrics.width(name) < br.width() else br.width()
+            width = (
+                metrics.width(name) if metrics.width(name) < br.width() else br.width()
+            )
             width = sx * (width + 5)
             height = sy * br.height()
             ti.setPos(row[0] - (row[0] < 0) * width, row[1] + (row[1] > 0) * height)
@@ -826,9 +907,12 @@ class OWRadviz(widget.OWWidget):
             name = self.data.name
             data = self.plotdata.data
             mask = self.plotdata.valid_mask.astype(int)
-            mask[mask == 1] = graph.selection if graph.selection is not None \
-                else [False * len(mask)]
-            selection = np.array([], dtype=np.uint8) if mask is None else np.flatnonzero(mask)
+            mask[mask == 1] = (
+                graph.selection if graph.selection is not None else [False * len(mask)]
+            )
+            selection = (
+                np.array([], dtype=np.uint8) if mask is None else np.flatnonzero(mask)
+            )
             if len(selection):
                 selected = data[selection]
                 selected.name = name + ": selected"
@@ -841,16 +925,19 @@ class OWRadviz(widget.OWWidget):
             annotated.name = name + ": annotated"
 
             comp_domain = Domain(
-                self.plotdata.points[:, 2],
-                metas=[StringVariable(name='component')])
+                self.plotdata.points[:, 2], metas=[StringVariable(name="component")]
+            )
 
             metas = np.array([["RX"], ["RY"], ["angle"]])
-            angle = np.arctan2(np.array(self.plotdata.points[:, 1].T, dtype=float),
-                               np.array(self.plotdata.points[:, 0].T, dtype=float))
+            angle = np.arctan2(
+                np.array(self.plotdata.points[:, 1].T, dtype=float),
+                np.array(self.plotdata.points[:, 0].T, dtype=float),
+            )
             components = Table.from_numpy(
                 comp_domain,
                 X=np.row_stack((self.plotdata.points[:, :2].T, angle)),
-                metas=metas)
+                metas=metas,
+            )
             components.name = name + ": components"
 
         self.Outputs.selected_data.send(selected)
@@ -864,12 +951,19 @@ class OWRadviz(widget.OWWidget):
         def name(var):
             return var and var.name
 
-        caption = report.render_items_vert((
-            ("Color", name(self.graph.attr_color)),
-            ("Label", name(self.graph.attr_label)),
-            ("Shape", name(self.graph.attr_shape)),
-            ("Size", name(self.graph.attr_size)),
-            ("Jittering", self.graph.jitter_size != 0 and "{} %".format(self.graph.jitter_size))))
+        caption = report.render_items_vert(
+            (
+                ("Color", name(self.graph.attr_color)),
+                ("Label", name(self.graph.attr_label)),
+                ("Shape", name(self.graph.attr_shape)),
+                ("Size", name(self.graph.attr_size)),
+                (
+                    "Jittering",
+                    self.graph.jitter_size != 0
+                    and "{} %".format(self.graph.jitter_size),
+                ),
+            )
+        )
         self.report_plot()
         if caption:
             self.report_caption(caption)
@@ -884,18 +978,22 @@ def add_arc(angle, col, dangle=5):
     angle_2 = 90 - angle_d - dangle
     angle_1 = 270 - angle_d + dangle
     dangle = np.deg2rad(dangle)
-    arrow1 = pg.ArrowItem(parent=None, angle=angle_1, brush=color, pen=pg.mkPen(color, width=1))
+    arrow1 = pg.ArrowItem(
+        parent=None, angle=angle_1, brush=color, pen=pg.mkPen(color, width=1)
+    )
     arrow1.setPos(np.cos(angle - dangle), np.sin(angle - dangle))
-    arrow2 = pg.ArrowItem(parent=None, angle=angle_2, brush=color, pen=pg.mkPen(color, width=1))
+    arrow2 = pg.ArrowItem(
+        parent=None, angle=angle_2, brush=color, pen=pg.mkPen(color, width=1)
+    )
     arrow2.setPos(np.cos(angle + dangle), np.sin(angle + dangle))
-    arc_x = np.fromfunction(lambda i: np.cos((angle - dangle) + (2 * dangle) * i / 120.), (121,),
-                            dtype=int)
-    arc_y = np.fromfunction(lambda i: np.sin((angle - dangle) + (2 * dangle) * i / 120.), (121,),
-                            dtype=int)
+    arc_x = np.fromfunction(
+        lambda i: np.cos((angle - dangle) + (2 * dangle) * i / 120.0), (121,), dtype=int
+    )
+    arc_y = np.fromfunction(
+        lambda i: np.sin((angle - dangle) + (2 * dangle) * i / 120.0), (121,), dtype=int
+    )
     arc = pg.PlotCurveItem(
-        x=arc_x, y=arc_y,
-        pen=pg.mkPen(color, width=1),
-        antialias=False
+        x=arc_x, y=arc_y, pen=pg.mkPen(color, width=1), antialias=False
     )
     return [arc, arrow1, arrow2]
 
@@ -929,4 +1027,5 @@ def main(argv=None):
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

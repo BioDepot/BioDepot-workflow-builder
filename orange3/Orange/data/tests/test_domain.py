@@ -7,8 +7,7 @@ from Orange.util import OrangeDeprecationWarning
 class DomainTest(unittest.TestCase):
     def test_bool_raises_warning(self):
         self.assertWarns(OrangeDeprecationWarning, bool, Domain([]))
-        self.assertWarns(OrangeDeprecationWarning, bool,
-                         Domain([ContinuousVariable()]))
+        self.assertWarns(OrangeDeprecationWarning, bool, Domain([ContinuousVariable()]))
 
     def test_empty(self):
         var = ContinuousVariable()

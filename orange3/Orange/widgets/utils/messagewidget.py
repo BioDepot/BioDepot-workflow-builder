@@ -5,18 +5,32 @@ from itertools import chain
 from operator import attrgetter
 from xml.sax.saxutils import escape
 from collections import OrderedDict
+
 # pylint: disable=unused-import
-from typing import (
-    NamedTuple, Tuple, List, Dict, Iterable, Union, Optional, Hashable
-)
+from typing import NamedTuple, Tuple, List, Dict, Iterable, Union, Optional, Hashable
 
 from AnyQt.QtCore import Qt, QSize, QBuffer
 from AnyQt.QtGui import (
-    QIcon, QPixmap, QPainter, QPalette, QLinearGradient, QBrush, QPen
+    QIcon,
+    QPixmap,
+    QPainter,
+    QPalette,
+    QLinearGradient,
+    QBrush,
+    QPen,
 )
 from AnyQt.QtWidgets import (
-    QWidget, QLabel, QSizePolicy, QStyle, QHBoxLayout, QMessageBox,
-    QMenu, QWidgetAction, QStyleOption, QStylePainter, QApplication
+    QWidget,
+    QLabel,
+    QSizePolicy,
+    QStyle,
+    QHBoxLayout,
+    QMessageBox,
+    QMenu,
+    QWidgetAction,
+    QStyleOption,
+    QStylePainter,
+    QApplication,
 )
 from AnyQt.QtCore import pyqtSignal as Signal
 
@@ -39,7 +53,7 @@ def image_data(pm):
     pm = QPixmap(pm)
     device = QBuffer()
     assert device.open(QBuffer.ReadWrite)
-    pm.save(device, b'png')
+    pm.save(device, b"png")
     device.close()
     data = bytes(device.data())
     payload = base64.b64encode(data).decode("ascii")
@@ -50,21 +64,25 @@ class Severity(enum.IntEnum):
     """
     Message severity level.
     """
+
     Information = QMessageBox.Information
     Warning = QMessageBox.Warning
     Error = QMessageBox.Critical
 
 
 class Message(
-        NamedTuple(
-            "Message", [
-                ("severity", Severity),
-                ("icon", QIcon),
-                ("text", str),
-                ("informativeText", str),
-                ("detailedText", str),
-                ("textFormat", Qt.TextFormat)
-            ])):
+    NamedTuple(
+        "Message",
+        [
+            ("severity", Severity),
+            ("icon", QIcon),
+            ("text", str),
+            ("informativeText", str),
+            ("detailedText", str),
+            ("textFormat", Qt.TextFormat),
+        ],
+    )
+):
     """
     A stateful message/notification.
 
@@ -86,15 +104,30 @@ class Message(
         `detailedText` will be rendered as html instead of plain text.
 
     """
+
     Severity = Severity
     Warning = Severity.Warning
     Information = Severity.Information
     Error = Severity.Error
 
-    def __new__(cls, severity=Severity.Information, icon=QIcon(), text="",
-                informativeText="", detailedText="", textFormat=Qt.PlainText):
-        return super().__new__(cls, Severity(severity), icon, text,
-                               informativeText, detailedText, textFormat)
+    def __new__(
+        cls,
+        severity=Severity.Information,
+        icon=QIcon(),
+        text="",
+        informativeText="",
+        detailedText="",
+        textFormat=Qt.PlainText,
+    ):
+        return super().__new__(
+            cls,
+            Severity(severity),
+            icon,
+            text,
+            informativeText,
+            detailedText,
+            textFormat,
+        )
 
     def asHtml(self):
         # type: () -> str
@@ -104,8 +137,9 @@ class Message(
         if self.textFormat == Qt.RichText:
             render = lambda t: t
         else:
-            render = lambda t: ('<span style="white-space: pre">{}</span>'
-                                .format(escape(t)))
+            render = lambda t: (
+                '<span style="white-space: pre">{}</span>'.format(escape(t))
+            )
 
         def iconsrc(message):
             # type: (Message) -> str
@@ -117,19 +151,31 @@ class Message(
             return image_data(pm)
 
         parts = [
-            ('<div style="white-space:pre" class="message {}">'
-             .format(self.severity.name.lower())),
-            ('<div class="field-text">'
-             '<img src="{iconurl}" width="12" height="12" />{text}</div>'
-             .format(iconurl=iconsrc(self), text=render(self.text)))
+            (
+                '<div style="white-space:pre" class="message {}">'.format(
+                    self.severity.name.lower()
+                )
+            ),
+            (
+                '<div class="field-text">'
+                '<img src="{iconurl}" width="12" height="12" />{text}</div>'.format(
+                    iconurl=iconsrc(self), text=render(self.text)
+                )
+            ),
         ]
         if self.informativeText:
-            parts += ['<div class="field-informative-text">{}</div>'
-                      .format(render(self.informativeText))]
+            parts += [
+                '<div class="field-informative-text">{}</div>'.format(
+                    render(self.informativeText)
+                )
+            ]
         if self.detailedText:
-            parts += ['<blockquote class="field-detailed-text">{}</blockquote>'
-                      .format(render(self.detailedText))]
-        parts += ['</div>']
+            parts += [
+                '<blockquote class="field-detailed-text">{}</blockquote>'.format(
+                    render(self.detailedText)
+                )
+            ]
+        parts += ["</div>"]
         return "\n".join(parts)
 
     def isEmpty(self):
@@ -137,8 +183,12 @@ class Message(
         """
         Is this message instance empty (has no text or icon)
         """
-        return (not self.text and self.icon.isNull() and
-                not self.informativeText and not self.detailedText)
+        return (
+            not self.text
+            and self.icon.isNull()
+            and not self.informativeText
+            and not self.detailedText
+        )
 
 
 def standard_pixmap(severity):
@@ -242,9 +292,10 @@ def summarize(messages):
         severity = Severity.Warning
 
     def format_plural(fstr, items, *args, **kwargs):
-        return fstr.format(len(items), *args,
-                           s="s" if len(items) != 1 else "",
-                           **kwargs)
+        return fstr.format(
+            len(items), *args, s="s" if len(items) != 1 else "", **kwargs
+        )
+
     if errors:
         text_parts.append(format_plural("{} error{s}", errors))
     if warnings:
@@ -261,11 +312,12 @@ def summarize(messages):
             text = text + " (" + ", ".join(text_parts) + ")"
     else:
         text = ", ".join(text_parts)
-    detailed = "<hr/>".join(m.asHtml()
-                            for m in chain([lead], errors, warnings, info)
-                            if m is not None and not m.isEmpty())
-    return Message(severity, icon, text, detailedText=detailed,
-                   textFormat=Qt.RichText)
+    detailed = "<hr/>".join(
+        m.asHtml()
+        for m in chain([lead], errors, warnings, info)
+        if m is not None and not m.isEmpty()
+    )
+    return Message(severity, icon, text, detailedText=detailed, textFormat=Qt.RichText)
 
 
 class MessagesWidget(QWidget):
@@ -276,6 +328,7 @@ class MessagesWidget(QWidget):
     are multiple messages they are summarized. The user can click on the
     widget to display the full message text in a popup view.
     """
+
     #: Signal emitted when an embedded html link is clicked
     #: (if `openExternalLinks` is `False`).
     linkActivated = Signal(str)
@@ -295,8 +348,7 @@ class MessagesWidget(QWidget):
 
     def __init__(self, parent=None, openExternalLinks=False, **kwargs):
         kwargs.setdefault(
-            "sizePolicy",
-            QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+            "sizePolicy", QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
         )
         super().__init__(parent, **kwargs)
         self.__openExternalLinks = openExternalLinks  # type: bool
@@ -316,7 +368,7 @@ class MessagesWidget(QWidget):
             wordWrap=False,
             textInteractionFlags=Qt.LinksAccessibleByMouse,
             openExternalLinks=self.__openExternalLinks,
-            sizePolicy=QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
+            sizePolicy=QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum),
         )
         #: Indicator that extended contents are accessible with a click on the
         #: widget.
@@ -431,8 +483,7 @@ class MessagesWidget(QWidget):
         self.__textlabel.setText(summary.text)
         messages = [m for m in self.__messages.values() if not m.isEmpty()]
         if messages:
-            messages = sorted(messages, key=attrgetter("severity"),
-                              reverse=True)
+            messages = sorted(messages, key=attrgetter("severity"), reverse=True)
             fulltext = "<hr/>".join(m.asHtml() for m in messages)
         else:
             fulltext = ""
@@ -454,9 +505,10 @@ class MessagesWidget(QWidget):
             if self.__popuptext:
                 popup = QMenu(self)
                 label = QLabel(
-                    self, textInteractionFlags=Qt.TextBrowserInteraction,
+                    self,
+                    textInteractionFlags=Qt.TextBrowserInteraction,
                     openExternalLinks=self.__openExternalLinks,
-                    text=self.__popuptext
+                    text=self.__popuptext,
                 )
                 label.linkActivated.connect(self.linkActivated)
                 label.linkHovered.connect(self.linkHovered)
@@ -487,8 +539,9 @@ class MessagesWidget(QWidget):
         if not self.__popupicon.isVisible():
             return
 
-        if not (opt.state & QStyle.State_MouseOver or
-                opt.state & QStyle.State_HasFocus):
+        if not (
+            opt.state & QStyle.State_MouseOver or opt.state & QStyle.State_HasFocus
+        ):
             return
 
         palette = opt.palette  # type: QPalette
@@ -497,9 +550,11 @@ class MessagesWidget(QWidget):
         else:
             pen = QPen(palette.color(QPalette.Dark))
 
-        if self.__fulltext and \
-                opt.state & QStyle.State_MouseOver and \
-                opt.state & QStyle.State_Active:
+        if (
+            self.__fulltext
+            and opt.state & QStyle.State_MouseOver
+            and opt.state & QStyle.State_Active
+        ):
             g = QLinearGradient()
             g.setCoordinateMode(QLinearGradient.ObjectBoundingMode)
             base = palette.color(QPalette.Window)
@@ -520,9 +575,11 @@ class IconWidget(QWidget):
     """
     A widget displaying an `QIcon`
     """
+
     def __init__(self, parent=None, icon=QIcon(), iconSize=QSize(), **kwargs):
-        sizePolicy = kwargs.pop("sizePolicy", QSizePolicy(QSizePolicy.Fixed,
-                                                          QSizePolicy.Fixed))
+        sizePolicy = kwargs.pop(
+            "sizePolicy", QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        )
         super().__init__(parent, **kwargs)
         self.__icon = QIcon(icon)
         self.__iconSize = QSize(iconSize)
@@ -557,8 +614,9 @@ class IconWidget(QWidget):
     def sizeHint(self):
         sh = self.iconSize()
         m = self.contentsMargins()
-        return QSize(sh.width() + m.left() + m.right(),
-                     sh.height() + m.top() + m.bottom())
+        return QSize(
+            sh.width() + m.left() + m.right(), sh.height() + m.top() + m.bottom()
+        )
 
     def paintEvent(self, event):
         painter = QStylePainter(self)
@@ -577,6 +635,7 @@ class IconWidget(QWidget):
 
 def main(argv=None):  # pragma: no cover
     from AnyQt.QtWidgets import QVBoxLayout, QCheckBox, QStatusBar
+
     app = QApplication(list(argv) if argv else [])
     l1 = QVBoxLayout()
     l1.setContentsMargins(0, 0, 0, 0)
@@ -587,27 +646,36 @@ def main(argv=None):  # pragma: no cover
     w = QWidget()
     w.setLayout(l1)
     messages = [
-        Message(Severity.Error, text="Encountered a HCF",
-                detailedText="<em>AAA! It burns.</em>",
-                textFormat=Qt.RichText),
-        Message(Severity.Warning,
-                text="ACHTUNG!",
-                detailedText=(
-                    "<div style=\"color: red\">DAS KOMPUTERMASCHINE IST "
-                    "NICHT FÜR DER GEFINGERPOKEN</div>"
-                ),
-                textFormat=Qt.RichText),
-        Message(Severity.Information,
-                text="The rain in spain falls mostly on the plain",
-                informativeText=(
-                    "<a href=\"https://www.google.si/search?q="
-                    "Average+Yearly+Precipitation+in+Spain\">Link</a>"
-                ),
-                textFormat=Qt.RichText),
-        Message(Severity.Error,
-                text="I did not do this!",
-                informativeText="The computer made suggestions...",
-                detailedText="... and the default options was yes."),
+        Message(
+            Severity.Error,
+            text="Encountered a HCF",
+            detailedText="<em>AAA! It burns.</em>",
+            textFormat=Qt.RichText,
+        ),
+        Message(
+            Severity.Warning,
+            text="ACHTUNG!",
+            detailedText=(
+                '<div style="color: red">DAS KOMPUTERMASCHINE IST '
+                "NICHT FÜR DER GEFINGERPOKEN</div>"
+            ),
+            textFormat=Qt.RichText,
+        ),
+        Message(
+            Severity.Information,
+            text="The rain in spain falls mostly on the plain",
+            informativeText=(
+                '<a href="https://www.google.si/search?q='
+                'Average+Yearly+Precipitation+in+Spain">Link</a>'
+            ),
+            textFormat=Qt.RichText,
+        ),
+        Message(
+            Severity.Error,
+            text="I did not do this!",
+            informativeText="The computer made suggestions...",
+            detailedText="... and the default options was yes.",
+        ),
         Message(),
     ]
     mw = MessagesWidget(openExternalLinks=True)
@@ -619,6 +687,7 @@ def main(argv=None):  # pragma: no cover
                 mw.setMessage(i, m)
             else:
                 mw.removeMessage(i)
+
         cb.toggled[bool].connect(toogled)
         blayout.addWidget(cb)
 
@@ -626,6 +695,7 @@ def main(argv=None):  # pragma: no cover
     w.layout().addWidget(sb, 0)
     w.show()
     return app.exec_()
+
 
 if __name__ == "__main__":  # pragma: no cover
     sys.exit(main(sys.argv))

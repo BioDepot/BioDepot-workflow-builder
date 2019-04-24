@@ -10,7 +10,11 @@ from AnyQt.QtCore import Qt, QObject, QCoreApplication, QThread, pyqtSlot
 from AnyQt.QtTest import QSignalSpy
 
 from Orange.widgets.utils.concurrent import (
-    ThreadExecutor, FutureWatcher, FutureSetWatcher, Task, methodinvoke
+    ThreadExecutor,
+    FutureWatcher,
+    FutureSetWatcher,
+    Task,
+    methodinvoke,
 )
 
 
@@ -62,11 +66,17 @@ class TestExecutor(CoreAppTestCase):
         # So invoked method can be called from the event loop
         self.app.processEvents()
 
-        self.assertIs(state[1], QThread.currentThread(),
-                      "set_state was called from the wrong thread")
+        self.assertIs(
+            state[1],
+            QThread.currentThread(),
+            "set_state was called from the wrong thread",
+        )
 
-        self.assertIsNot(state[0], QThread.currentThread(),
-                         "set_state was invoked in the main thread")
+        self.assertIsNot(
+            state[0],
+            QThread.currentThread(),
+            "set_state was invoked in the main thread",
+        )
 
         executor.shutdown(wait=True)
 
@@ -89,7 +99,7 @@ class TestFutureWatcher(CoreAppTestCase):
                 finished=QSignalSpy(w.finished),
                 result=QSignalSpy(w.resultReady),
                 error=QSignalSpy(w.exceptionReady),
-                cancelled=QSignalSpy(w.cancelled)
+                cancelled=QSignalSpy(w.cancelled),
             )
 
         spy = spies(w)
@@ -101,7 +111,7 @@ class TestFutureWatcher(CoreAppTestCase):
         self.assertEqual(list(spy.error), [])
         self.assertEqual(list(spy.cancelled), [])
 
-        f = executor.submit(lambda: 1/0)
+        f = executor.submit(lambda: 1 / 0)
         w = FutureWatcher(f)
         spy = spies(w)
 
@@ -147,8 +157,7 @@ class TestFutureSetWatcher(CoreAppTestCase):
             )
 
         executor = ThreadPoolExecutor(max_workers=5)
-        fs = [executor.submit(lambda i: "Hello {}".format(i), i)
-              for i in range(10)]
+        fs = [executor.submit(lambda i: "Hello {}".format(i), i) for i in range(10)]
         w = FutureSetWatcher(fs)
         spy = spies(w)
 
@@ -176,10 +185,8 @@ class TestFutureSetWatcher(CoreAppTestCase):
         self.assertSetEqual(as_set(spy.doneAt), set(enumerate(fs)))
         self.assertSetEqual(as_set(spy.finishedAt), set(enumerate(fs)))
         self.assertSetEqual(as_set(spy.cancelledAt), set())
-        results = {(i, f.result())
-                   for i, f in enumerate(fs) if not f.exception()}
-        exceptions = {(i, f.exception())
-                      for i, f in enumerate(fs) if f.exception()}
+        results = {(i, f.result()) for i, f in enumerate(fs) if not f.exception()}
+        exceptions = {(i, f.exception()) for i, f in enumerate(fs) if f.exception()}
         assert len(results | exceptions) == len(fs)
         self.assertSetEqual(as_set(spy.resultAt), results)
         self.assertSetEqual(as_set(spy.exceptionAt), exceptions)
@@ -208,7 +215,7 @@ class TestFutureSetWatcher(CoreAppTestCase):
         watcher = FutureSetWatcher(futures)
         emithistory = []
         watcher.doneAt.connect(lambda i, f: emithistory.append(("doneAt", i, f)))
-        watcher.doneAll.connect(lambda: emithistory.append(("doneAll", )))
+        watcher.doneAll.connect(lambda: emithistory.append(("doneAll",)))
 
         spy = spies(watcher)
         watcher.wait()
@@ -217,8 +224,9 @@ class TestFutureSetWatcher(CoreAppTestCase):
         watcher.flush()
         self.assertEqual(len(spy.doneAt), 100)
         self.assertEqual(list(spy.doneAll), [[]])
-        self.assertSetEqual(set(emithistory[:-1]),
-                            {("doneAt", i, f) for i, f in enumerate(futures)})
+        self.assertSetEqual(
+            set(emithistory[:-1]), {("doneAt", i, f) for i, f in enumerate(futures)}
+        )
         self.assertEqual(emithistory[-1], ("doneAll",))
 
         # doneAll must be emitted even when on an empty futures list
@@ -235,13 +243,13 @@ class TestFutureSetWatcher(CoreAppTestCase):
         with self.assertRaises(RuntimeError):
             watcher.wait()
 
-        with unittest.mock.patch.object(watcher, "thread", lambda: 42), \
-                self.assertRaises(RuntimeError):
+        with unittest.mock.patch.object(
+            watcher, "thread", lambda: 42
+        ), self.assertRaises(RuntimeError):
             watcher.flush()
 
 
 class TestTask(CoreAppTestCase):
-
     def test_task(self):
         results = []
 

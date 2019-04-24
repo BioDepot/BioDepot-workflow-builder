@@ -40,34 +40,48 @@ class OWRandomize(OWWidget):
         box = gui.hBox(self.controlArea, "Shuffled columns")
         box.layout().setSpacing(20)
         self.class_check = gui.checkBox(
-            box, self, "shuffle_class", "Classes",
-            callback=self._shuffle_check_changed)
+            box, self, "shuffle_class", "Classes", callback=self._shuffle_check_changed
+        )
         self.attrs_check = gui.checkBox(
-            box, self, "shuffle_attrs", "Features",
-            callback=self._shuffle_check_changed)
+            box, self, "shuffle_attrs", "Features", callback=self._shuffle_check_changed
+        )
         self.metas_check = gui.checkBox(
-            box, self, "shuffle_metas", "Metas",
-            callback=self._shuffle_check_changed)
+            box, self, "shuffle_metas", "Metas", callback=self._shuffle_check_changed
+        )
 
         box = gui.vBox(self.controlArea, "Shuffled rows")
         hbox = gui.hBox(box)
         gui.widgetLabel(hbox, "None")
         self.scope_slider = gui.hSlider(
-            hbox, self, "scope_prop", minValue=0, maxValue=100, width=140,
-            createLabel=False, callback=self._scope_slider_changed)
+            hbox,
+            self,
+            "scope_prop",
+            minValue=0,
+            maxValue=100,
+            width=140,
+            createLabel=False,
+            callback=self._scope_slider_changed,
+        )
         gui.widgetLabel(hbox, "All")
         self.scope_label = gui.widgetLabel(
-            box, "", alignment=Qt.AlignCenter,
-            sizePolicy=(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed))
+            box,
+            "",
+            alignment=Qt.AlignCenter,
+            sizePolicy=(QSizePolicy.MinimumExpanding, QSizePolicy.Fixed),
+        )
         self._set_scope_label()
         gui.separator(box, 10, 10)
         self.replicable_check = gui.checkBox(
-            box, self, "random_seed", "Replicable shuffling",
-            callback=self._shuffle_check_changed)
+            box,
+            self,
+            "random_seed",
+            "Replicable shuffling",
+            callback=self._shuffle_check_changed,
+        )
 
         self.apply_button = gui.auto_commit(
-            self.controlArea, self, "auto_apply", "&Apply",
-            box=False, commit=self.apply)
+            self.controlArea, self, "auto_apply", "&Apply", box=False, commit=self.apply
+        )
 
     @property
     def parts(self):
@@ -105,13 +119,19 @@ class OWRandomize(OWWidget):
     def send_report(self):
         labels = ["classes", "features", "metas"]
         include = [label for label, i in zip(labels, self.parts) if i]
-        text = "none" if not include else \
-            " and ".join(filter(None, (", ".join(include[:-1]), include[-1])))
+        text = (
+            "none"
+            if not include
+            else " and ".join(filter(None, (", ".join(include[:-1]), include[-1])))
+        )
         self.report_items(
             "Settings",
-            [("Shuffled columns", text),
-             ("Proportion of shuffled rows", "{}%".format(self.scope_prop)),
-             ("Replicable", ["no", "yes"][self.random_seed])])
+            [
+                ("Shuffled columns", text),
+                ("Proportion of shuffled rows", "{}%".format(self.scope_prop)),
+                ("Replicable", ["no", "yes"][self.random_seed]),
+            ],
+        )
 
 
 if __name__ == "__main__":
