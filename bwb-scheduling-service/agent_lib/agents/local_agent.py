@@ -85,7 +85,7 @@ class DockerLocalAgent:
 
             try:
                 command = json.loads(queue_object)
-                DockerLocalAgent.__execute_command__(command)
+                DockerLocalAgent.__execute_command__(command['command'])
             except Exception as e:
                 logging.exception(e)
 

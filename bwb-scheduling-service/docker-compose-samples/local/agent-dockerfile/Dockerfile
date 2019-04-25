@@ -16,3 +16,4 @@ RUN add-apt-repository -y \
    && apt-get autoremove -y \
    && rm -rf /var/lib/apt/lists/*
 
+COPY . /usr/src/app

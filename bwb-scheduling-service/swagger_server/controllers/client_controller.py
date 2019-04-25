@@ -1,6 +1,7 @@
 import json
 import sys, os
 from threading import Thread
+import logging
 
 import redis
 
@@ -41,7 +42,7 @@ def send_command(**kwargs):
 
 def schedule_job(job, cpu_count, memory):  # noqa: E501
     try:
-        commands = job["tasks"]
+        commands = job["tasks"]['commands']
     except Exception as e:
         return "Invalid input task, %s" % str(job), 400
     hosts = HostRegistry.get_available_host(core_count=cpu_count, memory=memory)
