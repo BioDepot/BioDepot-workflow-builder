@@ -130,9 +130,10 @@ COPY orangePatches/link.py /orange3/Orange/canvas/scheme/link.py
 COPY orangePatches/signals.py /orange3/Orange/widgets/utils/signals.py
 
 #add bwb start scripts
-COPY scripts/startBwb.sh /bin/startBwb.sh
-COPY scripts/runDockerJob.sh /bin/runDockerJob.sh
-COPY scripts/startScheduler.sh /bin/startScheduler.sh
+COPY scripts/startBwb.sh /usr/local/bin/startBwb.sh
+COPY scripts/runDockerJob.sh /usr/local/bin/runDockerJob.sh
+COPY scripts/startScheduler.sh /usr/local/bin/startScheduler.sh
+COPY scripts/runScheduler.sh /usr/local/bin/runScheduler.sh
 
 #add widgets and workflows
 ADD widgets /widgets/

@@ -100,28 +100,30 @@ class ConsoleProcess:
 class CmdJson:
     def __init__(self, imageName):
         self.jsonObj = {}
-        self.jsonObj["args"] = []
-        self.jsonObj["image"] = imageName
-        self.jsonObj["deps"] = ""
-        self.jsonObj["envs"] = []
-        self.jsonObj["volumes"] = []
+        self.jsonObj["command"] = {}
+        self.jsonObj["command"]["args"] = []
+        self.jsonObj["command"]["image"] = imageName
+        self.jsonObj["command"]["deps"] = ""
+        self.jsonObj["command"]["envs"] = []
+        self.jsonObj["command"]["volumes"] = []
 
     def addBaseArgs(self, cmd):
-        self.jsonObj["args"] = ["-i", "--rm", "--init", cmd]
+        #self.jsonObj["command"]["args"] = ["-i", "--rm", "--init", cmd]
+        self.jsonObj["command"]["args"] = [cmd]
 
     def addVolume(self, host_dir, container_dir, mode):
         volumeMapping = {}
         volumeMapping["host_dir"] = host_dir
         volumeMapping["mount_dir"] = container_dir
         volumeMapping["mode"] = mode
-        self.jsonObj["volumes"].append(volumeMapping)
+        self.jsonObj["command"]["volumes"].append(volumeMapping)
 
     def addEnv(self, key, val):
         key.strip()
         # strip quotes if present
         if key[0] == key[-1] and key.startswith(("'", '"')):
             key = key[1:-1]
-        self.jsonObj["envs"].append({"key": key, "val": val})
+        self.jsonObj["command"]["envs"].append({"key": key, "val": val})
 
     # need to fix this so that we can add parameters for maxWorkers and threads per worker
     def addThreadsRam(self, nThreads, ram):
@@ -209,8 +211,8 @@ class DockerClient:
                     and settings["data"][attr]["ram"]
                 ):
                     ramSize = int(settings["data"][attr]["ram"])
-                    if ramSizes > maxRam:
-                        maxRam = ramSizes
+                    if ramSize > maxRam:
+                        maxRam = ramSize
         return maxThreads, maxRam
 
     def create_container_external(

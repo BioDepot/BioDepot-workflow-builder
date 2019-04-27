@@ -44,7 +44,7 @@ from AnyQt.QtWidgets import (
 
 def breakpoint(title=None, message=None):
     return
-    # QtGui.QMessageBox.warning(title,'',message)
+    #QtGui.QMessageBox.warning(title,'',message)
 
 
 def getJsonName(filename, widgetName):
