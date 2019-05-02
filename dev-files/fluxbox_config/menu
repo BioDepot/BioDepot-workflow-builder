@@ -20,8 +20,6 @@
   [exec] (Bwb-debug) {/bin/bash -c 'export XENVIRONMENT=/root/.Xresources; xterm -e orange-canvas -l 4'} </root/.fluxbox/bwb256.png>
   [exec] (geany) {geany}	
   [exec] (firefox) {firefox}	
-  [exec] (inkscape) {inkscape}	
-  [exec] (gimp) {gimp}	
   [exec] (Terminal) {/bin/bash -c 'export XENVIRONMENT=/root/.Xresources; xterm'}
   [exec] (QUIT Container) {pkill supervisord}
   [endencoding]
