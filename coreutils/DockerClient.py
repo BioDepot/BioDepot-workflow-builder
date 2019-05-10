@@ -6,29 +6,65 @@ from docker import APIClient
 from PyQt5.QtCore import QThread, pyqtSignal, QProcess, Qt
 from PyQt5 import QtWidgets, QtGui, QtCore
 import datetime
+import uuid
 import time
-
+from pathlib import Path
 
 class ConsoleProcess:
     # subclass that attaches a process and pipes the output to textedit widget console widget
     def __init__(self, console=None, errorHandler=None, finishHandler=None):
+        self.threadNumber=0
+        self.finishHandler=None
+        self.log = QProcess()
+        self.logDir=None
+        self.logFile=None
         self.process = QProcess()
         self.console = console
         self.state = "stopped"
         if console:
-            self.process.readyReadStandardOutput.connect(
+            self.log.readyReadStandardOutput.connect(
                 lambda: self.writeConsole(
-                    self.process, console, self.process.readAllStandardOutput, Qt.white
+                    self.log, console, self.log.readAllStandardOutput, Qt.white
                 )
             )
-            self.process.readyReadStandardError.connect(
+            self.log.readyReadStandardError.connect(
                 lambda: self.writeConsole(
-                    self.process, console, self.process.readAllStandardError, Qt.red
+                    self.log, console, self.log.readAllStandardError, Qt.red
                 )
-            )
+            )        
         if finishHandler:
-            self.process.finished.connect(finishHandler)
-
+            self.finishHandler=finishHandler
+            self.process.finished.connect(self.finishHandler)
+        self.process.finished.connect(self.onFinish)
+        
+    def changeThreadNumber(self,newThreadNumber):
+        if newThreadNumber == self.threadNumber:
+            return
+        self.threadNumber = newThreadNumber
+        if self.logDir:
+            self.logFile='/data/.bwb/{}/log{}'.format(self.logDir,self.threadNumber)
+        self.changeConsole()
+    
+    def changeConsole(self):
+        if self.process.state() == 0:
+            self.writeFileToConsole(self.logFile)
+        else:
+            sys.stderr.write("terminating log\n")
+            self.log.kill()
+            self.log.waitForFinished(10)
+            if self.process.state():
+                sys.stderr.write("starting new log\n")
+                self.startLog()
+            else:
+                self.writeFileToConsole(self.logFile)
+                
+    def writeFileToConsole(self,filename):
+        if filename and Path(filename).is_file():
+            self.log.kill()
+            self.log.waitForFinished(10)            
+            if (self.log.state() == 0):
+                self.log.start('cat',[filename])
+        
     def addIterateSettings(self, settings):
         env = QtCore.QProcessEnvironment.systemEnvironment()
         attrs = []
@@ -93,8 +129,37 @@ class ConsoleProcess:
         self.state = "stopped"
         # the runDockerJob.sh cleans itself up when interrupted
         self.process.terminate()
+        self.log.terminate()
         if message:
             self.writeMessage(message)
+            
+    def startLog(self):
+        self.logFile='/data/.bwb/{}/log{}'.format(self.logDir,self.threadNumber)
+        myPath=Path(self.logFile)
+        if not myPath.is_file():
+            myPath.touch()
+        self.writeMessage('tail -c +0 -f {}'.format(self.logFile))
+        tailParams=['-c','+0','-f',self.logFile]
+        self.log.start('tail',tailParams)
+    
+    def startTest(self,cmdString):
+        self.writeMessage(cmdString)
+        if self.finishHandler:
+            self.finishHandler()
+    def start(self,cmds):
+        self.cleanup()
+        self.logDir='logs.{}'.format(uuid.uuid4().hex)
+        os.makedirs('/data/.bwb/{}'.format(self.logDir))
+        self.startLog()
+        cmds.insert(0,self.logDir)
+        self.process.start('runDockerJob.sh',cmds)
+        
+    def onFinish(self):
+        self.log.terminate()
+
+    def cleanup(self):
+        if self.logDir:
+            os.system('cd /data/.bwb && rm {} -r'.format(self.logDir))
 
 
 class CmdJson:
@@ -256,7 +321,7 @@ class DockerClient:
         jsonFile = "/tmp/docker.{}.json".format(time.strftime("%Y%m%d-%H%M%S"))
         with open(jsonFile, "w") as outfile:
             json.dump(taskJson.jsonObj, outfile)
-        consoleProc.process.start("runScheduler.sh", [jsonFile, "1", "1024"])
+        consoleProc.start("runScheduler.sh", [jsonFile, "1", "1024"])
 
     def create_container_iter(
         self,
@@ -326,10 +391,10 @@ class DockerClient:
                 with open(self.logFile, "a") as f:
                     f.write(echoStr)
 
-            consoleProc.process.start("echo", [echoStr])
+            consoleProc.startTest(echoStr)
         else:
             sys.stderr.write("starting runDockerJob.sh\n")
-            consoleProc.process.start("runDockerJob.sh", dockerCmds)
+            consoleProc.start(dockerCmds)
 
     def findVolumeMappings(self):
         for c in self.cli.containers():

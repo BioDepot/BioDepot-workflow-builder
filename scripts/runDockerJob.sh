@@ -4,6 +4,11 @@
 #A lock directory will be made by the starting process with the pid in the name
 #if interrupted - still cleanup
 
+#echo "$@"
+logDir=$1
+shift
+#echo "logDir is $logDir"
+
 myjobs=( "$@" )
 echo "$@"
 lockDir=/tmp/locks.$$
@@ -26,7 +31,8 @@ cleanup(){
         echo docker stop ${cid} 2> /dev/null 
         docker stop ${cid} 2> /dev/null 
     done
-    rm ${lockDir} -rf
+    cd /tmp && rm locks.$$ -rf
+    #cd /data/.bwb && rm $logDir
     exit
 }
 
@@ -47,11 +53,17 @@ runJob(){
     done
     exit
 }
-
-for i in $(seq 1 $NWORKERS); do
-    echo "starting job with thread $i"
-    runJob $i &
-done
+if [ -z "$logDir" ]; then
+	for i in $(seq 1 $NWORKERS); do
+		echo "starting job with thread $i"
+		runJob $i &
+	done
+else
+	for i in $(seq 1 $NWORKERS); do
+		echo "starting job with thread $i"
+		runJob $i 2>&1 | tee -a /data/.bwb/${logDir}/log$i >> /data/.bwb/${logDir}/log0 &
+	done	
+fi
 #catch sigint and term and cleanup anyway
 
 wait
