@@ -36,6 +36,7 @@ class ConsoleProcess:
             self.finishHandler=finishHandler
             self.process.finished.connect(self.finishHandler)
         self.process.finished.connect(self.onFinish)
+
         
     def changeThreadNumber(self,newThreadNumber):
         if newThreadNumber == self.threadNumber:
@@ -133,7 +134,10 @@ class ConsoleProcess:
         if message:
             self.writeMessage(message)
             
-    def startLog(self):
+    def startLog(self,schedule=False,namespace=None):
+        if schedule:
+            self.scheduleLog(namespace)
+            return
         self.logFile='/data/.bwb/{}/log{}'.format(self.logDir,self.threadNumber)
         myPath=Path(self.logFile)
         if not myPath.is_file():
@@ -146,6 +150,18 @@ class ConsoleProcess:
         self.writeMessage(cmdString)
         if self.finishHandler:
             self.finishHandler()
+            
+    def scheduleLog(self,namespace):
+        sys.stderr.write('getlog.sh {}\n'.format(namespace))
+        self.log.start('getlog.sh {}'.format(namespace))
+        
+    def schedule(self,parms):
+        sys.stderr.write('runScheduler.sh {}\n'.format(parms))
+        self.process.start('runScheduler.sh',parms)
+        self.process.waitForFinished()
+        self.startLog(schedule=True,namespace=parms[0])
+        
+        
     def start(self,cmds):
         self.cleanup()
         self.logDir='logs.{}'.format(uuid.uuid4().hex)
@@ -162,33 +178,31 @@ class ConsoleProcess:
             os.system('cd /data/.bwb && rm {} -r'.format(self.logDir))
 
 
-class CmdJson:
+class TaskJson:
     def __init__(self, imageName):
-        self.jsonObj = {}
-        self.jsonObj["command"] = {}
-        self.jsonObj["command"]["args"] = []
-        self.jsonObj["command"]["image"] = imageName
-        self.jsonObj["command"]["deps"] = ""
-        self.jsonObj["command"]["envs"] = []
-        self.jsonObj["command"]["volumes"] = []
+        self.jsonObj={}
+        self.jsonObj["image"] = imageName
+        self.jsonObj["args"] = []
+        self.jsonObj["envs"] = []
+        self.jsonObj["volumes"] = []
 
     def addBaseArgs(self, cmd):
         #self.jsonObj["command"]["args"] = ["-i", "--rm", "--init", cmd]
-        self.jsonObj["command"]["args"] = [cmd]
+        self.jsonObj["args"] = [cmd]
 
     def addVolume(self, host_dir, container_dir, mode):
         volumeMapping = {}
         volumeMapping["host_dir"] = host_dir
         volumeMapping["mount_dir"] = container_dir
         volumeMapping["mode"] = mode
-        self.jsonObj["command"]["volumes"].append(volumeMapping)
+        self.jsonObj["volumes"].append(volumeMapping)
 
     def addEnv(self, key, val):
         key.strip()
         # strip quotes if present
         if key[0] == key[-1] and key.startswith(("'", '"')):
             key = key[1:-1]
-        self.jsonObj["command"]["envs"].append({"key": key, "val": val})
+        self.jsonObj["env"].append({"key": key, "val": val})
 
     # need to fix this so that we can add parameters for maxWorkers and threads per worker
     def addThreadsRam(self, nThreads, ram):
@@ -202,14 +216,15 @@ class CmdJson:
         self.jsonObj["description"] = description
 
 
-class TaskJson:
-    def __init__(self, cmdsJson):
+class DockerJson:
+    def __init__(self, tasksJson,namespace,name="",description=""):
         self.jsonObj = {}
-        self.jsonObj["tasks"] = {}
-        self.jsonObj["tasks"]["commands"] = []
-        for cmdJson in cmdsJson:
-            self.jsonObj["tasks"]["commands"].append(cmdJson.jsonObj)
-
+        self.jsonObj["namespace"]=namespace
+        self.jsonObj["name"]=name
+        self.jsonObj["description"]=description
+        self.jsonObj['tasks']=[]
+        for taskJson in tasksJson:
+            self.jsonObj['tasks'].append(taskJson.jsonObj)
 
 class DockerClient:
     def __init__(self, url, name):
@@ -296,32 +311,38 @@ class DockerClient:
         iterateSettings=None,
         iterate=False,
     ):
-        cmdsJson = []
+        tasksJson = []
         count = 0
+        cpuCount='8'
+        memory='8096'
         for cmd in cmds:
-            cmdJson = CmdJson(name)
-            cmdJson.addBaseArgs(cmd)
+            taskJson = TaskJson(name)
+            taskJson.addBaseArgs(cmd)
             for env, var in environment.items():
-                cmdJson.addEnv(env, var)
+                taskJson.addEnv(env, var)
             for container_dir, host_dir in hostVolumes.items():
-                cmdJson.addVolume(host_dir, container_dir, "rw")
+                taskJson.addVolume(host_dir, container_dir, "rw")
             if exportGraphics:
-                cmdJson.addEnv("DISPLAY", ":1")
-                cmdJson.addVolume("/tmp/.X11-unix", "/tmp/.X11-unix", "rw")
+                taskJson.addEnv("DISPLAY", ":1")
+                taskJson.addVolume("/tmp/.X11-unix", "/tmp/.X11-unix", "rw")
             maxThreads = 1
             maxRam = 0
             if iterate and iterateSettings:
                 maxThreads, maxRam = self.findMaxIterateValues(iterateSettings)
-            cmdJson.addThreadsRam(maxThreads, maxRam)
-            cmdJson.addName("cmdName{}".format(count))
-            cmdJson.addDescription("command{}".format(count))
-            cmdsJson.append(cmdJson)
+            taskJson.addThreadsRam(maxThreads, maxRam)
+            taskJson.addName("cmdName{}".format(count))
+            taskJson.addDescription("command{}".format(count))
+            tasksJson.append(taskJson)
             count += 1
-        taskJson = TaskJson(cmdsJson)
-        jsonFile = "/tmp/docker.{}.json".format(time.strftime("%Y%m%d-%H%M%S"))
+
+        namespace=str(uuid.uuid4().hex)[0:19]
+        dockerJson = DockerJson(tasksJson,namespace=namespace)
+        #jsonFile = "/data/dockerTest.json"
+        jsonFile = "/tmp/docker.{}.json".format(namespace)
         with open(jsonFile, "w") as outfile:
-            json.dump(taskJson.jsonObj, outfile)
-        consoleProc.start("runScheduler.sh", [jsonFile, "1", "1024"])
+            json.dump(dockerJson.jsonObj, outfile)
+        parms=[namespace,jsonFile,cpuCount,memory]
+        consoleProc.schedule(parms)
 
     def create_container_iter(
         self,

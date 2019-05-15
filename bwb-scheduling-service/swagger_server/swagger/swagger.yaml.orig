@@ -236,6 +236,8 @@ definitions:
     - commands
     - description
     additionalProperties: false
+<<<<<<< HEAD
+=======
 parameters:
     namespace:
       name: namespace
@@ -243,3 +245,4 @@ parameters:
       required: true
       type: string
       maxLength: 20
+>>>>>>> cleanup-agent-redis

@@ -9,8 +9,7 @@ services:
   redis:
     image: redis
   agent:
-    #build: ./agent-dockerfile
-    image: local_agent
+    build: ./agent-dockerfile
     restart: always
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock

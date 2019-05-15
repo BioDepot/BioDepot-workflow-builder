@@ -1,5 +1,10 @@
 import json
+<<<<<<< HEAD
+import sys,os
+from threading import Thread
+=======
 import os
+>>>>>>> cleanup-agent-redis
 
 import redis
 from flask import Response
@@ -40,7 +45,7 @@ def schedule_job(namespace, job, cpu_count, memory):  # noqa: E501
     try:
         commands = job['tasks']
     except Exception as e:
-        return "Invalid input task, %s" % str(e), 400
+        return "Invalid input task, %s" % str(job), 400
     hosts = HostRegistry.get_available_host(core_count=cpu_count, memory=memory)
     if not hosts:
         return "No available agents to process the request.", 400
