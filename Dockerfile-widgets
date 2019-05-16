@@ -134,6 +134,8 @@ COPY scripts/startBwb.sh /usr/local/bin/startBwb.sh
 COPY scripts/runDockerJob.sh /usr/local/bin/runDockerJob.sh
 COPY scripts/startScheduler.sh /usr/local/bin/startScheduler.sh
 COPY scripts/runScheduler.sh /usr/local/bin/runScheduler.sh
+COPY scripts/getlog.sh /usr/local/bin/getlog.sh
+COPY scripts/monitor.sh /usr/local/bin/monitor.sh
 
 #add widgets and workflows
 ADD widgets /widgets/

@@ -14,6 +14,7 @@ class ConsoleProcess:
     # subclass that attaches a process and pipes the output to textedit widget console widget
     def __init__(self, console=None, errorHandler=None, finishHandler=None):
         self.threadNumber=0
+        self.startupOnly=False
         self.finishHandler=None
         self.log = QProcess()
         self.logDir=None
@@ -34,7 +35,6 @@ class ConsoleProcess:
             )        
         if finishHandler:
             self.finishHandler=finishHandler
-            self.process.finished.connect(self.finishHandler)
         self.process.finished.connect(self.onFinish)
 
         
@@ -152,14 +152,16 @@ class ConsoleProcess:
             self.finishHandler()
             
     def scheduleLog(self,namespace):
-        sys.stderr.write('getlog.sh {}\n'.format(namespace))
         self.log.start('getlog.sh {}'.format(namespace))
         
     def schedule(self,parms):
-        sys.stderr.write('runScheduler.sh {}\n'.format(parms))
+        namespace=parms[0]
+        self.startupOnly=True
         self.process.start('runScheduler.sh',parms)
         self.process.waitForFinished()
-        self.startLog(schedule=True,namespace=parms[0])
+        self.startupOnly=False
+        self.process.start('monitor.sh',[namespace])
+        self.scheduleLog(namespace)
         
         
     def start(self,cmds):
@@ -171,6 +173,10 @@ class ConsoleProcess:
         self.process.start('runDockerJob.sh',cmds)
         
     def onFinish(self):
+        if self.startupOnly:
+            return
+        if self.finishHandler:
+            self.finishHandler()
         self.log.terminate()
 
     def cleanup(self):
