@@ -38,22 +38,17 @@ class FlaskAppWrapper(object):
     __hostname__ = None
     __hostport__ = None
     __run_command_fnc__ = None
-    __status_fnc__ = None
-    __log_fnc__ = None
 
-    def __init__(self, hostname, hostport, run_command_fnc, status_fnc):
+    def __init__(self, hostname, hostport, run_command_fnc):
         self.__hostname__ = hostname
         self.__hostport__ = hostport
         self.__run_command_fnc__ = run_command_fnc
-        self.__status_fnc__ = status_fnc
 
         app_name = 'agent'
         self.app = Flask(app_name)
         self.add_endpoint(endpoint='/run_command', endpoint_name='run_command', handler=self.run_command,
                           methods=['POST'])
         self.add_endpoint(endpoint='/ping', endpoint_name='ping', handler=ping, methods=['GET'])
-        self.add_endpoint(endpoint='/status', endpoint_name='status', handler=self.status, methods=['GET'])
-
 
     def run(self):
         self.app.run(host=self.__hostname__, port=self.__hostport__)
@@ -64,12 +59,6 @@ class FlaskAppWrapper(object):
     def run_command(self):
         data = json.loads(request.data.decode())
         return self.__run_command_fnc__(**data)
-
-    def status(self):
-        container_name = request.args.get('container_name')
-        if container_name is None:
-            raise RuntimeError("get parameter 'container_name' missing.")
-        return self.__status_fnc__(container_name=container_name)
 
 
 def ping():

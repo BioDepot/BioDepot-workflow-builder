@@ -1,12 +1,13 @@
 {	
-	"namespace": "1234", 
+	"namespace": "1234",
+	"maxWorkers": 2,
 	"name": "test", 
 	"description": "sequencying step", 
 	"tasks": [
 				{
 					"image": "alpine", 
 					"args": ["sleep", "10", "&&", "echo", "hello", "world", "this"], 
-					"volumes": [{"host_dir": "/tmp/a", "mount_dir": "/tmp", "mode": "rw"}], 
+					"volumes": [{"host_dir": "/tmp", "mount_dir": "/data", "mode": "rw"}], 
 					"env": [{"key": "1", "val": "2"}]
 				}
 			]

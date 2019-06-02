@@ -25,7 +25,6 @@ paths:
       produces:
       - "application/json"
       parameters:
-      - $ref: "#/parameters/job_id"
       - name: "job"
         in: "body"
         description: "Docker commands to be run"
@@ -55,41 +54,6 @@ paths:
           description: "Job Accepted"
           schema:
             $ref: "#/definitions/InventoryItem"
-        400:
-          description: "bad input parameter"
-      x-swagger-router-controller: "swagger_server.controllers.client_controller"
-  /status:
-    get:
-      tags:
-      - "client"
-      summary: "Get docker status codes"
-      description: "Gets all docker instances active for a job_id and their status_codes.\n"
-      operationId: "status"
-      produces:
-      - "application/json"
-      parameters:
-      - $ref: "#/parameters/job_id"
-      responses:
-        200:
-          description: "Status code"
-        400:
-          description: "bad input parameter"
-      x-swagger-router-controller: "swagger_server.controllers.client_controller"
-  /log:
-    get:
-      tags:
-      - "client"
-      summary: "Get docker logs"
-      description: "Gets all docker instances active for a job_id and their logs.\n"
-      operationId: "log"
-      produces:
-      - "application/stream"
-      parameters:
-      - $ref: "#/parameters/job_id"
-      - $ref: "#/parameters/worker_id"
-      responses:
-        200:
-          description: "log"
         400:
           description: "bad input parameter"
       x-swagger-router-controller: "swagger_server.controllers.client_controller"
@@ -237,16 +201,3 @@ definitions:
     - commands
     - description
     additionalProperties: false
-parameters:
-    job_id:
-      name: job_id
-      in: query
-      required: true
-      type: string
-      maxLength: 20
-    worker_id:
-      name: worker_id
-      in: query
-      required: false
-      type: string
-      maxLength: 20

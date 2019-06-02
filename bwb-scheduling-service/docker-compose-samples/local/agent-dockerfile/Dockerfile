@@ -1,3 +1,2 @@
 FROM biodepot/bwb-scheduling-service
-
-RUN apk add docker
+ADD logDocker.sh /usr/local/bin

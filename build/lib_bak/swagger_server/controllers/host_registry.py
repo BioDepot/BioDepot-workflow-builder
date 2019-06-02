@@ -1,14 +1,10 @@
 import json
-import logging
-import pickle
-from base64 import b64decode
 from threading import Lock
 from typing import Dict, List
 from uuid import uuid4, uuid5
-import sys
+
 import requests
-from requests import get
-from flask import Flask, jsonify, request, Response, stream_with_context
+
 
 class ResourceHostObject:
     @property
@@ -79,14 +75,7 @@ class ResourceHostObject:
 
     def __repr__(self):
         return json.dumps(self.to_object())
-        
-class JobUnit:
-    def __init__(self,job_id):
-        self.hosts=[]
-        self.job_id=job_id
-    def add_host(self, host):
-        self.hosts.append(host)
-        
+
 
 class HostRegistry:
     __SERVICE_HOST_ID__ = uuid4()
@@ -104,56 +93,19 @@ class HostRegistry:
             return {'id': resource_host_id}
 
     @staticmethod
-    def get_available_host(core_count, memory, maxWorkers, job_id) -> List[ResourceHostObject]:
-        job_unit=JobUnit(job_id)
-        nhosts=0
+    def get_available_host(core_count, memory) -> List[ResourceHostObject]:
+        available_hosts = []
         with HostRegistry.__LOCK__:
             for resource_host_obj in HostRegistry.__RESOURCES__.values():
-                while nhosts < maxWorkers and resource_host_obj.use_resources(required_cores=core_count, required_memory=memory):
-                    job_unit.add_host(resource_host_obj)
-                    nhosts=nhosts+1
-        return job_unit
+                if resource_host_obj.use_resources(required_cores=core_count, required_memory=memory):
+                    available_hosts.append(resource_host_obj)
+        return available_hosts
 
     @staticmethod
-    def run_command(host, command_queue_id, redis_host, redis_port, job_id, worker_id):
+    def run_command(host, queue_id, redis_host, redis_port):
         host_name = host.host_name
         host_port = host.host_port
         uri = "http://%s:%s/run_command" % (host_name, host_port)
-        data=json.dumps(
-            {'command_queue_id': command_queue_id, 'redis_host': redis_host, 'redis_port': redis_port, 'job_id': job_id, 'worker_id': worker_id })
-        r = requests.post(uri, data)
-        try:
-            response = r.json()
-            if r.status_code != 200:
-                error = b64decode(response['error'].encode())
-                raise RuntimeError(error)
-        except Exception as e:
-            logging.exception(e)
-            raise RuntimeError("Failed to parse response")
-
-    @staticmethod
-    def status(host, container_name):
-        host_name = host.host_name
-        host_port = host.host_port
-        uri = "http://%s:%s/status" % (host_name, host_port)
-        r = requests.get(uri, params={'container_name': container_name})
-        try:
-            response = r.json()
-        except Exception as e:
-            logging.exception(e)
-            raise RuntimeError("Failed to parse response")
-        if r.status_code != 200:
-            error = b64decode(response['error'].encode())
-            raise RuntimeError(error)
-        status_code = json.loads(b64decode(response['output'].encode()).decode())
-        return status_code
-
-    @staticmethod
-    def log(job_id,worker_id=0):
-        if worker_id:
-            r=get('http://logger/logs/name:{}.{}'.format(job_id,worker_id),stream=True)
-        else:
-            r=get('http://logger/logs/name:{}*'.format(job_id),stream=True)
-        return Response(r.iter_content(chunk_size=10*1024),
-                    content_type=r.headers['Content-Type'])
-
+        r = requests.post(uri, data=json.dumps(
+            {'queue_id': queue_id, 'redis_host': redis_host, 'redis_port': redis_port}))
+        return r.status_code, r.json()

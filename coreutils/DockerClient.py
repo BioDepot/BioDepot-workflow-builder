@@ -9,7 +9,7 @@ import datetime
 import uuid
 import time
 from pathlib import Path
-
+#runScheduler.sh ['b2b72d36270f4200a9e', '/tmp/docker.b2b72d36270f4200a9e.json', '8', '8096']
 class ConsoleProcess:
     # subclass that attaches a process and pipes the output to textedit widget console widget
     def __init__(self, console=None, errorHandler=None, finishHandler=None):
@@ -119,7 +119,7 @@ class ConsoleProcess:
 
     def writeConsole(self, process, console, read, color):
         console.setTextColor(color)
-        console.append(read().data().decode("utf-8", errors="ignore"))
+        console.append(read().data().decode("utf-8", errors="ignore").rstrip())
 
     def writeMessage(self, message, color=Qt.green):
         # for bwb messages
@@ -155,22 +155,26 @@ class ConsoleProcess:
         self.log.start('getlog.sh {}'.format(namespace))
         
     def schedule(self,parms):
-        namespace=parms[0]
-        self.startupOnly=True
+        job_id=parms[0]
+        #self.startupOnly=True
         self.process.start('runScheduler.sh',parms)
         self.process.waitForFinished()
-        self.startupOnly=False
-        self.process.start('monitor.sh',[namespace])
-        self.scheduleLog(namespace)
+        #self.startupOnly=False
+        #self.process.start('monitor.sh',[namespace])
+        self.scheduleLog(job_id)
         
         
-    def start(self,cmds):
+    def start(self,cmds,schedule=False):
         self.cleanup()
-        self.logDir='logs.{}'.format(uuid.uuid4().hex)
-        os.makedirs('/data/.bwb/{}'.format(self.logDir))
-        self.startLog()
-        cmds.insert(0,self.logDir)
-        self.process.start('runDockerJob.sh',cmds)
+        if schedule:
+            sys.stderr.write('runScheduler.sh {}\n'.format(cmds))
+            self.process.start('runScheduler.sh',cmds)
+        else:
+            self.logDir='logs.{}'.format(uuid.uuid4().hex)
+            os.makedirs('/data/.bwb/{}'.format(self.logDir))
+            self.startLog()
+            cmds.insert(0,self.logDir)
+            self.process.start('runDockerJob.sh',cmds)
         
     def onFinish(self):
         if self.startupOnly:
@@ -348,7 +352,7 @@ class DockerClient:
         with open(jsonFile, "w") as outfile:
             json.dump(dockerJson.jsonObj, outfile)
         parms=[namespace,jsonFile,cpuCount,memory]
-        consoleProc.schedule(parms)
+        consoleProc.start(parms,schedule=True)
 
     def create_container_iter(
         self,
