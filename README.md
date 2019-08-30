@@ -175,12 +175,12 @@ A major motivation for our development of Bwb was that our own software tools we
 ## Usage
 
 ### How do I use Bwb on my own data files?
-The mapping of local files to be used by Bwb workflows happens in the command line at launch time.
+The mapping of local files to be used by Bwb workflows happens in the command line at launch time. For Windows, there is also an additional step of making the Windows directories accessible to the VM that is launching Docker. More about this later, but first let's talk about how to map your directories so that the Docker container can read/write to them.
 
 The -v option allows you to map one or more personal (local) directory to an internal directory that the Bwb container can see them. Usually we map them to /data internally. The following start command for example maps the current directory to the /data directory inside the container. 
 ```
 docker run --rm   -p 6080:6080 \
-    -v  $pwd/:/data  \
+    -v  ${PWD}/:/data  \
     -v  /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     --privileged --group-add root \
@@ -207,8 +207,22 @@ docker run --rm   -p 6080:6080 \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     --privileged --group-add root \
     biodepot/bwb
- ```
- 
+```
+
+For Windows there is the additonal step of sharing a Windows folder with the VirtualBox or HyperV VM that is running Docker. Otherwise, the container will map an empty directory to the Docker container. For Windows 10 Pro instructions are ![here](https://docs.docker.com/docker-for-windows/#shared-drives). For other Windows versions instructions are ![here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572).
+
+For example, if a the C://Users/myName folder is share with the name homefolder then
+```
+docker run --rm  -p 6080:6080 \
+    -v  /homefolder:/data  \
+    -v  /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    --privileged --group-add root \
+    biodepot/bwb
+```
+
+would make the files and directories at C://Users/myName available to Bwb.
+
 ### How do I connect one widget to another?
 
 Drag the mouse from the right side of the source widget to the left side of the sink widget. If they can be connected a dialog box should appear allowing you to choose which widgets to connect. This is shown in our [video](#tutorial---adding-a-python-script-to-a-bwb-workflow) at 5:49 to 6:05.
@@ -422,7 +436,7 @@ For other versions of Windows, the older toolbox version that uses VirtualBox wi
 
 5\. For those using the Docker version that uses VirtualBox start the Docker application as an Administrator. To adjust the available memory, the user must launch Oracle VirtualBox, stop the Virtual machine and adjust the Systems settings to give the machine more RAM. The default is just 1 GB.
 
-6\. To allow for sharing of files in Windows systems, the directories must be made available to either HyperV in Windows Pro (instructions ![here](https://docs.docker.com/docker-for-windows/#shared-drives) ) or VirtualBxo other Windows versions (instructions ![here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572) ).
+6\. To allow for sharing of files in Windows systems, the directories must be made available to either HyperV in Windows Pro (instructions ![here](https://docs.docker.com/docker-for-windows/#shared-drives) ) or VirtualBox other Windows versions (instructions ![here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572) ).
 
 ### On The Cloud
 
@@ -505,7 +519,7 @@ docker run --rm -p 6080:6080 -v /c/users:/data -v /var/run/docker.sock:/var/run/
 ```
 
 
-This command will launch a mini-webserver and start a windowing environment inside the container. The Bwb application is automatically launched upon running the container and appears as a maximized window on the Desktop inside the container. In the above command we have set the port to be 6080. For  Linux/MacOS the current directory is mapped to the /data directory inside the container. For Windows, by default the C://Users directory is made available for Docker and we map this to the /data directory in side the container. Other mappings are possible  However, all this is hidden from view until the user connects to the container using a browser. 
+This command will launch a mini-webserver and start a windowing environment inside the container. The Bwb application is automatically launched upon running the container and appears as a maximized window on the Desktop inside the container. In the above command we have set the port to be 6080. For  Linux/MacOS the current directory is mapped to the /data directory inside the container. For Windows, by default the C://Users directory is made available for Docker and we map this to the /data directory in side the container. Other mappings are [possible](#How do I use Bwb on my own data files)  However, all this is hidden from view until the user connects to the container using a browser. 
 
 To access the container open up a browser window and type in the IP of the container and port that it is listening to into the address bar. For a local installation using Linux, the IP of the container is localhost or 127.0.0.1 so the user would type localhost:6080 into the address bar of the browser. For a remote installation, the ip is the ip of the server.
 <a name="findip"></a>
