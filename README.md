@@ -294,9 +294,20 @@ Source code	: [https://github.com/BioDepot/BioDepot-workflow-builder](https://gi
 
 2\. Start the container with Bwb by executing the following Docker command by typing into a window (Linux) or on the Docker command line (Windows/macOs). For Windows, it may be necessary to run the Docker application as an Administrator. 
 
+Linux/Mac
 ```bash 
     docker run --rm   -p 6080:6080 \
     -v  ${PWD}/:/data  \
+    -v  /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    --privileged --group-add root \
+    biodepot/bwb
+```
+
+Windows
+```bash 
+    docker run --rm   -p 6080:6080 \
+    -v  /c/users:/data  \
     -v  /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     --privileged --group-add root \
@@ -314,8 +325,6 @@ For Windows and Macs the IP may vary depending on your setup
 Windows 10 Pro and newer Mac's running native Docker will use the same localhost setup. Windows 7, 8 and 10 Home edition, and older Macs that use a Virtual machine (VM) will need to use the IP of the virtual machine instead of localhost - usually 192.168.99.100. In addition, for these VM setups, the available RAM of the VM limits the RAM that can be used (usually 1 or 2 GB only). The VM settings must be adjusted to increase the available memory for applications such as Kallisto (roughly 8 GB and STAR (roughly 32 GB for human datasets) . 
 
 4\. To quit the container, right click inside the browser and choose the QUIT container option. Alternatively, you can also stop it by finding the container id and stopping the container. Quitting the browser just closes the viewport to the container - it does not stop the container.
-
-
 
 
 ## Installing and starting Docker
@@ -373,7 +382,7 @@ launch it. Privileged access is needed to install networking components and link
 
 ![](./docs/images/image16.png) 
 
-3\. By default, Docker for Windows limit the memory usage to 2 GB. Given that most Bioinformatics workflows are computationally intensive, some of the tasks may require a higher memory usage. To change the memory allocation, go to `Docker Preferences (Right Click on the docker Icon) -> Preferences -> Advanced`, and adjust the memory allocation as needed. We recommend allowing Docker engine to use at least 10 Gb of memory or more. 
+4\. By default, Docker will limit the memory usage to 2 GB. Given that most Bioinformatics workflows are computationally intensive, some of the tasks may require a higher memory usage. To change the memory allocation, go to `Docker Preferences (Right Click on the docker Icon) -> Preferences -> Advanced`, and adjust the memory allocation as needed. We recommend allowing Docker engine to use at least 10 Gb of memory or more. 
 
 ![](./docs/images/image25.png)
 
@@ -393,7 +402,9 @@ For other versions of Windows, the older toolbox version that uses VirtualBox wi
  * click the finish button to complete the installation. 
 ![](./docs/images/image21.png) 
 
-2\.  To start Docker,
+2\. For DockerToolbox installations on Windows 10 Home Edition, we recommend that you install the latest version of VirtualBox (6.0.10) available [here](https://download.virtualbox.org/virtualbox/6.0.10/VirtualBox-6.0.10-132072-Win.exe). VirtualBox will ask you whether you wish to install the extensions, which you should.
+
+3\.  To start Docker,
 * search for Docker, select the app in the search results, and click it (or hit Return).
 ![](./docs/images/image11.png) 
 * when the whale in the status bar stays steady, Docker is up-and-running, and accessible from any terminal window.
@@ -405,11 +416,13 @@ For other versions of Windows, the older toolbox version that uses VirtualBox wi
 ![](./docs/images/image15.png) 
 
 
-3\. By default, Docker for Windows limit the memory usage to 2 GB. Given that most Bioinformatics workflows are computationally intensive, some of the tasks may require a higher memory usage. To change the memory allocation, go to `Docker Preferences (Right Click on the docker Icon) -> Preferences -> Advanced`, and adjust the memory allocation as needed. We recommend allowing Docker engine to use at least 10 Gb of memory or more. 
+4\. By default, Docker for Windows limit the memory usage to 2 GB. Given that most Bioinformatics workflows are computationally intensive, some of the tasks may require a higher memory usage. To change the memory allocation, go to `Docker Preferences (Right Click on the docker Icon) -> Preferences -> Advanced`, and adjust the memory allocation as needed. We recommend allowing Docker engine to use at least 10 Gb of memory or more. 
 
 ![](./docs/images/image26.png)
 
-4\. For those using the Docker version that uses VirtualBox start the Docker application as an Administrator. To adjust the available memory, the user must launch Oracle VirtualBox, stop the Virtual machine and adjust the Systems settings to give the machine more RAM. The default is just 1 GB.
+5\. For those using the Docker version that uses VirtualBox start the Docker application as an Administrator. To adjust the available memory, the user must launch Oracle VirtualBox, stop the Virtual machine and adjust the Systems settings to give the machine more RAM. The default is just 1 GB.
+
+6\. To allow for sharing of files in Windows systems, the directories must be made available to either HyperV in Windows Pro (instructions ![here](https://docs.docker.com/docker-for-windows/#shared-drives) ) or VirtualBxo other Windows versions (instructions ![here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572) ).
 
 ### On The Cloud
 
@@ -482,11 +495,17 @@ docker build -t bwb/biodepot:latest .
 ``` 
 2\.  Start the Bwb container 
 
+For Linux/MacOX
 ```bash
-docker run --rm -p 6080:6080 -v $PWD:/data -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/.X11-unix:/tmp/.X11-unix  --privileged --group-add root biodepot/bwb
+docker run --rm -p 6080:6080 -v ${PWD}:/data -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/.X11-unix:/tmp/.X11-unix  --privileged --group-add root biodepot/bwb
+```
+For Windows
+```bash
+docker run --rm -p 6080:6080 -v /c/users:/data -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/.X11-unix:/tmp/.X11-unix  --privileged --group-add root biodepot/bwb
 ```
 
-This command will launch a mini-webserver and start a windowing environment inside the container. The Bwb application is automatically launched upon running the container and appears as a maximized window on the Desktop inside the container. In the above command we have set the port to be 6080 and the current directory is mapped to the /data directory inside the container. However, all this is hidden from view until the user connects to the container using a browser. 
+
+This command will launch a mini-webserver and start a windowing environment inside the container. The Bwb application is automatically launched upon running the container and appears as a maximized window on the Desktop inside the container. In the above command we have set the port to be 6080. For  Linux/MacOS the current directory is mapped to the /data directory inside the container. For Windows, by default the C://Users directory is made available for Docker and we map this to the /data directory in side the container. Other mappings are possible  However, all this is hidden from view until the user connects to the container using a browser. 
 
 To access the container open up a browser window and type in the IP of the container and port that it is listening to into the address bar. For a local installation using Linux, the IP of the container is localhost or 127.0.0.1 so the user would type localhost:6080 into the address bar of the browser. For a remote installation, the ip is the ip of the server.
 <a name="findip"></a>
