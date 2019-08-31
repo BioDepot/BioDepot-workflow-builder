@@ -209,7 +209,7 @@ docker run --rm   -p 6080:6080 \
     biodepot/bwb
 ```
 
-For Windows there is the additonal step of sharing a Windows folder with the VirtualBox or HyperV VM that is running Docker. Otherwise, the container will map an empty directory to the Docker container. For Windows 10 Pro instructions are ![here](https://docs.docker.com/docker-for-windows/#shared-drives). For other Windows versions instructions are ![here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572).
+For Windows there is the additonal step of sharing a Windows folder with the VirtualBox or HyperV VM that is running Docker. Otherwise, the container will map an empty directory to the Docker container. For Windows 10 Pro instructions are [here](https://docs.docker.com/docker-for-windows/#shared-drives). For other Windows versions instructions are [here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572).
 
 For example, if a the C://Users/myName folder is share with the name homefolder then
 ```
@@ -436,7 +436,7 @@ For other versions of Windows, the older toolbox version that uses VirtualBox wi
 
 5\. For those using the Docker version that uses VirtualBox start the Docker application as an Administrator. To adjust the available memory, the user must launch Oracle VirtualBox, stop the Virtual machine and adjust the Systems settings to give the machine more RAM. The default is just 1 GB.
 
-6\. To allow for sharing of files in Windows systems, the directories must be made available to either HyperV in Windows Pro (instructions ![here](https://docs.docker.com/docker-for-windows/#shared-drives) ) or VirtualBox other Windows versions (instructions ![here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572) ).
+6\. To allow for sharing of files in Windows systems, the directories must be made available to either HyperV in Windows Pro (instructions [here](https://docs.docker.com/docker-for-windows/#shared-drives) ) or VirtualBox other Windows versions (instructions [here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572) ).
 
 ### On The Cloud
 
