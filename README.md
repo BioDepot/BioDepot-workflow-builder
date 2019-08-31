@@ -379,8 +379,12 @@ For more information please refer to -
 
 [https://docs.docker.com/engine/installation/linux/ubuntulinux/](https://docs.docker.com/engine/installation/)
 
+### Linux virtual machine on Windows or MacOS
 
-### macOS
+There are two viable routes for installing Docker on non-Linux platforms. One is installing a Linux VM using VirtualBox or another hypervisor and following the instructions for installing Docker on Linux. The other option, discussed in the next sections, is to use the Docker for Windows/Mac installers which create and manage the VM for you. The first approach requires learning and managing a full Linux distribution in a virtual environment. However, once the VM is correctly set up the Docker installation is simple and robust. Thi might be the best option for older operating systems or where the Windows user is unable or does not want to run Hyper-V. An (older) example of how to do this is given [here](https://wiki.cyverse.org/wiki/display/HDFDE/Installing+VirtualBox,+Ubuntu,+and+Docker)
+
+
+### Docker for Mac
 
 1\. Download the Docker package -  [Docker for Mac](https://download.docker.com/mac/stable/Docker.dmg)
 2\. To install Docker: double-click Docker.dmg to open the installer, then drag Moby the whale to the Applications folder.		
@@ -401,8 +405,10 @@ launch it. Privileged access is needed to install networking components and link
 ![](./docs/images/image25.png)
 
 
-### Windows
 
+The second option relies on Docker to provision the VM and is simpler. However, there is 
+
+#### Docker for Windows
 1\. To install Docker,
 
 For Windows 10 Pro (with HyperV) download to the package - [Docker for Windows](https://download.docker.com/win/stable/Docker%20for%20Windows%20Installer.exe)
