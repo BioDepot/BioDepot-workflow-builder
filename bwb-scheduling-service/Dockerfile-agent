@@ -1,0 +1,16 @@
+FROM python:3-alpine
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+COPY requirements.txt /usr/src/app/
+
+RUN apk add build-base linux-headers bash \
+        && pip3 install --no-cache-dir -r requirements.txt \
+        && apk del build-base linux-headers
+RUN apk add docker
+RUN apk add curl
+COPY . /usr/src/app
+EXPOSE 8080
+ENTRYPOINT ["/usr/src/app/docker_init.sh"]
+ADD logDocker.sh /usr/local/bin

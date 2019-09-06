@@ -13,6 +13,7 @@ services:
     restart: always
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock
+    - /tmp:/var/bwblogs
     entrypoint:
     - /bin/bash
     - /usr/src/app/docker_init.sh
@@ -26,3 +27,10 @@ services:
     - redis
     - --redis_port
     - "6379"
+  logger:
+    image: gliderlabs/logspout
+    restart: always
+    volumes: 
+    - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+    - "8000:80" 

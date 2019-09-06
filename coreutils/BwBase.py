@@ -44,7 +44,7 @@ from AnyQt.QtWidgets import (
 
 def breakpoint(title=None, message=None):
     return
-    # QtGui.QMessageBox.warning(title,'',message)
+    #QtGui.QMessageBox.warning(title,'',message)
 
 
 def getJsonName(filename, widgetName):
@@ -500,9 +500,9 @@ class OWBwBWidget(widget.OWWidget):
             setattr(self.leditOptionalLayout.layout(), "added", True)
             self.drawOptionalElements()
 
-        # self.scheduleBox,scheduleLayout=self.tabs.addBox('Scheduler',minHeight=160)
-        # self.scheduleBox.layout().addLayout(self.fileDirScheduleLayout.layout())
-        # self.drawScheduleElements()
+            self.scheduleBox,scheduleLayout=self.tabs.addBox('Scheduler',minHeight=160)
+            self.scheduleBox.layout().addLayout(self.fileDirScheduleLayout.layout())
+            self.drawScheduleElements()
 
         # disable connected elements
         for i in self.inputs:
@@ -512,6 +512,7 @@ class OWBwBWidget(widget.OWWidget):
 
         # make a box for the console and console control - not abs necessary but it might help with future org and with the size hinting system
         self.consoleBox, consoleLayout = self.tabs.addBox("Console", minHeight=160)
+        
         # self.consoleBox = gui.widgetBox(self.controlArea)
         consoleControlLayout = BwbGridLayout()
         self.consoleBox.layout().addLayout(consoleControlLayout.layout())
@@ -548,6 +549,12 @@ class OWBwBWidget(widget.OWWidget):
         self.btnConsoleSave = gui.button(None, self, "Save", callback=self.saveConsole)
         self.btnConsoleSave.setStyleSheet(self.css)
         self.btnConsoleSave.setFixedSize(60, 20)
+        self.cboThreadNumber = QtGui.QComboBox()
+        self.cboThreadNumber.setMaximumWidth(100)
+        self.cboThreadNumberPopulate()
+        self.displayThread=self.cboThreadNumber.currentIndex()
+        self.cboThreadNumber.currentIndexChanged.connect(self.cboThreadNumberUpdate)
+        layout.addWidget(self.cboThreadNumber)
         layout.addWidget(self.btnConsoleClear)
         layout.addWidget(self.btnConsoleSave)
         # self.drawFileDirElements(pname, pvalue, box=box,layout=layout, addCheckbox=True)
@@ -558,6 +565,22 @@ class OWBwBWidget(widget.OWWidget):
             setattr(self, btnPname, None)
         self.bgui.add(btnPname, self.btnConsoleClear)
         self.bgui.add(btnPname, self.btnConsoleSave)
+
+    def cboThreadNumberUpdate(self):
+        sys.stderr.write('changed cboThreadNumber index from {} to {}\n'.format(self.displayThread,self.cboThreadNumber.currentIndex()))
+        self.displayThread= self.cboThreadNumber.currentIndex()
+        self.pConsole.changeThreadNumber(self.displayThread)
+        
+    def cboThreadNumberPopulate(self):
+        if hasattr(self,'cboThreadNumber'):
+            self.cboThreadNumber.clear()            
+            self.cboThreadNumber.addItem('All threads')
+            if self.iterate:
+                self.cboThreadNumber.setEnabled(True)
+                for i in range (1, self.nWorkers+1):
+                    self.cboThreadNumber.addItem('Thread {}'.format(i))
+            else:
+                self.cboThreadNumber.setEnabled(False)
 
     def clearConsole(self):
         self.console.clear()
@@ -815,9 +838,9 @@ class OWBwBWidget(widget.OWWidget):
 
         cbLabel = QtGui.QLabel("Number of workers: ")
         if not hasattr(self, "nWorkers"):
-            self.nWorkers = 0
+            self.nWorkers = 1
         self.threadSpin = QSpinBox()
-        self.threadSpin.setRange(0, 128)
+        self.threadSpin.setRange(1, 128)
         self.threadSpin.valueChanged.connect(self.updateThreadSpin)
         self.threadSpin.setValue(self.nWorkers)
 
@@ -841,7 +864,9 @@ class OWBwBWidget(widget.OWWidget):
             iterateCheckbox.stateChanged.connect(
                 lambda: self.threadSpin.setEnabled(iterateCheckbox.isChecked())
             )
-
+            iterateCheckbox.stateChanged.connect(
+                self.cboThreadNumberPopulate
+            )
             iterateBox = QtGui.QHBoxLayout()
             iterateBox.addWidget(iterateCheckbox)
             iterateBox.addWidget(self.iterateSettingsBtn)
@@ -878,7 +903,7 @@ class OWBwBWidget(widget.OWWidget):
 
         self.fileDirScheduleLayout.addLayout(scheduleBox, 1, 0)
         self.fileDirScheduleLayout.addLayout(threadBox, 2, 0)
-
+        
     def setIteration(self):
         iterateDialog = IterateDialog(self.iterateSettings)
         iterateDialog.exec_()
@@ -886,6 +911,7 @@ class OWBwBWidget(widget.OWWidget):
 
     def updateThreadSpin(self):
         self.nWorkers = self.threadSpin.value()
+        self.cboThreadNumberPopulate()
 
     def drawCheckbox(self, pname, pvalue, box=None):
         # for booleans - their value is the same as the checkbox state
