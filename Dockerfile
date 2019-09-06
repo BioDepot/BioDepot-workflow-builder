@@ -33,8 +33,8 @@ RUN apt-get update && apt-get install -y wget libssl1.0 \
 #files for web interface noVNC
 ADD web /web/
 RUN apt-get update && apt-get install -y build-essential gcc python-pip python-dev python3-pip \
-    && pip install --upgrade pip==9.0.3 \
-    && pip install -U setuptools \
+    && pip install --upgrade wsgiref \
+    && python3 -m pip install --upgrade pip wheel setuptools \
     && pip install -r /web/requirements.txt \
     && pip3 install docker \
     && apt-get remove -y gcc build-essential python-pip python-dev python3-pip \
@@ -52,10 +52,8 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 RUN virtualenv --python=python3 --system-site-packages orange3venv
 RUN source orange3venv/bin/activate
 COPY orange3 orange3
-RUN apt-get update && apt-get install -y build-essential gcc python-dev python3-dev python3-pip python-pip\
-    && pip3 install --upgrade pip==9.0.3 \
-    && pip install numpy \
-    && pip3 install -U setuptools \
+RUN apt-get update && apt-get install -y build-essential gcc python-dev python3-dev python3-pip python-pip zlib1g-dev libbz2-dev liblzma-dev \
+    && python3 -m pip install --upgrade pip wheel setuptools \
     && pip3 install -r orange3/requirements-core.txt \
     && pip3 install -r orange3/requirements-gui.txt \
     && pip3 install docker pysam beautifulsoup4\
