@@ -380,7 +380,7 @@ class OWImageBuilder(widget.OWWidget):
         try:
             self.dockerClient = DockerClient("unix:///var/run/docker.sock", "local")
             strDockerInfo = self.lblDockerVersion.text().format(
-                self.dockerClient.version()["Version"]
+                self.dockerClient.getClient().version()["Version"]
             )
             self.dockerInitialized = True
         except:
