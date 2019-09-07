@@ -141,7 +141,7 @@ ADD coreutils /coreutils/
 ADD icons /icons/
 ADD tutorialFiles /tutorialFiles
 ADD serverSettings.json /biodepot
-ADD bwb-scheduling-service /bwb-scheduling-service/
+#ADD bwb-scheduling-service /bwb-scheduling-service/
 
 #start it up
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
