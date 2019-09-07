@@ -1,7 +1,7 @@
 FROM ubuntu:18.04
 MAINTAINER lhhung<lhhung@uw.edu>
 #Dockerfile for widget development container
-
+#comment to force rebuild
 ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /root
 #base files/utils to be used inside container
@@ -52,10 +52,9 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 RUN virtualenv --python=python3 --system-site-packages orange3venv
 RUN source orange3venv/bin/activate
 COPY orange3 orange3
-RUN apt-get update && apt-get install -y build-essential gcc python-dev python3-dev python3-pip python-pip\
-    && pip3 install --upgrade pip==9.0.3 \
+RUN apt-get update && apt-get install -y build-essential gcc python-dev python3-dev python3-pip python-pip zlib1g-dev libbz2-dev liblzma-dev \
+    && python3 -m pip install --upgrade pip wheel setuptools \
     && pip install numpy \
-    && pip3 install -U setuptools \
     && pip3 install -r orange3/requirements-core.txt \
     && pip3 install -r orange3/requirements-gui.txt \
     && pip3 install docker pysam beautifulsoup4\
@@ -98,18 +97,17 @@ ADD startup.sh /
 EXPOSE 6080
 WORKDIR /data
 
+#install rsync
 #install rsync curl and docker-compose
 RUN apt-get update && apt-get install -y rsync curl \
     && curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose\
     && apt-get autoclean -y \
     && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/**
 
 #Change app name to Bwb
 RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
-
-#devfiles
 
 RUN apt-get update && apt-get install -y wget geany firefox openssh-client
 
@@ -133,9 +131,6 @@ COPY orangePatches/signals.py /orange3/Orange/widgets/utils/signals.py
 COPY scripts/startBwb.sh /usr/local/bin/startBwb.sh
 COPY scripts/runDockerJob.sh /usr/local/bin/runDockerJob.sh
 COPY scripts/startScheduler.sh /usr/local/bin/startScheduler.sh
-COPY scripts/runScheduler.sh /usr/local/bin/runScheduler.sh
-COPY scripts/getlog.sh /usr/local/bin/getlog.sh
-COPY scripts/monitor.sh /usr/local/bin/monitor.sh
 
 #add widgets and workflows
 ADD widgets /widgets/
@@ -150,4 +145,3 @@ ADD bwb-scheduling-service /bwb-scheduling-service/
 
 #start it up
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
-
