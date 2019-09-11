@@ -163,7 +163,7 @@ University of Washington Tacoma
 
 #### Biomedical scientists 
 
-The Bwb GUI is designed for non-programmers who want to use a workflow on their own data without worrying about installation and reproducibility. Bwb auto-installs the components and provides a very simple and intuitive GUI interface for modifying key parameters and accepting user files. We realise that for many users, interactive visualization is a large part of their analyses and Bwb supports Jupyter notebooks, Cytoscape and other software that have their own graphics and GUIs. The casual user can use familiar tools to customize the final stages of the analyses while maintaining a complete record and provenance of the entire pipeline which is essential for publication, sharing and reproducibility. Advanced users can swap in different parameter sets or even different modules just by dragging and dropping into an existing tested pipeline. A bash script can be created for the purpose of publication or to use in one of the many schedulers that support bash scripts such as SLURM/SGE/Torque-Maui.
+The Bwb GUI is designed for non-programmers who want to use a workflow on their own data without worrying about installation and reproducibility. Bwb auto-installs the components and provides a very simple and intuitive GUI interface for modifying key parameters and accepting user files. We realise that for many users, interactive visualization is a large part of their analyses. Bwb supports Jupyter notebooks, Cytoscape and other software that have their own graphics and GUIs. The casual user can use familiar tools to customize the final stages of the analyses while maintaining a complete record and provenance of the entire pipeline which is essential for publication, sharing and reproducibility. Advanced users can swap in different parameter sets or even different modules just by dragging and dropping into an existing tested pipeline. A bash script can be created for the purpose of publication or to use in one of the many schedulers that support bash scripts such as SLURM/SGE/Torque-Maui.
 
 #### Bioinformaticians
 
@@ -171,7 +171,7 @@ Bwb is also designed for bioinformaticians who support a group of users by analy
 
 #### Software tool developers
 
-A major motivation for our development of Bwb was that our own software tools were not being adopted or even tested by may users. The barriers of installing and integrating new software into existing workflows are very high. By providing a GUI and an auto-installation method across different platforms, the adoption costs are greatly reduced. **Bwb is NOT meant to be a visual programming language** as this we find this a cumbersome method for writing software and probably too complicated to be used by users without a programming background. Bwb is designed to allow the developer an mechanism to provide a consistent and intuitive GUI for their software that largely consists of filling out a set of forms. In some cases, an additional wrapper script may be needed. Filling out the Bwb forms to skin an application is usually less work than the alternatives of writing a custom GUI, providing or conforming to a web-based API, writing, or dragging-and-dropping together a script toe create a workflow one or more workflow description languages. Our test cases are examples of ready-to-run modifiable workflows that self-install executables, dependencies and data. Bwb workflows can be added, for example, to a GitHub to encourage users to try out new software.
+A major motivation for our development of Bwb was that our own software tools were not being adopted or even tested by potential users. The barriers of installing and integrating new software into existing workflows are very high. By providing a GUI and an auto-installation method across different platforms, the adoption costs are greatly reduced. **Bwb is NOT meant to be a visual programming language** as we find this to be a cumbersome method for experienced coders while being too complicated to be easily adopted by users without a programming background. Instead, Bwb is designed to allow the developer a mechanism to provide a consistent and intuitive GUI for their software that largely consists of filling out a set of forms with minimal coding. In some cases, an additional wrapper script may be needed. Filling out the Bwb forms to skin an application is usually less work than the alternatives of writing a custom GUI, providing or conforming to a web-based API, writing, or dragging-and-dropping together a script to create a workflow using one or more workflow description languages. Our test cases are examples of ready-to-run modifiable workflows that self-install executables, dependencies and data. One possible use cas is to add Bwb workflows to a GitHub to encourage users to try out new software.
 
 ## Usage
 
@@ -233,10 +233,10 @@ Bwb is a containerized mini webserver that can be run on any platform. To run it
 
 ### What browser should I use with Bwb?
 
-We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine. In the past we have with Edge but the latest versions of Firefox and Safari work well. If you must use Edge it **may** be possible to use by following this [recipe](https://www.hanselman.com/blog/FixedMicrosoftEdgeCantSeeOrOpenVirtualBoxhostedLocalWebSites.aspx) to allow it to connect to a local URL or by running Bwb from a remote server.
+We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine. In the past we have had problems with Edge but the latest versions of Firefox and Safari work well. If you must use Edge it **may** be possible to use by following this [recipe](https://www.hanselman.com/blog/FixedMicrosoftEdgeCantSeeOrOpenVirtualBoxhostedLocalWebSites.aspx) to allow it to connect to a local URL or by running Bwb from a remote server.
 
 ### Where are the sample workflows and datasets?
-Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we use of the provided downloadURL widget to download files from an external source (eg. Google drive) for use with the containers. This is the mechanism that we use in all our examples. You can use our widget to download the data or look at the widget parameters to find the URL of the files and download them yourself. Then you can save these files if you wish and use them directly.
+Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we use of the provided downloadURL widget to download files from an external source (eg. a Google drive) for use with the containers. This is the mechanism that we use in all our examples. You can use our widget to download the data or look at the widget parameters to find the URL of the files and download them yourself. Then you can save these files if you wish and use them directly.
 
 ### Is it possible to use Bwb to run a batch of datasets?
 Currently, this is possible in a couple of ways:
@@ -256,7 +256,11 @@ We have provided basic widgets for Python, R, Perl, Bash, and Java. There is a [
 
 1. Check that virtualization is turned on. This may require booting into BIOS by restarting and pressing a function key (typically F1, F8 or F10). 
 2. If you are using VirtualBox (Docker toolbox) make sure that you allow Docker to install it i.e. you should uninstall Virtualbox if there is a previous installation before running the Docker installer.
-3. Make sure that you have read/write permissions to the directory that you using to share files with Bwb and Docker. One method is use your Desktop or a folder on your Desktop as the starting point for sharing files. For example when launching from Docker toolbox the starting command would be
+3. If are using a Docker version that uses a VM and you have upgraded VirtualBox, it is possible that the ip of the VM has changed from 192.168.99.100. You can run the following command to find the IP.
+```
+docker run --rm --net host alpine ip address
+```
+4. Make sure that you have read/write permissions to the directory that you using to share files with Bwb and Docker. One method is use your Desktop or a folder on your Desktop as the starting point for sharing files. For example when launching from Docker toolbox the starting command would be
 
 ```
 docker run --rm   -p 6080:6080 \
@@ -292,7 +296,7 @@ The container should build correctly now.
 
 ## Miscellaneous
 ### How should I reference Bwb if I use it?
-Please reference our biorXiv preprint https://www.biorxiv.org/content/10.1101/099010v2
+Please reference Cell Systems (2019), https://doi.org/10.1016/j.cels.2019.08.007 
 
 # MANUAL
 ## GENERAL INFORMATION
@@ -516,7 +520,7 @@ docker build -t bwb/biodepot:latest .
 ``` 
 2\.  Start the Bwb container 
 
-For Linux/MacOX
+For Linux/MacOS
 ```bash
 docker run --rm -p 6080:6080 -v ${PWD}:/data -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/.X11-unix:/tmp/.X11-unix  --privileged --group-add root biodepot/bwb
 ```
@@ -536,6 +540,10 @@ For Macs and Windows machines using VirtualBox, the local ip is usually [192:168
 ```bash
 docker ps
 ```
+Alternatively you can run a simple docker command
+```
+docker run --rm --net host alpine ip address
+```
 
 More information about finding Docker IP is available here: [https://docs.docker.com/machine/reference/ip](https://docs.docker.com/machine/reference/ip/)
 
@@ -548,7 +556,7 @@ The Bwb no-vnc container launches a mini-webserver that is accessed using your b
 
 ### Basic window manipulations
 
- The Bwb application is started automatically upon starting the Docker container. The window can be minimized, maximized/restore and closed using the buttons in the left hand corner. These are the same buttons available in standard Windows, MacOS and Linux windowing systems. The window can also be resized by clcking on the middle button to unmaximize and then dragging the lower right hand corner.
+The Bwb application is started automatically upon starting the Docker container. The window can be minimized, maximized/restore and closed using the buttons in the left hand corner. These are the same buttons available in standard Windows, MacOS and Linux windowing systems. The window can also be resized by clcking on the middle button to unmaximize and then dragging the lower right hand corner.
 
 Clicking on the left minimize button of th window hides the window and reveals the background. The window can be restored by clicking on the panels in the lower toolbar. Clicking on the right close button closes the application. It, however, does not quit the container.
 
