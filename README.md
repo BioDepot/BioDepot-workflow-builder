@@ -229,7 +229,7 @@ would make the files and directories at C://Users/myName available to Bwb.
 Drag the mouse from the right side of the source widget to the left side of the sink widget. If they can be connected a dialog box should appear allowing you to choose which widgets to connect. This is shown in our [video](#tutorial---adding-a-python-script-to-a-bwb-workflow) at 5:49 to 6:05.
 
 ### How do I run Bwb on the cloud?
-Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws)
+Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws)interactin
 
 ### What browser should I use with Bwb?
 
@@ -241,7 +241,7 @@ Bwb includes a set of sample workflows. These are found under the /workflows dir
 ### Is it possible to use Bwb to run a batch of datasets?
 Currently, this is possible in a couple of ways:
 
-1) A wrapper script can be used inside the widget to distribute the computing to multiple threads. An example is [here] (https://github.com/BioDepot/LINCS_RNAseq_cpp/blob/master/scripts/multibwa.sh)
+1) A wrapper script can be used inside the widget to distribute the computing to multiple threads. An example is [here] (https://github.com/BioDepot/LINCS_RNAseq_cpp/blob/master/scripts/multibwa.sh)interactin
 
 2) Export the pipeline as a [bash script](#testing-and-exporting-workflows-as-a-bash-script) and modify the scripts to be used with a HPC scheduler such as SLURM, SGE or Torque-Maui. One could also use the script as the basis for a CWL or WDL descriptor for the workflow.
 
@@ -276,7 +276,7 @@ Try the following:
 2. Maximize the window
 3. Type in the url to connect to Bwb but do not let it auto-complete e.g. localhost:6080 **NOT** localhost:6080/vnc_auto.html
 
-The technical explanation is that Bwb resizes to the window size that it detects when it is first connected to a browser by cycling through a series of different endpoints. However, the last url may get cached and may skip the resizing steps.
+The technical explanation is that Bwb resizes to the window size that it detects when it is first connected to a browser by cycling through a series of different endpoints. However, the last url may get cached and mayinteractin skip the resizing steps.
 
 ### STAR and Kallisto won't run
 There are two common reasons:
@@ -605,11 +605,11 @@ Widgets and drawers can be added and deleted from the Tool Dock by choosing the 
 
 ### Interacting with widgets
 
-To interact with a widget, it is first dragged from the Tool Dock onto the canvas. Clicking on a widget brings up the widget UI window with tabs for parameter entry, an output console and a tool bar with options to control the execution of the widget. Right-clicking on the widget and choosing the edit widget item brings up the widget definition window. The definition window contains a set of forms that define the parameters to be queried by the UI window, the Docker container to be used, and the commands to be run upon execution. Finally dragging the mouse from the edge of one widget to another creates a link between the output of one widget to the input of the second widget. These three sets of actions are described in the next sections
+To interact with a widget, it is first dragged from the Tool Dock onto the canvas. Clicking on a widget brings up the widget UI window with tabs for parameter entry, an output console and a tool bar with options to control the execution of the widget. Right-clicking on the widget and choosing the edit widget item brings up the widget definition window. The definition window contains a set of forms that define the parameters to be queried by the UI window, the Docker container to be used, and the commands to be run upon execution. Finally dragging the mouse from the edge of one widget to another creates a link between the output of one widget to the input of the second widget. These three sets of actions are described in the next sections.
 
 #### Widget user interaction window 
 
-The Bwb interaction window pops up when when a widget is double clicked. There are up to 3 tabs in each window: Required entries, optional entries and console. 
+The Bwb interaction window pops up when a widget is double clicked. There are up to 3 tabs in each window: Required entries, optional entries and console. 
 
 ##### Required parameters screen
 Required entries are parameters that must be entered before the widget can execute. An example would be fastq files for an alignment widget. 
@@ -617,7 +617,7 @@ Required entries are parameters that must be entered before the widget can execu
 
 
 ##### Optional parameters screen
-Additional optional entries are optional flags and parameters that are not required for program execution. When these are present, they are displayed by clicking on the optional entires tab. 
+Additional optional entries are flags and parameters that are not required for program execution. When these are present, they are displayed by clicking on the optional entries tab. 
 ![](./docs/images/optional.png)
 
 ##### Console screen
@@ -635,16 +635,16 @@ The stop button then becomes active and pressing it will terminate execution.
 ###### Export graphics 
 The export graphics box, if checked allows the widget to output interactive graphics to the Bwb screen. This is necessary for applications such as Jupyter and Cytoscape that have their own GUI.
 ###### Test mode
-The test mode box, if checked runs the widget and downstream widgets in test mode. In test mode, upon pressing the start button, the docker  commands are not executed but are generated and recorded in console windows. An option will also appear to allow the user to save the commands to an executable bash script that can be run without Bwb.
+The test mode box, if checked, runs the widget and downstream widgets in test mode. In test mode, upon pressing the start button, the docker  commands are not executed but are generated and recorded in console windows. An option will also appear to allow the user to save the commands to an executable bash script that can be run without Bwb.
 ###### Run mode
-The runmode menu controls how the widget will be executed. In manual mode, the default option, the widget can only be run by the user pressing the start button. Automatic mode meanst that the widget will run without user input, once all the required options are entered. The last run mode is the triggered run mode. The widget will start execution after one or more inputs are received *AND* all the required parameters are set. Manual start mode is typically used for widgets at the beginning of pipelines or in optional sections of the pipeline. Triggered mode is typcially used in downstream widgets to allow widgets to sequentially process the data as it flows through the analytical pipeline.
+The runmode menu controls how the widget will be executed. In manual mode, the default option, the widget can only be run by the user pressing the start button. Automatic mode means that the widget will run without user input, once all the required options are entered. The last run mode is the triggered run mode. The widget will start execution after one or more inputs are received *AND* all the required parameters are set. Manual start mode is typically used for widgets at the beginning of pipelines or in optional sections of the pipeline. Triggered mode is typcially used in downstream widgets to allow widgets to sequentially process the data as it flows through the analytical pipeline.
 ###### Select triggers
-The Select triggers menu  allows the user to specify which inputs will trigger execution. If more than one input is chosen, the widget will wait until all inputs are received before executing. This menu is only active if the Triggered runmode is chosen
+The select triggers menu allows the user to specify which inputs will trigger execution. If more than one input is chosen, the widget will wait until all inputs are received before executing. This menu is only active if the triggered runmode is chosen.
 
 
 #### Widget definition window
 
-Right clicking on the widget brings up the option to edit its definition parameters. Choosing the edit option edits the present widget. Choosing the new option edits a new widget. The same options are also available from the main menu. Upon entering the edit widget mode, a window pops up with multiple tabs described next:
+Right-clicking on the widget brings up the option to edit its definition parameters. Choosing the edit option edits the present widget. Choosing the new option edits a new widget. The same options are also available from the main menu. Upon entering the edit widget mode, a window pops up with multiple tabs described next:
 
 ##### General tab
 The general tab allows the user to enter general information about the widget. 
@@ -656,15 +656,15 @@ A description of the widgets function. When the user mouses over a widget in the
 ###### docker_image_name
 The name of the Docker container that is used. 
 ###### docker image tag
-The image tag for the Docker container. The default tag for any conainer is latest which is not necessarily the most recent in spite of the name. Bwb has the version of software and the major dependencies and the date separated by underscores to proivde a detailed yet human readable versioning tag
+The image tag for the Docker container. The default tag for any container is latest which is not necessarily the most recent in spite of the name. Bwb has the version of software and the major dependencies and the date separated by underscores to provide a detailed, yet human readable, versioning tag
 ###### priority
-Determines the order of appearance in the Tool Dock drawer
+Determines the order of appearance in the Tool Dock drawer.
 ###### icon
-The icon used for the widget
+The icon used for the widget.
 
 ##### Inputs tab
 ![](./docs/images/def_inputs.png)
-The input section allows the user to specify the name of the inputs accepted by the widget. These are variable names that can also be assigned to parameters and outputs. Currently the callback option is not used. When an input name is also a parameter name, the value of the parameter will be determined by the input if it is connected to the output of another widget
+The input section allows the user to specify the name of the inputs accepted by the widget. These are variable names that can also be assigned to parameters and outputs. Currently, the callback option is not used. When an input name is also a parameter name, the value of the parameter will be determined by the value received by input if it is connected to the output of another widget.
 
 ##### Outputs tab
 ![](./docs/images/def_outputs.png)
@@ -702,15 +702,15 @@ will generate the following command
 ```
 ##### Docker tab
 ![](./docs/images/def_docker.png)
-The Docker tab contains information about the Dockerfiles and build commands used to construct the container. This currently is mainly for documenting the provenance of the container. However, we will be adding the option of generating the containers from this section rather than downloading the container from a repo. 
+The Docker tab contains information about the Dockerfiles and build commands used to construct the container. Currently, this is mainly for documenting the provenance of the container. However, we will be adding the option of generating the containers from this section rather than downloading the container from a repo. 
 
-Currently buttons exist to copy a Dockerfile to the widget directory (Add Dockerfile), delete Dockerfiles (Clear).
+Currently, buttons exist to copy a Dockerfile to the widget directory (Add Dockerfile) or delete Dockerfiles (Clear).
 There is also a button to bring up the BiocImageBuilder utility which facilitates the building of Docker containers.
 
 ##### Widget definition save options and further customization by editing the .py file
 ![](./docs/images/def_bar.png)
 
-At the bottom of the window are the save options. To understand the save options, let's first explain the files gernerated by the Bwb widget builder after saving the definition. The files generated for widget mywidget are
+At the bottom of the window are the save options. To understand the save options, let's first explain the files generated by the Bwb widget builder after saving the definition. The files generated for widget mywidget are
 ```
 mywidget/mywidget.attr
 mywidget/mywidget.states
@@ -719,23 +719,23 @@ mywidget/mywdiget.py
 
 ```
 mywidget.attr is a json file saves the variables entered into the definition window.
-mywidget.states  is a json file saves the actual state of the form so that when the defintion window is opened again, the user can resume whre he or she left off.
+mywidget.states  is a json file saves the actual state of the form so that when the defintion window is opened again, the user can resume where he or she left off.
 mywidget.json is a json file that stores the variables which are actually read in by the UI window and is derived from the attr and states file.
-mywidget.py is the code that is executed to implement the widget and reads in mywidget.json file to display the UI window and execute the command in the docker container when the form is filled. Note that the values for the form are not stored with the widget but with the workflow .ows file described later.
+mywidget.py is the code that is executed to implement the widget, and reads in mywidget.json file to display the UI window and execute the command in the docker container when the form is filled. Note that the values for the form are not stored with the widget but with the workflow .ows file described later.
 
-Originally in the OrangeML setup, the mywidget.py code was written manually. Most of the boilerplate code has been automated using the mywidget.json file and type based form based interfaces. The input and output control routines have also been automated but this is an area where some customized code maybe required, for example to process internal variables into a form that will be output.  
+Originally in the OrangeML setup, the mywidget.py code was written manually. Most of the boilerplate code has been automated using the mywidget.json file and type based interfaces. The input and output control routines have also been automated but this is an area where some customized code maybe required, for example to process internal variables into a form that will be output.  
 
 To accommodate custom code, there are 3 save options. 
 ###### Save mode: Overwrite 
-Overwrites the existing python file with the newly generated one. This is used when there is no customized code
+Overwrites the existing python file with the newly generated one. This is used when there is no customized code.
 ###### Save mode: Merge
 Will only overwrite the boilerplate code for reading values from the json file (the first 80% of the code). Any code that appears after this first part of the script is untouched.
 ###### Save mode: Data
-Will not touch the python file. Will only generate the json files
+Will not touch the python file. Will only generate the json files.
 
-Finally in addition to the save and save as button there is an additional load button.
+Finally, in addition to the save, and save as button there is a load button.
 ###### Load button
-Will load the attrs and state from another widget - this allows the user to use a pre-existing widget as a template or starting point
+Will load the attrs and state from another widget - this allows the user to use a pre-existing widget as a template or starting point.
 
 ### Building workflows from widgets
 
@@ -766,23 +766,23 @@ We recommend that for most cases that you merge all widgets that are to be used 
 N.B. changes to widgets and workflows may not be reflected immediately as Bwb must reload in order to incorporate new or changed routines. This is done as much as possible automatically but if it does not, using the reset settings option from the File menu or the Load workflow option to reload the workflow **
 
 #### Connecting widgets
-Widgets are connected by dragging from the right side of the source widget to the left side of the destination widget. This transfers the output of the source widget to the destination widget. When there are more than one possible connection, Bwb will choose one. Double clicking on the link will allow the user to edit this choice and select which inputs are to be connected to which output. An output can be connected to multiple inputs but inputs in Bwb by default currently accept one output. This may be changed in the future - especially for triggers
+Widgets are connected by dragging from the right side of the source widget to the left side of the destination widget. This transfers the output of the source widget to the destination widget. When there are several possible connection, Bwb will choose one. Double clicking on the link will allow the user to edit this choice and select which inputs are to be connected to which output. An output can be connected to multiple inputs but inputs in Bwb by default currently accept one output. This may be changed in the future - especially for triggers
 
 ##### Input from connections override user input
-When an input is connected to an output - the output value will become the input value and will override any user input and the form for that imput will be grayed out and inaccessible.
+When an input is connected to an output - the output value will become the input value. This value will override any user input. Accordingly, the form for that imput will be grayed out and inaccessible.
 
 ##### Connections to triggers are used to control the execution of widgets
-One of the major uses of connections is to control the execution of widgets in workflows. A widget that has one or more inputs that are connected can use these as execution triggers using the run mode at the bottom of the destination widget. The widget will not execute until all required parameters are entered and all the inputs that are triggers receive input. This allows for a widget to wait until another widget has finished processing. For example, the kallisto quant widget in the kallisto-sleuth demo workflow is triggered by the indexFile produced by the kallisto index widget and the output of the fastq download widget. It will wait unti the index file is ready and the fastq files are downloaded before proceeding
+One of the major uses of connections is to control the execution of widgets in workflows. A widget that has one or more inputs that are connected can use these as execution triggers using the run mode at the bottom of the destination widget. The widget will not execute until all required parameters are entered and all the inputs that are triggers receive input. This allows for a widget to wait until another widget has finished processing. For example, the kallisto quant widget in the kallisto-sleuth demo workflow is triggered by the indexFile produced by the kallisto index widget and the output of the fastq download widget. It will wait unti the index file is ready and the fastq files are downloaded before proceeding.
 
 #### Saving workflows
 The 'Save workflow as' option under the File menu will bring up a dialog box. The dialog box will ask for the workflow name which will also be the name of the directory where the widgets and other workflow files are stored. The parent directory where the workflow directory will reside also needs to be inputted. Optionally, a color and icon can provided. Otherwise, the current icon and color of the workflow are used, or in the case of new workflows, default icons and color will be used. Finally, there is a check box to merge all widgets. If this is left unchecked, the workflow will not maintain a separate copy of the widgets in its directory. The workflow will function but will use off-the-shelf widgets provided by Bwb or another loaded workflow. Checking the box clones all the widgets into the workflow directory. Note that different drawers can carry its own version of a widget. These will be assigned different names if there is a conflict before being copied into the workflow.
 
 #### Loading and executing a workflow
-To load a workflow go to the File menu at the top left corner of the Bwb window and choose the 'Load workflow' option. A file dialog will pop up allowing you to chooe the workflow to load. The workflow is a directory.
+To load a workflow go to the File menu at the top left corner of the Bwb window and choose the 'Load workflow' option. A file dialog will pop up allowing you to chosoe the workflow to load. The workflow is a directory.
 
 Demo workflows that come with Bwb are in the /workflows directory.
 
-To execute a workflow, double click on a widget and manual start from that widget by hitting the blue start button. When that widget is finished execution it will send output to connected widgets. If these widgets are triggered by the output, they will then execute (as long as all the required parameters and other other trigger signals have been received. Workflows also can be started from any widget if the required files and parameters are present. For example,  an alignment pipeline can skip the indexing steps if the index has already been generated or downloaded.
+To execute a workflow, double click on a widget and manual start from that widget by hitting the blue start button. When that widget has finished execution it will send output to connected widgets. If these widgets are triggered by the output, they will then execute (as long as all the required parameters and other other trigger signals have been received). Workflows also can be started from any widget if the required files and parameters are present. For example,  an alignment pipeline can skip the indexing steps if the index has already been generated or downloaded.
 
 #### Testing and exporting workflows as a bash script 
 A test mode is also provided for testing. Checking the test mode box before hitting the start button causes the widget and downstream connected widgets to output the docker commands to the console rather than executing them. This allows the user to check whether the triggers are set and the necessary parameters are entered without needing to run a lengthy workflow. In addition, the user will be prompted for a file to save the docker commands as a bash script. The script is a record of the actual docker commands that are run when the workflow is executed. 
