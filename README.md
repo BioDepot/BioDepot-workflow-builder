@@ -296,7 +296,7 @@ The container should build correctly now.
 
 ## Miscellaneous
 ### How should I reference Bwb if I use it?
-Please reference [Building Containerized Workflows Using the BioDepot-Workflow-Builder Cell Systems (2019)] (https://www.cell.com/cell-systems/fulltext/S2405-4712(19)30276-5)
+Please reference [Building Containerized Workflows Using the BioDepot-Workflow-Builder Cell Systems (2019)](https://www.cell.com/cell-systems/fulltext/S2405-4712(19)30276-5)
 
 # MANUAL
 ## GENERAL INFORMATION
