@@ -11,17 +11,23 @@ import time
 from pathlib import Path
 #runScheduler.sh ['b2b72d36270f4200a9e', '/tmp/docker.b2b72d36270f4200a9e.json', '8', '8096']
 class ConsoleProcess:
+    #note that the logBaseDir is hard coded under /data/.bwb for now - this should be changed for whatever the primary volume mapping is
     # subclass that attaches a process and pipes the output to textedit widget console widget
     def __init__(self, console=None, errorHandler=None, finishHandler=None):
         self.threadNumber=0
+        self.processDir="proc.{}".format(uuid.uuid4().hex)
         self.startupOnly=False
         self.finishHandler=None
         self.log = QProcess()
-        self.logDir=None
-        self.logFile=None
+        self.baseLogDir="/data/.bwb"
+        self.logDir="{}/{}/logs".format(self.baseLogDir,self.processDir)
+        self.logFile="{}/log{}".format(self.logDir,self.threadNumber)
+        self.errorDir="/tmp/{}/errors".format(self.processDir)
         self.process = QProcess()
         self.console = console
         self.state = "stopped"
+        #call cleanup just in case there is a previous processDir with same name
+        self.cleanup()
         if console:
             self.log.readyReadStandardOutput.connect(
                 lambda: self.writeConsole(
@@ -42,8 +48,7 @@ class ConsoleProcess:
         if newThreadNumber == self.threadNumber:
             return
         self.threadNumber = newThreadNumber
-        if self.logDir:
-            self.logFile='/data/.bwb/{}/log{}'.format(self.logDir,self.threadNumber)
+        self.logFile="{}/log{}".format(self.logDir,self.threadNumber)
         self.changeConsole()
     
     def changeConsole(self):
@@ -138,7 +143,7 @@ class ConsoleProcess:
         if schedule:
             self.scheduleLog(namespace)
             return
-        self.logFile='/data/.bwb/{}/log{}'.format(self.logDir,self.threadNumber)
+        self.logFile='{}/log{}'.format(self.logDir,self.threadNumber)
         myPath=Path(self.logFile)
         if not myPath.is_file():
             myPath.touch()
@@ -156,13 +161,9 @@ class ConsoleProcess:
         
     def schedule(self,parms):
         job_id=parms[0]
-        #self.startupOnly=True
         self.process.start('runScheduler.sh',parms)
         self.process.waitForFinished()
-        #self.startupOnly=False
-        #self.process.start('monitor.sh',[namespace])
         self.scheduleLog(job_id)
-        
         
     def start(self,cmds,schedule=False):
         self.cleanup()
@@ -170,22 +171,36 @@ class ConsoleProcess:
             sys.stderr.write('runScheduler.sh {}\n'.format(cmds))
             self.process.start('runScheduler.sh',cmds)
         else:
-            self.logDir='logs.{}'.format(uuid.uuid4().hex)
-            os.makedirs('/data/.bwb/{}'.format(self.logDir))
+            os.makedirs(self.logDir)
             self.startLog()
-            cmds.insert(0,self.logDir)
+            cmds.insert(0,self.baseLogDir)
+            cmds.insert(0,self.processDir)
+            self.writeMessage('runDockerJob.sh {}'.format(cmds))
             self.process.start('runDockerJob.sh',cmds)
         
-    def onFinish(self):
+    def onFinish(self,code,status):
         if self.startupOnly:
             return
         if self.finishHandler:
-            self.finishHandler()
+            if not status:
+                status=self.checkForErrors()
+            self.finishHandler(code=code,status=status)
         self.log.terminate()
 
+    def checkForErrors(self):
+        if os.path.exists(self.errorDir):
+            return -1;
+        return 0
+        
     def cleanup(self):
-        if self.logDir:
-            os.system('cd /data/.bwb && rm {} -r'.format(self.logDir))
+        if self.baseLogDir and self.processDir:
+            path="{}/".format(self.baseLogDir,self.processDir)
+            if os.path.exists(path):
+                os.system("rm {} -r".format(path))
+        if self.processDir:
+            path="/tmp/{}".format(self.processDir)
+            if os.path.exists(path):
+                os.system("rm {} -r".format(path))            
 
 
 class TaskJson:

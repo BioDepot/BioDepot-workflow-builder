@@ -2739,9 +2739,15 @@ class OWBwBWidget(widget.OWWidget):
         self.jobRunning = False
         self.pConsole.writeMessage("Finished")
         if code is not None:
-            self.pConsole.writeMessage("Exit code is {}".format(code))
+            if code:
+                self.pConsole.writeMessage("Exit code is {}".format(code), color=Qt.red)
+            else:
+                self.pConsole.writeMessage("Exit code is {}".format(code))
         if status is not None:
-            self.pConsole.writeMessage("Exit status is {}".format(status))
+            if status:
+                self.pConsole.writeMessage("Exit status is {}".format(status), color=Qt.red)
+            else:
+                self.pConsole.writeMessage("Exit status is {}".format(status))
         self.bgui.reenableAll(self)
         self.reenableExec()
         if self.status != "stopped" and self.status != "finished":
