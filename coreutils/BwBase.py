@@ -44,7 +44,7 @@ from AnyQt.QtWidgets import (
 
 def breakpoint(title=None, message=None):
     return
-    #QtGui.QMessageBox.warning(title,'',message)
+    QtGui.QMessageBox.warning(title,'',message)
 
 
 def getJsonName(filename, widgetName):
@@ -677,6 +677,7 @@ class OWBwBWidget(widget.OWWidget):
                 sys.stderr.write("type is {} {}\n".format(pvalue["type"], type("text")))
                 continue
             if isOptional:
+                sys.stderr.write("type is {} {}\n".format(pvalue["type"], type("text")))
                 self.drawLedit(
                     pname,
                     pvalue,
@@ -791,6 +792,7 @@ class OWBwBWidget(widget.OWWidget):
                     setattr(self, pname, None)
                 if (getattr(self, pname) is None) and ("default" in pvalue):
                     setattr(self, pname, pvalue["default"])
+                    sys.stderr.write("default value is {}\n".format(pvalue["default"]))
                 if not (pname in self.optionsChecked):
                     self.optionsChecked[pname] = False
                 optionalList.append(pname)
@@ -1065,9 +1067,9 @@ class OWBwBWidget(widget.OWWidget):
                 )
             )
             queryElements.append(checkbox)
-        labelValue = pvalue["label"] + " directory"
-        if labelValue is None:
-            labelValue = ""
+        labelValue="Directory"
+        if pvalue["label"]:
+            labelValue = pvalue["label"] + " directory"
         sys.stderr.write(
             "adding filedir for pname {} using layout {}\n".format(pname, layout)
         )
@@ -1099,8 +1101,9 @@ class OWBwBWidget(widget.OWWidget):
                 lambda: findFileCB.setEnabled(checkbox.isChecked())
             )
         layout.addLinefeed(startCol=startCol)
-
-        patternLabel = QtGui.QLabel(pvalue["label"] + " pattern")
+        patternLabel = QtGui.QLabel("Pattern")
+        if pvalue["label"]:
+            patternLabel = QtGui.QLabel(pvalue["label"] + " pattern")
         patternLedit = gui.lineEdit(None, self, patternAttr, disabled=addCheckbox)
         patternLedit.setClearButtonEnabled(True)
         patternLedit.setPlaceholderText("Enter search pattern eg. **/*.fq")
@@ -1383,7 +1386,7 @@ class OWBwBWidget(widget.OWWidget):
             )
             self.bgui.add(pname, checkbox)
 
-        self.bwbLedit(box, None, ledit, layout=layout, label=pvalue["label"])
+        self.bwbLedit(box, checkbox, ledit, layout=layout, label=pvalue["label"])
         # check if the value is none - then we clear it
         if getattr(self, pname) is None or getattr(self, pname) is "":
             ledit.clear()

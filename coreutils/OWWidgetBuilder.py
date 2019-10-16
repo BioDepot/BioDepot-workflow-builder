@@ -1686,7 +1686,6 @@ class OWWidgetBuilder(widget.OWWidget):
                 "directory list",
                 "bool",
                 "bool list",
-                "text",
                 "text list",
                 "int",
                 "int list",
