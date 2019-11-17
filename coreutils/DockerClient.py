@@ -368,7 +368,12 @@ class DockerClient:
             json.dump(dockerJson.jsonObj, outfile)
         parms=[namespace,jsonFile,cpuCount,memory]
         consoleProc.start(parms,schedule=True)
-
+    def arrayPrint(self,var):
+        #remove spaces from array 
+        if type(var) is list or type(var) is tuple:
+            return"[{}]".format(",".join(map(repr, var)))
+        else:
+            return var
     def create_container_iter(
         self,
         name,
@@ -400,7 +405,7 @@ class DockerClient:
             # strip quotes if present
             if env[0] == env[-1] and env.startswith(("'", '"')):
                 env = env[1:-1]
-            envs = envs + "-e {}={} ".format(env, var)
+            envs = envs + "-e {}={} ".format(env, self.arrayPrint(var))
         # create container cmds
         # the runDockerJob.sh script takes care of the first part of the docker command and cidfile
         # docker  run -i --rm --init --cidfile=<lockfile>'
