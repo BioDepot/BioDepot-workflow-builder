@@ -1536,8 +1536,7 @@ class OWBwBWidget(widget.OWWidget):
             sys.stderr.write(
                 "add item number {} value {}\n".format(i, boxEdit.item(i).text())
             )
-        if myItems:
-            setattr(self, attr, myItems)
+        setattr(self, attr, myItems)
 
     def drawTextBox(self, pname, pvalue, box=None, layout=None, addCheckbox=False):
         # for multiple files or directories draw a widget list with a line edit below and buttons to browse, add, delete, submit and reload
@@ -1571,12 +1570,14 @@ class OWBwBWidget(widget.OWWidget):
                 lambda: self.updateCheckbox(pname, checkbox.isChecked(), value=value)
             )
             elements.append(checkbox)
+            if checkbox.isChecked() and not self.inputConnections.isConnected(pname):
+                disabledFlag = False
 
         # line edit for manual file entry
         leditAttr = pname + "Ledit"
         if not hasattr(self, leditAttr):
             setattr(self, leditAttr, None)
-        ledit = gui.lineEdit(None, self, leditAttr, disabled=addCheckbox)
+        ledit = gui.lineEdit(None, self, leditAttr, disabled=disabledFlag)
         ledit.setClearButtonEnabled(True)
         if pvalue["type"] == "file list":
             ledit.setPlaceholderText("Enter file")
