@@ -1775,6 +1775,8 @@ class OWBwBWidget(widget.OWWidget):
         if self.data["inputs"] is not None:
             for pname in self.data["inputs"]:
                 self.candidateTriggers.append(pname)
+        # make sure that runTriggers are a subset of candidateTriggers
+        self.runTriggers=[trigger for trigger in self.runTriggers if trigger in self.data["inputs"]]
         # initialize the exec state
         self.execLayout = QtGui.QGridLayout()
         self.execLayout.setSpacing(5)
