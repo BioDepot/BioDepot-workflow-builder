@@ -2252,7 +2252,7 @@ class OWBwBWidget(widget.OWWidget):
     def checkRequiredParms(self):
         for parm in self.data["requiredParameters"]:
             if hasattr(self, parm):
-                if not getattr(self, parm):
+                if not getattr(self, parm) and getattr(self, parm) != 0:
                     return parm
         return None
 
