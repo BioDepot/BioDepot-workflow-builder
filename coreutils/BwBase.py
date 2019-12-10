@@ -2034,6 +2034,11 @@ class OWBwBWidget(widget.OWWidget):
         checkAttr = pname + "Checked"
         self.optionsChecked[pname] = getattr(self, checkAttr)
 
+    def removeRequiredFromOptionsChecked(self):
+        for pname in self.data["requiredParameters"]:
+            if pname in self.optionsChecked:
+                del(self.optionsChecked[pname])
+                
     def convertOrangeTypes(self, inputType):
         inputTypeArray = inputType.split(".")
         return inputTypeArray[-1]
@@ -2156,6 +2161,7 @@ class OWBwBWidget(widget.OWWidget):
         self.hostVolumes = {}
         # check for missing parameters and volumes
         missingParms = self.checkRequiredParms()
+
         if missingParms:
             self.console.append("missing required parameters: {}".format(missingParms))
             return
@@ -2167,6 +2173,8 @@ class OWBwBWidget(widget.OWWidget):
             return
 
         # get ready to start
+        #make sure that requiredParms are not in options checked
+        self.removeRequiredFromOptionsChecked()
         attrList = self.__dict__.keys()
         self.bgui.disableAll()
         self.disableExec()
@@ -2420,7 +2428,7 @@ class OWBwBWidget(widget.OWWidget):
             # do not add to arguments if it is an environment variable and there is no flag
             # if you really want it added put a space in the flag field
             if pvalue["flag"] is None or pvalue["flag"] == "" and "env" in pvalue:
-                sys.stderr.write("Found env: pname {} pvalue{}\n".format(pname, pvalue))
+                sys.stderr.write("Found env: pname {} pvalue{} which is added to arguments \n".format(pname, pvalue))
                 continue
             # if required or checked then it is added to the flags
             addParms = False
@@ -2671,12 +2679,9 @@ class OWBwBWidget(widget.OWWidget):
     def getEnvironmentVariables(self):
         # dynamic environment variables
         if "parameters" in self.data and self.data["parameters"] is not None:
-            for pname in self.data["parameters"]:
+            for pname in self.data["parameters"]:           
                 pvalue = self.data["parameters"][pname]
                 if "env" in pvalue and getattr(self, pname) is not None:
-                    sys.stderr.write(
-                        "env for var {} value {}\n".format(pname, getattr(self, pname))
-                    )
                     checkAttr = pname + "Checked"
                     setenv = False
                     # check if boolean
@@ -2687,18 +2692,9 @@ class OWBwBWidget(widget.OWWidget):
                         if pname in self.optionsChecked:
                             if self.optionsChecked[pname]:
                                 self.envVars[pvalue["env"]] = self.getAttrValue(pname)
-                                sys.stderr.write(
-                                    "env optional var {} env {} assigned to {}\n".format(
-                                        pname, pvalue["env"], self.getAttrValue(pname)
-                                    )
-                                )
                         else:
                             self.envVars[pvalue["env"]] = self.getAttrValue(pname)
-                            sys.stderr.write(
-                                "var {} env {} assigned to {}\n".format(
-                                    pname, pvalue["env"], self.getAttrValue(pname)
-                                )
-                            )
+
 
         # now assign static environment variables
         if "env" in self.data:
