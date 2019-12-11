@@ -1869,7 +1869,7 @@ class OWBwBWidget(widget.OWWidget):
             return
         if checked and attr not in self.runTriggers:
             self.runTriggers.append(attr)
-            self.triggerReady[attr] = True
+            self.triggerReady[attr] = False
         elif not checked and attr in self.runTriggers:
             (self.runTriggers).remove(attr)
             self.triggerReady[attr] = False
@@ -1916,6 +1916,8 @@ class OWBwBWidget(widget.OWWidget):
             )
             for trigger in self.runTriggers:
                 if not self.inputConnections.isSet(trigger):
+                    return
+                if not self.triggerReady[trigger]:
                     return
             self.onRunClicked()
 
@@ -2115,7 +2117,6 @@ class OWBwBWidget(widget.OWWidget):
                 receiveFtn(value)
             else:
                 setattr(self, attr, value)
-            self.checkTrigger(inputReceived=True)
             if attr in self.runTriggers:
                 sys.stderr.write(
                     "trigger value for attr {} is {}\n".format(
@@ -2123,6 +2124,7 @@ class OWBwBWidget(widget.OWWidget):
                     )
                 )
                 self.triggerReady[attr] = True
+            self.checkTrigger(inputReceived=True)
         if value is not None:
             inputType = type(value)
         self.updateGui(attr, value, inputType=inputType)
