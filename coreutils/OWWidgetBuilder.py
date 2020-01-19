@@ -9,7 +9,7 @@ import tempfile, shutil
 import OWImageBuilder, toolDockEdit
 from glob import glob
 from pathlib import Path
-from shutil import copyfile
+from shutil import copyfile, copytree
 from createWidget import mergeWidget, createWidget, findIconFile
 from copy import deepcopy
 from collections import OrderedDict
@@ -46,6 +46,9 @@ from AnyQt.QtWidgets import (
 )
 
 defaultIconFile = "/icons/default.png"
+def mybreakpoint(title=None, message=None):
+    QtGui.QMessageBox.warning(title,'',message)
+    return
 
 
 class SaveWorkflowForm(QDialog):
@@ -66,7 +69,6 @@ class SaveWorkflowForm(QDialog):
         self.returnData = returnData
         self.returnData["success"] = False
         self.initialData = returnData.copy()
-        self.defaultIconFile = "/icons/user.png"
         if "start_dir" in self.initialData and self.initialData["start_dir"]:
             self.defaultDir = self.initialData["start_dir"]
         self.browseIcon = QtGui.QIcon("/icons/bluefile.png")
@@ -423,7 +425,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.saveModeIndex = widget.currentIndex()
         self.allAttrs["saveModeIndex"] = self.saveModeIndex
 
-    def loadWidget(self, loadWidgetDir=None, loadNameCheck=True, startDir=None):
+    def loadWidget(self, loadWidgetDir=None, loadNameCheck=True, startDir=None, newLoad=False):
         if not startDir:
             if self.widgetDir:
                 startDir = self.widgetDir
@@ -457,15 +459,16 @@ class OWWidgetBuilder(widget.OWWidget):
             # we need to make default files in case the default files change from versions
             if loadNameCheck or not self.widgetName:
                 self.widgetName = self.getWidgetName()
-            self.makeDefaultFiles()
             if not self.widgetName:
                 return
+            # new widget 
+            self.makeDefaultFiles()
+            self.checkIconFile(loadWidgetDir)
             if self.isDrawn:
                 self.updateWidget()
             else:
                 self.startWidget()
         return
-
     def getWidgetName(self):
         niceName = self.widgetName
         if not niceName:
@@ -736,13 +739,42 @@ class OWWidgetBuilder(widget.OWWidget):
             if self.canvas:
                 self.canvas.reload_current()
         return
+        
+    def checkIconFile(self,loadWidgetDir):
+        if 'icon' in self.allStates and self.allStates['icon'][2][1] and os.path.isfile(self.allStates['icon'][2][1]):
+            loadIconFile = self.allStates['icon'][2][1]
+            if self.widgetDir:
+                os.system("rm {}/icon/*".format(self.widgetDir))
+                os.system("cp {} {}/icon/.".format(loadIconFile,self.widgetDir))
+                self.resetIconFile()
+        else:
+            loadIconFile = os.listdir(loadWidgetDir + "/icon")[0]
+            if self.widgetDir and self.widgetDir != loadWidgetDir:
+                os.system("cp {} {}/icon/.".format(loadIconFile,self.widgetDir)) 
+                self.resetIconFile()
+            else:
+                self.allStates['icon'][2][1]="{}/icon/{}".format(loadWidgetDir,loadIconFile) 
 
+    def resetIconFile(self):
+        if "icon" in self.allAttrs:
+            self.allAttrs["icon"]=None
+        if "icon" in self.allStates:
+            self.allStates["icon"][2][1]=''
+        return
+
+        
     def makeDefaultFiles(self):
+        if not self.widgetDir:
+            return
+        #this routine makes the default files/directories that might not be present in earlier versions
         iconDir = "{}/icon".format(self.widgetDir)
+        dockerFiles="{}/Dockerfiles".format(self.widgetDir)
         os.system("mkdir -p {} ".format(iconDir))
+        os.system("mkdir -p {} ".format(dockerFiles))
+        #add iconFile if none exists
         if not os.listdir("{}/icon".format(self.widgetDir)):
             copyfile(defaultIconFile, iconDir + "/" + os.path.basename(defaultIconFile))
-        os.system("mkdir -p {}/Dockerfiles".format(self.widgetDir))
+        
 
     def pickleWidget(self):
         myData = self.buildData()
