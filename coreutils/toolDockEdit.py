@@ -339,8 +339,15 @@ class ToolDockEdit(widget.OWWidget):
                     workflowPath, workflowPath, category, widgetName
                 )
         # finally remove the widget and symlink
-        shutil.rmtree(widgetPath)
         os.unlink(symlink)
+        delret = qm.question(
+            self,
+            "",
+            "Do you want to delete the widget files {} ".format(widgetPath),
+                qm.Yes | qm.No,
+            )
+        if delret == qm.Yes:
+            shutil.rmtree(widgetPath)
         qm.information(
             self,
             "Successfully removed",
