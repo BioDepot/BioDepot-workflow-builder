@@ -10,6 +10,9 @@ import pprint
 from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QInputDialog, QLineEdit
 
+def breakpoint(title=None, message=None):
+    QtGui.QMessageBox.warning(title,'',message)
+    return
 
 def deClass(string):
     # removes the <class 'id'> and returns id
@@ -78,9 +81,10 @@ def createWidget(inputJson, outputWidget, widgetName, inputData=None):
             os.system("cp {} {}/icon/".format(iconFile, inputPath))
         else:
             icons = os.listdir(inputPath + "/icon")
-            iconFile = os.path.basename(defaultIconFile)
             if not icons:
+                breakpoint(message="icons not found".format())
                 os.system("cp {} {}/icon/".format(defaultIconFile, inputPath))
+                iconFile = os.path.basename(defaultIconFile)
             else:
                 iconFile = icons[0]
         f.write(
