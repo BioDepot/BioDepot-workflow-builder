@@ -47,7 +47,7 @@ from AnyQt.QtWidgets import (
 
 defaultIconFile = "/icons/default.png"
 def breakpoint(title=None, message=None):
-    QtGui.QMessageBox.warning(title,'',message)
+    QtGui.QMessageBox.warning(None,title,message)
     return
 
 
@@ -752,8 +752,10 @@ class OWWidgetBuilder(widget.OWWidget):
                     self.resetIconFile()
         else:
             loadIconFile = os.listdir(loadWidgetDir + "/icon")[0]
-            if self.widgetDir and self.widgetDir != loadWidgetDir:
-                os.system("cp {} {}/icon/.".format(loadIconFile,self.widgetDir)) 
+            if self.widgetDir:
+                if os.path.realpath(self.widgetDir) != os.path.realpath(loadWidgetDir):
+                    breakpoint(message="cp {}/icon/{} {}/icon/.".format(loadWidgetDir,loadIconFile,self.widgetDir))
+                    os.system("cp {}/icon/{} {}/icon/.".format(loadWidgetDir,loadIconFile,self.widgetDir)) 
                 self.resetIconFile()
             else:
                 self.allStates['icon'][2][1]="{}/icon/{}".format(loadWidgetDir,loadIconFile) 

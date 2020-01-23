@@ -11,7 +11,7 @@ from PyQt5 import QtWidgets, QtGui
 from PyQt5.QtWidgets import QInputDialog, QLineEdit
 
 def breakpoint(title=None, message=None):
-    QtGui.QMessageBox.warning(title,'',message)
+    QtGui.QMessageBox.warning(None,title,message)
     return
 
 def deClass(string):
