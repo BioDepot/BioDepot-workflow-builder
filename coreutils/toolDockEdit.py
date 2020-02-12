@@ -358,6 +358,19 @@ class ToolDockEdit(widget.OWWidget):
 
     def widgetRename(self, widgetName=None, category=None, newName=None):
         qm = QtGui.QMessageBox
+        document = self.canvas.current_document()
+        if document.isModifiedStrict():
+            ret = qm.question(
+                self,
+                "",
+                "The workflow has changed since the last save - do you want to save the workflow and then rename the widget?",
+                qm.Yes | qm.No,
+            )
+            if ret == qm.Yes:
+                self.canvas.reload_current()
+            else:
+                return
+        
         if not widgetName:
             widgetName = self.getComboValue(self.RNWwbox)
         if not category:
