@@ -90,9 +90,10 @@ def replaceNamePy(pyFile, oldName, newName):
                 line = "class OW{}(OWBwBWidget):\n".format(newName)
             elif line.strip() == 'name = "{}"'.format(oldName):
                 line = '    name = "{}"\n'.format(newName)
-            elif line.strip() == 'with open(getJsonName(__file__,"{}")) as f:'.format(
-                oldName
-            ):
+            elif (line.strip() == 'with open(getJsonName(__file__,"{}")) as f:'.format(
+                oldName)) or (line.strip() == 'with open(getJsonName(__file__, "{}")) as f:'.format(
+                oldName)):
+			#second form with space after _file_ is possible with some old widget file
                 line = '        with open(getJsonName(__file__,"{}")) as f:\n'.format(
                     newName
                 )
