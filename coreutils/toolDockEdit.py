@@ -359,7 +359,7 @@ class ToolDockEdit(widget.OWWidget):
     def widgetRename(self, widgetName=None, category=None, newName=None):
         qm = QtGui.QMessageBox
         document = self.canvas.current_document()
-        if document.isModifiedStrict():
+        while document.isModifiedStrict():
             ret = qm.question(
                 self,
                 "",
@@ -367,7 +367,7 @@ class ToolDockEdit(widget.OWWidget):
                 qm.Yes | qm.No,
             )
             if ret == qm.Yes:
-                self.canvas.reload_current()
+                self.canvas.save_scheme()
             else:
                 return
         
