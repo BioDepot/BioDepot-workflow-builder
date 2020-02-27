@@ -853,7 +853,6 @@ class CanvasMainWindow(QMainWindow):
         self.toolDock_menu.addAction(self.editDockAction)
 
         menu_bar.addMenu(self.toolDock_menu)
-
         # self.scheduler_menu = QMenu(self.tr('&Scheduler'), self)
         # self.scheduler_menu.addAction(self.editServersAction)
         # self.scheduler_menu.addAction(self.serverlessAction)

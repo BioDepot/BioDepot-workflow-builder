@@ -2708,30 +2708,61 @@ class OWBwBWidget(widget.OWWidget):
                 if e not in self.envVars:
                     self.envVars[e] = self.data["env"][e]
 
+    def exportWorkflow(self,widgetName="chosen widget"):
+        qm = QtGui.QMessageBox
+        ret = qm.question(
+                self, "Export?", "Export workflow starting from {}?".format(widgetName), qm.Yes | qm.No
+            )
+        if ret == qm.No:
+            return
+        else:
+            self.saveBashFile = ""
+            retValue = QtWidgets.QFileDialog.getSaveFileName(
+                self,
+                "Export Docker commands",
+                "myscript.sh",
+                "Text files (*.sh);;All Files (*)",
+            )[0]
+            if retValue:
+                self.saveBashFile = retValue
+                with open(self.saveBashFile, "w") as f:
+                    f.write("#!/bin/bash\n")
+                self.useTestMode=True
+                self.startJob()
+                mb = QtGui.QMessageBox
+                ret  = mb.information(self,"Export to workflow to script","Saved workflow to {}".format(self.saveBashFile))
+                self.useTestMode=False
+                sleep(10)
+                self.replaceMappingsWithBashVariables()
+                return
+            else:
+                return       
+                     
+    def replaceMappingsWithBashVariables(self):
+        homeDirs=self.dockerClient.bwbMounts.keys()
+        with open(self.saveBashFile) as f:
+            s = f.read()
+        i=1
+        for homeDir in homeDirs:
+            mapping="-v "+ homeDir
+            if mapping in s:
+                parm="-v ${}".format(str(i))
+                s=s.replace(mapping,parm)
+            i= int(i)+1
+        with open(self.saveBashFile, 'w') as f:
+            f.write(s)
+        # change this to something nicer when we start having user permissions for written files
+        os.system("chmod +777 {}".format(self.saveBashFile))
+        
     # Event handlers
     def onRunClicked(self, button=None):
         if button and self.useTestMode:
             qm = QtGui.QMessageBox
             ret = qm.question(
-                self, "Export?", "Export Docker commands?", qm.Yes | qm.No
+                self, "Test Run?", "Run without generating results?", qm.Yes | qm.No
             )
             if ret == qm.No:
-                self.saveBashFile = ""
-                self.startJob()
-            else:
-                self.saveBashFile = ""
-                retValue = QtWidgets.QFileDialog.getSaveFileName(
-                    self,
-                    "Export Docker commands",
-                    "myscript.sh",
-                    "Text files (*.sh);;All Files (*)",
-                )[0]
-                if retValue:
-                    self.saveBashFile = retValue
-                    with open(self.saveBashFile, "w") as f:
-                        f.write("#!/bin/bash\n")
-                    # change this to something nicer when we start having user permissions for written files
-                    os.system("chmod +777 {}".format(self.saveBashFile))
+                return           
         self.startJob()
 
     def onStopClicked(self):

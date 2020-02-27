@@ -169,6 +169,8 @@ class SchemeEditWidget(QWidget):
         self.__widgetMenu = QMenu(self.tr("&Widget"), self)
         self.__widgetMenu.addAction(self.__openSelectedAction)
         self.__widgetMenu.addSeparator()
+        self.__widgetMenu.addAction(self.__exportAction)
+        self.__widgetMenu.addSeparator()
         self.__widgetMenu.addAction(self.__renameAction)
         self.__widgetMenu.addAction(self.__removeSelectedAction)
         self.__widgetMenu.addSeparator()
@@ -314,6 +316,14 @@ class SchemeEditWidget(QWidget):
             toolTip=self.tr("Edit the widget"),
             triggered=self.editWidget,
             enabled=True,
+        )
+        self.__exportAction = QAction(
+            self.tr("Export workflow"),
+            self,
+            objectName="export-widget",
+            toolTip=self.tr("Export the workflow to a script starting at selected widget"),
+            triggered=self.export,
+            enabled=False,
         )
 
         # self.__editToolBoxAction = \
@@ -964,7 +974,16 @@ class SchemeEditWidget(QWidget):
         selected = self.scene().selected_node_items()
         for item in selected:
             self.__onNodeActivate(item)
-
+    
+    def export(self):
+        """
+        Export workflow starting from selected node
+        """
+        selected = self.scene().selected_node_items()
+        node=selected[0]
+        self.__onNodeExport(node)
+        self.canvas.reload_last()
+            
     def editNodeTitle(self, node):
         """
         Edit (rename) the `node`'s title. Opens an input dialog.
@@ -1308,7 +1327,7 @@ class SchemeEditWidget(QWidget):
             self.__editWidgetAction.setEnabled(len(nodes) == 1)
         else:
             self.__editWidgetAction.setEnabled(len(nodes) == 0)
-
+        self.__exportAction.setEnabled(len(nodes) == 1)
         if len(nodes) > 1:
             self.__openSelectedAction.setText(self.tr("Open All"))
         else:
@@ -1341,6 +1360,11 @@ class SchemeEditWidget(QWidget):
 
             QCoreApplication.sendEvent(self, ev)
 
+    def __onNodeExport(self, item):
+        node = self.__scene.node_for_item(item)
+        widget = self.scheme().widget_for_node(node)
+        widget.exportWorkflow(node.title)
+        
     def __onNodeActivate(self, item):
         node = self.__scene.node_for_item(item)
         widget = self.scheme().widget_for_node(node)
