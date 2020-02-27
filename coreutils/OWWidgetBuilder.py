@@ -1070,9 +1070,14 @@ class OWWidgetBuilder(widget.OWWidget):
 
     def onItemMoved(self, oldRow, newRow, qWidgetList):
         sys.stderr.write("oldRow is {} newRow is {}\n".format(oldRow, newRow))
-        temp = qWidgetList.states[oldRow]
-        qWidgetList.states[newRow + 1 : oldRow + 1] = qWidgetList.states[newRow:oldRow]
-        qWidgetList.states[newRow] = temp
+        #algorithm works if newRow > oldRow
+        if newRow != oldRow:
+            temp = qWidgetList.states[oldRow]
+            qWidgetList.states.pop(oldRow)
+            if newRow < oldRow:
+                qWidgetList.states.insert(newRow,temp)
+            else:
+                qWidgetList.states.insert(newRow,temp)
         qWidgetList.updateAllStates()
 
     def drawCommand(self, pname, layout=None):
