@@ -6,7 +6,7 @@ import os, re
 import sys
 
 sys.path.append("/coreutils")
-import OWWidgetBuilder, toolDockEdit, ServerUtils
+import OWWidgetBuilder, toolDockEdit, ServerUtils, makeContainers
 
 # import workflowList
 import logging
@@ -616,6 +616,13 @@ class CanvasMainWindow(QMainWindow):
             triggered=self.reload_last,
             shortcut=QKeySequence(Qt.ControlModifier | Qt.Key_R),
         )
+        self.load_containers_action = QAction(
+            self.tr("Load containers"),
+            self,
+            objectName="load-containers",
+            toolTip=self.tr("Load containers for workflow"),
+            triggered=self.load_containers,
+        )
         self.reload_settings_action = QAction(
             self.tr("Reload settings"),
             self,
@@ -773,7 +780,7 @@ class CanvasMainWindow(QMainWindow):
         #        file_menu.addAction(self.open_and_freeze_action)
         file_menu.addAction(self.reload_last_action)
         file_menu.addAction(self.reload_settings_action)
-
+        file_menu.addAction(self.load_containers_action)
         # File -> Open Recent submenu
         self.recent_menu = QMenu(self.tr("Open Recent"), file_menu)
         file_menu.addMenu(self.recent_menu)
@@ -1290,7 +1297,32 @@ class CanvasMainWindow(QMainWindow):
                 return QDialog.Accepted
 
         return QDialog.Rejected
+    def load_dialog(self,owsFile):
+        if not hasattr(self, "buildContainers"):
+            self.buildContainers = makeContainers.BuildContainers(canvasMainWindow=self)
+        # widgetName=QFileDialog.getExistingDirectory(self, caption="Choose widget to add to ToolDock", directory='/widgets')
+        widget = self.buildContainers
+        widget.showNormal()
+        widget.raise_()
+        widget.activateWindow()
 
+    def load_containers(self):
+        """Reload last opened scheme. Return QDialog.Rejected if the
+        user canceled the operation and QDialog.Accepted otherwise.
+
+        """
+        # TODO: Search for a temp backup scheme with per process
+        # locking.
+        if self.recent_schemes:
+            self.load_dialog(self.recent_schemes[0][1])
+            return QDialog.Accepted
+        else:
+            self.save_scheme_as()
+            if self.recent_schemes:
+                self.load_workflow(ows=self.recent_schemes[0][1])
+                return QDialog.Accepted
+
+        return QDialog.Rejected
     def set_new_scheme(self, new_scheme):
         """
         Set new_scheme as the current shown scheme. The old scheme

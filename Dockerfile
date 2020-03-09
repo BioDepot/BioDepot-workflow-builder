@@ -96,8 +96,8 @@ EXPOSE 6080
 WORKDIR /data
 
 #install rsync
-#install rsync curl and docker-compose
-RUN apt-get update && apt-get install -y rsync curl \
+#install rsync curl docker-compose and jq
+RUN apt-get update && apt-get install -y rsync curl jq \
     && curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose\
     && apt-get autoclean -y \
@@ -123,6 +123,7 @@ COPY orangePatches/signals.py /orange3/Orange/widgets/utils/signals.py
 COPY scripts/startBwb.sh /usr/local/bin/startBwb.sh
 COPY scripts/runDockerJob.sh /usr/local/bin/runDockerJob.sh
 COPY scripts/startScheduler.sh /usr/local/bin/startScheduler.sh
+COPY scripts/build_workflow_containers.sh /usr/local/bin/build_workflow_containers.sh
 
 #add widgets and workflows
 ADD widgets /widgets/
