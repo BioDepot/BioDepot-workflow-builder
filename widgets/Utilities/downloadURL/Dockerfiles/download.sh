@@ -1,6 +1,7 @@
 #!/bin/bash
 decompString(){
     dcmd=""
+    zipFlag=""
     if [ -n "$decompress" ]
     then
         case $1 in
@@ -18,6 +19,7 @@ decompString(){
             else
                 dcmd='| tar xz'
             fi
+            return
             ;;  
         *.tar)
             if [ -n "$concatenateFile" ]; then
@@ -25,6 +27,7 @@ decompString(){
             else
                 dcmd='| tar x'
             fi
+            return
             ;;
         *.gz)
             if [ -n "$concatenateFile" ]; then
@@ -43,10 +46,11 @@ decompString(){
             return
             ;;
         *.zip)
+			zipFlag=1
             if [ -n "$concatenateFile" ]; then
                 dcmd="&& unzip -p >> $concatenateFile"
             else
-                dcmd="-o ' $filename ' && unzip -o ' $filename ' && rm ' $filename '"
+                dcmd="&& unzip -o '$filename' && rm '$filename'"
             fi
             return
             ;;
@@ -113,6 +117,7 @@ fi
 #loop through the urls
 status=0
 for url in  "${urls[@]}" ; do
+	zipFlag=""
     if [[ $url == *drive.google.com* ]]  
     then
         #find filename and fileID and keep cookie
@@ -124,14 +129,24 @@ for url in  "${urls[@]}" ; do
                 rm ./cookie
                 echo No problem with virus check no verification needed
                 decompString "$filename"
-                echo "curl  -L 'https://docs.google.com/uc?export=download&id=${fileID}' $dcmd"
-                bash -c "curl -L 'https://docs.google.com/uc?export=download&id=$fileID' $dcmd"
+                if [[ -n $zipFlag ]]; then
+					echo "curl  -L 'https://docs.google.com/uc?export=download&id=${fileID}' -o '$filename' $dcmd"
+					bash -c "curl -L 'https://docs.google.com/uc?export=download&id=$fileID' -o '$filename' $dcmd"                
+                else
+					echo "curl  -L 'https://docs.google.com/uc?export=download&id=${fileID}' $dcmd"
+					bash -c "curl -L 'https://docs.google.com/uc?export=download&id=$fileID' $dcmd"
+				fi
                 curlret=$?
             else
                 echo "Verification code to bypass virus scan is $code "
                 decompString "$filename"
-                echo "curl  -Lb ./cookie 'https://drive.google.com/uc?export=download&confirm=${code}&id=$fileID' $dcmd"
-                bash -c "curl -Lb ./cookie 'https://drive.google.com/uc?export=download&confirm=${code}&id=$fileID' $dcmd"
+                if [[ -n $zipFlag ]]; then
+					echo "curl  -Lb ./cookie 'https://drive.google.com/uc?export=download&confirm=${code}&id=$fileID' -o '$filename' $dcmd"
+					bash -c "curl  -Lb ./cookie 'https://drive.google.com/uc?export=download&confirm=${code}&id=$fileID' -o '$filename' $dcmd"                
+                else
+					echo "curl  -Lb ./cookie 'https://drive.google.com/uc?export=download&confirm=${code}&id=$fileID' $dcmd"
+					bash -c "curl -Lb ./cookie 'https://drive.google.com/uc?export=download&confirm=${code}&id=$fileID' $dcmd"
+				fi
                 curlret=$?
                 rm ./cookie
             fi
@@ -146,8 +161,14 @@ for url in  "${urls[@]}" ; do
             filename="${url##*/}"
             echo filename is "$filename"
             decompString "$filename"
-            echo "curl $url $dcmd" 
-            curl $url $dcmd
+            
+            if [[ -n $zipFlag ]]; then
+				echo "curl -JLO $url $dcmd" 
+				bash -c "curl -JLO $url $dcmd"
+			else
+				echo "curl $url $dcmd" 
+				curl $url $dcmd
+			fi
             curret=$?     
         else
             if [ -n "$concatenateFile" ]; then
