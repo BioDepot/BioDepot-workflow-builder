@@ -622,6 +622,7 @@ class CanvasMainWindow(QMainWindow):
             objectName="load-containers",
             toolTip=self.tr("Load containers for workflow"),
             triggered=self.load_containers,
+            enabled=self.isWorkflowLoaded()
         )
         self.reload_settings_action = QAction(
             self.tr("Reload settings"),
@@ -1305,7 +1306,17 @@ class CanvasMainWindow(QMainWindow):
         widget.showNormal()
         widget.raise_()
         widget.activateWindow()
-
+    def isWorkflowLoaded(self):
+        temp_directoryList = (
+            str(
+                os.popen("""grep -oP 'packages=\["\K[^"]+' /biodepot/setup.py""").read()
+            )
+        ).split()
+        for directory in temp_directoryList:
+            iconLink = "/biodepot/{}/icon".format(directory)
+            if os.path.islink(iconLink):
+                return True
+        return False
     def load_containers(self):
         """Reload last opened scheme. Return QDialog.Rejected if the
         user canceled the operation and QDialog.Accepted otherwise.
