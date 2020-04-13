@@ -174,9 +174,9 @@ class SaveWorkflowForm(QDialog):
             lambda: self.getCheckBoxState(self.merge_checkBox, "merge")
         )
         if "merge" in self.initialData and self.initialData["merge"] is not None:
-            self.merge_checkBox.setCheckState(self.initialData["merge"])
+            self.merge_checkBox.setCheckState(self.booleanToQtChecked(self.initialData["merge"]))
         else:
-            self.merge_checkBox.setCheckState(False)
+            self.merge_checkBox.setCheckState(Qt.Checked)
 
         # OK cancel buttons
         buttonbox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -193,7 +193,11 @@ class SaveWorkflowForm(QDialog):
         self.setLayout(layout)
 
         # save/cancel buttons
-
+    def booleanToQtChecked(self,state):
+        if state:
+            return Qt.Checked
+        return Qt.Unchecked
+		
     def cancel(self):
         self.returnData = self.initialData
         self.returnData["success"] = False
@@ -425,7 +429,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.saveModeIndex = widget.currentIndex()
         self.allAttrs["saveModeIndex"] = self.saveModeIndex
 
-    def loadWidget(self, loadWidgetDir=None, loadNameCheck=True, startDir=None, newLoad=False):
+    def loadWidget(self, loadWidgetDir=None, loadNameCheck=False, startDir=None, newLoad=False):
         if not startDir:
             if self.widgetDir:
                 startDir = self.widgetDir
@@ -456,6 +460,14 @@ class OWWidgetBuilder(widget.OWWidget):
             if os.path.exists(allStatesFile):
                 self.allStates = self.unPickleData(allStatesFile)
                 self.addGroupToStates()
+            #copy the location of the icon file to the icon ledit
+            if os.path.normpath(loadWidgetDir) != os.path.normpath(self.widgetDir): 
+                if hasattr(self,"widgetIconLedit"):
+                    iconFiles=os.listdir(loadWidgetDir + "/icon")
+                    if iconFiles:
+                        self.widgetIconLedit.setState([None,None,[True,loadWidgetDir+"/icon/"+iconFiles[0]]])
+                newDockerFiles="{}/Dockerfiles".format(loadWidgetDir)
+                self.replaceDockerDir(newDockerFiles)
             # we need to make default files in case the default files change from versions
             if loadNameCheck or not self.widgetName:
                 self.widgetName = self.getWidgetName()
@@ -962,7 +974,7 @@ class OWWidgetBuilder(widget.OWWidget):
             self.drawLedit(pname, layout=leditGeneralLayout)
         self.drawLedit("priority", layout=leditGeneralLayout)
         # file entry for icon
-        self.drawLedit(
+        self.widgetIconLedit=self.drawLedit(
             "icon", layout=leditGeneralLayout, addBrowseButton=True, fileType=None
         )
 
@@ -1197,7 +1209,30 @@ class OWWidgetBuilder(widget.OWWidget):
             title = "Added Dockerfile"
             message = "Added {}".format(src)
             qm.information(self, title, message, QtGui.QMessageBox.Ok)
-
+            
+    def replaceDockerDir(self,newDockerfiles):
+        breakpoint(message="replace Dockerfile with {}".format(newDockerfiles))
+        if newDockerfiles and os.path.isdir(newDockerfiles):
+            currentDockerfiles = self.widgetDir + "/" + "Dockerfiles"
+            if os.path.exists(currentDockerfiles):
+                qm = QtGui.QMessageBox
+                ret = qm.question(
+                    self,
+                    "Confirm delete",
+                    "The directory {} exits Delete?".format(currentDockerfiles),
+                    qm.Yes | qm.No,
+                )
+                if ret == qm.No:
+                    return False
+                shutil.rmtree(currentDockerfiles)
+            shutil.copytree(newDockerfiles, currentDockerfiles)
+            qm = QtGui.QMessageBox
+            title = "Copied Dockerfiles"
+            message = "Added Dockerfiles {}".format(newDockerfiles)
+            qm.information(self, title, message, QtGui.QMessageBox.Ok)
+        else:
+            breakpoint(message="{} not found".format(newDockerfiles))
+            
     def addDockerDir(self, ledit):
         if not hasattr(ledit, "text"):
             return
@@ -1240,11 +1275,12 @@ class OWWidgetBuilder(widget.OWWidget):
             qm.Yes | qm.No,
         )
         if ret == qm.No:
-            return
+            return False
         os.system("cd {} && rm -rf * ".format(dockerDir))
         title = "Cleared docker files"
         message = "Cleared docker files"
         qm.information(self, title, message, QtGui.QMessageBox.Ok)
+        return True
 
     def makeTextBox(self, attr, label):
         box = QHBoxLayout()
@@ -1370,20 +1406,20 @@ class OWWidgetBuilder(widget.OWWidget):
                 ledit.clear()
                 label.setEnabled(True)
             return
-        if checkBox is not None:
+        if checkBox is not None and state[0] is not None:
             checkBox.setEnabled(state[0][0])
             checkBox.setChecked(state[0][1])
 
-        if label is not None:
+        if label is not None and state[1] is not None:
             sys.stderr.write(
                 "labelEnable is {} labelState is {}\n".format(state[1][0], state[1][1])
             )
             label.setEnabled(state[1][0])
             label.setText(state[1][1])
 
-        if ledit is not None:
+        if ledit is not None and state[2] is not None:
             ledit.setEnabled(state[2][0])
-            if state[1][1]:
+            if state[2][1]:
                 ledit.setText(state[2][1])
             else:
                 ledit.clear()

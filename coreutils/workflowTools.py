@@ -1,4 +1,5 @@
 import sys, os, re, shutil, glob, tempfile, jsonpickle
+from PyQt5 import QtWidgets, QtGui, QtCore
 from glob import glob
 from makeToolDockCategories import *
 from xml.dom import minidom
@@ -6,6 +7,9 @@ from collections import Counter, OrderedDict
 from itertools import groupby
 import datetime
 
+def breakpoint(title=None, message=None):
+    QtGui.QMessageBox.warning(None,title,message)
+    return
 
 def findMode(lst):
     maxFreq = max(map(lst.count, lst))
@@ -93,7 +97,7 @@ def replaceNamePy(pyFile, oldName, newName):
             elif (line.strip() == 'with open(getJsonName(__file__,"{}")) as f:'.format(
                 oldName)) or (line.strip() == 'with open(getJsonName(__file__, "{}")) as f:'.format(
                 oldName)):
-			#second form with space after _file_ is possible with some old widget file
+            #second form with space after _file_ is possible with some old widget file
                 line = '        with open(getJsonName(__file__,"{}")) as f:\n'.format(
                     newName
                 )
@@ -148,7 +152,7 @@ def findWidgetPathFromLink(widgetName, groupName):
     widgetPath = os.path.dirname(os.path.realpath(link))
     return widgetPath
 
-
+    
 def widgetNameSeen(name, projectNames):
     # see if the first part of the name is in one of the projectPaths
     namelen = len(name)
@@ -226,7 +230,14 @@ def renameWidgetInWorkflow(inputOWS, outputOWS, projectName, widgetName, newName
     with open(outputOWS, "w") as f:
         f.write("".join([s for s in doc.toxml().splitlines(True) if s.strip()]))
 
-
+def getToolDockWidgetPaths(widgetDir):
+    toolDockPaths=[]
+    for subPath in os.listdir(widgetDir):
+        fullPath=os.path.join(widgetDir,subPath)
+        if os.path.isdir(fullPath) and subPath != "icon":
+            toolDockPaths.append(fullPath)
+    return toolDockPaths
+    
 def exportWorkflow(
     bwbOWS,
     outputWorkflow,
@@ -235,15 +246,18 @@ def exportWorkflow(
     color=None,
     iconFile=None,
     basePath="",
+    onlyInOWS=False
 ):
     tempDir = tempfile.mkdtemp()
     projectTitlePath = niceForm(projectTitle, useDash=False)
     os.makedirs(tempDir + "/widgets/{}".format(projectTitlePath, useDash=False))
     tempOWS = "{}/{}".format(tempDir, os.path.basename(bwbOWS))
     shutil.copyfile(bwbOWS, tempOWS)
+    currentWidgetDir="{}/widgets/{}".format(os.path.dirname(bwbOWS),os.path.basename(os.path.dirname(bwbOWS)))
+    toolDockPaths=getToolDockWidgetPaths(currentWidgetDir)
     doc = minidom.parse(bwbOWS)
-    nodes = doc.getElementsByTagName("node")
-    if not nodes:
+    owsNodes = doc.getElementsByTagName("node")
+    if not owsNodes:
         shutil.rmtree(tempDir)
         return False
     # find the old title
@@ -255,10 +269,12 @@ def exportWorkflow(
         color = color.strip()
     if merge:
         projectNames = []
+        #assume that widgetPaths are 
         widgetPaths = {}
+        widgetPaths[oldProjectTitlePath]=toolDockPaths
         # gather paths and order the projects names by ProjectName and then other projects by number of occurences
         # this is the order to copy/convert the names
-        for node in nodes:
+        for node in owsNodes:
             projectName = node.getAttribute("project_name")
             projectNamePath = niceForm(projectName, useDash=False)
             widgetName = node.getAttribute("name")
@@ -303,7 +319,14 @@ def exportWorkflow(
         reformatOWS(projectTitle, bwbOWS, tempOWS, uniqueNames)
     else:
         widgetPaths = set()
-        for node in nodes:
+        for widgetPath in toolDockPaths:
+            widgetPaths.add(widgetPath)
+            os.system(
+                "cp -r {} {}/widgets/{}/{}".format(
+                    widgetPath, tempDir, oldProjectTitlePath, os.path.basename(widgetPath)
+                )
+            )
+        for node in owsNodes:
             projectName = node.getAttribute("project_name")
             if projectName == projectTitle:
                 widgetName = node.getAttribute("name")

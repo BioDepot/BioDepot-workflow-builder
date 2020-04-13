@@ -1506,7 +1506,7 @@ class CanvasMainWindow(QMainWindow):
         self.saveWorkflowSettings["icon"] = ""
         self.saveWorkflowSettings["name"] = ""
         self.saveWorkflowSettings["color"] = ""
-        self.saveWorkflowSettings["merge"] = False
+        self.saveWorkflowSettings["merge"] = True
 
         for illegal in r'<>:"\/|?*\0':
             title = title.replace(illegal, "_")
