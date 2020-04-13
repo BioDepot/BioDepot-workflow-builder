@@ -144,14 +144,22 @@ def renameWidget(srcWidget, oldName, newName):
     newPyPath = "{}/{}.py".format(newPath, newName)
     renameWidgetInToolDock(oldPyPath, newPyPath)
 
-
+def findWidgetDirectoryFromLink(groupName):
+    link = "/biodepot/{}/__init__.py".format(niceForm(groupName, useDash=False))
+    return os.path.dirname(os.path.realpath(link))
+    
 def findWidgetPathFromLink(widgetName, groupName):
     link = "/biodepot/{}/OW{}.py".format(
         niceForm(groupName, useDash=False), niceForm(widgetName, useDash=False)
     )
     widgetPath = os.path.dirname(os.path.realpath(link))
     return widgetPath
-
+def findWidgetPathFromLink(widgetName, groupName):
+    link = "/biodepot/{}/OW{}.py".format(
+        niceForm(groupName, useDash=False), niceForm(widgetName, useDash=False)
+    )
+    widgetPath = os.path.dirname(os.path.realpath(link))
+    return widgetPath
     
 def widgetNameSeen(name, projectNames):
     # see if the first part of the name is in one of the projectPaths
@@ -232,10 +240,11 @@ def renameWidgetInWorkflow(inputOWS, outputOWS, projectName, widgetName, newName
 
 def getToolDockWidgetPaths(widgetDir):
     toolDockPaths=[]
-    for subPath in os.listdir(widgetDir):
-        fullPath=os.path.join(widgetDir,subPath)
-        if os.path.isdir(fullPath) and subPath != "icon":
-            toolDockPaths.append(fullPath)
+    if os.path.exists(widgetDir) and os.path.isdir(widgetDir):
+        for subPath in os.listdir(widgetDir):
+            fullPath=os.path.join(widgetDir,subPath)
+            if os.path.isdir(fullPath) and subPath != "icon":
+                toolDockPaths.append(fullPath)
     return toolDockPaths
     
 def exportWorkflow(
@@ -253,8 +262,6 @@ def exportWorkflow(
     os.makedirs(tempDir + "/widgets/{}".format(projectTitlePath, useDash=False))
     tempOWS = "{}/{}".format(tempDir, os.path.basename(bwbOWS))
     shutil.copyfile(bwbOWS, tempOWS)
-    currentWidgetDir="{}/widgets/{}".format(os.path.dirname(bwbOWS),os.path.basename(os.path.dirname(bwbOWS)))
-    toolDockPaths=getToolDockWidgetPaths(currentWidgetDir)
     doc = minidom.parse(bwbOWS)
     owsNodes = doc.getElementsByTagName("node")
     if not owsNodes:
@@ -264,6 +271,8 @@ def exportWorkflow(
     myScheme = doc.getElementsByTagName("scheme")[0]
     oldProjectTitle = myScheme.getAttribute("title")
     oldProjectTitlePath = niceForm(oldProjectTitle, useDash=False)
+    currentWidgetDir=findWidgetDirectoryFromLink(oldProjectTitlePath)
+    toolDockPaths=getToolDockWidgetPaths(currentWidgetDir)
     # get rid of anything like \n in the color string
     if color:
         color = color.strip()
