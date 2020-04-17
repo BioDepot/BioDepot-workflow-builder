@@ -2843,9 +2843,13 @@ class OWBwBWidget(widget.OWWidget):
                     conVol, bwbVol, hostVol, hostPath
                 )
             )
-            sys.stderr.write(
-                "common {}\n".format(os.path.commonpath([hostVol, hostPath]))
-            )
+            try:
+                commonPath=os.path.commonpath([hostVol, hostPath])
+                sys.stderr.write(
+                    "common {}\n".format(commonPath)
+                )
+            except Exception as e:
+                pass
             prefix = None
             if hostVol == hostPath:
                 prefix = ""
