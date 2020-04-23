@@ -388,6 +388,8 @@ class DockerClient:
                     return var[1:-1]
             except TypeError:
                 return var
+            except IndexError:
+                return var
             return var
     def create_container_iter(
         self,
