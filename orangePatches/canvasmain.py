@@ -688,7 +688,13 @@ class CanvasMainWindow(QMainWindow):
             triggered=self.zoom_in,
             shortcut=QKeySequence(Qt.ControlModifier | Qt.Key_Plus),
         )
-
+        self.show_link_names_action = QAction(
+            self.tr("Show link names"),
+            self,
+            checkable=True,
+            checked=QSettings().value("show-channel-names", defaultValue=True, type=bool),
+            triggered=lambda checked: self.show_link_names(checked),
+        )
         self.zoom_out_action = QAction(
             self.tr("Zoom out"),
             self,
@@ -826,6 +832,8 @@ class CanvasMainWindow(QMainWindow):
         self.view_menu.addAction(self.show_log_action)
         #        self.view_menu.addAction(self.show_report_action)
 
+        self.view_menu.addSeparator()
+        self.view_menu.addAction(self.show_link_names_action)
         self.view_menu.addSeparator()
         self.view_menu.addAction(self.zoom_in_action)
         self.view_menu.addAction(self.zoom_out_action)
@@ -2273,7 +2281,10 @@ class CanvasMainWindow(QMainWindow):
 
     def zoom_in(self):
         self.scheme_widget.view().change_zoom(1)
-
+        
+    def show_link_names(self,checked):
+        self.scheme_widget.setChannelNamesVisible(checked)
+        
     def zoom_out(self):
         self.scheme_widget.view().change_zoom(-1)
 
