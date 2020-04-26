@@ -118,6 +118,7 @@ COPY orangePatches/widgetsscheme.py /orange3/Orange/canvas/scheme/widgetsscheme.
 COPY orangePatches/signalmanager.py /orange3/Orange/canvas/scheme/signalmanager.py
 COPY orangePatches/link.py /orange3/Orange/canvas/scheme/link.py
 COPY orangePatches/signals.py /orange3/Orange/widgets/utils/signals.py
+COPY orangePatches/linkitem.py /orange3/Orange/canvas/canvas/items/linkitem.py
 
 #add bwb start scripts
 COPY scripts/startBwb.sh /usr/local/bin/startBwb.sh
