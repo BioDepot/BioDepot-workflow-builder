@@ -167,7 +167,7 @@ for url in  "${urls[@]}" ; do
 				bash -c "curl -JLO $url $dcmd"
 			else
 				echo "curl $url $dcmd" 
-				curl $url $dcmd
+				bash -c "curl $url $dcmd"
 			fi
             curret=$?     
         else
