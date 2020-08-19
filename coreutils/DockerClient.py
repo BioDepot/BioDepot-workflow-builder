@@ -368,6 +368,7 @@ class DockerClient:
             json.dump(dockerJson.jsonObj, outfile)
         parms=[namespace,jsonFile,cpuCount,memory]
         consoleProc.start(parms,schedule=True)
+        
     def prettyEnv(self,var):
         if type(var) is list:
             output="["

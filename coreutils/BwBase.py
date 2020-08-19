@@ -2308,7 +2308,7 @@ class OWBwBWidget(widget.OWWidget):
     def flagString(self, pname):
         if "parameters" in self.data and pname in self.data["parameters"]:
             pvalue = self.data["parameters"][pname]
-            sys.stderr.write("pname {} pvalue {}\n".format(pname, pvalue))
+            sys.stderr.write("checkign flag with pname {} pvalue {}\n".format(pname, pvalue))
             if "flag" in pvalue and hasattr(self, pname):
                 flagName = pvalue["flag"]
                 if flagName is None:
@@ -2379,7 +2379,7 @@ class OWBwBWidget(widget.OWWidget):
                         return flagName + " " + " ".join(flagValue)
                     else:
                         return " ".join(flagValue)
-                elif flagValue:
+                elif flagValue is not None:
                     return self.joinFlagValue(flagName, flagValue)
         return None
 
