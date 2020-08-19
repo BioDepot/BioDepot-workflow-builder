@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme description="" title="" version="2.0">
+	<nodes>
+		<node id="0" name="fastqc" position="(270.0, 78.0)" project_name="Utilities" qualified_name="Utilities.OWfastqc.OWfastqc" title="fastqc" version="" />
+		<node id="1" name="gnumeric" position="(202.0, 103.0)" project_name="Utilities" qualified_name="Utilities.OWgnumeric.OWgnumeric" title="gnumeric" version="" />
+	</nodes>
+	<links />
+	<annotations />
+	<thumbnail />
+	<node_properties>
+		<properties format="literal" node_id="0">{'controlAreaVisible': True, 'exportGraphics': False, 'inputConnectionsStore': {}, 'inputDir': '', 'inputFiles': [], 'iterate': False, 'iterateSettings': {'iterableAttrs': ['inputFiles']}, 'nWorkers': 1, 'optionsChecked': {'inputFiles': False, 'outputDir': False, 'inputDir': False}, 'outputDir': '', 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': None, 'triggerReady': {}, 'useScheduler': False, '__version__': 1}</properties>
+		<properties format="literal" node_id="1">{'controlAreaVisible': True, 'exportGraphics': False, 'inputConnectionsStore': {}, 'inputFile': '', 'iterate': False, 'iterateSettings': {'iterableAttrs': []}, 'nWorkers': 1, 'optionsChecked': {'inputFile': False}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': None, 'triggerReady': {}, 'useScheduler': False, '__version__': 1}</properties>
+	</node_properties>
+</scheme>

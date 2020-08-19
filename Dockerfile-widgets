@@ -91,6 +91,7 @@ RUN pip3 install --user jsonpickle
 
 #put biodepot here and keep pip for rapid updates
 ADD biodepot biodepot
+RUN pip3 install pip==20.0.1
 RUN pip3 install -e biodepot 
 
 ADD startup.sh /
