@@ -1,3 +1,10 @@
+setup.py
+Scripting/OWJava8.py
+Scripting/OWPerl.py
+Scripting/OWPython2.py
+Scripting/OWPython3.py
+Scripting/OWbash_utils.py
+Scripting/OWbioc_R.py
 Scripting/__init__.py
 Scripting.egg-info/PKG-INFO
 Scripting.egg-info/SOURCES.txt

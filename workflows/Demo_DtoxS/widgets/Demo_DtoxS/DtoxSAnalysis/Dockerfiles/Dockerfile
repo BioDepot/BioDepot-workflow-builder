@@ -1,4 +1,4 @@
-FROM biodepot/ubuntu-bioc-r:16.04-3.6-3.4.3
+FROM biodepot/ubuntu-bioc-r:18.04-3.7-3.5.1
 #Mostly from Trevor's Dockerfile except for versioning and clean up
 MAINTAINER Ling-Hong Hung "lhhung@uw.edu"
 
