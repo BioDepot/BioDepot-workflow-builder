@@ -103,7 +103,7 @@ University of Washington Tacoma
          * [Connecting the widget to the workflow](#connecting-the-widget-to-the-workflow)
          * [Running and testing the workflow](#running-and-testing-the-workflow)
       * [Appendices](#appendices)
-         * [1. Development environment](#1-development-environment)
+         * [Development environment](#development-environment)
          * [How Bwb executes workflows](#how-bwb-executes-workflows)
             * [TLDR;](#tldr-1)
          * [Organization of code](#organization-of-code)
@@ -315,7 +315,7 @@ Source code	: [https://github.com/BioDepot/BioDepot-workflow-builder](https://gi
 
 Linux/Mac
 ```bash 
-    docker run --rm   -p 6080:6080 \
+docker run --rm   -p 6080:6080 \
     -v  ${PWD}/:/data  \
     -v  /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -325,7 +325,7 @@ Linux/Mac
 
 Windows
 ```bash 
-    docker run --rm   -p 6080:6080 \
+docker run --rm   -p 6080:6080 \
     -v  /c/users:/data  \
     -v  /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -349,7 +349,6 @@ Windows 10 Pro and newer Mac's running native Docker will use the same localhost
 ## Installing and starting Docker
 
 ### Linux
-<a name="DockerInstall"></a>
 1\. Update your package manager index. 
 
 On Debian based distros such as Ubuntu the package manager is apt-get
@@ -383,7 +382,7 @@ The last command downloads a test image and runs it in a container. When the con
 
 For more information please refer to -     
 
-[https://docs.docker.com/engine/installation/linux/ubuntulinux/](https://docs.docker.com/engine/installation/)
+https://docs.docker.com/engine/installation/
 
 ### Linux virtual machine on Windows or MacOS
 
@@ -483,10 +482,10 @@ On the cloud, BwB can also be run on any cloud instance. Please refer to the Lin
 (Type the commands in the directory where the ssh key of AWS instance was downloaded)
 ```bash
  # Update demo.pem with your ssh key name
- chmod 400 demo.pem 	`
+ chmod 400 demo.pem
  ssh -i demo.pem ubuntu@public-dns-of-aws-instance
 ```
-9\.  After you are logged use the instructions [here](#DockerInstall) to install Docker on Linux.
+9\.  After you are logged use the instructions [here](#linux) to install Docker on Linux.
 
 10\. Configure the firewall using the instructions here [http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/authorizing-access-to-an-instance.html](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/authorizing-access-to-an-instance.html) 
 
@@ -697,11 +696,10 @@ For example the command
 ```
 rm -f Counts/*
 Rscript Programs/analyze.R _bwb{ConfigurationFile}
-
 ```
 will generate the following command
 ```
-	rm -f Counts/* && Rscript Programs/analyze.R <ConfigurationFile> <flags> <arguments>
+rm -f Counts/* && Rscript Programs/analyze.R <ConfigurationFile> <flags> <arguments>
 ```
 ##### Docker tab
 ![](./docs/images/def_docker.png)
@@ -719,7 +717,6 @@ mywidget/mywidget.attr
 mywidget/mywidget.states
 mywidget/mywidget.json
 mywidget/mywdiget.py
-
 ```
 mywidget.attr is a json file saves the variables entered into the definition window.
 mywidget.states  is a json file saves the actual state of the form so that when the defintion window is opened again, the user can resume where he or she left off.
@@ -813,7 +810,7 @@ This workflow is a popular RNA-seq workflow using kallisto to pseudo-align the r
 ### kallisto-sleuth with Jupyter demo
 ![](./docs/images/kallisto_jup_wf.png)
 
-[Accompanying video link](https://www.youtube.com/watch?v=jtu-jCU2DU0) https://www.youtube.com/watch?v=jtu-jCU2DU0
+Accompanying video link, https://www.youtube.com/watch?v=jtu-jCU2DU0
 
 The kallisto-sleuth workflow with Jupyter demo is identical to the kallisto-sleuth workflow except that instead of wrapping sleuth in a bash script and outputting the results using gnumeric - a Jupyter notebook is used to run and display the results. The first notebook widget runs nbconvert which runs the code in the notebook and generates a filled notebook with the results, including a graph of the expression of the top differentially expressed gene. This widget triggers a second jupyter widget which opens the filled notebook. The second widget is run in a container with firefox which automatically opens the notebook at the end of the workflow. The user is free to interact with the code to change the analyses or conduct further analyses using the filled notebook as it is a fully functional dynamic instance of Jupyter.
 
@@ -823,7 +820,7 @@ STAR aligner is another popular RNA-seq aligner. Here we have paired it with DES
 
 ## Tutorial - Adding a Python script to a Bwb workflow
 
-[Link to accompanying video](https://www.youtube.com/watch?v=r_03_UG1mBg&feature=youtu.be) https://www.youtube.com/watch?v=r_03_UG1mBg&feature=youtu.be
+Accompanying video link, https://www.youtube.com/watch?v=r_03_UG1mBg
 
 The aims of this workflow are to demonstrate how to build a widget for a custom Python script and modify and customize an existing workflow. In this tutorial we will write a script to call cutadapt ( a Python app for removing adapters from reads) and insert it into the kallisto-jupyter demo workflow to trim the reads before alignment.
 
@@ -926,15 +923,15 @@ The widget is built starting from the Dockerfile used for the python2 widget. Th
 
 To add this Dockerfile and build this Dockerfile:
 
-1\. Click on the Docker tab of the Python2 definition window. This is the rightmost tab and may require scrolling to see it
-. 
+1\. Click on the Docker tab of the Python2 definition window. This is the rightmost tab and may require scrolling to see it.
+
 2\. Click on the blue folder button on  'Add Dockerfile' line and navigating to /tutorialFiles/Dockerfile. Then press the add button (rightmost button) to add the Dockerfile. A message should appear confirming that the fie has been added.
 
 3\. Click on the blue launch button to launch the image builder. Resize it by dragging th right corner and scroll to the bottom to see the open button. 
 
-4\.Click on the the open button. It should start in the Python2 widgets Dockerfiles directory. The Dockerfile should be there. Open the file. 
+4\. Click on the the open button. It should start in the Python2 widgets Dockerfiles directory. The Dockerfile should be there. Open the file. 
 
-5\.Enter biodepot/cutadapt-demo:1.0 into the Image Name box and press the build button
+5\. Enter biodepot/cutadapt-demo:1.0 into the Image Name box and press the build button
 
 ### Save widget and load the workflow again
 
@@ -979,8 +976,6 @@ for i in range(0,len(files)/2):
 
 #copy the filtered files and remove the temp directory
 os.system("cp -r tmp/* . && rm -r tmp")
-
-
 ```
 The script should be stored locally because files stored in the Bwb container files system (those not accessed via /data or other mountpoint) are lost when the container terminates. In addition, although the script is in the bwb container, the widget will not be able to see it unless we add a volume mapping or simply move the file to our local system.
 
