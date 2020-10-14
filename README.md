@@ -30,7 +30,7 @@ University of Washington Tacoma
          * [Overview: Running Bwb](#overview-running-bwb)
       * [Installing and starting Docker](#installing-and-starting-docker)
          * [Linux](#linux)
-         * [Linux virtual machine on Windows or MacOS](#linux-virtual-machine-on-windows-or-macOw)         
+         * [Linux virtual machine on Windows or MacOS](#linux-virtual-machine-on-windows-or-macos)         
          * [Docker for Mac](#docker-for-mac)         
          * [Docker for Windows](#docker-for-windows)
          * [On The Cloud](#on-the-cloud)
@@ -171,7 +171,7 @@ Bwb is also designed for bioinformaticians who support a group of users by analy
 
 #### Software tool developers
 
-A major motivation for our development of Bwb was that our own software tools were not being adopted or even tested by potential users. The barriers of installing and integrating new software into existing workflows are very high. By providing a GUI and an auto-installation method across different platforms, the adoption costs are greatly reduced. **Bwb is NOT meant to be a visual programming language** as we find this to be a cumbersome method for experienced coders while being too complicated to be easily adopted by users without a programming background. Instead, Bwb is designed to allow the developer a mechanism to provide a consistent and intuitive GUI for their software that largely consists of filling out a set of forms with minimal coding. In some cases, an additional wrapper script may be needed. Filling out the Bwb forms to skin an application is usually less work than the alternatives of writing a custom GUI, providing or conforming to a web-based API, writing, or dragging-and-dropping together a script to create a workflow using one or more workflow description languages. Our test cases are examples of ready-to-run modifiable workflows that self-install executables, dependencies and data. One possible use cas is to add Bwb workflows to a GitHub to encourage users to try out new software.
+A major motivation for our development of Bwb was that our own software tools were not being adopted or even tested by potential users. The barriers of installing and integrating new software into existing workflows are very high. By providing a GUI and an auto-installation method across different platforms, the adoption costs are greatly reduced. **Bwb is NOT meant to be a visual programming language** as we find this to be a cumbersome method for experienced coders while being too complicated to be easily adopted by users without a programming background. Instead, Bwb is designed to allow the developer a mechanism to provide a consistent and intuitive GUI for their software that largely consists of filling out a set of forms with minimal coding. In some cases, an additional wrapper script may be needed. Filling out the Bwb forms to skin an application is usually less work than the alternatives of writing a custom GUI, providing or conforming to a web-based API, writing, or dragging-and-dropping together a script to create a workflow using one or more workflow description languages. Our test cases are examples of ready-to-run modifiable workflows that self-install executables, dependencies and data. One possible use case is to add Bwb workflows to a GitHub to encourage users to try out new software.
 
 ## Usage
 
@@ -229,7 +229,7 @@ would make the files and directories at C://Users/myName available to Bwb.
 Drag the mouse from the right side of the source widget to the left side of the sink widget. If they can be connected a dialog box should appear allowing you to choose which widgets to connect. This is shown in our [video](#tutorial---adding-a-python-script-to-a-bwb-workflow) at 5:49 to 6:05.
 
 ### How do I run Bwb on the cloud?
-Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws)interactin
+Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws) interaction.
 
 ### What browser should I use with Bwb?
 
@@ -241,7 +241,7 @@ Bwb includes a set of sample workflows. These are found under the /workflows dir
 ### Is it possible to use Bwb to run a batch of datasets?
 Currently, this is possible in a couple of ways:
 
-1) A wrapper script can be used inside the widget to distribute the computing to multiple threads. An example is [here] (https://github.com/BioDepot/LINCS_RNAseq_cpp/blob/master/scripts/multibwa.sh)interactin
+1) A wrapper script can be used inside the widget to distribute the computing to multiple threads. An example is [here](https://github.com/BioDepot/LINCS_RNAseq_cpp/blob/master/scripts/multibwa.sh).
 
 2) Export the pipeline as a [bash script](#testing-and-exporting-workflows-as-a-bash-script) and modify the scripts to be used with a HPC scheduler such as SLURM, SGE or Torque-Maui. One could also use the script as the basis for a CWL or WDL descriptor for the workflow.
 
@@ -361,7 +361,8 @@ On Redhat based distros such as Fedora/Centos the package manager is dnf or yum 
 sudo dnf -y update
 ```
 2\. Install Docker.
-    Ubuntu;
+
+Ubuntu:
 ```bash
 sudo apt-get -y install docker-engine
 ```
@@ -392,6 +393,7 @@ There are two viable routes for installing Docker on non-Linux platforms. One is
 ### Docker for Mac
 
 1\. Download the Docker package -  [Docker for Mac](https://download.docker.com/mac/stable/Docker.dmg)
+
 2\. To install Docker: double-click Docker.dmg to open the installer, then drag Moby the whale to the Applications folder.		
 
 ![](./docs/images/image1.png) 
@@ -416,9 +418,9 @@ The second option relies on Docker to provision the VM and is simpler. However, 
 #### Docker for Windows
 1\. To install Docker,
 
-For Windows 10 Pro (with HyperV) download to the package - [Docker for Windows](https://download.docker.com/win/stable/Docker%20for%20Windows%20Installer.exe)
+For Windows 10 Pro (with HyperV) download to the package - [Docker for Windows](https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe)
 
-For other versions of Windows, the older toolbox version that uses VirtualBox will need to be installed which is available [here](https://download.docker.com/win/stable/DockerToolbox.exe)
+For other versions of Windows, the older toolbox version that uses VirtualBox will need to be installed which is available [here](https://github.com/docker/toolbox/releases)
 
  * go to folder where the installation file (Installer.exe) is saved and run (double-click) the installation file. 
  * click the installer link to download.
@@ -480,7 +482,7 @@ On the cloud, BwB can also be run on any cloud instance. Please refer to the Lin
 8\.  SSH into the instance by typing the following command into the terminal. 
 (Type the commands in the directory where the ssh key of AWS instance was downloaded)
 ```bash
- #(demo.pem is name of the key)
+ # Update demo.pem with your ssh key name
  chmod 400 demo.pem 	`
  ssh -i demo.pem ubuntu@public-dns-of-aws-instance
 ```
@@ -493,7 +495,8 @@ On the cloud, BwB can also be run on any cloud instance. Please refer to the Lin
 
 After you have installed Docker on your machine, you are now ready to start your Bwb session to create and execute Docker container workflows. Bwb comes inside its own Docker container so it is first necessary to launch Docker as shown in the previous sections depending on which platform is being used.
 
-Then run the following commands on command prompt / terminal. 
+Then run the following commands on command prompt / terminal.
+
 1\.  Download the docker image containing Bwb. 
 
 ```bash
@@ -507,7 +510,7 @@ On Linux and Macs
 ```bash
 git clone https://github.com/BioDepot/BioDepot-workflow-builder.git
 cd BioDepot-workflow-builder
-docker build -t bwb/biodepot:latest .
+sudo docker build -t bwb/biodepot:latest .
 ```
 On Windows (using Git for Windows)
 
@@ -522,7 +525,7 @@ docker build -t bwb/biodepot:latest .
 
 For Linux/MacOS
 ```bash
-docker run --rm -p 6080:6080 -v ${PWD}:/data -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/.X11-unix:/tmp/.X11-unix  --privileged --group-add root biodepot/bwb
+sudo docker run --rm -p 6080:6080 -v ${PWD}:/data -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/.X11-unix:/tmp/.X11-unix  --privileged --group-add root biodepot/bwb
 ```
 For Windows
 ```bash
@@ -1011,7 +1014,7 @@ The workflow is ready to be run by double clicking on the 'Download sleuth direc
 
 ## Appendices
 
-### 1. Development environment
+### Development environment
 
 We provide additional tools in a the biodepot/bwb-widget-dev for development of widgets. This includes a full-fledged editor, geany, some graphics tools for making icons, firefox for cutting pasting from stack overflow and other resources and for editing json files inside the container. This can be pulled from Dockerhub
 
