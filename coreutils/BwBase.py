@@ -447,6 +447,8 @@ class OWBwBWidget(widget.OWWidget):
             self.QBGroups = {}
         if not ("parameters" in self.data):
             return
+        if  self.data["parameters"] is None:
+            return
         for pname in self.data["parameters"]:
             pvalue = self.data["parameters"][pname]
             if "group" in pvalue and pvalue["group"]:
