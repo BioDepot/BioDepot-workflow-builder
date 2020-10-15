@@ -315,7 +315,7 @@ Source code	: [https://github.com/BioDepot/BioDepot-workflow-builder](https://gi
 
 Linux/Mac
 ```bash 
-docker run --rm   -p 6080:6080 \
+sudo docker run --rm   -p 6080:6080 \
     -v  ${PWD}/:/data  \
     -v  /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -509,7 +509,7 @@ On Linux and Macs
 ```bash
 git clone https://github.com/BioDepot/BioDepot-workflow-builder.git
 cd BioDepot-workflow-builder
-sudo docker build -t bwb/biodepot:latest .
+sudo docker build -t biodepot/bwb:latest .
 ```
 On Windows (using Git for Windows)
 
@@ -518,7 +518,7 @@ Right click on the git bash icon and choose to run as an administrator
 git config --system core.longpaths true
 git clone https://github.com/BioDepot/BioDepot-workflow-builder.git
 cd BioDepot-workflow-builder
-docker build -t bwb/biodepot:latest .
+docker build -t biodepot/bwb:latest .
 ``` 
 2\.  Start the Bwb container 
 
