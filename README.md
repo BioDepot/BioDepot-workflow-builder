@@ -459,37 +459,43 @@ On the cloud, BwB can also be run on any cloud instance. Please refer to the Lin
 
 #### Amazon AWS
 
-1\.  Login to your console and create a new EC2 instance of ubuntu (Here we are using ubuntu, however, you can choose the operating system of your choice).
+1\.  Login to your console and create a new EC2 Linux instance.
 
-2\.  Select the configuration and click on "Review and Launch".
+2\.  Select the configuration and click on "Configure Instance Details".
 
-3\.  You will be prompted to associate a ssh key pair with the instance, you can use an existing key pair or create a new one. The key will be downloaded onto the computer  which will be later used to ssh into the machine.
-![](./docs/images/image9.png) 
+3\.  Continue configuring your instance. You will click on "Next:Add Storage" then "Next Add Tags" and then "Next Configure Security Group"
 
-4\.  Once the instance is running, select your instance and scroll right for security groups.
+4\.  When you reach the "Step 6: Configure Security Group" page click on the "Add Rule" button on the lower left of the screen
 
-5\.  From the "Actions" button select "Edit inbound rules". 
+5\.  We will the new rule that starts with "Custom TCP" that should appear
 
-![](./docs/images/image5.png) 
+6\.  Change the Port Range (third box) from 0 to 6080.
 
-6\.  Add a new http rule for port 6080 to access the GUI from the container.
+7\.  Click on the drop down menu that says "Custom" (under "Source" right next to the "Port Range") and choose "My IP" if you want to restrict access to Bwb to the computer that you are on or "Anywhere" if you wish to access Bwb from any computer
 
-![](./docs/images/image10.png) 
+8\.  Now click on "Review and Launch" 
 
-7\.  Copy the public dns of the instance. 
+9\.  Copy the public url of the instance. 
 
-![](./docs/images/image22.png) 
-
-8\.  SSH into the instance by typing the following command into the terminal: 
+10\.  SSH into the instance by typing the following command into the terminal: 
 (Type the commands in the directory where the ssh key of the AWS instance was downloaded)
 ```bash
  # Update demo.pem with your ssh key name
  chmod 400 demo.pem
  ssh -i demo.pem ubuntu@public-dns-of-aws-instance
 ```
-9\.  After you are logged in use the instructions [here](#linux) to install Docker on Linux.
+11\.  After you are logged in use the instructions [here](#linux) to install Docker on Linux.
 
-10\. Configure the firewall using the instructions here [http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/authorizing-access-to-an-instance.html](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/authorizing-access-to-an-instance.html) 
+12\. Then you can start Bwb
+```bash 
+sudo docker run --rm   -p 6080:6080 \
+    -v  ${PWD}/:/data  \
+    -v  /var/run/docker.sock:/var/run/docker.sock \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    --privileged --group-add root \
+    biodepot/bwb
+```
+13\. Open a browser and then type http:\\<instance public url>:6080
 
 
 ## Starting Bwb
