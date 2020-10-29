@@ -495,7 +495,7 @@ sudo docker run --rm   -p 6080:6080 \
     --privileged --group-add root \
     biodepot/bwb
 ```
-13\. Open a browser and then type http:\\<instance public url>:6080
+13\. Open a browser and then type <instance public url>:6080
 
 
 ## Starting Bwb
