@@ -163,7 +163,7 @@ University of Washington Tacoma
 
 #### Biomedical scientists 
 
-The Bwb GUI is designed for non-programmers who want to use a workflow on their own data without worrying about installation and reproducibility. Bwb auto-installs the components and provides a very simple and intuitive GUI interface for modifying key parameters and accepting user files. We realise that for many users, interactive visualization is a large part of their analyses. Bwb supports Jupyter notebooks, Cytoscape and other software that have their own graphics and GUIs. The casual user can use familiar tools to customize the final stages of the analyses while maintaining a complete record and provenance of the entire pipeline which is essential for publication, sharing and reproducibility. Advanced users can swap in different parameter sets or even different modules just by dragging and dropping into an existing tested pipeline. A bash script can be created for the purpose of publication or to use in one of the many schedulers that support bash scripts such as SLURM/SGE/Torque-Maui.
+The Bwb GUI is designed for non-programmers who want to use a workflow on their own data without worrying about installation and reproducibility. Bwb auto-installs the components and provides a very simple and intuitive GUI interface for modifying key parameters and accepting user files. We realize that for many users, interactive visualization is a large part of their analyses. Bwb supports Jupyter notebooks, Cytoscape and other software that have their own graphics and GUIs. The casual user can use familiar tools to customize the final stages of the analyses while maintaining a complete record and provenance of the entire pipeline which is essential for publication, sharing and reproducibility. Advanced users can swap in different parameter sets or even different modules just by dragging and dropping into an existing tested pipeline. A bash script can be created for the purpose of publication or to use in one of the many schedulers that support bash scripts such as SLURM/SGE/Torque-Maui.
 
 #### Bioinformaticians
 
@@ -210,7 +210,7 @@ docker run --rm   -p 6080:6080 \
     biodepot/bwb
 ```
 
-For Windows there is the additonal step of sharing a Windows folder with the VirtualBox or HyperV VM that is running Docker. Otherwise, the container will map an empty directory to the Docker container. For Windows 10 Pro instructions are [here](https://docs.docker.com/docker-for-windows/#shared-drives). For other Windows versions instructions are [here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572).
+For Windows there is the additional step of sharing a Windows folder with the VirtualBox or HyperV VM that is running Docker. Otherwise, the container will map an empty directory to the Docker container. For Windows 10 Pro instructions are [here](https://docs.docker.com/docker-for-windows/#shared-drives). For other Windows versions instructions are [here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572).
 
 For example, if a the C://Users/myName folder is share with the name homefolder then
 ```
@@ -229,14 +229,14 @@ would make the files and directories at C://Users/myName available to Bwb.
 Drag the mouse from the right side of the source widget to the left side of the sink widget. If they can be connected a dialog box should appear allowing you to choose which widgets to connect. This is shown in our [video](#tutorial---adding-a-python-script-to-a-bwb-workflow) at 5:49 to 6:05.
 
 ### How do I run Bwb on the cloud?
-Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws) interaction.
+Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the IP and port accessible to the user. An example is given here for [AWS](#amazon-aws) interaction.
 
 ### What browser should I use with Bwb?
 
 We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine. In the past we have had problems with Edge but the latest versions of Firefox and Safari work well. If you must use Edge it **may** be possible to use by following this [recipe](https://www.hanselman.com/blog/FixedMicrosoftEdgeCantSeeOrOpenVirtualBoxhostedLocalWebSites.aspx) to allow it to connect to a local URL or by running Bwb from a remote server.
 
 ### Where are the sample workflows and datasets?
-Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we use of the provided downloadURL widget to download files from an external source (eg. a Google drive) for use with the containers. This is the mechanism that we use in all our examples. You can use our widget to download the data or look at the widget parameters to find the URL of the files and download them yourself. Then you can save these files if you wish and use them directly.
+Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we use of the provided downloadURL widget to download files from an external source (e.g. a Google drive) for use with the containers. This is the mechanism that we use in all our examples. You can use our widget to download the data or look at the widget parameters to find the URL of the files and download them yourself. Then you can save these files if you wish and use them directly.
 
 ### Is it possible to use Bwb to run a batch of datasets?
 Currently, this is possible in a couple of ways:
@@ -260,7 +260,7 @@ We have provided basic widgets for Python, R, Perl, Bash, and Java. There is a [
 ```
 docker run --rm --net host alpine ip address
 ```
-4. Make sure that you have read/write permissions to the directory that you are using to share files with Bwb and Docker. One method is to use your Desktop or a folder on your Desktop as the starting point for sharing files. For example when launching from Docker toolbox the starting command would be
+4. Make sure that you have read/write permissions to the directory that you are using to share files with Bwb and Docker. One method is to use your Desktop or a folder on your Desktop as the starting point for sharing files. For example, when launching from Docker toolbox the starting command would be
 
 ```
 docker run --rm   -p 6080:6080 \
@@ -534,9 +534,9 @@ docker run --rm -p 6080:6080 -v /c/users:/data -v /var/run/docker.sock:/var/run/
 ```
 
 
-This command will launch a mini-webserver and start a windowing environment inside the container. The Bwb application is automatically launched upon running the container and appears as a maximized window on the Desktop inside the container. In the above command we have set the port to be 6080. For Linux/MacOS the current directory is mapped to the /data directory inside the container. For Windows, by default the C://Users directory is made available for Docker and we map this to the /data directory in side the container. Other mappings are [possible](#How do I use Bwb on my own data files)  However, all this is hidden from view until the user connects to the container using a browser. 
+This command will launch a mini-webserver and start a windowing environment inside the container. The Bwb application is automatically launched upon running the container and appears as a maximized window on the Desktop inside the container. In the above command we have set the port to be 6080. For Linux/MacOS the current directory is mapped to the /data directory inside the container. For Windows, by default the C://Users directory is made available for Docker and we map this to the /data directory inside the container. Other mappings are [possible](#How do I use Bwb on my own data files)  However, all this is hidden from view until the user connects to the container using a browser. 
 
-To access the container open up a browser window and type in the IP of the container, and port that it is listening to, into the address bar. For a local installation using Linux, the IP of the container is localhost or 127.0.0.1 so the user would type localhost:6080 into the address bar of the browser. For a remote installation, the IP is the IP of the server.
+To access the container, open up a browser window and type in the IP of the container, and port that it is listening to, into the address bar. For a local installation using Linux, the IP of the container is localhost or 127.0.0.1 so the user would type localhost:6080 into the address bar of the browser. For a remote installation, the IP is the IP of the server.
 <a name="findip"></a>
 
 For Macs and Windows machines using VirtualBox, the local IP is usually [192:168:99:100](http://192:168:99:100:6080). If that does not work, you can find the IP with the following command in a terminal if using Linux/MacOS, or in the Docker window if using Windows.
@@ -560,7 +560,7 @@ The Bwb no-vnc container launches a mini-webserver that is accessed using your b
 
 ### Basic window manipulations
 
-The Bwb application is started automatically upon starting the Docker container. The window can be minimized, maximized/restored and closed using the buttons in the upper left-hand corner. These are the same buttons available in standard Windows, MacOS and Linux windowing systems. The window can also be resized by clcking on the middle button to unmaximize and then dragging the lower right-hand corner.
+The Bwb application is started automatically upon starting the Docker container. The window can be minimized, maximized/restored and closed using the buttons in the upper left-hand corner. These are the same buttons available in standard Windows, MacOS and Linux windowing systems. The window can also be resized by clicking on the middle button to unmaximize and then dragging the lower right-hand corner.
 
 Clicking on the left minimize button of the window hides the window and reveals the background. The window can be restored by clicking on the panels in the lower toolbar. Clicking on the right close button closes the application. It, however, does not quit the container.
 
@@ -593,7 +593,7 @@ In Bwb, we use Bwb workflows and widgets to represent and execute analytical pip
 
 ### Tool Dock
 
-When Bwb is started, the Bwb application window pops up. On the left-hand side of the application window is toolbox (Tool Dock) with multiple tabs (drawers), which contain different collections of widgets. Clicking on the tab expands the toolbox drawer to reveal the contents. Drawers are organized by function. Bwb comes with a set of ready-to-use widgets. These are all linked to containers available on our BioDepot repositiory on Docker hub. Any workflows constructed with these widgets will automatically download the necessary containers the first time that they are run and require no installation. 
+When Bwb is started, the Bwb application window pops up. On the left-hand side of the application window is toolbox (Tool Dock) with multiple tabs (drawers), which contain different collections of widgets. Clicking on the tab expands the toolbox drawer to reveal the contents. Drawers are organized by function. Bwb comes with a set of ready-to-use widgets. These are all linked to containers available on our BioDepot repository on Docker hub. Any workflows constructed with these widgets will automatically download the necessary containers the first time that they are run and require no installation. 
 
 Users can also create their own drawers. A new drawer is created whenever a workflow is loaded. Also, widgets can be added (and removed) using the Tool Dock editor available from the menu bar. (See the section on editing the Tool Dock.)
 
@@ -601,7 +601,7 @@ Note that different drawers in the Tool Dock can have widgets with the same name
 
 The Tool Dock can be minimized using the button on the top right-hand side.
 
-A miniature version of the Tool Dock is accessible by right clicking in the canvas section to the right of the toolbox.
+A miniature version of the Tool Dock is accessible by right-clicking in the canvas section to the right of the toolbox.
 
 ### Editing the Tool Dock
 
@@ -772,7 +772,7 @@ For most cases, we recommend that you merge all widgets that are to be used, bef
 Widgets are connected by dragging the cursor from the right side of the source widget to the left side of the destination widget. This transfers the output of the source widget to the destination widget. When there are several possible connections, Bwb will choose one. Double clicking on the link will allow the user to edit this choice and select which inputs are to be connected to which output. An output can be connected to multiple inputs, but inputs in Bwb by default currently accept only one output. This may be changed in the future - especially for triggers.
 
 ##### Input from connections override user input
-When an input is connected to an output - the output value will become the input value. This value will override any user input. Accordingly, the form for that imput will be grayed out and inaccessible.
+When an input is connected to an output - the output value will become the input value. This value will override any user input. Accordingly, the form for that input will be grayed out and inaccessible.
 
 ##### Connections to triggers are used to control the execution of widgets
 One of the major uses of connections is to control the execution of widgets in workflows. A widget that has one or more inputs that are connected can use these as execution triggers using the run mode at the bottom of the destination widget. The widget will not execute until all required parameters are entered and all the inputs that are triggers receive input. This allows for a widget to wait until another widget has finished processing. For example, the kallisto quant widget in the kallisto-sleuth demo workflow is triggered by the indexFile produced by the kallisto index widget and the output of the fastq download widget. It will wait until the index file is ready and the fastq files are downloaded before proceeding.
@@ -785,7 +785,7 @@ To load a workflow go to the File menu at the top left corner of the Bwb window 
 
 Demo workflows that come with Bwb are in the /workflows directory.
 
-To execute a workflow, double-click on a widget and manual start from that widget by hitting the blue start button. When that widget has finished executing, it will send output to connected widgets. If these widgets are triggered by the output, they will then execute (as long as all the required parameters and other other trigger signals have been received). Workflows can also be started from any widget if the required files and parameters are present. For example,  an alignment pipeline can skip the indexing steps if the index has already been generated or downloaded.
+To execute a workflow, double-click on a widget and manual start from that widget by hitting the blue start button. When that widget has finished executing, it will send output to connected widgets. If these widgets are triggered by the output, they will then execute (as long as all the required parameters and other trigger signals have been received). Workflows can also be started from any widget if the required files and parameters are present. For example,  an alignment pipeline can skip the indexing steps if the index has already been generated or downloaded.
 
 #### Testing and exporting workflows as a bash script 
 A test mode is also provided for testing. Checking the test mode box before hitting the start button causes the widget and downstream connected widgets to output the docker commands to the console rather than executing them. This allows the user to check whether the triggers are set and the necessary parameters are entered without needing to run a lengthy workflow. In addition, the user will be prompted for a file to save the docker commands as a bash script. The script is a record of the actual docker commands that are run when the workflow is executed. 
@@ -865,7 +865,7 @@ The basic steps will be to:
 
 ### Rename and customize the Python2 widget
 
-1\. Right-click on the Python2 widget. A menu should pop up. Choose the 'Edit Widget' option to bring up the Widget Defintion window. Hit the rename button and change the name to cutadapt_demo. This will rename the widget definition, i.e. the base name of the widget in the drawer in the ToolDock
+1\. Right-click on the Python2 widget. A menu should pop up. Choose the 'Edit Widget' option to bring up the Widget Defintion window. Hit the rename button and change the name to cutadapt_demo. This will rename the widget definition, i.e. the base name of the widget in the drawer in the Tool Dock
 
 2\. The Python2 definition window should have 8 tabs. If the window is too narrow, not all the tabs will be visible. Either resize the window by dragging on the lower right corner or use the arrows in the top right to scroll the content. The 'General' tab should be the active one by default. Make the following changes:
 
@@ -878,21 +878,21 @@ The description will appear in the lower left-hand help window under the Tool Do
 
 3\. Click on the Inputs Tab. Under the big white text box there is a set of data entry boxes followed by an add button (file icon with plus sign) and a delete button (file icon with x sign) which should be inactive. Enter 'OutputDir' in the 'Name' box and then click on the add button. The new entry should be visible in the text box. To edit an entry if there is a mistake, click on the entry in the text box. The boxes at the bottom will be filled with the values from the entry and can be edited and saved by clicking the add button. The delete button should become active and allow you to delete the entry.
 
-What we have done is defined 'outputDir' as an input. This is because the fastq download widget outputs the output directory upon finishing and we want to be able to receive that signal. However we also want to be able to use that information by passing it to our script. We will do this in the next step.
+What we have done is defined 'OutputDir' as an input. This is because the fastq download widget outputs the output directory upon finishing and we want to be able to receive that signal. However, we also want to be able to use that information by passing it to our script. We will do this in the next step.
 
 4\. Click on the Parameters tab. Do the following:
 
-- Create an entry for 'OutputDir' by putting "OutputDir" in the 'name' text box, choosing 'file' from the 'Type' text box, checking the 'flag' box, entering *-d* followed by a space as the value, and pressing 'enter'. Check the 'label' checkbox, and enter "fastq directory:" into the 'label' text box. Then press the 'add' button.
+- Create an entry for 'OutputDir' by putting "OutputDir" in the 'name' text box, choosing 'file' from the 'Type' text box, checking the 'flag' box, entering *-d* followed by a space as the value, and pressing 'enter'. Check the 'label' checkbox and enter "fastq directory:" into the 'label' text box. Then press the 'add' button.
 
 - Create an entry for 'quality' by putting "quality" in the 'name' text box, choosing 'int' from the 'Type' box, checking the 'flag' checkbox, and entering *-q* followed by a space, as the value for the flag. Enter "Mininum quality" in the label box. Enter "10" in the 'default' box. Then press the 'add' button.
 
 - Create an entry for 'minLength' by putting "minLength" in the 'name' text box, choosing 'int' from the 'Type' box, checking the 'flag' checkbox, and entering *-m* followed by a space, as the value for the flag. Enter "Mininum read length" in the label box. Enter "50" in the 'default' box. Then press the 'add' button.
 
-- Modify the the 'inputFile' entry by clicking on the inputFile entry. Then at the bottom uncheck the 'Argument' box. Check the 'flag' checkbox and enter a single space for the value of the flag. Click on the 'save' button (file icon with plus sign).
+- Modify the 'inputFile' entry by clicking on the inputFile entry. Then at the bottom uncheck the 'Argument' box. Check the 'flag' checkbox and enter a single space for the value of the flag. Click on the 'save' button (file icon with plus sign).
 
-We have now created three new entry forms. One for 'outputDir', which is where the fastq file reside, one for the minimum quality of the reads, and one for the minimum read length. We also changed the 'inputFile' entry (which is the python script) to have a blank flag instead of being an argument. Bwb will place all parameters after the command in the order in which they appear in the list. However, arguments will be placed after all flags. The bare command is visible in the Command tab and is simply 'python'. 
+We have now created three new entry forms. One for 'OutputDir', which is where the fastq file reside, one for the minimum quality of the reads, and one for the minimum read length. We also changed the 'inputFile' entry (which is the python script) to have a blank flag instead of being an argument. Bwb will place all parameters after the command in the order in which they appear in the list. However, arguments will be placed after all flags. The bare command is visible in the Command tab and is simply 'python'. 
 
-So with our changes the widget will execute:
+So, with our changes the widget will execute:
 
 ```
 python <blank flag><scriptName> -d <outputDir> -q <quality> -m <minLength>
@@ -969,7 +969,7 @@ os.chdir(options.d)
 #we use the fact that for our naming convention the paired end files will be nicely grouped in pairs
 files=sorted(glob('SRR*.gz'))
 
-#make a the temporary directory
+#make a temporary directory
 if not os.path.exists('tmp'):
     os.makedirs('tmp')
     
@@ -1021,7 +1021,7 @@ We provide additional tools in the biodepot/bwb-widget-dev for development of wi
 ```bash
 docker pull biodepot/bwb-widget-dev
 ``` 
-Alternatively the image can be built from source using the Dockerfile:
+Alternatively, the image can be built from source using the Dockerfile:
 
 ```bash
 cd <github repo>
@@ -1035,7 +1035,7 @@ As the development version of Bwb is not yet linked to the github, it is better 
 
 Bwb takes values from the widget forms, generates and executes a Docker command for the widget, and passes signals and data to downstream widgets to trigger their execution.
 
-Bwb takes the values from the forms and generates a Docker command (or set of commands when there are multiple commands) for each widget. Pressing the start button in the widget UI window, executes the command as a Quicktime QProcess which is interruptable and can signal when it is finished. If the process finishes without error, output signals are emitted and passed to linked widgets using the OrangeML signal manager. Upon receiving a signal, the widget checks that all necessary parameters are set and if execution is also triggered (or is automatic once parameters are set), its execution starts. 
+Bwb takes the values from the forms and generates a Docker command (or set of commands when there are multiple commands) for each widget. Pressing the start button in the widget UI window, executes the command as a Quicktime QProcess which is interruptible and can signal when it is finished. If the process finishes without error, output signals are emitted and passed to linked widgets using the OrangeML signal manager. Upon receiving a signal, the widget checks that all necessary parameters are set and if execution is also triggered (or is automatic once parameters are set), its execution starts. 
 
 ### Organization of code
 
@@ -1104,9 +1104,9 @@ Alpine and Python 2.7
 Alpine and Python 3.6
 
 #### Jupyter widgets:
-All jupyter widgets take as a required parameter an ipynb notebook file which is executed. The export graphics checkbox must be checked if the notebook is to be used interactively. Base operating system is ubuntu. Firefox is used to interact with Jupyter.
+All Jupyter widgets take as a required parameter an ipynb notebook file which is executed. The export graphics checkbox must be checked if the notebook is to be used interactively. Base operating system is ubuntu. Firefox is used to interact with Jupyter.
 ##### jupyter_base 
-The basic vanilla jupyter widget with Python kernel. It takes a Jupyter notebook .ipynb file as an input. Most external libraries will have to be installed by the notebook.
+The basic vanilla Jupyter widget with Python kernel. It takes a Jupyter notebook .ipynb file as an input. Most external libraries will have to be installed by the notebook.
 ##### jupyter_bioc  
 Bioconductor and the R kernel have been installed. It can be further customized so that packages are pre-installed in the container using the  BiocImagebuilder utility
 ##### jupyter_sleuth
@@ -1247,7 +1247,7 @@ There are 4 main elements that are drawn:
 
 2\. Required parameters - the forms for the parameters required to run the widget are here
 
-3\. Optional parmeters - a list of optional parameters is placed here
+3\. Optional parameters - a list of optional parameters is placed here
 
 4\. Execution box - whether the widget is run automatically, manually, or semi-automatically depending on runTriggers is set here
 
