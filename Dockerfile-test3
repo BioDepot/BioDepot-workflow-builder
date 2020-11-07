@@ -1,0 +1,2 @@
+From test:test
+RUN rm biodepot/*.egg-info

@@ -1,5 +1,4 @@
 FROM biodepot/bwb-dev:latest
-MAINTAINER lhhung<lhhung@uw.edu>
-COPY scripts/startBwb.sh /usr/local/bin/startBwb.sh
-COPY orangePatches/canvasmain.py /orange3/Orange/canvas/application/canvasmain.py
-COPY orangePatches/__main__.py /orange3/Orange/canvas/__main__.py
+RUN rm -r /biodepot/*.egg-info
+#CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
+
