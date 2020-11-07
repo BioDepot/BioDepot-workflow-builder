@@ -6,7 +6,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /root
 #base files/utils to be used inside container
 RUN apt-get update \
-    && apt-get install -y --force-yes --no-install-recommends supervisor \
+    && apt-get install -y --allow-downgrades --allow-remove-essential --allow-change-held-packages --no-install-recommends supervisor \
         pwgen sudo nano \
         net-tools \
         fluxbox feh xterm x11vnc xvfb \
