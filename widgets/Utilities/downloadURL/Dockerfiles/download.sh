@@ -169,7 +169,7 @@ for url in  "${urls[@]}" ; do
 				echo "curl $url $dcmd" 
 				bash -c "curl $url $dcmd"
 			fi
-            curret=$?     
+            curlret=$?     
         else
             if [ -n "$concatenateFile" ]; then
                 echo  'curl $url >>' "$concatenateFile"

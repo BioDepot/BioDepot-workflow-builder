@@ -22,13 +22,12 @@ def niceForm(badString, useDash="False"):
     return ret
 
 
-def entryString(category, directory):
-    ret = 'setup(name="{}",\n'.format(category)
-    ret += '      packages=["{}"],\n'.format(directory)
-    ret += '      package_data={{"{}": ["icons/*.svg"]}},\n'.format(directory)
-    ret += '      entry_points={{"orange.widgets": "{} = {}"}},)\n'.format(
-        category, directory
-    )
+def entryString(category,directory):
+    ret='setup(\n'
+    ret+='      name="{}",\n'.format(category)
+    ret+='      packages=["{}"],\n'.format(directory)
+    ret+='      package_data={{"{}": ["icons/*.svg"]}},\n'.format(directory)
+    ret+='      entry_points={{"orange.widgets": "{} = {}"}},\n)\n'.format(category,directory)
     return ret
 
 

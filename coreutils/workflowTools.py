@@ -256,7 +256,7 @@ def exportWorkflow(
     iconFile=None,
     basePath="",
     onlyInOWS=False
-):
+    ):
     tempDir = tempfile.mkdtemp()
     projectTitlePath = niceForm(projectTitle, useDash=False)
     os.makedirs(tempDir + "/widgets/{}".format(projectTitlePath, useDash=False))
@@ -419,48 +419,46 @@ def exportWorkflow(
         shutil.rmtree(tempDir)
 
 
-def importWorkflow(owsFile):
-    changedSetup = False
+def importWorkflow(owsFile,basePath="/biodepot"):
     workflowDir = os.path.dirname(owsFile)
     projectTitlePath = os.path.basename(workflowDir)
     projectTitle = niceForm(projectTitlePath, useDash=True)
-    symDir = "/biodepot/{}".format(projectTitlePath)
-    if not os.path.exists(symDir):
-        os.makedirs(symDir)
-    with open("/biodepot/setup.py", "r") as f:
+    with open("{}/setup.py".format(basePath), "r") as f:
         setupData = f.read()
-    projectList = re.findall(r'setup\(name="([^"]+)"', setupData)
-    changedSetup = True
-    for projectName in projectList:
-        if projectName == projectTitle:
-            changedSetup = False
-            break
-    if changedSetup:
+    print (setupData)
+    projectList = re.findall(r'setup\(\s+name="([^"]+)"', setupData)
+    print (projectTitle)
+    print (projectList)
+    symDir = "{}/{}".format(basePath,projectTitlePath)
+    if projectTitle in projectList:
+        os.system("rm -rf {}".format(symDir))
+    else:
         setupData += entryString(projectTitle, projectTitlePath)
+    if not os.path.exists(symDir):
+        os.makedirs(symDir)        
     pythonFiles = glob("{}/widgets/*/*/*.py".format(workflowDir))
     for pythonFile in pythonFiles:
         basePythonFile = os.path.basename(pythonFile)
-        destLink = "/biodepot/{}/OW{}".format(projectTitlePath, basePythonFile)
+        destLink = "{}/{}/OW{}".format(basePath,projectTitlePath, basePythonFile)
         os.system("ln -sf {} {}".format(pythonFile, destLink))
     # make link to icons and __init__.py
     print(
-        "ln -sf {}/widgets/{}/icon /biodepot/{}/icon".format(
-            workflowDir, projectTitlePath, projectTitlePath
+        "ln -sf {}/widgets/{}/icon {}/{}/icon".format(
+            workflowDir, projectTitlePath,basePath,projectTitlePath
         )
     )
-    if os.path.exists("/biodepot/{}/icon".format(projectTitlePath)):
-        os.unlink("/biodepot/{}/icon".format(projectTitlePath))
+    if os.path.exists("{}/{}/icon".format(basePath,projectTitlePath)):
+        os.unlink("{}/{}/icon".format(basePath,projectTitlePath))
     os.system(
-        "ln -sf {}/widgets/{}/icon /biodepot/{}/icon".format(
-            workflowDir, projectTitlePath, projectTitlePath
+        "ln -sf {}/widgets/{}/icon {}/{}/icon".format(
+            workflowDir, projectTitlePath, basePath, projectTitlePath
         )
     )
     os.system(
-        "ln -sf {}/widgets/{}/__init__.py /biodepot/{}/__init__.py".format(
-            workflowDir, projectTitlePath, projectTitlePath
+        "ln -sf {}/widgets/{}/__init__.py {}/{}/__init__.py".format(
+            workflowDir, projectTitlePath, basePath, projectTitlePath
         )
     )
-    if changedSetup:
-        with open("/biodepot/setup.py", "w") as f:
-            f.write(setupData)
-        os.system("cd /biodepot && pip install -e .")
+    with open("{}/setup.py".format(basePath), "w") as f:
+        f.write(setupData)
+    os.system("cd {} && pip install -e .".format(basePath))
