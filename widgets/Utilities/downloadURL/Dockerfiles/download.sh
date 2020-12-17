@@ -1,12 +1,11 @@
 #!/bin/bash
-decompress=1
 function getFilename(){
 	filename=""
 	echo "finding filename for url $url"
 	tempDir="$(mktemp -d /tmp/XXXXXXXXX)"
 	#make a temporary directory without write permissions to force curl to quit after obtaining filename
-	chmod -w $tempDir
-	filename=$( (cd $tempDir; curl -JLO "$url" |& grep file | grep -o -P '(?<=file ).*(?=:)') )
+	chmod -w $tempDir	
+	filename=$( (cd $tempDir; su user -c "curl -JLO $url |& grep file | sed 's/.*file \(.*\):.*/\1/'") )
 	rm $tempDir -rf
 	if [ -z "$filename" ]; then
 	    filename="${url##*/}"
