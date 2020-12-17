@@ -13,7 +13,7 @@ from pathlib import Path
 class ConsoleProcess:
     #note that the logBaseDir is hard coded under /data/.bwb for now - this should be changed for whatever the primary volume mapping is
     # subclass that attaches a process and pipes the output to textedit widget console widget
-    def __init__(self, console=None, errorHandler=None, finishHandler=None, logHandler=None):
+    def __init__(self, console=None, errorHandler=None, finishHandler=None):
         self.threadNumber=0
         self.processDir="proc.{}".format(uuid.uuid4().hex)
         self.startupOnly=False
@@ -26,24 +26,17 @@ class ConsoleProcess:
         self.process = QProcess()
         self.console = console
         self.state = "stopped"
-<<<<<<< HEAD
-        self.stdoutColor=Qt.white
-        self.stderrColor=Qt.red
-        self.job_id=None
-        self.schedule_pid=0
-=======
         #call cleanup just in case there is a previous processDir with same name
         self.cleanup()
->>>>>>> f0a94431916b263daed02d8b06468b720099d07b
         if console:
             self.log.readyReadStandardOutput.connect(
                 lambda: self.writeConsole(
-                    self.log, console, self.log.readAllStandardOutput, self.stdoutColor
+                    self.log, console, self.log.readAllStandardOutput, Qt.white
                 )
             )
             self.log.readyReadStandardError.connect(
                 lambda: self.writeConsole(
-                    self.log, console, self.log.readAllStandardError, self.stderrColor
+                    self.log, console, self.log.readAllStandardError, Qt.red
                 )
             )        
         if finishHandler:
@@ -129,9 +122,9 @@ class ConsoleProcess:
     def addServerSettings(self, settings):
         pass
 
-    def writeConsole(self, process, console, read, color=None):
+    def writeConsole(self, process, console, read, color):
         console.setTextColor(color)
-        console.append(read().data().decode('utf-8',errors="ignore"))
+        console.append(read().data().decode("utf-8", errors="ignore").rstrip())
 
     def writeMessage(self, message, color=Qt.green):
         # for bwb messages
@@ -146,9 +139,9 @@ class ConsoleProcess:
         if message:
             self.writeMessage(message)
             
-    def startLog(self,schedule=False,job_id=None):
+    def startLog(self,schedule=False,namespace=None):
         if schedule:
-            self.scheduleLog(job_id)
+            self.scheduleLog(namespace)
             return
         self.logFile='{}/log{}'.format(self.logDir,self.threadNumber)
         myPath=Path(self.logFile)
@@ -163,13 +156,9 @@ class ConsoleProcess:
         if self.finishHandler:
             self.finishHandler()
             
-    def startScheduleLog(self):
+    def scheduleLog(self,namespace):
+        self.log.start('getlog.sh {}'.format(namespace))
         
-<<<<<<< HEAD
-        self.log.start('getlog.sh',[self.job_id])
-        
-    def start(self,cmds,schedule=False,job_id=None):
-=======
     def schedule(self,parms):
         job_id=parms[0]
         self.process.start('runScheduler.sh',parms)
@@ -177,22 +166,12 @@ class ConsoleProcess:
         self.scheduleLog(job_id)
         
     def start(self,cmds,schedule=False):
->>>>>>> f0a94431916b263daed02d8b06468b720099d07b
         self.cleanup()
-        if not job_id:
-            self.job_id=str(uuid.uuid4().hex)[0:19]
-        self.job_id=job_id
-        self.logDir='logs.{}'.format(self.job_id)
-        os.makedirs('/data/.bwb/{}'.format(self.logDir))
         if schedule:
-            self.startScheduleLog()
             sys.stderr.write('runScheduler.sh {}\n'.format(cmds))
             self.process.start('runScheduler.sh',cmds)
         else:
-<<<<<<< HEAD
-=======
             os.makedirs(self.logDir)
->>>>>>> f0a94431916b263daed02d8b06468b720099d07b
             self.startLog()
             cmds.insert(0,self.baseLogDir)
             cmds.insert(0,self.processDir)
@@ -225,7 +204,6 @@ class ConsoleProcess:
 
 
 class TaskJson:
-    #nWorkers same as maxWorkers - both kept to not break older pipelines
     def __init__(self, imageName):
         self.jsonObj={}
         self.jsonObj["image"] = imageName
@@ -252,9 +230,6 @@ class TaskJson:
         self.jsonObj["env"].append({"key": key, "val": val})
 
     # need to fix this so that we can add parameters for maxWorkers and threads per worker
-    def addMaxWorkers(self, maxWorkers):
-        self.jsonObj['maxWorkers']=maxWorkers
-        
     def addThreadsRam(self, nThreads, ram):
         self.jsonObj["nThreads"] = nThreads
         self.jsonObj["ram"] = ram
@@ -267,12 +242,11 @@ class TaskJson:
 
 
 class DockerJson:
-    def __init__(self, tasksJson,job_id,name="",description="",maxWorkers=1):
+    def __init__(self, tasksJson,namespace,name="",description=""):
         self.jsonObj = {}
-        self.jsonObj["job_id"]=job_id
+        self.jsonObj["namespace"]=namespace
         self.jsonObj["name"]=name
         self.jsonObj["description"]=description
-        self.jsonObj["maxWorkers"]=maxWorkers
         self.jsonObj['tasks']=[]
         for taskJson in tasksJson:
             self.jsonObj['tasks'].append(taskJson.jsonObj)
@@ -284,7 +258,7 @@ class DockerClient:
         self.cli = APIClient(base_url=url)
         self.bwb_instance_id = str(
             subprocess.check_output(
-                'cat /proc/self/cgroup | head -1 | cut -d "/" -f3',
+                'cat /proc/self/cgroup | grep devices | head -1 | cut -d "/" -f3',
                 shell=True,
                 universal_newlines=True,
             )
@@ -366,9 +340,6 @@ class DockerClient:
         count = 0
         cpuCount='8'
         memory='8096'
-        maxWorkers=1
-        if iterateSettings and 'nWorkers' in iterateSettings:
-            maxWorkers=iterateSettings['nWorkers']
         for cmd in cmds:
             taskJson = TaskJson(name)
             taskJson.addBaseArgs(cmd)
@@ -389,26 +360,38 @@ class DockerClient:
             tasksJson.append(taskJson)
             count += 1
 
-        job_id=str(uuid.uuid4().hex)[0:19]
-        dockerJson = DockerJson(tasksJson,job_id=job_id,maxWorkers=maxWorkers)
+        namespace=str(uuid.uuid4().hex)[0:19]
+        dockerJson = DockerJson(tasksJson,namespace=namespace)
         #jsonFile = "/data/dockerTest.json"
-        jsonFile = "/tmp/docker.{}.json".format(job_id)
+        jsonFile = "/tmp/docker.{}.json".format(namespace)
         with open(jsonFile, "w") as outfile:
             json.dump(dockerJson.jsonObj, outfile)
-<<<<<<< HEAD
-        parms=[job_id,jsonFile,cpuCount,memory]
-        consoleProc.start(parms,schedule=True,job_id=job_id)
-
-=======
         parms=[namespace,jsonFile,cpuCount,memory]
         consoleProc.start(parms,schedule=True)
-    def arrayPrint(self,var):
-        #remove spaces from array 
-        if type(var) is list or type(var) is tuple:
-            return"[{}]".format(",".join(map(repr, var)))
+        
+    def prettyEnv(self,var):
+        if type(var) is list:
+            output="["
+            for v in var:
+                #strip single quotes
+                if v[0] == "'" and v[-1] =="'":
+                    v=v[1:-1]
+                output+='\\"{}\\",'.format(v)
+            #delete extra comma and replace with ]
+            output=output[:-1]+"]"
+            #check if output is empty
+            if output == "]":
+                output="[]"
+            return output       
         else:
+            try:
+                if var[0] == "'" and var[-1] =="'":
+                    return var[1:-1]
+            except TypeError:
+                return var
+            except IndexError:
+                return var
             return var
->>>>>>> f0a94431916b263daed02d8b06468b720099d07b
     def create_container_iter(
         self,
         name,
@@ -440,7 +423,7 @@ class DockerClient:
             # strip quotes if present
             if env[0] == env[-1] and env.startswith(("'", '"')):
                 env = env[1:-1]
-            envs = envs + "-e {}={} ".format(env, self.arrayPrint(var))
+            envs = envs + "-e {}={} ".format(env, self.prettyEnv(var))
         # create container cmds
         # the runDockerJob.sh script takes care of the first part of the docker command and cidfile
         # docker  run -i --rm --init --cidfile=<lockfile>'
