@@ -4,12 +4,12 @@ function getFilename(){
 	echo "finding filename for url $url"
 	tempDir="$(mktemp -d /tmp/XXXXXXXXX)"
 	#make a temporary directory without write permissions to force curl to quit after obtaining filename
-	chmod -w $tempDir	
-	filename=$( (cd $tempDir; su user -c "curl -JLO $url |& grep file | sed 's/.*file \(.*\):.*/\1/'") )
-	rm $tempDir -rf
-	if [ -z "$filename" ]; then
-	    filename="${url##*/}"
-	fi
+	chmod -w $tempDir
+	filename=$(cd $tempDir; su user -c "wget --content-disposition $url  |& grep denied | sed 's/.*denied //' | sed 's/:.*//'")
+    rm $tempDir -r
+    if [ -z filename ]; then
+       filename="${url##*/}"
+    fi
 }
 
 function decompString(){
@@ -174,10 +174,9 @@ for url in  "${urls[@]}" ; do
     else
         echo "url $url is not from google drive"
         getFilename
+        echo "$filename"
         if [ -n "$decompress" ] 
-        then
-            
-            echo filename is "$filename"
+        then            
             decompString "$filename"
             
             if [[ -n $zipFlag ]]; then

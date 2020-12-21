@@ -43,6 +43,7 @@ from AnyQt.QtWidgets import (
 
 
 def breakpoint(title=None, message=None):
+    return
     QtGui.QMessageBox.warning(title,'',message)
 
 
