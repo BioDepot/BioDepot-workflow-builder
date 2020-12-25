@@ -1,4 +1,15 @@
 #!/bin/bash
+function checkFilename(){
+echo "check zero length"
+[[ -n "$filename" ]] || return
+echo "check too long"
+[[ $(echo "${#filename}") -lt 255 ]] || return
+echo "check character"
+[[ $filename =~ ^[0-9a-zA-Z._-]+$ ]] || return
+echo "check first char"
+[[ $(echo $filename | cut -c1-1) =~ ^[0-9a-zA-Z]+$ ]]
+}
+
 function getFilename(){
 	filename=""
 	echo "finding filename for url $url"
@@ -6,10 +17,10 @@ function getFilename(){
 	#make a temporary directory without write permissions to force curl to quit after obtaining filename
 	chmod -w $tempDir
 	filename=$(cd $tempDir; su user -c "wget --content-disposition $url  |& grep denied | sed 's/.*denied //' | sed 's/:.*//'")
-    rm $tempDir -r
-    if [ -z filename ]; then
-       filename="${url##*/}"
-    fi
+	checkFilename && return
+	filename=$(su user -c "curl -JLO $url |& grep denied | sed 's/.* file //g' | sed 's/:.*//g'")
+    checkFilename && return
+    filename="${url##*/}"
 }
 
 function decompString(){
