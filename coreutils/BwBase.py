@@ -1629,7 +1629,7 @@ class OWBwBWidget(widget.OWWidget):
             if type(entryList) == list:
                 boxEdit.addItems(entryList)
             else:
-                boxEdit.addItems([entryList])
+                boxEdit.addItems([str(entryList)])
         boxEdit.setDisabled(disabledFlag)
         if elements:
             elements.append(boxEdit)

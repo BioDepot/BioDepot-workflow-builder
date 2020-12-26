@@ -1,13 +1,14 @@
 #!/bin/bash
+decompress=1
 function checkFilename(){
-echo "check zero length"
-[[ -n "$filename" ]] || return
-echo "check too long"
-[[ $(echo "${#filename}") -lt 255 ]] || return
-echo "check character"
-[[ $filename =~ ^[0-9a-zA-Z._-]+$ ]] || return
-echo "check first char"
-[[ $(echo $filename | cut -c1-1) =~ ^[0-9a-zA-Z]+$ ]]
+  echo "check zero length"
+  [[ -n "$filename" ]] || return
+  echo "check too long"
+  [[ $(echo "${#filename}") -lt 255 ]] || return
+  echo "check character"
+  [[ $filename =~ ^[0-9a-zA-Z._-]+$ ]] || return
+  echo "check first char"
+  [[ $(echo $filename | cut -c1-1) =~ ^[0-9a-zA-Z]+$ ]]
 }
 
 function getFilename(){
