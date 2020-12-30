@@ -502,9 +502,9 @@ class OWBwBWidget(widget.OWWidget):
             setattr(self.leditOptionalLayout.layout(), "added", True)
             self.drawOptionalElements()
 
-            self.scheduleBox,scheduleLayout=self.tabs.addBox('Scheduler',minHeight=160)
-            self.scheduleBox.layout().addLayout(self.fileDirScheduleLayout.layout())
-            self.drawScheduleElements()
+        self.scheduleBox,scheduleLayout=self.tabs.addBox('Scheduler',minHeight=160)
+        self.scheduleBox.layout().addLayout(self.fileDirScheduleLayout.layout())
+        self.drawScheduleElements()
 
         # disable connected elements
         for i in self.inputs:
@@ -2572,7 +2572,7 @@ class OWBwBWidget(widget.OWWidget):
                 subs.append(sub)
                 subFlags[sub] = self.iteratedfString(sub)
                 sys.stderr.write("sub is {} flags are {}".format(sub, subFlags[sub]))
-                if len(subFlags[sub]) > maxLen:
+                if (subFlags and len(subFlags[sub]) > maxLen):
                     maxLen = len(subFlags[sub])
         sys.stderr.write("subs are {}\n".format(subs))
 
