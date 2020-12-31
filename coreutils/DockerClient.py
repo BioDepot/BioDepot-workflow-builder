@@ -258,7 +258,7 @@ class DockerClient:
         self.cli = APIClient(base_url=url)
         self.bwb_instance_id = str(
             subprocess.check_output(
-                'cat /proc/self/cgroup | grep devices | head -1 | cut -d "/" -f3',
+                'cat /proc/self/cgroup | grep devices | head -1 | cut -d "/" -f3 | sed "s/.*-//g" | sed "s/\..*//g"',
                 shell=True,
                 universal_newlines=True,
             )
