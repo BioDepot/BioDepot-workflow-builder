@@ -2174,7 +2174,6 @@ class OWBwBWidget(widget.OWWidget):
             self.console.append("missing required parameters: {}".format(missingParms))
             return
         missingVols = self.getRequiredVols()
-        breakpoint(message="got required volumes")
         if missingVols:
             self.console.append(
                 "missing or incorrect volume mappings to: {}".format(missingVols)
@@ -2207,9 +2206,7 @@ class OWBwBWidget(widget.OWWidget):
             )
         )
         if self.iterate:
-            breakpoint(message="cmd is {}".format(cmd))
             cmds = self.findIteratedFlags(cmd)
-            breakpoint(message="cmds are {}".format(cmds))
         else:
             cmds = [cmd]
         # generate cmds here
@@ -2585,8 +2582,6 @@ class OWBwBWidget(widget.OWWidget):
                 sys.stderr.write("sub {} i = {}\n".format(sub, i))
                 replaceStr = subFlags[sub][index]
                 cmds[i] = cmds[i].replace("_iterate{{{}}}".format(sub), replaceStr)
-
-        breakpoint(message="end of findIterated cmds are {}".format(cmds))
         return cmds
 
     def replaceIteratedVars(self, cmd):
