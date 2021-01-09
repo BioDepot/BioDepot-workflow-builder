@@ -5,32 +5,12 @@
 
 #echo "$@"d
 #tempDir is a directory in /tmp
-tempDir=$1
-shift
-logBaseDir=$1
-shift
-echo "tempDir $tempDir"
-echo "logBaseDir $logBaseDir"
-#echo "logDir is $logDir"
-
-myjobs=( "$@" )
-echo "$@"
-lockDir=/tmp/${tempDir}/locks
-echo "mkdir -p $lockDir"
-mkdir -p $lockDir
-
-errorDir=/tmp/${tempDir}/errors
-echo "running job with $NWORKERS threads"
-
-#wait until all the variables i.e. lockDir have been defined
-for ((i=1; i<${#myjobs[@]}; ++i)); do
-    cmd="${myjobs[i]}"
-    echo "job $i is docker run -i --rm  --init --cidfile=$lockDir/lock$i/pid.$BASHPID $cmd"
-done
-trap "cleanup ${lockDir} -1 " SIGINT INT TERM
-
+logPrint(){
+ echo "$@" >> ${logDir}/log0
+}
 cleanup(){
     echo "cleaning up $1"
+    rm -rf $bwbDataDir
     find $1 -type f -name 'pid.*' 2> /dev/null | while read file; do
         echo ${file}
         cid=$(cat $file)
@@ -39,6 +19,51 @@ cleanup(){
     done
     cd /tmp/$tempDir && rm locks -rf
 }
+gatherData(){
+ #array declaration is by default local
+ declare -a allData=()
+ #gather all the threads
+ for ((i=0; i<${#myjobs[@]}; ++i)); do
+    threadData=()
+	keyfiles=$(ls $bwbDataDir/output$i)
+	if (( ${#keyfiles[@]} )); then
+		allData[$i]=$(for keyfile in ${keyfiles[@]}; do
+			printf '%s\0%s\0' "$keyfile" "$(cat $bwbDataDir/output$i/$keyfile)"
+		done | jq -Rs ' split("\u0000") | . as $a | reduce range(0; length/2) as $i ({}; . + {($a[2*$i]): ($a[2*$i + 1]|fromjson? // .)})')
+	else
+	   allData[$i]="None"
+	fi
+ done
+ dataString=$(printf '%s\n' "${allData[@]}"  | jq -s .)
+}
+outputFile=$1
+shift
+tempDir=$1
+shift
+logBaseDir=$1
+shift
+logDir="${logBaseDir}/${tempDir}/logs"
+mkdir -p $logDir
+
+
+logPrint "tempDir $tempDir"
+logPrint "logBaseDir $logBaseDir"
+#echo "logDir is $logDir"
+
+myjobs=( "$@" )
+logPrint "$@"
+lockDir=/tmp/${tempDir}/locks
+echo "mkdir -p $lockDir"
+mkdir -p $lockDir
+
+errorDir=/tmp/${tempDir}/errors
+#must pass through the mountpoint - write to mountpoint/.bwb
+
+hostDataDir=$BWBHOSTSHARE/$tempDir
+bwbDataDir=$BWBSHARE/$tempDir
+#wait until all the variables i.e. lockDir have been defined
+
+trap "cleanup ${lockDir} -1 " SIGINT INT TERM
 
 runJob(){
     for ((i=0; i<${#myjobs[@]}; ++i)); do
@@ -48,7 +73,8 @@ runJob(){
             cmd="${myjobs[i]}"
             #write the pid of the process in the name of a file in the lock directory
             #this will also contain the cid of the docker process so that it can be aborted
-            cmdStr="docker run -i --rm  --init --cidfile=$lockDir/lock$i/pid.$BASHPID" 
+            mkdir -p $bwbDataDir/output$i
+            cmdStr="docker run -i --rm  --init --cidfile=$lockDir/lock$i/pid.$BASHPID -v $hostDataDir/output$i:/tmp/output " 
             cmdStr="$cmdStr $cmd"
             echo "$cmdStr"
             eval $cmdStr
@@ -62,8 +88,9 @@ runJob(){
     done
     exit 0
 }
-logDir="${logBaseDir}/${tempDir}/logs"
-mkdir -p $logDir
+if [ -z $NWORKERS ]; then
+    NWORKERS=1
+fi
 for i in $(seq 1 $NWORKERS); do
     echo "starting job with thread $i"
     runJob $i 2>&1 | tee -a ${logDir}/log$i >> ${logDir}/log0 &
@@ -71,6 +98,9 @@ done
 
 #catch sigint and term and cleanup anyway
 wait
+gatherData
+echo "output is $dataString"
+echo "$dataString" > $outputFile
 cleanup ${lockDir}
 exit 0
 

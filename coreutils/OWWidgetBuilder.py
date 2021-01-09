@@ -197,7 +197,7 @@ class SaveWorkflowForm(QDialog):
         if state:
             return Qt.Checked
         return Qt.Unchecked
-		
+        
     def cancel(self):
         self.returnData = self.initialData
         self.returnData["success"] = False
@@ -636,16 +636,13 @@ class OWWidgetBuilder(widget.OWWidget):
                         newDict["default"] = str(myDict["default"])
                     else:
                         newDict["default"] = myDict["default"]
-
                 if "flag" in myDict:
                     newDict["flag"] = myDict["flag"]
                 # arguments are the same as having a null flag value
                 if "argument" in myDict and myDict["argument"]:
                     newDict["argument"] = True
-                if "label" in myDict:
+                if "label" in myDict and myDict["label"] is not None:
                     newDict["label"] = myDict["label"]
-                else:
-                    newDict["label"] = None
                 if "type" in myDict and myDict["type"]:
                     newDict["type"] = myDict["type"]
                 if "env" in myDict and myDict["env"]:
@@ -707,7 +704,6 @@ class OWWidgetBuilder(widget.OWWidget):
             ):
                 # same directory is occupied
                 # ask permission to nuke it
-
                 ret = qm.question(
                     self,
                     "",
@@ -1362,6 +1358,8 @@ class OWWidgetBuilder(widget.OWWidget):
 
     def getLeditValue(self, ledit):
         if ledit.isEnabled():
+            if ledit.text() is None:
+                return ""
             return ledit.text()
         return None
 

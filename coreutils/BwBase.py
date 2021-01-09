@@ -3,6 +3,7 @@ import re
 import sys
 import logging
 import jsonpickle
+import json
 import functools
 import multiprocessing
 import glob
@@ -43,7 +44,6 @@ from AnyQt.QtWidgets import (
 
 
 def breakpoint(title=None, message=None):
-    return
     QtGui.QMessageBox.warning(title,'',message)
 
 
@@ -124,6 +124,7 @@ class BwbHelperFunctions:
         self.disableGUI = {}
         self.generate = {}
         self.receive = {}
+        self.update = {}
 
     def add(self, attr, functionType, function):
         try:
@@ -409,6 +410,7 @@ class OWBwBWidget(widget.OWWidget):
         self.useTestMode = False
         self.jobRunning = False
         self.saveBashFile = None
+        self.iterEnvVars = []
         if not hasattr(self, "iterateSettings"):
             setattr(self, "iterateSettings", {})
             self.iterateSettings["iteratedAttrs"] = []
@@ -418,6 +420,9 @@ class OWBwBWidget(widget.OWWidget):
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self._dockerImageName = image_name
         self._dockerImageTag = image_tag
+        self.varOutputDir="/tmp/vars/pid{}/{}".format(os.getpid(),self.widget_id)
+        os.system("rm -rf {}".format(self.varOutputDir))
+        os.system("mkdir -p {}".format(self.varOutputDir))
         # setting the qbutton groups
 
         # drawing layouts for gui
@@ -480,8 +485,8 @@ class OWBwBWidget(widget.OWWidget):
         self.tabs = tabbedWindow()
         self.controlArea.layout().addWidget(self.tabs)
         self.setStyleSheet(":disabled { color: #282828}")
-
-        if "requiredParameters" in self.data and self.data["requiredParameters"]:
+        requiredList=self.findRequiredElements()
+        if requiredList:
             self.requiredBox, requiredLayout = self.tabs.addBox(
                 "Required entries", minHeight=160
             )
@@ -489,9 +494,10 @@ class OWBwBWidget(widget.OWWidget):
             setattr(self.fileDirRequiredLayout.layout(), "added", True)
             self.requiredBox.layout().addLayout(self.leditRequiredLayout.layout())
             setattr(self.leditRequiredLayout.layout(), "added", True)
-            self.drawRequiredElements()
+            self.drawElements(self.data["requiredParameters"])
 
-        if self.findOptionalElements():
+        optionalList=self.findOptionalElements()
+        if optionalList:
             self.optionalBox, optionalLayout = self.tabs.addBox(
                 "Optional entries", minHeight=160
             )
@@ -500,8 +506,8 @@ class OWBwBWidget(widget.OWWidget):
             setattr(self.fileDirOptionalLayout.layout(), "added", True)
             self.optionalBox.layout().addLayout(self.leditOptionalLayout.layout())
             setattr(self.leditOptionalLayout.layout(), "added", True)
-            self.drawOptionalElements()
-
+            self.drawElements(optionalList, isOptional=True)
+        
         self.scheduleBox,scheduleLayout=self.tabs.addBox('Scheduler',minHeight=160)
         self.scheduleBox.layout().addLayout(self.fileDirScheduleLayout.layout())
         self.drawScheduleElements()
@@ -608,12 +614,11 @@ class OWBwBWidget(widget.OWWidget):
         # consoleControlLayout.addWidget(outputLabel,0,0)
 
     def drawElements(self, elementList, isOptional=False):
+        #eliminate
         for pname in elementList:
-            if not ("parameters" in self.data) or not (
-                pname in self.data["parameters"]
-            ):
-                continue
             pvalue = self.data["parameters"][pname]
+            #case when there is no label skip input - input must come from connections in this case
+
             if (
                 "gui" in pvalue
                 and pvalue["gui"] != "file"
@@ -637,10 +642,6 @@ class OWBwBWidget(widget.OWWidget):
                 )
 
         for pname in elementList:
-            if not ("parameters" in self.data) or not (
-                pname in self.data["parameters"]
-            ):
-                continue
             pvalue = self.data["parameters"][pname]
             if ("gui" in pvalue and pvalue["gui"][-4:] != "list") or (
                 pvalue["type"][-4:] != "list"
@@ -666,10 +667,6 @@ class OWBwBWidget(widget.OWWidget):
                 )
 
         for pname in elementList:
-            if not ("parameters" in self.data) or not (
-                pname in self.data["parameters"]
-            ):
-                continue
             pvalue = self.data["parameters"][pname]
             if ("gui" in pvalue and pvalue["gui"] != "Ledit") or (
                 pvalue["type"] != "double"
@@ -693,10 +690,6 @@ class OWBwBWidget(widget.OWWidget):
                 )
 
         for pname in elementList:
-            if not ("parameters" in self.data) or not (
-                pname in self.data["parameters"]
-            ):
-                continue
             pvalue = self.data["parameters"][pname]
             if ("gui" in pvalue and pvalue["gui"] != "Spin") or (
                 pvalue["type"] != "int"
@@ -708,10 +701,6 @@ class OWBwBWidget(widget.OWWidget):
                 self.drawSpin(pname, pvalue, self.requiredBox)
 
         for pname in elementList:
-            if not ("parameters" in self.data) or not (
-                pname in self.data["parameters"]
-            ):
-                continue
             pvalue = self.data["parameters"][pname]
             if ("gui" in pvalue and pvalue["gui"] != "bool") or (
                 pvalue["type"] != "bool"
@@ -723,10 +712,6 @@ class OWBwBWidget(widget.OWWidget):
                 self.drawCheckbox(pname, pvalue, self.requiredBox)
 
         for pname in elementList:
-            if not ("parameters" in self.data) or not (
-                pname in self.data["parameters"]
-            ):
-                continue
             pvalue = self.data["parameters"][pname]
             if ("gui" in pvalue and pvalue["gui"] != "patternQuery") or (
                 pvalue["type"] != "patternQuery"
@@ -748,58 +733,71 @@ class OWBwBWidget(widget.OWWidget):
                     layout=self.fileDirRequiredLayout,
                 )
 
-    def drawRequiredElements(self):
-        for pname in self.data["requiredParameters"]:
-            if not ("parameters" in self.data) or not (
-                pname in self.data["parameters"]
-            ):
-                continue
-            pvalue = self.data["parameters"][pname]
-            if not hasattr(self, pname):
-                setattr(self, pname, None)
-            if (getattr(self, pname) is None) and ("default" in pvalue):
-                setattr(self, pname, pvalue["default"])
-                sys.stderr.write(
-                    "set {} to default {} with type {} - current value {} of type {}\n".format(
-                        pname,
-                        pvalue["default"],
-                        type(pvalue["default"]),
-                        getattr(self, pname),
-                        type(getattr(self, pname)),
-                    )
-                )
-            else:
-                sys.stderr.write(
-                    "{} has prevous value {} of type {}\n".format(
-                        pname, getattr(self, pname), type(getattr(self, pname))
-                    )
-                )
-        self.drawElements(self.data["requiredParameters"])
 
+    def findRequiredElements(self):
+        requiredList=[]
+        if "requiredParameters" in self.data and self.data["requiredParameters"]:
+            for pname in self.data["requiredParameters"]:
+                if not ("parameters" in self.data) or not (
+                    pname in self.data["parameters"]
+                ):
+                    continue
+                pvalue = self.data["parameters"][pname]
+                if "label" in pvalue and pvalue["label"] is not None:
+                    if not hasattr(self, pname):
+                        setattr(self, pname, None)
+                    if (getattr(self, pname) is None) and ("default" in pvalue):
+                        setattr(self, pname, pvalue["default"])
+                        sys.stderr.write(
+                            "set {} to default {} with type {} - current value {} of type {}\n".format(
+                                pname,
+                                pvalue["default"],
+                                type(pvalue["default"]),
+                                getattr(self, pname),
+                                type(getattr(self, pname)),
+                            )
+                        )
+                    else:
+                        sys.stderr.write(
+                            "{} has prevous value {} of type {}\n".format(
+                                pname, getattr(self, pname), type(getattr(self, pname))
+                            )
+                        )
+                    requiredList.append(pname)
+                else:
+                    #no label but these initializations are necessary in case the definition has changed 
+                    setattr(self, pname, None)
+                    self.optionsChecked[pname] = False
+                    if (getattr(self, pname) is None) and ("default" in pvalue):
+                        setattr(self, pname, pvalue["default"])
+                        sys.stderr.write("default value is {}\n".format(pvalue["default"]))
+        return requiredList
+                
     def findOptionalElements(self):
+        optionalList=[]
         # checks that there are optional elements
         if not "parameters" in self.data or not self.data["parameters"]:
-            return False
-        for pname in self.data["parameters"]:
-            if pname not in self.data["requiredParameters"]:
-                return True
-        return False
-
-    def drawOptionalElements(self):
-        optionalList = []
+            return optionalList
         for pname in self.data["parameters"]:
             if pname not in self.data["requiredParameters"]:
                 pvalue = self.data["parameters"][pname]
-                if not hasattr(self, pname):
+                if "label" in pvalue and pvalue["label"] is not None:
+                    if not hasattr(self, pname):
+                        setattr(self, pname, None)
+                    if (getattr(self, pname) is None) and ("default" in pvalue):
+                        setattr(self, pname, pvalue["default"])
+                        sys.stderr.write("default value is {}\n".format(pvalue["default"]))
+                    if not (pname in self.optionsChecked):
+                        self.optionsChecked[pname] = False
+                    optionalList.append(pname)
+                else:
+                    #these initializations are necessary in case the definition has changed
                     setattr(self, pname, None)
-                if (getattr(self, pname) is None) and ("default" in pvalue):
-                    setattr(self, pname, pvalue["default"])
-                    sys.stderr.write("default value is {}\n".format(pvalue["default"]))
-                if not (pname in self.optionsChecked):
                     self.optionsChecked[pname] = False
-                optionalList.append(pname)
-        self.drawElements(optionalList, isOptional=True)
-
+                    if (getattr(self, pname) is None) and ("default" in pvalue):
+                        setattr(self, pname, pvalue["default"])
+                        sys.stderr.write("default value is {}\n".format(pvalue["default"]))
+        return optionalList
     def drawScheduleElements(self):
         with open(self.serversFile) as f:
             serverSettings = jsonpickle.decode(f.read())
@@ -1367,7 +1365,12 @@ class OWBwBWidget(widget.OWWidget):
                 globOutput.append(match)
         os.chdir(pwd)
         return globOutput
-
+        
+    def isList(self,pname):
+        if "parameters" in self.data and pname in self.data["parameters"]:
+            return "list" in self.data["parameters"][pname]["type"]
+        return False
+        
     def drawLedit(self, pname, pvalue, box=None, layout=None, addCheckbox=False):
         checkAttr = None
         checkbox = None
@@ -1607,7 +1610,18 @@ class OWBwBWidget(widget.OWWidget):
                 disabledFlag=disabledFlag,
             ),
         )
-
+    def fillBoxEdit(self,boxEdit,pname):
+        boxEdit.clear()
+        if hasattr(self, pname):
+            entryList = getattr(self, pname)
+            sys.stderr.write(
+                "filling with {} of type {}\n".format(entryList, type(entryList))
+            )
+        if type(entryList) == list:
+            boxEdit.addItems(entryList)
+        else:
+            boxEdit.addItems([str(entryList)])
+            
     def addBoxEdit(
         self, pname, pvalue, layout, ledit, checkbox, elements=None, disabledFlag=False
     ):
@@ -1621,15 +1635,7 @@ class OWBwBWidget(widget.OWWidget):
         boxEdit.setMinimumHeight(60)
 
         # fill boxEdit - ONLY part that is tracked
-        if hasattr(self, pname):
-            entryList = getattr(self, pname)
-            sys.stderr.write(
-                "filling with {} of type {}\n".format(entryList, type(entryList))
-            )
-            if type(entryList) == list:
-                boxEdit.addItems(entryList)
-            else:
-                boxEdit.addItems([str(entryList)])
+        self.fillBoxEdit(boxEdit,pname)
         boxEdit.setDisabled(disabledFlag)
         if elements:
             elements.append(boxEdit)
@@ -1740,6 +1746,8 @@ class OWBwBWidget(widget.OWWidget):
 
         # just in case the state has changed while drawing this - do an update
         self.updateBoxEditValue(pname, boxEdit)
+        #add a helper function for updating
+        self.helpers.add(pname, "update", lambda: self.fillBoxEdit(boxEdit,pname))
         return filesBoxLeditLayout
 
     def addLedit(self, attr, ledit, boxEdit, addBtn):
@@ -1768,7 +1776,16 @@ class OWBwBWidget(widget.OWWidget):
             if "list" in pvalue["type"] or pvalue["type"] == "patternQuery":
                 retList.append(pname)
         return retList
-
+        
+    def getIterableGroupSize(self,pname):
+        if ("data" in self.iterateSettings
+                and pname in self.iterateSettings["data"]
+                and "groupSize" in self.iterateSettings["data"][pname]
+                and self.iterateSettings["data"][pname]["groupSize"]
+            ):
+            return int(self.iterateSettings["data"][pname]["groupSize"])
+        return 0
+        
     def drawExec(self, box=None):
         if not hasattr(self, "useDockerfile"):
             setattr(self, "useDockerfile", False)
@@ -2151,6 +2168,10 @@ class OWBwBWidget(widget.OWWidget):
     def updateGui(self, attr, value, removeFlag=False, disableFtn=None, inputType=None):
         # disables manual input when the value has been given by an input connection
         if self.inputConnections.isConnected(attr):
+            #update the GUI if there is an update function
+            updateFunction=self.helpers.function(attr, "update")
+            if updateFunction:
+                updateFunction()
             if disableFtn:
                 if value is not None:
                     inputType = type(value)
@@ -2199,16 +2220,18 @@ class OWBwBWidget(widget.OWWidget):
             else:
                 self.iterateSettings["nWorkers"] = multiprocessing.cpu_count()
         #        try:
-        imageName = "{}:{}".format(self._dockerImageName, self._dockerImageTag)
+        imageName = "{}:{} ".format(self._dockerImageName, self._dockerImageTag)
         self.pConsole.writeMessage(
             "Generating Docker command from image {}\nVolumes {}\nCommands {}\nEnvironment {}\n".format(
                 imageName, self.hostVolumes, cmd, self.envVars
             )
         )
+        self.varOutputFile=self.varOutputDir+"/output"
+        os.system("rm -f {}".format(self.varOutputFile))
         if self.iterate:
-            cmds = self.findIteratedFlags(cmd)
+            cmds = self.findIteratedFlags(imageName,cmd)
         else:
-            cmds = [cmd]
+            cmds = [imageName+cmd]
         # generate cmds here
         self.status = "running"
         self.setStatusMessage("Running...")
@@ -2230,7 +2253,6 @@ class OWBwBWidget(widget.OWWidget):
             )
         else:
             self.dockerClient.create_container_iter(
-                imageName,
                 hostVolumes=self.hostVolumes,
                 cmds=cmds,
                 environment=self.envVars,
@@ -2239,6 +2261,7 @@ class OWBwBWidget(widget.OWWidget):
                 portMappings=self.portMappings(),
                 testMode=self.useTestMode,
                 logFile=self.saveBashFile,
+                outputFile=self.varOutputFile,
                 scheduleSettings=None,
                 iterateSettings=self.iterateSettings,
                 iterate=self.iterate,
@@ -2494,7 +2517,6 @@ class OWBwBWidget(widget.OWWidget):
                 flagName = pvalue["flag"]
             else:
                 flagName = ""
-
             # get flag values and groupSize
             groupSize = 1
             if (
@@ -2551,9 +2573,8 @@ class OWBwBWidget(widget.OWWidget):
                 return flags
         return None
 
-    def findIteratedFlags(self, cmd):
+    def findIteratedFlags(self, imageName, cmd):
         # replace positional values
-        cmd = self.replaceIteratedVars(cmd)
         pattern = r"\_iterate\{([^\}]+)\}"
         regex = re.compile(pattern)
         subs = []
@@ -2572,9 +2593,35 @@ class OWBwBWidget(widget.OWWidget):
                 if (subFlags and len(subFlags[sub]) > maxLen):
                     maxLen = len(subFlags[sub])
         sys.stderr.write("subs are {}\n".format(subs))
+        #find maxlen of environment variables
 
+        envKeys=[]
+        envValues={}
+
+        for pname in self.iterEnvVars:
+            plist=getattr(self,pname)
+            groupSize=self.getIterableGroupSize(pname)
+            if plist and len(plist) and groupSize:
+                plength=int (len(plist)/groupSize)
+                if plength > maxLen:
+                    maxLen=plength
+                envKey=self.data["parameters"][pname]["env"]
+                # strip whitespace
+                envKey.strip()
+                # strip single quotes if present
+                if envKey[0] == envKey[-1] and envKey.startswith(("'", '"')):
+                    envKey = envKey[1:-1]
+                envKeys.append(envKey)
+                if groupSize > 1:
+                    envValues[envKey]=[]
+                    for i in range(plength):
+                        start=i*groupSize
+                        pslice=plist[start:start+groupSize]
+                        envValues[envKey].append(pslice)
+                else:
+                    envValues[envKey]= plist
         if not maxLen:
-            return [cmd]
+            return [imageName+cmd]
         for i in range(maxLen):
             cmds.append(cmd)
             for sub in subs:
@@ -2582,6 +2629,10 @@ class OWBwBWidget(widget.OWWidget):
                 sys.stderr.write("sub {} i = {}\n".format(sub, i))
                 replaceStr = subFlags[sub][index]
                 cmds[i] = cmds[i].replace("_iterate{{{}}}".format(sub), replaceStr)
+            #add name here because of possible environment variables    
+            cmds[i]= imageName + cmds[i]
+            for envKey in envKeys:
+                cmds[i]=" -e {}={} ".format(envKey, self.dockerClient.prettyEnv(envValues[envKey][i])) + cmds[i]
         return cmds
 
     def replaceIteratedVars(self, cmd):
@@ -2589,6 +2640,7 @@ class OWBwBWidget(widget.OWWidget):
         pattern = r"\_bwb\{([^\}]+)\}"
         regex = re.compile(pattern)
         subs = []
+        print ("before {}".format(cmd))
         for match in regex.finditer(cmd):
             pname = match.group(1)
             if (
@@ -2599,9 +2651,11 @@ class OWBwBWidget(widget.OWWidget):
                 cmd = cmd.replace(
                     "_bwb{{{}}}".format(pname), "_iterate{{{}}}".format(pname)
                 )
+        print ("after {}".format(cmd))
         return cmd
 
     def replaceVars(self, cmd, pnames, varSeen):
+        cmd = self.replaceIteratedVars(cmd)
         pattern = r"\_bwb\{([^\}]+)\}"
         regex = re.compile(pattern)
         subs = []
@@ -2684,23 +2738,32 @@ class OWBwBWidget(widget.OWWidget):
         return cmdStr
 
     def getEnvironmentVariables(self):
+        self.iterEnvVars=[]
         # dynamic environment variables
         if "parameters" in self.data and self.data["parameters"] is not None:
             for pname in self.data["parameters"]:           
                 pvalue = self.data["parameters"][pname]
                 if "env" in pvalue and getattr(self, pname) is not None:
                     checkAttr = pname + "Checked"
-                    setenv = False
                     # check if boolean
                     if pvalue["type"] == "bool":
                         if getattr(self, pname) is True:
                             self.envVars[pvalue["env"]] = getattr(self, pname)
                     else:
+                        
+                        iterFlag=(self.iterate and hasattr(self, "iterateSettings") and "iteratedAttrs" in self.iterateSettings 
+                            and pname in self.iterateSettings["iteratedAttrs"])
                         if pname in self.optionsChecked:
                             if self.optionsChecked[pname]:
-                                self.envVars[pvalue["env"]] = self.getAttrValue(pname)
+                                if iterFlag:
+                                    self.iterEnvVars.append(pname)
+                                else:
+                                    self.envVars[pvalue["env"]] = self.getAttrValue(pname)
                         else:
-                            self.envVars[pvalue["env"]] = self.getAttrValue(pname)
+                            if iterFlag:
+                                self.iterEnvVars.append(pname)
+                            else:
+                                self.envVars[pvalue["env"]] = self.getAttrValue(pname)
 
 
         # now assign static environment variables
@@ -2797,8 +2860,41 @@ class OWBwBWidget(widget.OWWidget):
             else:
                 self.setStatusMessage("Finished")
                 self.status = "finished"
+                self.updateOutputs()
                 if hasattr(self, "handleOutputs"):
                     self.handleOutputs()
+    def updateOutputs(self):
+        outputData=[]
+        jsonData=""
+        if os.path.isfile(self.varOutputFile):
+            with open(self.varOutputFile,'r') as f:
+                jsonData=f.read()
+            outputData=json.loads(jsonData)
+        if not outputData:
+            return
+        if not self.iterate or len(outputData) == 1:
+            dataDict=outputData[0]
+            for key in dataDict:
+                if hasattr(self,key):
+                    setattr(self,key,dataDict[key]) 
+        else:
+            #the output is treated as a list when there is a list
+            listkeys=[]
+            listValues={}
+            for key in outputData[0]:
+                if hasattr(self,key):
+                    value=outputData[0][key]
+                    if self.isList(key):
+                        listkeys=[key]
+                        listValues[key]=[value]
+                    else:
+                        setattr(self,key,value)        
+            for index, dataDict in enumerate(outputData[1:]):
+                print(index) 
+                for key in listkeys:
+                    listValues[key].append(dataDict[key])
+            for key in listkeys:
+                setattr(self,key,listValues[key])
 
     def onRunError(self, error):
         self.bgui.reenableAll(self)
