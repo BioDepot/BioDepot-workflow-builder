@@ -1037,10 +1037,11 @@ class OWBwBWidget(widget.OWWidget):
         findFileAttr = pname + "findFile"
         findDirAttr = pname + "findDir"
         patternAttr = pname + "Pattern"
+        valueAttr = pname + "Value"
         if not hasattr(self, pname) or not getattr(self, pname):
             setattr(self, pname, {})
         self.initializePatterQueryAttrs(
-            pname, rootAttr, patternAttr, findFileAttr, findDirAttr
+            pname, rootAttr, patternAttr, findFileAttr, findDirAttr, valueAttr
         )
 
         queryElements = []
@@ -1154,7 +1155,7 @@ class OWBwBWidget(widget.OWWidget):
                 findDirCB,
             ),
             updateCallback=lambda: self.updatePatternQuery(
-                pname, rootAttr, patternAttr, findFileAttr, findDirAttr
+                pname, rootAttr, patternAttr, findFileAttr, findDirAttr, valueAttr
             ),
         )
         # update the values on changes
@@ -1165,6 +1166,7 @@ class OWBwBWidget(widget.OWWidget):
                 getattr(self, patternAttr),
                 getattr(self, findFileAttr),
                 getattr(self, findDirAttr),
+                getattr(self, valueAttr)
             )
         )
         patternLedit.textChanged.connect(
@@ -1174,6 +1176,7 @@ class OWBwBWidget(widget.OWWidget):
                 getattr(self, patternAttr),
                 getattr(self, findFileAttr),
                 getattr(self, findDirAttr),
+                getattr(self, valueAttr)
             )
         )
         findFileCB.stateChanged.connect(
@@ -1183,6 +1186,7 @@ class OWBwBWidget(widget.OWWidget):
                 getattr(self, patternAttr),
                 getattr(self, findFileAttr),
                 getattr(self, findDirAttr),
+                getattr(self, valueAttr)
             )
         )
         findDirCB.stateChanged.connect(
@@ -1192,23 +1196,25 @@ class OWBwBWidget(widget.OWWidget):
                 getattr(self, patternAttr),
                 getattr(self, findFileAttr),
                 getattr(self, findDirAttr),
+                getattr(self, valueAttr)
             )
         )
 
     def testPatternQuery(self, pname):
-        queryResults = self.generatePatternQuery(pname)
+        queryResults = self.generatePatternQuery(pname,test=True)
         qm = ScrollMessageBox(queryResults, None)
         qm.setWindowTitle("{} query values".format(pname))
         qm.exec_()
 
     def updatePatternQuery(
-        self, attr, root, pattern, findFile, findDir
+        self, attr, root, pattern, findFile, findDir, value
     ):  # updates for input - called before and after addition and deletion of input
         patternQuery = getattr(self, attr)
         patternQuery["root"] = root
         patternQuery["pattern"] = pattern
         patternQuery["findFile"] = findFile
         patternQuery["findDir"] = findDir
+        patternQuery["value"] = value
 
     def enablePatternQuery(
         self,
@@ -1243,16 +1249,18 @@ class OWBwBWidget(widget.OWWidget):
                 rootLedit.setText(value["root"])
             if "pattern" in value:
                 patternQuery["pattern"] = value["pattern"]
-                patterLedit.setText(value["pattern"])
+                patternLedit.setText(value["pattern"])
             if "findFile" in value:
                 patternQuery["findFile"] = value["findFile"]
-                findFileCb.setChecked(value["findFile"])
+                findFileCB.setChecked(value["findFile"])
             if "findDir" in value:
                 patternQuery["findDir"] = value["findDir"]
-                findDirCb.setChecked(value["findDir"])
+                findDirCB.setChecked(value["findDir"])
+            if "value" in value:
+                patternQuery["value"] = value["value"]
 
     def initializePatterQueryAttrs(
-        self, attr, rootAttr, patternAttr, findFileAttr, findDirAttr
+        self, attr, rootAttr, patternAttr, findFileAttr, findDirAttr, valueAttr
     ):
         patternQuery = getattr(self, attr)
         if patternQuery:
@@ -1260,11 +1268,17 @@ class OWBwBWidget(widget.OWWidget):
             setattr(self, patternAttr, patternQuery["pattern"])
             setattr(self, findFileAttr, patternQuery["findFile"])
             setattr(self, findDirAttr, patternQuery["findDir"])
+            if "value" in patternQuery:
+                setattr(self, valueAttr, patternQuery["value"])
+            else:
+                patternQuery["value"]=None
+                setattr(self, valueAttr, patternQuery["value"])
         else:
             setattr(self, rootAttr, "")
             setattr(self, patternAttr, "")
             setattr(self, findFileAttr, True)
             setattr(self, findDirAttr, False)
+            setattr(self, valueAttr, None)
 
     def initializePatternQueryHelpers(
         self, pname, rootLedit, browseBtn, patternLedit, findFileCB, findDirCB
@@ -1337,7 +1351,7 @@ class OWBwBWidget(widget.OWWidget):
             rootLedit.setDisabled(True)
             browseBtn.setDisabled(True)
 
-    def generatePatternQuery(self, pname):
+    def generatePatternQuery(self, pname, test=False):
         patternQuery = getattr(self, pname)
         path = patternQuery["root"]
         pattern = patternQuery["pattern"]
@@ -1350,6 +1364,9 @@ class OWBwBWidget(widget.OWWidget):
             matches.extend(self.getGlobDirs(path, pattern))
         if matches:
             matches.sort()
+        if not test:
+            patternQuery["value"]=matches
+            setattr(self,pname + "Value", matches)
         return matches
 
     def getGlobFiles(self, path, pattern):
@@ -1622,18 +1639,27 @@ class OWBwBWidget(widget.OWWidget):
         )
     def fillBoxEdit(self,boxEdit,pname):
         boxEdit.clear()
+        inputList=[]
         if hasattr(self, pname):
-            entryList = getattr(self, pname)
-            sys.stderr.write(
-                "filling with {} of type {}\n".format(entryList, type(entryList))
-            )
-        if type(entryList) == list:
-            boxEdit.addItems(entryList)
+            inputValue = getattr(self, pname)
+            if not inputValue:
+                setattr(self, pname, None)
+                return
+            if type(inputValue) == dict:
+                if "value" in inputValue:
+                    inputList=inputValue["value"]
+                else:
+                    inputList=inputValue.values()
+            else:
+                if type(inputValue) == list:
+                    inputList=inputValue
+                else:
+                    stringValue=str(inputValue)
+                    inputList=stringValue.split()
+            boxEdit.addItems(inputList)
+            setattr(self, pname, inputList)
         else:
-            inputValue=str(entryList)
-            entryList=inputValue.split()
-            boxEdit.addItems(entryList)
-            setattr(self, pname, entryList)
+            setattr(self, pname, None)
             
     def addBoxEdit(
         self, pname, pvalue, layout, ledit, checkbox, elements=None, disabledFlag=False
@@ -1800,7 +1826,6 @@ class OWBwBWidget(widget.OWWidget):
         return 0
         
     def receiveStrToList(self,pname,inputValue):
-        breakpoint(message="pname is {} inputValue is {} type is {}".format(pname,inputValue,type(inputValue)))
         if type(inputValue) is str:
             try:
                 inputList=inputValue.split()
@@ -2444,7 +2469,12 @@ class OWBwBWidget(widget.OWWidget):
             value = getattr(self, attr)
             generateFunction = self.helpers.function(attr, "generate")
             if generateFunction:
-                return generateFunction()
+                #need to store generated value to pass to any outputs
+                #this needs to be set before execution and *not* recalculated as things can change after execution
+                generated_attr=attr+"_generated"
+                generated_value=generateFunction()
+                setattr(self, generated_attr, generated_value) 
+                return generated_value
             return value
         return None
 
