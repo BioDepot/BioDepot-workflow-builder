@@ -383,7 +383,8 @@ class OWBwBWidget(widget.OWWidget):
     nWorkers = pset(1)
     iterateSettings = pset({})
     iterate = pset(False)
-
+    
+    
     # Initialization
     def __init__(self, image_name, image_tag):
         super().__init__()
@@ -438,7 +439,6 @@ class OWBwBWidget(widget.OWWidget):
 
         # keep track of gui elements associated with each attribute
         self.bgui = BwbGuiElements()
-
         # For compatibility if triggers are not being kept
         if not hasattr(self, "triggerReady"):
             self.triggerReady = {}
@@ -473,6 +473,15 @@ class OWBwBWidget(widget.OWWidget):
                 if not hasattr(self, bwbVolAttr):
                     setattr(self, bwbVolAttr, None)
 
+        
+    def setupListsHelpers(self):
+        attrList=[]
+        attrList=self.findOptionalElements()
+        attrList.append(self.findRequiredElements())
+        for attr, pvalue in self.data["parameters"].items():
+            if "list" in pvalue["type"] :
+                self.helpers.add(attr,"receive", lambda value: self.receiveStrToList(attr, value))
+
     # Override the send function to handle the test flag
     def send(self, attr, *args, **kwargs):
         if self.useTestMode:
@@ -486,6 +495,7 @@ class OWBwBWidget(widget.OWWidget):
         self.controlArea.layout().addWidget(self.tabs)
         self.setStyleSheet(":disabled { color: #282828}")
         requiredList=self.findRequiredElements()
+        #self.setupListsHelpers()
         if requiredList:
             self.requiredBox, requiredLayout = self.tabs.addBox(
                 "Required entries", minHeight=160
@@ -1620,7 +1630,10 @@ class OWBwBWidget(widget.OWWidget):
         if type(entryList) == list:
             boxEdit.addItems(entryList)
         else:
-            boxEdit.addItems([str(entryList)])
+            inputValue=str(entryList)
+            entryList=inputValue.split()
+            boxEdit.addItems(entryList)
+            setattr(self, pname, entryList)
             
     def addBoxEdit(
         self, pname, pvalue, layout, ledit, checkbox, elements=None, disabledFlag=False
@@ -1786,6 +1799,21 @@ class OWBwBWidget(widget.OWWidget):
             return int(self.iterateSettings["data"][pname]["groupSize"])
         return 0
         
+    def receiveStrToList(self,pname,inputValue):
+        breakpoint(message="pname is {} inputValue is {} type is {}".format(pname,inputValue,type(inputValue)))
+        if type(inputValue) is str:
+            try:
+                inputList=inputValue.split()
+                setattr(self,pname,inputList)
+                return inputList
+            except Exception as e:
+                sys.stderr.write("unable to convert {} to list".format(inputValue))
+                setattr(self,pname,inputValue)
+                return inputValue
+        else:
+            setattr(self,pname,inputValue)
+            return inputValue
+                
     def drawExec(self, box=None):
         if not hasattr(self, "useDockerfile"):
             setattr(self, "useDockerfile", False)
@@ -2137,7 +2165,7 @@ class OWBwBWidget(widget.OWWidget):
             # put transfer value here
             receiveFtn = self.helpers.function(attr, "receive")
             if receiveFtn:
-                receiveFtn(value)
+                value=receiveFtn(value)
             else:
                 setattr(self, attr, value)
             if attr in self.runTriggers:
@@ -2147,11 +2175,12 @@ class OWBwBWidget(widget.OWWidget):
                     )
                 )
                 self.triggerReady[attr] = True
+            if value is not None:
+                inputType = type(value)
+            self.updateGui(attr, value, inputType=inputType)
+            #put check at end to allow for update of variable
             self.checkTrigger(inputReceived=True)
-        if value is not None:
-            inputType = type(value)
-        self.updateGui(attr, value, inputType=inputType)
-
+            
     def initializeAttr(self, attr, inputType=None):
         if not hasattr(self, attr):
             setattr(self, attr, None)
@@ -2369,7 +2398,7 @@ class OWBwBWidget(widget.OWWidget):
                     # check whether it is iterated
                     files = flagValue
                     sys.stderr.write(
-                        "flagnName {} files are {}\n".format(flagName, files)
+                        "flagName {} files are {}\n".format(flagName, files)
                     )
                     if files:
                         hostFiles = []
@@ -2655,7 +2684,8 @@ class OWBwBWidget(widget.OWWidget):
         return cmd
 
     def replaceVars(self, cmd, pnames, varSeen):
-        cmd = self.replaceIteratedVars(cmd)
+        if self.iterate:
+            cmd = self.replaceIteratedVars(cmd)
         pattern = r"\_bwb\{([^\}]+)\}"
         regex = re.compile(pattern)
         subs = []
@@ -2687,7 +2717,7 @@ class OWBwBWidget(widget.OWWidget):
                 else:
                     cmd = cmd.replace(matchStr, "")
             else:
-                cmd = cmd.replace(matchStr, "")
+                cmd = cmd.replace(matchStr, "")      
         return cmd
 
     def generateCmdFromBash(self, executables, flags=[], args=[]):
