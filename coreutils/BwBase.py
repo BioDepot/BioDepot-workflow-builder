@@ -1318,13 +1318,14 @@ class OWBwBWidget(widget.OWWidget):
     ):
         if value is None:
             rootLedit.clear()
+            patternLedit.clear()
+            findFileCB.setChecked(True)
+            findDirCB.setChecked(False)
         elif type(value) is str and value:
             rootLedit.setText(value)
         if type(value) is str or inputType == "str":
             return
-        patternLedit.clear()
-        findFileCB.setChecked(True)
-        findDirCB.setChecked(False)
+
 
     def disableGUIPatternQuery(
         self,
@@ -1337,20 +1338,24 @@ class OWBwBWidget(widget.OWWidget):
         value=None,
         inputType=None,
     ):
-        if type(value) is dict or inputType == "dict":
+        if value is None:
+            self.pname = {}
+            rootLedit.clear()
+            patternLedit.clear()
+            findDirCB.setChecked(False)
+            findFileCB.setChecked(False)
+        elif type(value) is dict or inputType == "dict":
             self.pname = {}
             if value:
                 self.pname = value
-            for element in [rootLedit, browseBtn, patternLedit, findFileCB, findDirCB]:
-                element.setDisabled(True)
         elif type(value) == str or inputType == "str":
             if value is None or value == "":
                 rootLedit.clear()
             else:
                 rootLedit.setText(value)
-            rootLedit.setDisabled(True)
-            browseBtn.setDisabled(True)
-
+        for element in [rootLedit, browseBtn, patternLedit, findFileCB, findDirCB]:
+            element.setDisabled(True)
+        
     def generatePatternQuery(self, pname, test=False):
         patternQuery = getattr(self, pname)
         path = patternQuery["root"]
@@ -2218,6 +2223,7 @@ class OWBwBWidget(widget.OWWidget):
                 setattr(self, attr, "")
             else:
                 setattr(self, attr, None)
+        self.updateGui(attr,value)
 
     def updateGui(self, attr, value, removeFlag=False, disableFtn=None, inputType=None):
         # disables manual input when the value has been given by an input connection
