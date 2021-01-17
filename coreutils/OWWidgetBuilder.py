@@ -313,10 +313,11 @@ class WidgetItem:
     # A set of gui widgets that correspond to the name and each parameter
     # A set of state vectors corresponding to the different elements that make up the item
 
-    def __init__(self, guiElements=OrderedDict(), states={}):
+    def __init__(self, guiElements=OrderedDict(), states={}, values={}):
         # guielements has parameter as key and qwidget as value
         self.guiElements = guiElements
         self.states = states
+        self.values = values
         if self.states and self.guiElements:
             for (key, element) in self.guiElements.items():
                 element.setState(self.states[key])
@@ -1000,11 +1001,13 @@ class OWWidgetBuilder(widget.OWWidget):
         if qWidgetList.selectedItems():
             index = qWidgetList.row(qWidgetList.selectedItems()[0])
             qWidgetList.states[index] = qWidgetItem.getState()
+            qWidgetList.values[index] = qWidgetList.selectedItems()[0].setText(qWidgetItem.printValue())
             qWidgetList.selectedItems()[0].setText(qWidgetItem.printValue())
         else:
             item = qWidgetItem.printValue()
             qWidgetList.addItem(item)
             qWidgetList.states.append(qWidgetItem.getState())
+            qWidgetList.values.append(item)
             sys.stderr.write("adding state {}\n".format(qWidgetItem.getState()))
             qWidgetItem.blankState()
         qWidgetList.updateAllStates()
@@ -1013,6 +1016,7 @@ class OWWidgetBuilder(widget.OWWidget):
         if qWidgetList.selectedItems():
             for item in qWidgetList.selectedItems():
                 del qWidgetList.states[qWidgetList.row(item)]
+                del qWidgetList.values[qWidgetList.row(item)]
                 qWidgetList.takeItem(qWidgetList.row(item))
         if not qWidgetList.count():
             removeBtn.setEnabled(False)
@@ -1055,6 +1059,7 @@ class OWWidgetBuilder(widget.OWWidget):
                 item = qWidgetItem.printValue()
                 qWidgetList.addItem(item)
                 qWidgetList.states.append(qWidgetItem.getState())
+                qWidgetList.values.append(item)
                 widgetList.append(qWidgetItem.getStateValue(serialState))
         if widgetList:
             self.data[pname] = OrderedDict(widgetList)
@@ -1076,17 +1081,30 @@ class OWWidgetBuilder(widget.OWWidget):
             removeBtn.setEnabled(False)
             addBtn.setEnabled(True)
 
+
+    def synchronizeStates(self,qlist):
+        #the states and values in a list will be out of sync after a drag and drop event
+        #could do shuffle with temp but simpler just to mark and make changes
+        indices=[]
+        states=[]        
+        for i in range (qlist.count()):
+            itemText=qlist.item(i).text()
+            if itemText != qlist.values[i]:
+                indices.append(i)
+                states.append(qlist.states[qlist.values.index(itemText)])
+        for i in range (len(indices)):
+            index=indices[i]
+            qlist.states[index]=states[i]
+            qlist.values[index]=qlist.item(index).text()
+            
     def onItemMoved(self, oldRow, newRow, qWidgetList):
-        sys.stderr.write("oldRow is {} newRow is {}\n".format(oldRow, newRow))
+        sys.stderr.write("oldRow is {} newRow is {} len {}\n".format(oldRow, newRow,len(qWidgetList.selectedItems())))
         #algorithm works if newRow > oldRow
+        sliceLen=len(qWidgetList.selectedItems())
         if newRow != oldRow:
-            temp = qWidgetList.states[oldRow]
-            qWidgetList.states.pop(oldRow)
-            if newRow < oldRow:
-                qWidgetList.states.insert(newRow,temp)
-            else:
-                qWidgetList.states.insert(newRow,temp)
+            self.synchronizeStates(qWidgetList)
         qWidgetList.updateAllStates()
+
 
     def drawCommand(self, pname, layout=None):
         labelTextBox = self.makeTextBox(pname, label="Enter command:")
@@ -1207,7 +1225,6 @@ class OWWidgetBuilder(widget.OWWidget):
             qm.information(self, title, message, QtGui.QMessageBox.Ok)
             
     def replaceDockerDir(self,newDockerfiles):
-        breakpoint(message="replace Dockerfile with {}".format(newDockerfiles))
         if newDockerfiles and os.path.isdir(newDockerfiles):
             currentDockerfiles = self.widgetDir + "/" + "Dockerfiles"
             if os.path.exists(currentDockerfiles):
@@ -1578,14 +1595,14 @@ class OWWidgetBuilder(widget.OWWidget):
         boxEdit.setStyleSheet(":disabled { color: #282828}")
         boxEdit.setMinimumHeight(60)
         return boxEdit
-
-    # multiple widget elements
+    
     def makeListWidgetUnit(
         self, pname, layout=None, lineWidgets=None, otherWidgets=None, elementsPerLine=5
     ):
         # widgets is ordered dict of widgets managed by listWidget
         boxEdit = self.makeListWidget(pname, None)
         setattr(boxEdit, "states", [])
+        setattr(boxEdit, "values", [])
         lineItem = WidgetItem(OrderedDict(lineWidgets), {})
         setattr(
             boxEdit,
