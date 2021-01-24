@@ -479,10 +479,17 @@ def main(argv=None):
 
     if want_welcome and not args and not open_requests:
         canvas_window.welcome_dialog()
-
     elif args:
-        log.info("Loading a scheme from the command line argument %r", args[0])
-        canvas_window.load_scheme(args[0])
+        if args[0] != "__init":
+            log.info("Loading a scheme from the command line argument %r", args[0])
+            canvas_window.load_scheme(args[0])
+        else:
+            canvas_window.load_workflow(args[1])
+            canvas_window.deleteLater()
+            app.processEvents()
+            app.flush()
+            del canvas_window
+            
     elif open_requests:
         log.info("Loading a scheme from an `QFileOpenEvent` for %r", open_requests[-1])
         canvas_window.load_scheme(open_requests[-1].toLocalFile())

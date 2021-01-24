@@ -165,7 +165,7 @@ class ConsoleProcess:
         self.process.waitForFinished()
         self.scheduleLog(job_id)
         
-    def start(self,cmds,schedule=False):
+    def start(self,cmds,outputFile=None,schedule=False):
         self.cleanup()
         if schedule:
             sys.stderr.write('runScheduler.sh {}\n'.format(cmds))
@@ -175,6 +175,7 @@ class ConsoleProcess:
             self.startLog()
             cmds.insert(0,self.baseLogDir)
             cmds.insert(0,self.processDir)
+            cmds.insert(0,outputFile)
             self.writeMessage('runDockerJob.sh {}'.format(cmds))
             self.process.start('runDockerJob.sh',cmds)
         
@@ -258,13 +259,15 @@ class DockerClient:
         self.cli = APIClient(base_url=url)
         self.bwb_instance_id = str(
             subprocess.check_output(
-                'cat /proc/self/cgroup | grep devices | head -1 | cut -d "/" -f3',
+                'cat /proc/self/cgroup | grep devices | head -1 | cut -d "/" -f3 | sed "s/.*-//g" | sed "s/\..*//g"',
                 shell=True,
                 universal_newlines=True,
             )
         ).splitlines()[0]
         self.bwbMounts = {}
         self.findVolumeMappings()
+        self.findShareMountPoint(overwrite=True)        
+        #self.findShareMountPoint()
         self.logFile = None
         self.schedulerStarted = False
 
@@ -394,7 +397,6 @@ class DockerClient:
             return var
     def create_container_iter(
         self,
-        name,
         volumes=None,
         cmds=None,
         environment=None,
@@ -404,6 +406,7 @@ class DockerClient:
         portMappings=None,
         testMode=False,
         logFile=None,
+        outputFile=None,
         scheduleSettings=None,
         iterateSettings=None,
         iterate=False,
@@ -436,7 +439,7 @@ class DockerClient:
                 dockerBaseFlags += "-p {} ".format(mapping)
         for cmd in cmds:
             dockerCmds.append(
-                dockerBaseFlags + " {} {} {} {}".format(volumeMappings, envs, name, cmd)
+                dockerBaseFlags + " {} {} {}".format(volumeMappings, envs, cmd)
             )
         consoleProc.state = "running"
         for dcmd in dockerCmds:
@@ -463,8 +466,27 @@ class DockerClient:
             consoleProc.startTest(echoStr)
         else:
             sys.stderr.write("starting runDockerJob.sh\n")
-            consoleProc.start(dockerCmds)
-
+            consoleProc.start(dockerCmds,outputFile=outputFile)
+    
+    def findShareMountPoint(self,overwrite=False):
+        if not os.getenv('BWBSHARE' or overwrite):
+            bwbshare=""
+            bwbhostshare=""
+            if self.bwbMounts:
+                for key in self.bwbMounts:
+                    if not bwbshare or "share" in self.bwbMounts[key]:
+                        bwbhostshare=key+"/.bwbshare"
+                        bwbshare=self.bwbMounts[key]+"/.bwbshare"
+            if not bwbshare:
+                bwbshare="/tmp/.X11/.bwbshare"
+                bwbhostshare="/tmp/.X11/.bwbshare"
+            #remove dir if present and make it
+            os.system("rm -rf {}".format(bwbshare))
+            os.system("mkdir -p {}".format(bwbhostshare))
+            os.environ['BWBSHARE']=bwbshare
+            os.environ['BWBHOSTSHARE']=bwbhostshare
+            
+        #check if mountpoint variable exists
     def findVolumeMappings(self):
         for c in self.cli.containers():
             container_id = c["Id"]
@@ -476,6 +498,7 @@ class DockerClient:
                     ):
                         self.bwbMounts[m["Source"]] = m["Destination"]
 
+                            
     def to_best_host_directory(self, path, returnNone=False):
         sys.stderr.write("bwbMounts are {}\n".format(self.bwbMounts))
         if self.bwbMounts == {}:
@@ -483,6 +506,9 @@ class DockerClient:
             sys.stderr.write(
                 "bwbMounts after findVolume are {}\n".format(self.bwbMounts)
             )
+            if not self.shareMountPoint:
+                self.shareMountPoint["bwb"]="/tmp/.X11/.bwb"
+                self.shareMountPoint["host"]="/tmp/.X11/.bwb"
         bestPath = None
         for source, dest in self.bwbMounts.items():
             absPath = self.to_host_directory(path, source, dest)

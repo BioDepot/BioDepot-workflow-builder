@@ -4,8 +4,16 @@ if [ $# -eq 0 ]; then
 else
     cmd="$*"
 fi
+if [ -z $STARTING_WORKFLOW ]; then
+workflow=""
+else
+    workflow="__init $STARTING_WORKFLOW"
+fi
+echo $workflow
+echo $cmd
 while true
 do
+echo $cmd $workflow
 $cmd $workflow &
 workflow="" 
 pid="$!"

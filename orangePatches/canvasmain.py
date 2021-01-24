@@ -1109,6 +1109,39 @@ class CanvasMainWindow(QMainWindow):
         self.set_new_scheme(new_scheme)
 
         return QDialog.Accepted
+    def load_starting_workflow(self, ows=None):
+        """Open a new workflow. Return QDialog.Rejected if the user canceled
+        the operation and QDialog.Accepted otherwise.
+
+        """
+        if ows:
+            importWorkflow(ows)
+            self.reload_settings(ows)
+            return QDialog.Accepted
+
+        if not self.pre_close_save():
+            return QDialog.Rejected
+
+        if self.last_scheme_dir is None:
+            # Get user 'Documents' folder
+            start_dir = user_documents_path()
+        else:
+            start_dir = self.last_scheme_dir
+
+        openDir = str(
+            QFileDialog.getExistingDirectory(
+                self, self.tr("Load Workflow from Directory"), start_dir
+            )
+        )
+        if not openDir:
+            return QFileDialog.Rejected
+        # copy widgets
+        print(openDir)
+        owsFile = os.popen("ls {}/*.ows".format(openDir)).read().split()[0]
+        print(owsFile)
+        importWorkflow(owsFile)
+        self.reload_settings(owsFile)
+        return QDialog.Accepted
 
     def load_workflow(self, ows=None):
         """Open a new workflow. Return QDialog.Rejected if the user canceled

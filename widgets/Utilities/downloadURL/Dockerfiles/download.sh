@@ -1,5 +1,30 @@
 #!/bin/bash
-decompString(){
+decompress=1
+function checkFilename(){
+  echo "check zero length"
+  [[ -n "$filename" ]] || return
+  echo "check too long"
+  [[ $(echo "${#filename}") -lt 255 ]] || return
+  echo "check character"
+  [[ $filename =~ ^[0-9a-zA-Z._-]+$ ]] || return
+  echo "check first char"
+  [[ $(echo $filename | cut -c1-1) =~ ^[0-9a-zA-Z]+$ ]]
+}
+
+function getFilename(){
+	filename=""
+	echo "finding filename for url $url"
+	tempDir="$(mktemp -d /tmp/XXXXXXXXX)"
+	#make a temporary directory without write permissions to force curl to quit after obtaining filename
+	chmod -w $tempDir
+	filename=$(cd $tempDir; su user -c "wget --content-disposition $url  |& grep denied | sed 's/.*denied //' | sed 's/:.*//'")
+	checkFilename && return
+	filename=$(su user -c "curl -JLO $url |& grep denied | sed 's/.* file //g' | sed 's/:.*//g'")
+    checkFilename && return
+    filename="${url##*/}"
+}
+
+function decompString(){
     dcmd=""
     zipFlag=""
     if [ -n "$decompress" ]
@@ -33,7 +58,8 @@ decompString(){
             if [ -n "$concatenateFile" ]; then
                 dcmd="| gzip -d >> $concatenateFile"
             else
-                dcmd="| gzip -d > ${1%.gz}"
+                outputname=$(basename "$1" .gz)
+                dcmd="| gzip -d > $outputname"
             fi
             return
             ;;
@@ -41,7 +67,8 @@ decompString(){
             if [ -n "$concatenateFile" ]; then
                 dcmd="| bzip2 -d >> $concatenateFile"
             else
-                dcmd="| bzip2 -d > ${1%.gz}"
+                outputname=$(basename "$1" .bz2)
+                dcmd="| bzip2 -d > $outputname"
             fi
             return
             ;;
@@ -88,7 +115,7 @@ while [[ $# -gt 0 ]] ; do
 done
 
 
-function findFilename(){
+function findGoogleFilename(){
  #check if it fits the
     if [[  $1 == *drive.google.com/file/d/* ]]; then
         fileID=$(echo "$1" | sed -n -e  's/.*drive\.google\.com\/file\/d\///p' | sed  's:/.*::')
@@ -117,11 +144,13 @@ fi
 #loop through the urls
 status=0
 for url in  "${urls[@]}" ; do
+    #if it falls through all code - then there is an error.
+	curlret=1
 	zipFlag=""
     if [[ $url == *drive.google.com* ]]  
     then
         #find filename and fileID and keep cookie
-        findFilename $url
+        findGoogleFilename $url
         decompString "$filename"
         echo "google drive url is $url filename is $filename fileID is $fileID code is $code dcmd is $dcmd"
         if [[ -n "$filename" ]]; then    
@@ -156,10 +185,10 @@ for url in  "${urls[@]}" ; do
         fi
     else
         echo "url $url is not from google drive"
+        getFilename
+        echo "$filename"
         if [ -n "$decompress" ] 
-        then
-            filename="${url##*/}"
-            echo filename is "$filename"
+        then            
             decompString "$filename"
             
             if [[ -n $zipFlag ]]; then
@@ -167,12 +196,12 @@ for url in  "${urls[@]}" ; do
 				bash -c "curl -JLO $url $dcmd"
 			else
 				echo "curl $url $dcmd" 
-				bash -c "curl $url $dcmd"
+				bash -c "curl -L $url $dcmd"
 			fi
-            curret=$?     
+            curlret=$?     
         else
             if [ -n "$concatenateFile" ]; then
-                echo  'curl $url >>' "$concatenateFile"
+                echo  'curl -L $url >>' "$concatenateFile"
                 curl url >> $concatenateFile
                 curlret=$?
             else
