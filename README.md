@@ -163,7 +163,7 @@ University of Washington Tacoma
 
 #### Biomedical scientists
 
-The Bwb GUI is designed for non-programmers who want to use a workflow on their own data without worrying about installation and reproducibility. Bwb auto-installs the components and provides a very simple and intuitive GUI interface for modifying key parameters and accepting user files. We realise that for many users, interactive visualization is a large part of their analyses. Bwb supports Jupyter notebooks, Cytoscape and other software that have their own graphics and GUIs. The casual user can use familiar tools to customize the final stages of the analyses while maintaining a complete record and provenance of the entire pipeline which is essential for publication, sharing and reproducibility. Advanced users can swap in different parameter sets or even different modules just by dragging and dropping into an existing tested pipeline. A bash script can be created for the purpose of publication or to use in one of the many schedulers that support bash scripts such as SLURM/SGE/Torque-Maui.
+The Bwb GUI is designed for non-programmers who want to use a workflow on their own data without worrying about installation and reproducibility. Bwb auto-installs the components and provides a very simple and intuitive GUI interface for modifying key parameters and accepting user files. We realize that for many users, interactive visualization is a large part of their analyses. Bwb supports Jupyter notebooks, Cytoscape and other software that have their own graphics and GUIs. The casual user can use familiar tools to customize the final stages of the analyses while maintaining a complete record and provenance of the entire pipeline which is essential for publication, sharing and reproducibility. Advanced users can swap in different parameter sets or even different modules just by dragging and dropping into an existing tested pipeline. A bash script can be created for the purpose of publication or to use in one of the many schedulers that support bash scripts such as SLURM/SGE/Torque-Maui.
 
 #### Bioinformaticians
 
@@ -177,8 +177,8 @@ A major motivation for our development of Bwb was that our own software tools we
 
 ### How do I use Bwb on my own data files?
 The mapping of local files to be used by Bwb workflows happens in the command line at launch time. For Windows, there is also an additional step of making the Windows directories accessible to the VM that is launching Docker. More about this later, but first let's talk about how to map your directories so that the Docker container can read from/write to them.
+The -v option allows you to map one or more personal (local) directories to an internal directory so that the Bwb container can see them. Usually we map them to /data internally. The following start command for example maps the current directory to the /data directory inside the container. 
 
-The -v option allows you to map one or more personal (local) directories to an internal directory so that the Bwb container can see them. Usually we map them to /data internally. The following start command for example maps the current directory to the /data directory inside the container.
 ```
 docker run --rm   -p 6080:6080 \
     -v  ${PWD}/:/data  \
@@ -210,7 +210,7 @@ docker run --rm   -p 6080:6080 \
     biodepot/bwb
 ```
 
-For Windows there is the additonal step of sharing a Windows folder with the VirtualBox or HyperV VM that is running Docker. Otherwise, the container will map an empty directory to the Docker container. For Windows 10 Pro instructions are [here](https://docs.docker.com/docker-for-windows/#shared-drives). For other Windows versions instructions are [here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572).
+For Windows there is the additional step of sharing a Windows folder with the VirtualBox or HyperV VM that is running Docker. Otherwise, the container will map an empty directory to the Docker container. For Windows 10 Pro instructions are [here](https://docs.docker.com/docker-for-windows/#shared-drives). For other Windows versions instructions are [here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572).
 
 For example, if a the C://Users/myName folder is share with the name homefolder then
 ```
@@ -229,14 +229,14 @@ would make the files and directories at C://Users/myName available to Bwb.
 Drag the mouse from the right side of the source widget to the left side of the sink widget. If they can be connected a dialog box should appear allowing you to choose which widgets to connect. This is shown in our [video](#tutorial---adding-a-python-script-to-a-bwb-workflow) at 5:49 to 6:05.
 
 ### How do I run Bwb on the cloud?
-Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the ip and port accessible to the user. An example is given here for [AWS](#amazon-aws) interaction.
+Bwb is a containerized mini webserver that can be run on any platform. To run it on the cloud requires you to make the IP and port accessible to the user. An example is given here for [AWS](#amazon-aws) interaction.
 
 ### What browser should I use with Bwb?
 
 We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine. In the past we have had problems with Edge but the latest versions of Firefox and Safari work well. If you must use Edge it **may** be possible to use by following this [recipe](https://www.hanselman.com/blog/FixedMicrosoftEdgeCantSeeOrOpenVirtualBoxhostedLocalWebSites.aspx) to allow it to connect to a local URL or by running Bwb from a remote server.
 
 ### Where are the sample workflows and datasets?
-Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we use of the provided downloadURL widget to download files from an external source (eg. a Google drive) for use with the containers. This is the mechanism that we use in all our examples. You can use our widget to download the data or look at the widget parameters to find the URL of the files and download them yourself. Then you can save these files if you wish and use them directly.
+Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we use of the provided downloadURL widget to download files from an external source (e.g. a Google drive) for use with the containers. This is the mechanism that we use in all our examples. You can use our widget to download the data or look at the widget parameters to find the URL of the files and download them yourself. Then you can save these files if you wish and use them directly.
 
 ### Is it possible to use Bwb to run a batch of datasets?
 Currently, this is possible in a couple of ways:
@@ -261,7 +261,6 @@ We have provided basic widgets for Python, R, Perl, Bash, and Java. There is a [
 docker run --rm --net host alpine ip address
 ```
 4. Make sure that you have read/write permissions to the directory that you are using to share files with Bwb and Docker. One method is to use your Desktop or a folder on your Desktop as the starting point for sharing files. For example when launching from Docker toolbox the starting command would be
-
 ```
 docker run --rm   -p 6080:6080 \
     -v  /c/Users/Desktop:/data  \
@@ -313,7 +312,7 @@ Source code	: [https://github.com/BioDepot/BioDepot-workflow-builder](https://gi
 ### Overview: Running Bwb
 1\. Install Docker.
 
-2\. Start the container with Bwb by executing the following Docker command by typing into a window (Linux) or on the Docker command line (Windows/MacOS). For Windows, it may be necessary to run the Docker application as an Administrator.
+2\. Start the container with Bwb by executing the following Docker command by typing into a window (Linux) or on the Docker command line (Windows/MacOS). For Windows, it may be necessary to run the Docker application as an Administrator. 
 
 Linux/Mac
 ```bash
@@ -343,10 +342,9 @@ For cloud instances and remote servers use the IP of the instance or remote serv
 
 For Windows and Macs the IP may vary depending on your setup.
 
-Windows 10 Pro and newer Macs running native Docker will use the same localhost setup. Windows 7, 8 and 10 Home edition, and older Macs that use a Virtual machine (VM) will need to use the IP of the virtual machine instead of localhost - usually 192.168.99.100. In addition, for these VM setups, the available RAM of the VM limits the RAM that can be used (usually 1 or 2 GB only). The VM settings must be adjusted to increase the available memory for applications such as Kallisto (roughly 8 GB and STAR (roughly 32 GB for human datasets).
+Windows 10 Pro and newer Macs running native Docker will use the same localhost setup. Windows 7, 8 and 10 Home edition, and older Macs that use a Virtual machine (VM) will need to use the IP of the virtual machine instead of localhost - usually 192.168.99.100. In addition, for these VM setups, the available RAM of the VM limits the RAM that can be used (usually 1 or 2 GB only). The VM settings must be adjusted to increase the available memory for applications such as Kallisto (roughly 8 GB and STAR (roughly 32 GB for human datasets). 
 
 4\. To quit the container, right click inside the browser and choose the QUIT container option. Alternatively, you can also stop it by finding the container id and stopping the container. Quitting the browser just closes the viewport to the container - it does not stop the container.
-
 
 ## Installing and starting Docker
 
@@ -382,7 +380,7 @@ sudo docker run hello-world
 
 The last command downloads a test image and runs it in a container. When the container runs, it prints an informational message and then exits.
 
-For more information please refer to:
+For more information please refer to:     
 
 https://docs.docker.com/engine/installation/
 
@@ -403,18 +401,17 @@ There are two viable routes for installing Docker on non-Linux platforms. One is
 
 ![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image13.png)
 
-You will be asked to authorize Docker.app with your system password after you
-launch it. Privileged access is needed to install networking components and links to the Docker apps. The whale in the top status bar indicates that Docker is running, and accessible from a terminal.
+
+You will be asked to authorize Docker.app with your system password after you launch it. Privileged access is needed to install networking components and links to the Docker apps. The whale in the top status bar indicates that Docker is running, and accessible from a terminal.
 
 ![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image16.png)
 
-4\. By default, Docker will limit the memory usage to 2 GB. Given that most Bioinformatics workflows are computationally intensive, some of the tasks may require a higher memory usage. To change the memory allocation, go to `Docker Preferences (Right Click on the docker Icon) -> Preferences -> Advanced`, and adjust the memory allocation as needed. We recommend allowing Docker engine to use at least 10 GB of memory or more.
+
+4\. By default, Docker will limit the memory usage to 2 GB. Given that most Bioinformatics workflows are computationally intensive, some of the tasks may require a higher memory usage. To change the memory allocation, go to `Docker Preferences (Right Click on the docker Icon) -> Preferences -> Advanced`, and adjust the memory allocation as needed. We recommend allowing Docker engine to use at least 10 GB of memory or more. 
 
 ![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image25.png)
 
-
-
-The second option relies on Docker to provision the VM and is simpler.
+The second option relies on Docker to provision the VM and is simpler.  
 
 #### Docker for Windows
 1\. To install Docker:
@@ -434,6 +431,7 @@ For other versions of Windows, the older toolbox version that uses VirtualBox wi
 
 3\.  To start Docker:
 * Search for Docker, select the app in the search results, and click it (or hit Return).
+
 ![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image11.png)
 * When the whale in the status bar stays steady, Docker is up-and-running, and accessible from any terminal window.
 ![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image20.png)
@@ -469,7 +467,7 @@ On the cloud, BwB can also be run on any cloud instance. Please refer to the Lin
 
 5\.  We will the new rule that starts with "Custom TCP" that should appear
 
-6\.  Change the Port Range (third box) from 0 to 6080.
+6\.  Change the Port Range (third box) from 0 to 6080
 
 7\.  Click on the drop down menu that says "Custom" (under "Source" right next to the "Port Range") and choose "My IP" if you want to restrict access to Bwb to the computer that you are on or "Anywhere" if you wish to access Bwb from any computer
 
@@ -478,6 +476,7 @@ On the cloud, BwB can also be run on any cloud instance. Please refer to the Lin
 9\.  Copy the public url of the instance.
 
 10\.  SSH into the instance by typing the following command into the terminal:
+
 (Type the commands in the directory where the ssh key of the AWS instance was downloaded)
 ```bash
  # Update demo.pem with your ssh key name
@@ -527,6 +526,7 @@ git config --system core.longpaths true
 git clone https://github.com/BioDepot/BioDepot-workflow-builder.git
 cd BioDepot-workflow-builder
 docker build -t biodepot/bwb:latest .
+
 ```
 2\.  Start the Bwb container.
 
@@ -539,10 +539,10 @@ For Windows
 docker run --rm -p 6080:6080 -v /c/users:/data -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/.X11-unix:/tmp/.X11-unix  --privileged --group-add root biodepot/bwb
 ```
 
-
 This command will launch a mini-webserver and start a windowing environment inside the container. The Bwb application is automatically launched upon running the container and appears as a maximized window on the Desktop inside the container. In the above command we have set the port to be 6080. For Linux/MacOS the current directory is mapped to the /data directory inside the container. For Windows, by default the C://Users directory is made available for Docker and we map this to the /data directory in side the container. Other mappings are [possible](#How do I use Bwb on my own data files)  However, all this is hidden from view until the user connects to the container using a browser.
 
 To access the container open up a browser window and type in the IP of the container, and port that it is listening to, into the address bar. For a local installation using Linux, the IP of the container is localhost or 127.0.0.1 so the user would type localhost:6080 into the address bar of the browser. For a remote installation, the IP is the IP of the server.
+
 <a name="findip"></a>
 
 For Macs and Windows machines using VirtualBox, the local IP is usually [192:168:99:100](http://192:168:99:100:6080). If that does not work, you can find the IP with the following command in a terminal if using Linux/MacOS, or in the Docker window if using Windows.
@@ -582,7 +582,6 @@ You can launch multiple instances of Bwb which will appear in separate windows. 
 
 Note that the fluxbox windowing system is inside the browser window. You still have access to whatever windowing system you are using on your host machine. If your browser closes or go to another url, nothing happens to Bwb - the browser merely provides a viewport to the server in Bwb container. Refreshing or reconnecting the browser to the container IP allows you to interact with Bwb again. Only by using the quit option from the fluxbox application menu, or by using Docker to terminate the container, can you actually quit.  Cut and paste is not yet available from windows in the user's host machine to windows in the browser, though this feature will be added soon.
 
-
 ## Bwb application
 
 ### Bwb window with kallisto-sleuth-jupyter workflow showing main features
@@ -600,6 +599,7 @@ In Bwb, we use Bwb workflows and widgets to represent and execute analytical pip
 ### Tool Dock
 
 When Bwb is started, the Bwb application window pops up. On the left-hand side of the application window is toolbox (Tool Dock) with multiple tabs (drawers), which contain different collections of widgets. Clicking on the tab expands the toolbox drawer to reveal the contents. Drawers are organized by function. Bwb comes with a set of ready-to-use widgets. These are all linked to containers available on our BioDepot repositiory on Docker hub. Any workflows constructed with these widgets will automatically download the necessary containers the first time that they are run and require no installation.
+
 
 Users can also create their own drawers. A new drawer is created whenever a workflow is loaded. Also, widgets can be added (and removed) using the Tool Dock editor available from the menu bar. (See the section on editing the Tool Dock.)
 
@@ -692,6 +692,7 @@ Similar to the volumes tab except the widget can query a host port to map to an 
 
 ##### Parameters tab
 ![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/def_parms.png)
+
 Different flags and environment variables to be queried and be entered in this section. The name box is the internal variable name. This can also be an output, input, volume, or port variable defined in the previous section that the widget wants the user to input. The type of the variable determines the manner of entry. For example, a file type will bring up a line for manual entry and a button to browse for files. A boolean type will bring up a check box in the UI window. There is an optional flag field. This can be a single -, -- or any string that appears before the value that is entered. The variable can be an argument with no flag. Arguments and flags are passed in the command line. The value can also be passed to the container as an environment variable as well. The entry of a value for the variable can be optional.
 
 Individual parameters are entered using the + button. This will add the parameter to the box where they can be dragged to change the order, deleted using the x button, or edited.
@@ -735,6 +736,7 @@ Originally in the OrangeML setup, the mywidget.py code was written manually. Mos
 
 To accommodate custom code, there are 3 save options:
 ###### Save mode: Overwrite
+
 Overwrites the existing python file with the newly generated one. This is used when there is no customized code.
 ###### Save mode: Merge
 Will only overwrite the boilerplate code for reading values from the json file (the first 80% of the code). Any code that appears after this first part of the script is untouched.
@@ -771,14 +773,13 @@ The workflow is stored in a single directory. This directory contains widgets sp
 
 For most cases, we recommend that you merge all widgets that are to be used, before modifying them in a workflow for maximum encapsulation and reproducibility.
 
-
 **N.B. Changes to widgets and workflows may not be reflected immediately as Bwb must reload in order to incorporate new or changed routines. This is done as much as possible automatically but if it does not, use the reset settings option from the File Menu or the Load Workflow option to reload the workflow. **
 
 #### Connecting widgets
 Widgets are connected by dragging the cursor from the right side of the source widget to the left side of the destination widget. This transfers the output of the source widget to the destination widget. When there are several possible connections, Bwb will choose one. Double clicking on the link will allow the user to edit this choice and select which inputs are to be connected to which output. An output can be connected to multiple inputs, but inputs in Bwb by default currently accept only one output. This may be changed in the future - especially for triggers.
 
 ##### Input from connections override user input
-When an input is connected to an output - the output value will become the input value. This value will override any user input. Accordingly, the form for that imput will be grayed out and inaccessible.
+When an input is connected to an output - the output value will become the input value. This value will override any user input. Accordingly, the form for that input will be grayed out and inaccessible.
 
 ##### Connections to triggers are used to control the execution of widgets
 One of the major uses of connections is to control the execution of widgets in workflows. A widget that has one or more inputs that are connected can use these as execution triggers using the run mode at the bottom of the destination widget. The widget will not execute until all required parameters are entered and all the inputs that are triggers receive input. This allows for a widget to wait until another widget has finished processing. For example, the kallisto quant widget in the kallisto-sleuth demo workflow is triggered by the indexFile produced by the kallisto index widget and the output of the fastq download widget. It will wait until the index file is ready and the fastq files are downloaded before proceeding.
@@ -825,6 +826,7 @@ The Kallisto-sleuth workflow with Jupyter demo is identical to the Kallisto-sleu
 
 ### STAR demo
 ![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/star_wf.png)
+
 STAR aligner is another popular RNA-seq aligner. Here we have paired it with DESEQ2 to perform the differential analyses. The pipeline is very similar in structure to the kallisto-sleuth pipeline. A downloadURL widget downloads the directory structure which then signals the download of the human genome and the calculation of indices. The fastqDump widget downloads the fastq files. STAR align waits for the downloads to complete and the index to be formed. Like Kallisto, this is wrapped in a bash script to allow STAR to run on multiple pairs of paired-end reads. A small widget runs a bash script then rearranges the output columns into a form that DESEQ2 can read. DESEQ2 is R-based and, like the sleuth widget, uses a bash script to pre-process the parameters and construct an R script. Gnumeric displays the final output as in the Kallisto-sleuth demo.
 
 ## Tutorial - Adding a Python script to a Bwb workflow
@@ -950,7 +952,6 @@ Hit the bottom save button to save all the changes to the widget. The workflow s
 
 The wrapper script is needed to call cutadapt on different sets of paired-end files. It is provided in /tutorialFiles/cutadapt_multi.py or you can paste the code into a local editor to be saved on your local file system. The code is also available from the github repository.
 
-
 The script is:
 ```python
 import os
@@ -975,7 +976,7 @@ os.chdir(options.d)
 #we use the fact that for our naming convention the paired end files will be nicely grouped in pairs
 files=sorted(glob('SRR*.gz'))
 
-#make a the temporary directory
+#make a temporary directory
 if not os.path.exists('tmp'):
     os.makedirs('tmp')
 
@@ -989,9 +990,7 @@ os.system("cp -r tmp/* . && rm -r tmp")
 The script should be stored locally because files stored in the Bwb container files system (those not accessed via /data or other mountpoint) are lost when the container terminates. In addition, although the script is in the Bwb container, the widget will not be able to see it unless we add a volume mapping or simply move the file to our local system.
 
 To do this:
-
 1\. Click on the orange right arrow at the bottom of the browser window to change the workspace to 'workspace 2'. There should be a screen with no windows.
-
 2\. Right click and choose the 'Terminal' option.
 
 3\. Enter the following command (assuming that you used the default /data mountpoint):
@@ -1253,7 +1252,7 @@ There are 4 main elements that are drawn:
 
 2\. Required parameters - the forms for the parameters required to run the widget are here
 
-3\. Optional parmeters - a list of optional parameters is placed here
+3\. Optional parameters - a list of optional parameters is placed here
 
 4\. Execution box - whether the widget is run automatically, manually, or semi-automatically depending on runTriggers is set here
 
