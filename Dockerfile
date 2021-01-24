@@ -4,78 +4,126 @@ MAINTAINER lhhung<lhhung@uw.edu>
 #comment to force rebuild
 ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /root
+ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 #base files/utils to be used inside container
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends supervisor \
-        pwgen sudo nano \
-        net-tools \
-        fluxbox feh xterm x11vnc xvfb \
-        gtk2-engines-murrine ttf-ubuntu-font-family \
+    && apt-get install -y --no-install-recommends \
+        feh \
+        fluxbox \
         fonts-wqy-microhei \
-        language-pack-zh-hant language-pack-gnome-zh-hant \
+        gtk2-engines-murrine \
+        language-pack-gnome-zh-hant \
+        language-pack-zh-hant \
+        libgl1-mesa-dri \
+        libqt5webkit5-dev \
+        libssl-dev \
+        mesa-utils \
+        nano \
+        net-tools \
         nginx \
-        mesa-utils libgl1-mesa-dri \
-    && apt-get clean -y \
-    && apt-get autoremove -y \
+        pwgen \
+        python3-pyqt5 \
+        python3-pyqt5.qtsvg \
+        python3-pyqt5.qtwebkit \
+        sudo \
+        supervisor \
+        ttf-ubuntu-font-family \
+        virtualenv \
+        x11vnc \
+        xterm \
+        xvfb \
+    && apt-get clean \
+    && apt-get autoremove -y --purge \
     && rm -rf /var/lib/apt/lists/*
 
 #files for vnc framebuffer
-RUN apt-get update && apt-get install -y wget libssl1.0 \
-    && chdir /tmp \
-    && wget --no-check-certificate --content-disposition https://github.com/BioDepot/BioDepot-workflow-builder/blob/master/noVNC/x11vnc-data_0.9.14-1.1ubuntu1_all.deb?raw=true \
-    && wget --no-check-certificate --content-disposition https://github.com/BioDepot/BioDepot-workflow-builder/blob/master/noVNC/x11vnc_0.9.14-1.1ubuntu1_amd64.deb?raw=true \
-    && dpkg -i /tmp/x11vnc*.deb \
-    && apt-get clean -y \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/* \
-    && chdir /root && rm /tmp/*.deb
+ADD noVNC /noVNC/
+RUN apt-get update \
+    && apt-get install -y \
+        libssl1.0 \
+        wget \
+    && dpkg -i /noVNC/x11vnc*.deb \
+    && apt-get clean \
+    && apt-get autoremove -y --purge \
+    && rm -rf /var/lib/apt/lists/*
 
 #files for web interface noVNC
 ADD web /web/
-RUN apt-get update && apt-get install -y build-essential gcc python-pip python-dev python3-pip \
+RUN apt-get update \
+    && apt-get install -y \
+        build-essential \
+        python-dev \
+        python-pip \
+        python3-pip \
     && pip install --upgrade wsgiref \
-    && python3 -m pip install --upgrade pip wheel setuptools \
+    && python3 -m pip install --upgrade \
+        pip \
+        setuptools \
+        wheel \
     && pip install -r /web/requirements.txt \
     && pip3 install docker \
-    && apt-get remove -y gcc build-essential python-pip python-dev python3-pip \
-    && apt-get clean -y \
-    && apt-get autoremove -y \
+    && apt-get remove -y --purge \
+        build-essential \
+        python-dev \
+        python-pip \
+        python3-pip \
+    && apt-get clean \
+    && apt-get autoremove -y --purge \
     && rm -rf /var/lib/apt/lists/*
-
-ADD noVNC /noVNC/
 
 #files for orange and biodepot
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends virtualenv libssl-dev libqt5webkit5-dev python3-pyqt5 python3-pyqt5.qtsvg python3-pyqt5.qtwebkit \
-    && apt-get clean -y \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN rm /bin/sh && ln -s /bin/bash /bin/sh
+RUN ln -fs /bin/bash /bin/sh
 RUN virtualenv --python=python3 --system-site-packages orange3venv
 RUN source orange3venv/bin/activate
 COPY orange3 orange3
-RUN apt-get update && apt-get install -y build-essential gcc python-dev python3-dev python3-pip python-pip zlib1g-dev libbz2-dev liblzma-dev \
-    && python3 -m pip install --upgrade pip wheel setuptools \
+RUN apt-get update \
+    && apt-get install -y \
+        build-essential \
+        libbz2-dev \
+        liblzma-dev \
+        python-dev \
+        python-pip \
+        python3-dev \
+        python3-pip \
+        zlib1g-dev \
+    && python3 -m pip install --upgrade \
+        pip \
+        setuptools \
+        wheel \
     && pip3 install -r orange3/requirements-core.txt \
     && pip3 install -r orange3/requirements-gui.txt \
-    && pip3 install docker pysam beautifulsoup4 \
+    && pip3 install \
+        beautifulsoup4 \
+        docker \
+        pysam \
     && pip3 install -e orange3 \
-    && apt-get remove -y gcc build-essential \
-    && apt-get clean -y \
-    && apt-get autoremove -y \
+    && apt-get remove -y --purge build-essential \
+    && apt-get clean \
+    && apt-get autoremove -y --purge \
     && rm -rf /var/lib/apt/lists/*
 
 #install Docker-ce
-RUN apt-get update && apt-get install -y \
-    apt-transport-https ca-certificates curl software-properties-common gnupg2 \
-    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add - \
+RUN apt-get update \
+    && apt-get install -y \
+        apt-transport-https \
+        curl \
+        gnupg2 \
+        software-properties-common \
+    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - \
     && add-apt-repository -y \
         "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" \
-    && apt-get update && apt-get install -y docker-ce docker-ce-cli containerd.io \
-    && apt-get remove -y curl gnupg2 apt-transport-https software-properties-common \
-    && apt-get clean -y \
-    && apt-get autoremove -y \
+    && apt-get update \
+    && apt-get install -y \
+        containerd.io \
+        docker-ce \
+        docker-ce-cli \
+    && apt-get remove -y --purge \
+        apt-transport-https \
+        curl \
+        gnupg2 \
+        software-properties-common \
+    && apt-get clean \
+    && apt-get autoremove -y --purge \
     && rm -rf /var/lib/apt/lists/*
 
 #nginx and supervisor setup
@@ -83,7 +131,6 @@ ADD supervisord.conf /etc/supervisor/conf.d/
 ADD nginx.conf /etc/nginx/sites-enabled/default
 
 #jsonpickle
-
 RUN pip3 install --user jsonpickle
 
 #put biodepot here and keep pip for rapid updates
@@ -96,15 +143,19 @@ EXPOSE 6080
 WORKDIR /data
 
 #install rsync curl docker-compose and jq
-RUN apt-get update && apt-get install -y rsync curl jq \
+RUN apt-get update \
+    && apt-get install -y \
+        curl \
+        jq \
+        rsync \
     && curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose \
-    && apt-get clean -y \
-    && apt-get autoremove -y \
+    && apt-get clean \
+    && apt-get autoremove -y --purge \
     && rm -rf /var/lib/apt/lists/*
 
 #Change app name to Bwb
-RUN sed -i 's/\"Orange Canvas\"/\"Bwb\"/' /orange3/Orange/canvas/config.py
+RUN sed -i 's/"Orange Canvas"/"Bwb"/' /orange3/Orange/canvas/config.py
 
 #set up some config files
 COPY fluxbox_config/ /root/.fluxbox/
@@ -139,4 +190,5 @@ ADD tutorialFiles /tutorialFiles
 ADD serverSettings.json /biodepot
 
 #start it up
-CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
+CMD /startup.sh \
+    && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
