@@ -1,2 +1,6 @@
-.git/
+build
+bwb-scheduling-service
+Desktop
+docs
+.git
 *.md
