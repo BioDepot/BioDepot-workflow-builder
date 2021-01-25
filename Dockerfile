@@ -8,15 +8,17 @@ ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 #base files/utils to be used inside container
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        curl \
         feh \
         fluxbox \
         fonts-wqy-microhei \
         gtk2-engines-murrine \
+        jq \
         language-pack-gnome-zh-hant \
         language-pack-zh-hant \
         libgl1-mesa-dri \
         libqt5webkit5-dev \
-        libssl-dev \
+        libssl1.0 \
         mesa-utils \
         nano \
         net-tools \
@@ -25,10 +27,12 @@ RUN apt-get update \
         python3-pyqt5 \
         python3-pyqt5.qtsvg \
         python3-pyqt5.qtwebkit \
+        rsync \
         sudo \
         supervisor \
         ttf-ubuntu-font-family \
         virtualenv \
+        wget \
         x11vnc \
         xterm \
         xvfb \
@@ -38,14 +42,8 @@ RUN apt-get update \
 
 #files for vnc framebuffer
 ADD noVNC /noVNC/
-RUN apt-get update \
-    && apt-get install -y \
-        libssl1.0 \
-        wget \
-    && dpkg -i /noVNC/x11vnc*.deb \
-    && apt-get clean \
-    && apt-get autoremove -y --purge \
-    && rm -rf /var/lib/apt/lists/*
+RUN dpkg -i /noVNC/x11vnc*.deb \
+    && apt-get autoremove -y --purge
 
 #files for web interface noVNC
 ADD web /web/
@@ -106,7 +104,6 @@ RUN apt-get update \
 RUN apt-get update \
     && apt-get install -y \
         apt-transport-https \
-        curl \
         gnupg2 \
         software-properties-common \
     && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - \
@@ -119,7 +116,6 @@ RUN apt-get update \
         docker-ce-cli \
     && apt-get remove -y --purge \
         apt-transport-https \
-        curl \
         gnupg2 \
         software-properties-common \
     && apt-get clean \
@@ -142,17 +138,9 @@ ADD startup.sh /
 EXPOSE 6080
 WORKDIR /data
 
-#install rsync curl docker-compose and jq
-RUN apt-get update \
-    && apt-get install -y \
-        curl \
-        jq \
-        rsync \
-    && curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
-    && chmod +x /usr/local/bin/docker-compose \
-    && apt-get clean \
-    && apt-get autoremove -y --purge \
-    && rm -rf /var/lib/apt/lists/*
+#install docker-compose
+RUN curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
+    && chmod +x /usr/local/bin/docker-compose
 
 #Change app name to Bwb
 RUN sed -i 's/"Orange Canvas"/"Bwb"/' /orange3/Orange/canvas/config.py
