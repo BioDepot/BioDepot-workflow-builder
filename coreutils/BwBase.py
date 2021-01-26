@@ -1797,8 +1797,11 @@ class OWBwBWidget(widget.OWWidget):
     def addLedit(self, attr, ledit, boxEdit, addBtn):
         # adds text in ledit to items in boxEdit
         if ledit.text():
-            boxEdit.addItem(ledit.text())
-            sys.stderr.write("adding {} to {}\n".format(ledit.text(), attr))
+            #split onlines otherwise this will cause an error if there are line feeds
+            itemList=ledit.text().splitlines()
+            for item in itemList:
+                boxEdit.addItem(item)
+                sys.stderr.write("adding {} to {}\n".format(item, attr))
             ledit.clear()
             addBtn.setEnabled(False)
             self.updateBoxEditValue(attr, boxEdit)
