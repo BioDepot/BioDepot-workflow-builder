@@ -12,7 +12,7 @@
     Connect parameters are provided in query string:
         http://example.com/?host=HOST&port=PORT&encrypt=1&true_color=1
     -->
-    <title>noVNC</title>
+    <title>BioDepot-workflow-builder</title>
 
     <meta charset="utf-8">
 
@@ -184,7 +184,7 @@
             $D('xvpResetButton').onclick = xvpReset;
 
             WebUtil.init_logging(WebUtil.getQueryVar('logging', 'warn'));
-            document.title = unescape(WebUtil.getQueryVar('title', 'noVNC'));
+            document.title = unescape(WebUtil.getQueryVar('title', 'BioDepot-workflow-builder'));
             // By default, use the host and port of server that served this file
             host = WebUtil.getQueryVar('host', window.location.hostname);
             port = WebUtil.getQueryVar('port', window.location.port);

@@ -16,7 +16,9 @@ RUN apt-get update \
         jq \
         language-pack-gnome-zh-hant \
         language-pack-zh-hant \
+        libbz2-dev \
         libgl1-mesa-dri \
+        liblzma-dev \
         libqt5webkit5-dev \
         libssl1.0 \
         mesa-utils \
@@ -28,7 +30,6 @@ RUN apt-get update \
         python3-pyqt5.qtsvg \
         python3-pyqt5.qtwebkit \
         rsync \
-        sudo \
         supervisor \
         ttf-ubuntu-font-family \
         virtualenv \
@@ -36,8 +37,7 @@ RUN apt-get update \
         x11vnc \
         xterm \
         xvfb \
-    && apt-get clean \
-    && apt-get autoremove -y --purge \
+        zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
 
 #files for vnc framebuffer
@@ -52,20 +52,8 @@ RUN apt-get update \
         build-essential \
         python-dev \
         python-pip \
-        python3-pip \
-    && pip install --upgrade wsgiref \
-    && python3 -m pip install --upgrade \
-        pip \
-        setuptools \
-        wheel \
     && pip install -r /web/requirements.txt \
-    && pip3 install docker \
-    && apt-get remove -y --purge \
-        build-essential \
-        python-dev \
-        python-pip \
-        python3-pip \
-    && apt-get clean \
+    && apt-get remove -y --purge build-essential \
     && apt-get autoremove -y --purge \
     && rm -rf /var/lib/apt/lists/*
 
@@ -77,15 +65,10 @@ COPY orange3 orange3
 RUN apt-get update \
     && apt-get install -y \
         build-essential \
-        libbz2-dev \
-        liblzma-dev \
-        python-dev \
-        python-pip \
         python3-dev \
         python3-pip \
-        zlib1g-dev \
     && python3 -m pip install --upgrade \
-        pip \
+        pip==20.0.1 \
         setuptools \
         wheel \
     && pip3 install -r orange3/requirements-core.txt \
@@ -96,7 +79,6 @@ RUN apt-get update \
         pysam \
     && pip3 install -e orange3 \
     && apt-get remove -y --purge build-essential \
-    && apt-get clean \
     && apt-get autoremove -y --purge \
     && rm -rf /var/lib/apt/lists/*
 
@@ -118,7 +100,6 @@ RUN apt-get update \
         apt-transport-https \
         gnupg2 \
         software-properties-common \
-    && apt-get clean \
     && apt-get autoremove -y --purge \
     && rm -rf /var/lib/apt/lists/*
 
@@ -131,7 +112,6 @@ RUN pip3 install --user jsonpickle
 
 #put biodepot here and keep pip for rapid updates
 ADD biodepot biodepot
-RUN pip3 install pip==20.0.1
 RUN pip3 install -e biodepot
 
 ADD startup.sh /
