@@ -36,6 +36,8 @@ gatherData(){
  done
  dataString=$(printf '%s\n' "${allData[@]}"  | jq -s .)
 }
+
+exitstatus=0
 outputFile=$1
 shift
 tempDir=$1
@@ -55,7 +57,6 @@ logPrint "$@"
 lockDir=/tmp/${tempDir}/locks
 echo "mkdir -p $lockDir"
 mkdir -p $lockDir
-
 errorDir=/tmp/${tempDir}/errors
 #must pass through the mountpoint - write to mountpoint/.bwb
 
@@ -75,18 +76,19 @@ runJob(){
             #this will also contain the cid of the docker process so that it can be aborted
             mkdir -p $bwbDataDir/output$i
             cmdStr="docker run -i --rm  --init --cidfile=$lockDir/lock$i/pid.$BASHPID -v $hostDataDir/output$i:/tmp/output " 
-            cmdStr="$cmdStr $cmd"
+            cmdStr="$cmdStr $cmd "
             echo "$cmdStr"
             eval $cmdStr
             if [ "$?" -eq "0" ]; then
                 echo "job$i exited successfully"
             else
+                exitstatus=1
                 mkdir -p $errorDir/job$i.$?
             fi
             rm $lockDir/lock$i/pid.$BASHPID
         fi
     done
-    exit 0
+    exit $exitstatus
 }
 if [ -z $NWORKERS ]; then
     NWORKERS=1
@@ -102,6 +104,6 @@ gatherData
 echo "output is $dataString"
 echo "$dataString" > $outputFile
 cleanup ${lockDir}
-exit 0
+exit $exitstatus
 
 

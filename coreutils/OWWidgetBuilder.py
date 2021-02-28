@@ -1043,7 +1043,7 @@ class OWWidgetBuilder(widget.OWWidget):
 
     def addGroupToStates(self):
         # for older files
-        if "parameters" in self.allStates:
+        if "parameters" in self.allStates and  self.allStates["parameters"]:
             for serialState in self.allStates["parameters"]:
                 if len(serialState) < 9:
                     serialState.append(serialState[7])
