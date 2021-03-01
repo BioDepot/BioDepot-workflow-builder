@@ -538,6 +538,7 @@ class OWWidgetBuilder(widget.OWWidget):
             "parameters",
             "command",
             "autoMap",
+            "runDockerMap"
         ):
             if attr in self.data and self.data[attr]:
                 myData[attr] = deepcopy(self.data[attr])
@@ -942,6 +943,7 @@ class OWWidgetBuilder(widget.OWWidget):
             "parameters",
             "command",
             "autoMap",
+            "runDockerMap",
             "buildCommand",
         ):
             if attr in self.allAttrs:
@@ -1713,20 +1715,27 @@ class OWWidgetBuilder(widget.OWWidget):
         self.makeListWidgetUnit(pname, layout=layout, lineWidgets=widgetList)
 
     def drawVolumeListWidget(self, pname, layout=None):
-        nameBox = self.makeLedit(pname + "Name", "Enter name", "Name")
+        nameBox = self.makeLedit(pname + "Name", "Enter variable", "Local volume variable")
         volumeBox = self.makeLedit(
-            pname + "volumeLedit", "Enter volume", "Additional volume"
+            pname + "volumeLedit", "Enter volume", "Container volume"
         )
         widgetList = [("name", nameBox), ("containerVolume", volumeBox)]
         autoMapCb = self.makeCheckBox(
             "autoMap",
-            "Pass current Bwb volumes to container",
+            "Pass local to Bwb mappings to container",
             default=True,
             persist=True,
             track=True,
         )
+        runDockerMapCb = self.makeCheckBox(
+            "runDockerMap",
+            "Pass mappings for launching containers",
+            default=False,
+            persist=True,
+            track=True,
+        )
         self.makeListWidgetUnit(
-            pname, layout=layout, lineWidgets=widgetList, otherWidgets=[autoMapCb]
+            pname, layout=layout, lineWidgets=widgetList, otherWidgets=[autoMapCb, runDockerMapCb]
         )
 
     def drawPortsListWidget(self, pname, layout=None):

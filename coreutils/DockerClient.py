@@ -410,11 +410,14 @@ class DockerClient:
         scheduleSettings=None,
         iterateSettings=None,
         iterate=False,
+        runDockerMap=False
     ):
         # reset logFile when it is not None - can be "" though - this allows an active reset
         if logFile is not None:
             self.logFile = logFile
         volumeMappings = ""
+        if runDockerMap:
+            volumeMappings = " -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/.X11-unix:/tmp/.X11-unix --privileged "
         for container_dir, host_dir in hostVolumes.items():
             volumeMappings = volumeMappings + "-v {}:{} ".format(
                 self.to_best_host_directory(host_dir), container_dir

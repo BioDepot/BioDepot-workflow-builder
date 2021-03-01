@@ -2299,6 +2299,9 @@ class OWBwBWidget(widget.OWWidget):
         self.status = "running"
         self.setStatusMessage("Running...")
         sys.stderr.write("cmds are {}\n".format(cmds))
+        runDockerMapFlag=False
+        if "runDockerMap" in self.data:
+            runDockerMapFlag=self.data["runDockerMap"]
         if hasattr(self, "useScheduler") and self.useScheduler:
             self.dockerClient.create_container_external(
                 imageName,
@@ -2328,6 +2331,7 @@ class OWBwBWidget(widget.OWWidget):
                 scheduleSettings=None,
                 iterateSettings=self.iterateSettings,
                 iterate=self.iterate,
+                runDockerMap=runDockerMapFlag
             )
         # except BaseException as e:
         # self.bgui.reenableAll(self)
