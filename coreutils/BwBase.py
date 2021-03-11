@@ -2776,7 +2776,7 @@ class OWBwBWidget(widget.OWWidget):
         # iterable flags is a dict of lists of flags
         iteratedFlags = []
         if not executables:
-            return ""
+            executables = " "
         cmdStr = "bash -c '"
         if len(executables) == 1:
             cmdStr = ""
