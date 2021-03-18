@@ -25,16 +25,18 @@ gatherData(){
  #gather all the threads
  for ((i=0; i<${#myjobs[@]}; ++i)); do
     threadData=()
-	keyfiles=$(ls $bwbDataDir/output$i)
+	keyfiles=($(ls $bwbDataDir/output$i))
+    logPrint "$(ls $bwbDataDir/outputs$i) keyfiles ${#keyfiles[@]} ${keyfiles[@]}"
 	if (( ${#keyfiles[@]} )); then
 		allData[$i]=$(for keyfile in ${keyfiles[@]}; do
 			printf '%s\0%s\0' "$keyfile" "$(cat $bwbDataDir/output$i/$keyfile)"
 		done | jq -Rs ' split("\u0000") | . as $a | reduce range(0; length/2) as $i ({}; . + {($a[2*$i]): ($a[2*$i + 1]|fromjson? // .)})')
 	else
-	   allData[$i]="None"
+	   allData[$i]={}
 	fi
  done
  dataString=$(printf '%s\n' "${allData[@]}"  | jq -s .)
+ logPrint "datastring $dataString"
 }
 
 exitstatus=0
@@ -101,7 +103,7 @@ done
 #catch sigint and term and cleanup anyway
 wait
 gatherData
-echo "output is $dataString"
+logPrint "output is $dataString"
 echo "$dataString" > $outputFile
 cleanup ${lockDir}
 exit $exitstatus
