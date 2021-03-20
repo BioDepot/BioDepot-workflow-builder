@@ -1,10 +1,10 @@
 FROM ubuntu:18.04
 MAINTAINER lhhung<lhhung@uw.edu>
-#Dockerfile for widget development container
-#comment to force rebuild
+
 ENV DEBIAN_FRONTEND noninteractive
 ENV HOME /root
 ENV PIP_DISABLE_PIP_VERSION_CHECK 1
+
 #base files/utils to be used inside container
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
@@ -53,8 +53,7 @@ RUN apt-get update \
         python-dev \
         python-pip \
     && pip install -r /web/requirements.txt \
-    && apt-get remove -y --purge build-essential \
-    && apt-get autoremove -y --purge \
+    && apt-get remove -y --purge --auto-remove build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 #files for orange and biodepot
@@ -78,8 +77,7 @@ RUN apt-get update \
         docker \
         pysam \
     && pip3 install -e orange3 \
-    && apt-get remove -y --purge build-essential \
-    && apt-get autoremove -y --purge \
+    && apt-get remove -y --purge --auto-remove build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 #install Docker-ce
@@ -96,11 +94,10 @@ RUN apt-get update \
         containerd.io \
         docker-ce \
         docker-ce-cli \
-    && apt-get remove -y --purge \
+    && apt-get remove -y --purge --auto-remove \
         apt-transport-https \
         gnupg2 \
         software-properties-common \
-    && apt-get autoremove -y --purge \
     && rm -rf /var/lib/apt/lists/*
 
 #nginx and supervisor setup
