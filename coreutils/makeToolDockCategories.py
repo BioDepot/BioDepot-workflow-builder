@@ -54,18 +54,18 @@ def removeCategoriesFromSetupFile(categories,setupFile):
     for category in categories:
         name_strings.append('name="{}"'.format(category))
     with open(tempFile,"w") as f:
-        for part in parts[1:len(parts)-1]:
+        f.write(parts[0])
+        for part in parts[1:len(parts)]:
             write_part=True
             for name_string in name_strings:
                 if (name_string in part):
                     write_part=False
                     break
             if write_part:
-                f.write("setup({}\n".format(part))
-
+                f.write("setup({}".format(part))
     os.system("cp {} {}".format(tempFile,setupFile))
     os.system("rm {}".format(tempFile))
-    
+        
 def removeCategoryFromToolDock(basePath,category,directory):
     setupFile='{}/setup.py'.format(basePath)
     categories=[category]

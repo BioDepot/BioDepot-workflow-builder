@@ -6,7 +6,8 @@ def keepWhiteListinToolDock(whiteList,basePath,setupFile):
         content = f.read()
     parts=content.split("setup(")
     with open(tempFile,"w") as f:
-        for part in parts:
+        f.write(parts[0])
+        for part in parts[1:len(parts)]:
             category=""
             package=""
             categoryMatch=re.search('name\=\"(.*?)\"', part,re.MULTILINE)
