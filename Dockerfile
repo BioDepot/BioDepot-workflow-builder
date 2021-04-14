@@ -143,6 +143,8 @@ COPY scripts/startScheduler.sh /usr/local/bin/startScheduler.sh
 COPY scripts/build_workflow_containers.sh /usr/local/bin/build_workflow_containers.sh
 COPY scripts/whiteListToolDock.py /usr/local/bin/whiteListToolDock.py
 COPY scripts/addWorkflowsToToolDock.py /usr/local/bin/addWorkflowsToToolDock.py
+COPY scripts/addWidgetToToolDock.sh /usr/local/bin/addWidgetToToolDock.sh
+COPY scripts/removeWidgetFromToolDock.sh /usr/local/bin/removeWidgetFromToolDock.sh
 
 #add widgets and workflows
 ADD widgets /widgets/
