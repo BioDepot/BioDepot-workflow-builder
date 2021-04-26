@@ -383,7 +383,7 @@ class OWBwBWidget(widget.OWWidget):
     nWorkers = pset(1)
     iterateSettings = pset({})
     iterate = pset(False)
-    
+    useGpu = pset(False)
     
     # Initialization
     def __init__(self, image_name, image_tag):
@@ -412,6 +412,7 @@ class OWBwBWidget(widget.OWWidget):
         self.jobRunning = False
         self.saveBashFile = None
         self.iterEnvVars = []
+
         if not hasattr(self, "iterateSettings"):
             setattr(self, "iterateSettings", {})
             self.iterateSettings["iteratedAttrs"] = []
@@ -1869,6 +1870,10 @@ class OWBwBWidget(widget.OWWidget):
         self.graphicsMode.setChecked(self.exportGraphics)
         self.graphicsMode.stateChanged.connect(self.graphicsModeChange)
 
+        self.gpuMode = QtGui.QCheckBox("Use gpu", self)
+        self.gpuMode.setChecked(self.useGpu)
+        self.gpuMode.stateChanged.connect(self.gpuModeChange)
+        
         self.testMode = QtGui.QCheckBox("Test mode", self)
         self.testMode.setChecked(self.useTestMode)
         self.testMode.stateChanged.connect(self.testModeChange)
@@ -1918,13 +1923,14 @@ class OWBwBWidget(widget.OWWidget):
         self.execLayout.addWidget(self.btnRun, 1, 0)
         self.execLayout.addWidget(self.btnStop, 1, 1)
         # self.execLayout.addWidget(self.iterateBtn,1,2)
-        self.execLayout.addWidget(self.graphicsMode, 1, 2)
-        self.execLayout.addWidget(self.testMode, 1, 3)
+        self.execLayout.addWidget(self.gpuMode, 1, 2)
+        self.execLayout.addWidget(self.graphicsMode, 1, 3)
+        self.execLayout.addWidget(self.testMode, 1, 4)
         # self.execLayout.addWidget(self.dockerMode,1,3)
-        self.execLayout.addWidget(myLabel, 1, 4)
-        self.execLayout.addWidget(self.cboRunMode, 1, 5)
+        self.execLayout.addWidget(myLabel, 1, 5)
+        self.execLayout.addWidget(self.cboRunMode, 1, 6)
         if self.candidateTriggers:
-            self.execLayout.addWidget(self.execBtn, 1, 6)
+            self.execLayout.addWidget(self.execBtn, 1, 7)
         box.layout().addLayout(self.execLayout)
 
     def testModeChange(self):
@@ -1935,7 +1941,10 @@ class OWBwBWidget(widget.OWWidget):
 
     def graphicsModeChange(self):
         self.exportGraphics = self.graphicsMode.isChecked()
-
+        
+    def gpuModeChange(self):
+        self.useGpu = self.gpuMode.isChecked()
+        
     def runModeChange(self):
         self.runMode = self.cboRunMode.currentIndex()
         if self.candidateTriggers:
@@ -2310,6 +2319,7 @@ class OWBwBWidget(widget.OWWidget):
                 environment=self.envVars,
                 consoleProc=self.pConsole,
                 exportGraphics=self.exportGraphics,
+                useGpu=self.useGpu,
                 portMappings=self.portMappings(),
                 testMode=self.useTestMode,
                 logFile=self.saveBashFile,
@@ -2324,6 +2334,7 @@ class OWBwBWidget(widget.OWWidget):
                 environment=self.envVars,
                 consoleProc=self.pConsole,
                 exportGraphics=self.exportGraphics,
+                useGpu=self.useGpu,
                 portMappings=self.portMappings(),
                 testMode=self.useTestMode,
                 logFile=self.saveBashFile,

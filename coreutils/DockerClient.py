@@ -332,6 +332,7 @@ class DockerClient:
         hostVolumes=None,
         consoleProc=None,
         exportGraphics=False,
+        useGpu=False,
         portMappings=None,
         testMode=False,
         logFile=None,
@@ -403,6 +404,7 @@ class DockerClient:
         hostVolumes=None,
         consoleProc=None,
         exportGraphics=False,
+        useGpu=False,
         portMappings=None,
         testMode=False,
         logFile=None,
@@ -435,6 +437,8 @@ class DockerClient:
         # docker  run -i --rm --init --cidfile=<lockfile>'
         dockerBaseFlags = ""
         dockerCmds = []
+        if useGpu:
+            dockerBaseFlags += "--gpus all "
         if exportGraphics:
             dockerBaseFlags += "-e DISPLAY=:1 -v /tmp/.X11-unix:/tmp/.X11-unix "
         if portMappings:
