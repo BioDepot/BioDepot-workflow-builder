@@ -2686,10 +2686,11 @@ class OWBwBWidget(widget.OWWidget):
             if sub not in subs:
                 subs.append(sub)
                 subFlags[sub] = self.iteratedfString(sub)
-                sys.stderr.write("sub is {} flags are {}".format(sub, subFlags[sub]))
+                sys.stderr.write("sub is {} with {} elements flags are {}".format(sub, len(subFlags[sub]), subFlags[sub]))
                 if (subFlags and len(subFlags[sub]) > maxLen):
                     maxLen = len(subFlags[sub])
         sys.stderr.write("subs are {}\n".format(subs))
+        sys.stderr.write("maxLen is {}\n".format(maxLen))
         #find maxlen of environment variables
 
         envKeys=[]
@@ -2698,8 +2699,14 @@ class OWBwBWidget(widget.OWWidget):
         for pname in self.iterEnvVars:
             plist=getattr(self,pname)
             groupSize=self.getIterableGroupSize(pname)
-            if plist and len(plist) and groupSize:
-                plength=int (len(plist)/groupSize)
+            plength=0
+            if plist and isinstance(plist, list):
+                plength=len(plist)
+            elif plist:
+                plength=len(plist["value"])
+                
+            if plist and plength and groupSize:
+                plength=int (plength/groupSize)
                 if plength > maxLen:
                     maxLen=plength
                 envKey=self.data["parameters"][pname]["env"]
@@ -2720,6 +2727,7 @@ class OWBwBWidget(widget.OWWidget):
         if not maxLen:
             return [imageName+cmd]
         for i in range(maxLen):
+            print("loop {} {}".format(i,maxLen)) 
             cmds.append(cmd)
             for sub in subs:
                 index = i % len(subFlags[sub])
@@ -2729,14 +2737,12 @@ class OWBwBWidget(widget.OWWidget):
             #add name here because of possible environment variables    
             cmds[i]= imageName + cmds[i]
             for envKey in envKeys:
-                if envValues[envKey] == None:
-                    continue
                 if isinstance(envValues[envKey], list):
                     cmds[i]=" -e {}={} ".format(envKey, self.dockerClient.prettyEnv(envValues[envKey][i])) + cmds[i]
                 else:
+                    print("{} {}".format(i,envValues[envKey]["value"][i]))
                     cmds[i]=" -e {}={} ".format(envKey, self.dockerClient.prettyEnv(envValues[envKey]["value"][i])) + cmds[i]
         return cmds
-
     def replaceIteratedVars(self, cmd):
         # replace any _bwb with _iter if iterated
         pattern = r"\_bwb\{([^\}]+)\}"
