@@ -1265,15 +1265,22 @@ class OWBwBWidget(widget.OWWidget):
     ):
         patternQuery = getattr(self, attr)
         if patternQuery:
-            setattr(self, rootAttr, patternQuery["root"])
-            setattr(self, patternAttr, patternQuery["pattern"])
-            setattr(self, findFileAttr, patternQuery["findFile"])
-            setattr(self, findDirAttr, patternQuery["findDir"])
-            if "value" in patternQuery:
-                setattr(self, valueAttr, patternQuery["value"])
-            else:
-                patternQuery["value"]=None
-                setattr(self, valueAttr, patternQuery["value"])
+            try:
+                setattr(self, rootAttr, patternQuery["root"])
+                setattr(self, patternAttr, patternQuery["pattern"])
+                setattr(self, findFileAttr, patternQuery["findFile"])
+                setattr(self, findDirAttr, patternQuery["findDir"])
+                if "value" in patternQuery:
+                    setattr(self, valueAttr, patternQuery["value"])
+                else:
+                    patternQuery["value"]=None
+                    setattr(self, valueAttr, patternQuery["value"])
+            except:
+                setattr(self, rootAttr, "")
+                setattr(self, patternAttr, "")
+                setattr(self, findFileAttr, True)
+                setattr(self, findDirAttr, False)
+                setattr(self, valueAttr, None)
         else:
             setattr(self, rootAttr, "")
             setattr(self, patternAttr, "")
