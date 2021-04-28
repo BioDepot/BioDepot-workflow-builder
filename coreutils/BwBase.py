@@ -2729,7 +2729,12 @@ class OWBwBWidget(widget.OWWidget):
             #add name here because of possible environment variables    
             cmds[i]= imageName + cmds[i]
             for envKey in envKeys:
-                cmds[i]=" -e {}={} ".format(envKey, self.dockerClient.prettyEnv(envValues[envKey][i])) + cmds[i]
+                if envValues[envKey] == None:
+                    continue
+                if isinstance(envValues[envKey], list):
+                    cmds[i]=" -e {}={} ".format(envKey, self.dockerClient.prettyEnv(envValues[envKey][i])) + cmds[i]
+                else:
+                    cmds[i]=" -e {}={} ".format(envKey, self.dockerClient.prettyEnv(envValues[envKey]["value"][i])) + cmds[i]
         return cmds
 
     def replaceIteratedVars(self, cmd):
