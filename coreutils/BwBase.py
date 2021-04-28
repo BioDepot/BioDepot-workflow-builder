@@ -1276,18 +1276,25 @@ class OWBwBWidget(widget.OWWidget):
                     patternQuery["value"]=None
                     setattr(self, valueAttr, patternQuery["value"])
             except:
-                setattr(self, rootAttr, "")
-                setattr(self, patternAttr, "")
-                setattr(self, findFileAttr, True)
-                setattr(self, findDirAttr, False)
-                setattr(self, valueAttr, None)
+                self.initializePatternQuerywithBlanks(attr, rootAttr, patternAttr, findFileAttr, findDirAttr, valueAttr)
+                
         else:
-            setattr(self, rootAttr, "")
-            setattr(self, patternAttr, "")
-            setattr(self, findFileAttr, True)
-            setattr(self, findDirAttr, False)
-            setattr(self, valueAttr, None)
-
+            self.initializePatternQuerywithBlanks(attr, rootAttr, patternAttr, findFileAttr, findDirAttr, valueAttr)
+    def initializePatternQuerywithBlanks(self, attr, rootAttr, patternAttr, findFileAttr, findDirAttr, valueAttr
+    ):
+        patternQuery={}
+        setattr(self, rootAttr, "")
+        setattr(self, patternAttr, "")
+        setattr(self, findFileAttr, True)
+        setattr(self, findDirAttr, False)
+        setattr(self, valueAttr, None)
+        patternQuery["root"]=""
+        patternQuery["pattern"]=""
+        patternQuery["findFile"]=True
+        patternQuery["findDir"]=False
+        patternQuery["value"]=None
+        setattr(self,attr,patternQuery)
+        
     def initializePatternQueryHelpers(
         self, pname, rootLedit, browseBtn, patternLedit, findFileCB, findDirCB
     ):
