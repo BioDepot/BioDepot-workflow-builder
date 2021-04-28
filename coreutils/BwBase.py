@@ -2224,6 +2224,9 @@ class OWBwBWidget(widget.OWWidget):
                 value=receiveFtn(value)
             else:
                 setattr(self, attr, value)
+                checkAttr = attr + "Checked"
+                if hasattr(self, checkAttr):
+                    setattr(self, checkAttr, True)
             if attr in self.runTriggers:
                 sys.stderr.write(
                     "trigger value for attr {} is {}\n".format(
@@ -2854,6 +2857,9 @@ class OWBwBWidget(widget.OWWidget):
                 pvalue = self.data["parameters"][pname]
                 if "env" in pvalue and getattr(self, pname) is not None:
                     checkAttr = pname + "Checked"
+                    #this needs to be checked here in case it checkAttr came from a signal
+                    if hasattr(self,checkAttr) and getattr(self,checkAttr) and pvalue["type"] != "bool":
+                        self.envVars[pvalue["env"]] = getattr(self, pname)
                     # check if boolean
                     if pvalue["type"] == "bool":
                         if getattr(self, pname) is True:
