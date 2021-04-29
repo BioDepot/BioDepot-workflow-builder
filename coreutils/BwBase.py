@@ -629,7 +629,8 @@ class OWBwBWidget(widget.OWWidget):
         for pname in elementList:
             pvalue = self.data["parameters"][pname]
             #case when there is no label skip input - input must come from connections in this case
-
+            if not ('label' in pvalue):
+                continue
             if (
                 "gui" in pvalue
                 and pvalue["gui"] != "file"
@@ -654,6 +655,9 @@ class OWBwBWidget(widget.OWWidget):
 
         for pname in elementList:
             pvalue = self.data["parameters"][pname]
+            #case when there is no label skip input - input must come from connections in this case
+            if not ('label' in pvalue):
+                continue
             if ("gui" in pvalue and pvalue["gui"][-4:] != "list") or (
                 pvalue["type"][-4:] != "list"
             ):
@@ -679,6 +683,8 @@ class OWBwBWidget(widget.OWWidget):
 
         for pname in elementList:
             pvalue = self.data["parameters"][pname]
+            if not ('label' in pvalue):
+                continue
             if ("gui" in pvalue and pvalue["gui"] != "Ledit") or (
                 pvalue["type"] != "double"
                 and pvalue["type"] != "str"
@@ -702,6 +708,8 @@ class OWBwBWidget(widget.OWWidget):
 
         for pname in elementList:
             pvalue = self.data["parameters"][pname]
+            if not ('label' in pvalue):
+                continue
             if ("gui" in pvalue and pvalue["gui"] != "Spin") or (
                 pvalue["type"] != "int"
             ):
@@ -713,6 +721,8 @@ class OWBwBWidget(widget.OWWidget):
 
         for pname in elementList:
             pvalue = self.data["parameters"][pname]
+            if not ('label' in pvalue):
+                continue
             if ("gui" in pvalue and pvalue["gui"] != "bool") or (
                 pvalue["type"] != "bool"
             ):
@@ -724,6 +734,8 @@ class OWBwBWidget(widget.OWWidget):
 
         for pname in elementList:
             pvalue = self.data["parameters"][pname]
+            if not ('label' in pvalue):
+                continue
             if ("gui" in pvalue and pvalue["gui"] != "patternQuery") or (
                 pvalue["type"] != "patternQuery"
             ):
@@ -749,11 +761,14 @@ class OWBwBWidget(widget.OWWidget):
         requiredList=[]
         if "requiredParameters" in self.data and self.data["requiredParameters"]:
             for pname in self.data["requiredParameters"]:
+
                 if not ("parameters" in self.data) or not (
                     pname in self.data["parameters"]
                 ):
                     continue
                 pvalue = self.data["parameters"][pname]
+                if not ('label' in pvalue):
+                    continue
                 if "label" in pvalue and pvalue["label"] is not None:
                     if not hasattr(self, pname):
                         setattr(self, pname, None)
