@@ -2684,7 +2684,7 @@ class OWBwBWidget(widget.OWWidget):
                         else:
                             baseFlag = ""
                         baseFlag += " ".join(fgroup)
-                        flags.append(baseFlag + value)
+                        flags.append(baseFlag)
                 return flags
         return None
 
