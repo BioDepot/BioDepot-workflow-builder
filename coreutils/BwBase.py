@@ -2565,6 +2565,7 @@ class OWBwBWidget(widget.OWWidget):
                     and hasattr(self, "iterateSettings")
                     and "iteratedAttrs" in self.iterateSettings
                     and pname in self.iterateSettings["iteratedAttrs"]
+                    and self.getAttrValue(pname)
                 ):
                     fStr = "_iterate{{{}}}".format(pname)
                 else:
@@ -2610,6 +2611,7 @@ class OWBwBWidget(widget.OWWidget):
                     and hasattr(self, "iterateSettings")
                     and "iteratedAttrs" in self.iterateSettings
                     and pname in self.iterateSettings["iteratedAttrs"]
+                    and self.getAttrValue(pname)
                 ):
                     fStr = "_iterate{{{}}}".format(pname)
                 else:
@@ -2645,9 +2647,12 @@ class OWBwBWidget(widget.OWWidget):
             flagValues = self.getAttrValue(pname)
             sys.stderr.write("original flagvalues are {}\n".format(flagValues))
             # make list of tuplets of groupSize
-            flagValues = list(
-                zip_longest(*[iter(flagValues)] * groupSize, fillvalue=flagValues[-1])
-            )
+            if flagValues:
+                flagValues = list(
+                    zip_longest(*[iter(flagValues)] * groupSize, fillvalue=flagValues[-1])
+                )
+            else:
+                flagValues=[]
             sys.stderr.write("chunked flagvalues are {}\n".format(flagValues))
             if (
                 pvalue["type"] == "file list"
@@ -2697,16 +2702,19 @@ class OWBwBWidget(widget.OWWidget):
         cmds = []
         sys.stderr.write("command is {}\n".format(cmd))
         maxLen = 0
+        flagsToDelete=[]
         # find matches
         for match in regex.finditer(cmd):
             sys.stderr.write("matched {}\n".format(match.group(1)))
             sub = match.group(1)
-            if sub not in subs:
+            subFlags[sub] = self.iteratedfString(sub)
+            if subFlags[sub] is None:
+                flagsToDelete.append(sub) 
+            elif sub not in subs:
                 subs.append(sub)
-                subFlags[sub] = self.iteratedfString(sub)
-                sys.stderr.write("sub is {} with {} elements flags are {}".format(sub, len(subFlags[sub]), subFlags[sub]))
                 if (subFlags and len(subFlags[sub]) > maxLen):
                     maxLen = len(subFlags[sub])
+            
         sys.stderr.write("subs are {}\n".format(subs))
         sys.stderr.write("maxLen is {}\n".format(maxLen))
         #find maxlen of environment variables
@@ -2715,14 +2723,11 @@ class OWBwBWidget(widget.OWWidget):
         envValues={}
 
         for pname in self.iterEnvVars:
-            plist=getattr(self,pname)
+            plist=self.getAttrValue(pname)
             groupSize=self.getIterableGroupSize(pname)
             plength=0
             if plist and isinstance(plist, list):
                 plength=len(plist)
-            elif plist:
-                plength=len(plist["value"])
-                
             if plist and plength and groupSize:
                 plength=int (plength/groupSize)
                 if plength > maxLen:
@@ -2742,7 +2747,7 @@ class OWBwBWidget(widget.OWWidget):
                         envValues[envKey].append(pslice)
                 else:
                     envValues[envKey]= plist
-        if not maxLen:
+        if not maxLen:            
             return [imageName+cmd]
         for i in range(maxLen):
             print("loop {} {}".format(i,maxLen)) 
@@ -2773,6 +2778,7 @@ class OWBwBWidget(widget.OWWidget):
                 pname
                 and self.iterateSettings["iteratedAttrs"]
                 and pname in self.iterateSettings["iteratedAttrs"]
+                and self.getAttrValue(pname)
             ):
                 cmd = cmd.replace(
                     "_bwb{{{}}}".format(pname), "_iterate{{{}}}".format(pname)
@@ -2874,7 +2880,7 @@ class OWBwBWidget(widget.OWWidget):
                     checkAttr = pname + "Checked"
                     #this needs to be checked here in case it checkAttr came from a signal
                     if hasattr(self,checkAttr) and getattr(self,checkAttr) and pvalue["type"] != "bool":
-                        self.envVars[pvalue["env"]] = getattr(self, pname)
+                        self.envVars[pvalue["env"]] = self.getAttrValue(pname)
                     # check if boolean
                     if pvalue["type"] == "bool":
                         if getattr(self, pname) is True:
@@ -2882,7 +2888,7 @@ class OWBwBWidget(widget.OWWidget):
                     else:
                         
                         iterFlag=(self.iterate and hasattr(self, "iterateSettings") and "iteratedAttrs" in self.iterateSettings 
-                            and pname in self.iterateSettings["iteratedAttrs"])
+                            and pname in self.iterateSettings["iteratedAttrs"])  
                         if pname in self.optionsChecked:
                             if self.optionsChecked[pname]:
                                 if iterFlag:
