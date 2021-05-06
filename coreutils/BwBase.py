@@ -1415,7 +1415,7 @@ class OWBwBWidget(widget.OWWidget):
         os.chdir(pwd)
         return globOutput
 
-    def getGlobDir(self, path, pattern):
+    def getGlobDirs(self, path, pattern):
         globOutput = []
         pwd = os.getcwd()
         os.chdir(path)
