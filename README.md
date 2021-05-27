@@ -1,4 +1,4 @@
-# BioDepot-Workflow-builder (Bwb)
+# BioDepot-workflow-builder (Bwb)
 
 ![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image19.png) ![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image23.png)
 
