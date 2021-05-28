@@ -99,7 +99,7 @@ def redirectme():
 
     # sed
     subprocess.check_call(
-        r"sed -i 's#^command=/usr/bin/Xvfb.*$#command=/usr/bin/Xvfb :1 -screen 0 {width}x{height}x16#' /etc/supervisor/conf.d/supervisord.conf".format(
+        r"sed -i 's#\(command=.*Xvfb.* \)[0-9]*x[0-9]*#\1{width}x{height}#' /etc/supervisor/conf.d/supervisord.conf".format(
             **env
         ),
         shell=True,
