@@ -352,7 +352,7 @@ class DockerClient:
             for container_dir, host_dir in hostVolumes.items():
                 taskJson.addVolume(host_dir, container_dir, "rw")
             if exportGraphics:
-                taskJson.addEnv("DISPLAY", ":1")
+                taskJson.addEnv("DISPLAY", "{}".format(os.getenv("DISPLAY")))
                 taskJson.addVolume("/tmp/.X11-unix", "/tmp/.X11-unix", "rw")
             maxThreads = 1
             maxRam = 0
@@ -440,7 +440,7 @@ class DockerClient:
         if useGpu:
             dockerBaseFlags += "--gpus all "
         if exportGraphics:
-            dockerBaseFlags += "-e DISPLAY=:1 -v /tmp/.X11-unix:/tmp/.X11-unix "
+            dockerBaseFlags += "-e DISPLAY={} -v /tmp/.X11-unix:/tmp/.X11-unix ".format(os.getenv("DISPLAY"))
         if portMappings:
             for mapping in portMappings:
                 dockerBaseFlags += "-p {} ".format(mapping)
