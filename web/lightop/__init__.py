@@ -97,9 +97,9 @@ def redirectme():
     if "height" in request.args:
         env["height"] = request.args["height"]
 
-    # sed
+    # use sed to set resolution in supervisord.conf
     subprocess.check_call(
-        r"sed -i 's#\(command=.*Xvfb.* \)[0-9]*x[0-9]*#\1{width}x{height}#' /etc/supervisor/conf.d/supervisord.conf".format(
+        r"sed -i '/Xvfb/ s/[0-9]\+x[0-9]\+/{width}x{height}/' /etc/supervisor/conf.d/supervisord.conf".format(
             **env
         ),
         shell=True,
