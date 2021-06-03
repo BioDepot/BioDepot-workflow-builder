@@ -766,9 +766,11 @@ class OWWidgetBuilder(widget.OWWidget):
             loadIconFile = os.listdir(loadWidgetDir + "/icon")[0]
             if self.widgetDir:
                 if os.path.realpath(self.widgetDir) != os.path.realpath(loadWidgetDir):
-                    breakpoint(message="cp {}/icon/{} {}/icon/.".format(loadWidgetDir,loadIconFile,self.widgetDir))
+                    #breakpoint(message="cp {}/icon/{} {}/icon/.".format(loadWidgetDir,loadIconFile,self.widgetDir))
                     os.system("cp {}/icon/{} {}/icon/.".format(loadWidgetDir,loadIconFile,self.widgetDir)) 
-                self.resetIconFile()
+                    self.allStates['icon'][2][1]="{}/icon/{}".format(self.widgetDir,loadIconFile)
+                else:
+                    self.resetIconFile()
             else:
                 self.allStates['icon'][2][1]="{}/icon/{}".format(loadWidgetDir,loadIconFile) 
 
