@@ -462,7 +462,9 @@ class OWWidgetBuilder(widget.OWWidget):
                 self.allStates = self.unPickleData(allStatesFile)
                 self.addGroupToStates()
             #copy the location of the icon file to the icon ledit
-            if not (self.widgetDir) or (os.path.normpath(loadWidgetDir) != os.path.normpath(self.widgetDir)): 
+            if not (self.widgetDir) or (os.path.normpath(loadWidgetDir) != os.path.normpath(self.widgetDir)):
+                if  not (self.widgetDir):
+                    self.widgetDir='/templates/Generic'
                 if hasattr(self,"widgetIconLedit"):
                     iconFiles=os.listdir(loadWidgetDir + "/icon")
                     if iconFiles:
