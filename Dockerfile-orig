@@ -1,7 +1,11 @@
 FROM ubuntu:18.04
-# Setup demo environment variables
-ENV DEBIAN_FRONTEND=noninteractive 
+MAINTAINER lhhung<lhhung@uw.edu>
 
+ENV DEBIAN_FRONTEND noninteractive
+ENV HOME /root
+ENV PIP_DISABLE_PIP_VERSION_CHECK 1
+
+#base files/utils to be used inside container
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
@@ -21,7 +25,6 @@ RUN apt-get update \
         nano \
         net-tools \
         nginx \
-        novnc \
         pwgen \
         python3-pyqt5 \
         python3-pyqt5.qtsvg \
@@ -35,9 +38,14 @@ RUN apt-get update \
         xterm \
         xvfb \
         zlib1g-dev \
-    && rm -rf /var/lib/apt/lists/*v 
+    && rm -rf /var/lib/apt/lists/*
 
-      
+#files for vnc framebuffer
+ADD noVNC /noVNC/
+RUN dpkg -i /noVNC/x11vnc*.deb \
+    && apt-get autoremove -y --purge
+
+#files for web interface noVNC
 ADD web /web/
 RUN apt-get update \
     && apt-get install -y \
@@ -91,24 +99,33 @@ RUN apt-get update \
         gnupg2 \
         software-properties-common \
     && rm -rf /var/lib/apt/lists/*
+
+#nginx and supervisor setup
+ADD supervisord.conf /etc/supervisor/conf.d/
+ADD nginx.conf /etc/nginx/sites-enabled/default
+
 #jsonpickle
 RUN pip3 install --user jsonpickle
-    
+
 #put biodepot here and keep pip for rapid updates
 ADD biodepot biodepot
 RUN pip3 install -e biodepot
+
+ADD startup.sh /
+EXPOSE 6080
+WORKDIR /data
 
 #install docker-compose
 RUN curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
     && chmod +x /usr/local/bin/docker-compose
 
 #Change app name to Bwb
-RUN sed -i 's/"Orange Canvas"/"Bwb"/' /orange3/Orange/canvas/config.py  
+RUN sed -i 's/"Orange Canvas"/"Bwb"/' /orange3/Orange/canvas/config.py
 
- 
+#set up some config files
 COPY fluxbox_config/ /root/.fluxbox/
 COPY user_config/ /root/
- 
+
 #patch orange3
 COPY orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
 COPY orangePatches/canvasmain.py /orange3/Orange/canvas/application/canvasmain.py
@@ -139,12 +156,6 @@ ADD icons /icons/
 ADD tutorialFiles /tutorialFiles
 ADD serverSettings.json /biodepot
 
-#COPY . /app
-ADD websockify /websockify
-ADD noVNC /noVNC
-ADD startup.sh /
-ADD nginx.conf /etc/nginx/sites-enabled/default
-ADD supervisord.conf /etc/supervisor/conf.d/
-WORKDIR /data
-CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
-EXPOSE 6080
+#start it up
+CMD /startup.sh \
+    && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
