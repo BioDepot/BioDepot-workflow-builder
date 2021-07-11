@@ -1,0 +1,12 @@
+FROM biodepot/bwb:beta
+MAINTAINER lhhung<lhhung@uw.edu>
+
+#add config files for dev tools
+COPY dev-files/menu /root/.fluxbox/
+COPY dev-files/geany/ /root/.config/
+
+RUN apt-get update \
+    && apt-get install -y \
+        firefox \
+        geany \
+    && rm -rf /var/lib/apt/lists/*
