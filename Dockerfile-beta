@@ -142,9 +142,9 @@ ADD serverSettings.json /biodepot
 #COPY . /app
 ADD websockify /websockify
 ADD noVNC /noVNC
-ADD startup.sh /
+ADD beta/startup.sh /
 ADD nginx.conf /etc/nginx/sites-enabled/default
-ADD supervisord.conf /etc/supervisor/conf.d/
+ADD beta/supervisord.conf /etc/supervisor/conf.d/
 WORKDIR /data
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
 EXPOSE 6080
