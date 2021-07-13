@@ -1,4 +1,4 @@
-FROM biodepot/bwb:latest
+FROM biodepot/bwb:beta
 MAINTAINER lhhung<lhhung@uw.edu>
 
 #add config files for dev tools
