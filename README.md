@@ -316,7 +316,7 @@ Source code	: [https://github.com/BioDepot/BioDepot-workflow-builder](https://gi
 
 Linux/Mac
 ```bash
-sudo docker run --rm   -p 6080:6080 \
+docker run --rm   -p 6080:6080 \
     -v  ${PWD}/:/data  \
     -v  /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
@@ -326,7 +326,7 @@ sudo docker run --rm   -p 6080:6080 \
 
 Windows
 ```bash
-docker run --rm   -p 6080:6080 \
+sudo docker run --rm   -p 6080:6080 \
     -v  /c/users:/data  \
     -v  /var/run/docker.sock:/var/run/docker.sock \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
