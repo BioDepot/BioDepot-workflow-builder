@@ -17,7 +17,7 @@ import Keyboard from "../core/input/keyboard.js";
 import RFB from "../core/rfb.js";
 import * as WebUtil from "./webutil.js";
 
-const PAGE_TITLE = "BioDepot-workflow-builder";
+const PAGE_TITLE = "noVNC";
 
 const UI = {
 
@@ -1659,7 +1659,7 @@ const UI = {
     updateDesktopName(e) {
         UI.desktopName = e.detail.name;
         // Display the desktop name in the document title
-        document.title = PAGE_TITLE;
+        document.title = e.detail.name + " - " + PAGE_TITLE;
     },
 
     bell(e) {
@@ -1695,7 +1695,7 @@ const UI = {
 };
 
 // Set up translations
-const LINGUAS = ["cs", "de", "el", "es", "ja", "ko", "nl", "pl", "pt_BR", "ru", "sv", "tr", "zh_CN", "zh_TW"];
+const LINGUAS = ["cs", "de", "el", "es", "fr", "ja", "ko", "nl", "pl", "pt_BR", "ru", "sv", "tr", "zh_CN", "zh_TW"];
 l10n.setup(LINGUAS);
 if (l10n.language === "en" || l10n.dictionary !== undefined) {
     UI.prime();
