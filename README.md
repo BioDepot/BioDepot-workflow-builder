@@ -18,6 +18,7 @@ University of Washington Tacoma
          * [Where are the sample workflows and datasets?](#where-are-the-sample-workflows-and-datasets)
          * [Is it possible to use Bwb to run a batch of datasets?](#is-it-possible-to-use-bwb-to-run-a-batch-of-datasets)
          * [How do I add my own scripts to a Bwb pipeline?](#how-do-i-add-my-own-scripts-to-a-bwb-pipeline)
+         * [How do I cut and paste into Bwb?](#how-do-i-cut-and-paste-into-bwb)
       * [Common problems](#common-problems)
          * [I'm having problems with windows](#im-having-problems-with-windows)
          * [My window is too small](#my-window-is-too-small)
@@ -250,6 +251,12 @@ We do have a built-in job scheduler that is under development for Bwb. You can t
 ### How do I add my own scripts to a Bwb pipeline?
 We have provided basic widgets for Python, R, Perl, Bash, and Java. There is a [tutorial](#tutorial---adding-a-python-script-to-a-bwb-workflow) and a [video](https://www.youtube.com/watch?v=jtu-jCU2DU0)  showing how to add a script to a Bwb pipeline.
 
+### How do I cut and paste into Bwb?
+#### Browser version: 
+There is a side arrow in the browser (noVNC) connected version of Bwb. Click on the arrow and a menu will show. Click on the clipboard icon. You can then cut and paste from your desktop to the clipboard and from the the clipboard into Bwb. The reverse is true too. When you are done you can hide the side menu. There are also icons for combined keystrokes such as control-c, control-v which are activated from the side menu. This gives a mechanism to override the browser mappings for these keystrokes. 
+#### VNC client version:
+If you are using a VNC client then you need to follow the instructions for that particular client. RealVNC, has very robust support for cut and paste, treating the windows inside Bwb like any other window. Also all the control-key combinations are supported without the need for a separate menu to enter them as there is no need to bypass the browser defaults.
+
 ## Common problems
 
 ### I'm having problems with windows
@@ -345,6 +352,16 @@ For Windows and Macs the IP may vary depending on your setup.
 Windows 10 Pro and newer Macs running native Docker will use the same localhost setup. Windows 7, 8 and 10 Home edition, and older Macs that use a Virtual machine (VM) will need to use the IP of the virtual machine instead of localhost - usually 192.168.99.100. In addition, for these VM setups, the available RAM of the VM limits the RAM that can be used (usually 1 or 2 GB only). The VM settings must be adjusted to increase the available memory for applications such as Kallisto (roughly 8 GB and STAR (roughly 32 GB for human datasets). 
 
 4\. To quit the container, right click inside the browser and choose the QUIT container option. Alternatively, you can also stop it by finding the container id and stopping the container. Quitting the browser just closes the viewport to the container - it does not stop the container.
+
+#### Using a VNC client
+
+In addition to being able to connect with a browser it is also possible to use a dedicated VNC client. Real VNC [Free version](https://www.realvnc.com/en/connect/download/viewer/) is one that we use. Using a VNC client makes all the control key combinations available and cut-and-paste from outside Bwb into Bwb available without using the side menu as in the browser connection.
+
+For a VNC connection you must add the flag
+```
+-p 5900:5900
+```
+to the Docker command to expose the port to communicate with the VNC client. Then connect your client to localhost:5900 if you are running Bwb locally or <ip>:5900 if you are running on the cloud. You will need to open the port if running on the cloud - follow the instructions [here](#on-the-cloud) but substituting 5900 for 6080. 
 
 ## Installing and starting Docker
 
