@@ -19,7 +19,7 @@ class OWgnumeric(OWBwBWidget):
     icon = getIconName(__file__, "gnumeric.png")
     want_main_area = False
     docker_image_name = "biodepot/gnumeric"
-    docker_image_tag = "1.12.18__debian-jessie-slim__080418"
+    docker_image_tag = "buster-slim__noshm__f8d184ab"
     inputs = [
         ("inputFile", str, "handleInputsinputFile"),
         ("Trigger", str, "handleInputsTrigger"),
