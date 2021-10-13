@@ -1038,16 +1038,16 @@ The workflow is ready to be run by double-clicking on the 'Download sleuth direc
 
 ### Development environment
 
-We provide additional tools in the biodepot/bwb-widget-dev for development of widgets. This includes a full-fledged editor, geany, some graphics tools for making icons, firefox for cutting pasting from stack overflow and other resources and for editing json files inside the container. This can be pulled from Dockerhub:
+We provide additional tools in the biodepot/bwb-dev for development of widgets. This includes a full-fledged editor, geany, some graphics tools for making icons, firefox for cutting pasting from stack overflow and other resources and for editing json files inside the container. This can be pulled from Dockerhub:
 
 ```bash
-docker pull biodepot/bwb-widget-dev
+docker pull biodepot/bwb-dev
 ```
 Alternatively the image can be built from source using the Dockerfile:
 
 ```bash
 cd <github repo>
-docker build -f ./Dockerfile-widgets -t biodepot/bwb-widget-dev .
+docker build -f ./Dockerfile-widgets -t biodepot/bwb-dev .
 ```
 As the development version of Bwb is not yet linked to the github, it is better to build the container locally.
 
