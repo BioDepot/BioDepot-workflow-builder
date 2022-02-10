@@ -1,0 +1,13 @@
+tempDir proc.6a768f799e9c4881830366eb38744c83
+logBaseDir /data/.bwb
+ -v /home/lhhung/repos/BioDepot-workflow-builder:/data   biodepot/bioconductor:3.14__ubuntu_20.04__R_4.1.0__d6630ab5 Rscript  /data/test.R 
+docker run -i --rm  --init --cidfile=/tmp/proc.6a768f799e9c4881830366eb38744c83/locks/lock0/pid.223 -v /home/lhhung/repos/BioDepot-workflow-builder/.bwbshare/proc.6a768f799e9c4881830366eb38744c83/output0:/tmp/output   -v /home/lhhung/repos/BioDepot-workflow-builder:/data   biodepot/bioconductor:3.14__ubuntu_20.04__R_4.1.0__d6630ab5 Rscript  /data/test.R  
+[1] "Hello World"
+job0 exited successfully
+ keyfiles 0 
+datastring [
+  {}
+]
+output is [
+  {}
+]

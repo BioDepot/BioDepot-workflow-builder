@@ -14,12 +14,12 @@ from PyQt5 import QtWidgets, QtGui
 
 class OWbioc_R(OWBwBWidget):
     name = "bioc_R"
-    description = "Bioconductor 3.7 R 3.5.1"
+    description = "Bioconductor 3.14 R 4.1.0"
     priority = 1
     icon = getIconName(__file__, "bioc-r.png")
     want_main_area = False
     docker_image_name = "biodepot/bioconductor"
-    docker_image_tag = "3.7__ubuntu-18.04__R-3.5.1__081318"
+    docker_image_tag = "3.14__ubuntu_20.04__R_4.1.0__d6630ab5"
     inputs = [
         ("inputFile", str, "handleInputsinputFile"),
         ("Trigger", str, "handleInputsTrigger"),
