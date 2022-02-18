@@ -94,7 +94,12 @@ RUN apt-get update \
 RUN pip3 install --user jsonpickle
 
 #put biodepot here and keep pip for rapid updates
+ADD widgets widgets
 ADD biodepot biodepot
+
+#This script is necessary for customization
+COPY scripts/generate_setup.sh /usr/local/bin/generate_setup.sh
+
 RUN pip3 install -e biodepot
 
 #install docker-compose
@@ -116,6 +121,7 @@ COPY orangePatches/link.py /orange3/Orange/canvas/scheme/link.py
 COPY orangePatches/signals.py /orange3/Orange/widgets/utils/signals.py
 COPY orangePatches/linkitem.py /orange3/Orange/canvas/canvas/items/linkitem.py
 COPY orangePatches/__main__.py /orange3/Orange/canvas/__main__.py
+COPY orangePatches/discovery.py /orange3/Orange/canvas/registry/discovery.py
 
 #add bwb start scripts
 COPY scripts/startBwb.sh /usr/local/bin/startBwb.sh
@@ -128,7 +134,7 @@ COPY scripts/addWidgetToToolDock.sh /usr/local/bin/addWidgetToToolDock.sh
 COPY scripts/removeWidgetFromToolDock.sh /usr/local/bin/removeWidgetFromToolDock.sh
 
 #add widgets and workflows
-ADD widgets /widgets/
+
 ADD workflows /workflows/
 ADD notebooks /notebooks/
 ADD templates /templates/
