@@ -1,9 +1,15 @@
 #!/bin/bash
 
-orderFile=drawers.txt
+[ -z "$custom" ] && exit 0
 
-mkdir -p /biodepot
+orderFile=$custom/category_list
 setup=/biodepot/setup.py
+mv /biodepot /biodepot.temp
+mv /widgets /widgets.temp 
+mkdir -p /widgets
+mkdir -p /biodepot
+cp /biodepot.temp/serverSettings.json /biodepot/. 
+
 createLinks () {
 	workflow=/biodepot/$1
 	widgets=($(cd $workflow/widgets && find $1 -mindepth 1 -maxdepth 1 -type d ! -name icon))
@@ -29,8 +35,8 @@ processLine () {
 	widgetPath="/widgets.temp/$dirName"
 	cp -r  $dirPath /biodepot/$dirName || exit 1
 	cp -r  $widgetPath /widgets/$dirName || exit 1
- elif [ -d "/extras/$dirName" ]; then
-	dirPath="/extras/$dirName"
+ elif [ -d "$custom/$dirName" ]; then
+	dirPath="$custom/$dirName"
 	cp -r  $dirPath /biodepot/$dirName || exit 1
 	cp -r  /biodepot/$dirName/widgets/$dirName/icon  /biodepot/$dirName/.
 	createLinks $dirName
@@ -44,10 +50,12 @@ processLine () {
  echo '    package_data={''"'"$dirName"'": [''"icons/*.svg''"]},' >> $setup
  echo '    entry_points={''"'orange.widgets'": ''"'"$drawName"' = '"$dirName"'"}' >> $setup
  echo ')' >> $setup
- pip3 install -e /biodepot
 }
 echo "from setuptools import setup" > $setup
 
 while IFS= read -r LINE; do
     processLine "$LINE"
 done < $orderFile
+pip3 install -e /biodepot
+rm -rf /biodepot.temp
+rm -rf /widgets.temp
