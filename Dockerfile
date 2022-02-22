@@ -132,7 +132,7 @@ COPY scripts/whiteListToolDock.py /usr/local/bin/whiteListToolDock.py
 COPY scripts/addWorkflowsToToolDock.py /usr/local/bin/addWorkflowsToToolDock.py
 COPY scripts/addWidgetToToolDock.sh /usr/local/bin/addWidgetToToolDock.sh
 COPY scripts/removeWidgetFromToolDock.sh /usr/local/bin/removeWidgetFromToolDock.sh
-
+COPY scripts/generate_setup.sh usr/local/bin/generate_setup.sh
 #add widgets and workflows
 
 ADD workflows /workflows/
