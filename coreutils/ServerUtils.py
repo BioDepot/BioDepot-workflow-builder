@@ -88,14 +88,10 @@ class IterateDialog(QDialog):
         self.settingsCopy = copy.deepcopy(self.iterateSettings)
         self.table.setRowCount(nRows)
         rowNum = 0
-
+        self.scatterOptions=['None','Auto','List','fastq','SAM','BAM']
+        self.gatherOptions=['None','Auto','Concatenate','fastq','SAM','BAM']
         for parm in self.settingsCopy["iterableAttrs"]:
-            scatterable=False
-            gatherOptions=['None','Auto','Concatenate','fastq','SAM','BAM']
-            gatherBox = QtGui.QComboBox()
-            #gatherBox.setEditable(True)
-            for gatherOption in gatherOptions:
-                gatherBox.addItem(gatherOption)  
+            scatterable=False 
             if parm  in self.iterateSettings["scatterableAttrs"]:
                 scatterable=True
             # init values if they are not there
@@ -133,7 +129,9 @@ class IterateDialog(QDialog):
                     self.setEnableSelect(scatterSizeItem, False)
                     self.setEnableSelect(scatterCmdItem, False)
                     self.setEnableSelect(gatherCmdItem, False)
-    
+                else:
+                    self.enableComboBox(rowNum,6,self.scatterOptions,scatterCmdItem.text())
+                    self.enableComboBox(rowNum,7,self.gatherOptions,gatherCmdItem.text())
                 cb.setCheckState(QtCore.Qt.Checked)
             else:
                 cb.setCheckState(QtCore.Qt.Unchecked)
@@ -155,7 +153,7 @@ class IterateDialog(QDialog):
             self.table.setItem(rowNum, 7, gatherCmdItem)
             rowNum = rowNum + 1
         self.table.cellChanged.connect(self.onCellChange)            
-
+        
         # buttons for save and load
 
         saveBtn = gui.button(None, self, "Save", callback=self.save)
@@ -206,14 +204,10 @@ class IterateDialog(QDialog):
     def onCellChange(self, row, column):
         if column == 0 :
             return self.onCheckBoxChange(row);
-        if column == 6 :
+        if column > 5 :
             if self.table.cellWidget(row,column):
                 if self.table.item(row,column).text() != self.table.cellWidget(row,column).currentText():
                     self.table.item(row,column).setText(self.table.cellWidget(row,column).currentText())
-            
-    def onScatterChange(self, row, column):
-        if self.table.cellWidget(row,column):
-            self.table.setItem(row,column,QTableWidgetItem(self.table.cellWidget(row,column).currentText()))
     
     def onCheckBoxChange(self, row):
         cb = self.table.item(row, 0)
@@ -230,8 +224,9 @@ class IterateDialog(QDialog):
                     item = self.table.item(row, col)
                     self.setEnableSelect(item, True)
                     if col == 6:
-                        self.enableScatterBox(row,col,self.table.item(row, col).text())
-                    
+                        self.enableComboBox(row,col,self.scatterOptions,self.table.item(row, col).text())
+                    if col == 7:
+                        self.enableComboBox(row,col,self.gatherOptions,self.table.item(row, col).text())                    
             if (
                 "iteratedAttrs" in self.settingsCopy
                 and parm not in self.settingsCopy["iteratedAttrs"]
@@ -252,19 +247,33 @@ class IterateDialog(QDialog):
                 and parm not in self.settingsCopy["iteratedAttrs"]
             ):
                 self.settingsCopy["iteratedAttrs"].remove(parm)
-    def enableScatterBox(self,row,col,value=None):
-        scatterOptions=['None','Auto','List','fastq','SAM','BAM']
-        scatterBox = QtGui.QComboBox()
-        #scatterBox.setEditable(True)
-        for scatterOption in scatterOptions:
-            scatterBox.addItem(scatterOption)
+
+    def enableComboBox(self,row,col,comboOptions,value=None):
+        comboBox = QtGui.QComboBox()
+        comboBox.setEditable(False)
+        for comboOption in comboOptions:
+            comboBox.addItem(comboOption)
         if value:
-            if value not in scatterOptions:
-                scatterBox.addItem(value);
-            scatterBox.setCurrentText(value)
+            if value not in comboOptions:
+                comboBox.addItem(value);
+                comboBox.setEditable(True)
+            else:
+                comboBox.addItem("Custom")
+            comboBox.setCurrentText(value)
         else:
-            scatterBox.addItem("Custom");
-        self.table.setCellWidget(row,col,scatterBox);
+            comboBox.addItem("Custom")
+        if value == "Custom":
+            comboBox.setEditable(True)
+        comboBox.currentIndexChanged.connect(lambda index: self.onComboBoxChange(index,cb=comboBox))
+        self.table.setCellWidget(row,col,comboBox)
+        
+    def onComboBoxChange (self,index,cb=None):
+        if cb and cb.count()-1 == index:
+            cb.setEditable(True)
+        else:
+            cb.setEditable(False)
+                        
+
         
     def disableBox(self,row,col):
         if self.table.cellWidget(row,col):
@@ -291,7 +300,11 @@ class IterateDialog(QDialog):
     def updateSettings(self):
         newData = OrderedDict()
         newIteratedAttrs = []
+
         for i in range(self.table.rowCount()):
+            #update any comboBoxes
+            self.onCellChange(i,6)
+            self.onCellChange(i,7)
             parm = itemToText(self.table.item(i, 1))
             newData[parm] = {
                 "groupSize": itemToText(self.table.item(i, 2)),
@@ -299,6 +312,7 @@ class IterateDialog(QDialog):
                 "ram": itemToText(self.table.item(i, 4)),
                 "scatterSize": itemToText(self.table.item(i, 5)),
                 "scatterCmd": itemToText(self.table.item(i, 6)),
+                "gatherCmd": itemToText(self.table.item(i, 7)),
             }
             if self.table.item(i, 0).checkState() == QtCore.Qt.Checked:
                 newIteratedAttrs.append(parm)

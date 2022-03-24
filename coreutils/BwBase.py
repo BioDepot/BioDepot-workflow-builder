@@ -886,22 +886,11 @@ class OWBwBWidget(widget.OWWidget):
             self.iterateSettingsBtn.setStyleSheet(self.css)
             self.iterateSettingsBtn.setFixedSize(80, 20)
             
-            
-            self.gatherSettingsBtn = gui.button(
-                None, self, "Gather", callback=self.setIteration
-            )
-            self.gatherSettingsBtn.setStyleSheet(self.css)
-            self.gatherSettingsBtn.setFixedSize(80, 20)
-            
             iterateCheckbox = gui.checkBox(None, self, "iterate", label="Iterate")
             self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked())
-            self.gatherSettingsBtn.setEnabled(iterateCheckbox.isChecked())
 
             iterateCheckbox.stateChanged.connect(
                 lambda: self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked())
-            )
-            iterateCheckbox.stateChanged.connect(
-                lambda: self.gatherSettingsBtn.setEnabled(iterateCheckbox.isChecked())
             )
 
             iterateCheckbox.stateChanged.connect(
@@ -913,7 +902,6 @@ class OWBwBWidget(widget.OWWidget):
             iterateBox = QtGui.QHBoxLayout()
             iterateBox.addWidget(iterateCheckbox)
             iterateBox.addWidget(self.iterateSettingsBtn)
-            iterateBox.addWidget(self.gatherSettingsBtn)
             iterateBox.addStretch(1)
 
             self.threadSpin.setEnabled(iterateCheckbox.isChecked())
