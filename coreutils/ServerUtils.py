@@ -53,7 +53,6 @@ class IterateDialog(QDialog):
         nRows = len(iterateSettings["iterableAttrs"])
         if not nRows:
             return
-        nCols = 5
         super().__init__()
         self.css = """
         QPushButton {background-color: #1588c5; color: white; height: 20px; border: 1px solid black; border-radius: 2px;}
@@ -61,7 +60,16 @@ class IterateDialog(QDialog):
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
         """
-        self.setMinimumSize(520, 240)
+        defaults={
+            "groupSize": "1",
+            "threads": "1",
+            "ram": "0",
+            "scatterSize": "None",
+            "scatterCmd": "None",
+            "gatherCmd": "None"
+        }
+        nCols = len(defaults)+2
+        self.setMinimumSize(860, 240)
         self.iterateSettings = iterateSettings
         self.setWindowTitle("Edit iterate settings")
         self.table = QTableWidget()
@@ -75,39 +83,33 @@ class IterateDialog(QDialog):
         )
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(
-            ["", "Parameter", "Group size", "Threads needed", "Required RAM (MB)"]
+            ["", "Parameter", "Group size", "Threads needed", "Required RAM (MB)", "Scatter size","Scatter type", "Gather type"]
         )
         self.settingsCopy = copy.deepcopy(self.iterateSettings)
         self.table.setRowCount(nRows)
         rowNum = 0
 
         for parm in self.settingsCopy["iterableAttrs"]:
+            scatterable=False
+            gatherOptions=['None','Auto','Concatenate','fastq','SAM','BAM']
+            gatherBox = QtGui.QComboBox()
+            #gatherBox.setEditable(True)
+            for gatherOption in gatherOptions:
+                gatherBox.addItem(gatherOption)  
+            if parm  in self.iterateSettings["scatterableAttrs"]:
+                scatterable=True
             # init values if they are not there
             if "data" not in self.settingsCopy:
                 self.settingsCopy["data"] = {}
             if parm not in self.settingsCopy["data"]:
-                self.settingsCopy["data"][parm] = {
-                    "groupSize": "1",
-                    "threads": "1",
-                    "ram": "0",
-                }
-
-            if (
-                "groupSize" not in self.settingsCopy["data"][parm].keys()
-                or not self.settingsCopy["data"][parm]["groupSize"]
-            ):
-                self.settingsCopy["data"][parm]["groupSize"] = "1"
-            if (
-                "threads" not in self.settingsCopy["data"][parm].keys()
-                or not self.settingsCopy["data"][parm]["threads"]
-            ):
-                self.settingsCopy["data"][parm]["threads"] = "1"
-            if (
-                "ram" not in self.settingsCopy["data"][parm].keys()
-                or not self.settingsCopy["data"][parm]["ram"]
-            ):
-                self.settingsCopy["data"][parm]["ram"] = "0"
-            # make column items
+                self.settingsCopy["data"][parm] = defaults
+            for key in defaults:
+                if (
+                    key not in self.settingsCopy["data"][parm].keys()
+                    or not self.settingsCopy["data"][parm][key]
+                ):
+                    self.settingsCopy["data"][parm][key] = defaults[key]
+             # make column items
             cb = QTableWidgetItem()
             parmItem = QTableWidgetItem(parm)
             groupSizeItem = QTableWidgetItem(
@@ -115,6 +117,9 @@ class IterateDialog(QDialog):
             )
             threadItem = QTableWidgetItem(self.settingsCopy["data"][parm]["threads"])
             ramItem = QTableWidgetItem(self.settingsCopy["data"][parm]["ram"])
+            scatterSizeItem = QTableWidgetItem(self.settingsCopy["data"][parm]["scatterSize"])
+            scatterCmdItem = QTableWidgetItem(self.settingsCopy["data"][parm]["scatterCmd"])
+            gatherCmdItem = QTableWidgetItem(self.settingsCopy["data"][parm]["gatherCmd"])
 
             self.setSelect(parmItem, False)
             parmItem.setFlags(parmItem.flags() ^ Qt.ItemIsEditable)
@@ -124,6 +129,11 @@ class IterateDialog(QDialog):
                 "iteratedAttrs" in self.settingsCopy
                 and parm in self.settingsCopy["iteratedAttrs"]
             ):
+                if not scatterable:
+                    self.setEnableSelect(scatterSizeItem, False)
+                    self.setEnableSelect(scatterCmdItem, False)
+                    self.setEnableSelect(gatherCmdItem, False)
+    
                 cb.setCheckState(QtCore.Qt.Checked)
             else:
                 cb.setCheckState(QtCore.Qt.Unchecked)
@@ -131,14 +141,20 @@ class IterateDialog(QDialog):
                 self.setEnableSelect(groupSizeItem, False)
                 self.setEnableSelect(threadItem, False)
                 self.setEnableSelect(ramItem, False)
-
+                self.setEnableSelect(scatterSizeItem, False)
+                self.setEnableSelect(scatterCmdItem, False)
+                self.setEnableSelect(gatherCmdItem, False)
+                    
             self.table.setItem(rowNum, 0, cb)
             self.table.setItem(rowNum, 1, parmItem)
             self.table.setItem(rowNum, 2, groupSizeItem)
             self.table.setItem(rowNum, 3, threadItem)
             self.table.setItem(rowNum, 4, ramItem)
+            self.table.setItem(rowNum, 5, scatterSizeItem)
+            self.table.setItem(rowNum, 6, scatterCmdItem)
+            self.table.setItem(rowNum, 7, gatherCmdItem)
             rowNum = rowNum + 1
-        self.table.cellChanged.connect(self.onCheckBoxChanged)
+        self.table.cellChanged.connect(self.onCellChange)            
 
         # buttons for save and load
 
@@ -178,6 +194,8 @@ class IterateDialog(QDialog):
             item.setFlags(item.flags() ^ Qt.ItemIsSelectable)
 
     def setEnableSelect(self, item, state):
+        if not item:
+            return
         if state:
             item.setFlags(item.flags() | Qt.ItemIsEnabled)
             item.setFlags(item.flags() | Qt.ItemIsSelectable)
@@ -185,17 +203,35 @@ class IterateDialog(QDialog):
             item.setFlags(item.flags() ^ Qt.ItemIsEnabled)
             item.setFlags(item.flags() ^ Qt.ItemIsSelectable)
 
-    def onCheckBoxChanged(self, row, column):
-        if column:
-            return
+    def onCellChange(self, row, column):
+        if column == 0 :
+            return self.onCheckBoxChange(row);
+        if column == 6 :
+            if self.table.cellWidget(row,column):
+                if self.table.item(row,column).text() != self.table.cellWidget(row,column).currentText():
+                    self.table.item(row,column).setText(self.table.cellWidget(row,column).currentText())
+            
+    def onScatterChange(self, row, column):
+        if self.table.cellWidget(row,column):
+            self.table.setItem(row,column,QTableWidgetItem(self.table.cellWidget(row,column).currentText()))
+    
+    def onCheckBoxChange(self, row):
         cb = self.table.item(row, 0)
         parmItem = self.table.item(row, 1)
         parm = parmItem.text()
+        #also need to enable disable any associated cell widgets
         if cb.checkState() == QtCore.Qt.Checked:
             self.setEnable(parmItem, True)
             for col in range(2, 5):
                 item = self.table.item(row, col)
                 self.setEnableSelect(item, True)
+            for col in range(5, 8):
+                if parm  in self.iterateSettings["scatterableAttrs"]:
+                    item = self.table.item(row, col)
+                    self.setEnableSelect(item, True)
+                    if col == 6:
+                        self.enableScatterBox(row,col,self.table.item(row, col).text())
+                    
             if (
                 "iteratedAttrs" in self.settingsCopy
                 and parm not in self.settingsCopy["iteratedAttrs"]
@@ -206,11 +242,33 @@ class IterateDialog(QDialog):
             for col in range(2, 5):
                 item = self.table.item(row, col)
                 self.setEnableSelect(item, False)
+            for col in range(5, 8):
+                if parm  in self.iterateSettings["scatterableAttrs"]:
+                    item = self.table.item(row, col)
+                    self.setEnableSelect(item, False)
+                    self.disableBox(row,col)
             if (
                 "iteratedAttrs" in self.settingsCopy
                 and parm not in self.settingsCopy["iteratedAttrs"]
             ):
                 self.settingsCopy["iteratedAttrs"].remove(parm)
+    def enableScatterBox(self,row,col,value=None):
+        scatterOptions=['None','Auto','List','fastq','SAM','BAM']
+        scatterBox = QtGui.QComboBox()
+        #scatterBox.setEditable(True)
+        for scatterOption in scatterOptions:
+            scatterBox.addItem(scatterOption)
+        if value:
+            if value not in scatterOptions:
+                scatterBox.addItem(value);
+            scatterBox.setCurrentText(value)
+        else:
+            scatterBox.addItem("Custom");
+        self.table.setCellWidget(row,col,scatterBox);
+        
+    def disableBox(self,row,col):
+        if self.table.cellWidget(row,col):
+            self.table.removeCellWidget(row,col);
 
     def closeEvent(self, event):
         if self.iterateSettings == self.settingsCopy:
@@ -239,6 +297,8 @@ class IterateDialog(QDialog):
                 "groupSize": itemToText(self.table.item(i, 2)),
                 "threads": itemToText(self.table.item(i, 3)),
                 "ram": itemToText(self.table.item(i, 4)),
+                "scatterSize": itemToText(self.table.item(i, 5)),
+                "scatterCmd": itemToText(self.table.item(i, 6)),
             }
             if self.table.item(i, 0).checkState() == QtCore.Qt.Checked:
                 newIteratedAttrs.append(parm)
@@ -275,7 +335,7 @@ class ServerDialog(QDialog):
         QPushButton:hover:pressed { background-color: lightBlue; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: white; border: 1px solid gray; } 
         """
-        self.setMinimumSize(640, 384)
+        self.setMinimumSize(720, 384)
         self.serverSettings = serverSettings
         self.setWindowTitle("Edit server settings")
         self.settingsFile = "/biodepot/serverSettings.json"
@@ -521,7 +581,7 @@ class ServerDialog(QDialog):
             or extension == ".JSN"
         ):
             saveJson = True
-        elif extension is not ".tsv":
+        elif extension != ".tsv":
             qm = QtGui.QMessageBox
             title = "Which save format"
             ret = qm.question(

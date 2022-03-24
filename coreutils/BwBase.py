@@ -877,18 +877,33 @@ class OWBwBWidget(widget.OWWidget):
         if not hasattr(self, "iterate"):
             self.iterate = False
 
-        self.iterateSettings["iterableAttrs"] = self.findIterables()
+        #set self.iterateSettings
+        self.findIterables();
         if self.iterateSettings["iterableAttrs"]:
             self.iterateSettingsBtn = gui.button(
                 None, self, "Settings", callback=self.setIteration
             )
             self.iterateSettingsBtn.setStyleSheet(self.css)
             self.iterateSettingsBtn.setFixedSize(80, 20)
+            
+            
+            self.gatherSettingsBtn = gui.button(
+                None, self, "Gather", callback=self.setIteration
+            )
+            self.gatherSettingsBtn.setStyleSheet(self.css)
+            self.gatherSettingsBtn.setFixedSize(80, 20)
+            
             iterateCheckbox = gui.checkBox(None, self, "iterate", label="Iterate")
             self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked())
+            self.gatherSettingsBtn.setEnabled(iterateCheckbox.isChecked())
+
             iterateCheckbox.stateChanged.connect(
                 lambda: self.iterateSettingsBtn.setEnabled(iterateCheckbox.isChecked())
             )
+            iterateCheckbox.stateChanged.connect(
+                lambda: self.gatherSettingsBtn.setEnabled(iterateCheckbox.isChecked())
+            )
+
             iterateCheckbox.stateChanged.connect(
                 lambda: self.threadSpin.setEnabled(iterateCheckbox.isChecked())
             )
@@ -898,6 +913,7 @@ class OWBwBWidget(widget.OWWidget):
             iterateBox = QtGui.QHBoxLayout()
             iterateBox.addWidget(iterateCheckbox)
             iterateBox.addWidget(self.iterateSettingsBtn)
+            iterateBox.addWidget(self.gatherSettingsBtn)
             iterateBox.addStretch(1)
 
             self.threadSpin.setEnabled(iterateCheckbox.isChecked())
@@ -936,6 +952,8 @@ class OWBwBWidget(widget.OWWidget):
         iterateDialog = IterateDialog(self.iterateSettings)
         iterateDialog.exec_()
         self.iterateSettings = iterateDialog.iterateSettings
+
+
 
     def updateThreadSpin(self):
         self.nWorkers = self.threadSpin.value()
@@ -1846,14 +1864,17 @@ class OWBwBWidget(widget.OWWidget):
             removeBtn.setEnabled(False)
 
     def findIterables(self):
-        retList = []
+        self.iterateSettings["iterableAttrs"]=[]
+        self.iterateSettings["scatterableAttrs"]=[]
         if self.data["parameters"] is None:
-            return retList
+            return
         for pname, pvalue in self.data["parameters"].items():
             if "list" in pvalue["type"] or pvalue["type"] == "patternQuery":
-                retList.append(pname)
-        return retList
-        
+                self.iterateSettings["iterableAttrs"].append(pname)
+            elif pvalue["type"] == "file" or pvalue["type"] == "directory":
+                self.iterateSettings["iterableAttrs"].append(pname)
+                self.iterateSettings["scatterableAttrs"].append(pname)
+ 
     def getIterableGroupSize(self,pname):
         if ("data" in self.iterateSettings
                 and pname in self.iterateSettings["data"]
