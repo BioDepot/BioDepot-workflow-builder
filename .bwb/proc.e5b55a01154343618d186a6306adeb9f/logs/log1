@@ -1,0 +1,149 @@
+docker run -i --rm  --init --cidfile=/tmp/proc.e5b55a01154343618d186a6306adeb9f/locks/lock0/pid.419 -v /home/lhhung/repos/BioDepot-workflow-builder/.bwbshare/proc.e5b55a01154343618d186a6306adeb9f/output0:/tmp/output   -v /home/lhhung/repos/BioDepot-workflow-builder:/data -v /home/lhhung/repos/BioDepot-workflow-builder/LINCS:/root/LINCS  -e BARCODE_FILENAME=barcodes_trugrade_96_set4.dat -e ENV_LANES=6 -e ENV_SERIES_NAME=20150409  biodepot/dtoxs_alignment:1.0__alpine-3.7__bwa-0.715-r1140__python-2.7.14__072818 /root/Programs/Broad-DGE/run-alignment-analysis.sh /root/LINCS  
+20150409
+barcodes_trugrade_96_set4.dat
+6
+/usr/bin/python2.7 /root/Programs/Broad-DGE/split_and_align.py RNAseq_20150409 Lane1 /root/LINCS/Seqs/RNAseq_20150409_Lane1_R1.fastq.gz /root/LINCS/Seqs/RNAseq_20150409_Lane1_R2.fastq.gz /root/LINCS/Aligns/ /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa 2> /root/LINCS/pyTimeLogs/pSplitTimeLog1 
+2) run individual align commands:
+bwa aln -l 24 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane1.25000.fastq | bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane1.25000.fastq > /root/LINCS/Aligns/RNAseq_20150409.Lane1.25000.fastq.sam
+[bwa_aln] 17bp reads: max_diff = 2
+[bwa_aln] 38bp reads: max_diff = 3
+[bwa_aln] 64bp reads: max_diff = 4
+[bwa_aln] 93bp reads: max_diff = 5
+[bwa_aln] 124bp reads: max_diff = 6
+[bwa_aln] 157bp reads: max_diff = 7
+[bwa_aln] 190bp reads: max_diff = 8
+[bwa_aln] 225bp reads: max_diff = 9
+[bwa_aln_core] calculate SA coordinate... 2.73 sec
+[bwa_aln_core] write to the disk... 0.01 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa aln -l 24 -t 1 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane1.25000.fastq
+[main] Real time: 2.916 sec; CPU: 2.847 sec
+[bwa_aln_core] convert to sequence coordinate... 0.24 sec
+[bwa_aln_core] refine gapped alignments... 0.03 sec
+[bwa_aln_core] print alignments... 0.07 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane1.25000.fastq
+[main] Real time: 3.296 sec; CPU: 0.433 sec
+/usr/bin/python2.7 /root/Programs/Broad-DGE/split_and_align.py RNAseq_20150409 Lane2 /root/LINCS/Seqs/RNAseq_20150409_Lane2_R1.fastq.gz /root/LINCS/Seqs/RNAseq_20150409_Lane2_R2.fastq.gz /root/LINCS/Aligns/ /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa 2> /root/LINCS/pyTimeLogs/pSplitTimeLog2 
+2) run individual align commands:
+bwa aln -l 24 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane2.25000.fastq | bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane2.25000.fastq > /root/LINCS/Aligns/RNAseq_20150409.Lane2.25000.fastq.sam
+[bwa_aln] 17bp reads: max_diff = 2
+[bwa_aln] 38bp reads: max_diff = 3
+[bwa_aln] 64bp reads: max_diff = 4
+[bwa_aln] 93bp reads: max_diff = 5
+[bwa_aln] 124bp reads: max_diff = 6
+[bwa_aln] 157bp reads: max_diff = 7
+[bwa_aln] 190bp reads: max_diff = 8
+[bwa_aln] 225bp reads: max_diff = 9
+[bwa_aln_core] calculate SA coordinate... 2.70 sec
+[bwa_aln_core] write to the disk... 0.00 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa aln -l 24 -t 1 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane2.25000.fastq
+[main] Real time: 2.885 sec; CPU: 2.814 sec
+[bwa_aln_core] convert to sequence coordinate... 0.25 sec
+[bwa_aln_core] refine gapped alignments... 0.03 sec
+[bwa_aln_core] print alignments... 0.07 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane2.25000.fastq
+[main] Real time: 3.275 sec; CPU: 0.442 sec
+/usr/bin/python2.7 /root/Programs/Broad-DGE/split_and_align.py RNAseq_20150409 Lane3 /root/LINCS/Seqs/RNAseq_20150409_Lane3_R1.fastq.gz /root/LINCS/Seqs/RNAseq_20150409_Lane3_R2.fastq.gz /root/LINCS/Aligns/ /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa 2> /root/LINCS/pyTimeLogs/pSplitTimeLog3 
+2) run individual align commands:
+bwa aln -l 24 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane3.25000.fastq | bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane3.25000.fastq > /root/LINCS/Aligns/RNAseq_20150409.Lane3.25000.fastq.sam
+[bwa_aln] 17bp reads: max_diff = 2
+[bwa_aln] 38bp reads: max_diff = 3
+[bwa_aln] 64bp reads: max_diff = 4
+[bwa_aln] 93bp reads: max_diff = 5
+[bwa_aln] 124bp reads: max_diff = 6
+[bwa_aln] 157bp reads: max_diff = 7
+[bwa_aln] 190bp reads: max_diff = 8
+[bwa_aln] 225bp reads: max_diff = 9
+[bwa_aln_core] calculate SA coordinate... 2.79 sec
+[bwa_aln_core] write to the disk... 0.01 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa aln -l 24 -t 1 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane3.25000.fastq
+[main] Real time: 2.960 sec; CPU: 2.899 sec
+[bwa_aln_core] convert to sequence coordinate... 0.27 sec
+[bwa_aln_core] refine gapped alignments... 0.03 sec
+[bwa_aln_core] print alignments... 0.07 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane3.25000.fastq
+[main] Real time: 3.364 sec; CPU: 0.465 sec
+/usr/bin/python2.7 /root/Programs/Broad-DGE/split_and_align.py RNAseq_20150409 Lane4 /root/LINCS/Seqs/RNAseq_20150409_Lane4_R1.fastq.gz /root/LINCS/Seqs/RNAseq_20150409_Lane4_R2.fastq.gz /root/LINCS/Aligns/ /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa 2> /root/LINCS/pyTimeLogs/pSplitTimeLog4 
+2) run individual align commands:
+bwa aln -l 24 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane4.25000.fastq | bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane4.25000.fastq > /root/LINCS/Aligns/RNAseq_20150409.Lane4.25000.fastq.sam
+[bwa_aln] 17bp reads: max_diff = 2
+[bwa_aln] 38bp reads: max_diff = 3
+[bwa_aln] 64bp reads: max_diff = 4
+[bwa_aln] 93bp reads: max_diff = 5
+[bwa_aln] 124bp reads: max_diff = 6
+[bwa_aln] 157bp reads: max_diff = 7
+[bwa_aln] 190bp reads: max_diff = 8
+[bwa_aln] 225bp reads: max_diff = 9
+[bwa_aln_core] calculate SA coordinate... 2.86 sec
+[bwa_aln_core] write to the disk... 0.01 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa aln -l 24 -t 1 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane4.25000.fastq
+[main] Real time: 3.030 sec; CPU: 2.960 sec
+[bwa_aln_core] convert to sequence coordinate... 0.26 sec
+[bwa_aln_core] refine gapped alignments... 0.03 sec
+[bwa_aln_core] print alignments... 0.07 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane4.25000.fastq
+[main] Real time: 3.422 sec; CPU: 0.463 sec
+/usr/bin/python2.7 /root/Programs/Broad-DGE/split_and_align.py RNAseq_20150409 Lane5 /root/LINCS/Seqs/RNAseq_20150409_Lane5_R1.fastq.gz /root/LINCS/Seqs/RNAseq_20150409_Lane5_R2.fastq.gz /root/LINCS/Aligns/ /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa 2> /root/LINCS/pyTimeLogs/pSplitTimeLog5 
+2) run individual align commands:
+bwa aln -l 24 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane5.25000.fastq | bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane5.25000.fastq > /root/LINCS/Aligns/RNAseq_20150409.Lane5.25000.fastq.sam
+[bwa_aln] 17bp reads: max_diff = 2
+[bwa_aln] 38bp reads: max_diff = 3
+[bwa_aln] 64bp reads: max_diff = 4
+[bwa_aln] 93bp reads: max_diff = 5
+[bwa_aln] 124bp reads: max_diff = 6
+[bwa_aln] 157bp reads: max_diff = 7
+[bwa_aln] 190bp reads: max_diff = 8
+[bwa_aln] 225bp reads: max_diff = 9
+[bwa_aln_core] calculate SA coordinate... 2.75 sec
+[bwa_aln_core] write to the disk... 0.00 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa aln -l 24 -t 1 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane5.25000.fastq
+[main] Real time: 2.877 sec; CPU: 2.849 sec
+[bwa_aln_core] convert to sequence coordinate... 0.25 sec
+[bwa_aln_core] refine gapped alignments... 0.03 sec
+[bwa_aln_core] print alignments... 0.07 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane5.25000.fastq
+[main] Real time: 3.270 sec; CPU: 0.402 sec
+/usr/bin/python2.7 /root/Programs/Broad-DGE/split_and_align.py RNAseq_20150409 Lane6 /root/LINCS/Seqs/RNAseq_20150409_Lane6_R1.fastq.gz /root/LINCS/Seqs/RNAseq_20150409_Lane6_R2.fastq.gz /root/LINCS/Aligns/ /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa 2> /root/LINCS/pyTimeLogs/pSplitTimeLog6 
+2) run individual align commands:
+bwa aln -l 24 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane6.25000.fastq | bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane6.25000.fastq > /root/LINCS/Aligns/RNAseq_20150409.Lane6.25000.fastq.sam
+[bwa_aln] 17bp reads: max_diff = 2
+[bwa_aln] 38bp reads: max_diff = 3
+[bwa_aln] 64bp reads: max_diff = 4
+[bwa_aln] 93bp reads: max_diff = 5
+[bwa_aln] 124bp reads: max_diff = 6
+[bwa_aln] 157bp reads: max_diff = 7
+[bwa_aln] 190bp reads: max_diff = 8
+[bwa_aln] 225bp reads: max_diff = 9
+[bwa_aln_core] calculate SA coordinate... 2.75 sec
+[bwa_aln_core] write to the disk... 0.00 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa aln -l 24 -t 1 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa /root/LINCS/Aligns/RNAseq_20150409.Lane6.25000.fastq
+[main] Real time: 2.927 sec; CPU: 2.848 sec
+[bwa_aln_core] convert to sequence coordinate... 0.24 sec
+[bwa_aln_core] refine gapped alignments... 0.03 sec
+[bwa_aln_core] print alignments... 0.07 sec
+[bwa_aln_core] 25000 sequences have been processed.
+[main] Version: 0.7.15-r1142-dirty
+[main] CMD: bwa samse -n 20 /root/LINCS/References/Broad_UMI/Human_RefSeq/refMrna_ERCC_polyAstrip.hg19.fa - /root/LINCS/Aligns/RNAseq_20150409.Lane6.25000.fastq
+[main] Real time: 3.305 sec; CPU: 0.454 sec
+job0 exited successfully

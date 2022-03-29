@@ -64,9 +64,9 @@ class IterateDialog(QDialog):
             "groupSize": "1",
             "threads": "1",
             "ram": "0",
-            "scatterSize": "None",
-            "scatterCmd": "None",
-            "gatherCmd": "None"
+            "splitSize": "None",
+            "splitCmd": "None",
+            "mergeCmd": "None"
         }
         nCols = len(defaults)+2
         self.setMinimumSize(860, 240)
@@ -83,17 +83,17 @@ class IterateDialog(QDialog):
         )
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(
-            ["", "Parameter", "Group size", "Threads needed", "Required RAM (MB)", "Scatter size","Scatter type", "Gather type"]
+            ["", "Parameter", "Group size", "Threads needed", "Required RAM (MB)", "Split size","Split type", "Merge type"]
         )
         self.settingsCopy = copy.deepcopy(self.iterateSettings)
         self.table.setRowCount(nRows)
         rowNum = 0
-        self.scatterOptions=['None','Auto','List','fastq','SAM','BAM']
-        self.gatherOptions=['None','Auto','Concatenate','fastq','SAM','BAM']
+        self.splitOptions=['None','Auto','List','fastq','SAM','BAM']
+        self.mergeOptions=['None','Auto','Concatenate','fastq','SAM','BAM']
         for parm in self.settingsCopy["iterableAttrs"]:
-            scatterable=False 
-            if parm  in self.iterateSettings["scatterableAttrs"]:
-                scatterable=True
+            splittable=False 
+            if parm  in self.iterateSettings["splittableAttrs"]:
+                splittable=True
             # init values if they are not there
             if "data" not in self.settingsCopy:
                 self.settingsCopy["data"] = {}
@@ -113,9 +113,9 @@ class IterateDialog(QDialog):
             )
             threadItem = QTableWidgetItem(self.settingsCopy["data"][parm]["threads"])
             ramItem = QTableWidgetItem(self.settingsCopy["data"][parm]["ram"])
-            scatterSizeItem = QTableWidgetItem(self.settingsCopy["data"][parm]["scatterSize"])
-            scatterCmdItem = QTableWidgetItem(self.settingsCopy["data"][parm]["scatterCmd"])
-            gatherCmdItem = QTableWidgetItem(self.settingsCopy["data"][parm]["gatherCmd"])
+            splitSizeItem = QTableWidgetItem(self.settingsCopy["data"][parm]["splitSize"])
+            splitCmdItem = QTableWidgetItem(self.settingsCopy["data"][parm]["splitCmd"])
+            mergeCmdItem = QTableWidgetItem(self.settingsCopy["data"][parm]["mergeCmd"])
 
             self.setSelect(parmItem, False)
             parmItem.setFlags(parmItem.flags() ^ Qt.ItemIsEditable)
@@ -125,13 +125,13 @@ class IterateDialog(QDialog):
                 "iteratedAttrs" in self.settingsCopy
                 and parm in self.settingsCopy["iteratedAttrs"]
             ):
-                if not scatterable:
-                    self.setEnableSelect(scatterSizeItem, False)
-                    self.setEnableSelect(scatterCmdItem, False)
-                    self.setEnableSelect(gatherCmdItem, False)
+                if not splittable:
+                    self.setEnableSelect(splitSizeItem, False)
+                    self.setEnableSelect(splitCmdItem, False)
+                    self.setEnableSelect(mergeCmdItem, False)
                 else:
-                    self.enableComboBox(rowNum,6,self.scatterOptions,scatterCmdItem.text())
-                    self.enableComboBox(rowNum,7,self.gatherOptions,gatherCmdItem.text())
+                    self.enableComboBox(rowNum,6,self.splitOptions,splitCmdItem.text())
+                    self.enableComboBox(rowNum,7,self.mergeOptions,mergeCmdItem.text())
                 cb.setCheckState(QtCore.Qt.Checked)
             else:
                 cb.setCheckState(QtCore.Qt.Unchecked)
@@ -139,18 +139,18 @@ class IterateDialog(QDialog):
                 self.setEnableSelect(groupSizeItem, False)
                 self.setEnableSelect(threadItem, False)
                 self.setEnableSelect(ramItem, False)
-                self.setEnableSelect(scatterSizeItem, False)
-                self.setEnableSelect(scatterCmdItem, False)
-                self.setEnableSelect(gatherCmdItem, False)
+                self.setEnableSelect(splitSizeItem, False)
+                self.setEnableSelect(splitCmdItem, False)
+                self.setEnableSelect(mergeCmdItem, False)
                     
             self.table.setItem(rowNum, 0, cb)
             self.table.setItem(rowNum, 1, parmItem)
             self.table.setItem(rowNum, 2, groupSizeItem)
             self.table.setItem(rowNum, 3, threadItem)
             self.table.setItem(rowNum, 4, ramItem)
-            self.table.setItem(rowNum, 5, scatterSizeItem)
-            self.table.setItem(rowNum, 6, scatterCmdItem)
-            self.table.setItem(rowNum, 7, gatherCmdItem)
+            self.table.setItem(rowNum, 5, splitSizeItem)
+            self.table.setItem(rowNum, 6, splitCmdItem)
+            self.table.setItem(rowNum, 7, mergeCmdItem)
             rowNum = rowNum + 1
         self.table.cellChanged.connect(self.onCellChange)            
         
@@ -220,13 +220,13 @@ class IterateDialog(QDialog):
                 item = self.table.item(row, col)
                 self.setEnableSelect(item, True)
             for col in range(5, 8):
-                if parm  in self.iterateSettings["scatterableAttrs"]:
+                if parm  in self.iterateSettings["splittableAttrs"]:
                     item = self.table.item(row, col)
                     self.setEnableSelect(item, True)
                     if col == 6:
-                        self.enableComboBox(row,col,self.scatterOptions,self.table.item(row, col).text())
+                        self.enableComboBox(row,col,self.splitOptions,self.table.item(row, col).text())
                     if col == 7:
-                        self.enableComboBox(row,col,self.gatherOptions,self.table.item(row, col).text())                    
+                        self.enableComboBox(row,col,self.mergeOptions,self.table.item(row, col).text())                    
             if (
                 "iteratedAttrs" in self.settingsCopy
                 and parm not in self.settingsCopy["iteratedAttrs"]
@@ -238,7 +238,7 @@ class IterateDialog(QDialog):
                 item = self.table.item(row, col)
                 self.setEnableSelect(item, False)
             for col in range(5, 8):
-                if parm  in self.iterateSettings["scatterableAttrs"]:
+                if parm  in self.iterateSettings["splittableAttrs"]:
                     item = self.table.item(row, col)
                     self.setEnableSelect(item, False)
                     self.disableBox(row,col)
@@ -310,9 +310,9 @@ class IterateDialog(QDialog):
                 "groupSize": itemToText(self.table.item(i, 2)),
                 "threads": itemToText(self.table.item(i, 3)),
                 "ram": itemToText(self.table.item(i, 4)),
-                "scatterSize": itemToText(self.table.item(i, 5)),
-                "scatterCmd": itemToText(self.table.item(i, 6)),
-                "gatherCmd": itemToText(self.table.item(i, 7)),
+                "splitSize": itemToText(self.table.item(i, 5)),
+                "splitCmd": itemToText(self.table.item(i, 6)),
+                "mergeCmd": itemToText(self.table.item(i, 7)),
             }
             if self.table.item(i, 0).checkState() == QtCore.Qt.Checked:
                 newIteratedAttrs.append(parm)

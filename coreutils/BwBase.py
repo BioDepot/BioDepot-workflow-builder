@@ -941,8 +941,6 @@ class OWBwBWidget(widget.OWWidget):
         iterateDialog.exec_()
         self.iterateSettings = iterateDialog.iterateSettings
 
-
-
     def updateThreadSpin(self):
         self.nWorkers = self.threadSpin.value()
         self.cboThreadNumberPopulate()
@@ -1853,15 +1851,14 @@ class OWBwBWidget(widget.OWWidget):
 
     def findIterables(self):
         self.iterateSettings["iterableAttrs"]=[]
-        self.iterateSettings["scatterableAttrs"]=[]
+        self.iterateSettings["splittableAttrs"]=[]
         if self.data["parameters"] is None:
             return
         for pname, pvalue in self.data["parameters"].items():
-            if "list" in pvalue["type"] or pvalue["type"] == "patternQuery":
+            if "list" in pvalue["type"] or pvalue["type"] == "patternQuery" or "file" in pvalue["type"] or "directory" in pvalue["type"]:
                 self.iterateSettings["iterableAttrs"].append(pname)
-            elif pvalue["type"] == "file" or pvalue["type"] == "directory":
-                self.iterateSettings["iterableAttrs"].append(pname)
-                self.iterateSettings["scatterableAttrs"].append(pname)
+            if  "file" in pvalue["type"] or "directory" in pvalue["type"]:
+                self.iterateSettings["splittableAttrs"].append(pname)
  
     def getIterableGroupSize(self,pname):
         if ("data" in self.iterateSettings
@@ -2539,11 +2536,37 @@ class OWBwBWidget(widget.OWWidget):
                 generated_attr=attr+"_generated"
                 generated_value=generateFunction()
                 setattr(self, generated_attr, generated_value) 
-                return generated_value
-            return value
+                return self.generateSplitValues(generated_value,attr)
+            return self.generateSplitValues(value,attr)
         return None
-
-    def generateCmdFromData(self):
+    def generateSplitValues(self,value,attr):
+        if self.iterateSettings and "splittableAttrs" in self.iterateSettings and "data" in self.iterateSettings:
+            if  (attr in self.iterateSettings["splittableAttrs"] and attr in self.iterateSettings["data"] and "splitSize" in self.iterateSettings["data"][attr] and "splitCmd" in self.iterateSettings["data"][attr] and self.iterateSettings["data"][attr]["splitCmd"] != "None" and int(self.iterateSettings["data"][attr]["splitSize"]) > 1): 
+                splitValues=[]
+                nSlices=0
+                origValues=[value]
+                if isinstance(value, list):
+                    origValues=value
+                for splitNum in range(0,int(self.iterateSettings["data"][attr]["splitSize"])):
+                    for path in origValues:
+                        (origDir,origBase,extension)=self.splitFileName(path)
+                        splitName="{}/split/{}_slice_{}{}".format(origDir,origBase,nSlices,extension)
+                        splitValues.append(splitName)
+                        nSlices+=1
+                return splitValues
+        return value
+    
+    def splitFileName(self,path):
+        origFile=os.path.basename(path)
+        origDir=os.path.dirname(path)
+        (origBase,extension)=os.path.splitext(origFile)
+        if (extension == ".gz" or extension == ".bz2"):
+            (origBase,extension2)=os.path.dirname(origBase)
+            if extension2:
+                extension=extension2+extension
+        return (origDir,origBase,extension)
+            
+    def generateCmdFromData(self,split=False):
         flags = []
         args = []
         # map port variables if necessary
