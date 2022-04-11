@@ -1852,6 +1852,7 @@ class OWBwBWidget(widget.OWWidget):
     def findIterables(self):
         self.iterateSettings["iterableAttrs"]=[]
         self.iterateSettings["splittableAttrs"]=[]
+        self.iterateSettings["outputableAttrs"]=[]
         if self.data["parameters"] is None:
             return
         for pname, pvalue in self.data["parameters"].items():
@@ -1859,6 +1860,7 @@ class OWBwBWidget(widget.OWWidget):
                 self.iterateSettings["iterableAttrs"].append(pname)
             if  "file" in pvalue["type"] or "directory" in pvalue["type"]:
                 self.iterateSettings["splittableAttrs"].append(pname)
+                self.iterateSettings["outputableAttrs"].append(pname)
  
     def getIterableGroupSize(self,pname):
         if ("data" in self.iterateSettings
@@ -2541,13 +2543,13 @@ class OWBwBWidget(widget.OWWidget):
         return None
     def generateSplitValues(self,value,attr):
         if self.iterateSettings and "splittableAttrs" in self.iterateSettings and "data" in self.iterateSettings:
-            if  (attr in self.iterateSettings["splittableAttrs"] and attr in self.iterateSettings["data"] and "splitSize" in self.iterateSettings["data"][attr] and "splitCmd" in self.iterateSettings["data"][attr] and self.iterateSettings["data"][attr]["splitCmd"] != "None" and int(self.iterateSettings["data"][attr]["splitSize"]) > 1): 
+            if  (attr in self.iterateSettings["splittableAttrs"] and attr in self.iterateSettings["data"] and "splitCount" in self.iterateSettings["data"][attr] and "splitCmd" in self.iterateSettings["data"][attr] and self.iterateSettings["data"][attr]["splitCmd"] != "None" and int(self.iterateSettings["data"][attr]["splitCount"]) > 1): 
                 splitValues=[]
                 nSlices=0
                 origValues=[value]
                 if isinstance(value, list):
                     origValues=value
-                for splitNum in range(0,int(self.iterateSettings["data"][attr]["splitSize"])):
+                for splitNum in range(0,int(self.iterateSettings["data"][attr]["splitCount"])):
                     for path in origValues:
                         (origDir,origBase,extension)=self.splitFileName(path)
                         splitName="{}/split/{}_slice_{}{}".format(origDir,origBase,nSlices,extension)
@@ -3163,3 +3165,4 @@ class OWBwBWidget(widget.OWWidget):
         self.btnStop.setEnabled(False)
         self.cboRunMode.setEnabled(True)
         self.graphicsMode.setEnabled(True)
+
