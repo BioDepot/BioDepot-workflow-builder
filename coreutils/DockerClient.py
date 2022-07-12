@@ -270,7 +270,7 @@ class DockerClient:
                 shell=True,
                 universal_newlines=True,
             ))
-            self.bwb_instance_id = outputString
+            self.bwb_instance_id = outputString.strip()
         print(self.bwb_instance_id)
         self.bwbMounts = {}
         self.shareMountPoint={};
