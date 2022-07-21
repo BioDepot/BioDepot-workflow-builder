@@ -345,6 +345,8 @@ docker run --rm   -p 6080:6080 \
 
    [http://localhost:6080](http://localhost:6080)
 
+***NOTE:*** the vnc password is set to **bwb**
+
 For cloud instances and remote servers use the IP of the instance or remote server instead of localhost.
 
 For Windows and Macs the IP may vary depending on your setup.
