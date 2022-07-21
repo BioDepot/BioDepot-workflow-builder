@@ -29,7 +29,6 @@ RUN apt-get update \
         rsync \
         supervisor \
         ttf-ubuntu-font-family \
-        virtualenv \
         wget \
         x11vnc \
         xterm \
@@ -49,8 +48,6 @@ RUN apt-get update \
 
 #files for orange and biodepot
 RUN ln -fs /bin/bash /bin/sh
-RUN virtualenv --python=python3 --system-site-packages orange3venv
-RUN source orange3venv/bin/activate
 COPY orange3 orange3
 RUN apt-get update \
     && apt-get install -y \
