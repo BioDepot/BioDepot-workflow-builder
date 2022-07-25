@@ -6,6 +6,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
         feh \
+        firefox \
         fluxbox \
         fonts-wqy-microhei \
         gtk2-engines-murrine \
@@ -17,6 +18,7 @@ RUN apt-get update \
         liblzma-dev \
         libqt5webkit5-dev \
         libssl1.0 \
+        libwebkit2gtk-4.0 \
         mesa-utils \
         nano \
         net-tools \
@@ -32,6 +34,7 @@ RUN apt-get update \
         virtualenv \
         wget \
         x11vnc \
+        xdg-utils \
         xterm \
         xvfb \
         zlib1g-dev \
@@ -133,6 +136,7 @@ COPY scripts/addWorkflowsToToolDock.py /usr/local/bin/addWorkflowsToToolDock.py
 COPY scripts/addWidgetToToolDock.sh /usr/local/bin/addWidgetToToolDock.sh
 COPY scripts/removeWidgetFromToolDock.sh /usr/local/bin/removeWidgetFromToolDock.sh
 COPY scripts/generate_setup.sh usr/local/bin/generate_setup.sh
+COPY executables /usr/local/bin/executables
 #add widgets and workflows
 
 ADD workflows /workflows/
