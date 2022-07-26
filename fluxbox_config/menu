@@ -17,8 +17,10 @@
 [begin] (Applications)
 [encoding] {UTF-8}
   [exec] (Bwb) {/usr/local/bin/startBwb.sh} </root/.fluxbox/bwb256.png>
+  [exec] (Files) {dbus-launch caja}
   [exec] (Terminal) {/bin/bash -c 'export XENVIRONMENT=/root/.Xresources; xterm'}
   [exec] (S3 transfer) {/usr/local/bin/executables/s3transfer/s3transfer-linux_x64}
+  [exec] (Sftp setup) {/usr/local/bin/executables/sftpSetup/sftpSetup-linux_x64}
   [exec] (QUIT Container) {pkill supervisord}
   [endencoding]
 [end]

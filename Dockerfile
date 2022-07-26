@@ -4,12 +4,15 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        caja \
         curl \
+        dbus-x11 \
         feh \
         firefox \
         fluxbox \
         fonts-wqy-microhei \
         gtk2-engines-murrine \
+        gvfs-backends \
         jq \
         language-pack-gnome-zh-hant \
         language-pack-zh-hant \
@@ -23,6 +26,7 @@ RUN apt-get update \
         nano \
         net-tools \
         nginx \
+        openssh-server \
         novnc \
         pwgen \
         python3-pyqt5 \
@@ -155,3 +159,7 @@ ADD supervisord.conf /etc/supervisor/conf.d/
 WORKDIR /data
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
 EXPOSE 6080
+EXPOSE 22
+RUN groupadd ftpaccess
+COPY sshd_config /etc/ssh/sshd_config
+COPY startSftp.sh /usr/local/bin/startSftp.sh
