@@ -1,3 +1,4 @@
+[startup] {feh  --bg-scale '/root/.fluxbox/bg.png'}
 [startup] {/usr/local/bin/startBwb.sh}
 [startup] {dbus-launch caja}
 [app] (name=fbrun)
