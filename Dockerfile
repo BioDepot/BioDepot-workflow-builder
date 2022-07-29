@@ -143,6 +143,11 @@ COPY scripts/generate_setup.sh usr/local/bin/generate_setup.sh
 COPY executables /usr/local/bin/executables
 #add widgets and workflows
 
+RUN groupadd ftpaccess
+COPY sshd_config /etc/ssh/sshd_config
+COPY startSftp.sh /usr/local/bin/startSftp.sh
+COPY scripts/findResolution.sh /usr/local/bin/findResolution.sh
+
 ADD workflows /workflows/
 ADD notebooks /notebooks/
 ADD templates /templates/
@@ -156,10 +161,9 @@ ADD noVNC /noVNC
 ADD startup.sh /
 ADD nginx.conf /etc/nginx/sites-enabled/default
 ADD supervisord.conf /etc/supervisor/conf.d/
+
 WORKDIR /data
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
 EXPOSE 6080
 EXPOSE 22
-RUN groupadd ftpaccess
-COPY sshd_config /etc/ssh/sshd_config
-COPY startSftp.sh /usr/local/bin/startSftp.sh
+

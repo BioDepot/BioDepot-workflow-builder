@@ -101,7 +101,7 @@ def index():
         subprocess.check_call(r"supervisorctl reload", shell=True)
 
         # check all running
-        for i in xrange(20):
+        for i in range(20):
             output = subprocess.check_output(
                 r"supervisorctl status | grep RUNNING | wc -l", shell=True
             )
@@ -110,8 +110,7 @@ def index():
                 return HTML_REDIRECT
             time.sleep(2)
         abort(500, "service is not ready, please restart container")
-    else:
-        return HTML_INDEX
+    return HTML_INDEX
 
 
 @app.route("/redirect.html")
@@ -138,7 +137,7 @@ def redirectme():
     subprocess.check_call(r"supervisorctl reload", shell=True)
 
     # check all running
-    for i in xrange(20):
+    for i in range(20):
         output = subprocess.check_output(
             r"supervisorctl status | grep RUNNING | wc -l", shell=True
         )
