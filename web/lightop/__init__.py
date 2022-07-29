@@ -81,7 +81,37 @@ HTML_REDIRECT = """<html><head>
 
 @app.route("/")
 def index():
-    return HTML_INDEX
+    global FIRST
+    if "auto" in request.args:
+        FIRST=True
+        return HTML_INDEX
+    if "width" in request.args and "height" in request.args:
+        FIRST=True
+        env = {"width": 1024, "height": 768}
+        env["width"] = request.args["width"]
+        env["height"] = request.args["height"]
+         # use sed to set resolution in supervisord.conf
+        subprocess.check_call(
+            r"sed -i '/Xvfb/ s/[0-9]\+x[0-9]\+/{width}x{height}/' /etc/supervisor/conf.d/supervisord.conf".format(
+            **env
+            ),
+            shell=True,
+        )
+        # supervisorctrl reload
+        subprocess.check_call(r"supervisorctl reload", shell=True)
+
+        # check all running
+        for i in xrange(20):
+            output = subprocess.check_output(
+                r"supervisorctl status | grep RUNNING | wc -l", shell=True
+            )
+            if output.strip() == "4":
+                FIRST = False
+                return HTML_REDIRECT
+            time.sleep(2)
+        abort(500, "service is not ready, please restart container")
+    else:
+        return HTML_INDEX
 
 
 @app.route("/redirect.html")
