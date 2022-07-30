@@ -1,6 +1,6 @@
 [startup] {feh  --bg-scale '/root/.fluxbox/bg.png'}
 [startup] {/usr/local/bin/startBwb.sh}
-[startup] {dbus-launch caja}
+[startup] {dbus-launch nemo}
 [app] (name=fbrun)
   [Position]	(CENTER)	{0 0}
   [Layer]	{2}

@@ -4,7 +4,6 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        caja \
         curl \
         dbus-x11 \
         feh \
@@ -24,6 +23,7 @@ RUN apt-get update \
         libwebkit2gtk-4.0 \
         mesa-utils \
         nano \
+        nemo \
         net-tools \
         nginx \
         openssh-server \
