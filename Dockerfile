@@ -132,6 +132,7 @@ COPY orangePatches/discovery.py /orange3/Orange/canvas/registry/discovery.py
 
 #add bwb start scripts
 COPY scripts/startBwb.sh /usr/local/bin/startBwb.sh
+COPY scripts/startSingleBwb.sh /usr/local/bin/startSingleBwb.sh
 COPY scripts/runDockerJob.sh /usr/local/bin/runDockerJob.sh
 COPY scripts/startScheduler.sh /usr/local/bin/startScheduler.sh
 COPY scripts/build_workflow_containers.sh /usr/local/bin/build_workflow_containers.sh
