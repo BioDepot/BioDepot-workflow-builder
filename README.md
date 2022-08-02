@@ -177,6 +177,9 @@ A major motivation for our development of Bwb was that our own software tools we
 ## Usage
 
 ### How do I use Bwb on my own data files?
+
+The instructions below are for local execution of Bwb. When Bwb is run on a cloud instance, the files will be saved to cloud instance file system. You will need to transfer files to and from the cloud. Tools such as sshfs, goofys, sftp/scp, or rsync can be used for this task. 
+
 The mapping of local files to be used by Bwb workflows happens in the command line at launch time. For Windows, there is also an additional step of making the Windows directories accessible to the VM that is launching Docker. More about this later, but first let's talk about how to map your directories so that the Docker container can read from/write to them.
 The -v option allows you to map one or more personal (local) directories to an internal directory so that the Bwb container can see them. Usually we map them to /data internally. The following start command for example maps the current directory to the /data directory inside the container. 
 
@@ -234,7 +237,7 @@ Bwb is a containerized mini webserver that can be run on any platform. To run it
 
 ### What browser should I use with Bwb?
 
-We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine. In the past we have had problems with Edge but the latest versions of Firefox and Safari work well. If you must use Edge it **may** be possible to use by following this [recipe](https://www.hanselman.com/blog/FixedMicrosoftEdgeCantSeeOrOpenVirtualBoxhostedLocalWebSites.aspx) to allow it to connect to a local URL or by running Bwb from a remote server.
+We recommend Chrome, only because most of our testing has been done using Chrome. However, any modern browser that has support for HTML5 is fine.
 
 ### Where are the sample workflows and datasets?
 Bwb includes a set of sample workflows. These are found under the /workflows directory. Data are typically **NOT** included with the containers. This maximizes the portability of the containers for different workflows and makes them easier to download. Instead we use of the provided downloadURL widget to download files from an external source (e.g. a Google drive) for use with the containers. This is the mechanism that we use in all our examples. You can use our widget to download the data or look at the widget parameters to find the URL of the files and download them yourself. Then you can save these files if you wish and use them directly.
@@ -276,13 +279,15 @@ docker run --rm   -p 6080:6080 \
     --privileged --group-add root \
     biodepot/bwb
 ```
-### My window is too small
-Try the following:
-1. Open a new browser window
-2. Maximize the window
-3. Type in the url to connect to Bwb but do not let it auto-complete e.g. localhost:6080 **NOT** localhost:6080/vnc_auto.html
+### My Bwb window and dexktop are too small
 
-The technical explanation is that Bwb resizes to the window size that it detects when it is first connected to a browser by cycling through a series of different endpoints. However, the last url may get cached and may skip the resizing steps.
+Note that changing the size of the Desktop restarts the application and any work that is not saved will be lost.
+
+If you are using a browser to connect to Bwb, zoom out until you have the desired window size. Then type ?auto after the url (e.g. localhost:6080/?auto) and press enter. The Desktop will resize after about 30 seconds to the size of the new window. You can also enter the height and width in pixels for the desktop instead (e.g. localhost:6080?width=1920&height=1080)
+
+Type ?auto after the url (localhost:6800/url) and press return. The
+
+If you are using a vnc client you can right-click on the canvas and choose resize from the dropdown menu. Enter the new width and height into the dialog box. The application will disconeect and restart with the new Desktop size. This may take 30 seconds or so. After resizing, reconnect with the VNC client.
 
 ### STAR and Kallisto won't run
 There are two common reasons:
