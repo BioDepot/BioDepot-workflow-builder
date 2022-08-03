@@ -285,8 +285,6 @@ Note that changing the size of the Desktop restarts the application and any work
 
 If you are using a browser to connect to Bwb, zoom out until you have the desired window size. Then type ?auto after the url (e.g. localhost:6080/?auto) and press enter. The Desktop will resize after about 30 seconds to the size of the new window. You can also enter the height and width in pixels for the desktop instead (e.g. localhost:6080?width=1920&height=1080)
 
-Type ?auto after the url (localhost:6800/url) and press return. The
-
 If you are using a vnc client you can right-click on the canvas and choose resize from the dropdown menu. Enter the new width and height into the dialog box. The application will disconeect and restart with the new Desktop size. This may take 30 seconds or so. After resizing, reconnect with the VNC client.
 
 ### STAR and Kallisto won't run
