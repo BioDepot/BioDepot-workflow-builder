@@ -21,7 +21,7 @@ University of Washington Tacoma
          * [How do I cut and paste into Bwb?](#how-do-i-cut-and-paste-into-bwb)
       * [Common problems](#common-problems)
          * [I'm having problems with windows](#im-having-problems-with-windows)
-         * [My window is too small](#my-window-is-too-small)
+         * [My window or desktop are too small](#my-window-or-desktop-are-too-small)
          * [STAR and Kallisto won't run](#star-and-kallisto-wont-run)
          * [The Bwb container won't build on Windows when using the git repository](#the-bwb-container-wont-build-on-windows-when-using-the-git-repository)
       * [Miscellaneous](#miscellaneous)
@@ -279,7 +279,7 @@ docker run --rm   -p 6080:6080 \
     --privileged --group-add root \
     biodepot/bwb
 ```
-### My Bwb window and dexktop are too small
+### My window or desktop are too small
 
 Note that changing the size of the Desktop restarts the application and any work that is not saved will be lost.
 
