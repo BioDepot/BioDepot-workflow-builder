@@ -257,14 +257,23 @@ class DockerClient:
         self.url = url
         self.name = name
         self.cli = APIClient(base_url=url)
-        self.bwb_instance_id = str(
-            subprocess.check_output(
+        outputString=str(subprocess.check_output(
                 'cat /proc/self/cgroup | grep devices | head -1 | cut -d "/" -f3 | sed "s/.*-//g" | sed "s/\..*//g"',
                 shell=True,
                 universal_newlines=True,
-            )
-        ).splitlines()[0]
+            ))
+        if outputString:
+            self.bwb_instance_id = outputString.splitlines()[0]
+        else:
+            outputString=str(subprocess.check_output(
+                "cat /proc/self/mountinfo | grep -oP '(?<=containers/).*?(?=/resolv)'",
+                shell=True,
+                universal_newlines=True,
+            ))
+            self.bwb_instance_id = outputString.strip()
+        print(self.bwb_instance_id)
         self.bwbMounts = {}
+        self.shareMountPoint={};
         self.findVolumeMappings()
         self.findShareMountPoint(overwrite=True)        
         #self.findShareMountPoint()
@@ -513,7 +522,7 @@ class DockerClient:
             sys.stderr.write(
                 "bwbMounts after findVolume are {}\n".format(self.bwbMounts)
             )
-            if not self.shareMountPoint:
+            if not hasattr(self,'shareMountPoint') or not self.shareMountPoint:
                 self.shareMountPoint["bwb"]="/tmp/.X11/.bwb"
                 self.shareMountPoint["host"]="/tmp/.X11/.bwb"
         bestPath = None

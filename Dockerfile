@@ -5,10 +5,13 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
+        dbus-x11 \
         feh \
+        firefox \
         fluxbox \
         fonts-wqy-microhei \
         gtk2-engines-murrine \
+        gvfs-backends \
         jq \
         language-pack-gnome-zh-hant \
         language-pack-zh-hant \
@@ -17,10 +20,13 @@ RUN apt-get update \
         liblzma-dev \
         libqt5webkit5-dev \
         libssl1.0 \
+        libwebkit2gtk-4.0 \
         mesa-utils \
         nano \
+        nemo \
         net-tools \
         nginx \
+        openssh-server \
         novnc \
         pwgen \
         python3-pyqt5 \
@@ -32,6 +38,7 @@ RUN apt-get update \
         virtualenv \
         wget \
         x11vnc \
+        xdg-utils \
         xterm \
         xvfb \
         zlib1g-dev \
@@ -125,6 +132,7 @@ COPY orangePatches/discovery.py /orange3/Orange/canvas/registry/discovery.py
 
 #add bwb start scripts
 COPY scripts/startBwb.sh /usr/local/bin/startBwb.sh
+COPY scripts/startSingleBwb.sh /usr/local/bin/startSingleBwb.sh
 COPY scripts/runDockerJob.sh /usr/local/bin/runDockerJob.sh
 COPY scripts/startScheduler.sh /usr/local/bin/startScheduler.sh
 COPY scripts/build_workflow_containers.sh /usr/local/bin/build_workflow_containers.sh
@@ -133,7 +141,13 @@ COPY scripts/addWorkflowsToToolDock.py /usr/local/bin/addWorkflowsToToolDock.py
 COPY scripts/addWidgetToToolDock.sh /usr/local/bin/addWidgetToToolDock.sh
 COPY scripts/removeWidgetFromToolDock.sh /usr/local/bin/removeWidgetFromToolDock.sh
 COPY scripts/generate_setup.sh usr/local/bin/generate_setup.sh
+COPY executables /usr/local/bin/executables
 #add widgets and workflows
+
+RUN groupadd ftpaccess
+COPY sshd_config /etc/ssh/sshd_config
+COPY startSftp.sh /usr/local/bin/startSftp.sh
+COPY scripts/findResolution.sh /usr/local/bin/findResolution.sh
 
 ADD workflows /workflows/
 ADD notebooks /notebooks/
@@ -148,6 +162,9 @@ ADD noVNC /noVNC
 ADD startup.sh /
 ADD nginx.conf /etc/nginx/sites-enabled/default
 ADD supervisord.conf /etc/supervisor/conf.d/
+
 WORKDIR /data
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
 EXPOSE 6080
+EXPOSE 22
+
