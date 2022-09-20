@@ -20,7 +20,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from time import sleep
-
+from imageTools import splitTiff,concatenate
 
 from AnyQt.QtWidgets import (
     QWidget,
@@ -412,6 +412,7 @@ class OWBwBWidget(widget.OWWidget):
         self.jobRunning = False
         self.saveBashFile = None
         self.iterEnvVars = []
+        self.mergeableParams = []
 
         if not hasattr(self, "iterateSettings"):
             setattr(self, "iterateSettings", {})
@@ -2317,15 +2318,20 @@ class OWBwBWidget(widget.OWWidget):
         #make sure that requiredParms are not in options checked
         self.removeRequiredFromOptionsChecked()
         attrList = self.__dict__.keys()
+        activeParams=self.getActiveParameters()
+        self.getAllGeneratedValues(activeParams)
         self.bgui.disableAll()
         self.disableExec()
         self.jobRunning = True
 
         # generate any needed data
-
+        
         cmd = self.generateCmdFromData()
         self.envVars = {}
         self.getEnvironmentVariables()
+        sys.stderr.write("ennVars is {}\n".format(self.envVars))
+        #breakpoint(message="just before command from Bash")
+        #breakpoint(message="gotEnv")
         if hasattr(self, "nWorkers") and self.nWorkers is not None:
             if self.nWorkers:
                 self.iterateSettings["nWorkers"] = self.nWorkers
@@ -2526,49 +2532,90 @@ class OWBwBWidget(widget.OWWidget):
                 elif flagValue is not None:
                     return self.joinFlagValue(flagName, flagValue)
         return None
-
+    def getValueType(self,attr):
+        return
     def getAttrValue(self, attr):
         # wrapper - returns the value of self.attr if there is not generate function
+        split_attr=attr+"_bwbsplit"
+        generated_attr=attr+"_bwbgenerated"
+
+        if self.valueIsSplit(attr) and hasattr(self,split_attr):
+            return getattr(self, split_attr)
+        if self.helpers.function(attr, "generate") and   hasattr(self,generated_attr): 
+            return  getattr(self,generated_attr)
+        if hasattr(self, attr):
+            return getattr(self, attr)
+        return None
+    def getGeneratedValue(self,attr):
         if hasattr(self, attr):
             value = getattr(self, attr)
             generateFunction = self.helpers.function(attr, "generate")
             if generateFunction:
-                #need to store generated value to pass to any outputs
-                #this needs to be set before execution and *not* recalculated as things can change after execution
-                generated_attr=attr+"_generated"
+                generated_attr=attr+"_bwbgenerated"
                 generated_value=generateFunction()
                 setattr(self, generated_attr, generated_value) 
-                return self.generateSplitValues(generated_value,attr)
-            return self.generateSplitValues(value,attr)
+                return generated_value
+            return value
         return None
-    def generateSplitValues(self,value,attr):
-        if self.iterateSettings and "splittableAttrs" in self.iterateSettings and "data" in self.iterateSettings:
-            if  (attr in self.iterateSettings["splittableAttrs"] and attr in self.iterateSettings["data"] and "splitCount" in self.iterateSettings["data"][attr] and "splitCmd" in self.iterateSettings["data"][attr] and self.iterateSettings["data"][attr]["splitCmd"] != "None" and int(self.iterateSettings["data"][attr]["splitCount"]) > 1): 
-                splitValues=[]
-                nSlices=0
-                origValues=[value]
-                if isinstance(value, list):
-                    origValues=value
-                for splitNum in range(0,int(self.iterateSettings["data"][attr]["splitCount"])):
-                    for path in origValues:
-                        (origDir,origBase,extension)=self.splitFileName(path)
-                        splitName="{}/split/{}_slice_{}{}".format(origDir,origBase,nSlices,extension)
-                        splitValues.append(splitName)
-                        nSlices+=1
-                return splitValues
-        return value
-    
-    def splitFileName(self,path):
-        origFile=os.path.basename(path)
-        origDir=os.path.dirname(path)
-        (origBase,extension)=os.path.splitext(origFile)
-        if (extension == ".gz" or extension == ".bz2"):
-            (origBase,extension2)=os.path.dirname(origBase)
-            if extension2:
-                extension=extension2+extension
-        return (origDir,origBase,extension)
+    def getAllGeneratedValues(self,attrList):
+        self.mergeableParams=[]
+        for attr in attrList:
+            value=self.getGeneratedValue(attr)
+            self.getSplitValue(attr,value)
             
-    def generateCmdFromData(self,split=False):
+    def getSplitValue(self,attr,value):
+        splitAttr=attr+"_bwbsplit"
+        if hasattr(self,splitAttr):
+            setattr(self,splitAttr,None)
+        if value and self.valueIsSplit(attr):
+            setattr(self, splitAttr,self.splitImageBySlice(attr,value))
+
+    def splitImageBySlice(self,attr,value):
+        splitValues=[]
+        if self.iterateSettings['data'][attr]['splitType']=="Count" and  self.iterateSettings['data'][attr]['splitUnit'] == "slices" and self.iterateSettings['data'][attr]['splitCmd'] == "For image":
+            numberOfFiles=int(self.iterateSettings['data'][attr]['splitSize'])
+            splitValues=[]
+            fileList=[value]
+            if type(value) is list:
+                fileList=value
+            for filename in fileList:
+                splitValues=splitValues+splitTiff(filename,numberOfFiles)
+            if splitValues and self.iterateSettings['data'][attr]['mergeFile']:
+                self.mergeableParams.append(attr)
+        return splitValues
+    def localToFullPath(self,attr,path):
+        
+        if path[0] == '/':
+            return path
+        value=getattr(self,attr)
+        dir=os.path.dirname(value)
+        return dir+"/"+path
+
+    def mergeSplitResults(self):
+        for attr in self.mergeableParams:
+            pattern=self.localToFullPath(attr,self.iterateSettings['data'][attr]['mergePattern'])
+            output=self.localToFullPath(attr,self.iterateSettings['data'][attr]['mergeFile'])
+            concatenate(pattern,output)
+
+
+    def valueIsSplit(self,pname):
+        if self.iterate and hasattr(self, "iterateSettings") and "splittableAttrs" in self.iterateSettings and pname in self.iterateSettings["splittableAttrs"]:
+            if "data" in self.iterateSettings and pname in self.iterateSettings['data'] and 'splitType' in self.iterateSettings['data'][pname] and self.iterateSettings['data'][pname]['splitType'] and  self.iterateSettings['data'][pname]['splitType'] != 'None':
+                return True
+        return False
+    def getActiveParameters(self):
+        paramList=[]
+        if "parameters" not in self.data or self.data["parameters"] is None:
+            return paramList
+        for pname in self.data["parameters"]:
+            if "requiredParameters" in self.data and pname in self.data["requiredParameters"]:
+                paramList.append(pname)
+            else:
+                if pname in self.optionsChecked:
+                    paramList.append(pname)
+        return paramList
+    
+    def generateCmdFromData(self):
         flags = []
         args = []
         # map port variables if necessary
@@ -2654,7 +2701,6 @@ class OWBwBWidget(widget.OWWidget):
                 sys.stderr.write("pvalue flag is {}\n".format(pvalue["flag"]))
                 if fStr:
                     flags.append(fStr)
-
         return self.generateCmdFromBash(self.data["command"], flags=flags, args=args)
 
     def iteratedfString(self, pname):
@@ -2692,12 +2738,13 @@ class OWBwBWidget(widget.OWWidget):
                 pvalue["type"] == "file list"
                 or pvalue["type"] == "directory list"
                 or pvalue["type"] == "patternQuery"
+                or self.valueIsSplit(pname)
             ):
                 files = flagValues
                 # can pass isFile flag for patternQuery - even if there are directories because the root directory is always given and must be mappable
-                isFileFlag = True
-                if pvalue["type"] == "directory list":
-                    isFileFlag = False
+                isFile = True
+                if pvalue["type"] == "directory list" or pvalue["type"] == "directory" :
+                    isFile = False
                 if files:
                     flags = []
                     baseFlag = ""
@@ -3030,6 +3077,8 @@ class OWBwBWidget(widget.OWWidget):
             else:
                 self.setStatusMessage("Finished")
                 self.status = "finished"
+                if self.mergeableParams:
+                    self.mergeSplitResults()
                 self.updateOutputs()
                 if hasattr(self, "handleOutputs"):
                     self.handleOutputs()

@@ -24,7 +24,8 @@ from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QStandardItemModel, QTableView, QDropEvent
-
+def breakpoint(title=None, message=None):
+    QtGui.QMessageBox.warning(title,'',message)
 from AnyQt.QtWidgets import (
     QWidget,
     QButtonGroup,
@@ -69,10 +70,14 @@ class IterateDialog(QDialog):
             "splitUnit": "Auto",
             "splitCmd": "Auto",
             "mergeCmd": "None",
-            "mergeOutput": "None"
+            "mergeOutput": "None",
+            "mergePattern": "*",
+            "mergeFile":""
         }
         nCols = len(defaults)+2
         self.setMinimumSize(860, 240)
+
+
         self.iterateSettings = iterateSettings
         self.setWindowTitle("Edit iterate settings")
         self.table = QTableWidget()
@@ -86,22 +91,21 @@ class IterateDialog(QDialog):
         )
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(
-            ["", "Parameter", "Group size", "Threads", "RAM (MB)","Split type", "Split size","Split unit","Split cmd", "Merge cmd", "Merge output"]
+            ["", "Parameter", "Group size", "Threads", "RAM (MB)","Split type", "Split size","Split unit","Split cmd", "Mrg cmd", "Mrg out", "Mrg pat","Mrg file"]
         )
         self.settingsCopy = copy.deepcopy(self.iterateSettings)
         self.table.setRowCount(nRows)
         rowNum = 0
-        self.splitTypeOptions=['None','Auto','Count','Max file size','Min file size']
-        self.splitUnitOptionsCounts=['None','Auto','By lines','By slices','By reads','By bytes','By kB','By MB']
-        self.splitUnitOptionsValues=['None','Auto','lines','slices','reads','bytes','kB','MB']
+        self.splitTypeOptions=['None','Auto','Count','Max file size']
+        self.splitUnitOptions=['None','Auto','lines','slices','reads','bytes','kB','MB']
         self.splitCmdOptions=['None','Auto','For list','For image','For fastq','For SAM','For BAM']
         self.mergeCmdOptions=['None','Auto','Concatenate','For image','For fastq','For SAM','For BAM']
         self.mergeOutputOptions=['None','Auto']
-        if self.iterateSettings["outputableAttrs"]:
+        if 'outputableAttrs' in self.iterateSettings and self.iterateSettings["outputableAttrs"]:
             self.mergeOutputOptions.extend(self.iterateSettings["outputableAttrs"])
         for parm in self.settingsCopy["iterableAttrs"]:
             splittable=False 
-            if parm  in self.iterateSettings["splittableAttrs"]:
+            if "splittableAttrs" in self.iterateSettings and  parm  in self.iterateSettings["splittableAttrs"]:
                 splittable=True
             # init values if they are not there
             if "data" not in self.settingsCopy:
@@ -129,7 +133,21 @@ class IterateDialog(QDialog):
             splitCmdItem = QTableWidgetItem(self.settingsCopy["data"][parm]["splitCmd"])
             mergeCmdItem = QTableWidgetItem(self.settingsCopy["data"][parm]["mergeCmd"])
             mergeOutputItem = QTableWidgetItem(self.settingsCopy["data"][parm]["mergeOutput"])
-
+            mergePatternItem = QTableWidgetItem(self.settingsCopy["data"][parm]["mergePattern"])
+            mergeFileItem = QTableWidgetItem(self.settingsCopy["data"][parm]["mergeFile"])
+            self.table.setItem(rowNum, 0, cb)
+            self.table.setItem(rowNum, 1, parmItem)
+            self.table.setItem(rowNum, 2, groupSizeItem)
+            self.table.setItem(rowNum, 3, threadItem)
+            self.table.setItem(rowNum, 4, ramItem)
+            self.table.setItem(rowNum, 5, splitTypeItem)
+            self.table.setItem(rowNum, 6, splitSizeItem)
+            self.table.setItem(rowNum, 7, splitUnitItem)
+            self.table.setItem(rowNum, 8, splitCmdItem)
+            self.table.setItem(rowNum, 9, mergeCmdItem)
+            self.table.setItem(rowNum, 10, mergeOutputItem)
+            self.table.setItem(rowNum, 11, mergePatternItem)
+            self.table.setItem(rowNum, 12, mergeFileItem)
             self.setSelect(parmItem, False)
             parmItem.setFlags(parmItem.flags() ^ Qt.ItemIsEditable)
             parmItem.setFlags(parmItem.flags() ^ Qt.ItemIsSelectable)
@@ -138,6 +156,7 @@ class IterateDialog(QDialog):
                 "iteratedAttrs" in self.settingsCopy
                 and parm in self.settingsCopy["iteratedAttrs"]
             ):
+                cb.setCheckState(QtCore.Qt.Checked)
                 if not splittable:
                     self.setEnableSelect(splitTypeItem, False)
                     self.setEnableSelect(splitSizeItem, False)
@@ -145,14 +164,17 @@ class IterateDialog(QDialog):
                     self.setEnableSelect(splitCmdItem, False)
                     self.setEnableSelect(mergeCmdItem, False)
                     self.setEnableSelect(mergeOutputItem, False)
+                    self.setEnableSelect(mergePatternItem, False)
+                    self.setEnableSelect(mergeFileItem, False)
                 else:
                     self.enableComboBox(rowNum,5,self.splitTypeOptions,splitTypeItem.text())
                     self.setEnableSelect(splitSizeItem, True)
-                    self.enableComboBox(rowNum,7,self.splitUnitOptionsValues,splitUnitItem.text())
+                    self.enableComboBox(rowNum,7,self.splitUnitOptions,splitUnitItem.text())
                     self.enableComboBox(rowNum,8,self.splitCmdOptions,splitCmdItem.text())
                     self.enableComboBox(rowNum,9,self.mergeCmdOptions,mergeCmdItem.text())
                     self.enableComboBox(rowNum,10,self.mergeOutputOptions,mergeOutputItem.text())
-                cb.setCheckState(QtCore.Qt.Checked)
+                    self.setEnableSelect(mergePatternItem, True)
+                    self.setEnableSelect(mergeFileItem, True)
             else:
                 cb.setCheckState(QtCore.Qt.Unchecked)
                 self.setEnable(parmItem, False)
@@ -165,18 +187,10 @@ class IterateDialog(QDialog):
                 self.setEnableSelect(splitCmdItem, False)
                 self.setEnableSelect(mergeCmdItem, False)
                 self.setEnableSelect(mergeOutputItem, False)
+                self.setEnableSelect(mergePatternItem, False)
+                self.setEnableSelect(mergeFileItem, False)
             
-            self.table.setItem(rowNum, 0, cb)
-            self.table.setItem(rowNum, 1, parmItem)
-            self.table.setItem(rowNum, 2, groupSizeItem)
-            self.table.setItem(rowNum, 3, threadItem)
-            self.table.setItem(rowNum, 4, ramItem)
-            self.table.setItem(rowNum, 5, splitTypeItem)
-            self.table.setItem(rowNum, 6, splitSizeItem)
-            self.table.setItem(rowNum, 7, splitUnitItem)
-            self.table.setItem(rowNum, 8, splitCmdItem)
-            self.table.setItem(rowNum, 9, mergeCmdItem)
-            self.table.setItem(rowNum, 10, mergeOutputItem)
+
             rowNum = rowNum + 1
         self.table.cellChanged.connect(self.onCellChange)            
         
@@ -232,7 +246,7 @@ class IterateDialog(QDialog):
             return self.onCheckBoxChange(row);
         if column == 5:
             return self.onSplitTypeChange(row);
-        if column > 6 :
+        if column > 6 and column < 11:
             if self.table.cellWidget(row,column):
                 if self.table.item(row,column).text() != self.table.cellWidget(row,column).currentText():
                     self.table.item(row,column).setText(self.table.cellWidget(row,column).currentText())
@@ -242,7 +256,6 @@ class IterateDialog(QDialog):
         if self.table.cellWidget(row,5):
             self.table.item(row,5).setText(self.table.cellWidget(row,5).currentText())
             if self.table.cellWidget(row,5).currentText() == "None":
-                sys.stderr.write("inside if \n");
                 self.setEnableSelect(self.table.item(row, 6), False)
                 for col in range(7, 9):
                     if parm  in self.iterateSettings["splittableAttrs"]:
@@ -257,12 +270,10 @@ class IterateDialog(QDialog):
                         value=self.table.item(row, col).text()
                         currentIndex=0
                         currentCount=0
-                        currentTable=self.splitUnitOptionsValues
+                        currentTable=self.splitUnitOptions
                         if self.table.cellWidget(row,col):
                             currentIndex=self.table.cellWidget(row,col).currentIndex()
                             currentCount=self.table.cellWidget(row,col).count()
-                        if self.table.cellWidget(row,5).currentText() == "Count":
-                            currentTable=self.splitUnitOptionsCounts
                         if currentIndex < currentCount:
                             value=currentTable[currentIndex]
                         self.table.item(row, col).setText(value)
@@ -281,8 +292,8 @@ class IterateDialog(QDialog):
             for col in range(2, 5):
                 item = self.table.item(row, col)
                 self.setEnableSelect(item, True)
-            for col in range(5, 11):
-                if parm  in self.iterateSettings["splittableAttrs"]:
+            for col in range(5, 13):
+                if "splittableAttrs" in self.iterateSettings and parm  in self.iterateSettings["splittableAttrs"]:
                     item = self.table.item(row, col)
                     self.setEnableSelect(item, True)
                     if col == 5:
@@ -301,7 +312,8 @@ class IterateDialog(QDialog):
                             self.enableComboBox(row,col,self.mergeCmdOptions,self.table.item(row, col).text())
                         if col == 10:
                             self.enableComboBox(row,col,self.mergeOutputOptions,self.table.item(row, col).text())                    
-                    
+                        if col > 10:   
+                            self.setEnableSelect(item, True)                    
             if (
                 "iteratedAttrs" in self.settingsCopy
                 and parm not in self.settingsCopy["iteratedAttrs"]
@@ -312,7 +324,7 @@ class IterateDialog(QDialog):
             for col in range(2, 5):
                 item = self.table.item(row, col)
                 self.setEnableSelect(item, False)
-            for col in range(5, 11):
+            for col in range(5, 13):
                 item = self.table.item(row, col)
                 self.setEnableSelect(item, False)
                 self.disableBox(row,col)                
@@ -387,17 +399,19 @@ class IterateDialog(QDialog):
                 "groupSize": itemToText(self.table.item(i, 2)),
                 "threads": itemToText(self.table.item(i, 3)),
                 "ram": itemToText(self.table.item(i, 4)),
-                "splitSize": itemToText(self.table.item(i, 5)),
-                "splitUnit" :itemToText(self.table.item(i, 6)),
-                "splitCmd": itemToText(self.table.item(i, 7)),
-                "mergeCmd": itemToText(self.table.item(i, 8)),
-                "mergeOutput": itemToText(self.table.item(i, 9)),
+                "splitType": itemToText(self.table.item(i, 5)),
+                "splitSize": itemToText(self.table.item(i, 6)),
+                "splitUnit" :itemToText(self.table.item(i, 7)),
+                "splitCmd": itemToText(self.table.item(i, 8)),
+                "mergeCmd": itemToText(self.table.item(i, 9)),
+                "mergeOutput": itemToText(self.table.item(i, 10)),
+                "mergePattern": itemToText(self.table.item(i, 11)),
+                "mergeFile": itemToText(self.table.item(i, 12))
             }
             if self.table.item(i, 0).checkState() == QtCore.Qt.Checked:
                 newIteratedAttrs.append(parm)
         self.settingsCopy["data"] = newData
         self.settingsCopy["iteratedAttrs"] = newIteratedAttrs
-
     def save(self):
         self.updateSettings()
         try:
