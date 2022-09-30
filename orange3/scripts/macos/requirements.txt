@@ -8,7 +8,7 @@ AnyQt==0.0.8
 Bottleneck==1.2.0
 chardet==3.0.4
 docutils==0.13.1
-joblib==0.11
+joblib==1.2.0
 keyring==10.3.1
 keyrings.alt==2.2
 numpy==1.12.1
