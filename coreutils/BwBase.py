@@ -2452,7 +2452,7 @@ class OWBwBWidget(widget.OWWidget):
                 flagValue = self.getAttrValue(pname)
                 if pvalue["type"] == "patternQuery":
                     if flagValue:
-                        return " ".join([flagName] + flagValue)
+                        return self.joinFlagValue(flagName ," ".join(flagValue))
                     else:
                         return flagName
                 elif pvalue["type"] == "bool":
@@ -2495,7 +2495,7 @@ class OWBwBWidget(widget.OWWidget):
                                 )
                             )
                         if flagName:
-                            return " ".join([flagName] + hostFiles)
+                            return self.joinFlagValue(flagName," ".join(hostFiles))
                         else:
                             return " ".join(hostFiles)
                     return None
@@ -2512,7 +2512,7 @@ class OWBwBWidget(widget.OWWidget):
                     return self.joinFlagValue(flagName, str(hostPath))
                 elif pvalue["type"][-4:] == "list":
                     if flagName:
-                        return flagName + " " + " ".join(flagValue)
+                        return self.joinFlagValue(flagName," ".join(flagValue))
                     else:
                         return " ".join(flagValue)
                 elif flagValue is not None:
