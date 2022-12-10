@@ -50,6 +50,23 @@ def breakpoint(title=None, message=None):
     QtGui.QMessageBox.warning(None,title,message)
     return
 
+def unPickleData( filename, jsonFlag=True):
+    if jsonFlag:
+        sys.stderr.write("opening file {}\n".format(filename))
+        try:
+             with open(filename, "r") as f:
+                data = jsonpickle.decode(f.read())
+                f.close()
+        except Exception as e:
+            with open(filename, "rb") as f:
+                data = pickle.load(f)
+                f.close()
+    else:
+        with open(filename, "rb") as f:
+            data = pickle.load(f)
+        f.close()
+    return data
+
 
 class SaveWorkflowForm(QDialog):
     def __init__(self, returnData, parent=None):
@@ -828,21 +845,7 @@ class OWWidgetBuilder(widget.OWWidget):
             f.close()
 
     def unPickleData(self, filename, jsonFlag=True):
-        if jsonFlag:
-            sys.stderr.write("opening file {}\n".format(filename))
-            try:
-                with open(filename, "r") as f:
-                    data = jsonpickle.decode(f.read())
-                f.close()
-            except Exception as e:
-                with open(filename, "rb") as f:
-                    data = pickle.load(f)
-                f.close()
-        else:
-            with open(filename, "rb") as f:
-                data = pickle.load(f)
-            f.close()
-        return data
+        unPickleData(filenmae,jsonFlag)
 
     def __init__(self, widgetID=None, canvasMainWindow=None):
         super().__init__()
