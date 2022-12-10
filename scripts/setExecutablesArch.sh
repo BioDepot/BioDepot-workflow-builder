@@ -5,7 +5,7 @@
 
 readarray -d '' files < <(find $1 -name "*-$suffix" -print0)
 for file in "${files[@]}"; do
-    echo "$file"
+    echo "making symbolic link for $file"
     path=${file%/*}
     $(ln -fs $file $path/${path##*/})
 done

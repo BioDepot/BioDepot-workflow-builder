@@ -1,4 +1,5 @@
 FROM ubuntu:18.04
+ARG TARGETARCH
 # Setup demo environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -86,7 +87,7 @@ RUN apt-get update \
         software-properties-common \
     && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - \
     && add-apt-repository -y \
-        "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" \
+        "deb [arch=$TARGETARCH] https://download.docker.com/linux/ubuntu bionic stable" \
     && apt-get update \
     && apt-get install -y \
         containerd.io \
@@ -162,6 +163,11 @@ ADD noVNC /noVNC
 ADD startup.sh /
 ADD nginx.conf /etc/nginx/sites-enabled/default
 ADD supervisord.conf /etc/supervisor/conf.d/
+
+#setup arch dependent executables
+
+COPY scripts/setExecutablesArch.sh /usr/local/bin/setExecutablesArch.sh
+RUN setExecutablesArch.sh /usr/local/bin/executables $TARGETARCH
 
 WORKDIR /data
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
