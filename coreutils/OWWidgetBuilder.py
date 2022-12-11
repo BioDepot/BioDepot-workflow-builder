@@ -50,23 +50,6 @@ def breakpoint(title=None, message=None):
     QtGui.QMessageBox.warning(None,title,message)
     return
 
-def unPickleData( filename, jsonFlag=True):
-    if jsonFlag:
-        sys.stderr.write("opening file {}\n".format(filename))
-        try:
-             with open(filename, "r") as f:
-                data = jsonpickle.decode(f.read())
-                f.close()
-        except Exception as e:
-            with open(filename, "rb") as f:
-                data = pickle.load(f)
-                f.close()
-    else:
-        with open(filename, "rb") as f:
-            data = pickle.load(f)
-        f.close()
-    return data
-
 
 class SaveWorkflowForm(QDialog):
     def __init__(self, returnData, parent=None):
@@ -770,7 +753,7 @@ class OWWidgetBuilder(widget.OWWidget):
         return
         
     def checkIconFile(self,loadWidgetDir):
-        if self.allStates is not None and 'icon' in self.allStates and self.allStates['icon'][2][1] and os.path.isfile(self.allStates['icon'][2][1]):
+        if 'icon' in self.allStates and self.allStates['icon'][2][1] and os.path.isfile(self.allStates['icon'][2][1]):
             loadIconFile = self.allStates['icon'][2][1]
             if self.widgetDir:
                 if os.path.realpath(self.widgetDir) != os.path.realpath(loadWidgetDir):
@@ -792,8 +775,6 @@ class OWWidgetBuilder(widget.OWWidget):
                 self.allStates['icon'][2][1]="{}/icon/{}".format(loadWidgetDir,loadIconFile) 
 
     def resetIconFile(self):
-        if self.allAttrs is None or self.allStates is None:
-            return
         if "icon" in self.allAttrs:
             self.allAttrs["icon"]=None
         if "icon" in self.allStates:
@@ -847,7 +828,21 @@ class OWWidgetBuilder(widget.OWWidget):
             f.close()
 
     def unPickleData(self, filename, jsonFlag=True):
-        unPickleData(filename,jsonFlag)
+        if jsonFlag:
+            sys.stderr.write("opening file {}\n".format(filename))
+            try:
+                with open(filename, "r") as f:
+                    data = jsonpickle.decode(f.read())
+                f.close()
+            except Exception as e:
+                with open(filename, "rb") as f:
+                    data = pickle.load(f)
+                f.close()
+        else:
+            with open(filename, "rb") as f:
+                data = pickle.load(f)
+            f.close()
+        return data
 
     def __init__(self, widgetID=None, canvasMainWindow=None):
         super().__init__()
@@ -939,10 +934,6 @@ class OWWidgetBuilder(widget.OWWidget):
     def startWidget(self):
         self.isDrawn = True
         self.setWindowTitle(self.widgetName + ":Definition")
-        if self.allAttrs is None:
-            self.allAttrs = {}
-        if self.allStates is None:
-            self.allStates = {}        
         for attr in (
             "name",
             "description",
@@ -1058,7 +1049,7 @@ class OWWidgetBuilder(widget.OWWidget):
 
     def addGroupToStates(self):
         # for older files
-        if self.allStates is not None and "parameters" in self.allStates and  self.allStates["parameters"] :
+        if "parameters" in self.allStates and  self.allStates["parameters"]:
             for serialState in self.allStates["parameters"]:
                 if len(serialState) < 9:
                     serialState.append(serialState[7])
