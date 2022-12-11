@@ -87,7 +87,9 @@ RUN apt-get update \
         software-properties-common \
     && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - \
     && add-apt-repository -y \
-        "deb [arch=$TARGETARCH] https://download.docker.com/linux/ubuntu bionic stable" \
+        "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" \    
+    && add-apt-repository -y \
+        "deb [arch=arm64] https://download.docker.com/linux/ubuntu bionic stable" \
     && apt-get update \
     && apt-get install -y \
         containerd.io \
