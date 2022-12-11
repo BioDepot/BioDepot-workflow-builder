@@ -770,7 +770,7 @@ class OWWidgetBuilder(widget.OWWidget):
         return
         
     def checkIconFile(self,loadWidgetDir):
-        if 'icon' in self.allStates and self.allStates['icon'][2][1] and os.path.isfile(self.allStates['icon'][2][1]):
+        if self.allStates is not None and 'icon' in self.allStates and self.allStates['icon'][2][1] and os.path.isfile(self.allStates['icon'][2][1]):
             loadIconFile = self.allStates['icon'][2][1]
             if self.widgetDir:
                 if os.path.realpath(self.widgetDir) != os.path.realpath(loadWidgetDir):
@@ -792,6 +792,8 @@ class OWWidgetBuilder(widget.OWWidget):
                 self.allStates['icon'][2][1]="{}/icon/{}".format(loadWidgetDir,loadIconFile) 
 
     def resetIconFile(self):
+        if self.allAttrs is None or self.allStates is None:
+            return
         if "icon" in self.allAttrs:
             self.allAttrs["icon"]=None
         if "icon" in self.allStates:
@@ -845,7 +847,7 @@ class OWWidgetBuilder(widget.OWWidget):
             f.close()
 
     def unPickleData(self, filename, jsonFlag=True):
-        unPickleData(filenmae,jsonFlag)
+        unPickleData(filename,jsonFlag)
 
     def __init__(self, widgetID=None, canvasMainWindow=None):
         super().__init__()
@@ -937,6 +939,10 @@ class OWWidgetBuilder(widget.OWWidget):
     def startWidget(self):
         self.isDrawn = True
         self.setWindowTitle(self.widgetName + ":Definition")
+        if self.allAttrs is None:
+            self.allAttrs = {}
+        if self.allStates is None:
+            self.allStates = {}        
         for attr in (
             "name",
             "description",
@@ -1052,7 +1058,7 @@ class OWWidgetBuilder(widget.OWWidget):
 
     def addGroupToStates(self):
         # for older files
-        if "parameters" in self.allStates and  self.allStates["parameters"]:
+        if self.allStates is not None and "parameters" in self.allStates and  self.allStates["parameters"] :
             for serialState in self.allStates["parameters"]:
                 if len(serialState) < 9:
                     serialState.append(serialState[7])

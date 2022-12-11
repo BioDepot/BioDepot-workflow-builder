@@ -1,0 +1,23 @@
+tempDir proc.e2196b6b2daf4214ba01210f10afb09f
+logBaseDir /data/.bwb
+ -v /Users/lhhung/BioDepot-workflow-builder:/data   biodepot/downloadurl:alpine_3.15__4c609a74 /root/download.sh --decompress --directory /data https://drive.google.com/open?id=16QHgiI_9QYuCukjZQmw03u7w374R3kt1 
+docker run -i --rm  --init --cidfile=/tmp/proc.e2196b6b2daf4214ba01210f10afb09f/locks/lock0/pid.263 -v /Users/lhhung/BioDepot-workflow-builder/.bwbshare/proc.e2196b6b2daf4214ba01210f10afb09f/output0:/tmp/output   -v /Users/lhhung/BioDepot-workflow-builder:/data   biodepot/downloadurl:alpine_3.15__4c609a74 /root/download.sh --decompress --directory /data https://drive.google.com/open?id=16QHgiI_9QYuCukjZQmw03u7w374R3kt1  
+fileID is 16QHgiI_9QYuCukjZQmw03u7w374R3kt1
+filename is LINCS_dtoxs.tar.bz2
+no code found
+google drive url is https://drive.google.com/open?id=16QHgiI_9QYuCukjZQmw03u7w374R3kt1 filename is LINCS_dtoxs.tar.bz2 fileID is 16QHgiI_9QYuCukjZQmw03u7w374R3kt1 code is  dcmd is | tar xj
+No problem with virus check no verification needed
+curl  -L 'https://docs.google.com/uc?export=download&id=16QHgiI_9QYuCukjZQmw03u7w374R3kt1' | tar xj
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0100  2281    0  2281    0     0  12909      0 --:--:-- --:--:-- --:--:-- 12960
+bzip2: (stdin) is not a bzip2 file.
+tar: Child returned status 2
+tar: Error is not recoverable: exiting now
+ keyfiles 0 
+datastring [
+  {}
+]
+output is [
+  {}
+]
