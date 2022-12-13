@@ -19,7 +19,7 @@ class OWdownloadURL(OWBwBWidget):
     icon = getIconName(__file__, "download.png")
     want_main_area = False
     docker_image_name = "biodepot/downloadurl"
-    docker_image_tag = "alpine_3.15__4c609a74"
+    docker_image_tag = "alpine_3.15__919a611c"
     inputs = [
         ("directory", str, "handleInputsdirectory"),
         ("trigger", str, "handleInputstrigger"),
