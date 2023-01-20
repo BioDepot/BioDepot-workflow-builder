@@ -7,6 +7,11 @@ jobs:
     name: Push Docker image to GitHub Container Registry
     runs-on: ubuntu-latest
     steps:
+      - name: Set lowercase owner name
+        run: |
+          echo "OWNER_LC=${OWNER,,}" >>${GITHUB_ENV}
+        env:
+          OWNER: '${{ github.repository_owner }}'
       - name: Check out the repo
         uses: actions/checkout@v2
       - name: Log in to GitHub Container Registry
@@ -19,10 +24,10 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/bwb:latest
+          tags: ghcr.io/${{ env.OWNER_LC }}/bwb:latest
       - name: Push development image to GitHub Container Registry
         uses: docker/build-push-action@v2
         with:
           file: ./Dockerfile-widgets
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/bwb-dev:latest
+          tags: ghcr.io/${{ env.OWNER_LC }}/bwb-dev:latest
