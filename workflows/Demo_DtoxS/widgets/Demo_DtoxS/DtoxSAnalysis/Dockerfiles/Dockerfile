@@ -14,3 +14,6 @@ WORKDIR $HOME
 # Add input directories/files
 ADD Programs/ $HOME/Programs/
 ADD Scripts/ $HOME/Scripts/
+
+LABEL "tag.0"="3.7"
+LABEL "tag.1"="r-3.5.1"
