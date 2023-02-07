@@ -1,12 +1,12 @@
-FROM biodepot/bioconductor:3.7__ubuntu-18.04__R-3.5.1__081318
-RUN apt-get update && apt-get -y install firefox \ 
-    build-essential python3-all python3-pip libncurses5-dev libncursesw5-dev libzmq3-dev \
-    && pip3 install --upgrade pip \
-    && pip install jupyter \
-    && apt-get -y remove build-essential \
-    && apt-get autoclean -y \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
-RUN R -e "install.packages(c('IRdisplay', 'repr', 'devtools', 'evaluate', 'crayon','pbdZMQ', 'uuid', 'digest' ),repos = 'http://cran.us.r-project.org'); devtools::install_github('IRkernel/IRkernel'); IRkernel::installspec()"
-#set mozilla preferences to not launch their homepage
+FROM biodepot/bioc-r:3.16-ubuntu-22.04-r-4.2.2__e3b0c442__3863bd4b__394dc8fc
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get -y install firefox python3-all sudo python3-pip libfontconfig1-dev libharfbuzz-dev libfribidi-dev git libtiff-dev libzmq3-dev build-essential libgit2-dev \
+ && python3 -m pip install pip==22.3.1 \
+ && pip install jupyter \
+ && R -e "install.packages(c('IRdisplay', 'devtools' ),repos = 'http://cran.us.r-project.org'); devtools::install_github('IRkernel/IRkernel'); IRkernel::installspec()" \
+ && apt-get remove -y build-essential \
+ && apt-get autoclean -y \
+ && apt-get autoremove -y \
+ && rm -rf /var/lib/apt/lists/*
 COPY .mozilla /root/.mozilla
+

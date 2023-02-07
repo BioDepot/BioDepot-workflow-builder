@@ -1,5 +1,2 @@
-source('http://bioconductor.org/biocLite.R')
-biocLite("withr")
-biocLite("rstudioapi")
-biocLite("devtools")
-biocLite("pachterlab/sleuth")
+install.packages('BiocManager',repos ='https://cloud.r-project.org/')
+BiocManager::install("pachterlab/sleuth")
