@@ -1,4 +1,3 @@
-#from https://github.com/frol/docker-alpine-python2/blob/master/Dockerfile
 FROM alpine:3.7
 RUN apk add --no-cache python && \
     python -m ensurepip && \

@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine:3.17.1
 #based on https://github.com/JoshuaRLi/alpine-python3-pip/blob/master/Dockerfile
 # NOTE: pip is installed with python3 in alpine repos.
 
