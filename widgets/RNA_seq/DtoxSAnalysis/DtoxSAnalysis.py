@@ -18,8 +18,8 @@ class OWDtoxSAnalysis(OWBwBWidget):
     priority = 2
     icon = getIconName(__file__, "dtoxs-analysis2.svg")
     want_main_area = False
-    docker_image_name = "biodepot/dtoxs_analysis"
-    docker_image_tag = "1.0__ubuntu-16.04__bioc-3.6__r-3.4.3__072818"
+    docker_image_name = "biodepot/dtoxsanalysis"
+    docker_image_tag = "bioc-r_3.6__r-3.4.3__ubuntu-16.04__62ce3cae__beefae07__01f906e9"
     inputs = [
         ("RepositoryDirectory", str, "handleInputsRepositoryDirectory"),
         ("ConfigurationFile", str, "handleInputsConfigurationFile"),

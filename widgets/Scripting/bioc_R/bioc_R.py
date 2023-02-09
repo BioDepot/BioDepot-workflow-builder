@@ -18,8 +18,8 @@ class OWbioc_R(OWBwBWidget):
     priority = 1
     icon = getIconName(__file__, "bioc-r.png")
     want_main_area = False
-    docker_image_name = "biodepot/bioconductor"
-    docker_image_tag = "3.14__ubuntu_20.04__R_4.1.0__d6630ab5"
+    docker_image_name = "biodepot/bioc-r"
+    docker_image_tag = "3.16-ubuntu-22.04-r-4.2.2__e3b0c442__3863bd4b__394dc8fc"
     inputs = [
         ("inputFile", str, "handleInputsinputFile"),
         ("Trigger", str, "handleInputsTrigger"),

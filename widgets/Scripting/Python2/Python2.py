@@ -19,7 +19,7 @@ class OWPython2(OWBwBWidget):
     icon = getIconName(__file__, "python2.png")
     want_main_area = False
     docker_image_name = "biodepot/python2"
-    docker_image_tag = "2.7.14-r2__alpine-3.7__pip-18.0__081418"
+    docker_image_tag = "2.7.15__alpine-3.7__b6c52c1c__ce08e7c9__0da9cd30"
     inputs = [
         ("inputFile", str, "handleInputsinputFile"),
         ("Trigger", str, "handleInputsTrigger"),

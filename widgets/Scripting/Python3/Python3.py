@@ -18,8 +18,8 @@ class OWPython3(OWBwBWidget):
     priority = 10
     icon = getIconName(__file__, "python3.png")
     want_main_area = False
-    docker_image_name = "biodepot/python3"
-    docker_image_tag = "3.6.3-r9__alpine-3.7__min__081418"
+    docker_image_name = "biodepot/python"
+    docker_image_tag = "3.10.9__alpine-3.17.1__8132a508__2132c733__29cfe2a0"
     inputs = [
         ("inputFile", str, "handleInputsinputFile"),
         ("Trigger", str, "handleInputsTrigger"),

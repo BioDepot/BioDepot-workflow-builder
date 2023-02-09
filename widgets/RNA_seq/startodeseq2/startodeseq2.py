@@ -18,8 +18,8 @@ class OWstartodeseq2(OWBwBWidget):
     priority = 13
     icon = getIconName(__file__, "startodeseq2.png")
     want_main_area = False
-    docker_image_name = "biodepot/star2deseq"
-    docker_image_tag = "1.0__alpine-3.7__07-29-18"
+    docker_image_name = "biodepot/startodeseq2"
+    docker_image_tag = "alpine-3.7__7e2b0473__2308bb8__b8faf310"
     inputs = [
         ("inputDirs", str, "handleInputsinputDirs"),
         ("Trigger", str, "handleInputsTrigger"),

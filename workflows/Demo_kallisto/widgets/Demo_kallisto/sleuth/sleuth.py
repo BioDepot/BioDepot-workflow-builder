@@ -19,7 +19,7 @@ class OWsleuth(OWBwBWidget):
     icon = getIconName(__file__, "sleuth2.png")
     want_main_area = False
     docker_image_name = "biodepot/sleuth"
-    docker_image_tag = "0.30.0__ubuntu-18.04__r-3.5.1__demo__082318"
+    docker_image_tag = "0.30.1__bioc-r_3.16-ubuntu-22.04-r-4.2.2__face979c__4bc3b0b7__394dc8fc"
     inputs = [("trigger", str, "handleInputstrigger")]
     outputs = [("output_file", str)]
     pset = functools.partial(settings.Setting, schema_only=True)

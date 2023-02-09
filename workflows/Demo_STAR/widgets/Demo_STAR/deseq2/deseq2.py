@@ -19,7 +19,7 @@ class OWdeseq2(OWBwBWidget):
     icon = getIconName(__file__, "deseq2.png")
     want_main_area = False
     docker_image_name = "biodepot/deseq2"
-    docker_image_tag = "1.20__ubuntu-16.04__bioc-3.7__r-3.5.1__072918"
+    docker_image_tag = "bioc-r_3.16-ubuntu-22.04-r-4.2.2__375472a0__186da45b__add50ffe"
     inputs = [
         ("Trigger", str, "handleInputsTrigger"),
         ("countsFile", str, "handleInputscountsFile"),

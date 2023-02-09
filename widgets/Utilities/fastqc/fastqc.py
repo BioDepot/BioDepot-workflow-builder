@@ -19,7 +19,7 @@ class OWfastqc(OWBwBWidget):
     icon = getIconName(__file__, "fastqc_icon_100.png")
     want_main_area = False
     docker_image_name = "biodepot/fastqc"
-    docker_image_tag = "latest"
+    docker_image_tag = "0.11.9__ubuntu-22.04__89635a47__4c65506a__7b51306f"
     inputs = [("inputDir", str, "handleInputsinputDir")]
     outputs = [("outputDir", str)]
     pset = functools.partial(settings.Setting, schema_only=True)

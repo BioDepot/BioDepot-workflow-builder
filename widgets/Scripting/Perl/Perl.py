@@ -19,7 +19,7 @@ class OWPerl(OWBwBWidget):
     icon = getIconName(__file__, "perl.png")
     want_main_area = False
     docker_image_name = "biodepot/perl"
-    docker_image_tag = "5.26.2-r1__alpine-3.7__081418"
+    docker_image_tag = "5.36.0__alpine-3.17.1__390857f2__38af5da5__695386a9"
     inputs = [
         ("inputFile", str, "handleInputsinputFile"),
         ("Trigger", str, "handleInputsTrigger"),

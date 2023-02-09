@@ -18,8 +18,8 @@ class OWJava8(OWBwBWidget):
     priority = 15
     icon = getIconName(__file__, "java.png")
     want_main_area = False
-    docker_image_name = "library/openjdk"
-    docker_image_tag = "8-jre-alpine3.8"
+    docker_image_name = "openjdk"
+    docker_image_tag = "21-slim-bullseye"
     inputs = [
         ("inputFile", str, "handleInputsinputFile"),
         ("Trigger", str, "handleInputsTrigger"),

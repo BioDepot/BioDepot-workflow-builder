@@ -18,8 +18,8 @@ class OWbash_utils(OWBwBWidget):
     priority = 1
     icon = getIconName(__file__, "bash.png")
     want_main_area = False
-    docker_image_name = "biodepot/bash-utils"
-    docker_image_tag = "alpine-3.7__081418"
+    docker_image_name = "biodepot/bash_utilities"
+    docker_image_tag = "alpine-3.17.1__24884064__91e2e7b9__1a66801e"
     inputs = [
         ("inputFile", str, "handleInputsinputFile"),
         ("Trigger", str, "handleInputsTrigger"),
