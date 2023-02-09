@@ -1,36 +1,14 @@
-FROM biodepot/rbase:3.4.4__ubuntu-16.04
+FROM biodepot/jupyter:bioc-r_3.16-ubuntu-22.04-r-4.2.2__4aa31a00__1c21d9fd__1e187a9d
 
-#For sleuth
-
-#install libgit2 separate as it has a (false) dependency on libcurl4-gnutils-dev 
-#which conflicts with the required libcur4-openssl-dev
-
-RUN apt-get update && apt-get install -y libgit2-dev \    
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y libssl-dev libgit2-dev libcurl4-gnutls-dev libxml2-dev libharfbuzz-dev r-bioc-rhdf5 libfribidi-dev libtiff-dev curl\
     && apt-get autoclean -y \
     && apt-get autoremove -y \
     && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && apt-get install -y libssl-dev libcurl4-openssl-dev libxml2-dev \
-    && apt-get autoclean -y \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
+  
 COPY install.R /home/root/install.R
 RUN Rscript /home/root/install.R
+COPY installDeps.R /home/root/installDeps.R
+RUN Rscript /home/root/installDeps.R
 
-RUN apt-get update && apt-get -y install build-essential python3-all python3-pip \
-    libncurses5-dev libncursesw5-dev libzmq3-dev zlib1g-dev \
-    && pip3 install --upgrade pip \
-    && pip install jupyter \
-    && apt-get autoclean -y \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
-
-COPY installKernel.R  /home/root/installKernel.R
-RUN Rscript /home/root/installKernel.R
-
-RUN apt-get update && apt-get -y install firefox \
-    && apt-get autoclean -y \
-    && apt-get autoremove -y \
-    && rm -rf /var/lib/apt/lists/*
-COPY .mozilla /root/.mozilla
 
