@@ -1,0 +1,5 @@
+library("BiocInstaller",lib="/usr/local/rhome/lib/")
+install.packages("https://cran.r-project.org/src/contrib/Archive/locfit/locfit_1.5-9.2.tar.gz", repos=NULL, type="source")
+#install.packages(c("bitops","RSQLite"), repos="cran.wustl.edu/")
+#install.packages("https://cran.r-project.org/src/contrib/Archive/caTools/caTools_1.17.1.1.tar.gz", repos=NULL, type="source")
+#biocLite(c("edgeR", "matrixStats", "gplots", "compare"), dependencies=TRUE)
