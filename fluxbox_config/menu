@@ -19,7 +19,7 @@
   [exec] (Bwb) {/usr/local/bin/startBwb.sh} </root/.fluxbox/bwb256.png>
   [exec] (Files) {dbus-launch nemo}
   [exec] (Resize) {/usr/local/bin/executables/changeRes/changeRes}
-  [exec] (Terminal) {/bin/bash -c 'export XENVIRONMENT=/root/.Xresources; xterm'}
+  [exec] (Terminal) {/bin/bash -c 'export XENVIRONMENT=/root/.Xresources; lxterminal'}
   [exec] (S3 transfer) {/usr/local/bin/executables/s3transfer/s3transfer}
   [exec] (Sftp setup) {/usr/local/bin/executables/sftpSetup/sftpSetup}
   [exec] (QUIT Container) {/usr/local/bin/executables/quitBwb/quitBwb}
