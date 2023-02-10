@@ -39,7 +39,7 @@ RUN apt-get update \
         wget \
         x11vnc \
         xdg-utils \
-        xterm \
+        lxterminal \
         xvfb \
         zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*

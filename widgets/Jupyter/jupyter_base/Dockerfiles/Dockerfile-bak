@@ -39,7 +39,7 @@ RUN apt-get update && \
 
 RUN echo R_UNZIPCMD="'"internal"'"  > /root/.Renviron
 
-RUN apt-get update && apt-get -y install epiphany-browser-data python3-all sudo python3-pip libfontconfig1-dev libharfbuzz-dev libfribidi-dev git libtiff-dev libzmq3-dev build-essential libgit2-dev \
+RUN apt-get update && apt-get -y install  python3-all sudo python3-pip libfontconfig1-dev libharfbuzz-dev libfribidi-dev git libtiff-dev libzmq3-dev build-essential libgit2-dev \
  && python3 -m pip install pip==22.3.1 \
  && pip install jupyter \
  && R -e "install.packages(c('IRdisplay', 'devtools' ),repos = 'http://cran.us.r-project.org'); devtools::install_github('IRkernel/IRkernel'); IRkernel::installspec()" \
@@ -47,3 +47,7 @@ RUN apt-get update && apt-get -y install epiphany-browser-data python3-all sudo 
  && apt-get autoclean -y \
  && apt-get autoremove -y \
  && rm -rf /var/lib/apt/lists/*
+COPY .mozilla /root/.mozilla
+RUN add-apt-repository ppa:mozillateam/ppa
+COPY mozilla-firefox /etc/apt/preferences.d/mozilla-firefox
+RUN apt -y install firefox

@@ -1,0 +1,5 @@
+
+Package: *
+Pin: release o=LP-PPA-mozillateam
+Pin-Priority: 1001
+
