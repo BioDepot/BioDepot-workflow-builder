@@ -1,4 +1,4 @@
-FROM biodepot/jupyter:bioc-r_3.16-ubuntu-22.04-r-4.2.2__4aa31a00__1c21d9fd__1e187a9d
+FROM biodepot/jupyter:6.5.2__bioc-r_3.16-ubuntu-22.04-r-4.2.2__dcf4705a__35f295e6__ee7d8c88
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y libssl-dev libgit2-dev libcurl4-gnutls-dev libxml2-dev libharfbuzz-dev r-bioc-rhdf5 libfribidi-dev libtiff-dev curl\

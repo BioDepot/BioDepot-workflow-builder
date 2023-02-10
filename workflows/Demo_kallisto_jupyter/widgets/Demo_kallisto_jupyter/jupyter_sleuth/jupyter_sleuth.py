@@ -18,7 +18,7 @@ class OWjupyter_sleuth(OWBwBWidget):
     icon = getIconName(__file__,"jupyter-sleuth.png")
     want_main_area = False
     docker_image_name = "biodepot/jupyter-sleuth"
-    docker_image_tag = "0.30.1__jupyter_bioc-r_3.16-ubuntu-22.04-r-4.2.2__9b45d436__9aec3c06__9f385d12"
+    docker_image_tag = "0.30.1__jupyter_bioc-r_3.16-ubuntu-22.04-r-4.2.2__7146caee__a1924844__dede96e7"
     inputs = [("InputDir",str,"handleInputsInputDir"),("Trigger",str,"handleInputsTrigger"),("startingNotebook",str,"handleInputsstartingNotebook")]
     outputs = [("OutputDir",str),("outputNotebook",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
