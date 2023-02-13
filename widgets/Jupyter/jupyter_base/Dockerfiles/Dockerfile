@@ -1,6 +1,4 @@
-FROM ubuntu:22.04
-
-MAINTAINER Ling-Hong Hung lhhunghimself@gmail.com
+FROM debian:bookworm-slim
 
 #needed so that there is no query for time zone
 ARG DEBIAN_FRONTEND=noninteractive
@@ -43,7 +41,7 @@ RUN apt-get update && apt-get -y install epiphany-browser-data xdg-utils python3
  && python3 -m pip install pip==22.3.1 \
  && pip install jupyter \
  && R -e "install.packages(c('IRdisplay', 'devtools' ),repos = 'http://cran.us.r-project.org'); devtools::install_github('IRkernel/IRkernel'); IRkernel::installspec()" \
- && apt-get remove -y build-essential \
+ && apt-get remove -y build-essential dbus-user-session \
  && apt-get autoclean -y \
  && apt-get autoremove -y \
  && rm -rf /var/lib/apt/lists/*
