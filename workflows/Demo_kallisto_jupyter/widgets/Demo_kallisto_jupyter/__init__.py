@@ -7,4 +7,4 @@ ICON = "icon/jupyter-kallisto-sleuth.png"
 
 # Background color for category background in menu
 # and widget icon background in workflow.
-BACKGROUND = "light-green"
+BACKGROUND = "#52fffa"
