@@ -1,4 +1,4 @@
-FROM biodepot/jupyter:6.5.2-bioc-3.16-r-4.2.2__bookworm-slim__4aaca88c__b411a0f0__3480c04e
+FROM biodepot/jupyter:6.5.2-bioc-3.16-r-4.2.2__bookworm-slim__fbb56450__7dec180a__36656509
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y libssl-dev libgit2-dev libcurl4-gnutls-dev libxml2-dev libharfbuzz-dev r-bioc-rhdf5 libfribidi-dev libtiff-dev curl\
