@@ -49,6 +49,9 @@ RUN apt-get update && apt-get -y install firefox-esr xdg-utils python3-all sudo 
  && apt-get autoclean -y \
  && apt-get autoremove -y \
  && rm -rf /var/lib/apt/lists/*
-
-RUN xdg-settings set default-web-browser firefox.desktop
+#This gives an error signal even though it is successful we put it in a combo so that the error is ignored
+RUN xdg-settings set default-web-browser firefox.desktop || echo 1
 COPY .mozilla ~/.mozilla
+
+#To prevent helvetica from being used 
+RUN echo 'options(bitmapType="cairo")' >> ~/.Rprofile
