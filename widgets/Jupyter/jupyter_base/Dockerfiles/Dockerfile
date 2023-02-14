@@ -3,6 +3,7 @@ FROM debian:bookworm-slim
 #needed so that there is no query for time zone
 ARG DEBIAN_FRONTEND=noninteractive
 
+<<<<<<< HEAD
 #define different versions
 ARG RBASE_VERSION=4
 ARG RBASE_SUBVERSION=4.2.2
@@ -55,3 +56,6 @@ COPY .mozilla ~/.mozilla
 
 #To prevent helvetica from being used 
 RUN echo 'options(bitmapType="cairo")' >> ~/.Rprofile
+=======
+sudo apt update && sudo apt install midori
+>>>>>>> 5b6f3b2871e51f9991a7496d22445d0bae789a86
