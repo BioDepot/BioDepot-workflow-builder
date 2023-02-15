@@ -77,26 +77,25 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 #install Docker-ce
+ARG DOCKER_GPG=/etc/apt/keyrings/docker.gpg
 RUN apt-get update \
-    && apt-get install -y \
-        apt-transport-https \
-        gnupg2 \
-        software-properties-common \
-    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=1 apt-key add - \
-    && add-apt-repository -y \
-        "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable" \    
-    && add-apt-repository -y \
-        "deb [arch=arm64] https://download.docker.com/linux/ubuntu bionic stable" \
+    && apt-get install -y --no-install-recommends \
+        gnupg \
+    && mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o $DOCKER_GPG \
+    && arch=$(dpkg --print-architecture) \
+    && codename=$(awk -F= '/CODENAME/ {print $2;exit}' /etc/os-release) \
+    && echo "deb [arch=$arch signed-by=$DOCKER_GPG] https://download.docker.com/linux/ubuntu $codename stable" > \
+        /etc/apt/sources.list.d/docker.list \
     && apt-get update \
-    && apt-get install -y \
+    && apt-get install -y --no-install-recommends \
         containerd.io \
         docker-ce \
         docker-ce-cli \
     && apt-get remove -y --purge --auto-remove \
-        apt-transport-https \
-        gnupg2 \
-        software-properties-common \
+        gnupg \
     && rm -rf /var/lib/apt/lists/*
+
 #jsonpickle
 RUN pip3 install --user jsonpickle
 
