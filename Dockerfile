@@ -11,6 +11,7 @@ RUN apt-get update \
         firefox \
         fluxbox \
         fonts-wqy-microhei \
+        geany \
         gtk2-engines-murrine \
         gvfs-backends \
         jq \
@@ -162,6 +163,9 @@ ADD startup.sh /
 ADD nginx.conf /etc/nginx/sites-enabled/default
 ADD supervisord.conf /etc/supervisor/conf.d/
 
+#add config files for dev tools
+COPY dev-files/geany/ /root/.config/
+
 #setup arch dependent executables
 
 COPY scripts/setExecutablesArch.sh /usr/local/bin/setExecutablesArch.sh
@@ -171,4 +175,3 @@ WORKDIR /data
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
 EXPOSE 6080
 EXPOSE 22
-
