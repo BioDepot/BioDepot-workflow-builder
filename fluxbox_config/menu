@@ -17,7 +17,7 @@
 [begin] (Applications)
 [encoding] {UTF-8}
   [exec] (Bwb) {/usr/local/bin/startBwb.sh} </root/.fluxbox/bwb256.png>
-  [exec] (Bwb-debug) {/bin/bash -c 'export XENVIRONMENT=/root/.Xresources; xterm -e startBwb.sh orange-canvas -l 4'} </root/.fluxbox/bwb256.png>
+  [exec] (Bwb-debug) {/bin/bash -c 'export XENVIRONMENT=/root/.Xresources; lxterminal -e startBwb.sh orange-canvas -l 4'} </root/.fluxbox/bwb256.png>
   [exec] (Files) {dbus-launch nemo}
   [exec] (Resize) {/usr/local/bin/executables/changeRes/changeRes}
   [exec] (Terminal) {/bin/bash -c 'export XENVIRONMENT=/root/.Xresources; lxterminal'}
