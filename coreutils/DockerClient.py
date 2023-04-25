@@ -543,11 +543,9 @@ class DockerClient:
         cleanDestination = os.path.normpath(dest)
         cleanPath = os.path.normpath(path)
         cleanSource = os.path.normpath(source)
-        # check if it is already relative to host path
-        if cleanSource in cleanPath:
-            return path
-
-        # if the path is not mapping from host, will return path
+        # Must check for equality or the abspath may have multiple leading slashes which are not cleaned up by normpath
+        if cleanPath == cleanDestination:
+            return cleanSource
         if cleanDestination not in cleanPath:
             return None
         abspath = os.path.normpath(
