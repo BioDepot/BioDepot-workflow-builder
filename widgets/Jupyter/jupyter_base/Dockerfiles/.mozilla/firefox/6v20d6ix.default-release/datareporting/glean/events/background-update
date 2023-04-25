@@ -1,1 +1,0 @@
-{"timestamp":1225648020,"category":"nimbus_events","name":"unenrollment","extra":{"branch":"rollout","reason":"targeting-mismatch","enrollment_id":"f98a5c0e-1763-43ab-a32b-2ccc00075df3","experiment":"pocket-newtab-spocs-cache-rollout"}}
