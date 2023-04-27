@@ -17,8 +17,8 @@ class OWjupyter_base(OWBwBWidget):
     priority = 103
     icon = getIconName(__file__,"jupyter_image.png")
     want_main_area = False
-    docker_image_name = "biodepot/jupyter"
-    docker_image_tag = "6.5.2-r-4.2.2__bookworm-slim__5abe72bd__3b25b3bb__262cb37c"
+    docker_image_name = "biodepot/jupyter-r"
+    docker_image_tag = "6.5.4__rbase-4.2.3__bookworm-slim"
     inputs = [("InputDir",str,"handleInputsInputDir"),("Trigger",str,"handleInputsTrigger"),("startingNotebook",str,"handleInputsstartingNotebook")]
     outputs = [("OutputDir",str),("outputNotebook",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
