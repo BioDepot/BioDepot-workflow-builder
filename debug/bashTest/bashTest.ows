@@ -1,0 +1,11 @@
+<?xml version="1.0" ?><scheme description="" title="bashTest" version="2.0">
+	<nodes>
+		<node id="0" name="bash_utils" position="(478.0, 300.0)" project_name="bashTest" qualified_name="bashTest.OWbash_utils.OWbash_utils" title="bash_utils" version=""/>
+	</nodes>
+	<links/>
+	<annotations/>
+	<thumbnail/>
+	<node_properties>
+		<properties format="literal" node_id="0">{'InputFile': '/data/BioDepot-workflow-builder', 'controlAreaVisible': True, 'exportGraphics': False, 'inputConnectionsStore': {}, 'iterate': False, 'iterateSettings': {'iterableAttrs': [], 'nWorkers': 1}, 'localvol': '/biodepot', 'nWorkers': 1, 'optionsChecked': {}, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x01\xc2\x00\x00\x00\x95\x00\x00\x05{\x00\x00\x037\x00\x00\x01\xc2\x00\x00\x00\xad\x00\x00\x05{\x00\x00\x034\x00\x00\x00\x00\x00\x00\x00\x00\x07\x80', 'triggerReady': {}, 'useGpu': False, 'useScheduler': False, '__version__': 1}</properties>
+	</node_properties>
+</scheme>

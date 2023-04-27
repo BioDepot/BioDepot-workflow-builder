@@ -45,7 +45,8 @@ from AnyQt.QtWidgets import (
 
 def breakpoint(title=None, message=None):
     QtGui.QMessageBox.warning(title,'',message)
-
+def bprint(message):
+    QtGui.QMessageBox.warning(None,'',message)
 
 def getJsonName(filename, widgetName):
     widgetPy = os.path.realpath(filename)
@@ -2287,7 +2288,9 @@ class OWBwBWidget(widget.OWWidget):
             self.bgui.enable(attr, value)
 
     # Generate commands and run job
-
+    def printHostVolumes(self,label):
+        for conVol, bwbVol in self.hostVolumes.items():
+            bprint("{} hostVolumes container volume {} to bwbVolume {}".format(label,conVol,bwbVol))
     def startJob(self):
         if self.jobRunning:
             return
@@ -2410,8 +2413,8 @@ class OWBwBWidget(widget.OWWidget):
         bwbDict = {}
         if "autoMap" in self.data and self.data["autoMap"]:
             print ("autoMapping")
-            #note that we do not want to map the hostvolume here - this will be done later
             for hostVolume, bwbVolume in self.dockerClient.bwbMounts.items():
+                #pass the bwbVolume in - not the hostVolume
                 self.hostVolumes[bwbVolume] = bwbVolume
                 bwbDict[bwbVolume] = bwbVolume
         if "volumeMappings" in self.data and self.data["volumeMappings"]:
@@ -2429,6 +2432,7 @@ class OWBwBWidget(widget.OWWidget):
                     else:
                         return conVol
                 self.hostVolumes[conVol] = getattr(self, attr)
+        self.printHostVolumes('1')
         return None
 
     def joinFlagValue(self, flag, value):
@@ -2466,6 +2470,7 @@ class OWBwBWidget(widget.OWWidget):
                         return None
                     filename = str(flagValue)
                     if filename.strip():
+                        bprint("converting path for file {}".format(filename))
                         hostFilename = self.bwbPathToContainerPath(
                             filename, isFile=True, returnNone=False
                         )
@@ -3044,6 +3049,7 @@ class OWBwBWidget(widget.OWWidget):
 
     # Utilities
     def bwbPathToContainerPath(self, path, isFile=False, returnNone=False):
+        self.printHostVolumes('2')
         # converts the path entered relative to the bwb mountpoint
         # will return None if not found or the original path (default) depending on variable
         # first map it to the  path
@@ -3065,12 +3071,12 @@ class OWBwBWidget(widget.OWWidget):
             )
             sys.stderr.write("bwbPath {} hostPath {}\n".format(path, hostPath))
         conPath = None
+        bprint('Past isFile')
         # now get all the possible submappings to volumeMappings by comparing the true hostmappings
         # if submap is found convert the common path to the container path
         # return shortest path
- 
+        self.printHostVolumes('3')
         for conVol, bwbVol in self.hostVolumes.items():
-            #actually need to do search since it is possible to have multiple mappings
             hostVol = os.path.normpath(
                 self.dockerClient.to_best_host_directory(bwbVol, returnNone=False)
             )
