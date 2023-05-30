@@ -1,5 +1,5 @@
-ARG SRATOOLS_VER="3.0.3"
-ARG NCBI_VDB_VER="3.0.2"
+ARG SRATOOLS_VER="3.0.5"
+ARG NCBI_VDB_VER="3.0.5"
 
 FROM debian:bookworm-slim as build
 ARG SRATOOLS_VER

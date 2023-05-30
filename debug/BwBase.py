@@ -2290,7 +2290,7 @@ class OWBwBWidget(widget.OWWidget):
     # Generate commands and run job
     def printHostVolumes(self,label):
         for conVol, bwbVol in self.hostVolumes.items():
-            bprint("{} hostVolumes container volume {} to bwbVolume {}".format(label,conVol,bwbVol))
+            bprint("{} container volume {} to bwbVolume {}".format(label,conVol,bwbVol))
     def startJob(self):
         if self.jobRunning:
             return
@@ -2432,7 +2432,7 @@ class OWBwBWidget(widget.OWWidget):
                     else:
                         return conVol
                 self.hostVolumes[conVol] = getattr(self, attr)
-        self.printHostVolumes('1')
+        self.printHostVolumes('Host volumes after getRequiredVols')
         return None
 
     def joinFlagValue(self, flag, value):
@@ -3049,7 +3049,6 @@ class OWBwBWidget(widget.OWWidget):
 
     # Utilities
     def bwbPathToContainerPath(self, path, isFile=False, returnNone=False):
-        self.printHostVolumes('2')
         # converts the path entered relative to the bwb mountpoint
         # will return None if not found or the original path (default) depending on variable
         # first map it to the  path
@@ -3071,11 +3070,11 @@ class OWBwBWidget(widget.OWWidget):
             )
             sys.stderr.write("bwbPath {} hostPath {}\n".format(path, hostPath))
         conPath = None
-        bprint('Past isFile')
+        
         # now get all the possible submappings to volumeMappings by comparing the true hostmappings
         # if submap is found convert the common path to the container path
         # return shortest path
-        self.printHostVolumes('3')
+        self.printHostVolumes('Host volumes before mapping them to container')
         for conVol, bwbVol in self.hostVolumes.items():
             hostVol = os.path.normpath(
                 self.dockerClient.to_best_host_directory(bwbVol, returnNone=False)

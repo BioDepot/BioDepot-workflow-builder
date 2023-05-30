@@ -515,9 +515,8 @@ class DockerClient:
                         "/var/run" in m["Source"] or "/tmp/.X11-unix" in m["Source"]
                     ):
                         self.bwbMounts[m["Source"]] = m["Destination"]
-                        bprint("mount point is source {} to destination {}".format(m["Source"],m["Destination"]))
         for source, dest in self.bwbMounts.items():
-            bprint("bwbMounts: source {} to destination {}".format(source,dest))
+            bprint("Listing Bwb volume mounts: host source {} to Bwb dest {}".format(source,dest))
                             
     def to_best_host_directory(self, path, returnNone=False):
         sys.stderr.write("bwbMounts are {}\n".format(self.bwbMounts))
@@ -531,7 +530,7 @@ class DockerClient:
                 self.shareMountPoint["host"]="/tmp/.X11/.bwb"
         bestPath = None
         for source, dest in self.bwbMounts.items():
-            bprint("loop mapping path {} using source {} to dest {} volume mapping".format(path,source,dest))
+            bprint("Find best mapped path for path {} using source {} to dest {} volume mapping".format(path,source,dest))
             absPath = self.to_host_directory(path, source, dest)
             if absPath is not None:
                 if bestPath is None:
@@ -542,6 +541,7 @@ class DockerClient:
             if returnNone:
                 return None
             return path
+            bprint("best mapped path for path {} is {}".format(path,bestPath))
         return bestPath
 
     def to_host_directory(self, path, source, dest):
@@ -566,7 +566,7 @@ class DockerClient:
                 ),
             )
         )
-        bprint("replaced {} with {} to get {}".format(cleanDestination,cleanSource,abspath))
+        bprint("replaced {} with {} to get mapped path {}".format(cleanDestination,cleanSource,abspath))
         return abspath
 
 
