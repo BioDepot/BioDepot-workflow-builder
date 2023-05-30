@@ -19,7 +19,7 @@ class OWfastqDump(OWBwBWidget):
     icon = getIconName(__file__, "pfqDump.png")
     want_main_area = False
     docker_image_name = "biodepot/sratools-vdb"
-    docker_image_tag = "3.0.3__3.0.2__bookworm-slim__0924831c__215120ac__57f3b966"
+    docker_image_tag = "3.0.5__3.0.5__bookworm-slim__e3b0c4429"
     inputs = [("Trigger", str, "handleInputsTrigger")]
     outputs = [("OutputDir", str)]
     pset = functools.partial(settings.Setting, schema_only=True)
