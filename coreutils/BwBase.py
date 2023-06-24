@@ -2341,8 +2341,11 @@ class OWBwBWidget(widget.OWWidget):
         self.setStatusMessage("Running...")
         sys.stderr.write("cmds are {}\n".format(cmds))
         runDockerMapFlag=False
+        nextFlowMapFlag=False
         if "runDockerMap" in self.data:
             runDockerMapFlag=self.data["runDockerMap"]
+        if "nextFlowMap" in self.data:
+            nextFlowMapFlag=self.data["nextFlowMap"]
         if hasattr(self, "useScheduler") and self.useScheduler:
             self.dockerClient.create_container_external(
                 imageName,
@@ -2374,7 +2377,8 @@ class OWBwBWidget(widget.OWWidget):
                 scheduleSettings=None,
                 iterateSettings=self.iterateSettings,
                 iterate=self.iterate,
-                runDockerMap=runDockerMapFlag
+                runDockerMap=runDockerMapFlag,
+                nextFlowMap=nextFlowMapFlag
             )
         # except BaseException as e:
         # self.bgui.reenableAll(self)
@@ -3048,12 +3052,14 @@ class OWBwBWidget(widget.OWWidget):
         # will return None if not found or the original path (default) depending on variable
         # first map it to the  path
         pathFile = None
+        hostFile=path
         if isFile:
             dirPath = os.path.dirname(path)
             pathFile = os.path.basename(path)
             hostPath = os.path.normpath(
                 self.dockerClient.to_best_host_directory(dirPath, returnNone=False)
             )
+            hostFile=os.path.normpath(str.join(os.sep, (hostPath, pathFile)))
             sys.stderr.write(
                 "dirPath {} pathFile {} hostPath {}\n".format(
                     dirPath, pathFile, hostPath
@@ -3065,6 +3071,12 @@ class OWBwBWidget(widget.OWWidget):
             )
             sys.stderr.write("bwbPath {} hostPath {}\n".format(path, hostPath))
         conPath = None
+        #if it is nextFlow - then return the hostPath 
+        if "nextFlowMap" in self.data and self.data["nextFlowMap"]:
+            if isFile:
+                return hostFile
+            return hostPath
+        
         # now get all the possible submappings to volumeMappings by comparing the true hostmappings
         # if submap is found convert the common path to the container path
         # return shortest path

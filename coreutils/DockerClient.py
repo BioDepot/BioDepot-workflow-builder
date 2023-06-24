@@ -421,13 +421,16 @@ class DockerClient:
         scheduleSettings=None,
         iterateSettings=None,
         iterate=False,
-        runDockerMap=False
+        runDockerMap=False,
+        nextFlowMap=False
     ):
         # reset logFile when it is not None - can be "" though - this allows an active reset
         if logFile is not None:
             self.logFile = logFile
         volumeMappings = ""
-        if runDockerMap:
+        if nextFlowMap:
+            volumeMappings = " -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/.X11-unix:/tmp/.X11-unix {} ".format(self.findNextFlowSelfMounts())
+        elif runDockerMap:
             volumeMappings = " -v /var/run/docker.sock:/var/run/docker.sock -v /tmp/.X11-unix:/tmp/.X11-unix --privileged "
         for container_dir, host_dir in hostVolumes.items():
             volumeMappings = volumeMappings + "-v {}:{} ".format(
@@ -514,7 +517,12 @@ class DockerClient:
                     ):
                         self.bwbMounts[m["Source"]] = m["Destination"]
 
-                            
+    def findNextFlowSelfMounts(self):
+        mountString=""
+        for key in self.bwbMounts:
+            mountString+=" -v {}:{} ".format(key,key)
+        return mountString
+        
     def to_best_host_directory(self, path, returnNone=False):
         sys.stderr.write("bwbMounts are {}\n".format(self.bwbMounts))
         if self.bwbMounts == {}:

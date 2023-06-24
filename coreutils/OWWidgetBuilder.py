@@ -540,7 +540,8 @@ class OWWidgetBuilder(widget.OWWidget):
             "parameters",
             "command",
             "autoMap",
-            "runDockerMap"
+            "runDockerMap",
+            "nextFlowMap"
         ):
             if attr in self.data and self.data[attr]:
                 myData[attr] = deepcopy(self.data[attr])
@@ -948,6 +949,7 @@ class OWWidgetBuilder(widget.OWWidget):
             "command",
             "autoMap",
             "runDockerMap",
+            "nextFlowMap",
             "buildCommand",
         ):
             if attr in self.allAttrs:
@@ -1738,8 +1740,15 @@ class OWWidgetBuilder(widget.OWWidget):
             persist=True,
             track=True,
         )
+        nextFlowMapCb = self.makeCheckBox(
+            "nextFlowMap",
+            "Pass nextflow mappings",
+            default=False,
+            persist=True,
+            track=True,
+        )
         self.makeListWidgetUnit(
-            pname, layout=layout, lineWidgets=widgetList, otherWidgets=[autoMapCb, runDockerMapCb]
+            pname, layout=layout, lineWidgets=widgetList, otherWidgets=[autoMapCb, runDockerMapCb, nextFlowMapCb]
         )
 
     def drawPortsListWidget(self, pname, layout=None):
