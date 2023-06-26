@@ -41,9 +41,10 @@ class OWnextflow(OWBwBWidget):
     command=pset("run")
     repo=pset("nf-core/rnaseq ")
     profile=pset("test,docker")
+    parametersfile=pset(None)
     script=pset(None)
     withdocker=pset(" -with-docker")
-    pipeline=pset("")
+    pipeline=pset(None)
     outdir=pset("")
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
