@@ -1,0 +1,5 @@
+FROM biodepot/bwb:test
+RUN rm -r /biodepot && rm -r /widgets
+ADD biodepot /biodepot
+ADD widgets /widgets
+RUN pip3 install -e /biodepot

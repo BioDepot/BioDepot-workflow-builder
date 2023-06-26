@@ -1,0 +1,1 @@
+../../widgets/Scripting/nextflow/nextflow.py

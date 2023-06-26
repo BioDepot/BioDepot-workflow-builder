@@ -1,0 +1,1 @@
+{"autoMap": null, "buildCommand": null, "command": null, "description": null, "docker_image_name": null, "docker_image_tag": null, "icon": null, "inputs": null, "name": "S3_upload", "outputs": null, "parameters": null, "priority": null, "volumes": null, "runDockerMap": null}
