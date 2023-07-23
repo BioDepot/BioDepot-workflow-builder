@@ -18,7 +18,7 @@ class OWkallistoQuant(OWBwBWidget):
     icon = getIconName(__file__,"kallistoquant.png")
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
-    docker_image_tag = "0.48.0__buster-slim__33392f01__5863669__eadd9536"
+    docker_image_tag = "0.48.0__buster-slim__fdfc2dda__edfb1d50__03a73025"
     inputs = [("indexFile",str,"handleInputsindexFile"),("fastqFiles",str,"handleInputsfastqFiles"),("trigger",str,"handleInputstrigger")]
     outputs = [("outputDir",str)]
     pset=functools.partial(settings.Setting,schema_only=True)

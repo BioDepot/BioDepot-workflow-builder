@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y build-essential cmake autoconf automake
 
 RUN curl -L https://github.com/pachterlab/kallisto/archive/refs/tags/v${VERSION}.tar.gz | tar -zvxf - 
 RUN cd kallisto*/ext/htslib && autoheader && autoconf
-RUN cd kallisto* && mkdir -p build && cd build && cmake ..  && make && make install
+RUN cd kallisto* && mkdir -p build && cd build && cmake .. -DUSE_HDF5=ON && make && make install
 
 FROM debian:buster-slim
 MAINTAINER Ling-Hong Hung

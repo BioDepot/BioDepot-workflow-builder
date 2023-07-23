@@ -19,7 +19,7 @@ class OWkallistoIndex(OWBwBWidget):
     icon = getIconName(__file__, "kallistoindex.png")
     want_main_area = False
     docker_image_name = "biodepot/kallisto"
-    docker_image_tag = "0.48.0__buster-slim__33392f01__5863669__eadd9536"
+    docker_image_tag = "0.48.0__buster-slim__fdfc2dda__edfb1d50__03a73025"
     inputs = [("trigger", str, "handleInputstrigger")]
     outputs = [("outputFilename", str)]
     pset = functools.partial(settings.Setting, schema_only=True)
