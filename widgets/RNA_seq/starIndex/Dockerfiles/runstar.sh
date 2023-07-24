@@ -153,9 +153,9 @@ if [ ${nFiles} -le 1 ]; then
     eval "${cmdStr}"
     exit 0
 fi
-
+#makefilestr is run here because it also creates the R1files and R2files array
+makefilestr
 if [[ -z "${MULTISAMPLE}" ]]; then
-    makefilestr
     echo 'single sample'
     echo "${cmdStr}"
     eval "${cmdStr}"
@@ -174,8 +174,10 @@ else
             eval "${baseCmd} --outFileNamePrefix $outputSubDir ""$( IFS=' '; echo "${cmd[*]}" )" "$file ${remainingFlags[@]}"
         done
     else
+        echo "working on paired ends"
         i=0
         for R1file in "${R1files[@]}"; do
+            echo "$R1file"
             R2file=${R2files[i]}
             findOutputSubDir $R1file
             echo "mkdir -p $outputSubDir"
