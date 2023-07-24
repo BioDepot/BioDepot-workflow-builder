@@ -19,7 +19,7 @@ class OWstarAlign(OWBwBWidget):
     icon = getIconName(__file__, "staralign.png")
     want_main_area = False
     docker_image_name = "biodepot/star"
-    docker_image_tag = "2.6.0c__bookworm-slim__d0d926bb__fd4cc2fa__4debfaea"
+    docker_image_tag = "2.6.0c__bookworm-slim__84ff9269__1d8ca5e4__94207031"
     inputs = [
         ("trigger", str, "handleInputstrigger"),
         ("outputDir", str, "handleInputsoutputDir"),
