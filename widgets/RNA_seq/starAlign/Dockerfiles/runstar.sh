@@ -153,9 +153,9 @@ if [ ${nFiles} -le 1 ]; then
     eval "${cmdStr}"
     exit 0
 fi
-makefilestr
+
 if [[ -z "${MULTISAMPLE}" ]]; then
-    cmdStr=${baseCmd}$( IFS=' '; echo "${args[*]}" )" --outFileNamePrefix ${outFileNamePrefix}"
+    makefilestr
     echo 'single sample'
     echo "${cmdStr}"
     eval "${cmdStr}"
