@@ -19,7 +19,7 @@ class OWstarIndex(OWBwBWidget):
     icon = getIconName(__file__, "starIndex.png")
     want_main_area = False
     docker_image_name = "biodepot/star"
-    docker_image_tag = "2.6.0c__bookworm-slim__84ff9269__1d8ca5e4__94207031"
+    docker_image_tag = "2.6.0c__bookworm-slim__4df49ea8__07281ffb__2ca6eea3"
     inputs = [("Trigger", str, "handleInputsTrigger")]
     outputs = [("genomeDir", str)]
     pset = functools.partial(settings.Setting, schema_only=True)
