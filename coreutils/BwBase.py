@@ -948,7 +948,7 @@ class OWBwBWidget(widget.OWWidget):
                 pname, pvalue, pvalue["label"]
             )
         )
-        if not hasattr(self, pname):
+        if not hasattr(self, pname) or getattr(self, pname) is None:
             if "default" in pvalue:
                 if type(pvalue["default"]) is str:
                     if pvalue["default"] == "True":
