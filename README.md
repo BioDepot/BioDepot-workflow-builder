@@ -19,6 +19,9 @@ University of Washington Tacoma
          * [Is it possible to use Bwb to run a batch of datasets?](#is-it-possible-to-use-bwb-to-run-a-batch-of-datasets)
          * [How do I add my own scripts to a Bwb pipeline?](#how-do-i-add-my-own-scripts-to-a-bwb-pipeline)
          * [How do I cut and paste into Bwb?](#how-do-i-cut-and-paste-into-bwb)
+      * [Writing workflows](#writing-workflows)
+         * [Is there a way to modfiy Bwb parameters at run time?](#is-there-a-way-to-modify-bwb-parameters-at-run-time)
+         * [How can I use a parameter to skip or execute a widget?](#how-can-i-use-a-parameter-to-skip-or-execute-a-widget)
       * [Common problems](#common-problems)
          * [I'm having problems with windows](#im-having-problems-with-windows)
          * [My window or desktop are too small](#my-window-or-desktop-are-too-small)
@@ -153,7 +156,7 @@ University of Washington Tacoma
          * [BwBase class](#bwbase-class)
             * [Keeping track of connections](#keeping-track-of-connections)
             * [Handling input signals](#handling-input-signals)
-            * [Drawing an managing the GUI form](#drawing-an-managing-the-gui-form)
+            * [Drawing and managing the GUI form](#drawing-and-managing-the-gui-form)
             * [Launching the executable with Docker](#launching-the-executable-with-docker)
 
 # FAQ
@@ -258,6 +261,30 @@ We have provided basic widgets for Python, R, Perl, Bash, and Java. There is a [
 There is a side arrow in the browser (noVNC) connected version of Bwb. Click on the arrow and a menu will show. Click on the clipboard icon. You can then cut and paste from your desktop to the clipboard and from the the clipboard into Bwb. The reverse is true too. When you are done you can hide the side menu. There are also icons for combined keystrokes such as control-c, control-v which are activated from the side menu. This gives a mechanism to override the browser mappings for these keystrokes. 
 #### VNC client version:
 If you are using a VNC client then you need to follow the instructions for that particular client. RealVNC, has very robust support for cut and paste, treating the windows inside Bwb like any other window. Also all the control-key combinations are supported without the need for a separate menu to enter them as there is no need to bypass the browser defaults.
+## Writing workflows
+
+### Is there a way to modify Bwb parameters at run time?
+Bwb keeps track of the /tmp/output directory inside the container of a widget. If you want to modify a variable "foo" and change the value to "bar", then have your script write "bar" to /tmp/output/foo. Bwb checks /tmp/output for parameter values that have changed.
+
+### How can I use a parameter to skip or execute a widget?
+You may want to do this to allow skipping  a widget programmatically.
+
+You can do this using a wrapper script included in your container.
+
+A potentially simpler method is to take advantage of the fact that separate lines in the command will be concatenated as compound bash command connected by a &&. This method can be used without changing the container.
+
+For example, in a download widget include a boolean parameter that defines a environment variable SKIPDOWNLOAD if chosen.
+Then put in the command window of the widget definition
+```
+[ -z "$SKIPDOWNLOAD" ] || exit 0
+download.sh
+```
+This executes as 
+```
+bash -c  '[ -z "$SKIPDOWNLOAD" ] || exit 0 && download.sh <Bwb parameters> <Bwb arguments>'
+```
+If $SKIPDOWNLOAD is defined then the first clause returns false. To resolve the || operation, the second clause must be executed which exits the operation without an error. 
+if $SKIPDOWNLOAD is not defined, the first clause is true. The second clause is not executed because its return value is not relevant to the || operation. However the final download.sh is executed because its return value is required to evaluate the && operator.
 
 ## Common problems
 
