@@ -1119,6 +1119,8 @@ class OWBwBWidget(widget.OWWidget):
         findFileCB.setDisabled(addCheckbox)
         findDirCB.setDisabled(addCheckbox)
         startCol = 0
+        layout.addLinefeed(startCol=startCol)
+        
         if addCheckbox:
             startCol += 1
             checkbox.stateChanged.connect(
@@ -1127,7 +1129,6 @@ class OWBwBWidget(widget.OWWidget):
             checkbox.stateChanged.connect(
                 lambda: findFileCB.setEnabled(checkbox.isChecked())
             )
-        layout.addLinefeed(startCol=startCol)
         patternLabel = QtGui.QLabel("Pattern")
         if pvalue["label"]:
             patternLabel = QtGui.QLabel(pvalue["label"] + " pattern")
@@ -1148,7 +1149,7 @@ class OWBwBWidget(widget.OWWidget):
         layout.addWidget(findFileCB, width=1)
         layout.addLinefeed(startCol=startCol + 1)
         layout.addWidget(findDirCB, width=1)
-        layout.addLinefeed(startCol=startCol + 1)
+        layout.addLinefeed(startCol=0)
 
         queryElements.extend(
             [rootLedit, browseBtn, patternLedit, findFileCB, findDirCB]
