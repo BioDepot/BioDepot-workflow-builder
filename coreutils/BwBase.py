@@ -1268,11 +1268,11 @@ class OWBwBWidget(widget.OWWidget):
                 patternQuery["pattern"] = value["pattern"]
                 patternLedit.setText(value["pattern"])
             if "findFile" in value:
-                patternQuery["findFile"] = value["findFile"]
                 findFileCB.setChecked(value["findFile"])
+                patternQuery["findFile"] = value["findFile"]
             if "findDir" in value:
-                patternQuery["findDir"] = value["findDir"]
                 findDirCB.setChecked(value["findDir"])
+                patternQuery["findDir"] = value["findDir"]
             if "value" in value:
                 patternQuery["value"] = value["value"]
 
