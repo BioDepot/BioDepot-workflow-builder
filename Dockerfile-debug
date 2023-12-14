@@ -1,4 +1,0 @@
-FROM biodepot/bwb:latest
-COPY debug/BwBase.py /coreutils/BwBase.py
-COPY debug/DockerClient.py /coreutils/DockerClient.py
-COPY debug/bashTest /workflows/bashTest
