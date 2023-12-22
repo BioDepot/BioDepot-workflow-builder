@@ -384,7 +384,7 @@ class OWBwBWidget(widget.OWWidget):
     iterateSettings = pset({})
     iterate = pset(False)
     useGpu = pset(False)
-    
+    repeat = pset(False)    
     # Initialization
     def __init__(self, image_name, image_tag):
         super().__init__()
@@ -1881,6 +1881,8 @@ class OWBwBWidget(widget.OWWidget):
     def drawExec(self, box=None):
         if not hasattr(self, "useDockerfile"):
             setattr(self, "useDockerfile", False)
+        if not hasattr(self, "repeat"):
+            setattr(self, "repeat", False)
         # find out if there are triggers
         self.candidateTriggers = []
         if self.data["inputs"] is not None:
@@ -1896,6 +1898,11 @@ class OWBwBWidget(widget.OWWidget):
         self.execLayout = QtGui.QGridLayout()
         self.execLayout.setSpacing(5)
 
+        
+        self.repeatMode = QtGui.QCheckBox("Repeat", self)
+        self.repeatMode.setChecked(self.repeat)
+        self.repeatMode.stateChanged.connect(self.repeatModeChange)
+
         self.graphicsMode = QtGui.QCheckBox("Export graphics", self)
         self.graphicsMode.setChecked(self.exportGraphics)
         self.graphicsMode.stateChanged.connect(self.graphicsModeChange)
@@ -1907,10 +1914,6 @@ class OWBwBWidget(widget.OWWidget):
         self.testMode = QtGui.QCheckBox("Test mode", self)
         self.testMode.setChecked(self.useTestMode)
         self.testMode.stateChanged.connect(self.testModeChange)
-
-        # self.dockerMode=QtGui.QCheckBox('Build container',self)
-        # self.dockerMode.setChecked(self.useDockerfile)
-        # self.dockerMode.stateChanged.connect(self.dockerModeChange)
 
         self.cboRunMode = QtGui.QComboBox()
         self.cboRunMode.addItem("Manual")
@@ -1956,11 +1959,12 @@ class OWBwBWidget(widget.OWWidget):
         self.execLayout.addWidget(self.gpuMode, 1, 2)
         self.execLayout.addWidget(self.graphicsMode, 1, 3)
         self.execLayout.addWidget(self.testMode, 1, 4)
+        self.execLayout.addWidget(self.repeatMode, 1, 5)
         # self.execLayout.addWidget(self.dockerMode,1,3)
-        self.execLayout.addWidget(myLabel, 1, 5)
-        self.execLayout.addWidget(self.cboRunMode, 1, 6)
+        self.execLayout.addWidget(myLabel, 1, 6)
+        self.execLayout.addWidget(self.cboRunMode, 1, 7)
         if self.candidateTriggers:
-            self.execLayout.addWidget(self.execBtn, 1, 7)
+            self.execLayout.addWidget(self.execBtn, 1, 8)
         box.layout().addLayout(self.execLayout)
 
     def testModeChange(self):
@@ -1971,7 +1975,10 @@ class OWBwBWidget(widget.OWWidget):
 
     def graphicsModeChange(self):
         self.exportGraphics = self.graphicsMode.isChecked()
-        
+ 
+    def repeatModeChange(self):
+        self.repeat = self.repeatMode.isChecked()
+               
     def gpuModeChange(self):
         self.useGpu = self.gpuMode.isChecked()
         
@@ -2969,13 +2976,24 @@ class OWBwBWidget(widget.OWWidget):
             )
             if ret == qm.No:
                 return           
+        # if self.repeat and not self.useTestMode:
+        #     self.startJob()
+        #     while self.status != 'stopped' and self.status != 'finished':
+        #         if self.status == 'restarting':
+        #             if(self.repeat and not self.useTestMode):
+        #                 self.startJob()
+        #             else:
+        #                 self.onStopClicked()
+        #         else:
+        #             sleep(10)
+        #     return
         self.startJob()
-
+        
     def onStopClicked(self):
         self.pConsole.stop("Stopped by user")
         self.setStatusMessage("Stopped")
         self.status = "stopped"
-        if self.jobRunning:
+        if self.jobRunning or self.repeat:
             self.bgui.reenableAll(self)
             self.reenableExec()
             self.jobRunning = False
@@ -2983,16 +3001,28 @@ class OWBwBWidget(widget.OWWidget):
     def onRunFinished(self, code=None, status=None):
         self.jobRunning = False
         self.pConsole.writeMessage("Finished")
+        goodExit = True
         if code is not None:
             if code:
                 self.pConsole.writeMessage("Exit code is {}".format(code), color=Qt.red)
+                goodExit = False
             else:
                 self.pConsole.writeMessage("Exit code is {}".format(code))
         if status is not None:
             if status:
                 self.pConsole.writeMessage("Exit status is {}".format(status), color=Qt.red)
+                goodExit = False
             else:
                 self.pConsole.writeMessage("Exit status is {}".format(status))
+        if goodExit and self.repeat and not self.status == "stopped":
+            self.updateOutputs()
+            if hasattr(self, "handleOutputs"):
+                self.handleOutputs()
+            sleep(10)
+            self.status="Restarting"
+            self.setStatusMessage("Restarting")
+            self.startJob()
+            return            
         self.bgui.reenableAll(self)
         self.reenableExec()
         if self.status != "stopped" and self.status != "finished":

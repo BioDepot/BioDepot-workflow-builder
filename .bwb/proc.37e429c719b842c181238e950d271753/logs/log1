@@ -1,5 +1,0 @@
-docker run -i --rm  --init --cidfile=/tmp/proc.37e429c719b842c181238e950d271753/locks/lock0/pid.452 -v /home/lhhung/ssh_repos/BioDepot-workflow-builder/.bwbshare/proc.37e429c719b842c181238e950d271753/output0:/tmp/output   -v /home/lhhung/ssh_repos/BioDepot-workflow-builder:/data -v /biodepot:/myvolume   biodepot/bash_utilities:alpine-3.17.1__24884064__91e2e7b9__1a66801e ls -l  /data/coreutils/DockerFiles  
-total 8
--rw-r--r--    1 1000     1000          1060 Jan 18 21:08 Base Bioc R.Dockerfile
--rw-r--r--    1 1000     1000           157 Jan 18 21:08 Use bioc-base.Dockerfile
-job0 exited successfully

@@ -1,0 +1,15 @@
+<?xml version="1.0" ?><scheme description="" title="test-async" version="2.0">
+	<nodes>
+		<node id="0" name="File" position="(261.0, 130.0)" project_name="test-async" qualified_name="test_async.OWFile.OWFile" title="File" version=""/>
+		<node id="1" name="Directory" position="(102.0, 128.0)" project_name="test-async" qualified_name="test_async.OWDirectory.OWDirectory" title="Directory" version=""/>
+	</nodes>
+	<links>
+		<link enabled="true" id="0" sink_channel="input" sink_node_id="0" source_channel="directory" source_node_id="1"/>
+	</links>
+	<annotations/>
+	<thumbnail/>
+	<node_properties>
+		<properties format="literal" node_id="0">{'controlAreaVisible': True, 'exportGraphics': False, 'input': '', 'inputConnectionsStore': {'input': [1]}, 'iterate': False, 'iterateSettings': {'iterableAttrs': [], 'nWorkers': 1}, 'nWorkers': 1, 'optionsChecked': {'File': False}, 'repeat': False, 'runMode': 2, 'runTriggers': ['input'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x03R\x00\x00\x01\xa1\x00\x00\x06\xbf\x00\x00\x04\n\x00\x00\x03R\x00\x00\x01\xb9\x00\x00\x06\xbf\x00\x00\x04\x07\x00\x00\x00\x00\x00\x00\x00\x00\x07\x80', 'triggerReady': {'input': False}, 'useGpu': False, 'useScheduler': False, '__version__': 1}</properties>
+		<properties format="literal" node_id="1">{'controlAreaVisible': True, 'directory': '/data/benchmark', 'exportGraphics': False, 'inputConnectionsStore': {}, 'iterate': False, 'iterateSettings': {'iterableAttrs': [], 'nWorkers': 1}, 'nWorkers': 1, 'optionsChecked': {}, 'repeat': True, 'runMode': 0, 'runTriggers': [], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x03R\x00\x00\x01\xb9\x00\x00\x06\x8b\x00\x00\x02\xbb\x00\x00\x03R\x00\x00\x01\xb9\x00\x00\x06\x8b\x00\x00\x02\xbb\x00\x00\x00\x00\x00\x00\x00\x00\x07\x80', 'triggerReady': {}, 'useGpu': False, 'useScheduler': False, '__version__': 1}</properties>
+	</node_properties>
+</scheme>
