@@ -3021,6 +3021,7 @@ class OWBwBWidget(widget.OWWidget):
             sleep(10)
             self.status="Restarting"
             self.setStatusMessage("Restarting")
+            self.pConsole = ConsoleProcess(console=self.console, finishHandler=self.onRunFinished)
             self.startJob()
             return            
         self.bgui.reenableAll(self)

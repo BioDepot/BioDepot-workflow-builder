@@ -716,7 +716,14 @@ class CanvasMainWindow(QMainWindow):
             triggered=self.set_signal_freeze,
             icon=canvas_icons("Pause.svg"),
         )
-
+        self.autorestart = QAction(
+            self.tr("Auto restart"),
+            self,
+            objectName="auto-restart-action",
+            checkable=True,
+            triggered=self.autorestart,
+        )
+        self.autorestart.setChecked(False)
         self.toggle_tool_dock_expand = QAction(
             self.tr("Expand Tool Dock"),
             self,
@@ -867,6 +874,12 @@ class CanvasMainWindow(QMainWindow):
         self.toolDock_menu.addAction(self.editDockAction)
 
         menu_bar.addMenu(self.toolDock_menu)
+        
+        # ToolBar menu
+        self.autorestart_menu = QMenu(self.tr("&AutoRestart"), self)
+        self.autorestart_menu.addAction(self.autorestart)
+        menu_bar.addMenu(self.autorestart_menu)
+        
         # self.scheduler_menu = QMenu(self.tr('&Scheduler'), self)
         # self.scheduler_menu.addAction(self.editServersAction)
         # self.scheduler_menu.addAction(self.serverlessAction)
@@ -2138,7 +2151,10 @@ class CanvasMainWindow(QMainWindow):
 
         """
         self.__update_scheme_margins()
-
+        
+    def autorestart(self):
+        self.reload_last
+        
     def set_tool_dock_expanded(self, expanded):
         """
         Set the dock widget expanded state.
