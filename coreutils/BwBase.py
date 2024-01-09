@@ -2050,7 +2050,9 @@ class OWBwBWidget(widget.OWWidget):
                 if not self.triggerReady[trigger]:
                     return
             self.onRunClicked()
-
+    def initTriggers(self):
+        for attr in self.runTriggers:
+            self.triggerReady[attr] = False
     def bwbFileEntry(
         self,
         widget,
@@ -3036,6 +3038,7 @@ class OWBwBWidget(widget.OWWidget):
                 self.updateOutputs()
                 if hasattr(self, "handleOutputs"):
                     self.handleOutputs()
+        self.initTriggers()
     def updateOutputs(self):
         outputData=[]
         jsonData=""
