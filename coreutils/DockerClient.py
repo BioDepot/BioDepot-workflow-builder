@@ -259,8 +259,9 @@ class DockerClient:
         self.url = url
         self.name = name
         self.cli = APIClient(base_url=url)
+        command = "awk -F'/docker/containers/|/resolv.conf' '$2!=\"\" {print $2; exit}' /proc/self/mountinfo"
         outputString=str(subprocess.check_output(
-                'cat /proc/self/cgroup | grep devices | head -1 | cut -d "/" -f3 | sed "s/.*-//g" | sed "s/\..*//g"',
+                command,
                 shell=True,
                 universal_newlines=True,
             ))
