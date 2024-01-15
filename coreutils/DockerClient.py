@@ -10,6 +10,8 @@ import uuid
 import time
 from pathlib import Path
 #runScheduler.sh ['b2b72d36270f4200a9e', '/tmp/docker.b2b72d36270f4200a9e.json', '8', '8096']
+def breakpoint(title=None, message=None):
+    QtGui.QMessageBox.warning(title,'',message)
 class ConsoleProcess:
     #note that the logBaseDir is hard coded under /data/.bwb for now - this should be changed for whatever the primary volume mapping is
     # subclass that attaches a process and pipes the output to textedit widget console widget
@@ -266,7 +268,7 @@ class DockerClient:
             self.bwb_instance_id = outputString.splitlines()[0]
         else:
             outputString=str(subprocess.check_output(
-                "cat /proc/self/mountinfo | grep -oP '(?<=containers/).*?(?=/resolv)'",
+                "cat /proc/self/mountinfo | grep -oP '(?<=docker/containers/).*?(?=/resolv)'",
                 shell=True,
                 universal_newlines=True,
             ))
@@ -516,7 +518,7 @@ class DockerClient:
                         "/var/run" in m["Source"] or "/tmp/.X11-unix" in m["Source"]
                     ):
                         self.bwbMounts[m["Source"]] = m["Destination"]
-
+                        
     def findNextFlowSelfMounts(self):
         mountString=""
         for key in self.bwbMounts:
