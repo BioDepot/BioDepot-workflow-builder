@@ -173,7 +173,7 @@ class ConsoleProcess:
             sys.stderr.write('runScheduler.sh {}\n'.format(cmds))
             self.process.start('runScheduler.sh',cmds)
         else:
-            os.makedirs(self.logDir)
+            os.makedirs(self.logDir,exist_ok=True)
             self.startLog()
             cmds.insert(0,self.baseLogDir)
             cmds.insert(0,self.processDir)

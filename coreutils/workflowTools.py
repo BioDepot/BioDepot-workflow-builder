@@ -259,7 +259,7 @@ def exportWorkflow(
     ):
     tempDir = tempfile.mkdtemp()
     projectTitlePath = niceForm(projectTitle, useDash=False)
-    os.makedirs(tempDir + "/widgets/{}".format(projectTitlePath, useDash=False))
+    os.makedirs(tempDir + "/widgets/{}".format(projectTitlePath, useDash=False), exist_ok=True)
     tempOWS = "{}/{}".format(tempDir, os.path.basename(bwbOWS))
     shutil.copyfile(bwbOWS, tempOWS)
     doc = minidom.parse(bwbOWS)
