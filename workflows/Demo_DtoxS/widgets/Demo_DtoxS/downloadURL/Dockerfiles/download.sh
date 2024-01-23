@@ -11,7 +11,6 @@ function checkFilename(){
     [[ $(echo $filename | cut -c1-1) =~ ^[0-9a-zA-Z]+$ ]] || return 1
     return 0
 }
-
 function getFilename(){
     curlret=0
     unset filename
@@ -23,7 +22,22 @@ function getFilename(){
     checkFilename && return
     filename=$(su user -c "curl -JLO $url |& grep -m 1 Warning | sed 's/.* file //; s/:.*//'")
     checkFilename && return
+    filename=$(basename "$url")
+    checkFilename && return
     filename="${url##*/}"
+}
+function getRequestURL(){
+    local content_url="https://drive.google.com/uc?export=download&id=$1"
+    local html_content=$(curl -c ./cookies.txt -s -L "$content_url")
+    # Extract values using grep and sed
+    local id=$(echo "$html_content" | grep -o 'name="id" value="[^"]*' | sed 's/name="id" value="//')
+    local export=$(echo "$html_content" | grep -o 'name="export" value="[^"]*' | sed 's/name="export" value="//')
+    local confirm=$(echo "$html_content" | grep -o 'name="confirm" value="[^"]*' | sed 's/name="confirm" value="//')
+    local uuid=$(echo "$html_content" | grep -o 'name="uuid" value="[^"]*' | sed 's/name="uuid" value="//')
+
+    # Construct the request URL
+    request_url="https://drive.usercontent.google.com/download?id=${id}&export=${export}&confirm=${confirm}&uuid=${uuid}"
+    
 }
 
 function findGoogleFilename(){
@@ -37,22 +51,11 @@ function findGoogleFilename(){
     filename=$(curl -s -L "$1" | sed -n -e 's/.*<meta property\="og\:title" content\="//p' | sed -n -e 's/">.*//p')
     echo curl -s -L "$1" 
     [ -z "$filename" ] && echo "Unable to find filename - cannot download from google" &&  exit 1
-    #try to get download code from session cookie
-    echo "filename is $filename"
-    echo "curl -s  -c ./cookie 'https://drive.google.com/uc?export=download&id=${fileID}'"
-    formText=$(curl -s -c ./cookie "https://drive.google.com/uc?export=download&id=${fileID}")
-    code=$(cat ./cookie | grep -o 'download_warning.*' | cut -f2)
-    [[ -z "$code" ]] && code=$(echo "$formText"  | grep -oP '(?<=;confirm=).*(?=\" method)')
-    #code= $(echo $text | grep -oP '(?<=;confirm=).*(?=\" method)')
-    echo $formText
-    echo $code
-    #echo "curl -c ./cookie 'https://drive.google.com/uc?export=download&id=${fileID}' &> /dev/null"
-
-    if [[ -n "$code" ]]; then
-        echo "code is $code"
-    else
-        echo "no code found"
-    fi
+    #first see if the file can be downloaded directly by checking the header when downloading to a non-writable directory
+    tempDir="$(mktemp -d /tmp/XXXXXXXXX)"
+    #make a temporary directory without write permissions to force curl to quit after obtaining filename
+    chmod -w $tempDir
+    cookie=$(cd $tempDir; su user bash -c "curl -I -L 'https://docs.google.com/uc?export=download&id=$fileID'" | grep -o -P '(?<=set-cookie: ).*' | sed 's/;.*//')
 }
 
 function decompString(){
@@ -159,19 +162,21 @@ for url in "${urls[@]}" ; do
         #find filename and fileID and keep cookie
         findGoogleFilename $url
         decompString "$filename"
-        echo "google drive url is $url filename is $filename fileID is $fileID code is $code dcmd is $dcmd"
+        echo "google drive url is $url filename is $filename fileID is $fileID dcmd is $dcmd"
         if [[ -n "$filename" ]]; then
             if [ -n "$noClobber" ] && [ -f "$filename" ]; then
                 echo "File $filename is already present, skipping download"
                 shift
                 continue
             fi
-            if [ -z "$code" ]; then
+            if [ -z "$cookie" ]; then
                 echo No problem with virus check no verification needed
                 cmd="curl -L 'https://docs.google.com/uc?export=download&id=${fileID}' "
             else
-                echo "Verification code to bypass virus scan is $code "
-                cmd="curl -Lb ./cookie 'https://drive.google.com/uc?export=download&confirm=${code}&id=$fileID' "
+                echo "We need to pass the virus check"
+                getRequestURL $fileID
+                echo "request url is $request_url"
+                cmd="curl -Lb ./cookies.txt '${request_url}' "
             fi
             if [[ -n $zipFlag ]]; then
                 cmd+="-o '$filename' "
