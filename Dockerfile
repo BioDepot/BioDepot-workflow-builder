@@ -170,6 +170,7 @@ COPY dev-files/geany/ /root/.config/
 
 COPY scripts/setExecutablesArch.sh /usr/local/bin/setExecutablesArch.sh
 RUN setExecutablesArch.sh /usr/local/bin/executables $TARGETARCH
+COPY scripts/killBwb.sh /usr/local/bin/killBwb.sh
 
 WORKDIR /data
 CMD /startup.sh && /usr/bin/supervisord -n -c /etc/supervisor/supervisord.conf
