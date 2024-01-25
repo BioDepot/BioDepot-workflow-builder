@@ -259,7 +259,7 @@ class DockerClient:
         self.url = url
         self.name = name
         self.cli = APIClient(base_url=url)
-        command = "awk -F'/docker/containers/|/resolv.conf' '$2!=\"\" {print $2; exit}' /proc/self/mountinfo"
+        command = "awk -F'/containers/|/resolv.conf' '$2!=\"\" {print $2; exit}' /proc/self/mountinfo"
         outputString=str(subprocess.check_output(
                 command,
                 shell=True,
