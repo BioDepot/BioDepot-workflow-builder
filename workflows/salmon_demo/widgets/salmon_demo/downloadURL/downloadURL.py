@@ -11,15 +11,15 @@ from DockerClient import DockerClient
 from BwBase import OWBwBWidget, ConnectionDict, BwbGuiElements, getIconName, getJsonName
 from PyQt5 import QtWidgets, QtGui
 
-class OWDirectory(OWBwBWidget):
-    name = "Directory"
-    description = "Directory"
-    priority = 10
-    icon = getIconName(__file__,"directory.svg")
+class OWdownloadURL(OWBwBWidget):
+    name = "downloadURL"
+    description = "Downloads files from URL"
+    priority = 1
+    icon = getIconName(__file__,"download.png")
     want_main_area = False
-    docker_image_name = "biodepot/alpine-bash"
-    docker_image_tag = "3.7"
-    inputs = [("Directory",str,"handleInputsDirectory")]
+    docker_image_name = "biodepot/downloadurl"
+    docker_image_tag = "latest"
+    inputs = [("directory",str,"handleInputsdirectory"),("trigger",str,"handleInputstrigger"),("URL",str,"handleInputsURL")]
     outputs = [("directory",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
     runMode=pset(0)
@@ -28,22 +28,35 @@ class OWDirectory(OWBwBWidget):
     triggerReady=pset({})
     inputConnectionsStore=pset({})
     optionsChecked=pset({})
+    URL=pset([])
+    decompress=pset(True)
     directory=pset(None)
+    concatenateFile=pset(None)
     def __init__(self):
         super().__init__(self.docker_image_name, self.docker_image_tag)
-        with open(getJsonName(__file__,"Directory")) as f:
+        with open(getJsonName(__file__,"downloadURL")) as f:
             self.data=jsonpickle.decode(f.read())
             f.close()
         self.initVolumes()
         self.inputConnections = ConnectionDict(self.inputConnectionsStore)
         self.drawGUI()
-    def handleInputsDirectory(self, value, *args):
+    def handleInputsdirectory(self, value, *args):
         if args and len(args) > 0: 
-            self.handleInputs("Directory", value, args[0][0], test=args[0][3])
+            self.handleInputs("directory", value, args[0][0], test=args[0][3])
+        else:
+            self.handleInputs("inputFile", value, None, False)
+    def handleInputstrigger(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("trigger", value, args[0][0], test=args[0][3])
+        else:
+            self.handleInputs("inputFile", value, None, False)
+    def handleInputsURL(self, value, *args):
+        if args and len(args) > 0: 
+            self.handleInputs("URL", value, args[0][0], test=args[0][3])
         else:
             self.handleInputs("inputFile", value, None, False)
     def handleOutputs(self):
-        outputValue=None
+        outputValue="/data"
         if hasattr(self,"directory"):
             outputValue=getattr(self,"directory")
         self.send("directory", outputValue)

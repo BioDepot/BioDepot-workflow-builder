@@ -1,0 +1,88 @@
+<?xml version="1.0" ?><scheme description="" title="salmon-demo" version="2.0">
+	<nodes>
+		<node id="0" name="SalmonIndex" position="(622.0, 317.0)" project_name="salmon-demo" qualified_name="salmon_demo.OWSalmonIndex.OWSalmonIndex" title="SalmonIndex" version=""/>
+		<node id="1" name="gnumeric" position="(968.0, 243.0)" project_name="salmon-demo" qualified_name="salmon_demo.OWgnumeric.OWgnumeric" title="View quantification for one sample" version=""/>
+		<node id="2" name="SalmonQuant" position="(798.0, 244.0)" project_name="salmon-demo" qualified_name="salmon_demo.OWSalmonQuant.OWSalmonQuant" title="SalmonQuant" version=""/>
+		<node id="3" name="Start" position="(255.0, 236.0)" project_name="salmon-demo" qualified_name="salmon_demo.OWStart.OWStart" title="Start" version=""/>
+		<node id="4" name="downloadURL" position="(460.0, 146.0)" project_name="salmon-demo" qualified_name="salmon_demo.OWdownloadURL.OWdownloadURL" title="Download samples FASTQ files" version=""/>
+		<node id="5" name="downloadURL" position="(460.0, 316.0)" project_name="salmon-demo" qualified_name="salmon_demo.OWdownloadURL.OWdownloadURL" title="Download FASTA file" version=""/>
+	</nodes>
+	<links>
+		<link enabled="true" id="0" sink_channel="Trigger" sink_node_id="1" source_channel="trigger" source_node_id="2"/>
+		<link enabled="true" id="1" sink_channel="index" sink_node_id="0" source_channel="index" source_node_id="3"/>
+		<link enabled="true" id="2" sink_channel="trigger" sink_node_id="0" source_channel="directory" source_node_id="5"/>
+		<link enabled="true" id="3" sink_channel="mates2" sink_node_id="2" source_channel="mate_2" source_node_id="3"/>
+		<link enabled="true" id="4" sink_channel="mates1" sink_node_id="2" source_channel="mate_1" source_node_id="3"/>
+		<link enabled="true" id="5" sink_channel="trigger" sink_node_id="2" source_channel="directory" source_node_id="4"/>
+		<link enabled="true" id="6" sink_channel="index" sink_node_id="2" source_channel="index" source_node_id="0"/>
+		<link enabled="true" id="7" sink_channel="directory" sink_node_id="4" source_channel="work_dir" source_node_id="3"/>
+		<link enabled="true" id="8" sink_channel="URL" sink_node_id="4" source_channel="sample_dl_links" source_node_id="3"/>
+		<link enabled="true" id="9" sink_channel="directory" sink_node_id="5" source_channel="work_dir" source_node_id="3"/>
+		<link enabled="true" id="10" sink_channel="outputDirs" sink_node_id="2" source_channel="output" source_node_id="3"/>
+	</links>
+	<annotations>
+		<text font-family="Helvetica" font-size="16" id="0" rect="(230.0, 412.0, 775.0, 197.0)" type="text/plain">Salmon tutorial website:
+https://combine-lab.github.io/salmon/getting_started/
+
+Project PRJDB2508 (Arabidopsis thaliana) samples list:
+https://www.ebi.ac.uk/ena/browser/view/PRJDB2508
+
+FASTA file link:
+ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz -o athal.fa.gz</text>
+	</annotations>
+	<thumbnail/>
+	<node_properties>
+		<properties format="literal" node_id="0">{'controlAreaVisible': True, 'decoys': '', 'exportGraphics': False, 'features': False, 'filterSize': 1, 'gencode': False, 'index': '/data/salmon_demo_work/athal_index', 'inputConnectionsStore': {'index': [3], 'trigger': [5]}, 'iterate': False, 'iterateSettings': {'iterableAttrs': [], 'nWorkers': 1}, 'keepDuplicates': False, 'kmerLen': 31, 'nThreads': 4, 'nWorkers': 1, 'noClip': False, 'optionsChecked': {'bootstrap': False, 'seed': False, 'plaintext': False, 'fusion': False, 'single': False, 'single_overhang': False, 'fr_stranded': False, 'rf_stranded': False, 'fragment_length': False, 'stdev': False, 'pseudoBam': False, 'genomeBam': False, 'gtf': False, 'multiSample': False, 'gencode': False, 'features': False, 'keepDuplicates': False, 'nThreads': True, 'filterSize': False, 'tmpdir': False, 'sparse': False, 'decoys': False, 'noClip': False, 'type': False, 'kmerLen': False}, 'repeat': False, 'runMode': 2, 'runTriggers': ['trigger', 'index'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x03\x88\x00\x00\x02!\x00\x00\x06\xef\x00\x00\x04f\x00\x00\x03\x88\x00\x00\x02!\x00\x00\x06\xef\x00\x00\x04f\x00\x00\x00\x00\x00\x00\x00\x00\x0c\x00', 'sparse': False, 'tmpdir': '', 'transcriptFasta': '/data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz', 'triggerReady': {'trigger': False, 'index': False}, 'type': 'puff', 'useGpu': False, 'useScheduler': False, '__version__': 1}</properties>
+		<properties format="literal" node_id="1">{'controlAreaVisible': True, 'exportGraphics': True, 'inputConnectionsStore': {'Trigger': [1]}, 'inputFile': '/data/salmon_demo_work/DRR016125_quant/quant.sf', 'iterate': False, 'iterateSettings': {'iterableAttrs': [], 'nWorkers': 1}, 'nWorkers': 1, 'optionsChecked': {'inputFile': True}, 'repeat': False, 'runMode': 2, 'runTriggers': ['Trigger'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x05\x92\x00\x00\x02\xae\x00\x00\x08~\x00\x00\x03\xb0\x00\x00\x05\x92\x00\x00\x02\xae\x00\x00\x08~\x00\x00\x03\xb0\x00\x00\x00\x00\x00\x00\x00\x00\x0c\x00', 'triggerReady': {'Trigger': False}, 'useGpu': False, 'useScheduler': False, '__version__': 1}</properties>
+		<properties format="pickle" node_id="2">gAN9cQAoWBIAAABjb250cm9sQXJlYVZpc2libGVxAYhYDgAAAGV4cG9ydEdyYXBoaWNzcQKJWAcA
+AABnZW5lTWFwcQNYAAAAAHEEWAUAAABpbmRleHEFWCIAAAAvZGF0YS9zYWxtb25fZGVtb193b3Jr
+L2F0aGFsX2luZGV4cQZYFQAAAGlucHV0Q29ubmVjdGlvbnNTdG9yZXEHfXEIKFgFAAAAaW5kZXhx
+CV1xCksEYVgGAAAAbWF0ZXMycQtdcQxLA2FYBgAAAG1hdGVzMXENXXEOSwNhWAcAAAB0cmlnZ2Vy
+cQ9dcRBLBmFYCgAAAG91dHB1dERpcnNxEV1xEksDYXVYBwAAAGl0ZXJhdGVxE4hYDwAAAGl0ZXJh
+dGVTZXR0aW5nc3EUfXEVKFgNAAAAaXRlcmFibGVBdHRyc3EWXXEXKFgGAAAAbWF0ZXMxcRhYBgAA
+AG1hdGVzMnEZWAwAAAB1bm1hdGVkUmVhZHNxGlgKAAAAb3V0cHV0RGlyc3EbZVgEAAAAZGF0YXEc
+Y2NvbGxlY3Rpb25zCk9yZGVyZWREaWN0CnEdKVJxHihYBgAAAG1hdGVzMXEffXEgKFgJAAAAZ3Jv
+dXBTaXplcSFYAQAAADFxIlgHAAAAdGhyZWFkc3EjaCJYAwAAAHJhbXEkWAEAAAAwcSV1WAYAAABt
+YXRlczJxJn1xJyhoIWgiaCNoImgkaCV1WAwAAAB1bm1hdGVkUmVhZHNxKH1xKShoIWgiaCNoImgk
+aCV1WAkAAABvdXRwdXREaXJxKn1xKyhoIWgiaCNoImgkaCV1dVgNAAAAaXRlcmF0ZWRBdHRyc3Es
+XXEtKGgfaCZoKGgqZVgIAAAAbldvcmtlcnNxLksBdVgHAAAAbGliVHlwZXEvWAEAAABBcTBYBgAA
+AG1hdGVzMXExXXEyWCgAAAAvZGF0YS9zYWxtb25fZGVtb193b3JrL0RSUjAxNjEyNV8xLmZhc3Rx
+cTNhWAYAAABtYXRlczJxNF1xNVgoAAAAL2RhdGEvc2FsbW9uX2RlbW9fd29yay9EUlIwMTYxMjVf
+Mi5mYXN0cXE2YVgIAAAAblRocmVhZHNxN0sEWAgAAABuV29ya2Vyc3E4SwFYDgAAAG9wdGlvbnND
+aGVja2VkcTl9cTooWAkAAABib290c3RyYXBxO4lYBAAAAHNlZWRxPIlYCQAAAHBsYWludGV4dHE9
+iVgGAAAAZnVzaW9ucT6JWAYAAABzaW5nbGVxP4lYDwAAAHNpbmdsZV9vdmVyaGFuZ3FAiVgLAAAA
+ZnJfc3RyYW5kZWRxQYlYCwAAAHJmX3N0cmFuZGVkcUKJWA8AAABmcmFnbWVudF9sZW5ndGhxQ4lY
+BQAAAHN0ZGV2cUSJWAkAAABwc2V1ZG9CYW1xRYlYCQAAAGdlbm9tZUJhbXFGiVgDAAAAZ3RmcUeJ
+WAsAAABtdWx0aVNhbXBsZXFIiVgGAAAAbWF0ZXMycUmIWAYAAABtYXRlczFxSohYDAAAAHVubWF0
+ZWRSZWFkc3FLiVgIAAAAblRocmVhZHNxTIhYBwAAAGdlbmVNYXBxTYl1WAoAAABvdXRwdXREaXJz
+cU5dcU9YJgAAAC9kYXRhL3NhbG1vbl9kZW1vX3dvcmsvRFJSMDE2MTI1X3F1YW50cVBhWAYAAABy
+ZXBlYXRxUYlYBwAAAHJ1bk1vZGVxUksCWAsAAABydW5UcmlnZ2Vyc3FTXXFUKFgFAAAAaW5kZXhx
+VVgHAAAAdHJpZ2dlcnFWWAYAAABtYXRlczFxV1gGAAAAbWF0ZXMycVhYCgAAAG91dHB1dERpcnNx
+WWVYEwAAAHNhdmVkV2lkZ2V0R2VvbWV0cnlxWkMyAdnQywACAAAAAAOIAAACIQAAB+wAAASgAAAD
+iAAAAiEAAAfsAAAEoAAAAAAAAAAADABxW1gMAAAAdHJpZ2dlclJlYWR5cVx9cV0oaFWIaFaJaFeI
+aFiIWAwAAAB1bm1hdGVkUmVhZHNxXoloWYh1WAwAAAB1bm1hdGVkUmVhZHNxX11xYFgGAAAAdXNl
+R3B1cWGJWAwAAAB1c2VTY2hlZHVsZXJxYolYCwAAAF9fdmVyc2lvbl9fcWNLAXUu
+</properties>
+		<properties format="literal" node_id="3">{'controlAreaVisible': True, 'exportGraphics': False, 'index': '/data/salmon_demo_work/athal_index', 'inputConnectionsStore': {}, 'iterate': False, 'iterateSettings': {'iterableAttrs': ['samples', 'mate_1', 'mate_2', 'unpaired', 'sample_dl_links', 'output'], 'nWorkers': 1}, 'mate_1': '/data/salmon_demo_work/DRR016125_1.fastq', 'mate_2': '/data/salmon_demo_work/DRR016125_2.fastq', 'nWorkers': 1, 'optionsChecked': {'sra_ids': False, 'mate_1': False, 'mate_2': False, 'unpaired': False, 'sam_output': False, 'hisat2_idx': False, 'gzip': False, 'sorted_bam_output': False, 'bam_output': False, 'metafile': False, 'output': False}, 'output': '/data/salmon_demo_work/DRR016125_quant', 'repeat': False, 'runMode': 0, 'runTriggers': [], 'sample_dl_links': ['ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz', 'ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz'], 'samples': ['DRR016125'], 'savedWidgetGeometry': b&quot;\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x03 \x00\x00\x00\x00\x00\x00\x05\xe2\x00\x00\x02'\x00\x00\x03 \x00\x00\x00\x18\x00\x00\x05\xe2\x00\x00\x02$\x00\x00\x00\x00\x00\x00\x00\x00\x07\x80&quot;, 'triggerReady': {}, 'unpaired': '/data/salmon_demo_work/DRR016125.fastq', 'useGpu': False, 'useScheduler': False, 'work_dir': '/data/salmon_demo_work', '__version__': 1}</properties>
+		<properties format="pickle" node_id="4">gAN9cQAoWAMAAABVUkxxAV1xAihYSAAAAGZ0cDovL2Z0cC5zcmEuZWJpLmFjLnVrL3ZvbDEvZmFz
+dHEvRFJSMDE2L0RSUjAxNjEyNS9EUlIwMTYxMjVfMS5mYXN0cS5nenEDWEgAAABmdHA6Ly9mdHAu
+c3JhLmViaS5hYy51ay92b2wxL2Zhc3RxL0RSUjAxNi9EUlIwMTYxMjUvRFJSMDE2MTI1XzIuZmFz
+dHEuZ3pxBGVYDwAAAGNvbmNhdGVuYXRlRmlsZXEFWAAAAABxBlgSAAAAY29udHJvbEFyZWFWaXNp
+YmxlcQeIWAoAAABkZWNvbXByZXNzcQiIWAkAAABkaXJlY3RvcnlxCVgWAAAAL2RhdGEvc2FsbW9u
+X2RlbW9fd29ya3EKWA4AAABleHBvcnRHcmFwaGljc3ELiVgVAAAAaW5wdXRDb25uZWN0aW9uc1N0
+b3JlcQx9cQ0oWAkAAABkaXJlY3RvcnlxDl1xD0sDYVgDAAAAVVJMcRBdcRFLA2F1WAcAAABpdGVy
+YXRlcRKIWA8AAABpdGVyYXRlU2V0dGluZ3NxE31xFChYDQAAAGl0ZXJhYmxlQXR0cnNxFV1xFlgD
+AAAAVVJMcRdhWAQAAABkYXRhcRhjY29sbGVjdGlvbnMKT3JkZXJlZERpY3QKcRkpUnEaWAMAAABV
+UkxxG31xHChYCQAAAGdyb3VwU2l6ZXEdWAEAAAAxcR5YBwAAAHRocmVhZHNxH2geWAMAAAByYW1x
+IFgBAAAAMHEhdXNYDQAAAGl0ZXJhdGVkQXR0cnNxIl1xI2gbYVgIAAAAbldvcmtlcnNxJEsCdVgI
+AAAAbldvcmtlcnNxJUsCWA4AAABvcHRpb25zQ2hlY2tlZHEmfXEnKFgKAAAAZGVjb21wcmVzc3Eo
+iVgPAAAAY29uY2F0ZW5hdGVGaWxlcSmJWAkAAABub0Nsb2JiZXJxKol1WAYAAAByZXBlYXRxK4lY
+BwAAAHJ1bk1vZGVxLEsCWAsAAABydW5UcmlnZ2Vyc3EtXXEuKFgJAAAAZGlyZWN0b3J5cS9YAwAA
+AFVSTHEwZVgTAAAAc2F2ZWRXaWRnZXRHZW9tZXRyeXExQzIB2dDLAAIAAAAAAyAAAAIoAAAGWQAA
+A7QAAAMgAAACQAAABlkAAAOxAAAAAAAAAAAHgHEyWAwAAAB0cmlnZ2VyUmVhZHlxM31xNChoL4lo
+MIl1WAYAAAB1c2VHcHVxNYlYDAAAAHVzZVNjaGVkdWxlcnE2iVgLAAAAX192ZXJzaW9uX19xN0sB
+dS4=
+</properties>
+		<properties format="literal" node_id="5">{'URL': ['ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz'], 'concatenateFile': '', 'controlAreaVisible': True, 'decompress': False, 'directory': '/data/salmon_demo_work', 'exportGraphics': False, 'inputConnectionsStore': {'directory': [3]}, 'iterate': False, 'iterateSettings': {'iterableAttrs': ['URL'], 'nWorkers': 1}, 'nWorkers': 1, 'optionsChecked': {'decompress': False, 'concatenateFile': False, 'noClobber': False}, 'repeat': False, 'runMode': 2, 'runTriggers': ['directory'], 'savedWidgetGeometry': b'\x01\xd9\xd0\xcb\x00\x02\x00\x00\x00\x00\x05\x92\x00\x00\x02\xae\x00\x00\x08~\x00\x00\x03\xb0\x00\x00\x05\x92\x00\x00\x02\xae\x00\x00\x08~\x00\x00\x03\xb0\x00\x00\x00\x00\x00\x00\x00\x00\x0c\x00', 'triggerReady': {'directory': False}, 'useGpu': False, 'useScheduler': False, '__version__': 1}</properties>
+	</node_properties>
+</scheme>
