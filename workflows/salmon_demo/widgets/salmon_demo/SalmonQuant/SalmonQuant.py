@@ -17,8 +17,8 @@ class OWSalmonQuant(OWBwBWidget):
     priority = 4
     icon = getIconName(__file__,"salmon-feat.png")
     want_main_area = False
-    docker_image_name = "combinelab/salmon"
-    docker_image_tag = "1.10.2"
+    docker_image_name = "biodepot/salmon"
+    docker_image_tag = "latest"
     inputs = [("index",str,"handleInputsindex"),("trigger",str,"handleInputstrigger"),("mates1",str,"handleInputsmates1"),("mates2",str,"handleInputsmates2"),("unmatedReads",str,"handleInputsunmatedReads"),("outputDirs",str,"handleInputsoutputDirs")]
     outputs = [("trigger",str)]
     pset=functools.partial(settings.Setting,schema_only=True)

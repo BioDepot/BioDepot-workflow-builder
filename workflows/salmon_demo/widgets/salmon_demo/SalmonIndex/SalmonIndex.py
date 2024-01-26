@@ -17,8 +17,8 @@ class OWSalmonIndex(OWBwBWidget):
     priority = 4
     icon = getIconName(__file__,"salmon-feat.png")
     want_main_area = False
-    docker_image_name = "combinelab/salmon"
-    docker_image_tag = "1.10.2"
+    docker_image_name = "biodepot/salmon"
+    docker_image_tag = "latest"
     inputs = [("index",str,"handleInputsindex"),("trigger",str,"handleInputstrigger"),("transcriptFasta",str,"handleInputstranscriptFasta")]
     outputs = [("index",str)]
     pset=functools.partial(settings.Setting,schema_only=True)
