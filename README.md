@@ -1,4 +1,3 @@
-# BioDepot-workflow-builder (Bwb)
 
 ![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image19.png) ![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image23.png)
 
@@ -432,75 +431,22 @@ For more information please refer to:
 
 https://docs.docker.com/engine/installation/
 
-### Linux virtual machine on Windows or MacOS
+### Windows or MacOS: Method 1 - Install Linux VM (preferred)
 
-There are two viable routes for installing Docker on non-Linux platforms. One is installing a Linux VM using VirtualBox or another hypervisor and following the instructions for installing Docker on Linux. The other option, discussed in the next sections, is to use the Docker for Windows/Mac installers which create and manage the VM for you. The first approach requires learning and managing a full Linux distribution in a virtual environment. However, once the VM is correctly set up the Docker installation is simple and robust. This might be the best option for older operating systems or where the Windows user is unable or does not want to run Hyper-V. An (older) example of how to do this is given [here](https://wiki.cyverse.org/wiki/display/HDFDE/Installing+VirtualBox,+Ubuntu,+and+Docker)
+There are two viable routes for installing Docker on non-Linux platforms. One is installing a Linux (Ubuntu) virtual machine (VM) and following the instructions for installing Docker on Linux. This is now the preferred and most reliable option given the current ease of installation and availabilty of Ubuntu VMs on Mac and Linux.
 
+On Windows 10/11, WSL2 provides an Ubuntu VM out of the box https://www.redswitches.com/blog/use-wsl2-to-install-ubuntu-on-windows/. VirtualBox also works well https://automaticaddison.com/how-to-install-ubuntu-and-virtualbox-on-a-windows-pc/. 
 
-### Docker for Mac
+For Macs, Multipass is a recommended. It is fast, runs natively on Mac M1/M2 and comes with a pre-build Docker/Ubuntu VM https://ubuntu.com/blog/docker-on-mac-a-lightweight-option-with-multipass
 
-1\. Download the Docker package -  [Docker for Mac](https://download.docker.com/mac/stable/Docker.dmg)
+### Windows or MacOS: Method 2 - Install Docker Desktop
 
-2\. To install Docker: double-click Docker.dmg to open the installer, then drag Moby the whale to the Applications folder.		
+The second option, is to use the Docker for Windows/Mac Docker for Desktop installers. This is free for most users but we find that the process has become complicated especially with managing file permissions.  https://www.docker.com/products/docker-desktop/
 
-![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image1.png)
-
-3\. To start Docker: double-click Docker.app in the Applications folder. (In the example below, the Applications folder is in "grid" view mode.)
-
-![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image13.png)
-
-
-You will be asked to authorize Docker.app with your system password after you launch it. Privileged access is needed to install networking components and links to the Docker apps. The whale in the top status bar indicates that Docker is running, and accessible from a terminal.
-
-![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image16.png)
-
-
-4\. By default, Docker will limit the memory usage to 2 GB. Given that most Bioinformatics workflows are computationally intensive, some of the tasks may require a higher memory usage. To change the memory allocation, go to `Docker Preferences (Right Click on the docker Icon) -> Preferences -> Advanced`, and adjust the memory allocation as needed. We recommend allowing Docker engine to use at least 10 GB of memory or more. 
-
-![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image25.png)
-
-The second option relies on Docker to provision the VM and is simpler.  
-
-#### Docker for Windows
-1\. To install Docker:
-
-For Windows 10 Pro (with HyperV) download the package - [Docker for Windows](https://desktop.docker.com/win/stable/Docker%20Desktop%20Installer.exe)
-
-For other versions of Windows, the older toolbox version that uses VirtualBox will need to be installed which is available [here](https://github.com/docker/toolbox/releases)
-
- * Go to the folder where the installation file (Installer.exe) is saved and run (double-click) the installation file.
- * Click the installer link to download.
- * Follow the install wizard to accept the license, authorize the installer, and proceed with the install.
- * When it completes, the installer reports it was successful.
- * Click the finish button to complete the installation.
-![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image21.png)
-
-2\. For DockerToolbox installations on Windows 10 Home Edition, we recommend that you install the latest version of VirtualBox (6.0.10) available [here](https://download.virtualbox.org/virtualbox/6.0.10/VirtualBox-6.0.10-132072-Win.exe). VirtualBox will ask you whether you wish to install the extensions, which you should.
-
-3\.  To start Docker:
-* Search for Docker, select the app in the search results, and click it (or hit Return).
-
-![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image11.png)
-* When the whale in the status bar stays steady, Docker is up-and-running, and accessible from any terminal window.
-![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image20.png)
-
-
-* If the whale is hidden in the Notifications area, click the up arrow on the taskbar to show it. To learn more, see [Docker Settings](https://docs.docker.com/docker-for-windows/#docker-settings).
-* If you just installed the app, you also get a popup success message with suggested next steps, and a link to this documentation.
-![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image15.png)
-
-
-4\. By default, Docker for Windows limits the memory usage to 2 GB. Given that most Bioinformatics workflows are computationally intensive, some of the tasks may require a higher memory usage. To change the memory allocation, go to `Docker Preferences (Right Click on the docker Icon) -> Preferences -> Advanced`, and adjust the memory allocation as needed. We recommend allowing Docker engine to use at least 10 GB of memory or more.
-
-![](https://github.com/BioDepot/BioDepot-workflow-builder/raw/master/docs/images/image26.png)
-
-5\. For those using the Docker version that uses VirtualBox, start the Docker application as an Administrator. To adjust the available memory, the user must launch Oracle VirtualBox, stop the Virtual machine and adjust the Systems settings to give the machine more RAM. The default is just 1 GB.
-
-6\. To allow for sharing of files in Windows systems, the directories must be made available to either HyperV in Windows Pro (instructions [here](https://docs.docker.com/docker-for-windows/#shared-drives) ) or VirtualBox other Windows versions (instructions [here](https://medium.com/@Charles_Stover/fixing-volumes-in-docker-toolbox-4ad5ace0e572) ).
 
 ### On The Cloud
 
-On the cloud, BwB can also be run on any cloud instance. Please refer to the Linux and Windows instructions to install Docker on the cloud instance.
+On the cloud, Bwb can also be run on any cloud instance. Docker is installed in the same manner as a local Linux server. However, the Bwb container uses ports 6080 for browser and 5900 for VNC connections. These are usually forwarded out to 6080 and 5900 on the instance/VM/server. On a cloud instance there is an additional forwarding step to make these ports available to the user's browser or VNC client. The next section details how this is accomplished for AWS. 
 
 
 #### Amazon AWS
