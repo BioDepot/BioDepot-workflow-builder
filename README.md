@@ -33,9 +33,9 @@ University of Washington Tacoma
          * [Overview: Running Bwb](#overview-running-bwb)
       * [Installing and starting Docker](#installing-and-starting-docker)
          * [Linux](#linux)
-         * [Linux virtual machine on Windows or MacOS](#linux-virtual-machine-on-windows-or-macos)
-         * [Docker for Mac](#docker-for-mac)
-         * [Docker for Windows](#docker-for-windows)
+         * [Windows/MacOS](#windows-or-macos)
+            * [Method 1](#method-1-install-linux-vm)
+            * [Method 2](#method-2-install-docker-desktop)
          * [On The Cloud](#on-the-cloud)
             * [Amazon AWS](#amazon-aws)
       * [Starting Bwb](#starting-bwb)
@@ -431,15 +431,17 @@ For more information please refer to:
 
 https://docs.docker.com/engine/installation/
 
-### Windows or MacOS: Method 1 - Install Linux VM (preferred)
+### Windows or MacOS
 
-There are two viable routes for installing Docker on non-Linux platforms. One is installing a Linux (Ubuntu) virtual machine (VM) and following the instructions for installing Docker on Linux. This is now the preferred and most reliable option given the current ease of installation and availabilty of Ubuntu VMs on Mac and Linux.
+#### Method 1 Install Linux VM
+
+There are two viable routes for installing Docker on non-Linux platforms. The preferred method is to install a Linux (Ubuntu) virtual machine (VM) and follow the instructions for installing Docker on Linux. This is currently tghe most reliable option.
 
 On Windows 10/11, WSL2 provides an Ubuntu VM out of the box https://www.redswitches.com/blog/use-wsl2-to-install-ubuntu-on-windows/. VirtualBox also works well https://automaticaddison.com/how-to-install-ubuntu-and-virtualbox-on-a-windows-pc/. 
 
 For Macs, Multipass is a recommended. It is fast, runs natively on Mac M1/M2 and comes with a pre-build Docker/Ubuntu VM https://ubuntu.com/blog/docker-on-mac-a-lightweight-option-with-multipass
 
-### Windows or MacOS: Method 2 - Install Docker Desktop
+#### Method 2 Install Docker Desktop
 
 The second option, is to use the Docker for Windows/Mac Docker for Desktop installers. This is free for most users but we find that the process has become complicated especially with managing file permissions.  https://www.docker.com/products/docker-desktop/
 
