@@ -77,7 +77,7 @@ arch=$(dpkg --print-architecture) \
      && chmod +x /usr/local/bin/docker-compose
  sed -i 's/"Orange Canvas"/"Bwb"/' /orange3/Orange/canvas/config.py
  rm -rf ~/.fluxbox
- rm -rf ~/.config
+ rm -rf ~/.config/biolab.si
  cp -r BioDepot-workflow-builder/fluxbox_config ~/.fluxbox
  cp -r BioDepot-workflow-builder/user_config/* ~/. 
  cp /orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py
