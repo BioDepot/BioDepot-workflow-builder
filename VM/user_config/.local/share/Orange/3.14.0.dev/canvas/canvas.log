@@ -1,0 +1,17 @@
+Adding search path 'orange' for prefix, 'canvas_icons'
+Setting up Canvas main window.
+'CanvasScene(objectName='', ...)' intitialized.
+Setting registry 'None on 'CanvasScene(objectName='', ...)'.
+'CanvasScene(objectName='', ...)' cleared.
+'CanvasScene(objectName='', ...)' intitialized.
+Setting registry 'None on 'CanvasScene(objectName='', ...)'.
+Setting scheme '<Orange.canvas.scheme.widgetsscheme.WidgetsScheme object at 0x7f0b5c49cc18>' on 'CanvasScene(objectName='', ...)'
+Running widget discovery process.
+Ignoring '/biodepot/RNA_seq/OWDtoxSAlignment.py'.
+Ignoring '/biodepot/RNA_seq/OWDtoxSAnalysis.py'.
+Setting registry '<Orange.canvas.registry.qt.QtWidgetRegistry object at 0x7f0b5c4ac168> on 'CanvasScene(objectName='', ...)'.
+Entering main event loop.
+'CanvasScene(objectName='', ...)' cleared.
+'CanvasScene(objectName='', ...)' intitialized.
+Setting registry '<Orange.canvas.registry.qt.QtWidgetRegistry object at 0x7f0b5c4ac168> on 'CanvasScene(objectName='', ...)'.
+Setting scheme '<Orange.canvas.scheme.widgetsscheme.WidgetsScheme object at 0x7f0b52c77828>' on 'CanvasScene(objectName='', ...)'

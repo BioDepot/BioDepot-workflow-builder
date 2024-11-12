@@ -1,0 +1,1724 @@
+Xsession: X session started for ubuntu at Tue Nov 12 09:27:34 PST 2024
+localuser:ubuntu being added to access control list
+dbus-update-activation-environment: setting QT_ACCESSIBILITY=1
+dbus-update-activation-environment: warning: error sending to systemd: org.freedesktop.DBus.Error.Spawn.ChildExited: Process org.freedesktop.systemd1 exited with status 1
+dbus-update-activation-environment: setting LESSOPEN=| /usr/bin/lesspipe %s
+dbus-update-activation-environment: setting MAIL=/var/mail/ubuntu
+dbus-update-activation-environment: setting USER=ubuntu
+dbus-update-activation-environment: setting SHLVL=1
+dbus-update-activation-environment: setting HOME=/home/ubuntu
+dbus-update-activation-environment: setting HUSHLOGIN=FALSE
+dbus-update-activation-environment: setting DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-mvyQhRbHzR,guid=cab5defd0d10a9c0c4fa670067339006
+dbus-update-activation-environment: setting LOGNAME=ubuntu
+dbus-update-activation-environment: setting JOURNAL_STREAM=9:20218
+dbus-update-activation-environment: setting _=/usr/bin/startx
+dbus-update-activation-environment: setting TERM=linux
+dbus-update-activation-environment: setting WINDOWPATH=1
+dbus-update-activation-environment: setting PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+dbus-update-activation-environment: setting INVOCATION_ID=242caf8b0e5244ff9c95162b9a3ef1fe
+dbus-update-activation-environment: setting XDG_RUNTIME_DIR=/run/user/1000
+dbus-update-activation-environment: setting DISPLAY=:0
+dbus-update-activation-environment: setting LANG=en_US.UTF-8
+dbus-update-activation-environment: setting LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+dbus-update-activation-environment: setting XAUTHORITY=/home/ubuntu/.Xauthority
+dbus-update-activation-environment: setting SHELL=/bin/bash
+dbus-update-activation-environment: setting QT_ACCESSIBILITY=1
+dbus-update-activation-environment: setting LESSCLOSE=/usr/bin/lesspipe %s %s
+dbus-update-activation-environment: setting GPG_AGENT_INFO=/run/user/1000/gnupg/S.gpg-agent:0:1
+dbus-update-activation-environment: setting PWD=/home/ubuntu
+dbus-update-activation-environment: setting XDG_DATA_DIRS=/usr/local/share:/usr/share:/var/lib/snapd/desktop
+dbus-update-activation-environment: warning: error sending to systemd: org.freedesktop.DBus.Error.Spawn.ChildExited: Process org.freedesktop.systemd1 exited with status 1
+xmodmap:  unable to open file '/home/ubuntu/.Xmodmap' for reading
+xmodmap:  1 error encountered, aborting.
+Keys: Invalid key/modifier on line 21): OnWindow Mod1 Mouse1 :MacroCmd {Raise} {Focus} {StartMoving}
+Error in apps file on line 14.
+
+orange-canvas
+orange-canvas
+Error: must specify one of: -solid, -mod, -gradient
+
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+QWidget::setWindowModified: The window title does not contain a '[*]' placeholder
+QLayout::addChildLayout: layout "" already has a parent
+libpng warning: iCCP: known incorrect sRGB profile
+read in server settings {'data': OrderedDict([('127.0.0.1', {'maxThreads': '1', 'volumeMapping': ''})]), 'saveIPDir': '/data'}
+fastaFiles has prevous value [] of type <class 'list'>
+outputFilename has prevous value None of type <class 'NoneType'>
+adding filedir for pname outputFilename using layout <BwBase.BwbGridLayout object at 0x7f3dfcd849e8>
+drawing textBox for  pname fastaFiles pvalue {'flag': None, 'type': 'file list', 'label': 'List of fasta files', 'argument': True}
+adding text box for pnamefastaFiles pvalue {'flag': None, 'type': 'file list', 'label': 'List of fasta files', 'argument': True} box <PyQt5.QtWidgets.QWidget object at 0x7f3dfcd93318> layout <BwBase.BwbGridLayout object at 0x7f3dfcd849e8> addCheckbox False
+0 objects in <BwBase.DragAndDropList object at 0x7f3dfcd93828>
+type is file list <class 'str'>
+type is file <class 'str'>
+type is int <class 'str'>
+type is bool <class 'str'>
+drawCB pname makeUnique pvalue {'flag': '--make-unique', 'type': 'bool', 'label': 'Replace repeated target names with unique names'} label Replace repeated target names with unique names
+draw CB pname makeUnique value False
+desc RNA_seq.OWkallistoIndex attrsFile is /widgets/RNA_seq/kallistoIndex/kallistoIndex.attrs and statesFile is /widgets/RNA_seq/kallistoIndex/kallistoIndex.states
+Could not write default settings for <class 'RNA_seq.OWkallistoIndex.OWkallistoIndex'> (PermissionError).
+Defaulting to user installation because normal site-packages is not writeable
+Obtaining file:///biodepot
+Installing collected packages: RNA-seq
+  Attempting uninstall: RNA-seq
+    Found existing installation: RNA-seq 0.0.0
+    Uninstalling RNA-seq-0.0.0:
+      Successfully uninstalled RNA-seq-0.0.0
+  Running setup.py develop for RNA-seq
+Successfully installed RNA-seq
+WARNING: You are using pip version 20.0.1; however, version 21.3.1 is available.
+You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
+None
+/workflows/Demo_kallisto
+/workflows/Demo_kallisto/Demo_kallisto.ows
+from setuptools import setup
+
+setup(
+    name="RNA-seq",
+    packages=["RNA_seq"],
+    package_data={"RNA_seq": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "RNA-seq = RNA_seq"},
+)
+setup(
+    name="Utilities",
+    packages=["Utilities"],
+    package_data={"Utilities": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Utilities = Utilities"},
+)
+setup(
+    name="Miscellaneous",
+    packages=["Miscellaneous"],
+    package_data={"Miscellaneous": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Miscellaneous = Miscellaneous"},
+)
+setup(
+    name="User",
+    packages=["User"],
+    package_data={"User": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "User = User"},
+)
+setup(
+    name="Jupyter",
+    packages=["Jupyter"],
+    package_data={"Jupyter": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Jupyter = Jupyter"},
+)
+setup(
+    name="Scripting",
+    packages=["Scripting"],
+    package_data={"Scripting": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Scripting = Scripting"},
+)
+setup(
+      name="salmon-demo",
+      packages=["salmon_demo"],
+      package_data={"salmon_demo": ["icons/*.svg"]},
+      entry_points={"orange.widgets": "salmon-demo = salmon_demo"},
+)
+
+Demo-kallisto
+['RNA-seq', 'Utilities', 'Miscellaneous', 'User', 'Jupyter', 'Scripting', 'salmon-demo']
+ln -sf /workflows/Demo_kallisto/widgets/Demo_kallisto/icon /biodepot/Demo_kallisto/icon
+orange-canvas /workflows/Demo_kallisto/Demo_kallisto.ows
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+libpng warning: iCCP: known incorrect sRGB profile
+QLayout::addChildLayout: layout "" already has a parent
+libpng warning: iCCP: known incorrect sRGB profile
+read in server settings {'data': OrderedDict([('127.0.0.1', {'maxThreads': '1', 'volumeMapping': ''})]), 'saveIPDir': '/data'}
+source type is builtins.str
+sink type is builtins.str
+experimental_description has prevous value /data/sleuth/exp_desc.tsv of type <class 'str'>
+num_cores has prevous value 1 of type <class 'int'>
+column has prevous value condition of type <class 'str'>
+output_file has prevous value /data/sleuth/gene_table.tsv of type <class 'str'>
+qvalue has prevous value 0.05 of type <class 'float'>
+adding filedir for pname experimental_description using layout <BwBase.BwbGridLayout object at 0x7f6017df2be0>
+adding filedir for pname output_file using layout <BwBase.BwbGridLayout object at 0x7f6017df2be0>
+type is file <class 'str'>
+type is int <class 'str'>
+type is file <class 'str'>
+updating filedir geneNamesFile
+adding filedir for pname geneNamesFile using layout <BwBase.BwbGridLayout object at 0x7f6017df2ba8>
+updating checkbox pname geneNamesFile connect False isChecked True
+checking attr geneNamesFile
+found attr in dict geneNamesFile
+enable callback for geneNamesFile
+cb is <PyQt5.QtWidgets.QCheckBox object at 0x7f6017ccde58> ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ccdd38>
+enabled
+type is str <class 'str'>
+updating checkbox pname full_model connect False isChecked False
+ignore cb, full_model disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ccdf78>
+disabled
+type is str <class 'str'>
+updating checkbox pname filter_fun connect False isChecked False
+ignore cb, filter_fun disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ccf168>
+disabled
+type is str <class 'str'>
+updating checkbox pname norm_fun_counts connect False isChecked False
+ignore cb, norm_fun_counts disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ccf318>
+disabled
+type is str <class 'str'>
+updating checkbox pname norm_fun_tpm connect False isChecked False
+ignore cb, norm_fun_tpm disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ccf4c8>
+disabled
+type is str <class 'str'>
+updating checkbox pname aggregation_column connect False isChecked False
+ignore cb, aggregation_column disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ccf678>
+disabled
+type is str <class 'str'>
+updating checkbox pname transformation_function connect False isChecked False
+ignore cb, transformation_function disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ccf828>
+disabled
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is int <class 'str'>
+type is file <class 'str'>
+drawCB pname read_bootstrap_tpm pvalue {'flag': '--read_bootstrap_tpm', 'label': 'Read_bootstrap_tpm', 'type': 'bool'} label Read_bootstrap_tpm
+draw CB pname read_bootstrap_tpm value False
+drawCB pname extra_bootstrap_summary pvalue {'label': 'Extra_bootstrap_summary', 'type': 'bool', 'flag': '--extra_bootstrap_summary'} label Extra_bootstrap_summary
+draw CB pname extra_bootstrap_summary value False
+drawCB pname wald pvalue {'flag': '--wald', 'label': 'Use Wald analyses', 'type': 'bool'} label Use Wald analyses
+draw CB pname wald value False
+slot found in connection check with contents [7] and ID None
+updating filedir inputFile
+adding filedir for pname inputFile using layout <BwBase.BwbGridLayout object at 0x7f6017cd2358>
+slot found in connection check with contents [1] and ID None
+updating checkbox pname inputFile connect True isChecked True
+slot found in connection check with contents [1] and ID None
+slot found in connection check with contents [1] and ID None
+type is file <class 'str'>
+slot found in connection check with contents [1] and ID None
+inputFile disabling <PyQt5.QtWidgets.QCheckBox object at 0x7f6017cdbdc8>
+inputFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017cdbca8>
+inputFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7f6017cdbd38>
+INPUT RECEIVED value is __add builtins.str sourceId is 1
+slot found in connection check with contents [1] and ID None
+inputFile disabling <PyQt5.QtWidgets.QCheckBox object at 0x7f6017cdbdc8>
+inputFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017cdbca8>
+inputFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7f6017cdbd38>
+attr is inputFile disableFtn is None inputType is str
+slot found in connection check with contents [1] and ID None
+updating checkbox pname inputFile connect True isChecked True
+slot found in connection check with contents [1] and ID None
+slot found in connection check with contents [1] and ID None
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7f6017cdbca8>
+inputFile disabling <PyQt5.QtWidgets.QCheckBox object at 0x7f6017cdbdc8>
+inputFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017cdbca8>
+inputFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7f6017cdbd38>
+Adding inputFile to connection [1]
+sig handler adding node with no signal: attr inputFile sourceId 1 value __add builtins.str
+connection dict value for inputFile is [1]
+source type is builtins.str
+sink type is builtins.str
+URL has prevous value ['ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz'] of type <class 'list'>
+directory has prevous value /data/sleuth of type <class 'str'>
+adding filedir for pname directory using layout <BwBase.BwbGridLayout object at 0x7f6017cd2c50>
+drawing textBox for  pname URL pvalue {'argument': True, 'type': 'text list', 'label': 'URL(s)', 'flag': None}
+adding text box for pnameURL pvalue {'argument': True, 'type': 'text list', 'label': 'URL(s)', 'flag': None} box <PyQt5.QtWidgets.QWidget object at 0x7f6017ce5b88> layout <BwBase.BwbGridLayout object at 0x7f6017cd2c50> addCheckbox False
+1 objects in <BwBase.DragAndDropList object at 0x7f6017ced168>
+add item number 0 value ftp://ftp.ensembl.org/pub/release-92/fasta/homo_sapiens/cdna/Homo_sapiens.GRCh38.cdna.all.fa.gz
+type is text list <class 'str'>
+type is directory <class 'str'>
+updating filedir concatenateFile
+adding filedir for pname concatenateFile using layout <BwBase.BwbGridLayout object at 0x7f6017cd2be0>
+updating checkbox pname concatenateFile connect False isChecked False
+ignore cb, concatenateFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ced9d8>
+ignore cb, concatenateFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7f6017ceda68>
+disabled
+type is bool <class 'str'>
+type is file <class 'str'>
+drawCB pname decompress pvalue {'flag': '--decompress', 'default': True, 'label': 'Decompress files', 'type': 'bool'} label Decompress files
+draw CB pname decompress value False
+slot found in connection check with contents [5] and ID None
+fastaFiles has prevous value ['/data/sleuth/Homo_sapiens.GRCh38.cdna.all.fa.gz'] of type <class 'list'>
+outputFilename has prevous value /data/sleuth/h38.idx of type <class 'str'>
+adding filedir for pname outputFilename using layout <BwBase.BwbGridLayout object at 0x7f6017cea860>
+drawing textBox for  pname fastaFiles pvalue {'label': 'List of fasta files', 'type': 'file list', 'flag': None, 'argument': True}
+adding text box for pnamefastaFiles pvalue {'label': 'List of fasta files', 'type': 'file list', 'flag': None, 'argument': True} box <PyQt5.QtWidgets.QWidget object at 0x7f6017cf4b88> layout <BwBase.BwbGridLayout object at 0x7f6017cea860> addCheckbox False
+1 objects in <BwBase.DragAndDropList object at 0x7f6017cfd0d8>
+add item number 0 value /data/sleuth/Homo_sapiens.GRCh38.cdna.all.fa.gz
+type is file list <class 'str'>
+type is file <class 'str'>
+type is int <class 'str'>
+type is bool <class 'str'>
+drawCB pname makeUnique pvalue {'flag': '--make-unique', 'type': 'bool', 'label': 'Replace repeated target names with unique names'} label Replace repeated target names with unique names
+draw CB pname makeUnique value False
+slot found in connection check with contents [3] and ID None
+INPUT RECEIVED value is __add builtins.str sourceId is 3
+slot found in connection check with contents [3] and ID None
+attr is trigger disableFtn is None inputType is str
+Adding trigger to connection [3]
+sig handler adding node with no signal: attr trigger sourceId 3 value __add builtins.str
+connection dict value for trigger is [3]
+source type is builtins.str
+sink type is builtins.str
+URL has prevous value ['https://drive.google.com/file/d/1yXfE5esUZTLPf9xYRpXkcatqQaOmMBoB/view?usp=sharing'] of type <class 'list'>
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+libpng warning: iCCP: known incorrect sRGB profile
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+directory has prevous value /data of type <class 'str'>
+adding filedir for pname directory using layout <BwBase.BwbGridLayout object at 0x7f6017cfb518>
+drawing textBox for  pname URL pvalue {'argument': True, 'type': 'text list', 'label': 'URL(s)', 'flag': None}
+adding text box for pnameURL pvalue {'argument': True, 'type': 'text list', 'label': 'URL(s)', 'flag': None} box <PyQt5.QtWidgets.QWidget object at 0x7f6017ced048> layout <BwBase.BwbGridLayout object at 0x7f6017cfb518> addCheckbox False
+1 objects in <BwBase.DragAndDropList object at 0x7f6017d02dc8>
+add item number 0 value https://drive.google.com/file/d/1yXfE5esUZTLPf9xYRpXkcatqQaOmMBoB/view?usp=sharing
+type is text list <class 'str'>
+type is directory <class 'str'>
+updating filedir concatenateFile
+adding filedir for pname concatenateFile using layout <BwBase.BwbGridLayout object at 0x7f6017cfb4a8>
+updating checkbox pname concatenateFile connect False isChecked False
+ignore cb, concatenateFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017d09678>
+ignore cb, concatenateFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7f6017d09708>
+disabled
+type is bool <class 'str'>
+type is file <class 'str'>
+drawCB pname decompress pvalue {'flag': '--decompress', 'default': True, 'label': 'Decompress files', 'type': 'bool'} label Decompress files
+draw CB pname decompress value True
+OutputDir has prevous value /data/sleuth of type <class 'str'>
+sraids has prevous value ['SRR493366', 'SRR493367', 'SRR493368', 'SRR493369', 'SRR493370', 'SRR493371'] of type <class 'list'>
+adding filedir for pname OutputDir using layout <BwBase.BwbGridLayout object at 0x7f6017d0b278>
+drawing textBox for  pname sraids pvalue {'argument': True, 'flag': None, 'label': 'ID(s)', 'type': 'text list'}
+adding text box for pnamesraids pvalue {'argument': True, 'flag': None, 'label': 'ID(s)', 'type': 'text list'} box <PyQt5.QtWidgets.QWidget object at 0x7f6017c91798> layout <BwBase.BwbGridLayout object at 0x7f6017d0b278> addCheckbox False
+6 objects in <BwBase.DragAndDropList object at 0x7f6017c91ca8>
+add item number 0 value SRR493366
+add item number 1 value SRR493367
+add item number 2 value SRR493368
+add item number 3 value SRR493369
+add item number 4 value SRR493370
+add item number 5 value SRR493371
+type is directory <class 'str'>
+type is text list <class 'str'>
+drawing textBox for  pname spotGroups pvalue {'type': 'text list', 'label': 'Spot groups', 'flag': '--spot-groups'}
+adding text box for pnamespotGroups pvalue {'type': 'text list', 'label': 'Spot groups', 'flag': '--spot-groups'} box <PyQt5.QtWidgets.QWidget object at 0x7f6017ca21f8> layout <BwBase.BwbGridLayout object at 0x7f6017d0b208> addCheckbox True
+0 objects in <BwBase.DragAndDropList object at 0x7f6017ca25e8>
+type is text <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is str <class 'str'>
+updating checkbox pname tableName connect False isChecked False
+ignore cb, tableName disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ca2a68>
+disabled
+type is bool <class 'str'>
+type is int <class 'str'>
+type is int <class 'str'>
+type is text list <class 'str'>
+type is bool <class 'str'>
+type is int <class 'str'>
+type is str <class 'str'>
+updating checkbox pname readFilter connect False isChecked False
+ignore cb, readFilter disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ca2c18>
+disabled
+type is int <class 'str'>
+type is int <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is str <class 'str'>
+updating checkbox pname alignedRegion connect False isChecked False
+ignore cb, alignedRegion disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ca2dc8>
+disabled
+type is str <class 'str'>
+updating checkbox pname matePairDistance connect False isChecked False
+ignore cb, matePairDistance disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ca2f78>
+disabled
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is str <class 'str'>
+updating checkbox pname dumpcs connect False isChecked False
+ignore cb, dumpcs disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ca5168>
+disabled
+type is int <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is str <class 'str'>
+updating checkbox pname deflineSeq connect False isChecked False
+ignore cb, deflineSeq disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ca5318>
+disabled
+type is str <class 'str'>
+updating checkbox pname deflineQual connect False isChecked False
+ignore cb, deflineQual disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017ca54c8>
+disabled
+type is bool <class 'str'>
+type is int <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+drawCB pname fqdversion pvalue {'type': 'bool', 'label': 'Version', 'flag': '-v'} label Version
+draw CB pname fqdversion value False
+drawCB pname help pvalue {'label': 'help', 'type': 'bool', 'flag': '-h'} label help
+draw CB pname help value False
+drawCB pname splitSpot pvalue {'type': 'bool', 'label': 'Split spot', 'flag': '--split-spot'} label Split spot
+draw CB pname splitSpot value False
+drawCB pname clip pvalue {'type': 'bool', 'label': 'Clip adapter sequences', 'flag': '-W'} label Clip adapter sequences
+draw CB pname clip value False
+drawCB pname aligned pvalue {'type': 'bool', 'label': 'aligned', 'flag': '--aligned'} label aligned
+draw CB pname aligned value False
+drawCB pname unaligned pvalue {'label': 'Unaligned', 'type': 'bool', 'flag': '--unaligned'} label Unaligned
+draw CB pname unaligned value False
+drawCB pname useStdout pvalue {'flag': '-Z', 'type': 'bool', 'label': 'Output to stdout'} label Output to stdout
+draw CB pname useStdout value False
+drawCB pname gzip pvalue {'flag': '--gzip', 'type': 'bool', 'label': 'Gzip'} label Gzip
+draw CB pname gzip value True
+drawCB pname bzip2 pvalue {'flag': '--bzip2', 'type': 'bool', 'label': 'Bzip2'} label Bzip2
+draw CB pname bzip2 value False
+drawCB pname splitFiles pvalue {'label': 'Split files', 'type': 'bool', 'flag': '--split-files'} label Split files
+draw CB pname splitFiles value True
+drawCB pname split3 pvalue {'flag': '--split-3', 'label': 'Split-3', 'type': 'bool'} label Split-3
+draw CB pname split3 value False
+drawCB pname spotGroup pvalue {'type': 'bool', 'label': 'Split into spot groups', 'flag': '-G'} label Split into spot groups
+draw CB pname spotGroup value False
+drawCB pname groupinDirs pvalue {'flag': '--group-in-dirs', 'type': 'bool', 'label': 'Split into subdirectories'} label Split into subdirectories
+draw CB pname groupinDirs value False
+drawCB pname keepEmpty pvalue {'flag': '-K', 'label': 'Keep empty files', 'type': 'bool'} label Keep empty files
+draw CB pname keepEmpty value False
+drawCB pname fasta pvalue {'flag': '--fasta', 'label': 'fasta (line width)', 'type': 'bool'} label fasta (line width)
+draw CB pname fasta value False
+drawCB pname suppressQual pvalue {'label': 'Suppress qual (Solid)', 'type': 'bool', 'flag': '--suppress-qual-for-cskey'} label Suppress qual (Solid)
+draw CB pname suppressQual value False
+drawCB pname origfmt pvalue {'label': 'Original format', 'type': 'bool', 'flag': '-F'} label Original format
+draw CB pname origfmt value False
+drawCB pname readids pvalue {'flag': '-I', 'type': 'bool', 'label': 'Append readID after spot ID'} label Append readID after spot ID
+draw CB pname readids value False
+drawCB pname helicos pvalue {'flag': '--helicos', 'type': 'bool', 'label': 'Helicos format'} label Helicos format
+draw CB pname helicos value False
+drawCB pname disablemt pvalue {'type': 'bool', 'label': 'Disable multithreading', 'flag': '--disable-multithreading'} label Disable multithreading
+draw CB pname disablemt value False
+drawCB pname verbose pvalue {'label': 'Verbose', 'type': 'bool', 'flag': '--verbose'} label Verbose
+draw CB pname verbose value False
+drawCB pname ncbiError pvalue {'type': 'bool', 'label': 'NCBI error report', 'flag': '--ncbi_error_report'} label NCBI error report
+draw CB pname ncbiError value False
+drawCB pname legacyError pvalue {'flag': '--legacy-report', 'label': 'Legacy report', 'type': 'bool'} label Legacy report
+libpng warning: iCCP: known incorrect sRGB profile
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+Defaulting to user installation because normal site-packages is not writeable
+Obtaining file:///biodepot
+Installing collected packages: RNA-seq
+  Attempting uninstall: RNA-seq
+    Found existing installation: RNA-seq 0.0.0
+    Uninstalling RNA-seq-0.0.0:
+      Successfully uninstalled RNA-seq-0.0.0
+  Running setup.py develop for RNA-seq
+Successfully installed RNA-seq
+WARNING: You are using pip version 20.0.1; however, version 21.3.1 is available.
+You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
+draw CB pname legacyError value False
+slot found in connection check with contents [5] and ID None
+INPUT RECEIVED value is __add builtins.str sourceId is 5
+slot found in connection check with contents [5] and ID None
+attr is Trigger disableFtn is None inputType is str
+Adding Trigger to connection [5]
+sig handler adding node with no signal: attr Trigger sourceId 5 value __add builtins.str
+connection dict value for Trigger is [5]
+source type is builtins.str
+sink type is builtins.str
+outputDir has prevous value /data/sleuth of type <class 'str'>
+indexFile has prevous value  of type <class 'str'>
+fastqFiles has prevous value ['/data/sleuth/SRR493366_1.fastq.gz', '/data/sleuth/SRR493366_2.fastq.gz', '/data/sleuth/SRR493367_1.fastq.gz', '/data/sleuth/SRR493367_2.fastq.gz', '/data/sleuth/SRR493368_1.fastq.gz', '/data/sleuth/SRR493368_2.fastq.gz', '/data/sleuth/SRR493369_1.fastq.gz', '/data/sleuth/SRR493369_2.fastq.gz', '/data/sleuth/SRR493370_1.fastq.gz', '/data/sleuth/SRR493370_2.fastq.gz', '/data/sleuth/SRR493371_1.fastq.gz', '/data/sleuth/SRR493371_2.fastq.gz'] of type <class 'list'>
+nThreads has prevous value 4 of type <class 'int'>
+adding filedir for pname outputDir using layout <BwBase.BwbGridLayout object at 0x7f6017cb80f0>
+adding filedir for pname indexFile using layout <BwBase.BwbGridLayout object at 0x7f6017cb80f0>
+drawing textBox for  pname fastqFiles pvalue {'type': 'file list', 'label': 'fastq files', 'flag': None, 'argument': True}
+adding text box for pnamefastqFiles pvalue {'type': 'file list', 'label': 'fastq files', 'flag': None, 'argument': True} box <PyQt5.QtWidgets.QWidget object at 0x7f6017cbf048> layout <BwBase.BwbGridLayout object at 0x7f6017cb80f0> addCheckbox False
+12 objects in <BwBase.DragAndDropList object at 0x7f6017cbf708>
+add item number 0 value /data/sleuth/SRR493366_1.fastq.gz
+add item number 1 value /data/sleuth/SRR493366_2.fastq.gz
+add item number 2 value /data/sleuth/SRR493367_1.fastq.gz
+add item number 3 value /data/sleuth/SRR493367_2.fastq.gz
+add item number 4 value /data/sleuth/SRR493368_1.fastq.gz
+add item number 5 value /data/sleuth/SRR493368_2.fastq.gz
+add item number 6 value /data/sleuth/SRR493369_1.fastq.gz
+add item number 7 value /data/sleuth/SRR493369_2.fastq.gz
+add item number 8 value /data/sleuth/SRR493370_1.fastq.gz
+add item number 9 value /data/sleuth/SRR493370_2.fastq.gz
+add item number 10 value /data/sleuth/SRR493371_1.fastq.gz
+add item number 11 value /data/sleuth/SRR493371_2.fastq.gz
+type is directory <class 'str'>
+type is file <class 'str'>
+type is file list <class 'str'>
+type is int <class 'str'>
+updating filedir gtf
+adding filedir for pname gtf using layout <BwBase.BwbGridLayout object at 0x7f6017cb8080>
+updating checkbox pname gtf connect False isChecked False
+ignore cb, gtf disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017cc21f8>
+ignore cb, gtf disabling <PyQt5.QtWidgets.QPushButton object at 0x7f6017cc2288>
+disabled
+type is int <class 'str'>
+type is int <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is int <class 'str'>
+type is double <class 'str'>
+updating checkbox pname stdev connect False isChecked False
+ignore cb, stdev disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017cc2438>
+disabled
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is file <class 'str'>
+type is int <class 'str'>
+drawCB pname plaintext pvalue {'type': 'bool', 'label': 'Output plaintext', 'flag': '--plantext'} label Output plaintext
+draw CB pname plaintext value False
+drawCB pname fusion pvalue {'flag': '--fusion', 'label': 'Search for fusion genes', 'type': 'bool'} label Search for fusion genes
+draw CB pname fusion value False
+drawCB pname single pvalue {'flag': '--single', 'label': 'Quantify single-end reads', 'type': 'bool'} label Quantify single-end reads
+draw CB pname single value False
+drawCB pname single_overhang pvalue {'label': 'Include reads that go beyond transcript start', 'type': 'bool', 'flag': '--single-overhang'} label Include reads that go beyond transcript start
+draw CB pname single_overhang value False
+drawCB pname fr_stranded pvalue {'type': 'bool', 'label': 'strand specific read - first read forward', 'flag': '--fr-stranded'} label strand specific read - first read forward
+draw CB pname fr_stranded value False
+drawCB pname rf_stranded pvalue {'type': 'bool', 'label': 'strand specific read - first read reverse', 'flag': '--rf_stranded'} label strand specific read - first read reverse
+draw CB pname rf_stranded value False
+drawCB pname pseudoBam pvalue {'flag': '--pseudoBam', 'label': 'Save alignments to BAM file', 'type': 'bool'} label Save alignments to BAM file
+draw CB pname pseudoBam value False
+drawCB pname genomeBam pvalue {'flag': '--genomeBam', 'type': 'bool', 'label': 'Project alignments to sorted BAM file'} label Project alignments to sorted BAM file
+draw CB pname genomeBam value False
+slot found in connection check with contents [4] and ID None
+indexFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017cbf4c8>
+indexFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7f6017cbf558>
+slot found in connection check with contents [6] and ID None
+INPUT RECEIVED value is __add builtins.str sourceId is 7
+slot found in connection check with contents [7] and ID None
+attr is trigger disableFtn is None inputType is str
+Adding trigger to connection [7]
+sig handler adding node with no signal: attr trigger sourceId 7 value __add builtins.str
+connection dict value for trigger is [7]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 5
+slot found in connection check with contents [5] and ID None
+attr is trigger disableFtn is None inputType is str
+Adding trigger to connection [5]
+sig handler adding node with no signal: attr trigger sourceId 5 value __add builtins.str
+connection dict value for trigger is [5]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 4
+slot found in connection check with contents [4] and ID None
+indexFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017cbf4c8>
+indexFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7f6017cbf558>
+attr is indexFile disableFtn is None inputType is str
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7f6017cbf4c8>
+indexFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f6017cbf4c8>
+indexFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7f6017cbf558>
+Adding indexFile to connection [4]
+sig handler adding node with no signal: attr indexFile sourceId 4 value __add builtins.str
+connection dict value for indexFile is [4]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 6
+slot found in connection check with contents [6] and ID None
+attr is trigger disableFtn is None inputType is str
+Adding trigger to connection [6]
+sig handler adding node with no signal: attr trigger sourceId 6 value __add builtins.str
+connection dict value for trigger is [6]
+Could not write default settings for <class 'Demo_kallisto.OWsleuth.OWsleuth'> (PermissionError).
+Could not write default settings for <class 'Demo_kallisto.OWgnumeric.OWgnumeric'> (PermissionError).
+Could not write default settings for <class 'Demo_kallisto.OWdownloadURL.OWdownloadURL'> (PermissionError).
+Could not write default settings for <class 'Demo_kallisto.OWkallistoIndex.OWkallistoIndex'> (PermissionError).
+Could not write default settings for <class 'Demo_kallisto.OWdownloadURL.OWdownloadURL'> (PermissionError).
+Could not write default settings for <class 'Demo_kallisto.OWfastqDump.OWfastqDump'> (PermissionError).
+Could not write default settings for <class 'Demo_kallisto.OWkallistoQuant.OWkallistoQuant'> (PermissionError).
+None
+/workflows/salmon_demo
+/workflows/salmon_demo/salmon_demo.ows
+from setuptools import setup
+
+setup(
+    name="RNA-seq",
+    packages=["RNA_seq"],
+    package_data={"RNA_seq": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "RNA-seq = RNA_seq"},
+)
+setup(
+    name="Utilities",
+    packages=["Utilities"],
+    package_data={"Utilities": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Utilities = Utilities"},
+)
+setup(
+    name="Miscellaneous",
+    packages=["Miscellaneous"],
+    package_data={"Miscellaneous": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Miscellaneous = Miscellaneous"},
+)
+setup(
+    name="User",
+    packages=["User"],
+    package_data={"User": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "User = User"},
+)
+setup(
+    name="Jupyter",
+    packages=["Jupyter"],
+    package_data={"Jupyter": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Jupyter = Jupyter"},
+)
+setup(
+    name="Scripting",
+    packages=["Scripting"],
+    package_data={"Scripting": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Scripting = Scripting"},
+)
+setup(
+      name="salmon-demo",
+      packages=["salmon_demo"],
+      package_data={"salmon_demo": ["icons/*.svg"]},
+      entry_points={"orange.widgets": "salmon-demo = salmon_demo"},
+)
+setup(
+      name="Demo-kallisto",
+      packages=["Demo_kallisto"],
+      package_data={"Demo_kallisto": ["icons/*.svg"]},
+      entry_points={"orange.widgets": "Demo-kallisto = Demo_kallisto"},
+)
+
+salmon-demo
+['RNA-seq', 'Utilities', 'Miscellaneous', 'User', 'Jupyter', 'Scripting', 'salmon-demo', 'Demo-kallisto']
+ln -sf /workflows/salmon_demo/widgets/salmon_demo/icon /biodepot/salmon_demo/icon
+orange-canvas /workflows/salmon_demo/salmon_demo.ows
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+libpng warning: iCCP: known incorrect sRGB profile
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+read in server settings {'data': OrderedDict([('127.0.0.1', {'maxThreads': '1', 'volumeMapping': ''})]), 'saveIPDir': '/data'}
+source type is builtins.str
+sink type is builtins.str
+index has prevous value /data/salmon_demo_work/athal_index of type <class 'str'>
+libType has prevous value A of type <class 'str'>
+outputDirs has prevous value ['/data/salmon_demo_work/DRR016125_quant'] of type <class 'list'>
+adding filedir for pname index using layout <BwBase.BwbGridLayout object at 0x7fdcc8072400>
+drawing textBox for  pname outputDirs pvalue {'flag': '-o ', 'label': 'Output quantification directories', 'type': 'directory list'}
+adding text box for pnameoutputDirs pvalue {'flag': '-o ', 'label': 'Output quantification directories', 'type': 'directory list'} box <PyQt5.QtWidgets.QWidget object at 0x7fdcc8077948> layout <BwBase.BwbGridLayout object at 0x7fdcc8072400> addCheckbox False
+slot found in connection check with contents [3] and ID None
+1 objects in <BwBase.DragAndDropList object at 0x7fdcc8077e58>
+add item number 0 value /data/salmon_demo_work/DRR016125_quant
+type is directory <class 'str'>
+type is directory list <class 'str'>
+updating filedir geneMap
+adding filedir for pname geneMap using layout <BwBase.BwbGridLayout object at 0x7fdcc8072390>
+updating checkbox pname geneMap connect False isChecked False
+ignore cb, geneMap disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8082828>
+ignore cb, geneMap disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc80828b8>
+disabled
+drawing textBox for  pname mates1 pvalue {'flag': '--mates1 ', 'label': 'FASTQ mate 1 files', 'type': 'file list'}
+adding text box for pnamemates1 pvalue {'flag': '--mates1 ', 'label': 'FASTQ mate 1 files', 'type': 'file list'} box <PyQt5.QtWidgets.QWidget object at 0x7fdcc8082558> layout <BwBase.BwbGridLayout object at 0x7fdcc8072390> addCheckbox True
+slot found in connection check with contents [3] and ID None
+1 objects in <BwBase.DragAndDropList object at 0x7fdcc8082b88>
+add item number 0 value /data/salmon_demo_work/DRR016125_1.fastq
+drawing textBox for  pname mates2 pvalue {'flag': '--mates2 ', 'label': 'FASTQ mate 2 files', 'type': 'file list'}
+adding text box for pnamemates2 pvalue {'flag': '--mates2 ', 'label': 'FASTQ mate 2 files', 'type': 'file list'} box <PyQt5.QtWidgets.QWidget object at 0x7fdcc8082558> layout <BwBase.BwbGridLayout object at 0x7fdcc8072390> addCheckbox True
+slot found in connection check with contents [3] and ID None
+1 objects in <BwBase.DragAndDropList object at 0x7fdcc80881f8>
+add item number 0 value /data/salmon_demo_work/DRR016125_2.fastq
+drawing textBox for  pname unmatedReads pvalue {'flag': '--unmatedReads ', 'label': 'Unmated reads FASTQ files', 'type': 'file list'}
+adding text box for pnameunmatedReads pvalue {'flag': '--unmatedReads ', 'label': 'Unmated reads FASTQ files', 'type': 'file list'} box <PyQt5.QtWidgets.QWidget object at 0x7fdcc8082558> layout <BwBase.BwbGridLayout object at 0x7fdcc8072390> addCheckbox True
+0 objects in <BwBase.DragAndDropList object at 0x7fdcc8088828>
+type is file list <class 'str'>
+type is file list <class 'str'>
+type is file list <class 'str'>
+type is int <class 'str'>
+type is file <class 'str'>
+slot found in connection check with contents [4] and ID None
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8077c18>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077ca8>
+slot found in connection check with contents [6] and ID None
+slot found in connection check with contents [3] and ID None
+mates1 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8082a68>
+mates1 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8082af8>
+mates1 disabling <BwBase.DragAndDropList object at 0x7fdcc8082b88>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082d38>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082c18>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082ca8>
+slot found in connection check with contents [3] and ID None
+mates2 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc80880d8>
+mates2 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8088168>
+mates2 disabling <BwBase.DragAndDropList object at 0x7fdcc80881f8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc80883a8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8088288>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8088318>
+slot found in connection check with contents [3] and ID None
+outputDirs disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8077dc8>
+outputDirs disabling <BwBase.DragAndDropList object at 0x7fdcc8077e58>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082048>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077ee8>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077f78>
+updating filedir inputFile
+adding filedir for pname inputFile using layout <BwBase.BwbGridLayout object at 0x7fdcc8087e48>
+updating checkbox pname inputFile connect False isChecked True
+checking attr inputFile
+found attr in dict inputFile
+enable callback for inputFile
+cb is <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc809a5e8> ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc809a4c8>
+enabled
+type is file <class 'str'>
+slot found in connection check with contents [1] and ID None
+INPUT RECEIVED value is __add builtins.str sourceId is 1
+slot found in connection check with contents [1] and ID None
+attr is Trigger disableFtn is None inputType is str
+Adding Trigger to connection [1]
+sig handler adding node with no signal: attr Trigger sourceId 1 value __add builtins.str
+connection dict value for Trigger is [1]
+source type is builtins.str
+sink type is builtins.str
+work_dir has prevous value /data/salmon_demo_work of type <class 'str'>
+samples has prevous value ['DRR016125'] of type <class 'list'>
+index has prevous value /data/salmon_demo_work/athal_index of type <class 'str'>
+sample_dl_links has prevous value ['ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz', 'ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz'] of type <class 'list'>
+adding filedir for pname work_dir using layout <BwBase.BwbGridLayout object at 0x7fdcc80243c8>
+adding filedir for pname index using layout <BwBase.BwbGridLayout object at 0x7fdcc80243c8>
+drawing textBox for  pname samples pvalue {'flag': '-ids ', 'label': 'Sample basenames', 'type': 'text list'}
+adding text box for pnamesamples pvalue {'flag': '-ids ', 'label': 'Sample basenames', 'type': 'text list'} box <PyQt5.QtWidgets.QWidget object at 0x7fdcc802b4c8> layout <BwBase.BwbGridLayout object at 0x7fdcc80243c8> addCheckbox False
+1 objects in <BwBase.DragAndDropList object at 0x7fdcc802bc18>
+add item number 0 value DRR016125
+drawing textBox for  pname sample_dl_links pvalue {'flag': None, 'label': 'Sample download links', 'type': 'text list'}
+adding text box for pnamesample_dl_links pvalue {'flag': None, 'label': 'Sample download links', 'type': 'text list'} box <PyQt5.QtWidgets.QWidget object at 0x7fdcc802b4c8> layout <BwBase.BwbGridLayout object at 0x7fdcc80243c8> addCheckbox False
+2 objects in <BwBase.DragAndDropList object at 0x7fdcc8033168>
+add item number 0 value ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz
+add item number 1 value ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz
+type is directory <class 'str'>
+type is text list <class 'str'>
+type is directory <class 'str'>
+type is text list <class 'str'>
+index has prevous value /data/salmon_demo_work/athal_index of type <class 'str'>
+transcriptFasta has prevous value /data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz of type <class 'str'>
+adding filedir for pname index using layout <BwBase.BwbGridLayout object at 0x7fdcc803d198>
+adding filedir for pname transcriptFasta using layout <BwBase.BwbGridLayout object at 0x7fdcc803d198>
+type is directory <class 'str'>
+type is file <class 'str'>
+updating filedir tmpdir
+adding filedir for pname tmpdir using layout <BwBase.BwbGridLayout object at 0x7fdcc803d128>
+updating checkbox pname tmpdir connect False isChecked False
+ignore cb, tmpdir disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc803ee58>
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+libpng warning: iCCP: known incorrect sRGB profile
+ignore cb, tmpdir disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc803eee8>
+disabled
+updating filedir decoys
+adding filedir for pname decoys using layout <BwBase.BwbGridLayout object at 0x7fdcc803d128>
+updating checkbox pname decoys connect False isChecked False
+ignore cb, decoys disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc802baf8>
+ignore cb, decoys disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc80470d8>
+disabled
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is int <class 'str'>
+type is int <class 'str'>
+type is directory <class 'str'>
+type is bool <class 'str'>
+type is file <class 'str'>
+type is bool <class 'str'>
+type is str <class 'str'>
+updating checkbox pname type connect False isChecked False
+ignore cb, type disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8047288>
+disabled
+type is int <class 'str'>
+drawCB pname gencode pvalue {'flag': '--gencode ', 'label': 'GENCODE format', 'type': 'bool'} label GENCODE format
+draw CB pname gencode value False
+drawCB pname features pvalue {'flag': '--features ', 'label': 'Split feature name at first tab char (.tsv transcript only)', 'type': 'bool'} label Split feature name at first tab char (.tsv transcript only)
+draw CB pname features value False
+drawCB pname keepDuplicates pvalue {'flag': '--keepDuplicates ', 'label': 'Keep sequence-identical duplicate transcripts', 'type': 'bool'} label Keep sequence-identical duplicate transcripts
+draw CB pname keepDuplicates value False
+drawCB pname sparse pvalue {'flag': '--sparse ', 'label': 'Sparse sampling of k-mer positions', 'type': 'bool'} label Sparse sampling of k-mer positions
+draw CB pname sparse value False
+drawCB pname noClip pvalue {'flag': '-n ', 'label': 'No clip ploy-A tails', 'type': 'bool'} label No clip ploy-A tails
+draw CB pname noClip value False
+slot found in connection check with contents [3] and ID None
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc803e798>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc803e828>
+slot found in connection check with contents [5] and ID None
+INPUT RECEIVED value is __add builtins.str sourceId is 3
+slot found in connection check with contents [3] and ID None
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc803e798>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc803e828>
+attr is index disableFtn is None inputType is str
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc803e798>
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc803e798>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc803e828>
+Adding index to connection [3]
+sig handler adding node with no signal: attr index sourceId 3 value __add builtins.str
+connection dict value for index is [3]
+source type is builtins.str
+sink type is builtins.str
+URL has prevous value ['ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz'] of type <class 'list'>
+directory has prevous value /data/salmon_demo_work of type <class 'str'>
+adding filedir for pname directory using layout <BwBase.BwbGridLayout object at 0x7fdcc80526d8>
+drawing textBox for  pname URL pvalue {'flag': None, 'argument': True, 'label': 'URL(s)', 'type': 'text list'}
+adding text box for pnameURL pvalue {'flag': None, 'argument': True, 'label': 'URL(s)', 'type': 'text list'} box <PyQt5.QtWidgets.QWidget object at 0x7fdcc8054dc8> layout <BwBase.BwbGridLayout object at 0x7fdcc80526d8> addCheckbox False
+1 objects in <BwBase.DragAndDropList object at 0x7fdcc805b3a8>
+add item number 0 value ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz
+type is text list <class 'str'>
+type is directory <class 'str'>
+updating filedir concatenateFile
+adding filedir for pname concatenateFile using layout <BwBase.BwbGridLayout object at 0x7fdcc8052668>
+updating checkbox pname concatenateFile connect False isChecked False
+ignore cb, concatenateFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc805bb88>
+ignore cb, concatenateFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc805bc18>
+disabled
+type is bool <class 'str'>
+type is file <class 'str'>
+drawCB pname decompress pvalue {'default': True, 'flag': '--decompress', 'label': 'Decompress files', 'type': 'bool'} label Decompress files
+draw CB pname decompress value False
+slot found in connection check with contents [3] and ID None
+directory disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc805b0d8>
+directory disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc805b168>
+INPUT RECEIVED value is __add builtins.str sourceId is 5
+slot found in connection check with contents [5] and ID None
+attr is trigger disableFtn is None inputType is str
+Adding trigger to connection [5]
+sig handler adding node with no signal: attr trigger sourceId 5 value __add builtins.str
+connection dict value for trigger is [5]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 3
+slot found in connection check with contents [3] and ID None
+mates2 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc80880d8>
+mates2 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8088168>
+mates2 disabling <BwBase.DragAndDropList object at 0x7fdcc80881f8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc80883a8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8088288>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8088318>
+attr is mates2 disableFtn is None inputType is str
+slot found in connection check with contents [3] and ID None
+updating checkbox pname mates2 connect True isChecked True
+slot found in connection check with contents [3] and ID None
+slot found in connection check with contents [3] and ID None
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8088168>
+mates2 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc80880d8>
+mates2 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8088168>
+mates2 disabling <BwBase.DragAndDropList object at 0x7fdcc80881f8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc80883a8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8088288>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8088318>
+Adding mates2 to connection [3]
+sig handler adding node with no signal: attr mates2 sourceId 3 value __add builtins.str
+connection dict value for mates2 is [3]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 3
+slot found in connection check with contents [3] and ID None
+mates1 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8082a68>
+mates1 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8082af8>
+mates1 disabling <BwBase.DragAndDropList object at 0x7fdcc8082b88>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082d38>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082c18>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082ca8>
+attr is mates1 disableFtn is None inputType is str
+slot found in connection check with contents [3] and ID None
+updating checkbox pname mates1 connect True isChecked True
+slot found in connection check with contents [3] and ID None
+slot found in connection check with contents [3] and ID None
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8082af8>
+mates1 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8082a68>
+mates1 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8082af8>
+mates1 disabling <BwBase.DragAndDropList object at 0x7fdcc8082b88>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082d38>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082c18>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082ca8>
+Adding mates1 to connection [3]
+sig handler adding node with no signal: attr mates1 sourceId 3 value __add builtins.str
+connection dict value for mates1 is [3]
+source type is builtins.str
+sink type is builtins.str
+URL has prevous value ['ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz', 'ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz'] of type <class 'list'>
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+directory has prevous value /data/salmon_demo_work of type <class 'str'>
+adding filedir for pname directory using layout <BwBase.BwbGridLayout object at 0x7fdcc805e358>
+drawing textBox for  pname URL pvalue {'flag': None, 'argument': True, 'label': 'URL(s)', 'type': 'text list'}
+adding text box for pnameURL pvalue {'flag': None, 'argument': True, 'label': 'URL(s)', 'type': 'text list'} box <PyQt5.QtWidgets.QWidget object at 0x7fdcc3d10ca8> layout <BwBase.BwbGridLayout object at 0x7fdcc805e358> addCheckbox False
+slot found in connection check with contents [3] and ID None
+2 objects in <BwBase.DragAndDropList object at 0x7fdcc3d17288>
+add item number 0 value ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz
+add item number 1 value ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz
+type is text list <class 'str'>
+type is directory <class 'str'>
+updating filedir concatenateFile
+adding filedir for pname concatenateFile using layout <BwBase.BwbGridLayout object at 0x7fdcc805e2b0>
+updating checkbox pname concatenateFile connect False isChecked False
+ignore cb, concatenateFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d17a68>
+ignore cb, concatenateFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17af8>
+disabled
+type is bool <class 'str'>
+type is file <class 'str'>
+drawCB pname decompress pvalue {'default': True, 'flag': '--decompress', 'label': 'Decompress files', 'type': 'bool'} label Decompress files
+draw CB pname decompress value True
+slot found in connection check with contents [3] and ID None
+directory disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d10f78>
+directory disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17048>
+slot found in connection check with contents [3] and ID None
+URL disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d171f8>
+URL disabling <BwBase.DragAndDropList object at 0x7fdcc3d17288>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17318>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d173a8>
+INPUT RECEIVED value is __add builtins.str sourceId is 6
+slot found in connection check with contents [6] and ID None
+attr is trigger disableFtn is None inputType is str
+Adding trigger to connection [6]
+sig handler adding node with no signal: attr trigger sourceId 6 value __add builtins.str
+connection dict value for trigger is [6]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 4
+slot found in connection check with contents [4] and ID None
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8077c18>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077ca8>
+attr is index disableFtn is None inputType is str
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8077c18>
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8077c18>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077ca8>
+Adding index to connection [4]
+sig handler adding node with no signal: attr index sourceId 4 value __add builtins.str
+connection dict value for index is [4]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 3
+slot found in connection check with contents [3] and ID None
+directory disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d10f78>
+directory disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17048>
+attr is directory disableFtn is None inputType is str
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d10f78>
+directory disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d10f78>
+directory disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17048>
+Adding directory to connection [3]
+sig handler adding node with no signal: attr directory sourceId 3 value __add builtins.str
+connection dict value for directory is [3]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 3
+slot found in connection check with contents [3] and ID None
+URL disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d171f8>
+URL disabling <BwBase.DragAndDropList object at 0x7fdcc3d17288>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17318>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d173a8>
+attr is URL disableFtn is None inputType is str
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d171f8>
+URL disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d171f8>
+URL disabling <BwBase.DragAndDropList object at 0x7fdcc3d17288>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17318>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d173a8>
+Adding URL to connection [3]
+sig handler adding node with no signal: attr URL sourceId 3 value __add builtins.str
+connection dict value for URL is [3]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 3
+slot found in connection check with contents [3] and ID None
+directory disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc805b0d8>
+directory disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc805b168>
+attr is directory disableFtn is None inputType is str
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc805b0d8>
+directory disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc805b0d8>
+directory disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc805b168>
+Adding directory to connection [3]
+sig handler adding node with no signal: attr directory sourceId 3 value __add builtins.str
+connection dict value for directory is [3]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 3
+slot found in connection check with contents [3] and ID None
+outputDirs disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8077dc8>
+outputDirs disabling <BwBase.DragAndDropList object at 0x7fdcc8077e58>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082048>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077ee8>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077f78>
+attr is outputDirs disableFtn is None inputType is str
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8077dc8>
+outputDirs disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8077dc8>
+outputDirs disabling <BwBase.DragAndDropList object at 0x7fdcc8077e58>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082048>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077ee8>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077f78>
+Adding outputDirs to connection [3]
+sig handler adding node with no signal: attr outputDirs sourceId 3 value __add builtins.str
+connection dict value for outputDirs is [3]
+desc salmon_demo.OWStart attrsFile is /workflows/salmon_demo/widgets/salmon_demo/Start/Start.attrs and statesFile is /workflows/salmon_demo/widgets/salmon_demo/Start/Start.states
+work_dir disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc802b798>
+work_dir disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc802b828>
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc802b948>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc802b9d8>
+samples disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc802bb88>
+samples disabling <BwBase.DragAndDropList object at 0x7fdcc802bc18>
+samples disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc802bca8>
+samples disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc802bd38>
+sample_dl_links disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc80330d8>
+sample_dl_links disabling <BwBase.DragAndDropList object at 0x7fdcc8033168>
+sample_dl_links disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc80331f8>
+sample_dl_links disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8033288>
+saveLogBtns disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc80355e8>
+saveLogBtns disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8035678>
+Initializing portVars
+Parsing parameters: pname work_dir pvalue{'flag': '-workdir ', 'label': 'Work directory', 'type': 'directory', 'env': 'work_dir'}
+checkign flag with pname work_dir pvalue {'flag': '-workdir ', 'label': 'Work directory', 'type': 'directory', 'env': 'work_dir'}
+bwbPath /data/salmon_demo_work hostPath /data/salmon_demo_work
+checking conVol /data bwbVol /data hostVol /data hostPath /data/salmon_demo_work
+common /data
+prefix is salmon_demo_work
+fStr is -workdir /data/salmon_demo_work
+pvalue flag is -workdir 
+Parsing parameters: pname samples pvalue{'flag': '-ids ', 'label': 'Sample basenames', 'type': 'text list'}
+checkign flag with pname samples pvalue {'flag': '-ids ', 'label': 'Sample basenames', 'type': 'text list'}
+fStr is -ids DRR016125
+pvalue flag is -ids 
+Parsing parameters: pname index pvalue{'flag': None, 'label': 'Salmon index directory', 'type': 'directory'}
+Found env: pname index pvalue{'flag': None, 'label': 'Salmon index directory', 'type': 'directory'} which is added to arguments 
+Parsing parameters: pname mate_1 pvalue{'flag': None, 'type': 'file list'}
+Found env: pname mate_1 pvalue{'flag': None, 'type': 'file list'} which is added to arguments 
+Parsing parameters: pname mate_2 pvalue{'flag': None, 'type': 'file list'}
+Found env: pname mate_2 pvalue{'flag': None, 'type': 'file list'} which is added to arguments 
+Parsing parameters: pname unpaired pvalue{'flag': None, 'type': 'file list'}
+Found env: pname unpaired pvalue{'flag': None, 'type': 'file list'} which is added to arguments 
+Parsing parameters: pname sample_dl_links pvalue{'flag': None, 'label': 'Sample download links', 'type': 'text list'}
+Found env: pname sample_dl_links pvalue{'flag': None, 'label': 'Sample download links', 'type': 'text list'} which is added to arguments 
+Parsing parameters: pname output pvalue{'flag': None, 'type': 'directory list'}
+Found env: pname output pvalue{'flag': None, 'type': 'directory list'} which is added to arguments 
+execs ['python start.py ']
+executables ['python start.py ']
+Orig executable python start.py  flags ['-workdir /data/salmon_demo_work', '-ids DRR016125'] args []
+command is python start.py 
+New executable python start.py  flags ['-workdir /data/salmon_demo_work', '-ids DRR016125'] args []
+cmds are ['biodepot/salmon-start-simple:alpine_3.18 python start.py  -workdir /data/salmon_demo_work -ids DRR016125 ']
+ -v /data:/data  -e work_dir=/data/salmon_demo_work  biodepot/salmon-start-simple:alpine_3.18 python start.py  -workdir /data/salmon_demo_work -ids DRR016125 
+starting runDockerJob.sh
+checking attr work_dir
+found attr in dict work_dir
+enable callback for work_dir
+cb is None ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc802b798>
+checking attr index
+found attr in dict index
+enable callback for index
+cb is None ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc802b948>
+checking attr samples
+found attr in dict samples
+enable callback for samples
+checking attr sample_dl_links
+found attr in dict sample_dl_links
+enable callback for sample_dl_links
+checking attr saveLogBtns
+found attr in dict saveLogBtns
+enable for saveLogBtns
+enable element <PyQt5.QtWidgets.QPushButton object at 0x7fdcc80355e8>
+enable element <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8035678>
+receive for schedulin signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135dc8>, value='/data/salmon_demo_work', id=(3, 'work_dir', None, False)), _Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135ee8>, value='/data/salmon_demo_work', id=(3, 'work_dir', None, False))]
+scheduling signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135dc8>, value='/data/salmon_demo_work', id=(3, 'work_dir', None, False)), _Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135ee8>, value='/data/salmon_demo_work', id=(3, 'work_dir', None, False))]
+pending emit signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135dc8>, value='/data/salmon_demo_work', id=(3, 'work_dir', None, False)), _Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135ee8>, value='/data/salmon_demo_work', id=(3, 'work_dir', None, False))]
+receive for schedulin signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135a68>, value='/data/salmon_demo_work/athal_index', id=(3, 'index', None, False))]
+scheduling signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135a68>, value='/data/salmon_demo_work/athal_index', id=(3, 'index', None, False))]
+pending emit signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135a68>, value='/data/salmon_demo_work/athal_index', id=(3, 'index', None, False))]
+receive for schedulin signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135c18>, value='/data/salmon_demo_work/DRR016125_1.fastq', id=(3, 'mate_1', None, False))]
+scheduling signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135c18>, value='/data/salmon_demo_work/DRR016125_1.fastq', id=(3, 'mate_1', None, False))]
+pending emit signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135c18>, value='/data/salmon_demo_work/DRR016125_1.fastq', id=(3, 'mate_1', None, False))]
+receive for schedulin signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135b88>, value='/data/salmon_demo_work/DRR016125_2.fastq', id=(3, 'mate_2', None, False))]
+scheduling signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135b88>, value='/data/salmon_demo_work/DRR016125_2.fastq', id=(3, 'mate_2', None, False))]
+pending emit signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135b88>, value='/data/salmon_demo_work/DRR016125_2.fastq', id=(3, 'mate_2', None, False))]
+receive for schedulin signals []
+scheduling signals []
+receive for schedulin signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135e58>, value=['ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz', 'ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz'], id=(3, 'sample_dl_links', None, False))]
+scheduling signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135e58>, value=['ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz', 'ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz'], id=(3, 'sample_dl_links', None, False))]
+pending emit signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135e58>, value=['ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz', 'ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz'], id=(3, 'sample_dl_links', None, False))]
+receive for schedulin signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135f78>, value='/data/salmon_demo_work/DRR016125_quant', id=(3, 'output', None, False))]
+scheduling signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135f78>, value='/data/salmon_demo_work/DRR016125_quant', id=(3, 'output', None, False))]
+pending emit signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135f78>, value='/data/salmon_demo_work/DRR016125_quant', id=(3, 'output', None, False))]
+INPUT RECEIVED value is /data/salmon_demo_work sourceId is 3
+Adding directory to connection [3]
+sig handler adding input: attr directory sourceId 3 value /data/salmon_demo_work
+connection dict value for directory is [3]
+trigger value for attr directory is False
+slot found in connection check with contents [3] and ID None
+directory disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d10f78>
+directory disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17048>
+Checking triggers with runTriggers['directory', 'URL']
+INPUT RECEIVED value is ['ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz', 'ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz'] sourceId is 3
+Adding URL to connection [3]
+sig handler adding input: attr URL sourceId 3 value ['ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz', 'ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz']
+connection dict value for URL is [3]
+trigger value for attr URL is False
+slot found in connection check with contents [3] and ID None
+URL disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d171f8>
+URL disabling <BwBase.DragAndDropList object at 0x7fdcc3d17288>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17318>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d173a8>
+Checking triggers with runTriggers['directory', 'URL']
+directory disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d10f78>
+directory disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17048>
+URL disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d171f8>
+URL disabling <BwBase.DragAndDropList object at 0x7fdcc3d17288>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17318>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d173a8>
+concatenateFile disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc3d17b88>
+concatenateFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d17a68>
+concatenateFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d17af8>
+decompress disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc3d17ca8>
+saveLogBtns disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d19d38>
+saveLogBtns disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d19dc8>
+Initializing portVars
+Parsing parameters: pname URL pvalue{'flag': None, 'argument': True, 'label': 'URL(s)', 'type': 'text list'}
+Parsing parameters: pname decompress pvalue{'default': True, 'flag': '--decompress', 'label': 'Decompress files', 'type': 'bool'}
+checkign flag with pname decompress pvalue {'default': True, 'flag': '--decompress', 'label': 'Decompress files', 'type': 'bool'}
+fStr is --decompress
+pvalue flag is --decompress
+Parsing parameters: pname directory pvalue{'flag': '--directory', 'label': 'Download directory', 'type': 'directory'}
+checkign flag with pname directory pvalue {'flag': '--directory', 'label': 'Download directory', 'type': 'directory'}
+bwbPath /data/salmon_demo_work hostPath /data/salmon_demo_work
+checking conVol /data bwbVol /data hostVol /data hostPath /data/salmon_demo_work
+common /data
+prefix is salmon_demo_work
+fStr is --directory /data/salmon_demo_work
+pvalue flag is --directory
+Parsing parameters: pname concatenateFile pvalue{'flag': '--concatenateFile', 'label': 'Download and join into one file', 'type': 'file'}
+execs ['/root/download.sh']
+executables ['/root/download.sh']
+Orig executable /root/download.sh flags ['--decompress', '--directory /data/salmon_demo_work'] args ['_iterate{URL}']
+command is /root/download.sh
+New executable /root/download.sh flags ['--decompress', '--directory /data/salmon_demo_work'] args ['_iterate{URL}']
+command is /root/download.sh --decompress --directory /data/salmon_demo_work _iterate{URL} 
+matched URL
+original flagvalues are ['ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz', 'ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz']
+chunked flagvalues are [('ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz',), ('ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz',)]
+subs are ['URL']
+maxLen is 2
+sub URL i = 0
+sub URL i = 1
+cmds are ['biodepot/downloadurl:latest /root/download.sh --decompress --directory /data/salmon_demo_work ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz ', 'biodepot/downloadurl:latest /root/download.sh --decompress --directory /data/salmon_demo_work ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz ']
+ -v /data:/data   biodepot/downloadurl:latest /root/download.sh --decompress --directory /data/salmon_demo_work ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz 
+ -v /data:/data   biodepot/downloadurl:latest /root/download.sh --decompress --directory /data/salmon_demo_work ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz 
+adding iterate settings
+finished method init
+checking attrs in settings
+adding attr URL
+added iterate settings
+starting runDockerJob.sh
+INPUT RECEIVED value is /data/salmon_demo_work sourceId is 3
+Adding directory to connection [3]
+sig handler adding input: attr directory sourceId 3 value /data/salmon_demo_work
+connection dict value for directory is [3]
+trigger value for attr directory is False
+slot found in connection check with contents [3] and ID None
+directory disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc805b0d8>
+directory disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc805b168>
+Checking triggers with runTriggers['directory']
+directory disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc805b0d8>
+directory disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc805b168>
+URL disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc805b318>
+URL disabling <BwBase.DragAndDropList object at 0x7fdcc805b3a8>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc805b438>
+URL disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc805b4c8>
+concatenateFile disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc805bca8>
+concatenateFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc805bb88>
+concatenateFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc805bc18>
+decompress disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc805bdc8>
+saveLogBtns disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8060e58>
+saveLogBtns disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8060ee8>
+Initializing portVars
+Parsing parameters: pname URL pvalue{'flag': None, 'argument': True, 'label': 'URL(s)', 'type': 'text list'}
+checkign flag with pname URL pvalue {'flag': None, 'argument': True, 'label': 'URL(s)', 'type': 'text list'}
+Parsing parameters: pname decompress pvalue{'default': True, 'flag': '--decompress', 'label': 'Decompress files', 'type': 'bool'}
+Parsing parameters: pname directory pvalue{'flag': '--directory', 'label': 'Download directory', 'type': 'directory'}
+checkign flag with pname directory pvalue {'flag': '--directory', 'label': 'Download directory', 'type': 'directory'}
+bwbPath /data/salmon_demo_work hostPath /data/salmon_demo_work
+checking conVol /data bwbVol /data hostVol /data hostPath /data/salmon_demo_work
+common /data
+prefix is salmon_demo_work
+fStr is --directory /data/salmon_demo_work
+pvalue flag is --directory
+Parsing parameters: pname concatenateFile pvalue{'flag': '--concatenateFile', 'label': 'Download and join into one file', 'type': 'file'}
+execs ['/root/download.sh']
+executables ['/root/download.sh']
+Orig executable /root/download.sh flags ['--directory /data/salmon_demo_work'] args ['ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz']
+command is /root/download.sh
+New executable /root/download.sh flags ['--directory /data/salmon_demo_work'] args ['ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz']
+cmds are ['biodepot/downloadurl:latest /root/download.sh --directory /data/salmon_demo_work ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz ']
+ -v /data:/data   biodepot/downloadurl:latest /root/download.sh --directory /data/salmon_demo_work ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz 
+starting runDockerJob.sh
+INPUT RECEIVED value is /data/salmon_demo_work/athal_index sourceId is 3
+Adding index to connection [3]
+sig handler adding input: attr index sourceId 3 value /data/salmon_demo_work/athal_index
+connection dict value for index is [3]
+trigger value for attr index is False
+slot found in connection check with contents [3] and ID None
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc803e798>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc803e828>
+Checking triggers with runTriggers['trigger', 'index']
+INPUT RECEIVED value is /data/salmon_demo_work/DRR016125_1.fastq sourceId is 3
+Adding mates1 to connection [3]
+sig handler adding input: attr mates1 sourceId 3 value /data/salmon_demo_work/DRR016125_1.fastq
+connection dict value for mates1 is [3]
+slot found in connection check with contents [3] and ID None
+updating checkbox pname mates1 connect True isChecked True
+slot found in connection check with contents [3] and ID None
+slot found in connection check with contents [3] and ID None
+trigger value for attr mates1 is False
+slot found in connection check with contents [3] and ID None
+mates1 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8082a68>
+mates1 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8082af8>
+mates1 disabling <BwBase.DragAndDropList object at 0x7fdcc8082b88>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082d38>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082c18>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082ca8>
+Checking triggers with runTriggers['index', 'trigger', 'mates1', 'mates2', 'outputDirs']
+INPUT RECEIVED value is /data/salmon_demo_work/DRR016125_2.fastq sourceId is 3
+Adding mates2 to connection [3]
+sig handler adding input: attr mates2 sourceId 3 value /data/salmon_demo_work/DRR016125_2.fastq
+connection dict value for mates2 is [3]
+slot found in connection check with contents [3] and ID None
+updating checkbox pname mates2 connect True isChecked True
+slot found in connection check with contents [3] and ID None
+slot found in connection check with contents [3] and ID None
+trigger value for attr mates2 is False
+slot found in connection check with contents [3] and ID None
+mates2 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc80880d8>
+mates2 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8088168>
+mates2 disabling <BwBase.DragAndDropList object at 0x7fdcc80881f8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc80883a8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8088288>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8088318>
+Checking triggers with runTriggers['index', 'trigger', 'mates1', 'mates2', 'outputDirs']
+INPUT RECEIVED value is /data/salmon_demo_work/DRR016125_quant sourceId is 3
+Adding outputDirs to connection [3]
+sig handler adding input: attr outputDirs sourceId 3 value /data/salmon_demo_work/DRR016125_quant
+connection dict value for outputDirs is [3]
+trigger value for attr outputDirs is False
+slot found in connection check with contents [3] and ID None
+outputDirs disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8077dc8>
+outputDirs disabling <BwBase.DragAndDropList object at 0x7fdcc8077e58>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8082048>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077ee8>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077f78>
+Checking triggers with runTriggers['index', 'trigger', 'mates1', 'mates2', 'outputDirs']
+slot found in connection check with contents [3] and ID None
+checking attr URL
+found attr in dict URL
+enable callback for URL
+checking attr concatenateFile
+found attr in dict concatenateFile
+enable callback for concatenateFile
+cb is <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc805bca8> ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc805bb88>
+checking attr decompress
+found attr in dict decompress
+enable for decompress
+enable element <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc805bdc8>
+checking attr saveLogBtns
+found attr in dict saveLogBtns
+enable for saveLogBtns
+enable element <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8060e58>
+enable element <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8060ee8>
+receive for schedulin signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135af8>, value='/data/salmon_demo_work', id=(5, 'directory', None, False))]
+scheduling signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135af8>, value='/data/salmon_demo_work', id=(5, 'directory', None, False))]
+pending emit signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135af8>, value='/data/salmon_demo_work', id=(5, 'directory', None, False))]
+INPUT RECEIVED value is /data/salmon_demo_work sourceId is 5
+Adding trigger to connection [5]
+sig handler adding input: attr trigger sourceId 5 value /data/salmon_demo_work
+connection dict value for trigger is [5]
+trigger value for attr trigger is False
+slot found in connection check with contents [5] and ID None
+Checking triggers with runTriggers['trigger', 'index']
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc803e798>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc803e828>
+transcriptFasta disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc803e948>
+transcriptFasta disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc803e9d8>
+tmpdir disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc803ef78>
+tmpdir disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc803ee58>
+tmpdir disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc803eee8>
+decoys disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047168>
+decoys disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc802baf8>
+decoys disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc80470d8>
+type disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047318>
+type disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8047288>
+nThreads disabling <Orange.widgets.gui.SpinBoxWFocusOut object at 0x7fdcc80475e8>
+filterSize disabling <Orange.widgets.gui.SpinBoxWFocusOut object at 0x7fdcc8047828>
+kmerLen disabling <Orange.widgets.gui.SpinBoxWFocusOut object at 0x7fdcc8047a68>
+gencode disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047af8>
+features disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047b88>
+keepDuplicates disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047c18>
+sparse disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047ca8>
+noClip disabling <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047d38>
+saveLogBtns disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc804fc18>
+saveLogBtns disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc804fca8>
+Initializing portVars
+Parsing parameters: pname index pvalue{'flag': '-i ', 'label': 'Salmon index directory', 'type': 'directory'}
+checkign flag with pname index pvalue {'flag': '-i ', 'label': 'Salmon index directory', 'type': 'directory'}
+bwbPath /data/salmon_demo_work/athal_index hostPath /data/salmon_demo_work/athal_index
+checking conVol /data bwbVol /data hostVol /data hostPath /data/salmon_demo_work/athal_index
+common /data
+prefix is salmon_demo_work/athal_index
+fStr is -i /data/salmon_demo_work/athal_index
+pvalue flag is -i 
+Parsing parameters: pname transcriptFasta pvalue{'flag': '-t ', 'label': 'Transcript FASTA file', 'type': 'file'}
+checkign flag with pname transcriptFasta pvalue {'flag': '-t ', 'label': 'Transcript FASTA file', 'type': 'file'}
+flagValue is /data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz
+dirPath /data/salmon_demo_work pathFile Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz hostPath /data/salmon_demo_work
+checking conVol /data bwbVol /data hostVol /data hostPath /data/salmon_demo_work
+common /data
+prefix is salmon_demo_work
+orig file /data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz convert to container /data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz
+fStr is -t /data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz
+pvalue flag is -t 
+Parsing parameters: pname gencode pvalue{'flag': '--gencode ', 'label': 'GENCODE format', 'type': 'bool'}
+Parsing parameters: pname features pvalue{'flag': '--features ', 'label': 'Split feature name at first tab char (.tsv transcript only)', 'type': 'bool'}
+Parsing parameters: pname keepDuplicates pvalue{'flag': '--keepDuplicates ', 'label': 'Keep sequence-identical duplicate transcripts', 'type': 'bool'}
+Parsing parameters: pname nThreads pvalue{'default': 2, 'flag': '-p ', 'label': 'Number of threads', 'type': 'int'}
+checkign flag with pname nThreads pvalue {'default': 2, 'flag': '-p ', 'label': 'Number of threads', 'type': 'int'}
+fStr is -p 4
+pvalue flag is -p 
+Parsing parameters: pname filterSize pvalue{'default': 1, 'flag': '--filterSize ', 'label': 'Bloom filter size for TwoPaCo', 'type': 'int'}
+Parsing parameters: pname tmpdir pvalue{'flag': '--tmpdir ', 'label': 'Directory for TwoPaCo temp files', 'type': 'directory'}
+Defaulting to user installation because normal site-packages is not writeable
+Obtaining file:///biodepot
+Installing collected packages: RNA-seq
+  Attempting uninstall: RNA-seq
+    Found existing installation: RNA-seq 0.0.0
+    Uninstalling RNA-seq-0.0.0:
+      Successfully uninstalled RNA-seq-0.0.0
+  Running setup.py develop for RNA-seq
+Successfully installed RNA-seq
+WARNING: You are using pip version 20.0.1; however, version 21.3.1 is available.
+You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
+Defaulting to user installation because normal site-packages is not writeable
+Obtaining file:///biodepot
+Installing collected packages: RNA-seq
+  Attempting uninstall: RNA-seq
+    Found existing installation: RNA-seq 0.0.0
+    Uninstalling RNA-seq-0.0.0:
+      Successfully uninstalled RNA-seq-0.0.0
+  Running setup.py develop for RNA-seq
+Successfully installed RNA-seq
+WARNING: You are using pip version 20.0.1; however, version 21.3.1 is available.
+You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
+QXcbConnection: XCB error: 3 (BadWindow), sequence: 2899, resource id: 8394595, major code: 40 (TranslateCoords), minor code: 0
+Parsing parameters: pname sparse pvalue{'flag': '--sparse ', 'label': 'Sparse sampling of k-mer positions', 'type': 'bool'}
+Parsing parameters: pname decoys pvalue{'flag': '--decoys ', 'label': 'Decoys file', 'type': 'file'}
+Parsing parameters: pname noClip pvalue{'flag': '-n ', 'label': 'No clip ploy-A tails', 'type': 'bool'}
+Parsing parameters: pname type pvalue{'default': 'puff', 'flag': '--type ', 'label': 'Type of index to build', 'type': 'str'}
+Parsing parameters: pname kmerLen pvalue{'default': 31, 'flag': '--kmerLen ', 'label': 'k-mer size for quasi index', 'type': 'int'}
+execs ['salmon index ']
+executables ['salmon index ']
+Orig executable salmon index  flags ['-i /data/salmon_demo_work/athal_index', '-t /data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz', '-p 4'] args []
+command is salmon index 
+New executable salmon index  flags ['-i /data/salmon_demo_work/athal_index', '-t /data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz', '-p 4'] args []
+cmds are ['biodepot/salmon:latest salmon index  -i /data/salmon_demo_work/athal_index -t /data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz -p 4 ']
+ -v /data:/data   biodepot/salmon:latest salmon index  -i /data/salmon_demo_work/athal_index -t /data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz -p 4 
+starting runDockerJob.sh
+slot found in connection check with contents [3] and ID None
+checking attr transcriptFasta
+found attr in dict transcriptFasta
+enable callback for transcriptFasta
+cb is None ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc803e948>
+checking attr tmpdir
+found attr in dict tmpdir
+enable callback for tmpdir
+cb is <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc803ef78> ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc803ee58>
+checking attr decoys
+found attr in dict decoys
+enable callback for decoys
+cb is <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047168> ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc802baf8>
+checking attr type
+found attr in dict type
+enable callback for type
+cb is <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047318> ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8047288>
+checking attr nThreads
+found attr in dict nThreads
+enable callback for nThreads
+checking attr filterSize
+found attr in dict filterSize
+enable callback for filterSize
+checking attr kmerLen
+found attr in dict kmerLen
+enable callback for kmerLen
+checking attr gencode
+found attr in dict gencode
+enable for gencode
+enable element <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047af8>
+checking attr features
+found attr in dict features
+enable for features
+enable element <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047b88>
+checking attr keepDuplicates
+found attr in dict keepDuplicates
+enable for keepDuplicates
+enable element <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047c18>
+checking attr sparse
+found attr in dict sparse
+enable for sparse
+enable element <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047ca8>
+checking attr noClip
+found attr in dict noClip
+enable for noClip
+enable element <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc8047d38>
+checking attr saveLogBtns
+found attr in dict saveLogBtns
+enable for saveLogBtns
+enable element <PyQt5.QtWidgets.QPushButton object at 0x7fdcc804fc18>
+enable element <PyQt5.QtWidgets.QPushButton object at 0x7fdcc804fca8>
+receive for schedulin signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135d38>, value='/data/salmon_demo_work/athal_index', id=(4, 'index', None, False))]
+scheduling signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135d38>, value='/data/salmon_demo_work/athal_index', id=(4, 'index', None, False))]
+pending emit signals [_Signal(link=<Orange.canvas.scheme.link.SchemeLink object at 0x7fdcc8135d38>, value='/data/salmon_demo_work/athal_index', id=(4, 'index', None, False))]
+INPUT RECEIVED value is /data/salmon_demo_work/athal_index sourceId is 4
+Adding index to connection [4]
+sig handler adding input: attr index sourceId 4 value /data/salmon_demo_work/athal_index
+connection dict value for index is [4]
+trigger value for attr index is False
+slot found in connection check with contents [4] and ID None
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc8077c18>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7fdcc8077ca8>
+Checking triggers with runTriggers['index', 'trigger', 'mates1', 'mates2', 'outputDirs']
+desc salmon_demo.OWdownloadURL attrsFile is /workflows/salmon_demo/widgets/salmon_demo/downloadURL/downloadURL.attrs and statesFile is /workflows/salmon_demo/widgets/salmon_demo/downloadURL/downloadURL.states
+slot found in connection check with contents [3] and ID None
+slot found in connection check with contents [3] and ID None
+checking attr concatenateFile
+found attr in dict concatenateFile
+enable callback for concatenateFile
+cb is <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc3d17b88> ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d17a68>
+checking attr decompress
+found attr in dict decompress
+enable for decompress
+enable element <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc3d17ca8>
+checking attr saveLogBtns
+found attr in dict saveLogBtns
+enable for saveLogBtns
+enable element <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d19d38>
+enable element <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d19dc8>
+slot found in connection check with contents [3] and ID None
+slot found in connection check with contents [3] and ID None
+checking attr concatenateFile
+found attr in dict concatenateFile
+enable callback for concatenateFile
+cb is <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc3d17b88> ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7fdcc3d17a68>
+checking attr decompress
+found attr in dict decompress
+enable for decompress
+enable element <PyQt5.QtWidgets.QCheckBox object at 0x7fdcc3d17ca8>
+checking attr saveLogBtns
+found attr in dict saveLogBtns
+enable for saveLogBtns
+enable element <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d19d38>
+enable element <PyQt5.QtWidgets.QPushButton object at 0x7fdcc3d19dc8>
+Could not write default settings for <class 'salmon_demo.OWSalmonQuant.OWSalmonQuant'> (PermissionError).
+Could not write default settings for <class 'salmon_demo.OWgnumeric.OWgnumeric'> (PermissionError).
+Could not write default settings for <class 'salmon_demo.OWStart.OWStart'> (PermissionError).
+Could not write default settings for <class 'salmon_demo.OWSalmonIndex.OWSalmonIndex'> (PermissionError).
+Could not write default settings for <class 'salmon_demo.OWdownloadURL.OWdownloadURL'> (PermissionError).
+Could not write default settings for <class 'salmon_demo.OWdownloadURL.OWdownloadURL'> (PermissionError).
+QXcbConnection: XCB error: 3 (BadWindow), sequence: 3035, resource id: 8395127, major code: 40 (TranslateCoords), minor code: 0
+None
+client mounts are dict_items([('/data', '/data')])
+
+autoMapping
+client mounts are dict_items([('/data', '/data')])
+
+autoMapping
+before /root/download.sh
+after /root/download.sh
+loop 0 2
+loop 1 2
+client mounts are dict_items([('/data', '/data')])
+
+autoMapping
+client mounts are dict_items([('/data', '/data')])
+
+autoMapping
+from setuptools import setup
+
+setup(
+    name="RNA-seq",
+    packages=["RNA_seq"],
+    package_data={"RNA_seq": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "RNA-seq = RNA_seq"},
+)
+setup(
+    name="Utilities",
+    packages=["Utilities"],
+    package_data={"Utilities": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Utilities = Utilities"},
+)
+setup(
+    name="Miscellaneous",
+    packages=["Miscellaneous"],
+    package_data={"Miscellaneous": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Miscellaneous = Miscellaneous"},
+)
+setup(
+    name="User",
+    packages=["User"],
+    package_data={"User": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "User = User"},
+)
+setup(
+    name="Jupyter",
+    packages=["Jupyter"],
+    package_data={"Jupyter": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Jupyter = Jupyter"},
+)
+setup(
+    name="Scripting",
+    packages=["Scripting"],
+    package_data={"Scripting": ["icons/*.svg"]},
+    entry_points={"orange.widgets": "Scripting = Scripting"},
+)
+setup(
+      name="salmon-demo",
+      packages=["salmon_demo"],
+      package_data={"salmon_demo": ["icons/*.svg"]},
+      entry_points={"orange.widgets": "salmon-demo = salmon_demo"},
+)
+
+salmon-demo
+['RNA-seq', 'Utilities', 'Miscellaneous', 'User', 'Jupyter', 'Scripting', 'salmon-demo']
+ln -sf /workflows/salmon_demo/widgets/salmon_demo/icon /biodepot/salmon_demo/icon
+orange-canvas
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+Defaulting to user installation because normal site-packages is not writeable
+Obtaining file:///biodepot
+Installing collected packages: RNA-seq
+  Attempting uninstall: RNA-seq
+    Found existing installation: RNA-seq 0.0.0
+    Uninstalling RNA-seq-0.0.0:
+      Successfully uninstalled RNA-seq-0.0.0
+  Running setup.py develop for RNA-seq
+Successfully installed RNA-seq
+WARNING: You are using pip version 20.0.1; however, version 21.3.1 is available.
+You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
+read in server settings {'data': OrderedDict([('127.0.0.1', {'maxThreads': '1', 'volumeMapping': ''})]), 'saveIPDir': '/data'}
+orange-canvas
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+read in server settings {'data': OrderedDict([('127.0.0.1', {'maxThreads': '1', 'volumeMapping': ''})]), 'saveIPDir': '/data'}
+Gtk-Message: 09:32:46.864: GtkDialog mapped without a transient parent. This is discouraged.
+Gtk-Message: 09:32:48.861: GtkDialog mapped without a transient parent. This is discouraged.
+Gdk-Message: 09:32:49.514: nemo: Fatal IO error 11 (Resource temporarily unavailable) on X server :0.0.
+
+XIO:  fatal IO error 11 (Resource temporarily unavailable) on X server ":0"
+      after 611157 requests (611157 known processed) with 0 events remaining.
+Unable to init server: Could not connect: Connection refused
+
+(zenity:3015): Gtk-WARNING **: 09:32:49.629: cannot open display: :0.0
+Unable to init server: Could not connect: Connection refused
+
+(zenity:3016): Gtk-WARNING **: 09:32:49.679: cannot open display: :0.0
+Xsession: X session started for ubuntu at Tue Nov 12 09:32:56 PST 2024
+localuser:ubuntu being added to access control list
+dbus-update-activation-environment: setting QT_ACCESSIBILITY=1
+dbus-update-activation-environment: warning: error sending to systemd: org.freedesktop.DBus.Error.Spawn.ChildExited: Process org.freedesktop.systemd1 exited with status 1
+dbus-update-activation-environment: setting LESSOPEN=| /usr/bin/lesspipe %s
+dbus-update-activation-environment: setting MAIL=/var/mail/ubuntu
+dbus-update-activation-environment: setting USER=ubuntu
+dbus-update-activation-environment: setting SHLVL=1
+dbus-update-activation-environment: setting HOME=/home/ubuntu
+dbus-update-activation-environment: setting HUSHLOGIN=FALSE
+dbus-update-activation-environment: setting DBUS_SESSION_BUS_ADDRESS=unix:abstract=/tmp/dbus-pCNTFCBReQ,guid=35e6e4295fb48ce166f6cb7e67339148
+dbus-update-activation-environment: setting LOGNAME=ubuntu
+dbus-update-activation-environment: setting JOURNAL_STREAM=9:20218
+dbus-update-activation-environment: setting _=/usr/bin/startx
+dbus-update-activation-environment: setting TERM=linux
+dbus-update-activation-environment: setting WINDOWPATH=1
+dbus-update-activation-environment: setting PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+dbus-update-activation-environment: setting INVOCATION_ID=242caf8b0e5244ff9c95162b9a3ef1fe
+dbus-update-activation-environment: setting XDG_RUNTIME_DIR=/run/user/1000
+dbus-update-activation-environment: setting DISPLAY=:0
+dbus-update-activation-environment: setting LANG=en_US.UTF-8
+dbus-update-activation-environment: setting LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:mi=00:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arc=01;31:*.arj=01;31:*.taz=01;31:*.lha=01;31:*.lz4=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.tzo=01;31:*.t7z=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;31:*.lrz=01;31:*.lz=01;31:*.lzo=01;31:*.xz=01;31:*.zst=01;31:*.tzst=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.alz=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.cab=01;31:*.wim=01;31:*.swm=01;31:*.dwm=01;31:*.esd=01;31:*.jpg=01;35:*.jpeg=01;35:*.mjpg=01;35:*.mjpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.m4a=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.oga=00;36:*.opus=00;36:*.spx=00;36:*.xspf=00;36:
+dbus-update-activation-environment: setting XAUTHORITY=/home/ubuntu/.Xauthority
+dbus-update-activation-environment: setting SHELL=/bin/bash
+dbus-update-activation-environment: setting QT_ACCESSIBILITY=1
+dbus-update-activation-environment: setting LESSCLOSE=/usr/bin/lesspipe %s %s
+dbus-update-activation-environment: setting GPG_AGENT_INFO=/run/user/1000/gnupg/S.gpg-agent:0:1
+dbus-update-activation-environment: setting PWD=/home/ubuntu
+dbus-update-activation-environment: setting XDG_DATA_DIRS=/usr/local/share:/usr/share:/var/lib/snapd/desktop
+dbus-update-activation-environment: warning: error sending to systemd: org.freedesktop.DBus.Error.Spawn.ChildExited: Process org.freedesktop.systemd1 exited with status 1
+xmodmap:  unable to open file '/home/ubuntu/.Xmodmap' for reading
+xmodmap:  1 error encountered, aborting.
+Keys: Invalid key/modifier on line 21): OnWindow Mod1 Mouse1 :MacroCmd {Raise} {Focus} {StartMoving}
+Error in apps file on line 14.
+
+orange-canvas
+orange-canvas
+Error: must specify one of: -solid, -mod, -gradient
+
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+read in server settings {'data': OrderedDict([('127.0.0.1', {'maxThreads': '1', 'volumeMapping': ''})]), 'saveIPDir': '/data'}
+Gtk-Message: 09:33:03.787: GtkDialog mapped without a transient parent. This is discouraged.
+Gtk-Message: 09:33:04.960: GtkDialog mapped without a transient parent. This is discouraged.
+XIO:  fatal IO error 11 (Resource temporarily unavailable) on X server ":0"
+      after 127339 requests (127339 known processed) with 0 events remaining.
+Gdk-Message: 09:33:06.053: nemo: Fatal IO error 11 (Resource temporarily unavailable) on X server :0.0.
+
+Unable to init server: Could not connect: Connection refused
+
+(zenity:3280): Gtk-WARNING **: 09:33:06.168: cannot open display: :0.0
+Unable to init server: Could not connect: Connection refused
+
+(zenity:3281): Gtk-WARNING **: 09:33:06.216: cannot open display: :0.0

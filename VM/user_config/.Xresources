@@ -1,0 +1,4 @@
+*.background: black
+*.foreground: green
+*.faceName: fixed
+*.faceSize: 12 

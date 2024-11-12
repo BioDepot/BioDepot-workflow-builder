@@ -1,4 +1,6 @@
 #!/bin/bash
+#run this as root from /
+USERNAME=ubuntu
 DOCKER_GPG=/etc/apt/keyrings/docker.gpg
  apt-get install -y --no-install-recommends \
         curl \
@@ -122,3 +124,7 @@ cp -r BioDepot-workflow-builder/VM/*.sh /usr/local/bin/
 cp BioDepot-workflow-builder/VM/menu /root/.fluxbox/menu
 cp /root/.fluxbox/bwb.svg /orange3/Orange/canvas/icons/orange-canvas.svg
 cp -r ~/biolab.si ~/.config/
+#for the user
+usermod -aG docker $USERNAME
+chown -R $USER:$USER /biodepot /BioDepot-workflow-builder /orange3 /widgets /workflows /coreutils /orangePatches /icons 
+rsync -av /BioDepot-workflow-builder/VM/user_config/ /home/$USERNAME/ && chown -R $USERNAME:$USERNAME /home/$USERNAME
