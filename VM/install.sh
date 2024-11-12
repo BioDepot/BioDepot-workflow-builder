@@ -126,5 +126,7 @@ cp /root/.fluxbox/bwb.svg /orange3/Orange/canvas/icons/orange-canvas.svg
 cp -r ~/biolab.si ~/.config/
 #for the user
 usermod -aG docker $USERNAME
-chown -R $USER:$USER /biodepot /BioDepot-workflow-builder /orange3 /widgets /workflows /coreutils /orangePatches /icons 
+chown -R $USERNAME:$USERNAME /biodepot /BioDepot-workflow-builder /orange3 /widgets /workflows /coreutils /orangePatches /icons 
 rsync -av /BioDepot-workflow-builder/VM/user_config/ /home/$USERNAME/ && chown -R $USERNAME:$USERNAME /home/$USERNAME
+
+#log out and login as $USERNAME and run startx
