@@ -65,7 +65,7 @@ arch=$(dpkg --print-architecture) \
          docker-ce \
          docker-ce-cli
  pip3 install --user jsonpickle
- cp -r BioDepot-workflow-builder/widgets /widgetsstat
+ cp -r BioDepot-workflow-builder/widgets /widgets
  cp -r BioDepot-workflow-builder/biodepot /biodepot
  cp -r BioDepot-workflow-builder/coreutils /coreutils
 
