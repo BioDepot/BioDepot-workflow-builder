@@ -65,7 +65,7 @@ arch=$(dpkg --print-architecture) \
          docker-ce \
          docker-ce-cli
  pip3 install --user jsonpickle
- cp -r BioDepot-workflow-builder/widgets /widgets
+ cp -r BioDepot-workflow-builder/widgets /widgetsstat
  cp -r BioDepot-workflow-builder/biodepot /biodepot
  cp -r BioDepot-workflow-builder/coreutils /coreutils
 
@@ -121,3 +121,5 @@ cp -r BioDepot-workflow-builder/VM/xorg.conf /etc/X11/xorg.conf
 cp -r BioDepot-workflow-builder/VM/*.sh /usr/local/bin/
 cp BioDepot-workflow-builder/VM/menu /root/.fluxbox/menu
 cp /root/.fluxbox/bwb.svg /orange3/Orange/canvas/icons/orange-canvas.svg
+rm -rf ~/.config/biolab.si
+cp -r ~/biolab.si ~/.config/
