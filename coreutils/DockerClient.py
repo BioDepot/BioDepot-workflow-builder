@@ -10,6 +10,21 @@ import uuid
 import time
 from pathlib import Path
 #runScheduler.sh ['b2b72d36270f4200a9e', '/tmp/docker.b2b72d36270f4200a9e.json', '8', '8096']
+def detect_container():
+    # Check for Docker-specific markers
+    if (os.path.isfile("/.dockerenv")):
+        return True
+
+    # Check for Apptainer/Singularity-specific markers
+    if (
+        os.environ.get("APPTAINER_NAME") or
+        os.environ.get("SINGULARITY_NAME") or
+        os.path.isdir("/.singularity.d") or
+        os.path.isfile("/.apptainer")
+    ):
+        return True
+    return False
+
 def breakpoint(title=None, message=None):
     QtGui.QMessageBox.warning(title,'',message)
 class ConsoleProcess:
@@ -259,21 +274,25 @@ class DockerClient:
         self.url = url
         self.name = name
         self.cli = APIClient(base_url=url)
-        command = "awk -F'/containers/|/resolv.conf' '$2!=\"\" {print $2; exit}' /proc/self/mountinfo"
-        outputString=str(subprocess.check_output(
-                command,
-                shell=True,
-                universal_newlines=True,
-            ))
-        if outputString:
-            self.bwb_instance_id = outputString.splitlines()[0]
-        else:
+        self.isContainer = detect_container()
+        self.bwb_instance_id = None
+        if(self.isContainer):   
+            command = "awk -F'/containers/|/resolv.conf' '$2!=\"\" {print $2; exit}' /proc/self/mountinfo"
             outputString=str(subprocess.check_output(
-                "cat /proc/self/mountinfo | grep -oP '(?<=docker/containers/).*?(?=/resolv)'",
-                shell=True,
-                universal_newlines=True,
-            ))
-            self.bwb_instance_id = outputString.strip()
+                    command,
+                    shell=True,
+                    universal_newlines=True,
+                ))
+            if outputString:
+                self.bwb_instance_id = outputString.splitlines()[0]
+            else:
+                outputString=str(subprocess.check_output(
+                    "cat /proc/self/mountinfo | grep -oP '(?<=docker/containers/).*?(?=/resolv)'",
+                    shell=True,
+                 universal_newlines=True,
+                ))
+                self.bwb_instance_id = outputString.strip()
+                
         print(self.bwb_instance_id)
         self.bwbMounts = {}
         self.shareMountPoint={};
@@ -282,6 +301,7 @@ class DockerClient:
         #self.findShareMountPoint()
         self.logFile = None
         self.schedulerStarted = False
+
 
     def getClient(self):
         return self.cli
@@ -510,6 +530,9 @@ class DockerClient:
             
         #check if mountpoint variable exists
     def findVolumeMappings(self):
+        if not self.isContainer:
+            self.bwbMounts["/data"] = "/data"
+            return
         for c in self.cli.containers():
             container_id = c["Id"]
             if container_id == self.bwb_instance_id:
@@ -527,6 +550,8 @@ class DockerClient:
         return mountString
         
     def to_best_host_directory(self, path, returnNone=False):
+        if not detect_container():
+            return path
         sys.stderr.write("bwbMounts are {}\n".format(self.bwbMounts))
         if self.bwbMounts == {}:
             self.findVolumeMappings()
