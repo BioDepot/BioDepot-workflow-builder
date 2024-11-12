@@ -35,7 +35,7 @@ DOCKER_GPG=/etc/apt/keyrings/docker.gpg
         xvfb \
         zlib1g-dev \
         zenity
-  git clone https://github.com/Biodepot/Biodepot-workflow-builder
+  git clone https://github.com/BioDepot/BioDepot-workflow-builder.git
   cp -r Biodepot-workflow-builder/orange3 /orange3
   cp -r Biodepot-workflow-builder/orangePatches /orangePatches
 apt-get install -y \
@@ -64,9 +64,9 @@ arch=$(dpkg --print-architecture) \
          docker-ce \
          docker-ce-cli
  pip3 install --user jsonpickle
- cp -r Biodepot-workflow-builder/widgets widgets
- cp -r Biodepot-workflow-builder/biodepot biodepot
- cp -r Biodepot-workflow-builder/coreutils coreutils
+ cp -r Biodepot-workflow-builder/widgets /widgets
+ cp -r Biodepot-workflow-builder/biodepot /biodepot
+ cp -r Biodepot-workflow-builder/coreutils /coreutils
 
  apt-get install -y xorg 
  cp -r Biodepot-workflow-builder/scripts/generate_setup.sh /usr/local/bin/generate_setup.sh
@@ -112,11 +112,10 @@ cp -r Biodepot-workflow-builder/tutorialFiles /tutorialFiles
 cp Biodepot-workflow-builder/serverSettings.json /biodepot
 
 cp Biodepot-workflow-builder/startup.sh /
-cp Biodepot-workflow-builder/nginx.conf /etc/nginx/sites-enabled/default
 
 #cp Biodepot-workflow-builder/ config files for dev tools
 cp -r Biodepot-workflow-builder/dev-files/geany/ /root/.config/
 cp -r Biodepot-workflow-builder/VM/xorg.conf /etc/X11/xorg.conf
 cp -r Biodepot-workflow-builder/VM/*.sh /usr/local/bin/
 cp Biodepot-workflow-builder/VM/menu /root/.fluxbox/menu
-cp .fluxbox/bwb.svg /orange3/Orange/canvas/icons/.
+cp /root/.fluxbox/bwb.svg /orange3/Orange/canvas/icons/.
