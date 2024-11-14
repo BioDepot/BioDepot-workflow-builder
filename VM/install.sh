@@ -30,10 +30,12 @@ DOCKER_GPG=/etc/apt/keyrings/docker.gpg
         python3-pyqt5.qtsvg \
         python3-pyqt5.qtwebkit \
         rsync \
+        supervisor \
         ttf-ubuntu-font-family \
         wget \
         xdg-utils \
         lxterminal \
+        x11-vnc \
         xvfb \
         zlib1g-dev \
         zenity
@@ -128,7 +130,9 @@ cp -r ~/biolab.si ~/.config/
 usermod -aG docker $USERNAME
 chown -R $USERNAME:$USERNAME /biodepot /BioDepot-workflow-builder /orange3 /widgets /workflows /coreutils /orangePatches /icons 
 rsync -av /BioDepot-workflow-builder/VM/user_config/ /home/$USERNAME/ && chown -R $USERNAME:$USERNAME /home/$USERNAME
-apt-get install -y x11vnc
-cp BioDepot-workflow-builder/VM/start_vnc.sh /usr/local/bin/start_vnc.sh
 
-#log out and login as $USERNAME and run startx
+
+#log out and login as $USERNAME 
+#supervisorctl -c ~/supervisor/supervisord.conf reread
+#supervisorctl -c ~/supervisor/supervisord.conf update
+#supervisorctl -c ~/supervisor/supervisord.conf start all

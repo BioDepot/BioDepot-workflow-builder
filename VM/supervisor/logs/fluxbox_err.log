@@ -1,0 +1,439 @@
+Warning: Failed to open file(/usr/share/fluxbox/nls/C.UTF-8/fluxbox.cat)
+for translation, using default messages.
+Keys: Invalid key/modifier on line 21): OnWindow Mod1 Mouse1 :MacroCmd {Raise} {Focus} {StartMoving}
+Error in apps file on line 14.
+Warning: Failed to open file(/usr/share/fluxbox/nls/C.UTF-8/fluxbox.cat)
+for translation, using default messages.
+Error: must specify one of: -solid, -mod, -gradient
+
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+WARNING: You are using pip version 20.0.1; however, version 21.3.1 is available.
+You should consider upgrading via the '/usr/bin/python3 -m pip install --upgrade pip' command.
+read in server settings {'data': OrderedDict([('127.0.0.1', {'maxThreads': '1', 'volumeMapping': ''})]), 'saveIPDir': '/data'}
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+libpng warning: iCCP: known incorrect sRGB profile
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+read in server settings {'data': OrderedDict([('127.0.0.1', {'maxThreads': '1', 'volumeMapping': ''})]), 'saveIPDir': '/data'}
+source type is builtins.str
+sink type is builtins.str
+index has prevous value /data/salmon_demo_work/athal_index of type <class 'str'>
+libType has prevous value A of type <class 'str'>
+outputDirs has prevous value ['/data/salmon_demo_work/DRR016125_quant'] of type <class 'list'>
+adding filedir for pname index using layout <BwBase.BwbGridLayout object at 0x7f53c48e8080>
+drawing textBox for  pname outputDirs pvalue {'flag': '-o ', 'label': 'Output quantification directories', 'type': 'directory list'}
+adding text box for pnameoutputDirs pvalue {'flag': '-o ', 'label': 'Output quantification directories', 'type': 'directory list'} box <PyQt5.QtWidgets.QWidget object at 0x7f53c48e7948> layout <BwBase.BwbGridLayout object at 0x7f53c48e8080> addCheckbox False
+slot found in connection check with contents [3] and ID None
+1 objects in <BwBase.DragAndDropList object at 0x7f53c48e7e58>
+add item number 0 value /data/salmon_demo_work/DRR016125_quant
+type is directory <class 'str'>
+type is directory list <class 'str'>
+updating filedir geneMap
+adding filedir for pname geneMap using layout <BwBase.BwbGridLayout object at 0x7f53c48e80b8>
+updating checkbox pname geneMap connect False isChecked False
+ignore cb, geneMap disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48f1828>
+ignore cb, geneMap disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f18b8>
+disabled
+drawing textBox for  pname mates1 pvalue {'flag': '--mates1 ', 'label': 'FASTQ mate 1 files', 'type': 'file list'}
+adding text box for pnamemates1 pvalue {'flag': '--mates1 ', 'label': 'FASTQ mate 1 files', 'type': 'file list'} box <PyQt5.QtWidgets.QWidget object at 0x7f53c48f1558> layout <BwBase.BwbGridLayout object at 0x7f53c48e80b8> addCheckbox True
+slot found in connection check with contents [3] and ID None
+1 objects in <BwBase.DragAndDropList object at 0x7f53c48f1b88>
+add item number 0 value /data/salmon_demo_work/DRR016125_1.fastq
+drawing textBox for  pname mates2 pvalue {'flag': '--mates2 ', 'label': 'FASTQ mate 2 files', 'type': 'file list'}
+adding text box for pnamemates2 pvalue {'flag': '--mates2 ', 'label': 'FASTQ mate 2 files', 'type': 'file list'} box <PyQt5.QtWidgets.QWidget object at 0x7f53c48f1558> layout <BwBase.BwbGridLayout object at 0x7f53c48e80b8> addCheckbox True
+slot found in connection check with contents [3] and ID None
+1 objects in <BwBase.DragAndDropList object at 0x7f53c48f51f8>
+add item number 0 value /data/salmon_demo_work/DRR016125_2.fastq
+drawing textBox for  pname unmatedReads pvalue {'flag': '--unmatedReads ', 'label': 'Unmated reads FASTQ files', 'type': 'file list'}
+adding text box for pnameunmatedReads pvalue {'flag': '--unmatedReads ', 'label': 'Unmated reads FASTQ files', 'type': 'file list'} box <PyQt5.QtWidgets.QWidget object at 0x7f53c48f1558> layout <BwBase.BwbGridLayout object at 0x7f53c48e80b8> addCheckbox True
+0 objects in <BwBase.DragAndDropList object at 0x7f53c48f5828>
+type is file list <class 'str'>
+type is file list <class 'str'>
+type is file list <class 'str'>
+type is int <class 'str'>
+type is file <class 'str'>
+slot found in connection check with contents [4] and ID None
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48e7c18>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48e7ca8>
+slot found in connection check with contents [6] and ID None
+slot found in connection check with contents [3] and ID None
+mates1 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7f53c48f1a68>
+mates1 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48f1af8>
+mates1 disabling <BwBase.DragAndDropList object at 0x7f53c48f1b88>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f1d38>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f1c18>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f1ca8>
+slot found in connection check with contents [3] and ID None
+mates2 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7f53c48f50d8>
+mates2 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48f5168>
+mates2 disabling <BwBase.DragAndDropList object at 0x7f53c48f51f8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f53a8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f5288>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f5318>
+slot found in connection check with contents [3] and ID None
+outputDirs disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48e7dc8>
+outputDirs disabling <BwBase.DragAndDropList object at 0x7f53c48e7e58>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f1048>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48e7ee8>
+outputDirs disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48e7f78>
+updating filedir inputFile
+adding filedir for pname inputFile using layout <BwBase.BwbGridLayout object at 0x7f53c48fbb00>
+updating checkbox pname inputFile connect False isChecked True
+checking attr inputFile
+found attr in dict inputFile
+enable callback for inputFile
+cb is <PyQt5.QtWidgets.QCheckBox object at 0x7f53c490a5e8> ledit is <PyQt5.QtWidgets.QLineEdit object at 0x7f53c490a4c8>
+enabled
+type is file <class 'str'>
+slot found in connection check with contents [1] and ID None
+INPUT RECEIVED value is __add builtins.str sourceId is 1
+slot found in connection check with contents [1] and ID None
+attr is Trigger disableFtn is None inputType is str
+Adding Trigger to connection [1]
+sig handler adding node with no signal: attr Trigger sourceId 1 value __add builtins.str
+connection dict value for Trigger is [1]
+source type is builtins.str
+sink type is builtins.str
+work_dir has prevous value /data/salmon_demo_work of type <class 'str'>
+samples has prevous value ['DRR016125'] of type <class 'list'>
+index has prevous value /data/salmon_demo_work/athal_index of type <class 'str'>
+sample_dl_links has prevous value ['ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz', 'ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz'] of type <class 'list'>
+adding filedir for pname work_dir using layout <BwBase.BwbGridLayout object at 0x7f53c489b048>
+adding filedir for pname index using layout <BwBase.BwbGridLayout object at 0x7f53c489b048>
+drawing textBox for  pname samples pvalue {'flag': '-ids ', 'label': 'Sample basenames', 'type': 'text list'}
+adding text box for pnamesamples pvalue {'flag': '-ids ', 'label': 'Sample basenames', 'type': 'text list'} box <PyQt5.QtWidgets.QWidget object at 0x7f53c489a4c8> layout <BwBase.BwbGridLayout object at 0x7f53c489b048> addCheckbox False
+1 objects in <BwBase.DragAndDropList object at 0x7f53c489ac18>
+add item number 0 value DRR016125
+drawing textBox for  pname sample_dl_links pvalue {'flag': None, 'label': 'Sample download links', 'type': 'text list'}
+adding text box for pnamesample_dl_links pvalue {'flag': None, 'label': 'Sample download links', 'type': 'text list'} box <PyQt5.QtWidgets.QWidget object at 0x7f53c489a4c8> layout <BwBase.BwbGridLayout object at 0x7f53c489b048> addCheckbox False
+2 objects in <BwBase.DragAndDropList object at 0x7f53c48a4168>
+add item number 0 value ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz
+add item number 1 value ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz
+type is directory <class 'str'>
+type is text list <class 'str'>
+type is directory <class 'str'>
+type is text list <class 'str'>
+index has prevous value /data/salmon_demo_work/athal_index of type <class 'str'>
+transcriptFasta has prevous value /data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz of type <class 'str'>
+adding filedir for pname index using layout <BwBase.BwbGridLayout object at 0x7f53c48abe48>
+adding filedir for pname transcriptFasta using layout <BwBase.BwbGridLayout object at 0x7f53c48abe48>
+type is directory <class 'str'>
+type is file <class 'str'>
+updating filedir tmpdir
+adding filedir for pname tmpdir using layout <BwBase.BwbGridLayout object at 0x7f53c48abdd8>
+updating checkbox pname tmpdir connect False isChecked False
+ignore cb, tmpdir disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48b0e58>
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+libpng warning: iCCP: known incorrect sRGB profile
+ignore cb, tmpdir disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48b0ee8>
+disabled
+updating filedir decoys
+adding filedir for pname decoys using layout <BwBase.BwbGridLayout object at 0x7f53c48abdd8>
+updating checkbox pname decoys connect False isChecked False
+ignore cb, decoys disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c489aaf8>
+ignore cb, decoys disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48b90d8>
+disabled
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is bool <class 'str'>
+type is int <class 'str'>
+type is int <class 'str'>
+type is directory <class 'str'>
+type is bool <class 'str'>
+type is file <class 'str'>
+type is bool <class 'str'>
+type is str <class 'str'>
+updating checkbox pname type connect False isChecked False
+ignore cb, type disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48b9288>
+disabled
+type is int <class 'str'>
+drawCB pname gencode pvalue {'flag': '--gencode ', 'label': 'GENCODE format', 'type': 'bool'} label GENCODE format
+draw CB pname gencode value False
+drawCB pname features pvalue {'flag': '--features ', 'label': 'Split feature name at first tab char (.tsv transcript only)', 'type': 'bool'} label Split feature name at first tab char (.tsv transcript only)
+draw CB pname features value False
+drawCB pname keepDuplicates pvalue {'flag': '--keepDuplicates ', 'label': 'Keep sequence-identical duplicate transcripts', 'type': 'bool'} label Keep sequence-identical duplicate transcripts
+draw CB pname keepDuplicates value False
+drawCB pname sparse pvalue {'flag': '--sparse ', 'label': 'Sparse sampling of k-mer positions', 'type': 'bool'} label Sparse sampling of k-mer positions
+draw CB pname sparse value False
+drawCB pname noClip pvalue {'flag': '-n ', 'label': 'No clip ploy-A tails', 'type': 'bool'} label No clip ploy-A tails
+draw CB pname noClip value False
+slot found in connection check with contents [3] and ID None
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48b0798>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48b0828>
+slot found in connection check with contents [5] and ID None
+INPUT RECEIVED value is __add builtins.str sourceId is 3
+slot found in connection check with contents [3] and ID None
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48b0798>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48b0828>
+attr is index disableFtn is None inputType is str
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48b0798>
+index disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48b0798>
+index disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48b0828>
+Adding index to connection [3]
+sig handler adding node with no signal: attr index sourceId 3 value __add builtins.str
+connection dict value for index is [3]
+source type is builtins.str
+sink type is builtins.str
+URL has prevous value ['ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz'] of type <class 'list'>
+directory has prevous value /data/salmon_demo_work of type <class 'str'>
+adding filedir for pname directory using layout <BwBase.BwbGridLayout object at 0x7f53c48c33c8>
+drawing textBox for  pname URL pvalue {'flag': None, 'argument': True, 'label': 'URL(s)', 'type': 'text list'}
+adding text box for pnameURL pvalue {'flag': None, 'argument': True, 'label': 'URL(s)', 'type': 'text list'} box <PyQt5.QtWidgets.QWidget object at 0x7f53c48c5dc8> layout <BwBase.BwbGridLayout object at 0x7f53c48c33c8> addCheckbox False
+1 objects in <BwBase.DragAndDropList object at 0x7f53c48ce3a8>
+add item number 0 value ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz
+type is text list <class 'str'>
+type is directory <class 'str'>
+updating filedir concatenateFile
+adding filedir for pname concatenateFile using layout <BwBase.BwbGridLayout object at 0x7f53c48c3358>
+updating checkbox pname concatenateFile connect False isChecked False
+ignore cb, concatenateFile disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48ceb88>
+ignore cb, concatenateFile disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48cec18>
+disabled
+type is bool <class 'str'>
+type is file <class 'str'>
+drawCB pname decompress pvalue {'default': True, 'flag': '--decompress', 'label': 'Decompress files', 'type': 'bool'} label Decompress files
+draw CB pname decompress value False
+slot found in connection check with contents [3] and ID None
+directory disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48ce0d8>
+directory disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48ce168>
+INPUT RECEIVED value is __add builtins.str sourceId is 5
+slot found in connection check with contents [5] and ID None
+attr is trigger disableFtn is None inputType is str
+Adding trigger to connection [5]
+sig handler adding node with no signal: attr trigger sourceId 5 value __add builtins.str
+connection dict value for trigger is [5]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 3
+slot found in connection check with contents [3] and ID None
+mates2 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7f53c48f50d8>
+mates2 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48f5168>
+mates2 disabling <BwBase.DragAndDropList object at 0x7f53c48f51f8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f53a8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f5288>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f5318>
+attr is mates2 disableFtn is None inputType is str
+slot found in connection check with contents [3] and ID None
+updating checkbox pname mates2 connect True isChecked True
+slot found in connection check with contents [3] and ID None
+slot found in connection check with contents [3] and ID None
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48f5168>
+mates2 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7f53c48f50d8>
+mates2 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48f5168>
+mates2 disabling <BwBase.DragAndDropList object at 0x7f53c48f51f8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f53a8>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f5288>
+mates2 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f5318>
+Adding mates2 to connection [3]
+sig handler adding node with no signal: attr mates2 sourceId 3 value __add builtins.str
+connection dict value for mates2 is [3]
+source type is builtins.str
+sink type is builtins.str
+INPUT RECEIVED value is __add builtins.str sourceId is 3
+slot found in connection check with contents [3] and ID None
+mates1 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7f53c48f1a68>
+mates1 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48f1af8>
+mates1 disabling <BwBase.DragAndDropList object at 0x7f53c48f1b88>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f1d38>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f1c18>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f1ca8>
+attr is mates1 disableFtn is None inputType is str
+slot found in connection check with contents [3] and ID None
+updating checkbox pname mates1 connect True isChecked True
+slot found in connection check with contents [3] and ID None
+slot found in connection check with contents [3] and ID None
+clearing line edit <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48f1af8>
+mates1 disabling <PyQt5.QtWidgets.QCheckBox object at 0x7f53c48f1a68>
+mates1 disabling <PyQt5.QtWidgets.QLineEdit object at 0x7f53c48f1af8>
+mates1 disabling <BwBase.DragAndDropList object at 0x7f53c48f1b88>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f1d38>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f1c18>
+mates1 disabling <PyQt5.QtWidgets.QPushButton object at 0x7f53c48f1ca8>
+Adding mates1 to connection [3]
+sig handler adding node with no signal: attr mates1 sourceId 3 value __add builtins.str
+connection dict value for mates1 is [3]
+source type is builtins.str
+sink type is builtins.str
+URL has prevous value ['ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz', 'ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz'] of type <class 'list'>
+QLayout::addChildLayout: layout "" already has a parent
+QLayout::addChildLayout: layout "" already has a parent
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+xrandr: Failed to get size of gamma for output screen
+Gtk-Message: 23:53:42.086: GtkDialog mapped without a transient parent. This is discouraged.
+xrandr: Failed to get size of gamma for output screen
+xrandr: Failed to get size of gamma for output screen
+xrandr: Failed to get size of gamma for output screen
+xrandr: Failed to get size of gamma for output screen
+xrandr: Failed to get size of gamma for output screen
+X Error of failed request:  BadName (named color or font does not exist)
+  Major opcode of failed request:  140 (RANDR)
+  Minor opcode of failed request:  16 (RRCreateMode)
+  Serial number of failed request:  19
+  Current serial number in output stream:  19
+xrandr: Failed to get size of gamma for output screen
+xrandr: Failed to get size of gamma for output screen
+xrandr: Failed to get size of gamma for output screen
+X Error of failed request:  BadMatch (invalid parameter attributes)
+  Major opcode of failed request:  140 (RANDR)
+  Minor opcode of failed request:  18 (RRAddOutputMode)
+  Serial number of failed request:  19
+  Current serial number in output stream:  20
+xrandr: Failed to get size of gamma for output screen
+xrandr: Failed to get size of gamma for output screen
+X Error of failed request:  BadMatch (invalid parameter attributes)
+  Major opcode of failed request:  140 (RANDR)
+  Minor opcode of failed request:  18 (RRAddOutputMode)
+  Serial number of failed request:  19
+  Current serial number in output stream:  20
+xrandr: Failed to get size of gamma for output screen
+Gtk-Message: 23:53:43.805: GtkDialog mapped without a transient parent. This is discouraged.
+
+(zenity:31769): GLib-WARNING **: 23:53:51.896: ../../../../glib/giounix.c:410Error while getting flags for FD: Bad file descriptor (9)
+
+Gtk-Message: 23:55:51.918: GtkDialog mapped without a transient parent. This is discouraged.
+Gtk-Message: 23:55:55.695: GtkDialog mapped without a transient parent. This is discouraged.
+
+(lxterminal:31791): Vte-WARNING **: 23:56:30.036: (../../src/vtegtk.cc:1906):int vte_terminal_match_add_gregex(VteTerminal*, GRegex*, GRegexMatchFlags): runtime check failed: (g_regex_get_compile_flags(gregex) & G_REGEX_MULTILINE)
+
+(lxterminal:31791): Vte-WARNING **: 23:56:30.036: (../../src/vtegtk.cc:1906):int vte_terminal_match_add_gregex(VteTerminal*, GRegex*, GRegexMatchFlags): runtime check failed: (g_regex_get_compile_flags(gregex) & G_REGEX_MULTILINE)
+Gtk-Message: 23:58:52.204: GtkDialog mapped without a transient parent. This is discouraged.
+Gtk-Message: 23:58:53.696: GtkDialog mapped without a transient parent. This is discouraged.
+Gtk-Message: 00:00:24.037: GtkDialog mapped without a transient parent. This is discouraged.
+Gtk-Message: 00:00:25.547: GtkDialog mapped without a transient parent. This is discouraged.
+Gtk-Message: 00:02:58.943: GtkDialog mapped without a transient parent. This is discouraged.
+Gtk-Message: 00:03:00.734: GtkDialog mapped without a transient parent. This is discouraged.
+Gtk-Message: 00:05:05.663: GtkDialog mapped without a transient parent. This is discouraged.
+Gtk-Message: 00:05:06.963: GtkDialog mapped without a transient parent. This is discouraged.
+XIO:  fatal IO error 11 (Resource temporarily unavailable) on X server ":1"
+      after 540182 requests (540182 known processed) with 0 events remaining.
+Warning: Failed to open file(/usr/share/fluxbox/nls/C.UTF-8/fluxbox.cat)
+for translation, using default messages.
+Error: Couldn't connect to XServer:1
+Warning: Failed to open file(/usr/share/fluxbox/nls/C.UTF-8/fluxbox.cat)
+for translation, using default messages.
+Keys: Invalid key/modifier on line 21): OnWindow Mod1 Mouse1 :MacroCmd {Raise} {Focus} {StartMoving}
+Error in apps file on line 14.
+Warning: Failed to open file(/usr/share/fluxbox/nls/C.UTF-8/fluxbox.cat)
+for translation, using default messages.
+Error: must specify one of: -solid, -mod, -gradient
+
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+Gtk-Message: 00:05:56.912: GtkDialog mapped without a transient parent. This is discouraged.
+Gtk-Message: 00:05:58.206: GtkDialog mapped without a transient parent. This is discouraged.
+XIO:  fatal IO error 11 (Resource temporarily unavailable) on X server ":1"
+      after 138632 requests (138632 known processed) with 0 events remaining.
+The X11 connection broke: I/O error (code 1)
+XIO:  fatal IO error 22 (Invalid argument) on X server ":1.0"
+      after 541 requests (541 known processed) with 0 events remaining.
+Gdk-Message: 00:08:24.918: nemo: Fatal IO error 0 (Success) on X server :1.0.
+
+Warning: Failed to open file(/usr/share/fluxbox/nls/C.UTF-8/fluxbox.cat)
+for translation, using default messages.
+Keys: Invalid key/modifier on line 21): OnWindow Mod1 Mouse1 :MacroCmd {Raise} {Focus} {StartMoving}
+Error in apps file on line 14.
+Warning: Failed to open file(/usr/share/fluxbox/nls/C.UTF-8/fluxbox.cat)
+for translation, using default messages.
+Error: must specify one of: -solid, -mod, -gradient
+
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+libpng warning: iCCP: known incorrect sRGB profile
+Gtk-Message: 00:11:22.771: GtkDialog mapped without a transient parent. This is discouraged.
+XIO:  fatal IO error 11 (Resource temporarily unavailable) on X server ":1"
+      after 107041 requests (107041 known processed) with 0 events remaining.
