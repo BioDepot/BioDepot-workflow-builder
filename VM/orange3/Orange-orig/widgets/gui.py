@@ -10,7 +10,8 @@ import warnings
 import logging
 import weakref
 from types import LambdaType
-from collections import defaultdict, Sequence
+from collections.abc import Sequence
+from collections import defaultdict
 
 import pkg_resources
 

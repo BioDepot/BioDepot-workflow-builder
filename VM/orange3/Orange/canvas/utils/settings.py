@@ -9,6 +9,7 @@ A more `dict` like interface for QSettings
 import abc
 import logging
 
+from collections.abc import MutableMapping
 from collections import namedtuple
 
 from AnyQt.QtCore import QObject, QEvent, QCoreApplication, QSettings
@@ -85,7 +86,7 @@ class _pickledvalue(object):
         self.value = value
 
 
-class Settings(QObject, metaclass=QABCMeta):
+class Settings(QObject, MutableMapping, metaclass=QABCMeta):
     """
     A `dict` like interface to a QSettings store.
     """

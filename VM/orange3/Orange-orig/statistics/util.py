@@ -6,7 +6,7 @@ It also patches bottleneck to contain these functions.
 """
 from warnings import warn
 
-#import bottleneck as bn
+import bottleneck as bn
 import numpy as np
 from scipy import sparse as sp
 
@@ -107,8 +107,52 @@ def bincount(x, weights=None, max_val=None, minlength=None):
     """
     # Store the original matrix before any manipulation to check for sparse
     x_original = x
-    bc = np.bincount(x.astype(np.int32, copy=False), weights=weights, minlength=minlength).astype(float)
-    nans=0
+    if sp.issparse(x):
+        if weights is not None:
+            # Match weights and x axis so `indices` will be set appropriately
+            if x.shape[0] == weights.shape[0]:
+                x = x.tocsc()
+            elif x.shape[1] == weights.shape[0]:
+                x = x.tocsr()
+
+            zero_weights = sparse_implicit_zero_weights(x, weights).sum()
+            weights = weights[x.indices]
+        else:
+            zero_weights = sparse_count_implicit_zeros(x)
+
+        x = x.data
+
+    x = np.asanyarray(x)
+    if x.dtype.kind == "f" and bn.anynan(x):
+        nonnan = ~np.isnan(x)
+        x = x[nonnan]
+        if weights is not None:
+            nans = (~nonnan * weights).sum(axis=0)
+            weights = weights[nonnan]
+        else:
+            nans = (~nonnan).sum(axis=0)
+    else:
+        nans = 0.0 if x.ndim == 1 else np.zeros(x.shape[1], dtype=float)
+
+    if minlength is None and max_val is not None:
+        minlength = max_val + 1
+
+    if minlength is not None and minlength <= 0:
+        bc = np.array([])
+    else:
+        bc = np.bincount(
+            x.astype(np.int32, copy=False), weights=weights, minlength=minlength
+        ).astype(float)
+        # Since `csr_matrix.values` only contain non-zero values or explicit
+        # zeros, we must count implicit zeros separately and add them to the
+        # explicit ones found before
+        if sp.issparse(x_original):
+            # If x contains only NaNs, then bc will be an empty array
+            if zero_weights and bc.size == 0:
+                bc = [zero_weights]
+            elif zero_weights:
+                bc[0] += zero_weights
+
     return bc, nans
 
 

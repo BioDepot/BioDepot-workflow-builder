@@ -9,7 +9,8 @@ A more `dict` like interface for QSettings
 import abc
 import logging
 
-from collections import namedtuple, MutableMapping
+from collections.abc import MutableMapping
+from collections import namedtuple
 
 from AnyQt.QtCore import QObject, QEvent, QCoreApplication, QSettings
 from AnyQt.QtCore import pyqtSignal as Signal

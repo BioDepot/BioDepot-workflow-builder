@@ -78,7 +78,6 @@ def git_version():
 
     Copied from numpy setup.py
     """
-
     def _minimal_ext_cmd(cmd):
         # construct minimal environment
         env = {}
@@ -116,7 +115,11 @@ if not release:
     short_version += ".dev"
 """
     global FULLVERSION
+    global GIT_REVISION
+	
     FULLVERSION = VERSION
+    GIT_REVISION =  ""
+   
     if os.path.exists(".git"):
         GIT_REVISION = git_version()
     elif os.path.exists("Orange/version.py"):

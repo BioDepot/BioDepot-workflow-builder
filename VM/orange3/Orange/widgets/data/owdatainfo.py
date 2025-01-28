@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict 
 import threading
 
 from AnyQt import QtWidgets

@@ -12,6 +12,7 @@ import sys
 import logging
 
 from collections import namedtuple
+from collections.abc import Callable
 
 import numpy
 

@@ -1,9 +1,9 @@
 import logging
-from collections import OrderedDict
+from collections import OrderedDict 
 from xml.sax.saxutils import escape
 
 import docutils.core
-import CommonMark
+import commonmark
 
 from AnyQt.QtWidgets import (
     QGraphicsItem,
@@ -531,7 +531,7 @@ class TextAnnotation(Annotation):
             menu = QMenu(event.widget())
             menu.setAttribute(Qt.WA_DeleteOnClose)
             formatmenu = menu.addMenu("Render as")
-            group = QActionGroup(self, exclusive=True)
+            group = QActionGroup(self)
 
             def makeaction(text, parent, data=None, **kwargs):
                 action = QAction(text, parent, **kwargs)

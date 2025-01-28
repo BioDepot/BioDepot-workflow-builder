@@ -11,7 +11,8 @@ with a quick search functionality.
 import sys
 import logging
 
-from collections import namedtuple, Callable
+from collections import namedtuple
+from collections.abc import Callable
 
 import numpy
 

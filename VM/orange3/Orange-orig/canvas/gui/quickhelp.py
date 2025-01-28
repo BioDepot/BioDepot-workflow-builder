@@ -1,4 +1,4 @@
-from collections import Callable
+from collections.abc import Callable
 
 from AnyQt.QtWidgets import QTextBrowser
 from AnyQt.QtGui import QStatusTipEvent, QWhatsThisClickedEvent

@@ -5,7 +5,7 @@ import csv
 import itertools
 import concurrent.futures
 
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict , namedtuple
 from typing import List, Tuple, Iterable  # pylint: disable=unused-import
 
 from math import isnan

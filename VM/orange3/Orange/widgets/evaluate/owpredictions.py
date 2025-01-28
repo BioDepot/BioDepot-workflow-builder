@@ -3,7 +3,7 @@ Predictions widget
 
 """
 import sys
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict , namedtuple
 
 import numpy
 from AnyQt.QtWidgets import (

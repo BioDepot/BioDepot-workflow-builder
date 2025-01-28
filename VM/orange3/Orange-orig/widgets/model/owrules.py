@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict 
 
 import numpy as np
 from AnyQt.QtCore import Qt

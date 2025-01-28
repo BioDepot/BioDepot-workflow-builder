@@ -2,7 +2,7 @@ import warnings
 import weakref
 
 from math import log
-#from collections import Iterable
+from collections.abc import Iterable
 from itertools import chain
 from numbers import Integral
 

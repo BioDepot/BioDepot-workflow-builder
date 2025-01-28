@@ -1,4 +1,4 @@
-from collections import OrderedDict
+from collections import OrderedDict 
 
 from AnyQt.QtGui import QBrush, QPen, QColor, QPainter, QPainterPath, QTransform
 from AnyQt.QtWidgets import (

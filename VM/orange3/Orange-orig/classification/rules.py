@@ -11,7 +11,7 @@ import operator
 from copy import copy
 from hashlib import sha1
 from collections import namedtuple
-#import bottleneck as bn
+import bottleneck as bn
 import numpy as np
 from scipy.stats import chi2
 
@@ -59,7 +59,7 @@ def argmaxrnd(a, random_seed=None):
         raise ValueError("argmaxrnd only accepts arrays of up to 2 dim")
 
     def rndc(x):
-        return 0
+        return random.choice((x == bn.nanmax(x)).nonzero()[0])
 
     random = np.random if random_seed is None else np.random.RandomState(random_seed)
 
@@ -191,6 +191,12 @@ class LaplaceAccuracyEvaluator(Evaluator):
         # all others
         tc = rule.target_class
         dist = rule.curr_class_dist
+        if tc is not None:
+            k = 2
+            target = dist[tc]
+        else:
+            k = len(dist)
+            target = bn.nanmax(dist)
         return (target + 1) / (dist.sum() + k)
 
 

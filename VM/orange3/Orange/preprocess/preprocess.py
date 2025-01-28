@@ -6,7 +6,7 @@ Preprocess
 import numpy as np
 import scipy.sparse as sp
 import sklearn.preprocessing as skl_preprocessing
-#import bottleneck as bn
+import bottleneck as bn
 
 import Orange.data
 from Orange.data.filter import HasClass
@@ -224,7 +224,7 @@ class RemoveConstant(Preprocess):
         data : an input dataset
         """
 
-        oks = 0
+        oks = bn.nanmin(data.X, axis=0) != bn.nanmax(data.X, axis=0)
         atts = [data.domain.attributes[i] for i, ok in enumerate(oks) if ok]
         domain = Orange.data.Domain(atts, data.domain.class_vars, data.domain.metas)
         return data.transform(domain)

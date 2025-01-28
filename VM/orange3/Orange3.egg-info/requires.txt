@@ -1,5 +1,5 @@
 AnyQt>=0.0.8
-CommonMark==0.7.5
+CommonMark>=0.9.1
 chardet>=3.0.2
 docutils
 joblib>=0.9.4

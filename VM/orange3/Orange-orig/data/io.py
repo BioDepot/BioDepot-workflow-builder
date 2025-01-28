@@ -8,7 +8,7 @@ import sys
 import warnings
 
 from ast import literal_eval
-from collections import OrderedDict, Counter, defaultdict
+from collections import OrderedDict , Counter, defaultdict
 from functools import lru_cache
 from importlib import import_module
 from itertools import chain, repeat
@@ -25,7 +25,6 @@ import numpy as np
 from chardet.universaldetector import UniversalDetector
 
 from Orange.data import (
-    _io,
     is_discrete_values,
     MISSING_VALUES,
     Table,

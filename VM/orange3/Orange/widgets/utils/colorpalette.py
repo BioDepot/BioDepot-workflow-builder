@@ -3,7 +3,7 @@ import sys
 import copy
 import math
 from numbers import Number
-from collections import Iterable
+from collections.abc import Iterable
 
 import numpy as np
 

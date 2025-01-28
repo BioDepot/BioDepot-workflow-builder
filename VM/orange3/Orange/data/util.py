@@ -2,7 +2,7 @@
 Data-manipulation utilities.
 """
 import numpy as np
-#import bottleneck as bn
+import bottleneck as bn
 from scipy import sparse as sp
 
 
@@ -30,7 +30,11 @@ def scale(values, min=0, max=1):
     """Return values scaled to [min, max]"""
     if not len(values):
         return np.array([])
-    return (values) * (max - min) + min
+    minval = np.float_(bn.nanmin(values))
+    ptp = bn.nanmax(values) - minval
+    if ptp == 0:
+        return np.clip(values, min, max)
+    return (-minval + values) / ptp * (max - min) + min
 
 
 class SharedComputeValue:

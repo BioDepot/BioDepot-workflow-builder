@@ -1,20 +1,18 @@
 import operator
 import os
 import zlib
-from collections import MutableSequence, Iterable, Sequence, Sized
+from collections.abc import MutableSequence, Iterable, Sequence, Sized
 from functools import reduce
 from itertools import chain
 from numbers import Real, Integral
 from threading import Lock, RLock
 
-#import bottleneck as bn
+import bottleneck as bn
 import numpy as np
 from scipy import sparse as sp
 
 import Orange.data  # import for io.py
 from Orange.data import (
-    _contingency,
-    _valuecount,
     Domain,
     Variable,
     Storage,
@@ -1127,11 +1125,15 @@ class Table(MutableSequence, Storage):
         return len(self)
 
     def has_missing(self):
-	return False
+        """Return `True` if there are any missing attribute or class values."""
+        missing_x = not sp.issparse(self.X) and bn.anynan(
+            self.X
+        )  # do not check for sparse X
+        return missing_x or bn.anynan(self._Y)
 
     def has_missing_class(self):
         """Return `True` if there are any missing class values."""
-        return False
+        return bn.anynan(self._Y)
 
     def checksum(self, include_metas=True):
         # TODO: zlib.adler32 does not work for numpy arrays with dtype object
@@ -1184,10 +1186,39 @@ class Table(MutableSequence, Storage):
             return rx(self.metas[:, -1 - index])
 
     def _filter_is_defined(self, columns=None, negate=False):
-        return False
+        if columns is None:
+            if sp.issparse(self.X):
+                remove = self.X.indptr[1:] != self.X.indptr[-1:] + self.X.shape[1]
+            else:
+                remove = bn.anynan(self.X, axis=1)
+            if sp.issparse(self._Y):
+                remove = np.logical_or(
+                    remove, self._Y.indptr[1:] != self._Y.indptr[-1:] + self._Y.shape[1]
+                )
+            else:
+                remove = np.logical_or(remove, bn.anynan(self._Y, axis=1))
+        else:
+            remove = np.zeros(len(self), dtype=bool)
+            for column in columns:
+                col, sparse = self.get_column_view(column)
+                if sparse:
+                    remove = np.logical_or(remove, col == 0)
+                else:
+                    remove = np.logical_or(remove, bn.anynan([col], axis=0))
+        retain = remove if negate else np.logical_not(remove)
+        return self.from_table_rows(self, retain)
 
     def _filter_has_class(self, negate=False):
-	return False
+        if sp.issparse(self._Y):
+            if negate:
+                retain = self._Y.indptr[1:] != self._Y.indptr[-1:] + self._Y.shape[1]
+            else:
+                retain = self._Y.indptr[1:] == self._Y.indptr[-1:] + self._Y.shape[1]
+        else:
+            retain = bn.anynan(self._Y, axis=1)
+            if not negate:
+                retain = np.logical_not(retain)
+        return self.from_table_rows(self, retain)
 
     def _filter_same_value(self, column, value, negate=False):
         if not isinstance(value, Real):

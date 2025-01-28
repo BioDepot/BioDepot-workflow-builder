@@ -6,7 +6,7 @@ from numbers import Real
 
 from Orange.util import Reprable
 import numpy as np
-#import bottleneck as bn
+import bottleneck as bn
 
 from Orange.data import Instance, Storage, Variable
 from Orange.util import Enum
@@ -52,7 +52,21 @@ class IsDefined(Filter):
         self.columns = columns
 
     def __call__(self, data):
-        return False
+        if isinstance(data, Instance):
+            return self.negate == bn.anynan(data._x)
+        if isinstance(data, Storage):
+            try:
+                return data._filter_is_defined(self.columns, self.negate)
+            except NotImplementedError:
+                pass
+
+        r = np.fromiter(
+            (not bn.anynan(inst._x) for inst in data), dtype=bool, count=len(data)
+        )
+        if self.negate:
+            r = np.logical_not(r)
+        return data[r]
+
 
 class HasClass(Filter):
     """
@@ -64,7 +78,19 @@ class HasClass(Filter):
     """
 
     def __call__(self, data):
-	return False
+        if isinstance(data, Instance):
+            return self.negate == bn.anynan(data._y)
+        if isinstance(data, Storage):
+            try:
+                return data._filter_has_class(self.negate)
+            except NotImplementedError:
+                pass
+
+        r = np.fromiter((not bn.anynan(inst._y) for inst in data), bool, len(data))
+        if self.negate:
+            r = np.logical_not(r)
+        return data[r]
+
 
 class Random(Filter):
     """

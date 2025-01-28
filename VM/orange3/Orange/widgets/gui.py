@@ -10,6 +10,7 @@ import warnings
 import logging
 import weakref
 from types import LambdaType
+from collections.abc import Sequence
 from collections import defaultdict
 
 import pkg_resources
@@ -2829,7 +2830,7 @@ class CallFrontListView(ControlledCallFront):
         model = view.model()
         sel_model = view.selectionModel()
 
-        if not isinstance(values):
+        if not isinstance(values, Sequence):
             values = [values]
 
         selection = QItemSelection()

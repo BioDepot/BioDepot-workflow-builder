@@ -1,6 +1,6 @@
 """Tree model used by Orange inducers, and Tree interface"""
 
-from collections import OrderedDict
+from collections import OrderedDict 
 
 import numpy as np
 import scipy.sparse as sp

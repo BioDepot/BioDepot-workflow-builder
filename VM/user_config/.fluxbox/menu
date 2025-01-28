@@ -16,7 +16,7 @@
 #     session.menuFile: ~/.fluxbox/my-menu
 [begin] (Applications)
 [encoding] {UTF-8}
-  [exec] (Bwb) {/usr/local/bin/startBwb.sh} </home/ubuntu/.fluxbox/bwb256.png>
+  [exec] (Bwb) {/usr/local/bin/startBwb.sh &> /dev/null } </home/ubuntu/.fluxbox/bwb256.png>
   [exec] (Bwb-debug) {/bin/bash -c 'export XENVIRONMENT=.Xresources; lxterminal -e startBwb.sh orange-canvas -l 4'} </home/ubuntu/.fluxbox/bwb256.png>
   [exec] (Files) {dbus-launch nemo}
   [exec] (Resize) {/usr/local/bin/resize.sh}

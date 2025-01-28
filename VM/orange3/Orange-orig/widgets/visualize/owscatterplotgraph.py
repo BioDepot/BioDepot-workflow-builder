@@ -1,4 +1,4 @@
-from collections import Counter
+from collections.abc import Counter
 import sys
 import itertools
 from xml.sax.saxutils import escape

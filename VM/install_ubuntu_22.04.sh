@@ -4,6 +4,7 @@ set -e
 USERNAME=ubuntu
 DOCKER_GPG=/etc/apt/keyrings/docker.gpg
 BIODEPOT=/home/$USERNAME/BioDepot-workflow-builder
+export DEBIAN_FRONTEND=noninteractive
 sudo apt-get -y update
 sudo apt-get install -y --no-install-recommends \
         curl \
@@ -53,10 +54,7 @@ sudo apt-get install -y \
         pip==20.0.1 \
         setuptools \
         wheel 
-sudo  rsync -a  $BIODEPOT/orange3/ /orange3/ && rsync -a $BIODEPOT/orangePatches/ /orangePatches/ \
-  && rsync -a $BIODEPOT/orange3-ubuntu-22-patches/ /orange3-ubuntu-22-patches/
-
-sudo rsync -av /orange3-ubuntu-22-patches/ /orange3/
+sudo  rsync -a  $BIODEPOT/VM/orange3/ /orange3/ && sudo rsync -a $BIODEPOT/orangePatches/ /orangePatches/
 sudo pip3 install -r /orange3/requirements-gui.txt \
          beautifulsoup4 \
          docker \
@@ -65,20 +63,20 @@ sudo pip3 install setuptools==65.5.1
 sudo pip3 install -e /orange3
 
 sudo apt-get install -y --no-install-recommends gnupg 
-sudo mkdir -p /etc/apt/keyrings && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o $DOCKER_GPG 
+sudo mkdir -p /etc/apt/keyrings && sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o $DOCKER_GPG 
 arch=$(dpkg --print-architecture) \
      && codename=$(awk -F= '/CODENAME/ {print $2;exit}' /etc/os-release) \
-     && echo "deb [arch=$arch signed-by=$DOCKER_GPG] https://download.docker.com/linux/ubuntu $codename stable" > \
+     && sudo echo "deb [arch=$arch signed-by=$DOCKER_GPG] https://download.docker.com/linux/ubuntu $codename stable" > \
          /etc/apt/sources.list.d/docker.list \
-     && apt-get update \
-     && apt-get install -y --no-install-recommends \
+     && sudo apt-get update \
+     && sudo apt-get install -y --no-install-recommends \
          containerd.io \
          docker-ce \
          docker-ce-cli
  sudo pip3 install --user jsonpickle
  sudo cp -r $BIODEPOT/widgets /widgets \
-  && cp -r $BIODEPOT/biodepot /biodepot \
-  && cp -r $BIODEPOT/coreutils /coreutils
+  && sudo cp -r $BIODEPOT/biodepot /biodepot \
+  && sudo cp -r $BIODEPOT/VM/coreutils /coreutils
 
  sudo apt-get install -y xorg 
  sudo cp -r $BIODEPOT/scripts/generate_setup.sh /usr/local/bin/generate_setup.sh

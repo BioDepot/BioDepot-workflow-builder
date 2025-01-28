@@ -10,7 +10,7 @@ from threading import Thread
 from pprint import pformat
 
 from tempfile import mkstemp
-from collections import OrderedDict
+from collections import OrderedDict 
 from urllib.parse import urljoin, urlencode
 from urllib.request import pathname2url, urlopen, build_opener
 from unittest.mock import patch

@@ -1,6 +1,6 @@
 """Tree learner widget"""
 
-from collections import OrderedDict
+from collections import OrderedDict 
 
 from AnyQt.QtCore import Qt
 

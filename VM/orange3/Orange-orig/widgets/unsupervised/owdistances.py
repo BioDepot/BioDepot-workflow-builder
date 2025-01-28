@@ -1,6 +1,6 @@
 from AnyQt.QtCore import Qt
 from scipy.sparse import issparse
-#import bottleneck as bn
+import bottleneck as bn
 
 import Orange.data
 import Orange.misc
@@ -138,7 +138,7 @@ class OWDistances(OWWidget):
 
         def _fix_missing():
             nonlocal data
-            if not metric.supports_missing:
+            if not metric.supports_missing and bn.anynan(data.X):
                 self.Warning.imputing_data()
                 data = distance.impute(data)
 

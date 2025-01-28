@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
-from collections import OrderedDict
+from collections import OrderedDict 
 
 from AnyQt.QtWidgets import (
     QLineEdit,

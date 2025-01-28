@@ -12,7 +12,7 @@ from functools import partial, reduce
 
 import concurrent.futures
 from concurrent.futures import Future
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict , namedtuple
 
 try:
     # only used in type hinting
