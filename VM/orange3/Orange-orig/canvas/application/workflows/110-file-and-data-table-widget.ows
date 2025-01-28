@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme description="The basic data mining units in Orange are called widgets. There are widgets for reading the data, preprocessing, visualization, clustering, classification and others. Widgets communicate through channels. Data mining workflow is thus a collection of widgets and communication channels.&#10;&#10;In this workflow, there is a File widget that reads the data. File widget communicates this data to Data Table widget that shows the data spreadsheet. Notice how the output of the file widget is connected to the input of the Data Table widget. In Orange, the outputs of the widgets are on the right, and the inputs on the left of the widget." title="File and Data Table" version="2.0">
+	<nodes>
+		<node id="0" name="File" position="(89.0, 157.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owfile.OWFile" title="File" version="" />
+		<node id="1" name="Data Table" position="(290.0, 157.0)" project_name="Orange3" qualified_name="Orange.widgets.data.owtable.OWDataTable" title="Data Table" version="" />
+	</nodes>
+	<links>
+		<link enabled="true" id="0" sink_channel="Data" sink_node_id="1" source_channel="Data" source_node_id="0" />
+	</links>
+	<annotations>
+		<text font-family="Helvetica" font-size="14" id="0" rect="(17.0, 21.0, 160.0, 55.0)" type="text/plain">A File widget. Double click to open it and select the dataset file.</text>
+		<text font-family="Helvetica" font-size="14" id="1" rect="(50.0, 229.0, 118.0, 40.0)" type="text/plain">The output of the File widget.</text>
+		<text font-family="Helvetica" font-size="14" id="2" rect="(241.0, 227.0, 131.0, 41.0)" type="text/plain">The input of the Data Table widget.</text>
+		<text font-family="Helvetica" font-size="14" id="3" rect="(138.0, 297.0, 150.0, 82.0)" type="text/plain">The communication channel. It passes the dataset from the File widget to the Data Table.</text>
+		<text font-family="Helvetica" font-size="14" id="4" rect="(262.0, 21.0, 150.0, 68.0)" type="text/plain">A Data Table widget. Double click the icon to see the data in a spreadsheet.</text>
+		<text font-family="Helvetica" font-size="14" id="5" rect="(415.0, 68.0, 150.0, 83.0)" type="text/plain">The output of the Data Table to send out any data (rows) that are selected to the widget.</text>
+		<text font-family="Helvetica" font-size="14" id="6" rect="(489.0, 177.0, 216.0, 181.0)" type="text/plain">This output is not used, hence dashed line. You can add another Data Table by clicking on its icon from the toolbox on the left, connect the ouput of Data Table to the input of new Data Table (1) and check if the selected data from Data Table is indeed sent to the downstream widget. This demo works best if both widgets are open, that is, their windows displayed.</text>
+		<arrow end="(88.00000000000004, 122.00000000000001)" fill="#C1272D" id="7" start="(89.00000000000004, 76.00000000000001)" />
+		<arrow end="(285.0, 129.0)" fill="#C1272D" id="8" start="(279.0, 86.00000000000001)" />
+		<arrow end="(117.0, 180.0)" fill="#C1272D" id="9" start="(140.0, 229.0)" />
+		<arrow end="(256.0, 171.0)" fill="#C1272D" id="10" start="(249.0, 224.0)" />
+		<arrow end="(194.99999999999997, 159.0)" fill="#C1272D" id="11" start="(195.99999999999997, 297.0)" />
+		<arrow end="(328.0, 166.99999999999997)" fill="#39B54A" id="12" start="(488.0, 197.99999999999997)" />
+		<arrow end="(327.0, 141.00000000000003)" fill="#C1272D" id="13" start="(414.0, 105.00000000000001)" />
+	</annotations>
+	<thumbnail />
+	<node_properties>
+		<properties format="pickle" node_id="0">gAN9cQAoWBIAAABjb250cm9sQXJlYVZpc2libGVxAYhYDAAAAHJlY2VudF9wYXRoc3ECXXEDY09y
+YW5nZS53aWRnZXRzLnV0aWxzLmZpbGVkaWFsb2dzClJlY2VudFBhdGgKcQQpgXEFfXEGKFgHAAAA
+YWJzcGF0aHEHWDAAAAAvVXNlcnMvYW56ZS9kZXYvb3JhbmdlMy9PcmFuZ2UvZGF0YXNldHMvaXJp
+cy50YWJxCFgGAAAAcHJlZml4cQlYDwAAAHNhbXBsZS1kYXRhc2V0c3EKWAcAAAByZWxwYXRocQtY
+CAAAAGlyaXMudGFicQxYBQAAAHRpdGxlcQ1YAAAAAHEOWAUAAABzaGVldHEPaA5YCwAAAGZpbGVf
+Zm9ybWF0cRBOdWJhWAsAAAByZWNlbnRfdXJsc3ERXXESWBMAAABzYXZlZFdpZGdldEdlb21ldHJ5
+cRNDLgHZ0MsAAQAAAAACEwAAATwAAAOqAAACNQAAAhMAAAFSAAADqgAAAjUAAAAAAABxFFgLAAAA
+c2hlZXRfbmFtZXNxFX1xFlgGAAAAc291cmNlcRdLAFgDAAAAdXJscRhoDlgNAAAAZG9tYWluX2Vk
+aXRvcnEZfXEaWAsAAABfX3ZlcnNpb25fX3EbSwFYEAAAAGNvbnRleHRfc2V0dGluZ3NxHF1xHWNP
+cmFuZ2Uud2lkZ2V0cy5zZXR0aW5ncwpDb250ZXh0CnEeKYFxH31xIChYBAAAAHRpbWVxIUdB1qcW
+DLpbX1gGAAAAdmFsdWVzcSJ9cSMoWAkAAAB2YXJpYWJsZXNxJF1xJVgJAAAAeGxzX3NoZWV0cSZo
+Dkr/////hnEnaBl9cShoJF1xKShdcSooWAwAAABzZXBhbCBsZW5ndGhxK2NPcmFuZ2UuZGF0YS52
+YXJpYWJsZQpDb250aW51b3VzVmFyaWFibGUKcSxLAGgOiGVdcS0oWAsAAABzZXBhbCB3aWR0aHEu
+aCxLAGgOiGVdcS8oWAwAAABwZXRhbCBsZW5ndGhxMGgsSwBoDohlXXExKFgLAAAAcGV0YWwgd2lk
+dGhxMmgsSwBoDohlXXEzKFgEAAAAaXJpc3E0Y09yYW5nZS5kYXRhLnZhcmlhYmxlCkRpc2NyZXRl
+VmFyaWFibGUKcTVLAVgsAAAASXJpcy1zZXRvc2EsIElyaXMtdmVyc2ljb2xvciwgSXJpcy12aXJn
+aW5pY2FxNollZXNoG0sBdVgKAAAAYXR0cmlidXRlc3E3KFgMAAAAc2VwYWwgbGVuZ3RocThLAoZx
+OVgLAAAAc2VwYWwgd2lkdGhxOksChnE7WAwAAABwZXRhbCBsZW5ndGhxPEsChnE9WAsAAABwZXRh
+bCB3aWR0aHE+SwKGcT90cUBYBQAAAG1ldGFzcUEpWAoAAABjbGFzc192YXJzcUJYBAAAAGlyaXNx
+Q11xRChYCwAAAElyaXMtc2V0b3NhcUVYDwAAAElyaXMtdmVyc2ljb2xvcnFGWA4AAABJcmlzLXZp
+cmdpbmljYXFHZYZxSIVxSVgSAAAAbW9kaWZpZWRfdmFyaWFibGVzcUpdcUt1YmF1Lg==
+</properties>
+		<properties format="pickle" node_id="1">gAN9cQAoWAsAAABhdXRvX2NvbW1pdHEBiFgOAAAAY29sb3JfYnlfY2xhc3NxAohYEgAAAGNvbnRy
+b2xBcmVhVmlzaWJsZXEDiFgOAAAAZGlzdF9jb2xvcl9SR0JxBChL3EvcS9xL/3RxBVgTAAAAc2F2
+ZWRXaWRnZXRHZW9tZXRyeXEGTlgLAAAAc2VsZWN0X3Jvd3NxB4hYFQAAAHNob3dfYXR0cmlidXRl
+X2xhYmVsc3EIiFgSAAAAc2hvd19kaXN0cmlidXRpb25zcQmJWAsAAABfX3ZlcnNpb25fX3EKSwFY
+EAAAAGNvbnRleHRfc2V0dGluZ3NxC11xDGNPcmFuZ2Uud2lkZ2V0cy5zZXR0aW5ncwpDb250ZXh0
+CnENKYFxDn1xDyhYBgAAAHZhbHVlc3EQfXERKFgNAAAAc2VsZWN0ZWRfY29sc3ESXXETWA0AAABz
+ZWxlY3RlZF9yb3dzcRRdcRVoCksBdVgFAAAAbWV0YXNxFn1xF1gOAAAAb3JkZXJlZF9kb21haW5x
+GF1xGShYDAAAAHNlcGFsIGxlbmd0aHEaSwKGcRtYCwAAAHNlcGFsIHdpZHRocRxLAoZxHVgMAAAA
+cGV0YWwgbGVuZ3RocR5LAoZxH1gLAAAAcGV0YWwgd2lkdGhxIEsChnEhWAQAAABpcmlzcSJLAYZx
+I2VYCgAAAGF0dHJpYnV0ZXNxJH1xJShoIEsCaBpLAmgeSwJoIl1xJihYCwAAAElyaXMtc2V0b3Nh
+cSdYDwAAAElyaXMtdmVyc2ljb2xvcnEoWA4AAABJcmlzLXZpcmdpbmljYXEpZWgcSwJ1WAQAAAB0
+aW1lcSpHQdanFgy9pBZ1YmF1Lg==
+</properties>
+	</node_properties>
+</scheme>
