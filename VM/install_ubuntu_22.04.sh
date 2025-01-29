@@ -10,6 +10,7 @@ DOCKER_GPG=/etc/apt/keyrings/docker.gpg
 
 BIODEPOT=/home/$USERNAME/BioDepot-workflow-builder
 export DEBIAN_FRONTEND=noninteractive
+echo "package_name package_name/option select value" | sudo debconf-set-selections
 sudo apt-get -y update
 sudo apt-get install -y --no-install-recommends \
         curl \
@@ -77,11 +78,11 @@ arch=$(dpkg --print-architecture) \
          docker-ce-cli
  sudo pip3 install --user jsonpickle
  sudo rsync -av $BIODEPOT/widgets/ /widgets/ \
-  && sudo rsync -av $BIODEPOT/biodepot /biodepot/ \
+  && sudo rsync -av $BIODEPOT/biodepot/ /biodepot/ \
   && sudo rsync -av $BIODEPOT/VM/coreutils/ /coreutils/
 
  sudo apt-get install -y xorg 
- sudo cp -r $BIODEPOT/scripts/generate_setup.sh /usr/local/bin/generate_setup.sh
+ sudo cp  $BIODEPOT/scripts/generate_setup.sh /usr/local/bin/generate_setup.sh
  sudo chmod +x /usr/local/bin/generate_setup.sh
  sudo pip3 install -e /biodepot
  sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose \
@@ -89,9 +90,8 @@ arch=$(dpkg --print-architecture) \
  sudo sed -i 's/"Orange Canvas"/"Bwb"/' /orange3/Orange/canvas/config.py
  sudo rm -rf ~/.fluxbox
  sudo rm -rf ~/.config/biolab.si
- sudo cp -r $BIODEPOT/fluxbox_config ~/.fluxbox && sudo cp -r $BIODEPOT/user_config/* ~/. 
+ sudo rsync -av $BIODEPOT/VM/user_config/ ~/ 
 
-sudo cp $BIODEPOT/scripts/startBwb.sh /usr/local/bin/startBwb.sh
 sudo cp $BIODEPOT/scripts/startSingleBwb.sh /usr/local/bin/startSingleBwb.sh
 sudo cp $BIODEPOT/scripts/runDockerJob.sh /usr/local/bin/runDockerJob.sh
 sudo cp $BIODEPOT/scripts/startScheduler.sh /usr/local/bin/startScheduler.sh
@@ -122,8 +122,8 @@ sudo cp -r $BIODEPOT/VM/xorg.conf /etc/X11/xorg.conf
 sudo cp -r $BIODEPOT/VM/*.sh /usr/local/bin/
 sudo cp $BIODEPOT/VM/menu /root/.fluxbox/menu
 sudo cp /root/.fluxbox/bwb.svg /orange3/Orange/canvas/icons/orange-canvas.svg
-sudo cp -r ~/biolab.si ~/.config/
+#sudo cp -r ~/biolab.si ~/.config/
 #for the user
 sudo usermod -aG docker $USERNAME
-sudo chown -R $USERNAME:$USERNAME /biodepot /$BIODEPOT /orange3 /widgets /workflows /coreutils /orangePatches /icons 
+sudo chown -R $USERNAME:$USERNAME /biodepot /$BIODEPOT /orange3 /widgets /workflows /coreutils  /icons 
 sudo rsync -av /$BIODEPOT/VM/user_config/ /home/$USERNAME/ && chown -R $USERNAME:$USERNAME /home/$USERNAME
