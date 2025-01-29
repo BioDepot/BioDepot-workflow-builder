@@ -1,8 +1,13 @@
 #!/bin/bash
-#run this as root from /
+#cd /home/$USERNAME
+#git clone https://github.com/BioDepot/BioDepot-workflow-builder.git
+#Then run this script using sudo
+#sudo /home/$USERNAME/BioDepot-workflow-builder/VM/install_ubuntu_22.04.sh
 set -e
 USERNAME=ubuntu
 DOCKER_GPG=/etc/apt/keyrings/docker.gpg
+
+
 BIODEPOT=/home/$USERNAME/BioDepot-workflow-builder
 export DEBIAN_FRONTEND=noninteractive
 sudo apt-get -y update
@@ -43,9 +48,6 @@ sudo apt-get install -y --no-install-recommends \
         zlib1g-dev \
         zenity
 
-  #cd / &&  git clone https://github.com/BioDepot/$BIODEPOT.git 
-  #cp -r $BIODEPOT/orange3 /orange3
-  #cp -r $BIODEPOT/orangePatches /orangePatches
 sudo apt-get install -y \
         build-essential \
         python3-dev \
@@ -54,7 +56,7 @@ sudo apt-get install -y \
         pip==20.0.1 \
         setuptools \
         wheel 
-sudo  rsync -a  $BIODEPOT/VM/orange3/ /orange3/ && sudo rsync -a $BIODEPOT/orangePatches/ /orangePatches/
+sudo  rsync -av  $BIODEPOT/VM/orange3/ /orange3/
 sudo pip3 install -r /orange3/requirements-gui.txt \
          beautifulsoup4 \
          docker \
@@ -74,9 +76,9 @@ arch=$(dpkg --print-architecture) \
          docker-ce \
          docker-ce-cli
  sudo pip3 install --user jsonpickle
- sudo cp -r $BIODEPOT/widgets /widgets \
-  && sudo cp -r $BIODEPOT/biodepot /biodepot \
-  && sudo cp -r $BIODEPOT/VM/coreutils /coreutils
+ sudo rsync -av $BIODEPOT/widgets/ /widgets/ \
+  && sudo rsync -av $BIODEPOT/biodepot /biodepot/ \
+  && sudo rsync -av $BIODEPOT/VM/coreutils/ /coreutils/
 
  sudo apt-get install -y xorg 
  sudo cp -r $BIODEPOT/scripts/generate_setup.sh /usr/local/bin/generate_setup.sh
@@ -87,17 +89,7 @@ arch=$(dpkg --print-architecture) \
  sudo sed -i 's/"Orange Canvas"/"Bwb"/' /orange3/Orange/canvas/config.py
  sudo rm -rf ~/.fluxbox
  sudo rm -rf ~/.config/biolab.si
- sudo cp -r $BIODEPOT/fluxbox_config ~/.fluxbox \
- && cp -r $BIODEPOT/user_config/* ~/. \
- && cp /orangePatches/schemeedit.py /orange3/Orange/canvas/document/schemeedit.py \
- && cp /orangePatches/canvasmain.py /orange3/Orange/canvas/application/canvasmain.py \
- && cp /orangePatches/widgetsscheme.py /orange3/Orange/canvas/scheme/widgetsscheme.py \
- && cp /orangePatches/signalmanager.py /orange3/Orange/canvas/scheme/signalmanager.py \
- && cp /orangePatches/link.py /orange3/Orange/canvas/scheme/link.py \
- && cp /orangePatches/signals.py /orange3/Orange/widgets/utils/signals.py \
- && cp /orangePatches/linkitem.py /orange3/Orange/canvas/canvas/items/linkitem.py \
- && cp /orangePatches/__main__.py /orange3/Orange/canvas/__main__.py \
- && cp /orangePatches/discovery.py /orange3/Orange/canvas/registry/discovery.py 
+ sudo cp -r $BIODEPOT/fluxbox_config ~/.fluxbox && sudo cp -r $BIODEPOT/user_config/* ~/. 
 
 sudo cp $BIODEPOT/scripts/startBwb.sh /usr/local/bin/startBwb.sh
 sudo cp $BIODEPOT/scripts/startSingleBwb.sh /usr/local/bin/startSingleBwb.sh
@@ -135,9 +127,3 @@ sudo cp -r ~/biolab.si ~/.config/
 sudo usermod -aG docker $USERNAME
 sudo chown -R $USERNAME:$USERNAME /biodepot /$BIODEPOT /orange3 /widgets /workflows /coreutils /orangePatches /icons 
 sudo rsync -av /$BIODEPOT/VM/user_config/ /home/$USERNAME/ && chown -R $USERNAME:$USERNAME /home/$USERNAME
-
-
-#log out and login as $USERNAME 
-#supervisorctl -c ~/supervisor/supervisord.conf reread
-#supervisorctl -c ~/supervisor/supervisord.conf update
-#supervisorctl -c ~/supervisor/supervisord.conf start all

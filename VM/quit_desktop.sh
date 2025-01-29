@@ -40,6 +40,16 @@ if [[ -n "$FLUXBOX_XVFB_PID" ]]; then
     zenity --info --text="Terminating framebuffer"
     terminate_process "$FLUXBOX_XVFB_PID" "Xvfb"
     exit 0
+else
+    FLUXBOX_XVFB_PID=$(ps -u "$USER" -o pid,cmd | grep -E 'Xvfb ' | grep -v grep | awk '{print $1}')
+    if [[ -n "$FLUXBOX_XVFB_PID" ]]; then
+        pid_array=($FLUXBOX_XVFB_PID)
+        for pid in "${pid_array[@]}"; do
+            zenity --info --text="Terminating Xvfb process (PID: $pid)..."
+            terminate_process "$pid" "Xvfb"
+        done
+    	exit 0
+    fi
 fi
 
 # If  Xvfb is not running, check for an Xorg process
