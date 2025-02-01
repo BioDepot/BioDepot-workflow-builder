@@ -124,6 +124,8 @@ sudo cp $BIODEPOT/VM/menu /root/.fluxbox/menu
 sudo cp /root/.fluxbox/bwb.svg /orange3/Orange/canvas/icons/orange-canvas.svg
 #sudo cp -r ~/biolab.si ~/.config/
 #for the user
+sudo groupadd $USERNAME
+sudo usermod -aG docker $USERNAME
 sudo usermod -aG docker $USERNAME
 sudo chown -R $USERNAME:$USERNAME /biodepot /$BIODEPOT /orange3 /widgets /workflows /coreutils  /icons 
 sudo rsync -av /$BIODEPOT/VM/user_config/ /home/$USERNAME/ && chown -R $USERNAME:$USERNAME /home/$USERNAME
