@@ -19,6 +19,7 @@ from Orange.widgets import widget, gui, settings
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 from makeToolDockCategories import niceForm
 
 # TODO
@@ -47,7 +48,7 @@ from AnyQt.QtWidgets import (
 
 defaultIconFile = "/icons/default.png"
 def breakpoint(title=None, message=None):
-    QtGui.QMessageBox.warning(None,title,message)
+    QMessageBox.warning(None,title,message)
     return
 
 
@@ -71,8 +72,8 @@ class SaveWorkflowForm(QDialog):
         self.initialData = returnData.copy()
         if "start_dir" in self.initialData and self.initialData["start_dir"]:
             self.defaultDir = self.initialData["start_dir"]
-        self.browseIcon = QtGui.QIcon("/icons/bluefile.png")
-        self.colorIcon = QtGui.QIcon("/icons/colorWheel.png")
+        self.browseIcon = QIcon("/icons/bluefile.png")
+        self.colorIcon = QIcon("/icons/colorWheel.png")
         self.ledits = {}
         self.required = ["name", "dir"]
         super(SaveWorkflowForm, self).__init__(parent)
@@ -84,7 +85,7 @@ class SaveWorkflowForm(QDialog):
         if "name" in self.initialData and self.initialData["name"]:
             name_ledit.setText(self.initialData["name"])
         name_ledit.setStyleSheet(":disabled { color: #282828}")
-        name_label = QtGui.QLabel("Workflow name:")
+        name_label = QLabel("Workflow name:")
         name_box = QHBoxLayout()
         name_box.addWidget(name_label)
         name_box.addWidget(name_ledit)
@@ -97,7 +98,7 @@ class SaveWorkflowForm(QDialog):
         if "dir" in self.initialData and self.initialData["dir"]:
             dir_ledit.setText(self.initialData["dir"])
         dir_ledit.setStyleSheet(":disabled { color: #282828}")
-        dir_label = QtGui.QLabel("Workflow parent directory:")
+        dir_label = QLabel("Workflow parent directory:")
         dir_button = gui.button(
             None,
             self,
@@ -126,7 +127,7 @@ class SaveWorkflowForm(QDialog):
         else:
             icon_ledit.setText("")
         icon_ledit.setStyleSheet(":disabled { color: #282828}")
-        icon_label = QtGui.QLabel("Change workflow icon:")
+        icon_label = QLabel("Change workflow icon:")
         icon_button = gui.button(
             None,
             self,
@@ -151,7 +152,7 @@ class SaveWorkflowForm(QDialog):
         if "color" in self.initialData and self.initialData["color"]:
             color_ledit.setText(self.initialData["color"])
         color_ledit.setStyleSheet(":disabled { color: #282828}")
-        color_label = QtGui.QLabel("Change workflow color:")
+        color_label = QLabel("Change workflow color:")
         color_button = gui.button(
             None,
             self,
@@ -169,7 +170,7 @@ class SaveWorkflowForm(QDialog):
         color_box.addWidget(color_button)
 
         # checkboxes
-        self.merge_checkBox = QtGui.QCheckBox("Merge all widget types", self)
+        self.merge_checkBox = QCheckBox("Merge all widget types", self)
         self.merge_checkBox.stateChanged.connect(
             lambda: self.getCheckBoxState(self.merge_checkBox, "merge")
         )
@@ -183,7 +184,7 @@ class SaveWorkflowForm(QDialog):
         buttonbox.accepted.connect(self.checkFields)
         buttonbox.rejected.connect(self.cancel)
 
-        layout = QtGui.QGridLayout()
+        layout = QGridLayout()
         layout.addLayout(name_box, 1, 1, 1, 2)
         layout.addLayout(dir_box, 2, 1, 1, 2)
         layout.addLayout(color_box, 3, 1, 1, 2)
@@ -279,14 +280,14 @@ class tabbedWindow(QTabWidget):
         return scroll_area
 
     def getLeditLayout(self, box):
-        layout = QtGui.QGridLayout()
+        layout = QGridLayout()
         layout.setSpacing(5)
         setattr(layout, "nextRow", 1)
         box.layout().addLayout(layout)
         return layout
 
 
-class DragAndDropList(QtGui.QListWidget):
+class DragAndDropList(QtWidgets.QListWidget):
     # overloads the Drag and dropEvents to emit code
     itemMoved = pyqtSignal(int, int)  # Old index, new index, item
 
@@ -294,7 +295,7 @@ class DragAndDropList(QtGui.QListWidget):
         super(DragAndDropList, self).__init__(parent, **args)
         self.setAcceptDrops(True)
         self.setDragEnabled(True)
-        self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+        self.setDragDropMode(QAbstractItemView.InternalMove)
         self.drag_item = None
         self.drag_row = None
 
@@ -388,7 +389,7 @@ class OWWidgetBuilder(widget.OWWidget):
     data = {}
 
     def drawExec(self, layout=None):
-        self.saveMode = QtGui.QComboBox()
+        self.saveMode = QComboBox()
         self.saveMode.addItem("Overwrite")
         self.saveMode.addItem("Merge")
         self.saveMode.addItem("Data")
@@ -412,10 +413,10 @@ class OWWidgetBuilder(widget.OWWidget):
         self.renameBtn.setFixedSize(100, 20)
         # choose save mode
 
-        saveLabel = QtGui.QLabel("Save mode:")
+        saveLabel = QLabel("Save mode:")
         saveLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self.saveMode.setCurrentIndex(self.saveModeIndex)
-        box = QtGui.QHBoxLayout()
+        box = QHBoxLayout()
         box.addWidget(saveLabel)
         box.addWidget(self.saveMode)
         box.addWidget(self.saveWidgetBtn)
@@ -678,7 +679,7 @@ class OWWidgetBuilder(widget.OWWidget):
             self.saveWidgetAs()
             return
         self.pickleWidget()
-        qm = QtGui.QMessageBox
+        qm = QMessageBox
         title = "Save {}".format(self.widgetName)
         ret = qm.question(
             self,
@@ -693,7 +694,7 @@ class OWWidgetBuilder(widget.OWWidget):
         return
 
     def saveWidgetAs(self):
-        qm = QtGui.QMessageBox
+        qm = QMessageBox
         self.widgetName = self.getWidgetName()
         if not self.widgetName:
             return
@@ -877,11 +878,11 @@ class OWWidgetBuilder(widget.OWWidget):
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
         """
         # self.setStyleSheet(self.css)
-        self.browseIcon = QtGui.QIcon("/icons/bluefile.png")
-        self.addIcon = QtGui.QIcon("/icons/add.png")
-        self.removeIcon = QtGui.QIcon("/icons/remove.png")
-        self.submitIcon = QtGui.QIcon("/icons/submit.png")
-        self.reloadIcon = QtGui.QIcon("/icons/reload.png")
+        self.browseIcon = QIcon("/icons/bluefile.png")
+        self.addIcon = QIcon("/icons/add.png")
+        self.removeIcon = QIcon("/icons/remove.png")
+        self.submitIcon = QIcon("/icons/submit.png")
+        self.reloadIcon = QIcon("/icons/reload.png")
         self.outputWidget = ""
         self.defaultDir = self.getDefaultDir()
         self.widgetDir = None
@@ -891,7 +892,7 @@ class OWWidgetBuilder(widget.OWWidget):
         self.saveModeIndex = 0
         self.newFlag = False
         if widgetID == "__New":
-            qm = QtGui.QMessageBox
+            qm = QMessageBox
             ret = qm.question(self, "", "Create new widget?", qm.Yes | qm.No)
             if ret == qm.No:
                 raise ValueError("User cancelled")
@@ -972,7 +973,7 @@ class OWWidgetBuilder(widget.OWWidget):
         # requiredBox = gui.widgetBox(self.generalBox, "Widget entries")
         # draw Ledits for the frequired elements
         leditGeneralLayout = self.tabs.add("General")
-        self.nameLabel = QtGui.QLabel("Name: " + self.widgetName)
+        self.nameLabel = QLabel("Name: " + self.widgetName)
         leditGeneralLayout.addWidget(self.nameLabel, leditGeneralLayout.nextRow, 0)
         leditGeneralLayout.nextRow = leditGeneralLayout.nextRow + 1
         for pname in ["description", "docker_image_name", "docker_image_tag"]:
@@ -1192,14 +1193,14 @@ class OWWidgetBuilder(widget.OWWidget):
         # self.drawLedit('Add directory to Dockerfiles',layout=layout,addBrowseButton=True, fileType='Directory')
 
         # addDateCb=self.makeCheckBox ('addBuildDate','Add date to docker tag',default=True,persist=True,track=True)
-        # containerIDLabel=QtGui.QLabel('Container ID: {}'.format(self.containerID))
-        imageBuilderLabel = QtGui.QLabel("Launch Image Builder")
+        # containerIDLabel=QLabel('Container ID: {}'.format(self.containerID))
+        imageBuilderLabel = QLabel("Launch Image Builder")
         imageBuilderBtn = gui.button(
             None, self, "Launch", callback=self.startImageBuilder
         )
         imageBuilderBtn.setStyleSheet(self.css)
         imageBuilderBtn.setFixedSize(80, 20)
-        updateLabel = QtGui.QLabel("Clear Dockerfiles")
+        updateLabel = QLabel("Clear Dockerfiles")
         updateBtn = gui.button(None, self, "Clear", callback=self.clearDockerfiles)
         updateBtn.setStyleSheet(self.css)
         updateBtn.setFixedSize(80, 20)
@@ -1227,16 +1228,16 @@ class OWWidgetBuilder(widget.OWWidget):
         if src and os.path.isfile(src):
             dest = self.widgetDir + "/" + "Dockerfiles/" + os.path.basename(src)
             copyfile(src, dest)
-            qm = QtGui.QMessageBox
+            qm = QMessageBox
             title = "Added Dockerfile"
             message = "Added {}".format(src)
-            qm.information(self, title, message, QtGui.QMessageBox.Ok)
+            qm.information(self, title, message, QMessageBox.Ok)
             
     def replaceDockerDir(self,newDockerfiles):
         if newDockerfiles and os.path.isdir(newDockerfiles):
             currentDockerfiles = self.widgetDir + "/" + "Dockerfiles"
             if os.path.exists(currentDockerfiles):
-                qm = QtGui.QMessageBox
+                qm = QMessageBox
                 ret = qm.question(
                     self,
                     "Confirm delete",
@@ -1247,10 +1248,10 @@ class OWWidgetBuilder(widget.OWWidget):
                     return False
                 shutil.rmtree(currentDockerfiles)
             shutil.copytree(newDockerfiles, currentDockerfiles)
-            qm = QtGui.QMessageBox
+            qm = QMessageBox
             title = "Copied Dockerfiles"
             message = "Added Dockerfiles {}".format(newDockerfiles)
-            qm.information(self, title, message, QtGui.QMessageBox.Ok)
+            qm.information(self, title, message, QMessageBox.Ok)
         else:
             breakpoint(message="{} not found".format(newDockerfiles))
             
@@ -1261,7 +1262,7 @@ class OWWidgetBuilder(widget.OWWidget):
         if src and os.path.isdir(src):
             dest = self.widgetDir + "/" + "Dockerfiles/" + os.path.basename(src)
             if os.path.isdir(dest):
-                qm = QtGui.QMessageBox
+                qm = QMessageBox
                 ret = qm.question(
                     self,
                     "Confirm delete",
@@ -1272,10 +1273,10 @@ class OWWidgetBuilder(widget.OWWidget):
                     return
                 shutil.rmtree(dest)
             shutil.copytree(src, dest)
-            qm = QtGui.QMessageBox
+            qm = QMessageBox
             title = "Added Directory"
             message = "Added {}".format(src)
-            qm.information(self, title, message, QtGui.QMessageBox.Ok)
+            qm.information(self, title, message, QMessageBox.Ok)
 
     def startImageBuilder(self):
         dockerDir = self.widgetDir + "/" + "Dockerfiles"
@@ -1288,7 +1289,7 @@ class OWWidgetBuilder(widget.OWWidget):
         dockerDir = self.widgetDir + "/" + "Dockerfiles"
         if not os.listdir(dockerDir):
             return
-        qm = QtGui.QMessageBox
+        qm = QMessageBox
         ret = qm.question(
             self,
             "Confirm delete",
@@ -1300,16 +1301,16 @@ class OWWidgetBuilder(widget.OWWidget):
         os.system("cd {} && rm -rf * ".format(dockerDir))
         title = "Cleared docker files"
         message = "Cleared docker files"
-        qm.information(self, title, message, QtGui.QMessageBox.Ok)
+        qm.information(self, title, message, QMessageBox.Ok)
         return True
 
     def makeTextBox(self, attr, label):
         box = QHBoxLayout()
         textLabel = None
         if label:
-            textLabel = QtGui.QLabel(label)
+            textLabel = QLabel(label)
             textLabel.setAlignment(Qt.AlignTop)
-        textBox = QtGui.QPlainTextEdit()
+        textBox = QPlainTextEdit()
         textBox.setStyleSheet(":disabled { color: #282828}")
         setattr(box, "textBox", textBox)
         setattr(box, "label", textLabel)
@@ -1345,15 +1346,15 @@ class OWWidgetBuilder(widget.OWWidget):
         leditLabel = None
         checkBox = None
         if label:
-            leditLabel = QtGui.QLabel(label)
-        ledit = QtGui.QLineEdit(self)
+            leditLabel = QLabel(label)
+        ledit = QLineEdit(self)
         ledit.setClearButtonEnabled(True)
         ledit.setPlaceholderText(text)
         ledit.setStyleSheet(":disabled { color: #282828}")
         if not initialValue:
             ledit.clear()
         if addCheckBox:
-            checkBox = QtGui.QCheckBox(None, self)
+            checkBox = QCheckBox(None, self)
             checkBox.stateChanged.connect(lambda: self.updateCheckBox(checkBox, ledit))
             ledit.setEnabled(checkBox.isChecked())
         box = QHBoxLayout()
@@ -1448,8 +1449,8 @@ class OWWidgetBuilder(widget.OWWidget):
                 ledit.clear()
 
     def makeComboBox(self, pname, label, elements):
-        comboBoxLabel = QtGui.QLabel(label)
-        comboBox = QtGui.QComboBox()
+        comboBoxLabel = QLabel(label)
+        comboBox = QComboBox()
         comboBox.addItems(elements)
         comboBox.currentIndex = 0
         box = QHBoxLayout()
@@ -1538,7 +1539,7 @@ class OWWidgetBuilder(widget.OWWidget):
         # not used as part of other elements
         if attr not in self.data:
             self.data[attr] = default
-        checkBox = QtGui.QCheckBox(label, self)
+        checkBox = QCheckBox(label, self)
         setattr(
             checkBox, "getValue", lambda: checkBox.isEnabled() and checkBox.isChecked()
         )
@@ -1648,8 +1649,8 @@ class OWWidgetBuilder(widget.OWWidget):
         # make button box for buttons so that they don't expand in linelayout
         # setmaximumwidth seems to be ignored
         # need blank field and high columns to push the buttons to the right and keep their size
-        buttonBoxLabel = QtGui.QLabel("")
-        buttonBox = QtGui.QGridLayout()
+        buttonBoxLabel = QLabel("")
+        buttonBox = QGridLayout()
         buttonBox.addWidget(buttonBoxLabel, 0, 0, 1, 20)
         buttonBox.addWidget(addBtn, 0, 25)
         buttonBox.addWidget(removeBtn, 0, 26)
@@ -1660,11 +1661,11 @@ class OWWidgetBuilder(widget.OWWidget):
         # layout
         # basic layout is other widgets on top with filesBox below and the lineItem underneath
 
-        filesBoxLeditLayout = QtGui.QVBoxLayout()
+        filesBoxLeditLayout = QVBoxLayout()
         # add to the main parameters box
         myBox = gui.vBox(None)
         myBox.layout().addLayout(filesBoxLeditLayout)
-        # label=QtGui.QLabel(pname+':')
+        # label=QLabel(pname+':')
         # label.setAlignment(Qt.AlignTop)
         # layout.addWidget(label,layout.nextRow,0)
         # otherwidgets here
@@ -1676,7 +1677,7 @@ class OWWidgetBuilder(widget.OWWidget):
         layout.addWidget(myBox, layout.nextRow, 1, 1, 2)
         layout.nextRow = layout.nextRow + 1
         # input with line layout here
-        lineLayout = QtGui.QGridLayout()
+        lineLayout = QGridLayout()
         col = 0
         row = 1
         for item in lineWidgets:
@@ -1685,7 +1686,7 @@ class OWWidgetBuilder(widget.OWWidget):
             if col >= elementsPerLine:
                 row += 1
                 col = 0
-            if isinstance(layout, QtGui.QCheckBox):
+            if isinstance(layout, QCheckBox):
                 lineLayout.addWidget(layout, row, col)
             else:
                 lineLayout.addLayout(layout, row, col)

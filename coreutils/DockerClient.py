@@ -5,11 +5,22 @@ import subprocess
 from docker import APIClient
 from PyQt5.QtCore import QThread, pyqtSignal, QProcess, Qt
 from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 import datetime
 import uuid
 import time
+import shlex
 from pathlib import Path
 #runScheduler.sh ['b2b72d36270f4200a9e', '/tmp/docker.b2b72d36270f4200a9e.json', '8', '8096']
+def breakpoint(title=None, message=None):
+    warning_box = QMessageBox()
+    warning_box.setIcon(QMessageBox.Warning)
+    warning_box.setWindowTitle(title)
+    warning_box.setText(message)
+    warning_box.setStandardButtons(QMessageBox.Ok)
+    warning_box.exec_()
+    
 def detect_container():
     # Check for Docker-specific markers
     if (os.path.isfile("/.dockerenv")):
@@ -25,8 +36,6 @@ def detect_container():
         return True
     return False
 
-def breakpoint(title=None, message=None):
-    QtGui.QMessageBox.warning(title,'',message)
 class ConsoleProcess:
     #note that the logBaseDir is hard coded under /data/.bwb for now - this should be changed for whatever the primary volume mapping is
     # subclass that attaches a process and pipes the output to textedit widget console widget
@@ -54,6 +63,17 @@ class ConsoleProcess:
             self.log.readyReadStandardError.connect(
                 lambda: self.writeConsole(
                     self.log, console, self.log.readAllStandardError, Qt.red
+                )
+            )
+        if self.process:
+            self.process.readyReadStandardOutput.connect(
+                lambda: self.writeConsole(
+                    self.process, self.console, self.process.readAllStandardOutput, Qt.white
+                )
+            )
+            self.process.readyReadStandardError.connect(
+                lambda: self.writeConsole(
+                    self.process, self.console, self.process.readAllStandardError, Qt.red
                 )
             )        
         if finishHandler:
@@ -90,18 +110,24 @@ class ConsoleProcess:
         
     def addIterateSettings(self, settings):
         env = QtCore.QProcessEnvironment.systemEnvironment()
+        # Create a dict to store env vars for JSON return
+        env_json = {}
+        
         attrs = []
         groupSizes = []
         ramSizes = []
         maxThreads = 1
         sys.stderr.write("finished method init\n")
         nWorkers = 1
+        
         if "nWorkers" in settings:
             nWorkers = settings["nWorkers"]
         env.insert("NWORKERS", "{}".format(nWorkers))
+        env_json["NWORKERS"] = str(nWorkers)
 
         if "iteratedAttrs" not in settings or not settings["iteratedAttrs"]:
-            return
+            return env_json
+        
         sys.stderr.write("checking attrs in settings\n")
         for attr in settings["iteratedAttrs"]:
             sys.stderr.write("adding attr {}\n".format(attr))
@@ -129,12 +155,19 @@ class ConsoleProcess:
                 ramSizes.append(settings["data"][attr]["ram"])
             else:
                 ramSizes.append("0")
+            
         # need to add code to pass environment arrays to process
         if attrs:
             env.insert("ITERATEDATTRS", ":".join(attrs))
             env.insert("GROUPSIZES", ":".join(groupSizes))
             env.insert("RAMSIZES", ":".join(ramSizes))
+            # Add to JSON object
+            env_json["ITERATEDATTRS"] = ":".join(attrs)
+            env_json["GROUPSIZES"] = ":".join(groupSizes)
+            env_json["RAMSIZES"] = ":".join(ramSizes)
+        
         self.process.setProcessEnvironment(env)
+        return env_json
 
     def addServerSettings(self, settings):
         pass
@@ -156,7 +189,7 @@ class ConsoleProcess:
         if message:
             self.writeMessage(message)
             
-    def startLog(self,schedule=False,namespace=None):
+    def startLog(self,schedule=False,namespace=None,global_env=None):
         if schedule:
             self.scheduleLog(namespace)
             return
@@ -182,7 +215,7 @@ class ConsoleProcess:
         self.process.waitForFinished()
         self.scheduleLog(job_id)
         
-    def start(self,cmds,outputFile=None,schedule=False):
+    def start(self,cmds,outputFile=None,schedule=False,direct_json=None,global_env=None):
         self.cleanup()
         if schedule:
             sys.stderr.write('runScheduler.sh {}\n'.format(cmds))
@@ -190,11 +223,31 @@ class ConsoleProcess:
         else:
             os.makedirs(self.logDir,exist_ok=True)
             self.startLog()
-            cmds.insert(0,self.baseLogDir)
-            cmds.insert(0,self.processDir)
-            cmds.insert(0,outputFile)
-            self.writeMessage('runDockerJob.sh {}'.format(cmds))
-            self.process.start('runDockerJob.sh',cmds)
+            if direct_json:
+                console_json = json.dumps({
+                    "baseLogDir": self.baseLogDir,
+                    "processDir": self.processDir,
+                    "outputfile": outputFile,
+                    "NWORKERS": global_env["NWORKERS"]
+                })
+#                breakpoint("start", "starting start with direct_json={}".format(direct_json))
+#                breakpoint("start", "console_json={}".format(console_json))
+                runCommand = "runDirectJob.sh"
+                #make a dict out of direct_json and console_json
+                total_json = {
+                    "console_json": console_json,
+                    "direct_json": direct_json
+                }
+                #combine console_json and direct_json into a single json string
+                json_args = json.dumps(total_json)
+                self.writeMessage("runDirectJob.sh {}".format(json_args))
+                self.process.start(runCommand,[json_args])
+            else:
+                cmds.insert(0,self.baseLogDir)
+                cmds.insert(0,self.processDir)
+                cmds.insert(0,outputFile)
+                self.writeMessage('runDockerJob.sh {}'.format(cmds))
+                self.process.start('runDockerJob.sh',cmds)
         
     def onFinish(self,code,status):
         if self.startupOnly:
@@ -273,7 +326,10 @@ class DockerClient:
     def __init__(self, url, name):
         self.url = url
         self.name = name
-        self.cli = APIClient(base_url=url)
+        #self.cli = APIClient(base_url=url)
+        self.cli = None
+        if (url):
+            self.cli = APIClient(base_url=url)
         self.isContainer = detect_container()
         self.bwb_instance_id = None
         if(self.isContainer):   
@@ -428,7 +484,77 @@ class DockerClient:
             except IndexError:
                 return var
             return var
-    def create_container_iter(
+    
+    def build_jobs(self,commands, global_env=None):
+        """
+        Given a list of command strings, extract any environment variables specified
+        using the "-e key=value" syntax and return a JSON object representing a list
+        of jobs. Each job is a dict with two keys:
+        - "command": the bare command with the -e parts removed.
+        - "env": a dict of environment variable assignments.
+
+        Additionally, if a global_env dictionary is provided, its key/value pairs
+        will be merged into every job's environment dictionary. In case of conflicts,
+        the command-specific environment variables take precedence.
+
+        Example:
+        Input:
+            commands = ['echo "Hello" -e MY_VAR=some_value -e ANOTHER_VAR=another_value']
+            global_env = {'GLOBAL_VAR': 'global_value', 'MY_VAR': 'global_override'}
+        Output:
+            [
+                {
+                "command": "echo Hello",
+                "env": {
+                    "GLOBAL_VAR": "global_value",
+                    "MY_VAR": "some_value",         # command-specific value wins
+                    "ANOTHER_VAR": "another_value"
+                }
+                }
+            ]
+        """
+        jobs = []
+        for cmd in commands:
+            # Use shlex to properly split the command while respecting quotes.
+            tokens = shlex.split(cmd)
+            bare_tokens = []
+            env = {}
+            skip_next = False
+            for i, token in enumerate(tokens):
+                if skip_next:
+                    # This token was consumed as the value after "-e"
+                    skip_next = False
+                    continue
+                if token == '-e':
+                    # Expect the next token to be in the form key=value.
+                    if i + 1 < len(tokens):
+                        env_assignment = tokens[i + 1]
+                        if '=' in env_assignment:
+                            key, value = env_assignment.split('=', 1)
+                            env[key] = value
+                        else:
+                            print(f"Warning: Expected key=value after -e but got '{env_assignment}'")
+                        skip_next = True  # Skip the next token as it is part of -e.
+                    else:
+                        print("Warning: '-e' flag found at the end of the command with no assignment.")
+                else:
+                    bare_tokens.append(token)
+            # Rebuild the bare command as a string.
+            bare_cmd = ' '.join(bare_tokens)
+            
+            # Merge the global environment variables (if provided) with the extracted ones.
+            # Command-specific env vars override any conflicting keys from global_env.
+            if global_env:
+                #will always have NWORKERS in global_env - this ensures that the env in the json file is never empty
+                merged_env = dict(global_env)  # Start with the global environment.
+                merged_env.update(env)           # Override with the command-specific ones.
+            else:
+                merged_env = env
+
+            job = {"command": bare_cmd, "env": merged_env}
+            jobs.append(job)
+        return json.dumps(jobs)   
+    def direct_execute_iter(
         self,
         volumes=None,
         cmds=None,
@@ -437,6 +563,7 @@ class DockerClient:
         consoleProc=None,
         exportGraphics=False,
         useGpu=False,
+        useContainer=True,
         portMappings=None,
         testMode=False,
         logFile=None,
@@ -447,6 +574,88 @@ class DockerClient:
         runDockerMap=False,
         nextFlowMap=False
     ):
+    
+    # reset logFile when it is not None - can be "" though - this allows an active reset
+        if logFile is not None:
+            self.logFile = logFile
+        #build the global env dict
+        global_env = {}
+        for env, var in environment.items():
+            # strip whitespace
+            env.strip()
+            # strip quotes if present
+            if env[0] == env[-1] and env.startswith(("'", '"')):
+                env = env[1:-1]
+            global_env[env] = self.prettyEnv(var)
+        if iterate and iterateSettings:
+            sys.stderr.write("adding iterate settings\n")
+            console_envs=consoleProc.addIterateSettings(iterateSettings)
+            #add console_envs to global envs
+            global_env.update(console_envs)
+            sys.stderr.write("added iterate settings\n")
+        else:
+            global_env["NWORKERS"] = "1"
+        #call build_jobs
+        #breakpoint("build_jobs", "starting build_jobs with cmds={} and global_env={}".format(cmds, global_env))
+        jobs_json = self.build_jobs(cmds, global_env)
+        cmd_envs = [jobs_json]
+        if testMode:
+            baseCmd = ""
+            echoStr = ""
+            for cmd_env in cmd_envs:
+                #generate a bash command string where we pass each of the cmd_envs to the command
+                env_assignments = " ".join(["{}='{}'".format(key, value) for key, value in global_env.items()])
+                job = json.loads(cmd_env)
+                fullCmd = "{} {}".format(env_assignments, job["cmd"]).strip()
+                echoStr = echoStr + fullCmd + "\n"
+            print(echoStr)
+            # Do not test for logFile - this may be None if it is not the first widget in testMode
+            if self.logFile:
+                with open(self.logFile, "a") as f:
+                    f.write(echoStr)
+            consoleProc.startTest(echoStr)
+        else:
+            sys.stderr.write("starting runDirectJob.sh\n")
+            dockerCmds=[]
+            consoleProc.start(dockerCmds,outputFile=outputFile,direct_json=cmd_envs,global_env=global_env)
+    def create_container_iter(
+        self,
+        volumes=None,
+        cmds=None,
+        environment=None,
+        hostVolumes=None,
+        consoleProc=None,
+        exportGraphics=False,
+        useGpu=False,
+        useContainer=True,
+        portMappings=None,
+        testMode=False,
+        logFile=None,
+        outputFile=None,
+        scheduleSettings=None,
+        iterateSettings=None,
+        iterate=False,
+        runDockerMap=False,
+        nextFlowMap=False
+    ):
+        if not useContainer:
+            #pass to the direct_execute_iter function
+            return self.direct_execute_iter(
+                volumes=volumes,
+                cmds=cmds,
+                environment=environment,
+                hostVolumes=hostVolumes,
+                consoleProc=consoleProc,
+                exportGraphics=exportGraphics,
+                useGpu=useGpu,
+                portMappings=portMappings,
+                testMode=testMode,
+                logFile=logFile,
+                outputFile=outputFile,
+                scheduleSettings=scheduleSettings,
+                iterateSettings=iterateSettings,
+                iterate=iterate
+            )
         # reset logFile when it is not None - can be "" though - this allows an active reset
         if logFile is not None:
             self.logFile = logFile

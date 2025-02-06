@@ -19,38 +19,8 @@ from Orange.widgets import widget, gui, settings
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QProcess
-from PyQt5.QtWidgets import (
-    QInputDialog,
-    QLineEdit,
-    QMainWindow,
-    QApplication,
-    QPushButton,
-    QWidget,
-    QAction,
-    QTabWidget,
-    QVBoxLayout,
-    QMessageBox,
-)
-
-from AnyQt.QtWidgets import (
-    QWidget,
-    QButtonGroup,
-    QGroupBox,
-    QRadioButton,
-    QSlider,
-    QDoubleSpinBox,
-    QComboBox,
-    QSpinBox,
-    QListView,
-    QLabel,
-    QScrollArea,
-    QVBoxLayout,
-    QHBoxLayout,
-    QFormLayout,
-    QSizePolicy,
-    QApplication,
-    QCheckBox,
-)
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 
 class PullBuildProcess:
     def __init__(self,console,workflow,forceLoad,preferDockerfile,maxAttempts,finishHandler=None):
@@ -163,11 +133,11 @@ class BuildContainers(widget.OWWidget):
         """
         self.baseToolPath = "/biodepot"
         self.setStyleSheet(self.css)
-        self.browseIcon = QtGui.QIcon("/icons/bluefile.png")
-        self.addIcon = QtGui.QIcon("/icons/add.png")
-        self.removeIcon = QtGui.QIcon("/icons/remove.png")
-        self.submitIcon = QtGui.QIcon("/icons/submit.png")
-        self.reloadIcon = QtGui.QIcon("/icons/reload.png")
+        self.browseIcon = QIcon("/icons/bluefile.png")
+        self.addIcon = QIcon("/icons/add.png")
+        self.removeIcon = QIcon("/icons/remove.png")
+        self.submitIcon = QIcon("/icons/submit.png")
+        self.reloadIcon = QIcon("/icons/reload.png")
         self.controlArea.setMinimumWidth(500)
         self.controlArea.setMinimumHeight(120)
         self.startWidget()
@@ -183,8 +153,8 @@ class BuildContainers(widget.OWWidget):
 
     def startWidget(self):
         self.setWindowTitle("Load Containers")
-        self.grid = QtGui.QGridLayout()
-        self.execute_box=QtGui.QHBoxLayout()
+        self.grid = QGridLayout()
+        self.execute_box=QHBoxLayout()
         self.controlArea.layout().addLayout(self.grid)
         self.initCategories()
         self.drawLoadContainers()
@@ -234,7 +204,7 @@ class BuildContainers(widget.OWWidget):
         preferFilecb=gui.checkBox(None, self, "preferFile", label="Try building from Dockerfile first")
         self.grid.addWidget(preferFilecb, 4, 1)
         self.maxAttempts=1
-        maxAttemptsLabel = QtGui.QLabel("Max attempts at pulling image: ")
+        maxAttemptsLabel = QLabel("Max attempts at pulling image: ")
         self.maxAttemptsSpin = QtWidgets.QSpinBox(self)
         self.maxAttemptsSpin.setSuffix(' attempts')
         self.maxAttemptsSpin.setRange(1,10)
@@ -247,11 +217,11 @@ class BuildContainers(widget.OWWidget):
         self.stopBtn.setFixedSize(40, 20)
         self.stopBtn.setStyleSheet(self.css)
         self.stopBtn.setEnabled(False)
-        self.console = QtGui.QTextEdit()
+        self.console = QTextEdit()
         self.console.setReadOnly(True)
-        pal = QtGui.QPalette()
-        pal.setColor(QtGui.QPalette.Base, Qt.black)
-        pal.setColor(QtGui.QPalette.Text, Qt.green)
+        pal = QPalette()
+        pal.setColor(QPalette.Base, Qt.black)
+        pal.setColor(QPalette.Text, Qt.green)
         self.console.setPalette(pal)
         self.console.setAutoFillBackground(True)
         self.controlArea.layout().addWidget(self.console)
@@ -295,8 +265,8 @@ class BuildContainers(widget.OWWidget):
     ):
         leditLabel = None
         if label:
-            leditLabel = QtGui.QLabel(label)
-        ledit = QtGui.QLineEdit(self)
+            leditLabel = QLabel(label)
+        ledit = QLineEdit(self)
         ledit.setClearButtonEnabled(True)
         ledit.setPlaceholderText(text)
         ledit.setStyleSheet(":disabled { color: #282828}")
@@ -334,8 +304,8 @@ class BuildContainers(widget.OWWidget):
     def makeComboBox(
         self, layout, label, elements, startRow=1, startColumn=1, callback=None
     ):
-        comboBoxLabel = QtGui.QLabel(label)
-        comboBox = QtGui.QComboBox()
+        comboBoxLabel = QLabel(label)
+        comboBox = QComboBox()
         if elements:
             comboBox.addItems(elements)
         comboBox.currentIndex = 0

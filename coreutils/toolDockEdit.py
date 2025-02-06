@@ -20,39 +20,9 @@ from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import (
-    QInputDialog,
-    QLineEdit,
-    QMainWindow,
-    QApplication,
-    QPushButton,
-    QWidget,
-    QAction,
-    QTabWidget,
-    QVBoxLayout,
-    QMessageBox,
-)
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 
-
-from AnyQt.QtWidgets import (
-    QWidget,
-    QButtonGroup,
-    QGroupBox,
-    QRadioButton,
-    QSlider,
-    QDoubleSpinBox,
-    QComboBox,
-    QSpinBox,
-    QListView,
-    QLabel,
-    QScrollArea,
-    QVBoxLayout,
-    QHBoxLayout,
-    QFormLayout,
-    QSizePolicy,
-    QApplication,
-    QCheckBox,
-)
 from makeToolDockCategories import *
 
 defaultIconFile = "/icons/default.png"
@@ -113,11 +83,11 @@ class ToolDockEdit(widget.OWWidget):
         """
         self.baseToolPath = "/biodepot"
         self.setStyleSheet(self.css)
-        self.browseIcon = QtGui.QIcon("/icons/bluefile.png")
-        self.addIcon = QtGui.QIcon("/icons/add.png")
-        self.removeIcon = QtGui.QIcon("/icons/remove.png")
-        self.submitIcon = QtGui.QIcon("/icons/submit.png")
-        self.reloadIcon = QtGui.QIcon("/icons/reload.png")
+        self.browseIcon = QIcon("/icons/bluefile.png")
+        self.addIcon = QIcon("/icons/add.png")
+        self.removeIcon = QIcon("/icons/remove.png")
+        self.submitIcon = QIcon("/icons/submit.png")
+        self.reloadIcon = QIcon("/icons/reload.png")
         self.controlArea.setMinimumWidth(500)
         self.controlArea.setMinimumHeight(120)
         self.startWidget()
@@ -132,7 +102,7 @@ class ToolDockEdit(widget.OWWidget):
                     self.clearLayout(child.layout())
 
     def addWidgetToCategory(self, category, directory, widgetPath, confirmation=True):
-        qm = QtGui.QMessageBox
+        qm = QMessageBox
         widgetName = os.path.basename(widgetPath)
         destLink = "/biodepot/{}/OW{}.py".format(directory, widgetName)
         pythonFile = glob("{}/*.py".format(widgetPath))[0]
@@ -160,14 +130,14 @@ class ToolDockEdit(widget.OWWidget):
             widgetName = os.path.basename(widgetPath)
             title = "Add {}".format(widgetName)
             message = "Added {} to {} in ToolDock".format(widgetName, category)
-            qm.information(self, title, message, QtGui.QMessageBox.Ok)
+            qm.information(self, title, message, QMessageBox.Ok)
             self.canvas.reload_current()
         # except:
         # pass
 
     def startWidget(self):
         self.setWindowTitle("WidgetToolDock Editor")
-        self.grid = QtGui.QGridLayout()
+        self.grid = QGridLayout()
         self.controlArea.layout().addLayout(self.grid)
         self.initCategories()
         self.drawAddWidget()
@@ -291,7 +261,7 @@ class ToolDockEdit(widget.OWWidget):
         self.grid.addWidget(widgetRemoveBtn, 2, 6)
 
     def widgetRemove(self):
-        qm = QtGui.QMessageBox
+        qm = QMessageBox
         widgetName = self.getComboValue(self.RWwbox)
         category = self.getComboValue(self.RWcbox)
         categoryDir = self.categoryToDirectory[category]
@@ -301,7 +271,7 @@ class ToolDockEdit(widget.OWWidget):
                 self,
                 "Non-existent symlink",
                 "Symlink {} not found".format(symlink),
-                QtGui.QMessageBox.Ok,
+                QMessageBox.Ok,
             )
             return
         widgetPath = os.path.dirname(os.readlink(symlink))
@@ -315,7 +285,7 @@ class ToolDockEdit(widget.OWWidget):
                 self,
                 "Non-existent widget",
                 "Widget {} not found".format(widgetPath),
-                QtGui.QMessageBox.Ok,
+                QMessageBox.Ok,
             )
             return
         # check if any ows file that is in toolbox uses the widget and issue a warning if so
@@ -352,12 +322,12 @@ class ToolDockEdit(widget.OWWidget):
             self,
             "Successfully removed",
             "removed widget {} from {}".format(widgetPath, category),
-            QtGui.QMessageBox.Ok,
+            QMessageBox.Ok,
         )
         self.canvas.reload_current()
 
     def widgetRename(self, widgetName=None, category=None, newName=None):
-        qm = QtGui.QMessageBox
+        qm = QMessageBox
         document = self.canvas.current_document()
         while document.isModifiedStrict():
             ret = qm.question(
@@ -388,7 +358,7 @@ class ToolDockEdit(widget.OWWidget):
                 "",
                 "Non-existent symlink",
                 "Symlink {} not found".format(symlink),
-                QtGui.QMessageBox.Ok,
+                QMessageBox.Ok,
             )
             return
         widgetPath = os.path.dirname(os.path.realpath(symlink))
@@ -398,7 +368,7 @@ class ToolDockEdit(widget.OWWidget):
                 self,
                 "",
                 "widget {} already exists".format(newWidgetPath),
-                QtGui.QMessageBox.Ok,
+                QMessageBox.Ok,
             )
             return
         if not os.path.exists(widgetPath):
@@ -406,7 +376,7 @@ class ToolDockEdit(widget.OWWidget):
                 self,
                 "Non-existent widget",
                 "Widget {} not found".format(widgetPath),
-                QtGui.QMessageBox.Ok,
+                QMessageBox.Ok,
             )
             return
         # check if any ows file that is in toolbox uses the widget and issue a warning if so
@@ -440,7 +410,7 @@ class ToolDockEdit(widget.OWWidget):
             self,
             "Successfully renamed",
             "renamed widget {} to {}".format(widgetName, newName),
-            QtGui.QMessageBox.Ok,
+            QMessageBox.Ok,
         )
         self.canvas.reload_current()
 
@@ -484,7 +454,7 @@ class ToolDockEdit(widget.OWWidget):
         self.grid.addWidget(catRemoveBtn, 4, 3)
 
     def categoryAdd(self, nameLedit, iconLedit):
-        qm = QtGui.QMessageBox
+        qm = QMessageBox
         category = self.getLeditValue(nameLedit)
         if not category:
             return
@@ -493,7 +463,7 @@ class ToolDockEdit(widget.OWWidget):
                 self,
                 "Add drawer",
                 "Drawer {} already in ToolDock".format(category),
-                QtGui.QMessageBox.Ok,
+                QMessageBox.Ok,
             )
             return
         iconFile = self.getLeditValue(iconLedit)
@@ -503,13 +473,13 @@ class ToolDockEdit(widget.OWWidget):
             self,
             "Add drawer",
             "Added drawer {} to directory {} in ToolDock".format(category, directory),
-            QtGui.QMessageBox.Ok,
+            QMessageBox.Ok,
         )
         self.updateCategories()
         self.canvas.reload_current()
 
     def categoryRemove(self, nameCombo):
-        qm = QtGui.QMessageBox
+        qm = QMessageBox
         category = self.getComboValue(nameCombo)
         if not category:
             return
@@ -519,7 +489,7 @@ class ToolDockEdit(widget.OWWidget):
                 self,
                 "Remove drawer",
                 "Drawer {} not in ToolDock".format(category),
-                QtGui.QMessageBox.Ok,
+                QMessageBox.Ok,
             )
             return
         ret = qm.question(
@@ -566,8 +536,8 @@ class ToolDockEdit(widget.OWWidget):
     ):
         leditLabel = None
         if label:
-            leditLabel = QtGui.QLabel(label)
-        ledit = QtGui.QLineEdit(self)
+            leditLabel = QLabel(label)
+        ledit = QLineEdit(self)
         ledit.setClearButtonEnabled(True)
         ledit.setPlaceholderText(text)
         ledit.setStyleSheet(":disabled { color: #282828}")
@@ -605,8 +575,8 @@ class ToolDockEdit(widget.OWWidget):
     def makeComboBox(
         self, layout, label, elements, startRow=1, startColumn=1, callback=None
     ):
-        comboBoxLabel = QtGui.QLabel(label)
-        comboBox = QtGui.QComboBox()
+        comboBoxLabel = QLabel(label)
+        comboBox = QComboBox()
         if elements:
             comboBox.addItems(elements)
         comboBox.currentIndex = 0

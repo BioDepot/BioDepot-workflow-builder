@@ -1,5 +1,4 @@
-import os
-import re
+import os, re
 import sys
 import logging
 import jsonpickle
@@ -44,7 +43,7 @@ from AnyQt.QtWidgets import (
 
 
 def breakpoint(title=None, message=None):
-    QtGui.QMessageBox.warning(title,'',message)
+    QMessageBox.warning(title,'',message)
 
 
 def getJsonName(filename, widgetName):
@@ -78,7 +77,7 @@ class ScrollMessageBox(QMessageBox):
             self.setStyleSheet("QScrollArea{min-width:50 px;}")
 
 
-class DragAndDropList(QtGui.QListWidget):
+class DragAndDropList(QtWidgets.QListWidget):
     # overloads the Drag and dropEvents to emit code
     itemMoved = pyqtSignal(int, int)  # Old index, new index, item
 
@@ -86,7 +85,7 @@ class DragAndDropList(QtGui.QListWidget):
         super(DragAndDropList, self).__init__(parent, **args)
         self.setAcceptDrops(True)
         self.setDragEnabled(True)
-        self.setDragDropMode(QtGui.QAbstractItemView.InternalMove)
+        self.setDragDropMode(QAbstractItemView.InternalMove)
         self.drag_item = None
         self.drag_row = None
 
@@ -159,7 +158,7 @@ class BwbGridLayout:
         QPushButton:hover:pressed { background-color: #1588c5; color: black; border-style: inset; border: 1px solid white} 
         QPushButton:disabled { background-color: lightGray; border: 1px solid gray; } 
         """
-        self._layout = QtGui.QGridLayout()
+        self._layout = QGridLayout()
         self._layout.setSpacing(spacing)
         self.nextCol = startCol
         self.nextRow = startRow
@@ -371,20 +370,27 @@ class ConnectionDict:
 
 class OWBwBWidget(widget.OWWidget):
     serversFile = "/biodepot/serverSettings.json"
-    dockerClient = DockerClient("unix:///var/run/docker.sock", "local")
-    defaultFileIcon = QtGui.QIcon("/icons/bluefile.png")
-    browseIcon = QtGui.QIcon("/icons/bluefile.png")
-    addIcon = QtGui.QIcon("/icons/add.png")
-    removeIcon = QtGui.QIcon("/icons/remove.png")
-    submitIcon = QtGui.QIcon("/icons/submit.png")
-    reloadIcon = QtGui.QIcon("icons/reload.png")
+    defaultFileIcon = QIcon("/icons/bluefile.png")
+    browseIcon = QIcon("/icons/bluefile.png")
+    addIcon = QIcon("/icons/add.png")
+    removeIcon = QIcon("/icons/remove.png")
+    submitIcon = QIcon("/icons/submit.png")
+    reloadIcon = QIcon("icons/reload.png")
     useScheduler = settings.Setting(False, schema_only=True)
     pset = functools.partial(settings.Setting, schema_only=True)
     nWorkers = pset(1)
     iterateSettings = pset({})
     iterate = pset(False)
     useGpu = pset(False)
-    repeat = pset(False)    
+    useContainer = pset(True)
+    repeat = pset(False)
+    if useContainer:
+        try:    
+            dockerClient = DockerClient("unix:///var/run/docker.sock", "local")
+        except Exception as e:
+            dockerClient = DockerClient(None, "local")
+            useContainer = False
+    
     # Initialization
     def __init__(self, image_name, image_tag):
         super().__init__()
@@ -429,10 +435,10 @@ class OWBwBWidget(widget.OWWidget):
 
         # drawing layouts for gui
         # file directory
-        self.filesBoxLayout = QtGui.QVBoxLayout()
+        self.filesBoxLayout = QVBoxLayout()
         self.fileDirRequiredLayout = BwbGridLayout()
         self.fileDirOptionalLayout = BwbGridLayout()
-        self.fileDirScheduleLayout = QtGui.QGridLayout()
+        self.fileDirScheduleLayout = QGridLayout()
         # lineEdits
         self.leditRequiredLayout = BwbGridLayout()
         self.leditOptionalLayout = BwbGridLayout()
@@ -537,15 +543,15 @@ class OWBwBWidget(widget.OWWidget):
         self.consoleBox.layout().addLayout(consoleControlLayout.layout())
         setattr(consoleControlLayout, "added", True)
         self.drawConsoleControl(box=self.consoleBox, layout=consoleControlLayout)
-        self.console = QtGui.QTextEdit()
+        self.console = QTextEdit()
         self.console.setReadOnly(True)
-        pal = QtGui.QPalette()
-        pal.setColor(QtGui.QPalette.Base, Qt.black)
-        pal.setColor(QtGui.QPalette.Text, Qt.green)
+        pal = QPalette()
+        pal.setColor(QPalette.Base, Qt.black)
+        pal.setColor(QPalette.Text, Qt.green)
         self.console.setPalette(pal)
         self.console.setAutoFillBackground(True)
         self.consoleBox.layout().addWidget(self.console)
-        controlBox = QtGui.QVBoxLayout()
+        controlBox = QVBoxLayout()
         self.pConsole = ConsoleProcess(
             console=self.console, finishHandler=self.onRunFinished
         )
@@ -554,7 +560,7 @@ class OWBwBWidget(widget.OWWidget):
 
     def drawConsoleControl(self, box=None, layout=None):
 
-        layout.addWidget(QtGui.QLabel("Console: "))
+        layout.addWidget(QLabel("Console: "))
         pname = "saveLog"
         pvalue = {"type": "directory", "label": "AutoLog"}
         if not hasattr(self, pname):
@@ -568,7 +574,7 @@ class OWBwBWidget(widget.OWWidget):
         self.btnConsoleSave = gui.button(None, self, "Save", callback=self.saveConsole)
         self.btnConsoleSave.setStyleSheet(self.css)
         self.btnConsoleSave.setFixedSize(60, 20)
-        self.cboThreadNumber = QtGui.QComboBox()
+        self.cboThreadNumber = QComboBox()
         self.cboThreadNumber.setMaximumWidth(100)
         self.cboThreadNumberPopulate()
         self.displayThread=self.cboThreadNumber.currentIndex()
@@ -837,15 +843,15 @@ class OWBwBWidget(widget.OWWidget):
             self.IPs = ["127.0.0.1"]
         self.schedulers = ["Default", "GKE", "AWS batch", "AWS lambda"]
 
-        threadBox = QtGui.QHBoxLayout()
-        scheduleBox = QtGui.QHBoxLayout()
+        threadBox = QHBoxLayout()
+        scheduleBox = QHBoxLayout()
 
         # have to wait until the OWxxx.py instance loads data from json before finding iterables - so don't move
 
         self.IPMenuItems = {}
         self.schedulerMenuItems = {}
-        self.IPMenu = QtGui.QMenu(self)
-        self.IPBtn = QtGui.QToolButton(self)
+        self.IPMenu = QMenu(self)
+        self.IPBtn = QToolButton(self)
         self.IPBtn.setText("Servers")
         for attr in self.IPs:
             action = self.IPMenu.addAction(attr)
@@ -854,17 +860,17 @@ class OWBwBWidget(widget.OWWidget):
             action.changed.connect(self.chooseIP)
             self.IPMenuItems[action] = attr
         self.IPBtn.setMenu(self.IPMenu)
-        self.IPBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
+        self.IPBtn.setPopupMode(QToolButton.InstantPopup)
 
         schedulerBox = QHBoxLayout()
-        self.schedulerLabel = QtGui.QLabel("Scheduler")
-        self.schedulerComboBox = QtGui.QComboBox()
+        self.schedulerLabel = QLabel("Scheduler")
+        self.schedulerComboBox = QComboBox()
         self.schedulerComboBox.addItems(self.schedulers)
         self.schedulerComboBox.currentIndex = 0
         schedulerBox.addWidget(self.schedulerLabel)
         schedulerBox.addWidget(self.schedulerComboBox)
 
-        cbLabel = QtGui.QLabel("Number of workers: ")
+        cbLabel = QLabel("Number of workers: ")
         if not hasattr(self, "nWorkers"):
             self.nWorkers = 1
         self.threadSpin = QSpinBox()
@@ -895,7 +901,7 @@ class OWBwBWidget(widget.OWWidget):
             iterateCheckbox.stateChanged.connect(
                 self.cboThreadNumberPopulate
             )
-            iterateBox = QtGui.QHBoxLayout()
+            iterateBox = QHBoxLayout()
             iterateBox.addWidget(iterateCheckbox)
             iterateBox.addWidget(self.iterateSettingsBtn)
             iterateBox.addStretch(1)
@@ -1129,9 +1135,9 @@ class OWBwBWidget(widget.OWWidget):
             checkbox.stateChanged.connect(
                 lambda: findFileCB.setEnabled(checkbox.isChecked())
             )
-        patternLabel = QtGui.QLabel("Pattern")
+        patternLabel = QLabel("Pattern")
         if pvalue["label"]:
-            patternLabel = QtGui.QLabel(pvalue["label"] + " pattern")
+            patternLabel = QLabel(pvalue["label"] + " pattern")
         patternLedit = gui.lineEdit(None, self, patternAttr, disabled=addCheckbox)
         patternLedit.setClearButtonEnabled(True)
         patternLedit.setPlaceholderText("Enter search pattern eg. **/*.fq")
@@ -1792,15 +1798,15 @@ class OWBwBWidget(widget.OWWidget):
         boxEdit.itemMoved.connect(lambda: self.updateBoxEditValue(pname, boxEdit))
 
         # layout section
-        filesBoxLeditLayout = QtGui.QVBoxLayout()
+        filesBoxLeditLayout = QVBoxLayout()
         # add to the main parameters box
         myBox = gui.vBox(None)
         myBox.layout().addLayout(filesBoxLeditLayout)
         startCol = 0
         if "label" in pvalue and pvalue["label"]:
-            label = QtGui.QLabel(pvalue["label"] + ":")
+            label = QLabel(pvalue["label"] + ":")
         else:
-            label = QtGui.QLabel(" ")
+            label = QLabel(" ")
         label.setAlignment(Qt.AlignTop)
         if checkbox:
             layout.addWidget(checkbox)
@@ -1895,27 +1901,32 @@ class OWBwBWidget(widget.OWWidget):
             self.triggerReady[attr] = False
         
         # initialize the exec state
-        self.execLayout = QtGui.QGridLayout()
+        self.execLayout = QGridLayout()
         self.execLayout.setSpacing(5)
 
         
-        self.repeatMode = QtGui.QCheckBox("Repeat", self)
+        self.repeatMode = QCheckBox("Repeat", self)
         self.repeatMode.setChecked(self.repeat)
         self.repeatMode.stateChanged.connect(self.repeatModeChange)
 
-        self.graphicsMode = QtGui.QCheckBox("Export graphics", self)
+        self.graphicsMode = QCheckBox("Export graphics", self)
         self.graphicsMode.setChecked(self.exportGraphics)
         self.graphicsMode.stateChanged.connect(self.graphicsModeChange)
 
-        self.gpuMode = QtGui.QCheckBox("Use gpu", self)
+        #container mode - if checked then no container
+        self.containerMode = QCheckBox("No container", self)
+        self.containerMode.setChecked(not self.useContainer)
+        self.containerMode.stateChanged.connect(self.containerModeChange)
+ 
+        self.gpuMode = QCheckBox("Use gpu", self)
         self.gpuMode.setChecked(self.useGpu)
         self.gpuMode.stateChanged.connect(self.gpuModeChange)
         
-        self.testMode = QtGui.QCheckBox("Test mode", self)
+        self.testMode = QCheckBox("Test mode", self)
         self.testMode.setChecked(self.useTestMode)
         self.testMode.stateChanged.connect(self.testModeChange)
 
-        self.cboRunMode = QtGui.QComboBox()
+        self.cboRunMode = QComboBox()
         self.cboRunMode.addItem("Manual")
         self.cboRunMode.addItem("Automatic")
         if self.candidateTriggers:
@@ -1924,9 +1935,9 @@ class OWBwBWidget(widget.OWWidget):
             self.runMode = 0
         self.cboRunMode.setCurrentIndex(self.runMode)
         if self.candidateTriggers:
-            self.execBtn = QtGui.QToolButton(self)
+            self.execBtn = QToolButton(self)
             self.execBtn.setText("Select Triggers")
-            self.execMenu = QtGui.QMenu(self)
+            self.execMenu = QMenu(self)
             self.triggerMenu = {}
             for attr in self.candidateTriggers:
                 action = self.execMenu.addAction(attr)
@@ -1935,13 +1946,13 @@ class OWBwBWidget(widget.OWWidget):
                 action.changed.connect(self.chooseTrigger)
                 self.triggerMenu[action] = attr
             self.execBtn.setMenu(self.execMenu)
-            self.execBtn.setPopupMode(QtGui.QToolButton.InstantPopup)
+            self.execBtn.setPopupMode(QToolButton.InstantPopup)
             if self.runMode == 2:
                 self.execBtn.setEnabled(True)
             else:
                 self.execBtn.setEnabled(False)
         self.cboRunMode.currentIndexChanged.connect(self.runModeChange)
-        myLabel = QtGui.QLabel("RunMode:")
+        myLabel = QLabel("RunMode:")
         myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         myLabel.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
         self.btnRun = gui.button(
@@ -1960,11 +1971,12 @@ class OWBwBWidget(widget.OWWidget):
         self.execLayout.addWidget(self.graphicsMode, 1, 3)
         self.execLayout.addWidget(self.testMode, 1, 4)
         self.execLayout.addWidget(self.repeatMode, 1, 5)
+        self.execLayout.addWidget(self.containerMode, 1, 6)
         # self.execLayout.addWidget(self.dockerMode,1,3)
-        self.execLayout.addWidget(myLabel, 1, 6)
-        self.execLayout.addWidget(self.cboRunMode, 1, 7)
+        self.execLayout.addWidget(myLabel, 1, 7)
+        self.execLayout.addWidget(self.cboRunMode, 1, 8)
         if self.candidateTriggers:
-            self.execLayout.addWidget(self.execBtn, 1, 8)
+            self.execLayout.addWidget(self.execBtn, 1, 9)
         box.layout().addLayout(self.execLayout)
 
     def testModeChange(self):
@@ -1981,7 +1993,17 @@ class OWBwBWidget(widget.OWWidget):
                
     def gpuModeChange(self):
         self.useGpu = self.gpuMode.isChecked()
-        
+    
+    def containerModeChange(self):
+        self.useContainer = not self.containerMode.isChecked()
+        if self.useContainer:
+            try:
+                self.dockerClient = DockerClient("unix:///var/run/docker.sock", "local")
+            except Exception as e:
+                self.dockerClient = DockerClient(None, "local")
+                self.containerMode.setChecked(True)
+                    
+            
     def runModeChange(self):
         self.runMode = self.cboRunMode.currentIndex()
         if self.candidateTriggers:
@@ -2077,7 +2099,7 @@ class OWBwBWidget(widget.OWWidget):
         if label:
             # myLabel=QtGui.QLabel(label)
             # myLabel.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-            layout.addWidget(QtGui.QLabel(label))
+            layout.addWidget(QLabel(label))
         layout.addWidget(ledit)
         layout.addWidget(button)
         if not hasattr(layout, "added") or not getattr(layout, "added"):
@@ -2090,9 +2112,9 @@ class OWBwBWidget(widget.OWWidget):
         ledit.setPlaceholderText("Enter parameter")
         if checkbox:
             layout.addWidget(checkbox)
-            layout.addWidget(QtGui.QLabel(label))
+            layout.addWidget(QLabel(label))
         else:
-            layout.addWidget(QtGui.QLabel(label), space=1)
+            layout.addWidget(QLabel(label), space=1)
         layout.addWidget(ledit)
         if not hasattr(layout, "added") or not getattr(layout, "added"):
             widget.layout().addLayout(layout.layout())
@@ -2343,9 +2365,16 @@ class OWBwBWidget(widget.OWWidget):
         self.varOutputFile=self.varOutputDir+"/output"
         os.system("rm -f {}".format(self.varOutputFile))
         if self.iterate:
-            cmds = self.findIteratedFlags(imageName,cmd)
+            if self.useContainer:
+                cmds = self.findIteratedFlags(imageName,cmd)
+            else:
+                cmds = self.findIteratedFlags("",cmd)
         else:
-            cmds = [imageName+cmd]
+            if self.useContainer:
+                cmds = [imageName+cmd]
+            else:
+                cmds = [cmd]
+
         # generate cmds here
         self.status = "running"
         self.setStatusMessage("Running...")
@@ -2365,6 +2394,7 @@ class OWBwBWidget(widget.OWWidget):
                 consoleProc=self.pConsole,
                 exportGraphics=self.exportGraphics,
                 useGpu=self.useGpu,
+                useContainer=self.useContainer,
                 portMappings=self.portMappings(),
                 testMode=self.useTestMode,
                 logFile=self.saveBashFile,
@@ -2380,6 +2410,7 @@ class OWBwBWidget(widget.OWWidget):
                 consoleProc=self.pConsole,
                 exportGraphics=self.exportGraphics,
                 useGpu=self.useGpu,
+                useContainer=self.useContainer,
                 portMappings=self.portMappings(),
                 testMode=self.useTestMode,
                 logFile=self.saveBashFile,
@@ -2924,7 +2955,7 @@ class OWBwBWidget(widget.OWWidget):
                     self.envVars[e] = self.data["env"][e]
 
     def exportWorkflow(self,widgetName="chosen widget"):
-        qm = QtGui.QMessageBox
+        qm = QMessageBox
         ret = qm.question(
                 self, "Export?", "Export workflow starting from {}?".format(widgetName), qm.Yes | qm.No
             )
@@ -2944,7 +2975,7 @@ class OWBwBWidget(widget.OWWidget):
                     f.write("#!/bin/bash\n")
                 self.useTestMode=True
                 self.startJob()
-                mb = QtGui.QMessageBox
+                mb = QMessageBox
                 ret  = mb.information(self,"Export to workflow to script","Saved workflow to {}".format(self.saveBashFile))
                 self.useTestMode=False
                 sleep(10)
@@ -2972,7 +3003,7 @@ class OWBwBWidget(widget.OWWidget):
     # Event handlers
     def onRunClicked(self, button=None):
         if button and self.useTestMode:
-            qm = QtGui.QMessageBox
+            qm = QMessageBox
             ret = qm.question(
                 self, "Test Run?", "Run without generating results?", qm.Yes | qm.No
             )

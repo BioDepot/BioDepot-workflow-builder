@@ -23,27 +23,7 @@ from Orange.widgets import widget, gui, settings
 from DockerClient import DockerClient, PullImageThread, ConsoleProcess
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QStandardItemModel, QTableView, QDropEvent
-
-from AnyQt.QtWidgets import (
-    QWidget,
-    QButtonGroup,
-    QGroupBox,
-    QRadioButton,
-    QSlider,
-    QDoubleSpinBox,
-    QComboBox,
-    QSpinBox,
-    QListView,
-    QLabel,
-    QScrollArea,
-    QVBoxLayout,
-    QHBoxLayout,
-    QFormLayout,
-    QSizePolicy,
-    QApplication,
-    QCheckBox,
-)
+from PyQt5.QtGui import  *
 
 defaultIconFile = "/icons/default.png"
 
@@ -68,10 +48,10 @@ class IterateDialog(QDialog):
         self.table.setColumnCount(nCols)
         for col in range(nCols - 1):
             self.table.horizontalHeader().setResizeMode(
-                col, QtGui.QHeaderView.ResizeToContents
+                col, QHeaderView.ResizeToContents
             )
         self.table.horizontalHeader().setResizeMode(
-            nCols - 1, QtGui.QHeaderView.Stretch
+            nCols - 1, QHeaderView.Stretch
         )
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(
@@ -251,11 +231,11 @@ class IterateDialog(QDialog):
             self.iterateSettings = self.settingsCopy
             title = "Save settings"
             message = "Settings successfully saved"
-            ret = QtGui.QMessageBox.information(
-                self, title, message, QtGui.QMessageBox.Ok
+            ret = QMessageBox.information(
+                self, title, message, QMessageBox.Ok
             )
         except Exception as e:
-            warning = QtGui.QMessageBox.warning(
+            warning = QMessageBox.warning(
                 None, "", "Settings not saved - error: {}\n".format(str(e))
             )
 
@@ -279,17 +259,17 @@ class ServerDialog(QDialog):
         self.serverSettings = serverSettings
         self.setWindowTitle("Edit server settings")
         self.settingsFile = "/biodepot/serverSettings.json"
-        self.addIcon = QtGui.QIcon("/icons/add.png")
-        self.removeIcon = QtGui.QIcon("/icons/remove.png")
+        self.addIcon = QIcon("/icons/add.png")
+        self.removeIcon = QIcon("/icons/remove.png")
         self.table = TableWidgetDragRows()
         self.table.setColumnCount(3)
         self.table.horizontalHeader().setResizeMode(
-            0, QtGui.QHeaderView.ResizeToContents
+            0, QHeaderView.ResizeToContents
         )
         self.table.horizontalHeader().setResizeMode(
-            1, QtGui.QHeaderView.ResizeToContents
+            1, QHeaderView.ResizeToContents
         )
-        self.table.horizontalHeader().setResizeMode(2, QtGui.QHeaderView.Stretch)
+        self.table.horizontalHeader().setResizeMode(2, QHeaderView.Stretch)
         self.table.horizontalHeader().setStretchLastSection(True)
         self.table.setHorizontalHeaderLabels(["Server IP", "Threads", "Volume map"])
         # start with blank slate - and keep temp copy of serverSettings
@@ -456,7 +436,7 @@ class ServerDialog(QDialog):
                     }
             return True
         else:
-            ret = QtGui.QMessageBox.warning(
+            ret = QMessageBox.warning(
                 None, "", "Unable to detect valid json or tsv servers file"
             )
             return False
@@ -469,11 +449,11 @@ class ServerDialog(QDialog):
                 f.write(jsonpickle.encode(self.serverSettings))
             title = "Save settings"
             message = "Settings successfully saved"
-            ret = QtGui.QMessageBox.information(
-                self, title, message, QtGui.QMessageBox.Ok
+            ret = QMessageBox.information(
+                self, title, message, QMessageBox.Ok
             )
         except Exception as e:
-            warning = QtGui.QMessageBox.warning(
+            warning = QMessageBox.warning(
                 None, "", "Settings not saved - error: {}\n".format(str(e))
             )
 
@@ -522,7 +502,7 @@ class ServerDialog(QDialog):
         ):
             saveJson = True
         elif extension is not ".tsv":
-            qm = QtGui.QMessageBox
+            qm = QMessageBox
             title = "Which save format"
             ret = qm.question(
                 self, title, "Can save as tsv or json. Save as json?", qm.Yes | qm.No
