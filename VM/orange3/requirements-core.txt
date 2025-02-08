@@ -1,5 +1,5 @@
-numpy>=1.22.0
-setuptools==65.5.1
+numpy>=1.26.6
+setuptools>=65.5.1
 pip>=9.0
 scipy>=0.16.1
 scikit-learn>=0.18.1
