@@ -1,0 +1,14 @@
+[startup] {feh  --bg-scale '/home/ubuntu/.fluxbox/bg.png'}
+[startup] {/usr/local/bin/startSingleBwb.sh}
+[startup] {dbus-launch nemo}
+[app] (name=fbrun)
+  [Position]	(CENTER)	{0 0}
+  [Layer]	{2}
+[end]
+
+#positioning also affects the windows that Bwb pops up so disable for now
+#[app] (name=orange-canvas) (class=Bwb)
+#  [Position]	(UPPERLEFT)	{28% 0%}
+#  [Dimensions] {60% 75%}
+#  [Minimized] {TRUE}  
+[end]

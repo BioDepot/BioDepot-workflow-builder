@@ -1,0 +1,49 @@
+2024-11-13 23:45:08,120 WARN No file matches via include "/home/ubuntu/supervisor/conf.d/*.conf"
+2024-11-13 23:45:08,125 INFO RPC interface 'supervisor' initialized
+2024-11-13 23:45:08,125 CRIT Server 'unix_http_server' running without any HTTP authentication checking
+2024-11-13 23:45:08,126 INFO daemonizing the supervisord process
+2024-11-13 23:45:08,126 INFO supervisord started with pid 31414
+2024-11-13 23:52:26,617 INFO spawned: 'Xvfb' with pid 31438
+2024-11-13 23:52:26,620 INFO spawned: 'fluxbox' with pid 31439
+2024-11-13 23:52:26,623 INFO spawned: 'x11vnc' with pid 31440
+2024-11-13 23:52:27,635 INFO success: Xvfb entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-13 23:52:27,635 INFO success: x11vnc entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-13 23:52:27,635 INFO success: fluxbox entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-13 23:53:05,314 INFO exited: x11vnc (exit status 2; expected)
+2024-11-13 23:53:06,317 INFO spawned: 'x11vnc' with pid 31604
+2024-11-13 23:53:07,324 INFO success: x11vnc entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-14 00:05:38,349 INFO waiting for Xvfb to stop
+2024-11-14 00:05:38,351 INFO exited: fluxbox (exit status 1; not expected)
+2024-11-14 00:05:38,353 INFO spawned: 'fluxbox' with pid 31887
+2024-11-14 00:05:38,361 INFO stopped: Xvfb (exit status 0)
+2024-11-14 00:05:38,364 INFO exited: fluxbox (exit status 1; not expected)
+2024-11-14 00:05:38,368 INFO exited: x11vnc (exit status 3; not expected)
+2024-11-14 00:05:39,370 INFO spawned: 'x11vnc' with pid 31890
+2024-11-14 00:05:39,372 INFO spawned: 'fluxbox' with pid 31891
+2024-11-14 00:05:39,377 INFO spawned: 'Xvfb' with pid 31892
+2024-11-14 00:05:39,378 INFO waiting for fluxbox to stop
+2024-11-14 00:05:39,379 INFO stopped: fluxbox (terminated by SIGTERM)
+2024-11-14 00:05:40,132 INFO spawned: 'fluxbox' with pid 31903
+2024-11-14 00:05:40,133 INFO waiting for x11vnc to stop
+2024-11-14 00:05:40,134 INFO stopped: x11vnc (terminated by SIGTERM)
+2024-11-14 00:05:40,191 INFO spawned: 'x11vnc' with pid 31932
+2024-11-14 00:05:40,964 INFO success: Xvfb entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-14 00:05:41,133 INFO success: fluxbox entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-14 00:05:41,206 INFO success: x11vnc entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-14 00:06:02,710 INFO exited: x11vnc (exit status 2; expected)
+2024-11-14 00:08:24,916 INFO waiting for Xvfb to stop
+2024-11-14 00:08:24,916 INFO waiting for fluxbox to stop
+2024-11-14 00:08:24,919 INFO stopped: fluxbox (exit status 1)
+2024-11-14 00:08:24,923 INFO stopped: Xvfb (exit status 0)
+2024-11-14 00:11:04,413 INFO spawned: 'Xvfb' with pid 32078
+2024-11-14 00:11:04,415 INFO spawned: 'x11vnc' with pid 32079
+2024-11-14 00:11:04,417 INFO spawned: 'fluxbox' with pid 32080
+2024-11-14 00:11:05,424 INFO success: Xvfb entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-14 00:11:05,424 INFO success: x11vnc entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-14 00:11:05,424 INFO success: fluxbox entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-11-14 00:11:25,381 INFO waiting for Xvfb to stop
+2024-11-14 00:11:25,381 INFO waiting for x11vnc to stop
+2024-11-14 00:11:25,381 INFO waiting for fluxbox to stop
+2024-11-14 00:11:25,383 INFO stopped: fluxbox (exit status 1)
+2024-11-14 00:11:25,385 INFO stopped: x11vnc (exit status 1)
+2024-11-14 00:11:25,392 INFO stopped: Xvfb (exit status 0)

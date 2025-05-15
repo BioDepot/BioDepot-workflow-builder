@@ -1,0 +1,2 @@
+#!/bin/sh
+'feh' '--bg-scale' '/home/ubuntu/.fluxbox/bg.png' 
