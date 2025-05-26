@@ -2403,9 +2403,9 @@ class CanvasMainWindow(QMainWindow):
         settings.endGroup()
         settings.beginGroup("schemeedit")
         show_channel_names = settings.value(
-            "show-channel-names", defaultValue=True, type=bool
+            "show-channel-names", defaultValue=False, type=bool
         )
-        self.scheme_widget.setChannelNamesVisible(show_channel_names)
+        self.scheme_widget.setChannelNamesVisible(False)
 
         node_animations = settings.value(
             "enable-node-animations", defaultValue=False, type=bool

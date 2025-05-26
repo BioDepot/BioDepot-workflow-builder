@@ -37,6 +37,9 @@ class ConsoleProcess:
         self.finishHandler=None
         self.log = QProcess()
         self.baseLogDir="/data/.bwb"
+        #check if we have permissions to write to the baseLogDir
+        if not os.access(self.baseLogDir, os.W_OK):
+            self.baseLogDir="/tmp/.bwb"
         self.logDir="{}/{}/logs".format(self.baseLogDir,self.processDir)
         self.logFile="{}/log{}".format(self.logDir,self.threadNumber)
         self.errorDir="/tmp/{}/errors".format(self.processDir)
@@ -516,12 +519,19 @@ class DockerClient:
             bwbhostshare=""
             if self.bwbMounts:
                 for key in self.bwbMounts:
+                    #check if we have permissions to write to the mount point
+                    if not os.access(key, os.W_OK):
+                        continue
                     if not bwbshare or "share" in self.bwbMounts[key]:
                         bwbhostshare=key+"/.bwbshare"
                         bwbshare=self.bwbMounts[key]+"/.bwbshare"
+            #check if we have permissions to write to the baseLogDi                 
             if not bwbshare:
                 bwbshare="/tmp/.X11/.bwbshare"
                 bwbhostshare="/tmp/.X11/.bwbshare"
+                if not os.access(bwbshare, os.W_OK):
+                    bwbshare="/tmp/.bwbshare"
+                    bwbhostshare="/tmp/.bwbshare"   
             #remove dir if present and make it
             os.system("rm -rf {}".format(bwbshare))
             os.system("mkdir -p {}".format(bwbhostshare))

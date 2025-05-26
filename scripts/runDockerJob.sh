@@ -45,6 +45,11 @@ shift
 tempDir=$1
 shift
 logBaseDir=$1
+#check if the logBaseDir is writable
+if [ ! -w "$logBaseDir" ]; then
+    echo "logBaseDir $logBaseDir is not writable"
+    logBaseDir="/tmp/.bwb"
+fi
 shift
 logDir="${logBaseDir}/${tempDir}/logs"
 mkdir -p $logDir

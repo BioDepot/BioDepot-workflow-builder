@@ -1,4 +1,7 @@
+# SpecStory explanation file
+.specstory
+
+# Docker log files
 dockerlog
 finished
-# SpecStory explanation file
-.specstory/.what-is-this.md
+
