@@ -523,8 +523,8 @@ class DockerClient:
                         bwbhostshare=key+"/.bwbshare"
                         bwbshare=self.bwbMounts[key]+"/.bwbshare"
             if not bwbshare:
-                bwbshare="/var/.X11/.bwbshare"
-                bwbhostshare="/var/.X11/.bwbshare"
+                bwbshare="/tmp/.X11-unix/.bwbshare"
+                bwbhostshare="/tmp/.X11-unix/.bwbshare"
             #remove dir if present and make it
             os.system("rm -rf {}".format(bwbshare))
             os.system("mkdir -p {}".format(bwbshare))
