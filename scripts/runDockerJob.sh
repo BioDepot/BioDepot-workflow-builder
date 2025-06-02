@@ -45,6 +45,8 @@ shift
 tempDir=$1
 shift
 logBaseDir=$1
+
+
 #check if the logBaseDir is writable
 if [ ! -w "$logBaseDir" ]; then
     echo "logBaseDir $logBaseDir is not writable"
@@ -60,7 +62,7 @@ logPrint "logBaseDir $logBaseDir"
 #echo "logDir is $logDir"
 
 myjobs=( "$@" )
-logPrint "$@"
+
 lockDir=/tmp/${tempDir}/locks
 echo "mkdir -p $lockDir"
 mkdir -p $lockDir
@@ -74,11 +76,17 @@ bwbDataDir=$BWBSHARE/$tempDir
 trap "cleanup ${lockDir} -1 " SIGINT INT TERM
 
 runJob(){
-    for ((i=0; i<${#myjobs[@]}; ++i)); do
+    local i
+    local thread=$1
+    local start=$(( $thread - 1 ))
+    local cmdStr
+    for ((i=$start; i<${#myjobs[@]}; ++i)); do
         #make a lock directory will fail if it exists
         #can replace this with another signaling/messaging method - but need to know when a job is taken
         if (mkdir $lockDir/lock$i 2> /dev/null ); then
             cmd="${myjobs[i]}"
+            logPrint "i $i"
+            logPrint "cmd $cmd"
             #write the pid of the process in the name of a file in the lock directory
             #this will also contain the cid of the docker process so that it can be aborted
             mkdir -p $bwbDataDir/output$i
