@@ -24,6 +24,10 @@ print("PASS: actual desktop registry has 34 widgets; web endpoint responds")
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("image")
+    parser.add_argument("--startup-timeout", type=float, default=90,
+                        help="seconds to wait for the desktop (allow more under emulation)")
+    parser.add_argument("--probe-timeout", type=float, default=10,
+                        help="seconds allowed for one registry/web probe")
     args = parser.parse_args()
     name = "bwb-desktop-smoke-" + uuid.uuid4().hex
     with tempfile.TemporaryDirectory(prefix="bwb-desktop-smoke-") as folder:
@@ -43,12 +47,13 @@ def main():
             "-e", "XDG_CACHE_HOME=/tmp/bwb-desktop-cache", args.image],
             universal_newlines=True).strip()
         try:
-            deadline = time.monotonic() + 90
+            deadline = time.monotonic() + args.startup_timeout
             while time.monotonic() < deadline:
                 result = subprocess.run(
                     ["docker", "exec", "-e", "QT_QPA_PLATFORM=offscreen",
                      cid, "python3", "-c", PROBE], stdout=subprocess.PIPE,
-                    stderr=subprocess.STDOUT, universal_newlines=True, timeout=10)
+                    stderr=subprocess.STDOUT, universal_newlines=True,
+                    timeout=args.probe_timeout)
                 if result.returncode == 0:
                     processes = subprocess.check_output(["docker", "top", cid],
                                                         universal_newlines=True)
@@ -61,7 +66,14 @@ def main():
             logs = subprocess.check_output(["docker", "logs", "--tail", "120", cid],
                                            stderr=subprocess.STDOUT,
                                            universal_newlines=True)
-            raise AssertionError((result.stdout, logs))
+            desktop_logs = subprocess.run(
+                ["docker", "exec", cid, "sh", "-c",
+                 "tail -n 100 /var/log/supervisor/fluxbox* /var/log/web.log 2>/dev/null"],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                universal_newlines=True, timeout=10)
+            processes = subprocess.check_output(["docker", "top", cid],
+                                                universal_newlines=True)
+            raise AssertionError((result.stdout, logs, desktop_logs.stdout, processes))
         finally:
             subprocess.run(["docker", "stop", "-t", "5", cid], check=True,
                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,

@@ -10,7 +10,9 @@ gevent>=1.0.1
 gevent-websocket>=0.9.3
 greenlet>=0.4.5
 itsdangerous>=0.24
-peewee>=2.4.1
+# The web server still runs Python 2.7. Peewee 4 is Python-3-only, and the
+# legacy pip resolver can select its source distribution despite that.
+peewee==3.18.3
 requests>=2.20.0
 six>=1.8.0
 websocket-client>=0.21.0

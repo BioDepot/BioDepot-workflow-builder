@@ -1,6 +1,6 @@
 # Preserve the published runtime while fixing workspace handling. The legacy
-# clean build currently fails compiling peewee for Python 2. Pin the previous
-# multi-platform release so neither architecture depends on a moving latest.
+# runtime uses legacy Python/Qt dependencies. Pin the previous multi-platform
+# release so neither architecture depends on a moving latest.
 ARG BWB_BASE=biodepot/bwb@sha256:025ddd59be52d00a16c219539fc698eb33ee066d5f89147d0f8c9906c0128121
 ARG DOCKER_CLI_IMAGE=docker:29.8.2-cli@sha256:b1805116a6a86cc591b5d5f60a910a0715cdcc9d18d866ad68b1457ead25c35c
 FROM ${DOCKER_CLI_IMAGE} AS docker_cli

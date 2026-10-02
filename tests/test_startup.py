@@ -77,8 +77,11 @@ class StartupContractTests(unittest.TestCase):
 
     def test_launcher_preserves_failed_program_exit_code(self):
         for filename in ("scripts/startBwb.sh", "scripts/startSingleBwb.sh", "VM/startBwb.sh"):
+            # A Bwb desktop running elsewhere on the host (including in another
+            # Docker container) must not make this exit-code test skip its child.
             result = subprocess.run(
-                ["bash", str(ROOT / filename), "/bin/false"],
+                ["bash", "-c", 'pgrep() { return 1; }; export -f pgrep; '
+                 'exec bash "$1" /bin/false', "launcher-test", str(ROOT / filename)],
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 universal_newlines=True, timeout=10)
             self.assertEqual(result.returncode, 1, (filename, result.stdout))

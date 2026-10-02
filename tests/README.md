@@ -37,6 +37,8 @@ The desktop test additionally starts the image's unmodified default command,
 including Xvfb, Fluxbox, and the real Bwb application. It uses a fresh registry
 cache, checks for 34 widgets and a responsive internal web endpoint, and stops
 only its own disposable container. No host ports or host X11 sockets are used.
+For ARM64 under QEMU, use `--startup-timeout 300 --probe-timeout 120`; importing
+the registry in the probe is also significantly slower under emulation.
 
 ## Workspace configuration
 
@@ -79,8 +81,13 @@ GUI. This change does not grant Windows/DrvFS permissions or change ownership.
 
 `Dockerfile.workspace-fix` applies the changed runtime modules, startup entry
 points, and runner to the previous published multi-platform image, pinned by digest. This avoids
-changing the legacy Python/Qt dependencies: the original clean Dockerfile fails
-while compiling an unpinned Python 2 `peewee` dependency.
+changing the legacy Python/Qt dependencies during a runtime hotfix.
+
+The clean Dockerfile's Python 2 web layer pins `peewee==3.18.3`: the unbounded
+requirement selected Python-3-only Peewee 4 and failed during compilation.
+Both GHCR workflows build and run `python3 tests/smoke_web.py IMAGE` before
+pushing. That test checks web imports, an in-memory SQLite round trip, and the
+Flask landing page without mounting host directories or publishing ports.
 
 Both Dockerfiles copy Docker CLI 29.8.2 and its Buildx plugin from the same
 digest-pinned, multi-architecture official Docker image. This replaces the old

@@ -2,6 +2,9 @@ name: Push Published Docker images
 on:
   release:
     types: published
+permissions:
+  contents: read
+  packages: write
 jobs:
   push_to_registry:
     name: Push Docker image to GitHub Container Registry
@@ -20,8 +23,16 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push standard image to GitHub Container Registry
+      - name: Build standard image for testing
         uses: docker/build-push-action@v2
         with:
-          push: true
+          load: true
           tags: ghcr.io/${{ env.OWNER_LC }}/bwb:${{ github.event.release.tag_name }}
+      - name: Test the web runtime before publishing
+        env:
+          BWB_IMAGE: ghcr.io/${{ env.OWNER_LC }}/bwb:${{ github.event.release.tag_name }}
+        run: python3 tests/smoke_web.py "$BWB_IMAGE"
+      - name: Push tested image to GitHub Container Registry
+        env:
+          BWB_IMAGE: ghcr.io/${{ env.OWNER_LC }}/bwb:${{ github.event.release.tag_name }}
+        run: docker push "$BWB_IMAGE"
