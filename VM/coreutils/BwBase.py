@@ -3002,7 +3002,6 @@ class OWBwBWidget(widget.OWWidget):
 
     def onRunFinished(self, code=None, status=None):
         self.jobRunning = False
-        self.pConsole.writeMessage("Finished")
         goodExit = True
         if code is not None:
             if code:
@@ -3016,6 +3015,8 @@ class OWBwBWidget(widget.OWWidget):
                 goodExit = False
             else:
                 self.pConsole.writeMessage("Exit status is {}".format(status))
+        self.pConsole.writeMessage("Finished" if goodExit else "Failed",
+                                   color=Qt.green if goodExit else Qt.red)
         if goodExit and self.repeat and not self.status == "stopped":
             self.updateOutputs()
             if hasattr(self, "handleOutputs"):
@@ -3029,8 +3030,8 @@ class OWBwBWidget(widget.OWWidget):
         self.bgui.reenableAll(self)
         self.reenableExec()
         if self.status != "stopped" and self.status != "finished":
-            if status:
-                self.setStatusMessage("Error Code {}".format(code))
+            if not goodExit:
+                self.setStatusMessage("Error Code {} (status {})".format(code, status))
                 self.status = "error"
             else:
                 self.setStatusMessage("Finished")

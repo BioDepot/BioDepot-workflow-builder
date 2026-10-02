@@ -1,0 +1,20 @@
+#!/bin/bash
+# Deliberately fake Docker; runner tests must never reach the real daemon.
+[ "$1" = run ] || exit 0
+printf '%s\n' "$*" >> "$BWB_TEST_CALLS"
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --cidfile=*) cidfile=${1#--cidfile=} ;;
+        -v) shift; output=${1%:/tmp/output} ;;
+        fail) exit 42 ;;
+        metadata) metadata=true ;;
+    esac
+    shift
+done
+printf 'test-cid\n' > "$cidfile"
+if [ "${metadata:-}" = true ]; then
+    printf '{"answer":42}\n' > "$output/key with spaces"
+    printf 'hello world\n' > "$output/text"
+else
+    printf 'ok\n' > "$output/result"
+fi

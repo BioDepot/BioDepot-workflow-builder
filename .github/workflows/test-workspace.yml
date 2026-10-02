@@ -1,0 +1,23 @@
+name: Shared workspace regressions
+on:
+  push:
+    paths:
+      - 'coreutils/DockerClient.py'
+      - 'coreutils/BwBase.py'
+      - 'VM/coreutils/DockerClient.py'
+      - 'VM/coreutils/BwBase.py'
+      - 'scripts/runDockerJob.sh'
+      - 'tests/**'
+      - '.github/workflows/test-workspace.yml'
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test as non-root, including actual permission failures
+        run: |
+          command -v jq
+          python3 -m unittest discover -s tests -v
+          bash -n scripts/runDockerJob.sh
+          git diff --check

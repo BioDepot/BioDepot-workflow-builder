@@ -10,6 +10,7 @@ from PyQt5.QtGui import *
 import datetime
 import uuid
 import time
+import tempfile
 from pathlib import Path
 #runScheduler.sh ['b2b72d36270f4200a9e', '/tmp/docker.b2b72d36270f4200a9e.json', '8', '8096']
 def detect_container():
@@ -298,7 +299,6 @@ class DockerClient:
         print(self.bwb_instance_id)
         self.bwbMounts = {}
         self.shareMountPoint={};
-        self.findVolumeMappings()
         self.findShareMountPoint(overwrite=True)        
         #self.findShareMountPoint()
         self.logFile = None
@@ -512,37 +512,104 @@ class DockerClient:
             sys.stderr.write("starting runDockerJob.sh\n")
             consoleProc.start(dockerCmds,outputFile=outputFile)
     
-    def findShareMountPoint(self,overwrite=False):
-        if not os.getenv('BWBSHARE' or overwrite):
-            bwbshare=""
-            bwbhostshare=""
-            if self.bwbMounts:
-                for key in self.bwbMounts:
-                    if not bwbshare or "share" in self.bwbMounts[key]:
-                        bwbhostshare=key+"/.bwbshare"
-                        bwbshare=self.bwbMounts[key]+"/.bwbshare"
-            if not bwbshare:
-                bwbshare="/tmp/.X11/.bwbshare"
-                bwbhostshare="/tmp/.X11/.bwbshare"
-            #remove dir if present and make it
-            os.system("rm -rf {}".format(bwbshare))
-            os.system("mkdir -p {}".format(bwbhostshare))
-            os.environ['BWBSHARE']=bwbshare
-            os.environ['BWBHOSTSHARE']=bwbhostshare
-            
-        #check if mountpoint variable exists
+    def shareHostPath(self, path):
+        """Translate a workspace using the most specific current Docker mount."""
+        if not os.path.isabs(path):
+            raise ValueError("BWBSHARE must be an absolute path")
+        path = os.path.normpath(path)
+        if path == os.path.sep:
+            raise ValueError("BWBSHARE must not be the filesystem root")
+        if not self.isContainer:
+            return path
+        matches = []
+        for mount in self.bwbMountInfo:
+            dest = os.path.normpath(mount["Destination"])
+            if path == dest or path.startswith(dest.rstrip(os.path.sep) + os.path.sep):
+                matches.append(mount)
+        if not matches:
+            raise ValueError("workspace is not inside a Docker mount")
+        mount = max(matches, key=lambda m: len(os.path.normpath(m["Destination"])))
+        if not mount.get("RW", False):
+            raise ValueError("workspace is on a read-only Docker mount")
+        if mount.get("Type") not in ("bind", "volume"):
+            raise ValueError("workspace must use a bind mount or Docker volume")
+        if not os.path.isdir(mount["Destination"]):
+            raise ValueError("workspace mount is not a directory")
+        source = mount.get("Source", "")
+        if not os.path.isabs(source):
+            raise ValueError("workspace mount has no absolute Docker source")
+        relative = os.path.relpath(path, mount["Destination"])
+        return os.path.normpath(os.path.join(source, relative))
+
+    def findShareMountPoint(self, overwrite=False):
+        """Provision local scratch space without deleting another job's files.
+
+        BWBSHARE can select a pre-provisioned directory. BWBHOSTSHARE is always
+        derived from current mounts, never trusted across container restarts.
+        overwrite refreshes mount discovery; it does not erase the workspace.
+        """
+        if overwrite or not hasattr(self, "bwbMountInfo"):
+            self.findVolumeMappings()
+        requested = os.environ.get("BWBSHARE")
+        if requested:
+            candidates = [requested]
+        else:
+            mounts = []
+            for mount in self.bwbMountInfo:
+                dest = os.path.normpath(mount["Destination"])
+                if dest == "/" or any(dest == p or dest.startswith(p + "/")
+                                      for p in ("/proc", "/sys", "/dev", "/run", "/var/run", "/etc")):
+                    continue
+                mounts.append(mount)
+            # Prefer a dedicated share, then /data. X11 is a last resort, and
+            # must be translated through its actual mount (especially on WSL).
+            def priority(mount):
+                dest = os.path.normpath(mount["Destination"])
+                if dest == "/tmp/.X11-unix":
+                    return 3
+                if "share" in dest:
+                    return 0
+                return 1 if dest == "/data" else 2
+            candidates = [os.path.join(m["Destination"], ".bwbshare")
+                          for m in sorted(mounts, key=priority)]
+        errors = []
+        for candidate in candidates:
+            try:
+                host_path = self.shareHostPath(candidate)
+                # Do not test the parent's write bit: an administrator may
+                # have provisioned a writable child under an unwritable root.
+                os.makedirs(candidate, exist_ok=True)
+                with tempfile.TemporaryDirectory(prefix=".bwb-probe-", dir=candidate) as probe:
+                    with open(os.path.join(probe, "write-test"), "wb") as handle:
+                        handle.write(b"bwb")
+            except (OSError, ValueError) as exc:
+                errors.append("{}: {}".format(candidate, exc))
+                continue
+            os.environ["BWBSHARE"] = os.path.normpath(candidate)
+            os.environ["BWBHOSTSHARE"] = host_path
+            return
+        raise RuntimeError(
+            "No writable shared Bwb workspace. Mount a writable directory and "
+            "set BWBSHARE to a directory inside it. " + "; ".join(errors))
+
     def findVolumeMappings(self):
+        self.bwbMounts = {}
+        self.bwbMountInfo = []
         if not self.isContainer:
             self.bwbMounts["/data"] = "/data"
+            self.bwbMountInfo = [{"Source": "/data", "Destination": "/data",
+                                  "RW": True, "Type": "bind"}]
             return
         for c in self.cli.containers():
             container_id = c["Id"]
             if container_id == self.bwb_instance_id:
                 for m in c["Mounts"]:
                     sys.stderr.write("Container mount points include {}\n".format(m))
-                    if not (
-                        "/var/run" in m["Source"] or "/tmp/.X11-unix" in m["Source"]
-                    ):
+                    self.bwbMountInfo.append(m)
+                    dest = os.path.normpath(m["Destination"])
+                    if m.get("Source") and not any(
+                            dest == p or dest.startswith(p + "/")
+                            for p in ("/var/run", "/run", "/tmp/.X11-unix")):
                         self.bwbMounts[m["Source"]] = m["Destination"]
                         
     def findNextFlowSelfMounts(self):

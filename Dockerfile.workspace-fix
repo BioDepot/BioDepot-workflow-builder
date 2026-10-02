@@ -1,0 +1,13 @@
+# Preserve the published runtime while fixing workspace handling. The legacy
+# clean build currently fails compiling peewee for Python 2. Pin the previous
+# multi-platform release so neither architecture depends on a moving latest.
+ARG BWB_BASE=biodepot/bwb@sha256:025ddd59be52d00a16c219539fc698eb33ee066d5f89147d0f8c9906c0128121
+FROM ${BWB_BASE}
+ARG VCS_REF=unknown
+LABEL org.opencontainers.image.source="https://github.com/BioDepot/BioDepot-workflow-builder" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.description="Bwb shared-workspace and worker failure hotfix"
+COPY coreutils/DockerClient.py coreutils/BwBase.py /coreutils/
+COPY scripts/runDockerJob.sh /usr/local/bin/runDockerJob.sh
+RUN python3 -m py_compile /coreutils/DockerClient.py /coreutils/BwBase.py \
+    && bash -n /usr/local/bin/runDockerJob.sh
