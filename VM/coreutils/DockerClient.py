@@ -11,6 +11,7 @@ import datetime
 import uuid
 import time
 import tempfile
+import shutil
 from pathlib import Path
 #runScheduler.sh ['b2b72d36270f4200a9e', '/tmp/docker.b2b72d36270f4200a9e.json', '8', '8096']
 def detect_container():
@@ -214,14 +215,23 @@ class ConsoleProcess:
         return 0
         
     def cleanup(self):
-        if self.baseLogDir and self.processDir:
-            path="{}/".format(self.baseLogDir,self.processDir)
-            if os.path.exists(path):
-                os.system("rm {} -r".format(path))
-        if self.processDir:
-            path="/tmp/{}".format(self.processDir)
-            if os.path.exists(path):
-                os.system("rm {} -r".format(path))            
+        if not self.processDir:
+            return
+        if not re.fullmatch(r"proc\.[A-Za-z0-9_-]+", self.processDir):
+            raise ValueError("Invalid Bwb process directory")
+        # Only this console's job directories belong to us. In particular,
+        # never erase /data/.bwb or another widget's logs on widget creation.
+        for base in (self.baseLogDir, "/tmp"):
+            if not base:
+                continue
+            path = os.path.join(base, self.processDir)
+            try:
+                if os.path.islink(path):
+                    os.unlink(path)
+                else:
+                    shutil.rmtree(path)
+            except FileNotFoundError:
+                pass
 
 
 class TaskJson:
@@ -279,28 +289,11 @@ class DockerClient:
         self.cli = APIClient(base_url=url)
         self.isContainer = detect_container()
         self.bwb_instance_id = None
-        if(self.isContainer):   
-            command = "awk -F'/containers/|/resolv.conf' '$2!=\"\" {print $2; exit}' /proc/self/mountinfo"
-            outputString=str(subprocess.check_output(
-                    command,
-                    shell=True,
-                    universal_newlines=True,
-                ))
-            if outputString:
-                self.bwb_instance_id = outputString.splitlines()[0]
-            else:
-                outputString=str(subprocess.check_output(
-                    "cat /proc/self/mountinfo | grep -oP '(?<=docker/containers/).*?(?=/resolv)'",
-                    shell=True,
-                 universal_newlines=True,
-                ))
-                self.bwb_instance_id = outputString.strip()
-                
-        print(self.bwb_instance_id)
         self.bwbMounts = {}
-        self.shareMountPoint={};
-        self.findShareMountPoint(overwrite=True)        
-        #self.findShareMountPoint()
+        self.shareMountPoint = {}
+        # Mount discovery is read-only. Startup validates /data explicitly;
+        # importing a widget must never create or probe a shared workspace.
+        self.findVolumeMappings()
         self.logFile = None
         self.schedulerStarted = False
 
@@ -592,6 +585,54 @@ class DockerClient:
             "No writable shared Bwb workspace. Mount a writable directory and "
             "set BWBSHARE to a directory inside it. " + "; ".join(errors))
 
+    def findContainer(self):
+        """Identify ourselves without assuming a particular Docker storage layout."""
+        containers = self.cli.containers()
+        # A previously verified full ID is safe to reuse within this process.
+        matches = [c for c in containers if c["Id"] == self.bwb_instance_id]
+        if len(matches) == 1:
+            return matches[0]
+        try:
+            with open("/proc/self/mountinfo") as handle:
+                ids = set(re.findall(r"/containers/([0-9a-f]{64})(?:/|$)", handle.read()))
+        except OSError:
+            ids = set()
+        matches = [c for c in containers if c["Id"] in ids]
+        if not matches:
+            # Docker's default hostname is a short container ID. Do not match
+            # an arbitrary/custom hostname or silently pick another container.
+            hostname = os.uname().nodename
+            if re.fullmatch(r"[0-9a-f]{12,64}", hostname):
+                matches = [c for c in containers if c["Id"].startswith(hostname)]
+        if len(matches) != 1:
+            raise RuntimeError(
+                "Cannot identify the Bwb container through the Docker socket; "
+                "shared mount discovery failed. Check that the socket belongs "
+                "to the Docker daemon running Bwb.")
+        self.bwb_instance_id = matches[0]["Id"]
+        return matches[0]
+
+    def checkStartupWorkspace(self, data_dir="/data"):
+        """Fail before widget discovery unless the required data mount is usable."""
+        self.findVolumeMappings()
+        # A directory in the image's private filesystem is not a shared mount.
+        # Also validates RW/type/source metadata before touching any directory.
+        self.shareHostPath(data_dir)
+        if not os.path.isdir(data_dir):
+            raise RuntimeError("{} is not an existing directory".format(data_dir))
+        for directory in (data_dir, os.path.join(data_dir, ".bwb")):
+            try:
+                os.makedirs(directory, exist_ok=True)
+                with tempfile.TemporaryDirectory(prefix=".bwb-probe-", dir=directory) as probe:
+                    with open(os.path.join(probe, "write-test"), "wb") as handle:
+                        handle.write(b"bwb")
+            except OSError as exc:
+                raise RuntimeError("Cannot write to {}: {}".format(directory, exc))
+        # Normal startup never silently falls back to X11 or another input mount.
+        if not os.environ.get("BWBSHARE"):
+            os.environ["BWBSHARE"] = os.path.join(data_dir, ".bwbshare")
+        self.findShareMountPoint()
+
     def findVolumeMappings(self):
         self.bwbMounts = {}
         self.bwbMountInfo = []
@@ -600,17 +641,15 @@ class DockerClient:
             self.bwbMountInfo = [{"Source": "/data", "Destination": "/data",
                                   "RW": True, "Type": "bind"}]
             return
-        for c in self.cli.containers():
-            container_id = c["Id"]
-            if container_id == self.bwb_instance_id:
-                for m in c["Mounts"]:
-                    sys.stderr.write("Container mount points include {}\n".format(m))
-                    self.bwbMountInfo.append(m)
-                    dest = os.path.normpath(m["Destination"])
-                    if m.get("Source") and not any(
-                            dest == p or dest.startswith(p + "/")
-                            for p in ("/var/run", "/run", "/tmp/.X11-unix")):
-                        self.bwbMounts[m["Source"]] = m["Destination"]
+        container = self.findContainer()
+        for m in container["Mounts"]:
+            sys.stderr.write("Container mount points include {}\n".format(m))
+            self.bwbMountInfo.append(m)
+            dest = os.path.normpath(m["Destination"])
+            if m.get("Source") and not any(
+                    dest == p or dest.startswith(p + "/")
+                    for p in ("/var/run", "/run", "/tmp/.X11-unix")):
+                self.bwbMounts[m["Source"]] = m["Destination"]
                         
     def findNextFlowSelfMounts(self):
         mountString=""

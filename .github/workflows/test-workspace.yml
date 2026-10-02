@@ -3,10 +3,20 @@ on:
   push:
     paths:
       - 'coreutils/DockerClient.py'
+      - 'coreutils/BwbStartup.py'
       - 'coreutils/BwBase.py'
       - 'VM/coreutils/DockerClient.py'
+      - 'VM/coreutils/BwbStartup.py'
       - 'VM/coreutils/BwBase.py'
       - 'scripts/runDockerJob.sh'
+      - 'scripts/startBwb.sh'
+      - 'scripts/startSingleBwb.sh'
+      - 'startup.sh'
+      - 'orangePatches/__main__.py'
+      - 'VM/orange3/Orange/canvas/__main__.py'
+      - 'VM/startBwb.sh'
+      - 'Dockerfile.workspace-fix'
+      - 'Dockerfile'
       - 'tests/**'
       - '.github/workflows/test-workspace.yml'
   pull_request:
@@ -19,5 +29,5 @@ jobs:
         run: |
           command -v jq
           python3 -m unittest discover -s tests -v
-          bash -n scripts/runDockerJob.sh
+          bash -n scripts/runDockerJob.sh scripts/startBwb.sh scripts/startSingleBwb.sh startup.sh VM/startBwb.sh
           git diff --check

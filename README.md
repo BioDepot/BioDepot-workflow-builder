@@ -179,6 +179,14 @@ A major motivation for our development of Bwb was that our own software tools we
 
 ### How do I use Bwb on my own data files?
 
+Bwb validates its shared workspace at startup, before loading widgets. The
+standard launch requires a writable host directory mounted at `/data`; Bwb also
+checks `/data/.bwb` for logs and `/data/.bwbshare` for scratch files. If these
+checks fail, Bwb exits with an error asking you to mount a different writable
+host directory at `/data`. It does not silently fall back to the X11 directory.
+Existing scratch/job files are preserved. An explicit `BWBSHARE` can change the
+scratch location but does not replace the requirement for writable `/data`.
+
 The instructions below are for local execution of Bwb. When Bwb is run on a cloud instance, the files will be saved to cloud instance file system. You will need to transfer files to and from the cloud. Tools such as sshfs, goofys, sftp/scp, or rsync can be used for this task. 
 
 The mapping of local files to be used by Bwb workflows happens in the command line at launch time. For Windows, there is also an additional step of making the Windows directories accessible to the VM that is launching Docker. More about this later, but first let's talk about how to map your directories so that the Docker container can read from/write to them.
@@ -1268,4 +1276,3 @@ Once the widget has decided to launch the executable, it calls the startJob meth
 Directory paths are a bit complicated as there are 3 different file systems. There is the container filesytem that is being launched, the host system (i.e. the laptop or cloud instance) and also the filesytem used by the Bwb container. The file browsers used by the Bwb GUI use the bwb directory paths. These are converted to host paths for the volume mappings. There can be multiple possible mappings - the shortest mapping is used.
 
 Support will be added for an additional automap mode that will automatically map the file system the user has provided to Bwb to the same paths in the container launched by the widget.
-

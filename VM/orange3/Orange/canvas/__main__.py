@@ -320,6 +320,18 @@ def main(argv=None):
 
     log.debug("Starting CanvasApplicaiton with argv = %r.", qt_argv)
     app = CanvasApplication(qt_argv)
+    # Startup failures must not be swallowed by per-widget import handling.
+    # Keep this before creating the canvas or reading/writing registry caches.
+    from BwbStartup import startup_preflight
+    try:
+        startup_preflight()
+    except RuntimeError as exc:
+        message = str(exc)
+        print(message, file=sys.stderr)
+        if os.environ.get("QT_QPA_PLATFORM") not in ("offscreen", "minimal"):
+            QMessageBox.critical(None, "Bwb cannot start", message)
+        return 1
+
     if app.style().metaObject().className() == "QFusionStyle":
         if fusiontheme == "breeze-dark":
             app.setPalette(breeze_dark())

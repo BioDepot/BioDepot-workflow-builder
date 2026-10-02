@@ -21,7 +21,12 @@ $cmd $workflow &
 workflow="" 
 pid="$!"
 mkdir -p "/tmp/pid.$pid"
-wait $pid
+wait "$pid"
+bwb_status=$?
+if [ "$bwb_status" -ne 0 ]; then
+    rmdir "/tmp/pid.$pid" 2>/dev/null || true
+    exit "$bwb_status"
+fi
 if [ -d "/tmp/pid.$pid" ]; then
     if [ -f "/tmp/pid.$pid/workflow" ]; then
         workflow=`cat /tmp/pid.$pid/workflow`

@@ -24,19 +24,35 @@ import uuid
 sys.path.insert(0, "/coreutils")
 from DockerClient import DockerClient
 
+# Test the actual CLI, not only the separately versioned Python Docker SDK.
+version = json.loads(subprocess.check_output(
+    ["docker", "version", "--format", "{{json .}}"], universal_newlines=True))
+assert version["Client"]["Version"] == "29.8.2", version
+assert version["Server"]["Version"], version
+subprocess.run(["docker", "buildx", "version"], check=True)
+print("PASS: Docker CLI {} communicates with daemon {}".format(
+    version["Client"]["Version"], version["Server"]["Version"]), flush=True)
+
 client = DockerClient("unix:///var/run/docker.sock", "local")
+client.findShareMountPoint(overwrite=True)
 assert os.environ["BWBSHARE"] == "/data/.bwbshare", os.environ["BWBSHARE"]
 assert os.environ["BWBHOSTSHARE"] == os.environ["EXPECTED_HOST_SHARE"]
 sentinel = Path("/data/.bwbshare/another-active-job")
 assert sentinel.read_text() == "keep"
 # The published desktop runs as root and installs jsonpickle in root's user
-# site. Test its full GUI imports in that normal configuration separately.
+# site. Test its full widget registry in that normal configuration separately.
 if os.environ.get("BWB_SMOKE_GUI"):
     from PyQt5.QtWidgets import QApplication
     app = QApplication([])
     import BwBase
+    from Orange.canvas import config
+    from Orange.canvas.registry import WidgetRegistry, WidgetDiscovery
+    config.init()
+    registry = WidgetRegistry()
+    WidgetDiscovery(registry=registry, cached_descriptions={}).run(config.widgets_entry_points())
+    assert len(registry.widgets()) == 34, [w.name for w in registry.widgets()]
     assert sentinel.read_text() == "keep"
-    print("PASS: complete production GUI module imports")
+    print("PASS: all 34 standard widgets discovered")
     sys.exit(0)
 assert not os.access("/data", os.W_OK), "test parent must really be unwritable"
 os.environ["BWBHOSTSHARE"] = "/stale-desktop-hash"
@@ -52,7 +68,10 @@ def run_job(command, expected_code):
                              "/data/.bwb", "--entrypoint /bin/sh " + image + " -c " + shlex.quote(command)],
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                             universal_newlines=True, timeout=120)
-    assert result.returncode == expected_code, (result.returncode, result.stdout)
+    if result.returncode != expected_code:
+        log = Path("/data/.bwb") / proc / "logs" / "log0"
+        details = log.read_text() if log.exists() else "(no job log)"
+        raise AssertionError((result.returncode, result.stdout, details))
     if expected_code == 0:
         assert json.loads(Path(output).read_text()) == [{"result": "ok"}]
     else:

@@ -1,3 +1,5 @@
+ARG DOCKER_CLI_IMAGE=docker:29.8.2-cli@sha256:b1805116a6a86cc591b5d5f60a910a0715cdcc9d18d866ad68b1457ead25c35c
+FROM ${DOCKER_CLI_IMAGE} AS docker_cli
 FROM ubuntu:18.04
 ARG TARGETARCH
 # Setup demo environment variables
@@ -96,6 +98,12 @@ RUN apt-get update \
     && apt-get remove -y --purge --auto-remove \
         gnupg \
     && rm -rf /var/lib/apt/lists/*
+
+# Use the same pinned, multi-architecture client as the runtime hotfix. The
+# Ubuntu 18.04 Docker package only supplies API 1.43, rejected by some hosts.
+COPY --from=docker_cli /usr/local/bin/docker /usr/bin/docker
+COPY --from=docker_cli /usr/local/libexec/docker/cli-plugins/docker-buildx /usr/local/libexec/docker/cli-plugins/docker-buildx
+RUN docker --version && docker buildx version
 
 #jsonpickle
 RUN pip3 install --user jsonpickle

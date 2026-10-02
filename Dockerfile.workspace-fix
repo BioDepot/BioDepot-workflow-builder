@@ -2,12 +2,23 @@
 # clean build currently fails compiling peewee for Python 2. Pin the previous
 # multi-platform release so neither architecture depends on a moving latest.
 ARG BWB_BASE=biodepot/bwb@sha256:025ddd59be52d00a16c219539fc698eb33ee066d5f89147d0f8c9906c0128121
+ARG DOCKER_CLI_IMAGE=docker:29.8.2-cli@sha256:b1805116a6a86cc591b5d5f60a910a0715cdcc9d18d866ad68b1457ead25c35c
+FROM ${DOCKER_CLI_IMAGE} AS docker_cli
 FROM ${BWB_BASE}
 ARG VCS_REF=unknown
 LABEL org.opencontainers.image.source="https://github.com/BioDepot/BioDepot-workflow-builder" \
       org.opencontainers.image.revision="${VCS_REF}" \
-      org.opencontainers.image.description="Bwb shared-workspace and worker failure hotfix"
-COPY coreutils/DockerClient.py coreutils/BwBase.py /coreutils/
+      org.opencontainers.image.description="Bwb startup preflight, widget discovery, and Docker API compatibility fix"
+# Only replace client-side executables; Bwb uses the host's existing daemon.
+# Buildx preserves docker build support without changing the Python/Qt runtime.
+COPY --from=docker_cli /usr/local/bin/docker /usr/bin/docker
+COPY --from=docker_cli /usr/local/libexec/docker/cli-plugins/docker-buildx /usr/local/libexec/docker/cli-plugins/docker-buildx
+COPY coreutils/DockerClient.py coreutils/BwBase.py coreutils/BwbStartup.py /coreutils/
+COPY orangePatches/__main__.py /orange3/Orange/canvas/__main__.py
+COPY startup.sh /startup.sh
+COPY scripts/startBwb.sh scripts/startSingleBwb.sh /usr/local/bin/
 COPY scripts/runDockerJob.sh /usr/local/bin/runDockerJob.sh
-RUN python3 -m py_compile /coreutils/DockerClient.py /coreutils/BwBase.py \
-    && bash -n /usr/local/bin/runDockerJob.sh
+RUN python3 -m py_compile /coreutils/DockerClient.py /coreutils/BwBase.py /coreutils/BwbStartup.py /orange3/Orange/canvas/__main__.py \
+    && bash -n /usr/local/bin/runDockerJob.sh /usr/local/bin/startBwb.sh /usr/local/bin/startSingleBwb.sh /startup.sh \
+    && docker --version \
+    && docker buildx version

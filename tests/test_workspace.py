@@ -6,6 +6,7 @@ The Docker image smoke test additionally imports the complete production modules
 import ast
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -29,7 +30,7 @@ def load_methods(path, class_name, names, namespace=None):
     module = ast.Module(body=body)
     if "type_ignores" in module._fields:
         module.type_ignores = []
-    ns = dict(os=os, sys=sys, tempfile=tempfile)
+    ns = dict(os=os, sys=sys, re=re, tempfile=tempfile, shutil=shutil)
     ns.update(namespace or {})
     exec(compile(module, str(path), "exec"), ns)
     return type(class_name, (), {name: ns[name] for name in names})
@@ -50,7 +51,8 @@ class WorkspaceCases:
         quiet.start()
         self.addCleanup(quiet.stop)
         cls = load_methods(ROOT / self.source / "DockerClient.py", "DockerClient",
-                           ["shareHostPath", "findShareMountPoint", "findVolumeMappings"])
+                           ["shareHostPath", "findShareMountPoint", "findVolumeMappings",
+                            "findContainer", "checkStartupWorkspace"])
         self.client = cls()
         self.client.isContainer = True
         self.client.bwb_instance_id = "test-container"
@@ -193,12 +195,172 @@ class WorkspaceCases:
         with self.assertRaisesRegex(RuntimeError, "filesystem root"):
             self.select()
 
+    def test_startup_prefers_data_and_preserves_existing_content(self):
+        other = self.mount("dedicated-share")
+        data = self.mount("data")
+        (data / ".bwbshare").mkdir()
+        (data / ".bwbshare" / "active-job").write_text("keep")
+        self.client.checkStartupWorkspace(str(data))
+        self.assertEqual(os.environ["BWBSHARE"], str(data / ".bwbshare"))
+        self.assertEqual(os.environ["BWBHOSTSHARE"], "/daemon-only/data/.bwbshare")
+        self.assertEqual((data / ".bwbshare" / "active-job").read_text(), "keep")
+        self.assertTrue((data / ".bwb").is_dir())
+        self.assertFalse((other / ".bwbshare").exists())
+        self.assertEqual(list(data.rglob(".bwb-probe-*")), [])
+
+    def test_startup_rejects_readonly_data_even_with_writable_alternative(self):
+        data = self.mount("data", rw=False)
+        self.mount("dedicated-share")
+        with self.assertRaisesRegex(ValueError, "read-only"):
+            self.client.checkStartupWorkspace(str(data))
+        self.assertFalse((data / ".bwb").exists())
+
+    def test_startup_empty_override_still_uses_data_not_another_mount(self):
+        self.mount("dedicated-share")
+        data = self.mount("data")
+        os.environ["BWBSHARE"] = ""
+        self.client.checkStartupWorkspace(str(data))
+        self.assertEqual(os.environ["BWBSHARE"], str(data / ".bwbshare"))
+
+    def test_startup_requires_data_to_be_shared_not_just_present(self):
+        data = self.base / "private-data"
+        data.mkdir()
+        self.mount("elsewhere")
+        with self.assertRaisesRegex(ValueError, "not inside a Docker mount"):
+            self.client.checkStartupWorkspace(str(data))
+        self.assertEqual(list(data.iterdir()), [])
+
+    @unittest.skipIf(os.geteuid() == 0, "real permission check requires non-root")
+    def test_startup_rejects_unwritable_data_even_with_writable_children(self):
+        data = self.mount("data")
+        (data / ".bwbshare").mkdir()
+        (data / ".bwb").mkdir()
+        self.mount("elsewhere")
+        data.chmod(0o555)
+        self.addCleanup(data.chmod, 0o755)
+        with self.assertRaisesRegex(RuntimeError, "Cannot write to"):
+            self.client.checkStartupWorkspace(str(data))
+        self.assertNotIn("BWBHOSTSHARE", os.environ)
+
+    @unittest.skipIf(os.geteuid() == 0, "real permission check requires non-root")
+    def test_startup_rejects_unwritable_log_directory(self):
+        data = self.mount("data")
+        logs = data / ".bwb"
+        logs.mkdir()
+        logs.chmod(0o555)
+        self.addCleanup(logs.chmod, 0o755)
+        with self.assertRaisesRegex(RuntimeError, r"Cannot write to .*\.bwb"):
+            self.client.checkStartupWorkspace(str(data))
+
+    @unittest.skipIf(os.geteuid() == 0, "real permission check requires non-root")
+    def test_startup_rejects_unwritable_share_directory(self):
+        data = self.mount("data")
+        share = data / ".bwbshare"
+        share.mkdir()
+        share.chmod(0o555)
+        self.addCleanup(share.chmod, 0o755)
+        with self.assertRaisesRegex(RuntimeError, "Permission denied"):
+            self.client.checkStartupWorkspace(str(data))
+
+    def test_startup_honors_explicit_workspace_but_still_checks_data(self):
+        data = self.mount("data")
+        share = self.mount("dedicated-share") / "custom"
+        os.environ["BWBSHARE"] = str(share)
+        self.client.checkStartupWorkspace(str(data))
+        self.assertEqual(os.environ["BWBSHARE"], str(share))
+        self.assertEqual(os.environ["BWBHOSTSHARE"], "/daemon-only/dedicated-share/custom")
+
+    def test_hostname_fallback_when_mountinfo_has_no_container_id(self):
+        full_id = "abcdef012345" + "a" * 52
+        self.client.bwb_instance_id = None
+        self.client.cli.containers = lambda: [{"Id": full_id, "Mounts": self.mounts}]
+        with mock.patch("builtins.open", mock.mock_open(read_data="new mount layout")), \
+                mock.patch("os.uname", return_value=types.SimpleNamespace(nodename=full_id[:12])):
+            self.client.findVolumeMappings()
+        self.assertEqual(self.client.bwb_instance_id, full_id)
+
+    def test_mountinfo_id_works_with_custom_hostname(self):
+        full_id = "a" * 64
+        self.client.bwb_instance_id = None
+        self.client.cli.containers = lambda: [{"Id": full_id, "Mounts": self.mounts}]
+        with mock.patch("builtins.open", mock.mock_open(
+                read_data="/var/lib/docker/containers/" + full_id + "/resolv.conf")), \
+                mock.patch("os.uname", return_value=types.SimpleNamespace(nodename="custom-bwb")):
+            self.client.findVolumeMappings()
+        self.assertEqual(self.client.bwb_instance_id, full_id)
+
+    def test_missing_or_ambiguous_identity_fails_instead_of_picking_a_mount(self):
+        self.client.bwb_instance_id = None
+        prefix = "abcdef012345"
+        self.client.cli.containers = lambda: [
+            {"Id": prefix + "a" * 52, "Mounts": self.mounts},
+            {"Id": prefix + "b" * 52, "Mounts": self.mounts}]
+        for hostname in ("", "custom-name", prefix):
+            with mock.patch("builtins.open", mock.mock_open(read_data="")), \
+                    mock.patch("os.uname", return_value=types.SimpleNamespace(nodename=hostname)):
+                with self.assertRaisesRegex(RuntimeError, "mount discovery failed"):
+                    self.client.findVolumeMappings()
+
 
 class DesktopWorkspaceTests(WorkspaceCases, unittest.TestCase):
     source = Path("coreutils")
 
 
 class VMWorkspaceTests(WorkspaceCases, unittest.TestCase):
+    source = Path("VM/coreutils")
+
+
+class ConsoleCleanupCases:
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="bwb-console-test-")
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        cls = load_methods(ROOT / self.source / "DockerClient.py", "ConsoleProcess", ["cleanup"])
+        self.console = cls()
+        self.logs = self.base / "logs with spaces"
+        self.logs.mkdir()
+        self.console.baseLogDir = str(self.logs)
+        self.console.processDir = "proc.test-" + uuid.uuid4().hex
+
+    def test_only_own_job_logs_are_removed(self):
+        sentinel = self.logs / "other-job"
+        sentinel.write_text("keep")
+        own = self.logs / self.console.processDir
+        own.mkdir()
+        (own / "log0").write_text("old log")
+        self.console.cleanup()
+        self.assertFalse(own.exists())
+        self.assertEqual(sentinel.read_text(), "keep")
+        self.console.cleanup()
+        self.assertEqual(sentinel.read_text(), "keep")
+
+    def test_new_widget_never_removes_log_root(self):
+        self.console.cleanup()
+        self.assertTrue(self.logs.is_dir())
+
+    def test_symlink_does_not_delete_its_target(self):
+        target = self.base / "unrelated"
+        target.mkdir()
+        (target / "keep").write_text("keep")
+        link = self.logs / self.console.processDir
+        link.symlink_to(target, target_is_directory=True)
+        self.console.cleanup()
+        self.assertFalse(link.is_symlink())
+        self.assertEqual((target / "keep").read_text(), "keep")
+
+    def test_invalid_job_identifier_is_rejected(self):
+        for name in ("../logs with spaces", "proc.../..", "/tmp", "proc.bad;echo"):
+            self.console.processDir = name
+            with self.assertRaisesRegex(ValueError, "Invalid Bwb process"):
+                self.console.cleanup()
+            self.assertTrue(self.logs.is_dir())
+
+
+class DesktopConsoleCleanupTests(ConsoleCleanupCases, unittest.TestCase):
+    source = Path("coreutils")
+
+
+class VMConsoleCleanupTests(ConsoleCleanupCases, unittest.TestCase):
     source = Path("VM/coreutils")
 
 

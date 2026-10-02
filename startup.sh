@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Fail visibly and with a nonzero container exit before starting the desktop.
+python3 /coreutils/BwbStartup.py || exit $?
+
 # Determine an available socket
 ((display=$(ls -rv /tmp/.X11-unix/ | grep -om1 '[0-9]*') + 1))
 sed -i "/^command/ s/ :[0-9]\+/ :${display}/" /etc/supervisor/conf.d/supervisord.conf

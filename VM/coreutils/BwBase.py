@@ -14,7 +14,8 @@ from functools import partial
 from pathlib import Path
 from AnyQt.QtCore import QThread, pyqtSignal, Qt
 from Orange.widgets import widget, gui, settings
-from DockerClient import DockerClient, PullImageThread, ConsoleProcess
+from DockerClient import PullImageThread, ConsoleProcess
+from BwbStartup import get_docker_client
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -371,7 +372,6 @@ class ConnectionDict:
 
 class OWBwBWidget(widget.OWWidget):
     serversFile = "/biodepot/serverSettings.json"
-    dockerClient = DockerClient("unix:///var/run/docker.sock", "local")
     defaultFileIcon = QIcon("/icons/bluefile.png")
     browseIcon = QIcon("/icons/bluefile.png")
     addIcon = QIcon("/icons/add.png")
@@ -387,6 +387,7 @@ class OWBwBWidget(widget.OWWidget):
     repeat = pset(False)    
     # Initialization
     def __init__(self, image_name, image_tag):
+        self.dockerClient = get_docker_client()
         super().__init__()
         self.helpers = BwbHelperFunctions()
 
