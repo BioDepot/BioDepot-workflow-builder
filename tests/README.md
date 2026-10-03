@@ -17,6 +17,7 @@ After building an image, test startup, full widget discovery, and nested Docker 
 python3 tests/smoke_docker.py biodepot/bwb:latest__amd64
 python3 tests/smoke_startup.py biodepot/bwb:latest__amd64
 python3 tests/smoke_desktop.py biodepot/bwb:latest__amd64
+python3 tests/smoke_web.py biodepot/bwb:latest__amd64
 ```
 
 This opt-in test needs Docker socket access. It starts disposable containers,
@@ -35,10 +36,19 @@ user workflow.
 
 The desktop test additionally starts the image's unmodified default command,
 including Xvfb, Fluxbox, and the real Bwb application. It uses a fresh registry
-cache, checks for 34 widgets and a responsive internal web endpoint, and stops
-only its own disposable container. No host ports or host X11 sockets are used.
+cache, checks for 34 widgets and a responsive internal web endpoint, then starts
+a second container with `STARTING_WORKFLOW` set to the bundled kallisto demo.
+It requires the demo widgets to be discovered and the relaunched canvas to stay
+alive with that workflow after the `__init` pass. It opens the demo without
+starting its jobs and stops only its own disposable containers. No host ports
+or host X11 sockets are used.
 For ARM64 under QEMU, use `--startup-timeout 300 --probe-timeout 120`; importing
 the registry in the probe is also significantly slower under emulation.
+
+The startup and Docker tests verify `BWBHOSTSHARE` by mounting it in a sibling
+container and reading existing scratch data. This works with Docker Desktop's
+daemon-side paths as well as native Docker Engine paths, and catches stale
+workspace mappings.
 
 ## Workspace configuration
 

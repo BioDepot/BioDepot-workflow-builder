@@ -481,6 +481,22 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(json.loads(self.output.read_text()),
                          [{"key with spaces": {"answer": 42}, "text": "hello world"}])
 
+    def check_json_file_list(self, filenames):
+        value = json.dumps(filenames, separators=(",", ":"))
+        # Widgets escape JSON quotes, but leave the list itself unquoted.
+        command = '-e inputfiles={} -e mode=align test-image success'.format(
+            value.replace('"', '\\"'))
+        result = self.run_job(command)
+        self.assertEqual(result.returncode, 0, result.stdout)
+        self.assertIn(' -e inputfiles={} -e mode=align test-image success'.format(value),
+                      self.calls.read_text())
+
+    def test_relative_json_file_list_reaches_docker(self):
+        self.check_json_file_list(["read1.fastq", "read2.fastq"])
+
+    def test_absolute_json_file_list_reaches_docker(self):
+        self.check_json_file_list(["/data/read1.fastq", "/data/read2.fastq"])
+
 
 class FinishTests(unittest.TestCase):
     def test_failure_never_emits_outputs_or_success(self):
