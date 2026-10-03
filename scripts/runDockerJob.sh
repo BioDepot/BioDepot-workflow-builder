@@ -30,7 +30,10 @@ fail() {
     exit 1
 }
 
-gatherData() {
+gatherData() (
+    # Empty output directories need nullglob, but widget JSON arguments must
+    # reach Docker unchanged. Keep this setting out of the job evaluation.
+    shopt -s nullglob
     local i keyfile
     local -a allData=() keyfiles=()
     for ((i=0; i<${#myjobs[@]}; ++i)); do
@@ -46,7 +49,7 @@ gatherData() {
     dataString=$(printf '%s\n' "${allData[@]}" | jq -s .) || return 1
     logPrint "output is $dataString"
     printf '%s\n' "$dataString" > "$outputFile"
-}
+)
 
 if [ "$#" -lt 4 ]; then
     echo 'Usage: runDockerJob.sh OUTPUT proc.ID LOGDIR DOCKER_COMMAND ...' >&2
@@ -65,7 +68,6 @@ fi
 lockDir="/tmp/$tempDir/locks"
 errorDir="/tmp/$tempDir/errors"
 ownsDataDir=false
-shopt -s nullglob
 
 if ! mkdir -p "$logBaseDir/$tempDir/logs"; then
     logBaseDir=/tmp/.bwb

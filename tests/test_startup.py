@@ -3,8 +3,12 @@ import ast
 import contextlib
 import importlib.util
 import io
+import json
+import os
 from pathlib import Path
 import subprocess
+import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -85,6 +89,55 @@ class StartupContractTests(unittest.TestCase):
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                 universal_newlines=True, timeout=10)
             self.assertEqual(result.returncode, 1, (filename, result.stdout))
+
+    def test_init_pass_returns_success_after_loading_workflow(self):
+        for filename in ("orangePatches/__main__.py",
+                         "VM/orange3/Orange/canvas/__main__.py"):
+            with self.subTest(filename=filename):
+                tree = ast.parse((ROOT / filename).read_text())
+                branch = next(n for n in ast.walk(tree) if isinstance(n, ast.If)
+                              and isinstance(n.test, ast.Compare)
+                              and any(isinstance(child, ast.Str) and child.s == "__init"
+                                      for child in ast.walk(n.test)))
+                wrapper = ast.parse("def init_pass(canvas_window, app, args):\n    pass\n")
+                wrapper.body[0].body = branch.orelse + ast.parse(
+                    "raise AssertionError('init pass fell through to deleted canvas')").body
+                namespace = {}
+                exec(compile(ast.fix_missing_locations(wrapper), filename, "exec"), namespace)
+                window, app = mock.Mock(), mock.Mock()
+                self.assertEqual(namespace["init_pass"](
+                    window, app, ["__init", "/workflows/demo.ows"]), 0)
+                window.load_workflow.assert_called_once_with("/workflows/demo.ows")
+                window.deleteLater.assert_called_once_with()
+
+    def test_launchers_reopen_workflow_after_successful_init(self):
+        for filename in ("scripts/startBwb.sh", "scripts/startSingleBwb.sh", "VM/startBwb.sh"):
+            with self.subTest(filename=filename), tempfile.TemporaryDirectory() as folder:
+                fake = Path(folder) / "canvas"
+                calls = Path(folder) / "calls.jsonl"
+                fake.write_text("#!" + sys.executable + "\n" + '''
+import json, os, pathlib, sys
+with open(os.environ["BWB_TEST_LAUNCHES"], "a") as handle:
+    handle.write(json.dumps([os.getpid(), sys.argv[1:]]) + "\\n")
+if sys.argv[1:2] == ["__init"]:
+    marker = pathlib.Path("/tmp/pid." + str(os.getpid()))
+    marker.mkdir(exist_ok=True)
+    (marker / "workflow").write_text(sys.argv[2])
+''')
+                fake.chmod(0o755)
+                workflow = "/workflows/demo/demo.ows"
+                result = subprocess.run(
+                    ["bash", "-c", 'pgrep() { return 1; }; export -f pgrep; '
+                     'exec bash "$1" "$2"', "launcher-test", str(ROOT / filename), str(fake)],
+                    env=dict(os.environ, STARTING_WORKFLOW=workflow, BWB_TEST_LAUNCHES=str(calls)),
+                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                    universal_newlines=True, timeout=10)
+                self.assertEqual(result.returncode, 0, result.stdout)
+                launches = [json.loads(line) for line in calls.read_text().splitlines()]
+                self.assertEqual([args for pid, args in launches],
+                                 [["__init", workflow], [workflow]])
+                for pid, args in launches:
+                    self.assertFalse(Path("/tmp/pid." + str(pid)).exists())
 
 
 if __name__ == "__main__":

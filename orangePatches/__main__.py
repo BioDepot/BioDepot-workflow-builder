@@ -501,7 +501,9 @@ def main(argv=None):
             app.processEvents()
             app.flush()
             del canvas_window
-            
+            # The launcher reopens the workflow from its restart marker.
+            return 0
+
     elif open_requests:
         log.info("Loading a scheme from an `QFileOpenEvent` for %r", open_requests[-1])
         canvas_window.load_scheme(open_requests[-1].toLocalFile())

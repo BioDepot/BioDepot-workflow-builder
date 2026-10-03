@@ -12,6 +12,7 @@ import tempfile
 
 GUI = r'''
 import os
+import subprocess
 import sys
 sys.path.insert(0, "/coreutils")
 if os.environ.get("BWB_TEST_HIDE_MOUNTINFO"):
@@ -28,7 +29,15 @@ def checked_event_loop(app):
     widgets = global_registry().widgets()
     assert len(widgets) == 34, [w.name for w in widgets]
     assert os.environ["BWBSHARE"] == "/data/.bwbshare"
-    assert os.environ["BWBHOSTSHARE"] == os.environ["EXPECTED_HOST_SHARE"]
+    host_share = os.environ["BWBHOSTSHARE"]
+    assert host_share != "/stale-daemon-path", host_share
+    # Docker Desktop may report a daemon path different from the client path.
+    visible = subprocess.check_output([
+        "docker", "run", "--rm", "--network", "none",
+        "-v", host_share + ":/shared:ro", "--entrypoint", "cat",
+        os.environ["BWB_SMOKE_IMAGE"], "/shared/another-active-job"],
+        universal_newlines=True, timeout=60)
+    assert visible == "keep", visible
     # Discovery alone is insufficient: also construct a standard Bwb widget.
     from importlib import import_module
     from unittest import mock
@@ -87,7 +96,7 @@ def main():
                            "-e", "QT_QPA_PLATFORM=offscreen",
                            "-e", "PYTHONDONTWRITEBYTECODE=1",
                            "-e", "BWBHOSTSHARE=/stale-daemon-path",
-                           "-e", "EXPECTED_HOST_SHARE=" + str(share)]
+                           "-e", "BWB_SMOKE_IMAGE=" + args.image]
                 if case != "missing_data":
                     command += ["-v", str(data) + ":/data" + (":ro" if case == "read_only" else "")]
                 if case != "missing_socket":

@@ -36,7 +36,18 @@ print("PASS: Docker CLI {} communicates with daemon {}".format(
 client = DockerClient("unix:///var/run/docker.sock", "local")
 client.findShareMountPoint(overwrite=True)
 assert os.environ["BWBSHARE"] == "/data/.bwbshare", os.environ["BWBSHARE"]
-assert os.environ["BWBHOSTSHARE"] == os.environ["EXPECTED_HOST_SHARE"]
+def check_host_share():
+    host_share = os.environ["BWBHOSTSHARE"]
+    assert host_share != "/stale-desktop-hash", host_share
+    # Validate the daemon's path by using it, including on Docker Desktop.
+    visible = subprocess.check_output([
+        "docker", "run", "--rm", "--network", "none",
+        "-v", host_share + ":/shared:ro", "--entrypoint", "cat",
+        os.environ["BWB_SMOKE_IMAGE"], "/shared/another-active-job"],
+        universal_newlines=True, timeout=60)
+    assert visible == "keep", visible
+
+check_host_share()
 sentinel = Path("/data/.bwbshare/another-active-job")
 assert sentinel.read_text() == "keep"
 # The published desktop runs as root and installs jsonpickle in root's user
@@ -57,7 +68,7 @@ if os.environ.get("BWB_SMOKE_GUI"):
 assert not os.access("/data", os.W_OK), "test parent must really be unwritable"
 os.environ["BWBHOSTSHARE"] = "/stale-desktop-hash"
 client.findShareMountPoint(overwrite=True)
-assert os.environ["BWBHOSTSHARE"] == os.environ["EXPECTED_HOST_SHARE"]
+check_host_share()
 assert sentinel.read_text() == "keep"
 
 image = shlex.quote(os.environ["BWB_SMOKE_IMAGE"])
@@ -109,7 +120,7 @@ def main():
                        "-v", str(drive) + ":/data",
                        "-v", "/var/run/docker.sock:/var/run/docker.sock",
                        "-e", "QT_QPA_PLATFORM=offscreen", "-e", "PYTHONDONTWRITEBYTECODE=1",
-                       "-e", "EXPECTED_HOST_SHARE=" + str(workspace),
+                       "-e", "BWBHOSTSHARE=/stale-desktop-hash",
                        "-e", "BWB_SMOKE_IMAGE=" + args.image,
                        "--entrypoint", "python3", args.image, "-"]
             # Two separate Bwb processes, like closing and reopening the GUI.
