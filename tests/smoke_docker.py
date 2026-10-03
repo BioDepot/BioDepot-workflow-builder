@@ -72,11 +72,11 @@ check_host_share()
 assert sentinel.read_text() == "keep"
 
 image = shlex.quote(os.environ["BWB_SMOKE_IMAGE"])
-def run_job(command, expected_code):
+def run_job(command, expected_code, environment=""):
     proc = "proc.smoke-" + uuid.uuid4().hex
     output = "/tmp/" + proc + ".json"
     result = subprocess.run(["/usr/local/bin/runDockerJob.sh", output, proc,
-                             "/data/.bwb", "--entrypoint /bin/sh " + image + " -c " + shlex.quote(command)],
+                             "/data/.bwb", environment + "--entrypoint /bin/sh " + image + " -c " + shlex.quote(command)],
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                             universal_newlines=True, timeout=120)
     if result.returncode != expected_code:
@@ -92,6 +92,10 @@ def run_job(command, expected_code):
     assert not Path("/data/.bwbshare/" + proc).exists()
 
 run_job("printf ok > /tmp/output/result", 0)
+for paths in (["read1.fastq", "read2.fastq"], ["/data/read1.fastq", "/data/read2.fastq"]):
+    value = json.dumps(paths, separators=(",", ":"))
+    run_job('test "$inputfiles" = ' + shlex.quote(value) + ' && printf ok > /tmp/output/result',
+            0, '-e inputfiles=' + value.replace('"', '\\"') + ' ')
 run_job("exit 42", 1)
 print("PASS: actual module imports, workspace mapping, restart, Docker output, failure propagation")
 '''
